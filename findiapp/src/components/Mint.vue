@@ -337,7 +337,7 @@ return 1;
 
 
 
-     let openTrades= trades.filter(t1=>t1.status=='OPEN')
+     let openTrades= trades.filter(t1=>t1.status=='COMPLETE')
          
      
      .forEach(t=>{
