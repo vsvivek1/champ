@@ -1,0 +1,20 @@
+{
+"holdings":{
+      "tradingsymbol": "string",
+      "exchange": "BSE",
+      "isin": "INE516F01016",
+      "quantity": int,
+      "t1_quantity": int,
+      "realised_quantity": int,
+  
+      "average_price": int,
+      "last_price": int,
+      "pnl": int,
+  
+      "product": "CNC",
+      "collateral_quantity": 0,
+      "collateral_type": null
+     
+  }
+
+}

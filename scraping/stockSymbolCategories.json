@@ -1,0 +1,194 @@
+[
+          {
+            "category": "nifty",
+            "text": "Nifty 50"
+          },
+          {
+            "category": "juniorNifty",
+            "text": "Nifty Next 50"
+          },
+          {
+            "category": "niftyMidcap50",
+            "text": "Nifty Midcap 50"
+          },
+          {
+            "category": "niftyMidcap150Online",
+            "text": "Nifty Midcap 150"
+          },
+          {
+            "category": "niftySmallcap50Online",
+            "text": "Nifty Smlcap 50"
+          },
+          {
+            "category": "niftySmallcap250Online",
+            "text": "Nifty Smlcap 250"
+          },
+          {
+            "category": "niftyMidsml400Online",
+            "text": "Nifty Midcap 400"
+          },
+      
+          {
+            "category": "cnxAuto",
+            "text": "Nifty Auto"
+          },
+          {
+            "category": "bankNifty",
+            "text": "Nifty Bank"
+          },
+          {
+            "category": "cnxEnergy",
+            "text": "Nifty Energy"
+          },
+          {
+            "category": "cnxFinance",
+            "text": "Nifty Financial Services"
+          },
+          {
+            "category": "cnxFMCG",
+            "text": "Nifty FMCG"
+          },
+          {
+            "category": "cnxit",
+            "text": "Nifty IT"
+          },
+          {
+            "category": "cnxMedia",
+            "text": "Nifty Media"
+          },
+          {
+            "category": "cnxMetal",
+            "text": "Nifty Metal"
+          },
+          {
+            "category": "cnxPharma",
+            "text": "Nifty Pharma"
+          },
+          {
+            "category": "cnxPSU",
+            "text": "Nifty PSU Bank"
+          },
+          {
+            "category": "cnxRealty",
+            "text": "Nifty Realty"
+          },
+          {
+            "category": "niftyPvtBank",
+            "text": "Nifty Private Bank"
+          }
+        
+      ,
+     
+          {
+            "category": "cnxCommodities",
+            "text": "Nifty Commodities"
+          },
+          {
+            "category": "cnxConsumption",
+            "text": "Nifty India Consumption"
+          },
+          {
+            "category": "cpse",
+            "text": "Nifty CPSE"
+          },
+          {
+            "category": "cnxInfra",
+            "text": "Nifty Infrastructure"
+          },
+          {
+            "category": "cnxMNC",
+            "text": "Nifty MNC"
+          },
+          {
+            "category": "ni15",
+            "text": "Nifty Growth Sector 15"
+          },
+          {
+            "category": "cnxPSE",
+            "text": "Nifty PSE"
+          },
+          {
+            "category": "cnxService",
+            "text": "Nifty Services Sector"
+          },
+          {
+            "category": "nseliquid",
+            "text": "Nifty100 Liquid 15"
+          },
+          {
+            "category": "niftyMidcapLiq15",
+            "text": "Nifty Midcap Liquid 15"
+          }
+       ,
+          {
+            "category": "cnxDividendOppt",
+            "text": "Nifty Dividend Opportunities 50"
+          },
+          {
+            "category": "nv20",
+            "text": "Nifty50 Value 20"
+          },
+          {
+            "category": "niftyQuality30",
+            "text": "Nifty100 Quality 30"
+          },
+          {
+            "category": "nifty50EqualWeight",
+            "text": "NIFTY50 Equal Weight"
+          },
+          {
+            "category": "nifty100EqualWeight",
+            "text": "NIFTY100 Equal Weight"
+          },
+          {
+            "category": "nifty100LowVol30",
+            "text": "NIFTY100 Low Volatility 30"
+          },
+          {
+            "category": "niftyAlpha50",
+            "text": "NIFTY Alpha 50"
+          },
+          {
+            "category": "nifty200Qlty30Online",
+            "text": "NIFTY200 Quality 30"
+          }
+      ,
+          {
+            "category": "sovGold",
+            "text": "Sovereign Gold Bonds"
+          },
+          {
+            "category": "foSec",
+            "text": "FO Stocks"
+          },
+          {
+            "category": "etf",
+            "text": "ETF"
+          },
+          {
+            "category": "goldEtf",
+            "text": "Gold ETF"
+          },
+          {
+            "category": "nifty50Etf",
+            "text": "Nifty 50 ETF"
+          },
+          {
+            "category": "iL",
+            "text": "Institutional Stock Watch"
+          },
+          {
+            "category": "bL",
+            "text": "BL Stock Watch"
+          },
+          {
+            "category": "cbmSecList",
+            "text": "Bonds in CM"
+          },
+          {
+            "category": "gsec",
+            "text": "GSec in CM"
+          }
+        ]
+   
+    
