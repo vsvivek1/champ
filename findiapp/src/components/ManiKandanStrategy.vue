@@ -3,9 +3,9 @@
  
 daysHourlyData {{daysHourlyData}}
         <v-row>
-            <v-row class="well">
+            <v-row >
                 <v-col cols=4 offset=4>
-<v-alert prominent success outlined >Manikandan-Vivek Strategy </v-alert>
+<v-alert  >Manikandan-Vivek Strategy </v-alert>
 
                 </v-col>
             </v-row>
@@ -315,13 +315,15 @@ LiveLtp:0,
 
                 },
                 
-                {
-    "instrument_token": 13614338,
-    "exchange_token": 53181,
-    "tradingsymbol": "NIFTY21JULFUT",
+    
+
+ {
+    "instrument_token": 13209858,
+    "exchange_token": 51601,
+    "tradingsymbol": "NIFTY21OCTFUT",
     "name": "NIFTY",
     "last_price": 0,
-    "expiry": "2021-07-29",
+    "expiry": "2021-10-28",
     "strike": 0,
     "tick_size": 0.05,
     "lot_size": 50,
@@ -329,14 +331,27 @@ LiveLtp:0,
     "segment": "NFO-FUT",
     "exchange": "NFO"
   },
-  
-   {
-    "instrument_token": 12477442,
-    "exchange_token": 48740,
-    "tradingsymbol": "NIFTY21SEPFUT",
+    {
+    "instrument_token": 13720834,
+    "exchange_token": 53597,
+    "tradingsymbol": "NIFTY21NOVFUT",
     "name": "NIFTY",
     "last_price": 0,
-    "expiry": "2021-09-30",
+    "expiry": "2021-11-25",
+    "strike": 0,
+    "tick_size": 0.05,
+    "lot_size": 50,
+    "instrument_type": "FUT",
+    "segment": "NFO-FUT",
+    "exchange": "NFO"
+  },
+  {
+    "instrument_token": 18258178,
+    "exchange_token": 71321,
+    "tradingsymbol": "NIFTY21DECFUT",
+    "name": "NIFTY",
+    "last_price": 0,
+    "expiry": "2021-12-30",
     "strike": 0,
     "tick_size": 0.05,
     "lot_size": 50,

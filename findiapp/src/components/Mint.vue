@@ -1,14 +1,10 @@
 <template>
   <div>
-    <!-- {{accessToken}} -->
-<!-- {{generatedSignals}} generatedSignals -->
 
-chat_id {{chat_id}}
-    <hr>
-   
-    <hr />
+<v-row>
+  <v-col>
 
-    <v-icon
+ <v-icon
       color="red"
       v-if="heartBeat"
       title="if This symbol changes color switches between red and blue system is conencted to market"
@@ -24,14 +20,21 @@ chat_id {{chat_id}}
       mdi-heart
     </v-icon>
 
-    <v-icon color="gold">mdi-clock</v-icon> {{ hours }}: {{ minutes }} :
+  </v-col>
+  <v-col>
+<img  v-if="chat_id<-1" src="https://img.icons8.com/color/48/000000/twitter--v2.png"/>
+
+
+  </v-col>
+
+  <v-col>
+<v-icon color="blue">mdi-clock</v-icon> {{ hours }}: {{ minutes }} :
     {{ seconds }}
 
-    <hr />
-    <!-- {{Object.keys(scripts[0])}} -->
 
-    <!-- {{scripts[0]}} -->
-    <!-- {{ localStorage }}localStorage -->
+  </v-col>
+</v-row>
+
 
     
 <v-btn v-if="!showSignals" @click="showSignals = true"> show Signals </v-btn>
@@ -74,7 +77,8 @@ chat_id {{chat_id}}
         </tr>
       </tbody>
     </table>
-    <hr />  
+
+&nbsp;
     
     
      
@@ -122,19 +126,30 @@ chat_id {{chat_id}}
     <hr />
 
     <!-- {{instrumentTokenList}} -->
+    
 
-    Strategy if ltp crosess below bc set flag as traded for symbol then sell
-    order with sl tc and targets at s1,s2,s3 or if ltp crosess above tc set flag
-    as traded for symbol then sell order with sl bc and targets at r1,r2,r3
+    <v-col cols=5 offset=4>
+    <v-alert border="left"
+      elevation="2"
+      colored-border
+
+       icon="mdi-twitter"
+    
+    
+     type="info"> Long buy above tc target r1 sl bc & short below bc target s2 sl tc</v-alert>
+
+     </v-col>
 
     <hr />
 
-    <v-row align="center">
+    <v-row align="center" class="mb-2">
       <v-col cols="2" offset="4">
 
+
+<label for="sel">Select the Index</label>
  <select
       name=""
-      id=""
+      id="sel"
       class="form-control"
       v-model="selectedCategory"
       @change="fetchSymbolsForTheCategory"
@@ -149,9 +164,22 @@ chat_id {{chat_id}}
     </select>
 
       </v-col>
-      <v-col cols="1">
+
+       <v-col cols="3">
+        <label for="sel">Amount per stock</label>
+        <input type="text" class="form-control" v-model="amountPerStock" placeholder="Amount Per Stock">
+      </v-col>
+     
+      <v-col cols="1" >
 
         <v-btn color="green" icon title="Refresh" @click="fetchSymbolsForTheCategory"> 
+          <v-icon>mdi-refresh</v-icon>
+        </v-btn>
+      </v-col>
+      
+      <v-col cols="1">
+
+        <v-btn color="red" icon title="Refresh trade status" @click="refreshTradeStatus"> 
           <v-icon>mdi-refresh</v-icon>
         </v-btn>
       </v-col>
@@ -342,16 +370,18 @@ return 1;
      
      .forEach(t=>{
 
-
-console.log('this.LatestQuotes',this.LatestQuotes.length)
+let entryPrice;
+let last_price;
+let b;
+//console.log('this.LatestQuotes',this.LatestQuotes.length)
   if(this.LatestQuotes.length>0){
 
 
-let last_price=this.LatestQuotes.filter(lq=>lq.tradingsymbol==t.symbol)[0].last_price;
+last_price=this.LatestQuotes.filter(lq=>lq.tradingsymbol==t.symbol)[0].last_price;
 
 
 
-let entryPrice=-1;
+
 
 let result='';
 let pl=0;
@@ -428,11 +458,7 @@ this.sendToTelegramGroup(text);
 
 
 return this.chat_id;
-
-                   // console.log('from bot ',r.data.result[0].channel_post.chat.id)
-            console.log('chat it from get chat id',this.chat_id)
-
-          //  this.sendToTelegramGroup(txt)
+          
             
                 }).catch(e=>e) 
 
@@ -454,14 +480,12 @@ if(true){
 obj.chat_id=this.chat_id;
 obj.text=text;
 
-console.log('obj.chat_id',obj.chat_id)
 
     let urlToSendMessage=`https://api.telegram.org/bot${this.token}/sendMessage`;
 
-    console.log(urlToSendMessage);
     axios.post(urlToSendMessage,obj).then(r=>{
 
-        console.log('from bot ',r.data.result[0])
+       // console.log('from bot ',r.data.result[0])
 
         
     }).catch(e=>e)
@@ -507,6 +531,70 @@ this.generatedSignals=[]
       return array;
     },
 
+
+    async refreshTradeStatus(){
+
+
+let livePositionsTmp=await this.getPositions();
+
+this.livePositions=livePositionsTmp.net;
+
+let today=this.today();
+
+let tmp;
+  if (localStorage.getItem(today) == null) {
+        tmp = [];
+      } else {
+        tmp = JSON.parse(localStorage.getItem(today));
+        localStorage.removeItem(today);
+      }
+
+tmp.forEach(
+
+t=>{
+
+let trade=this.livePositions.filter(lp=>lp.tradingsymbol==t.symbol)[0];
+
+if(typeof trade=='undefined'){
+
+  return false
+}
+
+if(trade.quantity!=0){
+
+t.status='COMPLETE'
+t.quantity=trade.quantity;
+t.average_price=trade.average_price
+}
+
+
+  
+
+     
+     
+
+
+
+console.log('t of storage',t)
+
+
+}
+
+)
+
+
+
+      
+      let tmp2 = JSON.stringify(tmp);
+     localStorage.setItem(today, tmp2);
+
+     this.localStorage=JSON.parse(localStorage.getItem(today));
+
+  
+
+      
+    },
+
     async getPositions() {
       let url = "/api/getPositions";
 
@@ -540,7 +628,7 @@ this.generatedSignals=[]
 
           let qty = lp.quantity * -1;
 
-          console.log("quantity", lp);
+          //console.log("quantity", lp);
 
           let order_type = "MARKET";
           let Price = lp.last_price;
@@ -562,7 +650,7 @@ this.generatedSignals=[]
           );
         });
 
-      this.placeOrder(orderArray); //impotant
+     // this.placeOrder(orderArray); //impotant
       console.log(
         "orderArray",
         orderArray,
@@ -1097,7 +1185,9 @@ let chkPricePoints=this.scripts.filter(
 
 
           /// CASE WHEN LTP IS ABOVE TC WE TRIGGER BUY 
-          if (symbol.last_price > tc && symbol.pvs_ltP<=tc && symbol.last_price  < r1) {
+
+          console.log('&& symbol.pvs_ltP<=tc &',symbol.pvs_ltP,symbol)
+          if (symbol.last_price > tc && symbol.last_price  < r1) {
             let tentativeProfit = (r3 - tc) * noStoksFor10k;
             if (!isNaN(tentativeProfit)){
 
@@ -1106,7 +1196,7 @@ LongProfit = LongProfit + tentativeProfit;
               
             let tradingsymbol = stock.symbol;
             let transaction_type = "BUY";
-            let qty = 1;
+            let qty = Math.floor(this.amountPerStock/tc)
             let order_type = "LIMIT";
             let Price = tc;
             let trigPrice = tc;
@@ -1142,60 +1232,29 @@ let obj={};
       this.setSignalsInLocalStorage(obj)
 
 
-var txt= `LONG  ${tradingsymbol} @ ${tc}
-              
-              LTP
-              ${stock.ltP}
-              stop loss
-              ${bc}
-              target1
-              ${pivotPoints.r1}
-              target2
-              ${pivotPoints.r2}
-              target3
-              ${pivotPoints.r3}
-
-              no of stocks
-              noStoksFor10k
-              target priofit for 10k
-              ${tentativeProfit}`
+var txt= `LONG ${tradingsymbol}, @ ${tc}, LTP ${stock.ltP}.Stop loss  ${bc},TARGET 1 ${pivotPoints.r1} TARGET 2  ${pivotPoints.r2} TARGET 3 ${pivotPoints.r3}`
 
 
 
 this.sendToTelegramGroup(txt)
 
-            console.log(
-              "long  @",tc,
-              stock.symbol,
-              "LTP",
-              stock.ltP,
-              "stop loss",
-              bc,
-              "target1",
-              pivotPoints.r1,
-              "target2",
-              pivotPoints.r2,
-              "target3",
-              pivotPoints.r3,
-
-              "no of stocks",
-              noStoksFor10k,
-              "target priofit for 10k",
-              tentativeProfit
-            );
+       
           }
 
           ///sell order
           //&& symbol.last_price>s1
-          //&& symbol.pvs_ltP>=bc                       else
-          if (symbol.last_price < bc && symbol.pvs_ltP>=bc   && symbol.last_price > s1 ) {
+          //&& symbol.pvs_ltP>=bc      
+          
+          
+         // console.log('&& symbol.pvs_ltP>=bc'symbol.pvs_ltP)                 //else
+          if (symbol.last_price < bc    && symbol.last_price > s1 ) {
             let tentativeProfit = (s3 - bc) * noStoksFor10k;
             if (!isNaN(tentativeProfit))
               LongProfit = LongProfit + tentativeProfit;
 
             let tradingsymbol = stock.symbol;
             let transaction_type = "SELL";
-            let qty = 1;
+           let qty = Math.floor(this.amountPerStock/bc)
             let order_type = "LIMIT";
             let Price = bc;
             let trigPrice = bc;
@@ -1234,46 +1293,13 @@ this.sendToTelegramGroup(txt)
       obj.signalType='SHORT';
       this.setSignalsInLocalStorage(obj)
 
-var txt=     `short   ${stock.symbol} @  ${bc}
-             
-              LTP
-              ${stock.ltP}
-              stop loss
-              ${tc}
-              target1
-              ${pivotPoints.s1}
-              target2
-              ${pivotPoints.s2}
-              target3
-              ${pivotPoints.s3}
+var txt= `SHORT ${tradingsymbol} @ ${bc}, LTP ${stock.ltP}.Stop loss   ${tc},TARGET 1 ${pivotPoints.s1} TARGET 2  ${pivotPoints.s2} TARGET 3 ${pivotPoints.s3}`
 
-              no of stocks
-              ${noStoksFor10k}
-              target priofit for 10k
-              ${tentativeProfit}`;
            
 
 this.sendToTelegramGroup(txt)
 
-            console.log(
-              "short  @",bc,
-              stock.symbol,
-              "LTP",
-              stock.ltP,
-              "stop loss",
-              tc,
-              "target1",
-              pivotPoints.s1,
-              "target2",
-              pivotPoints.s2,
-              "target3",
-              pivotPoints.s3,
-
-              "no of stocks",
-              noStoksFor10k,
-              "target priofit for 10k",
-              tentativeProfit
-            );
+          
 
             if (!isNaN(tentativeProfit))
               ShortProfit = ShortProfit + tentativeProfit;
@@ -1294,6 +1320,8 @@ this.sendToTelegramGroup(txt)
 let hasTradingScriptOrderCompleted=this.checkTradingScriptOrderCompleted(CurScript.symbol)
 
 let hasTradingScriptOrderCycleCompleted=this.checkTradingScriptOrderCycleCompleted(CurScript.symbol)
+
+//let hasReverseOrderPlaced=this. hasReverseOrderPlaced(CurScript.symbol)
 
 
         if (hasTraded && hasTradingScriptOrderCompleted && !hasTradingScriptOrderCycleCompleted) {
@@ -1382,7 +1410,7 @@ console.log('undedfined triggered')
 
                   let tradingsymbol = stock.symbol;
                   let transaction_type = "SELL";
-                  let qty = 1;
+                  let qty = CurTraded[0].quantity;
                   let order_type = "LIMIT";
                   let Price = r1;
                   let trigPrice = r1;
@@ -1445,7 +1473,7 @@ this.sendToTelegramGroup(txt)
 
                   let tradingsymbol = stock.symbol;
                   let transaction_type = "SELL";
-                  let qty = 1;
+                  let qty = CurTraded[0].quantity;
                   let order_type = "LIMIT";
                   let Price = bc;
                   let trigPrice = bc;
@@ -1482,12 +1510,10 @@ let obj={};
 
 //var txt=`Stop Loss hit for symbol ${tradingsymbol}  @  ${obj.price}, ${obj.transaction_type} @ ${obj.price}. Advise given at Price ${tc} .Loss Per stock is ${obj.price-tc}`;
 
-var txt=`Stop Loss hit for symbol ${tradingsymbol} , Squareoff  @ ${obj.price}. Advise to ${CurTraded[0].transaction_type}
- given @ Price ${tc} .Loss Per stock  is ${tc-obj.price}`;
+var txt=`Stop Loss hit for symbol ${tradingsymbol} , Squareoff  @ ${obj.price}. Advise to ${CurTraded[0].transaction_type} given @ Price ${tc} .Loss Per stock  is ${tc-obj.price}`;
 this.sendToTelegramGroup(txt)
 
 
-                  console.log("placed stop losss order for ",tradingsymbol);
                 }
 
                 break;
@@ -1504,7 +1530,7 @@ this.sendToTelegramGroup(txt)
 
                   let tradingsymbol = stock.symbol;
                   let transaction_type = "BUY";
-                  let qty = 1;
+                  let qty = CurTraded[0].quantity;
                   let order_type = "LIMIT";
                   let Price = s1;
                   let trigPrice = s1;
@@ -1558,7 +1584,7 @@ this.sendToTelegramGroup(txt)
 
                   let tradingsymbol = stock.symbol;
                   let transaction_type = "BUY";
-                  let qty = 1;
+                  let qty = CurTraded[0].quantity;
                   let order_type = "LIMIT";
                   let Price = tc;
                   let trigPrice = tc;
@@ -1675,7 +1701,7 @@ this.sendToTelegramGroup(txt)
 
           // console.clear();
 
-          console.log("this.symbolList", this.symbolList);
+         // console.log("this.symbolList", this.symbolList);
 
           this.scriptLoaded = true;
           socket.emit(
@@ -1729,35 +1755,67 @@ return ;
 
       this.symbolList = [];
 
-      this.scripts.forEach(async (r) => {
-        let timeout = 333;
 
-        let index = 1;
-        setTimeout(async () => {
-          console.log("request");
+let tmpScript=[...this.scripts]
 
-          index++;
+let ti=setInterval(async ()=>{
 
-          let pp = await this.getPricePoints(
-            r.instrument_token,
+
+let CurScript=tmpScript.pop();
+
+ let pp = await this.getPricePoints(
+            CurScript.instrument_token,
             this.accessToken
           );
 
-          this.symbolList.push(r.instrument_token);
+          this.symbolList.push(CurScript.instrument_token);
 
-          // console.log('pp',pp)
 
-          this.$set(r, "pricePoints", pp);
+ this.$set( this.scripts.filter(s=>s.instrument_token==s.CurScript.instrument_token)[0] , "pricePoints", pp);
 
-          ln--;
-          if (ln == 0) {
-            socket.emit(
-              "subscribe-scripts-for-mint",
-              JSON.stringify(this.symbolList)
-            );
-          }
-        }, timeout * index);
-      });
+
+ if (tmpScript.length == 0) {
+  socket.emit("subscribe-scripts-for-mint", JSON.stringify(this.symbolList) );
+  
+    clearInterval(ti)
+  }
+ 
+
+
+},200)
+
+ 
+
+
+      // this.scripts.forEach(async (r) => {
+      //   let timeout = 333;
+
+      //   let index = 1;
+      //   setTimeout(async () => {
+      //     console.log("request");
+
+      //     index++;
+
+      //     let pp = await this.getPricePoints(
+      //       r.instrument_token,
+      //       this.accessToken
+      //     );
+
+      //     this.symbolList.push(r.instrument_token);
+
+      //     // console.log('pp',pp)
+
+      //     this.$set(r, "pricePoints", pp);
+
+      //     ln--;
+      //     if (ln == 0) {
+      //       socket.emit(
+      //         "subscribe-scripts-for-mint",
+      //         JSON.stringify(this.symbolList)
+      //       );
+      //     }
+      //   }, timeout * index);
+      // });
     },
 
     fetchSymbolsForTheCategory() {
@@ -1788,6 +1846,8 @@ return ;
 
   data() {
     return {
+amountPerStock:1000,
+      CurrentCycleStatus1:-1,
       LatestQuotes:[],
       previousOrderUpdate:{},
 chat_id:-1,
@@ -1810,7 +1870,7 @@ chat_id:-1,
       scripts: [],
       categories: [],
       selectedCategory: "",
-    };
+    }
   },
 
   watch:{
@@ -1821,7 +1881,38 @@ selectedCategory(n,o){
 
 
   },
+  
   mounted() {
+
+
+   window.setInterval(() => {
+
+      
+      var d = new Date();
+      this.hours = d.getHours();
+      this.minutes = d.getMinutes();
+      this.seconds = d.getSeconds();
+
+
+//
+ 
+
+ 
+
+      if (this.hours == 15 && this.minutes < 59 && this.seconds<55) {
+
+        //cancel all orders
+
+this.sendSquareOffAlertToTelegram()
+
+        this.getCurrentPositionsAndSquareOff();
+        //function to fetch mis trades in eq, reverese and sqaureoff
+       // console.log("time triggered", this.hours, this.minutes);
+      }
+    }, 1000);
+
+
+
 
 
 if(this.chat_id==-1){
@@ -1834,9 +1925,11 @@ var d = new Date();
 
      
 let today=d.toLocaleString().slice(0, 10);
+
+
+
 var txt="Welcome to Trading on "+today;
  this.sendToTelegramGroup(txt)
-  this.sendSquareOffAlertToTelegram();
    }
  )
 
@@ -1844,28 +1937,16 @@ var txt="Welcome to Trading on "+today;
 }
 
 
-   
+ //let t=this.today();
+
+ 
 
 
 
+ 
 
-    window.setInterval(() => {
-      var d = new Date();
-      this.hours = d.getHours();
-      this.minutes = d.getMinutes();
-      this.seconds = d.getSeconds();
 
-      if (this.hours == 15 && this.minutes == 13 && this.seconds == 0) {
 
-        //cancel all orders
-
-this.sendSquareOffAlertToTelegram()
-
-        this.getCurrentPositionsAndSquareOff();
-        //function to fetch mis trades in eq, reverese and sqaureoff
-        console.log("time triggered", this.hours, this.minutes);
-      }
-    }, 1000);
 
     let today = this.today();
 
@@ -1886,7 +1967,7 @@ this.updateSignalFromLocalStorageToVaraible();
 
     setInterval(() => {
       console.log("clearing console");
-       console.clear()
+    //   console.clear()
     }, 600000);
 
     socket.on("order_update", (orderUpdates) => {
@@ -1895,7 +1976,7 @@ this.updateSignalFromLocalStorageToVaraible();
 
 this.previousOrderUpdate=orderUpdates;
       
-      //console.log('orderUpdates.order_id',orderUpdates)
+   // console.log('orderUpdates.order_id',orderUpdates)
 
      
 
@@ -1903,14 +1984,43 @@ this.previousOrderUpdate=orderUpdates;
 
       if(sameOrderUpdate){
 
-        console.log('same order update');
-        return false;
+        //console.log('same order update');
+       // return false;
       }
 
       let tradingsymbol = orderUpdates.tradingsymbol;
 
       let status = orderUpdates.status;
-      this.setScriptTradedStatus(tradingsymbol, "status", status);
+
+
+
+///if order current status is cycle finisheied do not update status
+
+
+let CurrentCycleStatus=this.getScriptTradedStatus(tradingsymbol).filter(t=>t.status=="CYCLE FINISHED").length;
+//this.CurrentCycleStatus1=this.getScriptTradedStatus(tradingsymbol)
+
+//.filter(t=>t.status=="CYCLE FINISHED");
+
+if(CurrentCycleStatus>0){
+
+  console.log('cycle finished status for CurrentCycleStatus ',CurrentCycleStatus,tradingsymbol,CurrentCycleStatus1)
+
+  // there is an entry of cycle finished do not update status
+}else{
+
+this.setScriptTradedStatus(tradingsymbol, "status", status);
+
+console.log('cycle finished status for CurrentCycleStatus ',CurrentCycleStatus,tradingsymbol,CurrentCycleStatus1)
+
+
+}
+
+
+      
+
+
+
 
       let quantity = orderUpdates.quantity;
       this.setScriptTradedStatus(tradingsymbol, "quantity", quantity);
