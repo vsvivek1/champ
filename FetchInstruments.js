@@ -310,74 +310,32 @@ res(true);
 
 
       // if (len > 0)
-      if (typeof e != 'undefined') {
-
+      if (e && typeof e != 'undefined') {
         let a = new pricePoint(e.instrument_token, accessToken);
         let c = await a.getPricePoints(7, 'day');
-
         e.pricePoints = c;
         e.SevenDayMaxMin = c.SevenDayMaxMin;
-
         e.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
-        e.seletedBuyingMethod = 'MAX'
+        e.seletedBuyingMethod = 'MAX';
         e.enterNowToTrade = false;
         e.PlacedReverseOrder = false;
-        e.hasLiveTarget= false;
-        e.hasLivePosition= false;
-
-
-        if (typeof e.pricePoints == 'undefined') {
-
-
-          console.log('e.pricePoints undefined pushing again', e.tradingsymbol);
-          strikes.push(e)
-
-
-          return;
-        }
-
-
-
-        if (!e.pricePoints.d0 || !e.pricePoints.d0.date || !e.pricePoints.length) {
-          console.log(`${e.tradingsymbol}: pricePoints not set, so not pushing`);
-          return;
-        }
-        
+        e.hasLiveTarget = false;
+        e.hasLivePosition = false;
       
-
-        
-        else {
-
-
-          // retObj={'othercriteriaCheck':false,'otherCriteriaObj':ob}
-
-
+        if (e.pricePoints && e.pricePoints.d0 && e.pricePoints.d0.date && e.pricePoints.length) {
           let { otherCriteriaCheck, otherCriteriaObj } = otherCriteria(e);
-
           e.otherCriteria = otherCriteriaObj;
           e.otherCriteriaCheck = otherCriteriaCheck;
-
           if (otherCriteriaCheck) {
-
-
-            jsonObj2.push(e)
+            jsonObj2.push(e);
           } else {
-
-            jsonObjWithOutCriteria.push(e)
-            // console.log('no nr 4',e.tradingsymbol)
-
-
-
+            jsonObjWithOutCriteria.push(e);
           }
-
-
+        } else {
+          console.log(`${e.tradingsymbol}: pricePoints not set, so not pushing`);
         }
-
-
-
-
-
       }
+      
 
 
 
@@ -524,49 +482,63 @@ function secondsToHms(d) {
 
 
 async function getHoldingInstruments(access_token) {
-
-
   try {
-
-    var kc = new KiteConnect({
+    const kc = new KiteConnect({
       api_key: api_key,
       access_token: access_token
     });
 
-    let pos = await kc.getPositions();
-    // console.log(pos)
-
-
-
-
-    // const inquirer = require('inquirer')
-
-    //     var questions = [
-    //       {
-    //         type: 'input',
-    //         name: 'name',
-    //         message: "What's your name?"
-    //       }
-    //     ]
-
-    //     inquirer.prompt(questions).then(answers => {
-    //       console.log(`Hi ${answers['name']}!`)
-    //     })
-
-    return pos.net.map(p => p.tradingsymbol)
-    // console.log((pos))
-
+    const positions = await kc.getPositions();
+    return positions.net.map(p => p.tradingsymbol);
   } catch (error) {
-    console.log('error', error)
+    console.error(error);
   }
-
-
-
-
 }
 
 
+
 function getNearestStrikes(ohlc, instruments) {
+  const peUpperPercentage = 1.03;
+  const peLowerPercentage = .97;
+  const ceUpperPercentage = 1.03;
+  const ceLowerPercentage = .97;
+
+  return Promise.resolve(
+    Object.entries(ohlc).reduce((currentInstruments, [item, value]) => {
+      let symbol = item.split(':')[1];
+      let lastPriceMax = value.last_price * peUpperPercentage;
+      let lastPriceMin = value.last_price * peLowerPercentage;
+      let lastPrice = value.last_price;
+
+      let curInstrument = instruments.find(i => {
+        if (symbol === 'NIFTY 50') {
+          symbol = 'NIFTY';
+        }
+        if (symbol === 'NIFTY BANK') {
+          symbol = 'BANKNIFTY';
+        }
+        return i.name === symbol;
+      });
+
+      if (curInstrument) {
+        if (curInstrument.instrument_type === 'FUT' && (curInstrument.name === 'NIFTY' || curInstrument.name === 'BANKNIFTY')) {
+          curInstrument.spot_price = lastPrice;
+          currentInstruments.push(curInstrument);
+        } else if (curInstrument.instrument_type === 'CE' && curInstrument.strike > lastPrice * ceLowerPercentage && curInstrument.strike < lastPrice * ceUpperPercentage) {
+          curInstrument.spot_price = lastPrice;
+          currentInstruments.push(curInstrument);
+        } else if (curInstrument.instrument_type === 'PE' && curInstrument.strike < lastPrice * peUpperPercentage && curInstrument.strike > lastPrice * peLowerPercentage) {
+          curInstrument.spot_price = lastPrice;
+          currentInstruments.push(curInstrument);
+        }
+      }
+      return currentInstruments;
+    }, [])
+  );
+}
+
+
+function getNearestStrikes_unoptimized(ohlc, instruments) {
 
 
   return new Promise((resolve, reject) => {
