@@ -2,6 +2,14 @@ const express= require('express');
 const path =require('path')
 const mongoose=require('mongoose');
 let ohlc=require('./scraping/ohlc');
+const cluster = require("cluster");
+const os = require("os");
+const api_key=process.env.api_key;
+let AccesTocken=require('./models/AccessTokens');
+;
+let  Enable=true;
+let ProxyTrade=false;
+const cors = require('cors')
 
 const NseApi=require('./scraping/nse');
 
@@ -9,38 +17,16 @@ const axios =require('axios');
 
 const Order=require('./models/Orders');
 
+const StartServerConnections=require('./StartServerConnections.js');
 
-// let AccesTocken=require('./models/AccessTokens');
-
-// var io = require('socket.io')(server);
-
-
-// var io = require('socket.io')(3000,{
-
-//   cors:{
-
-//     origin:['http://localhost:7000']
-//   }
-
-// })
+const commonFunctions=require('./common_functions.js')
 
 
-// io.on('connection',socket=>{
+let pricePoint=require('./pricePoints.js');
 
-//   console.log('socketid',socket.id);
-//   socket.on('order-book',e=>{
-    
-
-//     io.emit('send-order',e)//emit to all
+let access_token_global;
 
 
-//     // socket.broadcast.emit('send-order',e) //emit to all exept tosender
-//     console.log('orderbook',e)
-
-//   });
-  
-  
-// })
 
 
 
@@ -63,15 +49,29 @@ process.on('uncaughtException', function(err) {
 
 
 app.use(history());
-const port =9090;
+
+let port = process.env.PORT;
+if (port == null || port == "") {
+  const port =9090;
+}
+
+// let port = 9091
+
+
+
 const  bodyParser = require("body-parser");
 
-app.use(express.static(path.join(__dirname, './findiapp/dist')));
+app.use(express.static(path.join(__dirname, './appv3/dist')));
+// app.use(express.static(path.join(__dirname, './appreact/build')));
+
+// app.use('/api/react', express.static(path.join(__dirname, './appreact/build')))
 
 
-let pricePoint=require('./pricePoints.js');
+// app.use(express.static('files'))
 
-let AccesTocken=require('./models/AccessTokens');
+
+
+
 let NarrowRange=require('./models/NarrowRange');
 
 // console.log('NarrowRange',NarrowRange)
@@ -85,7 +85,7 @@ app.use(bodyParser.json());
 
 // https://kite.zerodha.com/connect/login?v=3&api_key=wkcurst2vu5obug7
 
-const api_key=process.env.api_key;
+
 
 let request_tocken;
 
@@ -96,6 +96,8 @@ let access_token=process.env.ACCESS_TOCKEN;
 
 
 var KiteConnect = require("kiteconnect").KiteConnect;
+
+// KiteConnect.invalidateAccessToken();
 const { exit } = require('process');
 const { isError } = require('util');
 
@@ -104,9 +106,14 @@ var kc = new KiteConnect({
 });
 
 
+
+
+
 app.post('/api/setRequestTocken/',(req,res)=>{
 
   request_tocken=req.body.Request_tocken;
+
+  console.log('request_tocken',request_tocken)
 
 let at=  ZerodhaAPI.generateSession(request_tocken).then(r=>{
   // console.log('at',r)
@@ -168,56 +175,10 @@ return false;
 
 
 
-// https://localhost:8000/?action=login&status=success&request_token=fz6liE6nCV6EgM64TR4k5w3DxM3Qkqdq
+// https://127.0.0.1:9090:8000/?action=login&status=success&request_token=fz6liE6nCV6EgM64TR4k5w3DxM3Qkqdq
 let holdings=[];
 
 
-function getHistoricalData(access_token,symbol='INE002A01018',start='2021-03-10',end='2019-03-10'){
-
-  console.log('access tocken from historical data',access_token);
-  console.log('\n \n access tocken from historical data api_key',api_key);
-
-  if(access_token==null){
-
-    console.log('No acceess tocken insdie get historical data');
-  }
-
-  console.log('access tocken from historical data',access_token);
-
-  // instrument_token, interval, from_date, to_date, continuous
-
-  // let api_key='wkcurst2vu5obug7';
-  var kc2 = new KiteConnect({
-    api_key: api_key,
-    access_token: access_token
-  });
-
-
-  console.log('this is kc2',kc2.getHistoricalData('IDEA','DAY','2021-03-01','2021-03-10',true))
-
-
-
-  var d1= new Date();
-  let today=d1.toISOString().split('T')[0];
-
-  let d2=new Date();
-  d2.setFullYear(d2.getFullYear() - 2);
-
-   symbol='IDEA'
- kc2.getHistoricalData(symbol,'day',d2,d1,true).then(res=>{
-
-  console.log('historical sbin',res)
-
-  return res;
- }).catch(err=>{
-
-  console.log('got an error',err)
-
-  
-  
-    });
-
-}
 
 
 
@@ -245,16 +206,42 @@ app.get('/Validate', (req,res) => {
 
   // res.send(req.params);
 
-  res.sendFile(path.join(__dirname, '../findiapp/build/index.html'));
+  res.sendFile(path.join(__dirname, '../appv3/dist/index.html'));
 });
 
 
+app.post('/api/getHourlyCandleLows', async (req,res) =>{
+  let access_token=req.body.accessToken;
+  let symbols_json=req.body.symbols_json;
+
+  let symbols=JSON.parse(symbols_json)
+  let a= await ZerodhaAPI.getHourlyCandleLows(access_token,symbols)
+  res.send(a)
+  // res(a)
+});
+
+
+
+
+
+
+app.post('/api/getOrdersPost',(req,res)=>{
+
+let accessToken=req.body.accessToken;
+ZerodhaAPI.getOrders(accessToken).then(r=>{
+
+res.send(r)
+
+});
+})
 
 
 app.get('/api/getOrders/:accessToken',(req,res)=>{
 
  
   let accessToken=req.params.accessToken;
+
+  console.log('here it is ',accessToken)
 
   let holding=[]
 
@@ -359,12 +346,14 @@ app.get('/api/longBuildUp', (req,res) => {
   s=>{
 
     res.send(s)
-    // console.log('exe',s)
+   
   }
   
   ).catch(e=>console.log('it happens inside',e));;
 
 });
+
+
 
 app.get('/hld',(req,res)=>{
 
@@ -375,18 +364,108 @@ app.get('/hld',(req,res)=>{
 })
 
 
-async function executeCI(href,accessToken){
-  // console.log('href',href)
 
-  let s= await CI.scrap(href,accessToken);
+app.delete('/api/deleteGTT/:trigger_id/',async(req,res)=>{
 
-  console.log('s',s)
-  return s; 
-  return CI.scrap(href);
+  console.log(req.headers.authorization.split(' ')[1],'req')
+
+  let accessToken=req.headers.authorization.split(' ')[1];
+ 
+  let trigger_id=req.params.trigger_id;
+ 
+  var kc = new KiteConnect({
+   api_key: api_key,
+   access_token: accessToken
+ });
+ 
+let out =await kc.deleteGTT(trigger_id);
+console.log(out,'gtt deletion')
+  // deleteGTT
+
+})
+app.post('/api/GTT',async (req,res)=>{
+console.log('gtt')
+  let today = new Date().toISOString().slice(0, 10);
+  let fileName = './'+'pricePoints_'+today+'.json';
+    
+  try {
+    let pp=0;
+     pp=require('./pricePoints/'+fileName)
+     console.log(pp)
+
+ res.send(pp)
+    
+  } catch (error) {
+console.log(error)
+
+    res.send(error)
+
   }
+  
+    
+})
+
+app.get('/api/dailyGainers/:accessTocken',async (req,res)=>{
+
+  let dailygainers=require('./dailyGainers');
+ let a= await dailygainers()
+  res.send(a)
+
+    
+})
+
+app.get('/api/dailyLosers/:accessTocken',async (req,res)=>{
+
+  letdailyLosers=require('./dailyGainers');
+ let a= await dailyLosers()
+  res.send(a)
+
+    
+})
+
+app.post('/api/updateMissingScriptInInstrumetsFile/',
+(req,res)=>{
+
+  console.log('updateMissingScriptInInstrumetsFile');
+
+
+
+  let updateMissingScriptInInstrumetsFile=require('./updateMissingScriptInInstrumetsFile.js')
+  
+
+  let instrument_token=req.body.instrument_token
+  let accessToken=req.body.accessToken
+  updateMissingScriptInInstrumetsFile(instrument_token,accessToken)
+  
+  // res.send('hi /')
+
+    // res.json(holdings)
+})
+
+
+const executeCI=commonFunctions.executeCI;
 
   // let url="/api/getOHLC/symbols/"+ arr+'/accessToken/'+accessToken;;
+  app.post('/api/WriteTrades', async (req,res) => {
+  
+ 
+    // let trade='\r\n'+req.body.trade;
+    let trade=req.body.trade;
+   
 
+    let today = new Date().toISOString().slice(0, 10);
+    let erroroutFile='./trades-'+today+'.text';
+
+    console.log(trade)
+     fs.appendFile(erroroutFile, JSON.stringify(trade), 'utf8', function (err) {
+       if (err) {
+           console.log("An error occured while writing JSON Object to File.");
+           return console.log(err);
+       }
+          //  console.log("Error file has been saved.",erroroutFile);
+   })
+   
+   });
 
 app.post('/api/CancelOrders', async (req,res) => {
   
@@ -400,22 +479,42 @@ app.post('/api/CancelOrders', async (req,res) => {
 
 let promises=[];
 arr.forEach(async a=>{
-try {
-  console.log('a.variety',a.variety,'a.order_id',a.order_id)
-  let o=await  kc.cancelOrder(a.variety, a.order_id)
 
 
-  let b=await kc.getOrderHistory(a.order_id);
-  console.log('etOrderHistory',b)
+  if(a!=null){
 
-  // promises.push(o);
-  console.log('cancel orders ',o);
-} catch (error) {
 
-  res.send('not-ok')
-  console.log('cancel order error',error)
-}
+    try {
+
+    console.log('a.variety',a.variety,'a.order_id',a.order_id)
+    let o=await  kc.cancelOrder(a.variety, a.order_id)
+  
+  
+    let b=await kc.getOrderHistory(a.order_id);
+    console.log('etOrderHistory',b)
+    res.send(b)
+    // promises.push(o);
+    console.log('cancel orders ',o);
+  } catch (error) {
+  
+    res.send('not-ok')
+    console.log('cancel order error',error)
+  }
+  }
+ 
   })
+});
+
+app.post('/api/FetchInstruments', async (req,res) => {
+  
+ 
+ let accessToken=req.body.accessToken;
+
+ console.log('this is from fetch instruments route ',accessToken)
+ //fetchInstrumentsForMining(accessToken)
+});
+
+
 
 // promises.all(promises).then(r=>{
 
@@ -425,7 +524,7 @@ try {
  
 
 
-});
+
 
 
 app.get('/api/getOHLC/symbols/:arr/accessToken/:accessToken', async (req,res) => {
@@ -454,6 +553,113 @@ app.get('/api/getOHLC/symbols/:arr/accessToken/:accessToken', async (req,res) =>
 
 
 
+app.post('/api/postOHLC', async (req,res) => {
+  
+ let arr=JSON.parse(req.body.symbols)
+ let accessToken=req.body.accessToken;
+
+
+ 
+
+ 
+try {
+  let ohlcs=await ohlc(accessToken,arr);
+
+  console.log('ohls',ohlcs,'ohls');
+ 
+  res.send(ohlcs)
+} catch (error) {
+  console.log(error,'error-ohlc @655')
+}
+
+});
+
+app.post('/api/getGTTs',async (req,res)=>{
+  let accessToken=req.body.accessToken;
+  try {
+    var kc = new KiteConnect({
+      api_key: api_key,
+      access_token: accessToken
+    });
+
+let gtts=await kc.getGTTs();
+
+res.send(gtts)
+
+console.log(gtts,'gtts')
+
+  }catch(e){
+
+    console.log(e,'gtt getting error')
+  }
+
+});
+
+
+app.post('/api/PlaceGTT', async (req,res) => {
+  
+ let params=req.body.params;
+ let accessToken=req.body.accessToken;
+
+ 
+try {
+  var kc = new KiteConnect({
+    api_key: api_key,
+    access_token: accessToken
+  });
+  params.trigger_type=kc.GTT_TYPE_SINGLE;
+
+
+  console.log(accessToken,'accessToken')
+  let out=await kc.placeGTT(params);
+
+  res.send(out);
+  return;
+
+} catch (error) {
+  console.log(error,'this error')
+}
+
+});
+
+
+app.post('/api/getLatestPricesOfClosedScripts', async (req,res) => {
+  
+ let arr=JSON.parse(req.body.symbols)
+ let accessToken=req.body.accessToken;
+
+
+ 
+
+ 
+try {
+  let ohlcs=await ohlc(accessToken,arr);
+
+
+
+  // console.log('ohls',ohlcs,'ohls');
+
+let ret= Object.keys(ohlcs).map(e=>{
+let ob={}
+ob.last_price=ohlcs[e].last_price;
+ob.instrument_token=e
+
+return ob;
+
+
+
+  })
+ 
+  res.send(ret)
+} catch (error) {
+  console.log(error,'error -ohlc 738')
+}
+
+});
+
+
+
+
 app.post('/api/PlaceBracketOrderInServer/', async (req,res) => {
 
 
@@ -465,13 +671,15 @@ app.post('/api/PlaceBracketOrderInServer/', async (req,res) => {
       // res.send(ltps)
  });
 
- app.get('/api/getMargins/accessTocken/:accessToken', async (req,res) => {
+ app.post('/api/getMargins/accessTocken/', async (req,res) => {
 
 
 
       
-      let accessToken=req.params.accessToken;
+      let accessToken=req.body.access_token;
       let margins =await ZerodhaAPI.getMargins(accessToken); 
+
+      // console.log(margins,',martrins')
       res.status(200).send(margins)
       // res.send(ltps)
  });
@@ -520,6 +728,34 @@ app.post('/api/getPositions', async (req,res) => {
       // res.send(ltps)
  });
  
+ app.get('/api/btstOptions', async (req,res) => {
+
+  console.clear();
+
+
+//   res('ok')
+//  return ;
+     
+      // let accessToken=req.body.accessToken;
+      const btst = require("./btst");
+     try {
+
+      let bts =await btst(); 
+
+
+      // console.log(bts,'bts')
+      res.status(200).send(bts)
+      // res.send(ltps)
+
+      return
+       
+     } catch (error) {
+       console.log(error,'error in btst')
+     }
+     
+      
+ });
+ 
  app.post('/api/modifyOrders', async (req,res) => {
 
       let ordersString=JSON.parse(req.body.ordersString);
@@ -535,6 +771,8 @@ app.get('/api/getStrategy/scanner/:href/accessToken/:accessToken', async (req,re
 
  let href=req.params.href
  let accessToken=req.params.accessToken
+
+ console.log('href1',href)
 
 let a1=await CI.scrap(href,accessToken).then(a=>{
   res.send(a)
@@ -582,7 +820,6 @@ app.post('/api/fetchSymbolsForTheCategory',async (req,res)=>{
  try {
   const symbols=await NseApi.fetchScripts(category,accessToken)
 
-
   res.send(symbols)
 
   // console.log('symbols',symbols)
@@ -599,7 +836,7 @@ app.post('/api/fetchSymbolsForTheCategory',async (req,res)=>{
 });
 
 
-app.post('/api/PlaceTarget',(req,res)=>{
+app.post('/api/PlaceTarget',async (req,res)=>{
   
 
   let accessToken=req.body.accessToken;
@@ -607,9 +844,9 @@ app.post('/api/PlaceTarget',(req,res)=>{
   let sessionString=req.body.sessionString;
   // console.log('zerodhaparamas',ZerodhaParams)
 
-  ZerodhaAPI.PlaceTarget(accessToken,ZerodhaParams,sessionString).then(r=>{
+ let z=await  ZerodhaAPI.PlaceTarget(accessToken,ZerodhaParams,sessionString).then(r=>{
 
-    console.log('zerodhaparamas',ZerodhaParams)
+    // console.log('zerodhaparamas after result ',ZerodhaParams)
     res.send(r)
   }).catch(e=>console.log('it happens inside',e));
 
@@ -617,19 +854,19 @@ app.post('/api/PlaceTarget',(req,res)=>{
 
 });
 
-app.post('/api/getQuoteFromZerodha',(req,res)=>{
+app.post('/api/getQuoteFromZerodha',async (req,res)=>{
   
 
   let accessToken=req.body.accessToken;
   let arryOfInstruments=req.body.arryOfInstruments;
 
-  res.send('11'); return;
-  
-  // ZerodhaAPI.getQuoteFromZerodha(accessToken,arryOfInstruments).then(r=>{
+  let a=await ZerodhaAPI.getQuoteFromZerodha (accessToken,arryOfInstruments);
 
-  //   console.log('zerodhaparamas',ZerodhaParams)
-  //   res.send(r)
-  // })
+
+
+  res.send(a);
+  
+  
 
  
 
@@ -651,7 +888,7 @@ app.get('/api/getInstruments/:accessToken',(req,res)=>{
     // console.log('r',eq)
   }).catch(e=>{
 
-    console.log('error',e)
+    console.log('error-get instruments 975',e)
   });
 
 });
@@ -662,186 +899,16 @@ function sleep(ms) {
 }
 
 
-function getMinRange(res,e){
-    let minRanges=[];   
 
-    let c=0;
-  let h1={};
-  h1.instrument_token=e.instrument_token;
-  h1.historical=res
+var getMinRange=commonFunctions.getMinRange;
 
-  res.forEach(h2 => {
-    h2.range=Math.abs(h2.high-h2.low)
-  });
-
-
-  let minValue=Math.min.apply(Math, res.map(function(o) { return o.range; }))
-
-  let min=res.filter(a=>a.range==minValue)[0];
-
-
-  let d3=new Date();
-d3.setDate(d3.getDate() -1);
-// d3.setHours(24, 00, 0);
-let ln=res.length;
-let yday1=res[res.length-1]
-
-// console.log('yday1',yday1.date,ln);
-
-// let yday= d3.toISOString().slice(0,10);
-let yday= d3.toISOString()
+var GetStocks=commonFunctions.GetStocks;
 
 
 
-let mindate=min.date.toISOString().slice(0,10,res)
- var dateIST = new Date(min.date.toISOString());
-     
-//// min date utc to ist////
-try {
-  // var dateIST = new Date(min.date.toISOString());
-  // var dateIST = new Date(min.date.toISOString());
 
-  var mindate1=min.date;
-  
-} catch (error) {
-  console.log(error);
-  var mindate1=0;
-  
-}
-try {
-  var ydate=yday1.date;
-  
-} catch (error) {
-  console.log(error);
-  var ydate=-1;
-}
+const NrRange=commonFunctions.NrRange;
 
-
-
-//date shifting for IST timezone (+5 hours and 30 minutes)
-dateIST.setHours(dateIST.getHours() + 5); 
-dateIST.setMinutes(dateIST.getMinutes() + 30);
-
-//// min date utc to ist////
-
-// console.log('dateIST::',dateIST,'mindate',mindate,'yday',d3.toISOString())
-
-    if(ydate==mindate1){
-
-      // console.log()
-    // if(true){
-
-      let m={};
-      m.generatedDate=new Date();;
-      m.instrument_token=e.instrument_token
-      m.tradingsymbol=e.tradingsymbol
-      m.date=mindate;
-      m.range=min.range;
-      m.low=min.low;
-      m.high=min.high
-      m._id=new mongoose.Types.ObjectId();
-
-      console.log(m)
-
-//       let Nr=new NarrowRange(m);
-// Nr.save().then(r=>{
-
-// })
-      minRanges.push(m)
-      // console.log('MINIMUM RANGE FOUND',e.tradingsymbol,m,yday);
-    return m;
-
-    }else{
-c=c+1;
-      // console.log('not a minimum range',e.tradingsymbol)
-      // console.log('not a minimum range',e.tradingsymbol,minValue,min,yday)
-      let a={};
-return a;
-    }
-    // return h1
-    }
-
-
-
-async function GetStocks(req){
-
-  
-  let minRanges=[];
-  var kc = new KiteConnect({
-    api_key: api_key,
-    access_token: req.params.accessToken
-  });
-
-
-  let eq1;
-
-  let instru=kc.getInstruments();
-
-
-let eq=instru.then(
-    r=>{
-      let eq=r.filter(r1=>r1.segment=='NSE' && r1.exchange=='NSE' && r1.instrument_type=='EQ' && r1.name!='');
-    
-      // eq1=eq
-
-      
-      return eq;
-    
-    }
-    
-      ).catch(e=>{
-
-        console.log('error in function get stocks with error',e)
-      })
-
-      // eq.then(r=>console.log('------------------ b4 retur ',r))
-
-      
-      return eq;
-
-}
-
-
-async function NrRange(req) {
-  let minRanges=[];
-  var kc2 = new KiteConnect({
-    api_key: api_key,
-    access_token: req.params.accessToken
-  });
-  var interval = 100; 
-  let eq=await GetStocks(req);
-  let eq1=eq.slice(0,100); 
-
-  var d1= new Date();
-  let today=d1.toISOString().split('T')[0];   
-
-  d1.setDate(d1.getDate()+2);
-
-  let d2=new Date();
-  d2.setDate(d2.getDate() - 6);
-
- let promises=  eq1.map(async (e,index)=>{
-  setTimeout(function  () {
-  
- return  kc2.getHistoricalData(e.instrument_token,'day',d2,d1,false,1)
-                                  
-    .then(
-res=>{
-
-  let mr=getMinRange(res,e);
-  // console.log('res',mr)
-  return mr
-}).catch(e=>console.log('it happens inside',e));;
-    
-  },interval*index)
-});
-
-
-// console.log('promise from nr range',promises)
-return promises;
-  
-
-}
 
 async function NrRange1(req) {
 
@@ -1038,7 +1105,7 @@ res.send(result);
     
   } catch (error) {
     console.log('errir',error);
-    StartServerConnections()
+
  
  
   }
@@ -1075,7 +1142,7 @@ console.log('ndefined fired')
     }
     
    }).catch(e=>{
-     console.log('error',e)
+     console.log('error @ 1399 get holdings',e)
    });
  
    
@@ -1108,6 +1175,26 @@ return;
         
 
 }
+
+app.get('/api/fetchInstrumentsForMining/accessToken/:accessToken',(req,res)=>{
+
+  let accessToken=req.params.accessToken;
+
+  fetchInstrumentsForMining(accessToken)
+
+});
+
+
+app.get('/api/triggerWebsocktsInServer/accessToken/:accessToken',(req,res)=>{
+
+  let accessToken=req.params.accessToken;
+
+  // startIoConnections();
+
+});
+
+
+
   app.get('/api/pricePoints/:instrument_tocken/accessToken/:accessToken',(req,res)=>{
 
 
@@ -1138,416 +1225,53 @@ return;
 
 
   app.get('/*', (req,res) => {
-    res.sendFile(path.join(__dirname, '/findiapp/build/index.html'));
+    res.sendFile(path.join(__dirname, '/appv3/dist/index.html'));
   });
 
 
 
-// io.on('connection', function(client) {
-//     console.log('Client connected...',client.id);
 
-//     client.on('join', function(data) {
-//         console.log(data);
-//     });
-//   });
 
 ///webscokets server
 
 let today = new Date().toISOString().slice(0, 10);
 
 
-var io = require('socket.io')(4000,{
+const http = require('http')
+const server = http.createServer(app)
 
-    cors:{
-  
-      origin:['http://localhost:7000','http://localhost:8080','http://localhost:9090']
-    }
-  
-  })
+
+
+
+
+
 ///webscokets server
 
-StartServerConnections()///
-
-function StartServerConnections(){
-
-const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-mongoose.connect(uri,{ useNewUrlParser: true, useUnifiedTopology: true }).then(r=>{
-
-  console.log('mongo db connected ');
-  app.listen(port, () => {
-    console.log(`Server listening on the port::${port}`);
-
-    // console.log('io',io)
-
-
-    AccesTocken.findOne({ 'date': today  },'access_token').then(e=>{              
-               
-      let access_token=e.access_token;
-  
-  /////////////////////io part
-
-    
-  io.on('connection',socket=>{
-   
-
-   
-
-
-    socket.on('forceDisconnect', (r)=>{
-
-      
-      var KiteTicker = require("kiteconnect").KiteTicker;
-      var ticker = new KiteTicker({
-      api_key: api_key,
-      access_token: access_token
-      });
-      
-console.log(r,'force disconenct')
-      ticker.unsubscribe(r);
+StartServerConnections(app,port,today)///
 
 
 
-      ticker.on("order_update", (orderUpdates)=>{
 
+const StartWebSockets=require('./StartWebSockets');
 
-        io.emit('order_update',orderUpdates)
-    
-        console.log('orderupdates',orderUpdates)
-    
-    
-     
-    
-    });
+var io = require('socket.io')(4000,{
 
-      
-      // socket.disconnect();
-  });
-
-  StartWebSockets(socket,access_token);
-  sktForMKVStrategy(socket,access_token);
-  startWebSocketsOnTrade(socket,access_token);
-  sktForMint(access_token,socket);
-
-
-
-  
-
-
-
-  });
-})
-
-.catch(e=>console.log('error',access_token));
-;
-
-   
-
- 
-
- 
-
-})
-}).catch(error=>{
-
-  console.log('mongo db connect error',error)
-
-  // StartServerConnections()
-})
-
-}
-
-function   sktForMint(access_token,socket){
-
-  var KiteTicker = require("kiteconnect").KiteTicker;
-  var ticker = new KiteTicker({
-  api_key: api_key,
-  access_token: access_token
-  });
-  
-  console.log('hi.....................................................................................');
-  // io.on('connection',socket=>{
-  
-  // console.log(socket,'io')
-  // console.log('subscribe-scripts-for-mint',items)
-
-
-socket.on('subscribe-scripts-for-mint',r=>{
-
-  var items =JSON.parse(r);
-
-  //ittems coming here
-  console.log('items comming in socket on subscribe start',items.lenght)
-  if(items.lenght){
-
-    console.log('items comming in socket on subscribe',items.lenght)
+  cors:{
+         origin:"*"
   }
 
-
-
-  ticker.connect();
-
-  ticker.on("connect", ()=>{
-
-   
-  var items =JSON.parse(r);
-  console.log('items comming in socket on subscribe',items.length)
-  if(items.lenght){
-
-    console.log('items comming in ticker on connect  subscribe',items.length)
-  }
-
-
-  // console.log('subscribe-scripts-for-mint on connect',items);
-  
-  // console.log(ticker,'ticker')
-   
-  ticker.subscribe(items);
-  ticker.setMode(ticker.modeLTP, items);
-
-});
-  
-  
-  ticker.on("ticks", (ticks)=>{
-
-
-    console.log('tick',ticks);
-    // console.log('items comming in socket on subscribe',items.lenght)
-    // console.log('items comming in ticker on tick ',items.lenght)
-
-    // console.log('ticks',ticks)
-      io.emit('ltp-for-mint',ticks)
-  
-      
-  });
-  
-  
-  
-  });
-
-
-/////////////////////io part
-
-  // })
-}
-
-function sktForMKVStrategy(socket,access_token){
-
-  
-
- 
-/////////////////////io part
-
-
-// socket.on('order-book',e=>{
-
-// io.emit('send-order',e)//emit to all
-
-
-// // socket.broadcast.emit('send-order',e) //emit to all exept tosender
-// console.log('orderbook',e)
-
-// });
-
-
-socket.on('subscribe-script-for-mkv-strategy',r=>{
-
-// console.log()
-var KiteTicker = require("kiteconnect").KiteTicker;
-var ticker = new KiteTicker({
-api_key: api_key,
-access_token: access_token
-});
-
-// console.log('ticker',ticker)
-ticker.connect();
-ticker.on("connect", ()=>{
-// console.log('r',r)
-var items =JSON.parse(r);
-
-// console.log('items-subscribe-script-for-mkv-strategy',items)
- 
-ticker.subscribe(items);
-ticker.setMode(ticker.modeFull, items);
-
-
-ticker.on("ticks", (ticks)=>{
-
-    io.emit('ltp-of-script-for-mkv-strategy',ticks)
-
-    console.log('ticks',ticks)
-});
-
-});
-
-
-// console.log('instruments',r)
-
-
-
-
-
-
-});
-
-
-
-
-
-/////////////////////io part
-
-
-
-
-
-
-
-
-
-
-
-
-}
-
-function startWebSocketsOnTrade(socket,access_token){
-
-
- 
-
-socket.on('forceDisconnect', r=>{
-// socket.disconnect();
-
-var KiteTicker = require("kiteconnect").KiteTicker;
-var ticker = new KiteTicker({
-api_key: api_key,
-access_token: access_token
-});
-
-console.log(r,'force disconenct')
-ticker.unsubscribe(r);
-});
-
-
-
-var KiteTicker = require("kiteconnect").KiteTicker;
-var ticker = new KiteTicker({
-api_key: api_key,
-access_token: access_token
-});
-
-// console.log('ticker',ticker)
-ticker.connect();
-ticker.on("connect", ()=>{
-
-  // console.log('viveeeek',ticker)
-
-
-ticker.on("order_update", (orderUpdates)=>{
-
-
-    io.emit('order_update',orderUpdates)
-
-    console.log('orderupdates',orderUpdates)
-
-
- 
-
-});
-
-});
-
-
-// console.log('instruments',r)
-
-
-
-
-/////////////////////io part
-
-
-
-
-
-
-
-
-}
-
-
-
-function StartWebSockets(socket,access_token){
-
-
-
-  socket.on('forceDisconnect', r=>{
-    var KiteTicker = require("kiteconnect").KiteTicker;
-    var ticker = new KiteTicker({
-    api_key: api_key,
-    access_token: access_token
-    });
-    
-console.log(r,'force disconenct')
-    ticker.unsubscribe(r);
-});
-
-
-
-
-// console.log('socketid',socket.id);
-socket.on('order-book',e=>{
-  
-  io.emit('send-order',e)//emit to all
-
-
-  // socket.broadcast.emit('send-order',e) //emit to all exept tosender
-  // console.log('orderbook',e)
-
-});
-
-
-socket.on('subscribe-orders',r=>{
-    
-    
-    var KiteTicker = require("kiteconnect").KiteTicker;
-    var ticker = new KiteTicker({
-        api_key: api_key,
-        access_token: access_token
-    });
-
-    // console.log('ticker',ticker)
-    ticker.connect();
-    ticker.on("connect", ()=>{
-        // console.log('r',r)
-        var items =JSON.parse(r);
-
-        // console.log('items',items)
-         
-        ticker.subscribe(items);
-        ticker.setMode(ticker.modeFull, items);
-        
-        
-        ticker.on("ticks", (ticks)=>{
-
-            io.emit('send-realtime-subscription',ticks)
-
-            // console.log('ticks',ticks)
-        });
-
-    });
-
-      
-    // console.log('instruments',r)
 })
 
 
-
-/////////////////////io part
-
-
-
+io.on('connection',socket=>{
+  StartWebSockets(socket,io)
+});
 
 
+const proxyTrade=require('./proxyTrade') ;
 
 
 
   
-}
+    
+  

@@ -138,7 +138,7 @@ return;
 module.exports=NseApi;
 
 
-NseApi.fetchScripts('nifty')
+// NseApi.fetchScripts('nifty')
 // NseApi.optionChain()
 
 

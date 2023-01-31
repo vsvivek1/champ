@@ -1,4 +1,4 @@
-const instruments=require('./instruments/instruments.json');
+const instruments=require('./appv3/public/instruments/instruments.json');
 
 module.exports = class Instruments {
     static getInstrumentToken(symbol){

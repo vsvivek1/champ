@@ -10,7 +10,7 @@ var io = require('socket.io')(4000,{
 
     cors:{
   
-      origin:['http://localhost:7000','http://localhost:8080']
+      origin:['*']
     }
   
   })
@@ -20,8 +20,8 @@ var io = require('socket.io')(4000,{
   
 
 
-const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-mongoose.connect(uri,{ useNewUrlParser: true, useUnifiedTopology: true }).then(r=>{
+// const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+// mongoose.connect(uri,{ useNewUrlParser: true, useUnifiedTopology: true }).then(r=>{
 
 
     AccesTocken.findOne({ 'date': today  },'access_token').then(e=>{
@@ -63,6 +63,16 @@ mongoose.connect(uri,{ useNewUrlParser: true, useUnifiedTopology: true }).then(r
         
    
    /////////////////////io part
+
+   var io = require('socket.io')(4000,{
+
+    cors:{
+           origin:"*"
+    }
+  
+  })
+
+
    io.on('connection',socket=>{
   
     console.log('socketid',socket.id);

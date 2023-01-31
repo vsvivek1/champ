@@ -1,0 +1,57 @@
+Server listening on the port::9090
+mongo db connected4
+false ticker.connected
+false ticker.connected
+false ticker.connected
+false ticker.connected
+access_token:  2ykjbBFZHBmQkCn2xMi7bntQtXwYpU85
+Server listening on the port::9090
+mongo db connected4
+access_token:  2ykjbBFZHBmQkCn2xMi7bntQtXwYpU85
+Server listening on the port::9090
+mongo db connected4
+access_token:  2ykjbBFZHBmQkCn2xMi7bntQtXwYpU85
+Server listening on the port::9090
+mongo db connected4
+access_token:  2ykjbBFZHBmQkCn2xMi7bntQtXwYpU85
+this is array before strigify test [
+  {
+    variety: 'regular',
+    params: {
+      exchange: 'NFO',
+      tradingsymbol: 'NAUKRI22NOV4000CE',
+      transaction_type: 'SELL',
+      quantity: 125,
+      product: 'NRML',
+      order_type: 'LIMIT',
+      validity: 'DAY',
+      price: '46.4'
+    }
+  }
+]
+regular a.variety {
+  exchange: 'NFO',
+  tradingsymbol: 'NAUKRI22NOV4000CE',
+  transaction_type: 'SELL',
+  quantity: 125,
+  product: 'NRML',
+  order_type: 'LIMIT',
+  validity: 'DAY',
+  price: '46.4'
+} a.params
+zerodhaparamas after result  [{"variety":"regular","params":{"exchange":"NFO","tradingsymbol":"NAUKRI22NOV4000CE","transaction_type":"SELL","quantity":125,"product":"NRML","order_type":"LIMIT","validity":"DAY","price":"46.4"}}]
+this is array before strigify test [
+  {
+    variety: 'regular',
+    params: {
+      exchange: 'NFO',
+      tradingsymbol: 'BAJFINANCE22NOV7000PE',
+      transaction_type: 'BUY',
+      quantity: 125,
+      product: 'NRML',
+      order_type: 'LIMIT',
+      validity: 'DAY',
+      price: '150.5'
+    }
+  }
+]

@@ -11,11 +11,13 @@ const FailedOrder=require('./models/FailedOrder');
 
 class ZerodhaAPI {
 
-
+// self= this;
 
     constructor() {
         const url = process.env.MONGO_URL + process.env.DB_NAME;
         const myDbName = process.env.DB_NAME;
+
+      // var self=this;
         
         
         // mongoose.connect(url + myDbName, {
@@ -50,7 +52,11 @@ class ZerodhaAPI {
         api_key: api_key,
         access_token: accessToken
       }); 
+
+      var modifiedOrderResults=[];
 if(ordersString.length==0){
+
+  console.log('modify order for stopp loss ordersString.length 0 ')
 
   return false
 }else{
@@ -61,23 +67,63 @@ if(ordersString.length==0){
       
 
       // return false;
-     return  ordersString.map(async o=>{
+    //  return
+     
+    
+    //  ordersString.map(async o=>{
+      let t1;
 
+if(ordersString.length==1){
+
+   t1=0;
+}else{
+
+   t1=501;
+}
+    
+    
+      let timer=setInterval(async ()=>{
+
+let o= ordersString.pop();
+
+if(typeof o=='undefined'){
+
+
+  clearInterval(timer);
+
+  return modifiedOrderResults ;
+
+}
+//04952355442
       try {
-        console.log('order string',o.variety,o.order_id,o.params);
+        console.log('order string',o.variety,o.order_id,o.params,o.tradingsymbol,'\n','\n','\n','\n',);
 
         let modifiedOrderResult= await  kc.modifyOrder(o.variety, o.order_id, o.params) ;
 
         
-        console.log('modifiedOrderResult',modifiedOrderResult)
-        return modifiedOrderResult;
+        console.log('\n','\n','\n','\n','modifiedOrderResult',modifiedOrderResult,'\n','\n','\n','\n',)
+        modifiedOrderResults.push( modifiedOrderResult);
       } catch (error) {
         console.log('SOME ERROR',error)
+
+
+        if(error.message=='Maximum allowed order modifications exceeded.'){
+
+
+          console.log('what to do max orders hogaya');
+          // let o2=await  kc.cancelOrder(o.variety, o.order_id);
+        
+          // console.log('order cancelled',o2)
+
+          // return o2;
+
+          // cancelordt
+        }
       }
 
      
 
-      })
+      },t1)
           
    
 
@@ -100,7 +146,7 @@ if(ordersString.length==0){
         access_token: accessToken
       });   
       
-      console.log('getMargins(accessToken)',accessToken);
+      // console.log('getMargins(accessToken)',accessToken);
       let ltps= await  kc.getMargins();       
     return ltps;
 
@@ -241,6 +287,12 @@ static IsJsonString(str) {
 
       // console.log('essionString',sessionString);
       // return false;
+
+
+      return new Promise((res,rej)=>{
+
+
+     
       let session={};
 
       let s=ZerodhaAPI .IsJsonString(sessionString)
@@ -259,18 +311,37 @@ static IsJsonString(str) {
         //   return ZerodhaParams;
           let arr=JSON.parse(ZerodhaParams);
 
-          // console.log('this is a',arr);
+        //  console.log('this is array before strigify test',arr);
 let response=[];
 
 let currentId=-1;
-          arr.forEach(a=>{
+
+let out=[];
+          // arr.forEach(async a=>{
+
+            let tm=setInterval(async ()=>{
+
+let a=arr.pop();
+
+if(typeof a=='undefined'){
+
+clearInterval(tm);
+res(out);
+return ;
+
+}
+
 // let testObj=Object.keys(a).length === 0 && a.constructor === Object
 
 let a1={};
 if(JSON.stringify(a)!=JSON.stringify(a1))//ch3cnking of null value of aa  was a workaround
 {
    
-       kc.placeOrder(a.variety, a.params)
+
+  // console.log(a.variety,'a.variety',a.params,'a.params');
+
+
+     let placeOrderOutput=await   kc.placeOrder(a.variety, a.params)
 
            .then(order_id=>{
 
@@ -280,6 +351,8 @@ if(JSON.stringify(a)!=JSON.stringify(a1))//ch3cnking of null value of aa  was a 
 let id=order_id.order_id
 
 currentId=order_id.order_id;
+
+out.push(order_id.order_id)
             const order=new Order({
 
               orderDetail:a,
@@ -302,15 +375,15 @@ currentId=order_id.order_id;
 
             
           
-            order.save().then(r=>{
+            // order.save().then(r=>{
           
-              // console.log('r',r)
-            }) .catch(e=>console.log('errror in saving order',e)) ;  
+            //   // console.log('r',r)
+            // }) .catch(e=>console.log('errror in saving order',e)) ;  
 
-            console.log(id)
+            // console.log(id,'order id')
            }).catch((e)=>{
 
-            console.log('error',e)
+            console.log('BUY/SELL ERROR',e.message)
 
             let resObj={};
             resObj.orderDetail=a;
@@ -322,9 +395,9 @@ currentId=order_id.order_id;
 
             // console.log('error response', resObj);
 
-            const FailedOrder1=new FailedOrder(resObj);
+            // const FailedOrder1=new FailedOrder(resObj);
           
-            FailedOrder1.save()
+            // FailedOrder1.save()
 
            }).catch(e=>console.log('errror in saving  failed order',e)) ; 
 
@@ -335,11 +408,13 @@ currentId=order_id.order_id;
             console.log('empty')
           }
 
-          })
+         
+
+          },501)
 
 
 
-
+        })
 
     }
 
@@ -370,7 +445,371 @@ out=res;
     }
 
 
+    static convertIsoDateToIST(iso){
+
+ 
+      let moment=require('moment');
+        
+        return moment(iso).format('DD-MM HH:mm')
+    
+    }
+
+    static async getHourlyCandleLows(accessToken,symbols1){
+      return new Promise((res,rej)=>{
+        var kc2 = new KiteConnect({
+          api_key: api_key,
+          access_token: accessToken
+        });
+
+
+
+        let totalTime=333*symbols1.length;
+      
+
+        let moment=require('moment');
+      
+        let from= moment().subtract(1, "days").hours(9).minute(15).format('Y-MM-DD HH:mm:ss');
+        let to= moment().format('Y-MM-DD HH:mm:ss');//.toString()//.format('Y-MM-DD hh:mm:ss');
+   
+let symbols=symbols1//.slice(0,20)
+        let out=[];
+
+     var ln=[...symbols].length;   
+     var instrumentsForMining1 = require("./appv3/public/instruments/instrumentsForMining.json");
+    //  var instrumentsForMining1 = require("./appv3/public/instruments/instrumentsForCommodity.json");
+   
+    
+    const ti=501;
+let t=setInterval(async ()=>{
+ 
+
+
+  let symbol=symbols.pop()
+
+
+
+
+
+  
+  if(typeof symbol=='undefined'){
+
+       res(out);
+  clearInterval(t);
+
+  return 
+    }
+
+    console.log( "%s out of %s time left is %s of %s fetiching %s",   
+    
+    symbols.length ,ln,symbols.length*ti/(1000),totalTime/(1000),symbol)
+
+  try {
+
+    let res= await kc2.getHistoricalData(symbol,'15minute',from,to,false);
+
+  
+    ln--
+
+
+
+    let ob={};
+
+    ob.instrument=instrumentsForMining1.filter(i=>i.instrument_token==symbol)[0]
+    ob.instrument_token=symbol;
+
+
+    let ln2=res.length;
+res.forEach((e,index,resObj)=>{
+
+e.dateIST=ZerodhaAPI.convertIsoDateToIST(e.date)
+
+e.range=(e.high-e.low).toFixed(1);
+e.rangeBreakOutTarget=e.high+(e.range/2).toFixed(1);
+e.rangeBreakDownTarget=e.low-(e.range/2).toFixed(1);
+
+
+console.log(e.range,e.rangeBreakOutTarget,e.rangeBreakDownTarget,'e.range')
+
+// if(index >3){
+
+  let c1=resObj[ln2-4]
+  let c2=resObj[ln2-3]
+  let c3=resObj[ln2-2]
+  let c4=resObj[ln2-1];
+
+  if(
+    typeof c1 =='undefined' ||
+    typeof c2 =='undefined' ||
+    typeof c3 =='undefined' ||
+    typeof c4 =='undefined' 
+    
+    
+    ){
+
+
+      return false;
+    }
+
+  c1.range=c1.high-c1.low;
+  c2.range=c2.high-c2.low;
+  c4.range=c4.high-c4.low;
+  c3.range=c3.high-c3.low;
+
+  if(Math.min(c1.range,c2.range,c3.range,c4.range)==c4.range && c4.range!=0){
+
+
+    e.nr4=true
+// console.log(c1.range,c2.range,c3.range,c4.range,'nr4 true')
+
+  }else{
+    e.nr4=false;
+
+  }
+
+
+// }
+
+
+})
+
+
+
+
+    ob.prices=res
+
+    // console.log(res,'res')
+
+    if(res.length==0){
+
+      console.log(res,'res')
+
+      console.log(ob.instrument.tradingsymbol,'is missing ',{symbol})
+    }
+
+    // let out1={[symbol]:ob}
+      out.push(ob)
+
+  }
+    catch (error) {
+     console.log(error, 'this error ano')
+    }
+  
+   
+  
+
+
+},ti)
+
+
+      
+        })
+
+
+     
+    }
+
+
+
+   static async getHourlyCandleLowsCommodity(accessToken,symbols1){
+      return new Promise((res,rej)=>{
+        var kc2 = new KiteConnect({
+          api_key: api_key,
+          access_token: accessToken
+        });
+
+
+
+        let totalTime=333*symbols1.length;
+      
+
+        let moment=require('moment');
+      
+        let from= moment().subtract(4, "days").hours(15).minute(15).format('Y-MM-DD HH:mm:ss');
+        let to= moment().format('Y-MM-DD HH:mm:ss');//.toString()//.format('Y-MM-DD hh:mm:ss');
+   
+let symbols=symbols1//.slice(0,20)
+        let out=[];
+
+     var ln=[...symbols].length;   
+    //  var instrumentsForMining1 = require("./appv3/public/instruments/instrumentsForMining.json");
+    var instrumentsForMining1 = require("./appv3/public/instruments/instrumentsForCommodity.json");
+     
+let t=setInterval(async ()=>{
+ 
+
+
+  let symbol=symbols.pop()
+
+
+
+
+
+  
+  if(typeof symbol=='undefined'){
+
+       res(out);
+  clearInterval(t);
+  return 
+    }
+    // console.log({symbol})
+    let tradingsymbol=instrumentsForMining1.filter(i=>i.instrument_token==symbol)[0].tradingsymbol
+
+    console.log( "%s out of %s time left is %s of %s fetiching %s",   
+    
+    symbols.length ,ln,symbols.length*333/(1000*60),totalTime/(1000*60),tradingsymbol)
+
+  try {
+
+    let res= await kc2.getHistoricalData(symbol,'15minute',from,to,false);
+
+  
+    ln--
+
+
+
+    let ob={};
+
+    ob.instrument=instrumentsForMining1.filter(i=>i.instrument_token==symbol)[0]
+
+    // console.log(ob.instrument)
+    ob.instrument_token=symbol;
+
+
+    let count=0;
+
+res.forEach((e,index,resObj)=>{
+
+  count=count+1;
+e.dateIST=ZerodhaAPI.convertIsoDateToIST(e.date)
+console.log({index},'index')
+if(index >3){
+
+  let c1=resObj[index-3]
+  let c2=resObj[index-2]
+  let c3=resObj[index-1]
+  let c4=resObj[index];
+
+  c1.range=c1.high-c1.low;
+  c2.range=c2.high-c2.low2
+  c4.range=c4.high-c4.low;
+  c3.range=c3.high-c3.low;
+
+  if(Math.min(c1.range,c2.range,c3.range,c4.range)==c4.range){
+
+console.log(c1.range,c2.range,c3.range,c4.range,'nr4 true')
+
+  }else{
+
+    console.log(c1.range,c2.range,c3.range,c4.range,'nr4 false')
+  }
+
+
+}
+
+
+})
+
+    ob.prices=res;
+
+    
+
+    let out1={[symbol]:ob}
+
+    if(res.length!=0){
+      console.log(res,'res')
+      out.push(ob)
+
+    }
+     
+  }
+    catch (error) {
+     console.log(error, 'this error ano')
+    }
+  
+   
+  
+
+
+},501)
+
+
+      
+        })
+
+
+     
+    }
+  
+
+    static async getClosingCandleData(accessToken,symbols){
+
+      return new Promise((res,rej)=>{
+
+
+     
+      var kc2 = new KiteConnect({
+        api_key: api_key,
+        access_token: accessToken
+      });
+
+
+      let moment=require('moment');
+      // subtract(1, 'days')
+        let from= moment().hours(9).minute(15).format('Y-MM-DD HH:mm:ss');
+        let to= moment().format('Y-MM-DD HH:mm:ss');//.toString()//.format('Y-MM-DD hh:mm:ss');
+
+
+   
+
+        let out=[];
+
+     var ln=symbols.length;   
+let t=setInterval(async ()=>{
+
+
+  let symbol=symbols.pop()
+  try {
+    // console.log(symbol)
+    let res= await kc2.getHistoricalData(symbol,'day',from,to,false);
+    let ob={symbol:res};
+   
+    out.push(ob)
+    // console.log(res)
+  }
+    catch (error) {
+      // console.log(error)
+    }
+  
+    
+    ln--;
+if(ln==0){
+  res(out);
+clearInterval(t)
+
+}
+
+    
+  
+
+
+},501)
+
+
+      
+        })
+      }
+    
+
+    
+
+
     static async getPositions(accessToken){
+
+      // let misPricePoints=require('./class/misPricePoints');
+
+      // let pp = misPricePoints(accessToken,)
+    
+
       var kc = new KiteConnect({
         api_key: api_key,
         access_token: accessToken
@@ -426,37 +865,66 @@ out=res;
       }
    
    
-      static async  getQuoteFromZerodha (accessToken,aryOfInstruments) {
 
-        return 1;
+      static async getDaysPrice(accessToken,instrument_token){
         var kc = new KiteConnect({
           api_key: api_key,
-          access_token: accessToken
+          access_token: accessToken,
         });
-        let tmp;
+       let result= await kc2.getHistoricalData(instrument_token, '5minute', 
+        this.FromDate(), this.ToDate(), false)
+
+
+      }
+      static async  getQuoteFromZerodha (accessToken,aryOfInstruments) {
+
         
-        console.log('accessToken',accessToken)
-      let holding = await  kc.getQuote(aryOfInstruments).then(res=>{
-            
-      tmp=res;
+        var kc = new KiteConnect({
+          api_key: api_key,
+          access_token: accessToken,
+        });
+
+
+  
+       return kc.getQuote(aryOfInstruments).then(res=>{
+        // console.log('getQuoteFromZerodha ',res)
+        return res
+
+        
+           
+   
       
    
         }).catch(err=>{
       
-      console.log('got an error',err)
+      console.log('got an error from get quote from zerodha ',err)
       
         });
       
       
-        // let access_tocken=getAccessTocken(request_tocken);
-        
       
-        return tmp
-        // .forEach(h=>h.selected=false);
       
       }
 
 
+
+    static FromDate() {
+        var moment = require('moment');
+    
+        
+    
+        return moment({hour: 9, minute: 15}).format('Y-M-D hh:mm:ss');
+    
+    }
+    
+   static ToDate() {
+        var moment = require('moment');
+    
+      
+    
+        return moment({hour: 15, minute: 30}).format('Y-M-D hh:mm:ss');
+    
+    }
     static async generateSession(request_tocken) {
 
         var kc = new KiteConnect({

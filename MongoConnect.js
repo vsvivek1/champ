@@ -1,7 +1,7 @@
 require('dotenv').config()
 var mongo = require('mongodb'); 
 var MongoClient = require('mongodb').MongoClient;
-// var url = "mongodb://localhost:27017/mydb";
+// var url = "mongodb://127.0.0.1:9090:27017/mydb";
 
 const url=process.env.MONGO_URL+process.env.DB_NAME;
 
