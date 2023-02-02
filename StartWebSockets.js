@@ -104,28 +104,13 @@ module.exports=function StartWebSockets(socket,io,access_token){
     
             let count=0;
 
-            if(ProxyTrade){
-    
-                if(count==0){
-        
-                  const getTickgenerator=require('./backtest/tickGenerator')
-        
-                  setInterval(e=>{
-                 let tick1= getTickgenerator(ticks,io)
-                 io.emit('send-realtime-subscription',tick1)
-                  },1000)
-        
-                  
-                 
-                  count=count+1
-                 }
-               }
+            count = proxyTradeProcedure(count);
               
         
             ticker.on("ticks", (ticks)=>{
     
            
-            console.log(ticks)
+     
     
                 io.emit('send-realtime-subscription',ticks)
     
@@ -272,6 +257,26 @@ module.exports=function StartWebSockets(socket,io,access_token){
     
     
     
+
+  function proxyTradeProcedure(count) {
+    if (ProxyTrade) {
+
+      if (count == 0) {
+
+        const getTickgenerator = require('./backtest/tickGenerator');
+
+        setInterval(e => {
+          let tick1 = getTickgenerator(ticks, io);
+          io.emit('send-realtime-subscription', tick1);
+        }, 1000);
+
+
+
+        count = count + 1;
+      }
+    }
+    return count;
+  }
     /////////////////////io part
     
     

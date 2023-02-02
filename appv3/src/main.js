@@ -69,6 +69,13 @@ Vue.config.productionTip = false
 
 Vue.mixin({
   methods: {
+
+   cl(i){
+
+      console.log(i)
+    },
+
+
     requireJson(url){
 
       return new Promise(async (res,rej)=>{

@@ -1,3 +1,4 @@
+process.stdout.write('\033c');
 const Fs = require('fs')
 const mongoose = require('mongoose');
 const Path = require('path')
@@ -8,6 +9,26 @@ const Fetch = require('./fetch.js')
 const csvToJson = require("csvtojson");
 
 let moment= require('moment');
+
+
+
+function printProgress(progress){
+  process.stdout.write(progress );
+  process.stdout.clearLine(0);
+  process.stdout.cursorTo(0);
+  process.stdout.write("\n");
+ 
+}
+
+function cl(i){
+
+  console.log(i)
+}
+
+// console.log = function(message) {
+//   // Custom behavior for console.log
+//   process.stdout.write(message);
+// }
 
 var overAllTimer;
 
@@ -23,7 +44,7 @@ let pe_upper_percentage=1;
 let pe_lower_percentage=.92;
 
 // const TIMER =505 ;
-const TIMER =100 ;
+const TIMER =200 ;
 var KiteConnect = require("kiteconnect").KiteConnect;
 
 
@@ -83,14 +104,13 @@ async function fetchInstrumentsForMining(accessToken) {
   let fileInputName = Path.resolve(__dirname, FILE_LOCATION, 'instruments.csv')
 
 
-  // console.log({fileInputName })
 
   let csvresult = await csvToJson().fromFile(fileInputName)
 
 
   Fs.unlink(fileInputName ,function(err){
     if(err) return console.log(err);
-    console.log('file deleted successfully');
+    // console.log('file deleted successfully');
 })
 
 
@@ -145,7 +165,7 @@ async function fetchInstrumentsForMining(accessToken) {
           console.log("An error occured while writing JSON Object to File.");
           return console.log(err);
         }
-        console.log(fileOutputName + "JSON file has been saved.");
+        // console.log(fileOutputName + "JSON file has been saved.");
 
         let targetDir = Path.join(__dirname, FILE_LOCATION+'/instruments.json');
 
@@ -154,7 +174,7 @@ async function fetchInstrumentsForMining(accessToken) {
 
           (err) => {
             if (err) throw err;
-            console.log(FILE_LOCATION+'/instruments.json was copied to ' + targetDir);
+            // console.log(FILE_LOCATION+'/instruments.json was copied to ' + targetDir);
 
 
             Fs.writeFile(jsonObjCommodityFile, JSON.stringify(jsonObjCommodity), 'utf8', function (err) {
@@ -175,7 +195,7 @@ async function fetchInstrumentsForMining(accessToken) {
               }
 
 
-console.log('instruAll is copied to %s',instruAll)
+// console.log('instruAll is copied to %s',instruAll)
 
 res(true);
 
@@ -204,17 +224,17 @@ res(true);
 
   let a = await getSymbols();
 
-  try {
+
 
     let ohlcs = await ohlc(accessToken, a);
     let instruments1 = require(FILE_LOCATION+'/instruments.json');
     let instruments = instruments1//.slice(0,1000)
-    let strikes = await getNearestStrikes(ohlcs, instruments)
+    let strikes = await getNearestStrikes_unoptimized(ohlcs, instruments)
 
     let symbols = [];
     let len1 = strikes.length;
 
-    console.log('---------------code block of timer started')
+    console.log('---------------code block of timer started total strikes',len1)
 
     let len = len1;
     let intr = setInterval(async () => {
@@ -233,7 +253,7 @@ res(true);
 
 
         console.log(jsonObj2.length, 'json obj len')
-        console.log('Now starting new mint ');
+        // console.log('Now starting new mint ');
 
         let write = await writeFinalScriptsTofile(jsonObj3, jsonObjWithOutCriteria);
 
@@ -253,56 +273,22 @@ res(true);
       let t = secondsToHms(sec)
       overAllTimer=sec
 
-      // console.log(len, 'left out of ', len1, ' ', t, ' time left', e.tradingsymbol);
 
+      let progress=`${len}, 'left out of ', ${len1}, ' ', ${t}, ' time left', ${e.tradingsymbol}`;
+
+      // console.log(len, 'left out of ', len1, ' ', t, ' time left', e.tradingsymbol);
+      printProgress(progress)
 
       // if (len == (len1 - 1))
 
       if(false) 
       if (e.length==0) 
       
+     
       {
 
         // let instruForFuture = require('./appv3/public/instruments/instruments.json');
-        let instruForFuture  = require('.FILE_LOCATIONinstrumentsAll.json');
-
-        let niftyfut = instruForFuture.filter(i => i.name == 'NIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT")[0];
-        let a = new pricePoint(niftyfut.instrument_token, accessToken);
-        let c = await a.getPricePoints(7, 'day');
-
-        niftyfut.pricePoints = c;
-        niftyfut.SevenDayMaxMin = c.SevenDayMaxMin;
-
-        niftyfut.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
-        niftyfut.seletedBuyingMethod = 'MAX'
-        niftyfut.enterNowToTrade = false;
-        niftyfut.PlacedReverseOrder = false;
-
-
-        //  console.log(niftyfut)
-        jsonObj2.push(niftyfut)
-        jsonObjWithOutCriteria.push(niftyfut)
-
-
-        let bankniftyfut = instruForFuture.filter(i => i.name == 'BANKNIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT")[0]
-
-
-
-
-        let abnf = new pricePoint(bankniftyfut.instrument_token, accessToken);
-        let cbnf = await abnf.getPricePoints(7, 'day');
-
-        bankniftyfut.pricePoints = cbnf;
-        bankniftyfut.SevenDayMaxMin = cbnf.SevenDayMaxMin;
-
-        bankniftyfut.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
-        bankniftyfut.seletedBuyingMethod = 'MAX'
-        bankniftyfut.enterNowToTrade = false;
-        bankniftyfut.PlacedReverseOrder = false;
-
-        //  console.log(bankniftyfut)
-        jsonObj2.push(bankniftyfut)
-        jsonObjWithOutCriteria.push(bankniftyfut)
+        await FunctionProcedureForFutures(e);
 
         // return false;
       }
@@ -311,29 +297,51 @@ res(true);
 
       // if (len > 0)
       if (e && typeof e != 'undefined') {
-        let a = new pricePoint(e.instrument_token, accessToken);
-        let c = await a.getPricePoints(7, 'day');
-        e.pricePoints = c;
-        e.SevenDayMaxMin = c.SevenDayMaxMin;
-        e.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
-        e.seletedBuyingMethod = 'MAX';
-        e.enterNowToTrade = false;
-        e.PlacedReverseOrder = false;
-        e.hasLiveTarget = false;
-        e.hasLivePosition = false;
+       
+       
+      try {
+          let a = new pricePoint(e.instrument_token, accessToken);
+  
+  
+          let c = await a.getPricePoints(7, 'day');
+         
+         
+          e.pricePoints = c;
+  
       
-        if (e.pricePoints && e.pricePoints.d0 && e.pricePoints.d0.date && e.pricePoints.length) {
-          let { otherCriteriaCheck, otherCriteriaObj } = otherCriteria(e);
-          e.otherCriteria = otherCriteriaObj;
-          e.otherCriteriaCheck = otherCriteriaCheck;
-          if (otherCriteriaCheck) {
-            jsonObj2.push(e);
+          e.SevenDayMaxMin = c.SevenDayMaxMin;
+          e.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
+          e.seletedBuyingMethod = 'MAX';
+          e.enterNowToTrade = false;
+          e.PlacedReverseOrder = false;
+          e.hasLiveTarget = false;
+          e.hasLivePosition = false;
+  
+  // console.log(&& e.pricePoints.d0 && e.pricePoints.d0.date)
+  
+  // return;
+  // && e.pricePoints.length
+  
+  // cl(e.pricePoints);
+          if (e.pricePoints ) {
+  
+         
+            let { otherCriteriaCheck, otherCriteriaObj } = otherCriteria(e);
+            e.otherCriteria = otherCriteriaObj;
+            e.otherCriteriaCheck = otherCriteriaCheck;
+            if (otherCriteriaCheck) {
+              jsonObj2.push(e);
+            } else {
+              jsonObjWithOutCriteria.push(e);
+            }
           } else {
-            jsonObjWithOutCriteria.push(e);
+            console.log(`${e.tradingsymbol}: pricePoints not set, so not pushing` ,e.pricePoints);
           }
-        } else {
-          console.log(`${e.tradingsymbol}: pricePoints not set, so not pushing`);
-        }
+      } catch (error) {
+        console.log(error)
+
+        strikes.push(e)
+      }
       }
       
 
@@ -346,25 +354,55 @@ res(true);
 
 
 
-  }
-
-  catch (error) {
-
-    consoole.log(strike.length,'strieks before')
-
-    strikes.push(e)
-    console.log('some error -so pusing e agin', error)
-
-    consoole.log(strike.length,'strieks after')
-
-
-  }
+ 
 
 
 
   return true;
 
 
+
+  async function FunctionProcedureForFutures(e) {
+    let instruForFuture = require('.FILE_LOCATIONinstrumentsAll.json');
+
+    let niftyfut = instruForFuture.filter(i => i.name == 'NIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT")[0];
+    let a = new pricePoint(niftyfut.instrument_token, accessToken);
+    let c = await a.getPricePoints(7, 'day');
+
+    niftyfut.pricePoints = c;
+    niftyfut.SevenDayMaxMin = c.SevenDayMaxMin;
+
+    niftyfut.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
+    niftyfut.seletedBuyingMethod = 'MAX';
+    niftyfut.enterNowToTrade = false;
+    niftyfut.PlacedReverseOrder = false;
+
+
+    //  console.log(niftyfut)
+    jsonObj2.push(niftyfut);
+    jsonObjWithOutCriteria.push(niftyfut);
+
+
+    let bankniftyfut = instruForFuture.filter(i => i.name == 'BANKNIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT")[0];
+
+
+
+
+    let abnf = new pricePoint(bankniftyfut.instrument_token, accessToken);
+    let cbnf = await abnf.getPricePoints(7, 'day');
+
+    bankniftyfut.pricePoints = cbnf;
+    bankniftyfut.SevenDayMaxMin = cbnf.SevenDayMaxMin;
+
+    bankniftyfut.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
+    bankniftyfut.seletedBuyingMethod = 'MAX';
+    bankniftyfut.enterNowToTrade = false;
+    bankniftyfut.PlacedReverseOrder = false;
+
+    //  console.log(bankniftyfut)
+    jsonObj2.push(bankniftyfut);
+    jsonObjWithOutCriteria.push(bankniftyfut);
+  }
 }
 
 
@@ -498,13 +536,17 @@ async function getHoldingInstruments(access_token) {
 
 
 function getNearestStrikes(ohlc, instruments) {
-  const peUpperPercentage = 1.03;
+  const peUpperPercentage = 1;
   const peLowerPercentage = .97;
-  const ceUpperPercentage = 1.03;
+  const ceUpperPercentage = 1;
   const ceLowerPercentage = .97;
+  
+
 
   return Promise.resolve(
     Object.entries(ohlc).reduce((currentInstruments, [item, value]) => {
+
+
       let symbol = item.split(':')[1];
       let lastPriceMax = value.last_price * peUpperPercentage;
       let lastPriceMin = value.last_price * peLowerPercentage;
@@ -520,20 +562,46 @@ function getNearestStrikes(ohlc, instruments) {
         return i.name === symbol;
       });
 
+
+
+      console.log(instruments.length);
+
+      return;
+      // console.log(curInstrument)
+
+     
+
       if (curInstrument) {
+
+
+        console.log()
+
+
         if (curInstrument.instrument_type === 'FUT' && (curInstrument.name === 'NIFTY' || curInstrument.name === 'BANKNIFTY')) {
+          
+          console.log(curInstrument.tradingsymbol)
+         
+
           curInstrument.spot_price = lastPrice;
           currentInstruments.push(curInstrument);
-        } else if (curInstrument.instrument_type === 'CE' && curInstrument.strike > lastPrice * ceLowerPercentage && curInstrument.strike < lastPrice * ceUpperPercentage) {
+        } else if (curInstrument.instrument_type === 'CE' && curInstrument.strike > lastPrice /** ceLowerPercentage && curInstrument.strike < lastPrice * ceUpperPercentage*/) {
+        
+          console.log(curInstrument)
+          
           curInstrument.spot_price = lastPrice;
           currentInstruments.push(curInstrument);
-        } else if (curInstrument.instrument_type === 'PE' && curInstrument.strike < lastPrice * peUpperPercentage && curInstrument.strike > lastPrice * peLowerPercentage) {
+        } else if (curInstrument.instrument_type === 'PE' && curInstrument.strike < lastPrice /** peUpperPercentage && curInstrument.strike > lastPrice * peLowerPercentage*/) {
           curInstrument.spot_price = lastPrice;
+
+          console.log(curInstrument)
           currentInstruments.push(curInstrument);
         }
       }
-      return currentInstruments;
+    return currentInstruments;
     }, [])
+
+
+
   );
 }
 
@@ -907,7 +975,7 @@ mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(
     access_token = e.access_token;
    
 
-    console.log('immidiate')
+    // console.log('immidiate')
     let t1 = await fetchInstrumentsForMining(access_token);
 
 // setInterval(async ()=>{
@@ -987,13 +1055,13 @@ function createAndMoveFileFromJson(fileOutputName, jsonObj2, targetDir) {
           console.log("An error occured while writing JSON Object to File.");
           return console.log(err);
         }
-        console.log(fileOutputName + "JSON file has been saved.");
+        // console.log(fileOutputName + "JSON file has been saved.");
 
 
         Fs.copyFile(FILE_LOCATION+'/instrumentsForMining.json', targetDir,
           (err) => {
             if (err) throw err;
-            console.log('source.txt was copied to destination.txt');
+            // console.log('source.txt was copied to destination.txt');
             res(true);
             return;
           });

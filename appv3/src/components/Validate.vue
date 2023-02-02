@@ -17,13 +17,17 @@ import store from '@/store';
 
 
 setCookies(){
-var midnight = new Date();
-midnight.setHours(23,59,59,0);
+    const midnight = new Date()
+midnight.setHours(24,0,0,0)
 
 
     let session_string=JSON.stringify(this.session);
-this.$cookie.set('session', session_string, midnight.toUTCString());
-this.$cookie.set('accessToken', this.accessToken, midnight.toUTCString());
+this.$cookie.set('session', session_string, {
+  expires: midnight
+});
+this.$cookie.set('accessToken', this.accessToken, {
+  expires: midnight
+});
 
 },
 

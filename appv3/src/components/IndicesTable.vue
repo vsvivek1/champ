@@ -21,27 +21,31 @@
                 <td>
 
               
-{{i.last_price-i.pricePoints.d0.open
+<!-- {{i.last_price-i.pricePoints.d0.open -->
 
 }}
 
 
-open{{i.pricePoints.d0.open}}
+open
+
+<!-- {{i.pricePoints.d0.open}} -->
 <v-chip>
 
-    {{ checkNiftyStatus(i.tradingsymbol) }}
+    <!-- {{ checkNiftyStatus(i.tradingsymbol) }} -->
     date
  
-{{
+<!-- {{
 
  
-checkNiftyStatus(i.tradingsymbol).normalDate}}//change
-{{checkNiftyStatus(i.tradingsymbol).change}}//
+checkNiftyStatus(i.tradingsymbol).normalDate}}//change -->
+
+
+<!-- {{checkNiftyStatus(i.tradingsymbol).change}}//
 {{checkNiftyStatus(i.tradingsymbol).changePc}}// changepc
 {{checkNiftyStatus(i.tradingsymbol).high}}// low
 
 
-{{checkNiftyStatus(i.tradingsymbol).low}}//
+{{checkNiftyStatus(i.tradingsymbol).low}}// -->
 
 
 

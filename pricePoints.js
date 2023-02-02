@@ -386,7 +386,7 @@ startDay=this.dateBeforeXdays(duration)
 
         const instruAll = require('./appv3/public/instruments/instrumentsAll.json');;
 
-console.log(this.stock_tocken,'this.stock_tocken')
+// console.log(this.stock_tocken,'this.stock_tocken')
 
 // if ts=
        let ts= instruAll .filter(f=>f.instrument_token==this.stock_tocken)[0]
@@ -398,7 +398,7 @@ var dd2=dd1.getFullYear()+'-' + (dd1.getMonth()+1) + '-'+dd1.getDate();//prints 
 
 
 
-        console.log( dd2,yesterdayData.high,' yesterdayData.date high',ts);
+        // console.log( dd2,yesterdayData.high,' yesterdayData.date high',ts);
 
 
         dayBeforeYesterdayData = sorted[len - 3];
