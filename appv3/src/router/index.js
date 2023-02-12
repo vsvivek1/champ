@@ -22,7 +22,7 @@ import Strategies from '@/components/Strategies.vue'
 // // import Mint from '@/components/Mint.vue' -->
 // import Mining from '@/components/Mining.vue'
 // import MiningMis from '@/components/MiningMis.vue'
-// import GTT from '@/components/GTT.vue'
+import GTT from '@/components/GTT.vue'
 // import BTST from '@/components/Btst.vue'
 // import dailyGainers from '@/components/dailyGainers.vue'
 
@@ -79,11 +79,11 @@ const routes = [
   //   name: 'REACT',
   //   component:rec
   // }, 
-  //   {
-  //   path: '/GTT',
-  //   name: 'GTT',
-  //   component: GTT
-  // }, 
+    {
+    path: '/GTT',
+    name: 'GTT',
+    component: GTT
+  }, 
   
   
   // {

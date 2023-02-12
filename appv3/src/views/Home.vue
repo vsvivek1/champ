@@ -76,7 +76,7 @@ export default {
 
 getSessionDetailsFromCookies(){
 
-  console.log('session from cookies',this.$cookie.get('session'))
+  // console.log('session from cookies',this.$cookie.get('session'))
 
 this.session=JSON.parse(this.$cookie.get('session'));
 this.accessToken=this.$cookie.get('accessToken');

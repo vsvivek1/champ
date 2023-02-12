@@ -1,5 +1,7 @@
 var KiteConnect = require("kiteconnect").KiteConnect;
 var moment=require('moment');
+const FILE_LOCATION='./appv3/public/instruments'
+const instruAll = require('./'+FILE_LOCATION+'/instrumentsAll.json');
 
 module.exports = 
 class pricePoint {
@@ -108,7 +110,7 @@ daysToAdvance=daysToAdvance+5
     // return d.toLocaleString('sv').slice(0, 10);
 
 
-    let moment=require('moment');
+
     
     return moment().format('Y-MM-DD')
   }
@@ -302,65 +304,174 @@ try {
 
 }
 
+
+// const sampleData = [
+//   {
+//     date: '2023-01-23T18:30:00.000Z',
+//     open: 11.5,
+//     high: 11.65,
+//     low: 10.5,
+//     close: 10.85,
+//     volume: 384000
+//   },
+//   // ...
+// ];
+
+
+
+// publicHolidays = ["2023-01-26"];
+
+
+get7DaysData = (data, today) => {
+
+
+
+let refNo;
+let refHr=16;
+  let tradingsymbol=instruAll.find(i=>i.instrument_token==this.stock_tocken).tradingsymbol
+
+  let publicHolidays = ["2023-01-26","2023-01-27"]
+  const result = {};
+  let currentDate = moment(today);
+
+
+
+  const currentHour = moment().format('HH');
+
+  let dummy ={
+    date: '',
+    open: -1,
+    high: -1,
+    low: -1,
+    close: -1,
+    volume: 0,
+    normalDate: '',
+    tradingsymbol: '',
+    instrument_token: ''
+  };
+  
+
+
+ 
+  if (currentHour  <= refHr) {
+refNo=8
+  }else{
+
+    refNo=7
+  }
+
+  for (let i = 0; i < refNo; i++) {
+    const currentDay = currentDate.format("YYYY-MM-DD");
+   
+    if (publicHolidays.includes(currentDay)) {
+      currentDate.subtract(1, "days");
+      i--;
+      continue;
+    }
+
+
+    const dayOfWeek = currentDate.day();
+    if (dayOfWeek === 0) {
+      currentDate.subtract(2, "days");
+    } else if (dayOfWeek === 6) {
+      currentDate.subtract(1, "days");
+    }
+    const dateToFind = currentDate.format("YYYY-MM-DD");
+    const matchingData = data.find(item => {
+      
+item.tradingsymbol=tradingsymbol
+item.instrument_token=this.stock_tocken
+   
+  
+   
+   
+      let itemDate=moment(item.date).format("YYYY-MM-DD");
+     
+      return itemDate == dateToFind
+    
+    });
+
+      if (currentHour  <= refHr) {
+      
+    result[`d${i}data`] = matchingData;
+
+    
+    currentDate.subtract(1, "days");
+     
+
+      }else{
+
+
+
+    result[`d${i + 1}data`] = matchingData;
+
+    result['d0data']=dummy;
+
+   
+    currentDate.subtract(1, "days");
+      }
+
+  }
+
+
+  
+ 
+  return result;
+};
+
+
+
+
+
+// const today = new Date();
+// const previousWeekData = getPreviousWeekData(today, sampleData);
+
+// console.log("Previous week data:", previousWeekData);
+
+getPreviousDate = (date, daysAgo) => {
+  const prevDate = new Date(date);
+  prevDate.setUTCDate(prevDate.getUTCDate() - daysAgo);
+  
+  return prevDate;
+};
   async getPricePoints(duration=34,durationType='month') {
 
 
     return new Promise(async (res,rej)  =>{
 
 
-    
+   
 
-    var kc2 = new KiteConnect({
-      api_key: process.env.api_key,
-      access_token: this.accessToken
-    });
+    var kc2 = this.initiateKiteConnecct();
 
 
     let retOb = {};
     let startDay;
 
-    if(durationType=='month'){
-      startDay=this.dateBforeXMonths(duration);
-
-    }else  if(durationType=='day'){
-
-startDay=this.dateBeforeXdays(duration)
-
-    }
-
-
-
-    // 
-    let b = await kc2.getHistoricalData(this.stock_tocken, 'day', 
-    startDay, this.today(), false).then(async res => {
-
-
-      
-      
+    let sorted;
+      ({ sorted, startDay } = await this.fetchHistoricalData(durationType, startDay, duration, kc2));
 
 
 
 
 
-      let sorted = res.sort((a, b) => {
 
 
-        return new Date(a.date) - new Date(b.date)
-      })
+     var today = moment().startOf('day').format('YYYY-MM-DDTHH:mm:ss.SSSZ');
+
+//  const sevenDaysData = this.get7DaysData(sorted, today);
 
 
-
-      
-
+ let {d7data,d6data,d5data,d4data,d3data,d2data,d1data,d0data}=this.get7DaysData(sorted, today);
+  
+// console.log({d7data,d6data,d5data,d4data,d3data,d2data,d1data,d0data},'decon')
         
 
 
       let len = sorted.length;
       let first = sorted[len - 1];
-
       retOb.SevenDayMaxMin=this. getNDayMaxAndMin(sorted,7)
 
-  
      
 
       let date = new Date();
@@ -369,188 +480,35 @@ startDay=this.dateBeforeXdays(duration)
       let minutes = date.getMinutes()
 
   
-      
-    
-
-
       let yesterdayData;
       let dayBeforeYesterdayData;
 
-      
-      let d7data,d6data,d5data,d4data,d3data,d2data,d1data,d0data;
-      if (hrs > 9 && hrs <= 15) {
-
-       
-
-        yesterdayData = sorted[len - 2];
-
-        const instruAll = require('./appv3/public/instruments/instrumentsAll.json');;
-
-// console.log(this.stock_tocken,'this.stock_tocken')
-
-// if ts=
-       let ts= instruAll .filter(f=>f.instrument_token==this.stock_tocken)[0]
-       .tradingsymbol
-
-var dd1=new Date(yesterdayData.date);
-
-var dd2=dd1.getFullYear()+'-' + (dd1.getMonth()+1) + '-'+dd1.getDate();//prints expected format.
-
-
-
-        // console.log( dd2,yesterdayData.high,' yesterdayData.date high',ts);
-
-
-        dayBeforeYesterdayData = sorted[len - 3];
-        d7data=sorted[len - 8];
-        d6data=sorted[len - 7];
-        d5data=sorted[len - 6];
-        d4data=sorted[len - 5];
-        d3data=sorted[len - 4];
-        d2data=sorted[len - 3];
-        d1data=sorted[len - 2];
-        d0data=sorted[len - 1];
-
-        // console.log(d0data,'dodata')
-
-
-
-        //asume placing during day time
-      } else {
-        yesterdayData = sorted[len-1];
-        dayBeforeYesterdayData = sorted[len - 2];
-
-
-        d7data=sorted[len - 7];
-        d6data=sorted[len - 6];
-        d5data=sorted[len -5];
-        
-        
-
-
-
-
-        d4data=sorted[len - 4];
-        d3data=sorted[len - 3];
-        d2data=sorted[len - 2];
-        d1data=sorted[len - 1];
-        // d0data=sorted[len - 0];
-      }
-
-
+ 
 
       
-      retOb.d0= this.yNdays(d0data);
-      retOb.d1= this.yNdays(d1data)
-      retOb.d2= this.yNdays(d2data);
-      retOb.d3= this.yNdays(d3data); 
-      retOb.d4= this.yNdays(d4data);
-
-     
-       retOb.d5= this.yNdays(d5data); 
-
-       retOb.d6= this.yNdays(d6data);
-       retOb.d7= this.yNdays(d7data);
-
-      if(retOb.d1.range<Math.min(retOb.d2.range,retOb.d3.range,retOb.d4.range,retOb.d5.range,retOb.d6.range,retOb.d7.range)){
-
-        retOb.nr7=true
-      }else{
-retOb.nr7=false
-
-      }
-
-
-      if(retOb.d1.range<Math.min(retOb.d2.range,retOb.d3.range,retOb.d4.range)){
-
-        retOb.nr4=true
-      }else{
-retOb.nr4=false
-
-      }
+      yesterdayData = this.setReturnObjetDatas(retOb, d0data, d1data, d2data, d3data, d4data, d5data, d6data, d7data, yesterdayData);
 
 
 
-//console.log('NR7',retOb.nr7)
+
+      this.estaBlishNarrowranges(retOb);
+
+
       let heikinAshiValues=this.getHeikinAshiValues(dayBeforeYesterdayData,yesterdayData)
       retOb.heikinAshi=heikinAshiValues;
 
 
-
       try {
-        
-     
+       
       yesterdayData.token = this.stock_tocken;
     } catch (error) {
       yesterdayData={};
       yesterdayData.token = this.stock_tocken;
     }
       
-      let pivotPoints = this.getPivotPoints(yesterdayData);
-      let pivotPointJson = JSON.stringify(pivotPoints);
-      let pivotPointObject = pivotPoints;
+      let { pivotPoints, pivotPointJson, pivotPointObject } = this.setPivotPoints(yesterdayData);
 
-      
-
-
-
-
-      let yesterDay = {};
-    
-      yesterDay.date = yesterdayData.date;
-      yesterDay.low = yesterdayData.low;
-      yesterDay.high = yesterdayData.high;
-      yesterDay.close = yesterdayData.close;
-      yesterDay.open = yesterdayData.open;
-
-      yesterDay.range = Math.abs(yesterdayData.high - yesterdayData.low);
-
-      yesterDay.rangeBreakOutTarget = yesterdayData.high + yesterDay.range;
-      yesterDay.rangeBreakDownTarget = yesterdayData.low - yesterDay.range;
-
-      yesterDay.pivot = pivotPoints.pivotPoint;
-      yesterDay.pivotBc = pivotPoints.bc;
-      yesterDay.pivotTc = pivotPoints.tc;
-      yesterDay.pivotR1 = pivotPoints.r1;
-      yesterDay.pivotR2 = pivotPoints.r2;
-      yesterDay.pivotR3 = pivotPoints.r3;
-      yesterDay.pivotS1 = pivotPoints.s1;
-      yesterDay.pivotS2 = pivotPoints.s2;
-      yesterDay.pivotS3 = pivotPoints.s3;
-      
-
-
-
-
-      yesterDay.length = len;
-
-
-      let yesterdayJson = JSON.stringify(yesterDay);
-
-
- 
-
-
-      let qoute=await kc2.getQuote(this.stock_tocken).then(r=>{
-
-   
-
-        yesterDay.qoute=r[this.stock_tocken];
-      });
-
-
-    
-
-  
-      retOb.pivotPoints = pivotPointJson;
-
-if(typeof(yesterDay)=='undefined'){
-
-  retOb.yesterday ={}
-}else{
-  retOb.yesterday = yesterDay;
-
-}
+      await this.setYesterdayObjectToRetObj(yesterdayData, pivotPoints, len, kc2, retOb, pivotPointJson);
       
 
 
@@ -558,7 +516,6 @@ if(typeof(yesterDay)=='undefined'){
 
  
 
-      // st.add(pivotPointJson);
 
       global.globalPrevious = 0;
 
@@ -659,11 +616,7 @@ if(typeof(tmp)!='undefined'){
 
 
 
-    }).catch(err => {
-
-      console.log('error', err)
-    })
-
+   
     // return this.pricePointData;
 
 
@@ -691,6 +644,143 @@ res(retOb)
   }
 
 
+
+  async setYesterdayObjectToRetObj(yesterdayData, pivotPoints, len, kc2, retOb, pivotPointJson) {
+    let yesterDay = {};
+
+    yesterDay.date = yesterdayData.date;
+    yesterDay.low = yesterdayData.low;
+    yesterDay.high = yesterdayData.high;
+    yesterDay.close = yesterdayData.close;
+    yesterDay.open = yesterdayData.open;
+
+    yesterDay.range = Math.abs(yesterdayData.high - yesterdayData.low);
+
+    yesterDay.rangeBreakOutTarget = yesterdayData.high + yesterDay.range;
+    yesterDay.rangeBreakDownTarget = yesterdayData.low - yesterDay.range;
+
+    yesterDay.pivot = pivotPoints.pivotPoint;
+    yesterDay.pivotBc = pivotPoints.bc;
+    yesterDay.pivotTc = pivotPoints.tc;
+    yesterDay.pivotR1 = pivotPoints.r1;
+    yesterDay.pivotR2 = pivotPoints.r2;
+    yesterDay.pivotR3 = pivotPoints.r3;
+    yesterDay.pivotS1 = pivotPoints.s1;
+    yesterDay.pivotS2 = pivotPoints.s2;
+    yesterDay.pivotS3 = pivotPoints.s3;
+
+
+    yesterDay.length = len;
+
+    let yesterdayJson = JSON.stringify(yesterDay);
+
+
+    let qoute = await kc2.getQuote(this.stock_tocken);
+
+
+
+    yesterDay.qoute = qoute[this.stock_tocken];
+
+
+
+    retOb.pivotPoints = pivotPointJson;
+
+    if (typeof (yesterDay) == 'undefined') {
+
+      retOb.yesterday = {};
+    } else {
+      retOb.yesterday = yesterDay;
+
+    }
+  }
+
+  setPivotPoints(yesterdayData) {
+    let pivotPoints = this.getPivotPoints(yesterdayData);
+    let pivotPointJson = JSON.stringify(pivotPoints);
+    let pivotPointObject = pivotPoints;
+    return { pivotPoints, pivotPointJson, pivotPointObject };
+  }
+
+  estaBlishNarrowranges(retOb) {
+    if (retOb.d1.range < Math.min(retOb.d2.range, retOb.d3.range, retOb.d4.range, retOb.d5.range, retOb.d6.range, retOb.d7.range)) {
+
+      retOb.nr7 = true;
+    } else {
+      retOb.nr7 = false;
+
+    }
+
+
+    if (retOb.d1.range < Math.min(retOb.d2.range, retOb.d3.range, retOb.d4.range)) {
+
+      retOb.nr4 = true;
+    } else {
+      retOb.nr4 = false;
+
+    }
+  }
+
+  setReturnObjetDatas(retOb, d0data, d1data, d2data, d3data, d4data, d5data, d6data, d7data, yesterdayData) {
+    retOb.d0 = this.yNdays(d0data);
+    retOb.d1 = this.yNdays(d1data);
+    retOb.d2 = this.yNdays(d2data);
+    retOb.d3 = this.yNdays(d3data);
+    retOb.d4 = this.yNdays(d4data);
+
+
+    retOb.d5 = this.yNdays(d5data);
+
+    retOb.d6 = this.yNdays(d6data);
+    retOb.d7 = this.yNdays(d7data);
+
+    yesterdayData = d1data;
+    return yesterdayData;
+  }
+
+  async fetchHistoricalData(durationType, startDay, duration, kc2) {
+    if (durationType == 'month') {
+      startDay = this.dateBforeXMonths(duration);
+
+    } else if (durationType == 'day') {
+
+      startDay = this.dateBeforeXdays(duration);
+
+    }
+
+
+
+    // 
+    let b = await kc2.getHistoricalData(this.stock_tocken, 'day',
+      startDay, this.today(), false).then(async (res) => {
+
+        return res;
+
+      });
+
+
+
+    b.forEach(e => {
+
+      e.normalDate = this.convertIsoDateToIST(e.date);
+
+    });
+
+
+
+    let sorted = b.sort((a, b) => {
+
+
+      return new Date(a.date) - new Date(b.date);
+    });
+    return { sorted, startDay };
+  }
+
+  initiateKiteConnecct() {
+    return new KiteConnect({
+      api_key: process.env.api_key,
+      access_token: this.accessToken
+    });
+  }
 }
 
 

@@ -454,159 +454,163 @@ out=res;
     
     }
 
-    static async getHourlyCandleLows(accessToken,symbols1){
-      return new Promise((res,rej)=>{
-        var kc2 = new KiteConnect({
-          api_key: api_key,
-          access_token: accessToken
-        });
-
-
-
-        let totalTime=333*symbols1.length;
-      
-
-        let moment=require('moment');
-      
-        let from= moment().subtract(1, "days").hours(9).minute(15).format('Y-MM-DD HH:mm:ss');
-        let to= moment().format('Y-MM-DD HH:mm:ss');//.toString()//.format('Y-MM-DD hh:mm:ss');
-   
-let symbols=symbols1//.slice(0,20)
-        let out=[];
-
-     var ln=[...symbols].length;   
-     var instrumentsForMining1 = require("./appv3/public/instruments/instrumentsForMining.json");
-    //  var instrumentsForMining1 = require("./appv3/public/instruments/instrumentsForCommodity.json");
-   
-    
-    const ti=501;
-let t=setInterval(async ()=>{
- 
-
-
-  let symbol=symbols.pop()
-
-
-
-
-
-  
-  if(typeof symbol=='undefined'){
-
-       res(out);
-  clearInterval(t);
-
-  return 
-    }
-
-    console.log( "%s out of %s time left is %s of %s fetiching %s",   
-    
-    symbols.length ,ln,symbols.length*ti/(1000),totalTime/(1000),symbol)
-
-  try {
-
-    let res= await kc2.getHistoricalData(symbol,'15minute',from,to,false);
-
-  
-    ln--
-
-
-
-    let ob={};
-
-    ob.instrument=instrumentsForMining1.filter(i=>i.instrument_token==symbol)[0]
-    ob.instrument_token=symbol;
-
-
-    let ln2=res.length;
-res.forEach((e,index,resObj)=>{
-
-e.dateIST=ZerodhaAPI.convertIsoDateToIST(e.date)
-
-e.range=(e.high-e.low).toFixed(1);
-e.rangeBreakOutTarget=e.high+(e.range/2).toFixed(1);
-e.rangeBreakDownTarget=e.low-(e.range/2).toFixed(1);
-
-
-console.log(e.range,e.rangeBreakOutTarget,e.rangeBreakDownTarget,'e.range')
-
-// if(index >3){
-
-  let c1=resObj[ln2-4]
-  let c2=resObj[ln2-3]
-  let c3=resObj[ln2-2]
-  let c4=resObj[ln2-1];
-
-  if(
-    typeof c1 =='undefined' ||
-    typeof c2 =='undefined' ||
-    typeof c3 =='undefined' ||
-    typeof c4 =='undefined' 
-    
-    
-    ){
-
-
-      return false;
-    }
-
-  c1.range=c1.high-c1.low;
-  c2.range=c2.high-c2.low;
-  c4.range=c4.high-c4.low;
-  c3.range=c3.high-c3.low;
-
-  if(Math.min(c1.range,c2.range,c3.range,c4.range)==c4.range && c4.range!=0){
-
-
-    e.nr4=true
-// console.log(c1.range,c2.range,c3.range,c4.range,'nr4 true')
-
-  }else{
-    e.nr4=false;
-
-  }
-
-
-// }
-
-
-})
-
-
-
-
-    ob.prices=res
-
-    // console.log(res,'res')
-
-    if(res.length==0){
-
-      console.log(res,'res')
-
-      console.log(ob.instrument.tradingsymbol,'is missing ',{symbol})
-    }
-
-    // let out1={[symbol]:ob}
-      out.push(ob)
-
-  }
-    catch (error) {
-     console.log(error, 'this error ano')
-    }
-  
-   
-  
-
-
-},ti)
-
-
-      
-        })
-
-
-     
-    }
+    static async getHourlyCandleLows(accessToken,symbols1){try {
+	
+	      return new Promise((res,rej)=>{
+	        var kc2 = new KiteConnect({
+	          api_key: api_key,
+	          access_token: accessToken
+	        });
+	
+	
+	
+	        let totalTime=333*symbols1.length;
+	      
+	
+	        let moment=require('moment');
+	      
+	        let from= moment().subtract(1, "days").hours(9).minute(15).format('Y-MM-DD HH:mm:ss');
+	        let to= moment().format('Y-MM-DD HH:mm:ss');//.toString()//.format('Y-MM-DD hh:mm:ss');
+	   
+	let symbols=symbols1//.slice(0,20)
+	        let out=[];
+	
+	     var ln=[...symbols].length;   
+	     var instrumentsForMining1 = require("./appv3/public/instruments/instrumentsForMining.json");
+	    //  var instrumentsForMining1 = require("./appv3/public/instruments/instrumentsForCommodity.json");
+	   
+	    
+	    const ti=501;
+	let t=setInterval(async ()=>{
+	 
+	
+	
+	  let symbol=symbols.pop()
+	
+	
+	
+	
+	
+	  
+	  if(typeof symbol=='undefined'){
+	
+	       res(out);
+	  clearInterval(t);
+	
+	  return 
+	    }
+	
+	    console.log( "%s out of %s time left is %s of %s fetiching %s",   
+	    
+	    symbols.length ,ln,symbols.length*ti/(1000),totalTime/(1000),symbol)
+	
+	  try {
+	
+	    let res= await kc2.getHistoricalData(symbol,'15minute',from,to,false);
+	
+	  
+	    ln--
+	
+	
+	
+	    let ob={};
+	
+	    ob.instrument=instrumentsForMining1.filter(i=>i.instrument_token==symbol)[0]
+	    ob.instrument_token=symbol;
+	
+	
+	    let ln2=res.length;
+	res.forEach((e,index,resObj)=>{
+	
+	e.dateIST=ZerodhaAPI.convertIsoDateToIST(e.date)
+	
+	e.range=(e.high-e.low).toFixed(1);
+	e.rangeBreakOutTarget=e.high+(e.range/2).toFixed(1);
+	e.rangeBreakDownTarget=e.low-(e.range/2).toFixed(1);
+	
+	
+	// console.log(e.range,e.rangeBreakOutTarget,e.rangeBreakDownTarget,'e.range')
+	
+	// if(index >3){
+	
+	  let c1=resObj[ln2-4]
+	  let c2=resObj[ln2-3]
+	  let c3=resObj[ln2-2]
+	  let c4=resObj[ln2-1];
+	
+	  if(
+	    typeof c1 =='undefined' ||
+	    typeof c2 =='undefined' ||
+	    typeof c3 =='undefined' ||
+	    typeof c4 =='undefined' 
+	    
+	    
+	    ){
+	
+	
+	      return false;
+	    }
+	
+	  c1.range=c1.high-c1.low;
+	  c2.range=c2.high-c2.low;
+	  c4.range=c4.high-c4.low;
+	  c3.range=c3.high-c3.low;
+	
+	  if(Math.min(c1.range,c2.range,c3.range,c4.range)==c4.range && c4.range!=0){
+	
+	
+	    e.nr4=true
+	// console.log(c1.range,c2.range,c3.range,c4.range,'nr4 true')
+	
+	  }else{
+	    e.nr4=false;
+	
+	  }
+	
+	
+	// }
+	
+	
+	})
+	
+	
+	
+	
+	    ob.prices=res
+	
+	    // console.log(res,'res')
+	
+	    if(res.length==0){
+	
+	      console.log(res,'res')
+	
+	      console.log(ob.instrument.tradingsymbol,'is missing ',{symbol})
+	    }
+	
+	    // let out1={[symbol]:ob}
+	      out.push(ob)
+	
+	  }
+	    catch (error) {
+	     console.log(error, 'this error ano')
+	    }
+	  
+	   
+	  
+	
+	
+	},ti)
+	
+	
+	      
+	        })
+	
+	
+	     
+	    
+} catch (error) {
+	console.log('error in zerodha api get hourlycandle low function',error,this)
+}}
 
 
 

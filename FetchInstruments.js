@@ -9,15 +9,59 @@ const Fetch = require('./fetch.js')
 const csvToJson = require("csvtojson");
 
 let moment= require('moment');
+const FILE_LOCATION='./appv3/public/instruments'
 
 
+let ce_upper_percentage=1.05;
+let ce_lower_percentage=1;
+
+let pe_upper_percentage=1;
+let pe_lower_percentage=.95;
+const TIMER =400 ;
+
+
+
+main();
+process.on('unhandledRejection', (reason, p) => {
+  console.log('Unhandled Rejection at: Promise', p, 'reason:', reason);
+  // application specific logging, throwing an error, or other logic here
+});
+
+
+function main() {
+  const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+  mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(r => {
+    // console.log(r)
+    return AccesTocken.findOne({ 'date': today }, 'access_token').then(async (e) => {
+
+      access_token = e.access_token;
+
+      await fetchInstrumentsForMining(access_token);
+
+
+
+
+    });
+
+    ;
+
+
+  });
+}
 
 function printProgress(progress){
-  process.stdout.write(progress );
-  process.stdout.clearLine(0);
-  process.stdout.cursorTo(0);
-  process.stdout.write("\n");
- 
+ try {
+	 process.stdout.write(progress );
+	  process.stdout.clearLine(0);
+	  process.stdout.cursorTo(0);
+	  process.stdout.write("\n");
+	 
+} catch (error) {
+  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
+  
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+}
 }
 
 function cl(i){
@@ -25,27 +69,16 @@ function cl(i){
   console.log(i)
 }
 
-// console.log = function(message) {
-//   // Custom behavior for console.log
-//   process.stdout.write(message);
-// }
+
 
 var overAllTimer;
 
-const FILE_LOCATION='./appv3/public/instruments'
-
-// const misPricePoints = require('./misPricePoints')
 
 
-let ce_upper_percentage=1.08;
-let ce_lower_percentage=1;
 
-let pe_upper_percentage=1;
-let pe_lower_percentage=.92;
-
-// const TIMER =505 ;
-const TIMER =200 ;
 var KiteConnect = require("kiteconnect").KiteConnect;
+
+
 
 
 require('dotenv').config()
@@ -72,338 +105,349 @@ const EXPIRY = getCurrentExpiryDate();
 // module.exports=
 function removeDuplicates(arr){
 
-  const uniqueArray = arr.filter((value, index) => {
-    const _value = JSON.stringify(value);
-    return index === arr.findIndex(obj => {
-      return JSON.stringify(obj) === _value;
-    });
-  });
-
-  return uniqueArray
+  try {
+	const uniqueArray = arr.filter((value, index) => {
+	    const _value = JSON.stringify(value);
+	    return index === arr.findIndex(obj => {
+	      return JSON.stringify(obj) === _value;
+	    });
+	  });
+	
+	  return uniqueArray
+} catch (error) {
+  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
+  
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+}
 
 }
 
 function  convertIsoDateToIST(iso) {
   
-
-  return moment(iso).format("DD-MM HH:mm");
+try {
+	
+	  return moment(iso).format("DD-MM HH:mm");
+} catch (error) {
+  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
+  
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+}
 }
 
 
-async function fetchInstrumentsForMining(accessToken) {
+async function fetchInstrumentsForMining(accessToken) {try {
+	
+	
+	
+	
+	
+	  let dl = await Fetch.downloadInstruments();
+	
+	
+	
+	
+	
+	  let fileInputName = Path.resolve(__dirname, FILE_LOCATION, 'instruments.csv')
+	
+	
+	
+	  let csvresult = await csvToJson().fromFile(fileInputName)
+	
+	
+	  Fs.unlink(fileInputName ,function(err){
+	    if(err) return console.log(err);
+	    // console.log('file deleted successfully');
+	})
+	
+	
+	  //  || j.exchange == 'NSE'
+	  let jsonObjMultiple = 
+	  csvresult.filter(j => (
+	    (
+	      
+	      j.exchange == 'NFO' && j.expiry == EXPIRY
+	      
+	   
+	      )
+	    
+	    
+	    ))
+	
+	    // && j.instrument_type == "FUT"   && ( j.name== "NIFTY" || j.name== "BANKNIFTY") 
+	
+	  // let jsonObj1=jsonObjMultiple.filter((curr,index,arr)=>arr.indexOf(curr=>curr.instrument_token==)
+	  
+	  
+	  // ==index)
+	
+	
+	  //   ;
+	  // let jsonObj1=removeDuplicates(jsonObjMultiple)
+	  let jsonObj1=jsonObjMultiple;
+	
+	  let jsonObjAll = csvresult//.filter(j => ((j.exchange == 'NFO') || j.exchange == 'NSE'));
+	  
+	  
+	  let jsonObjCommodity = csvresult.filter(j => ((j.exchange == 'MCX') 
+	  ));
+	
+	
+	
+	
+	
+	
+	
+	  let fileOutputName = Path.resolve(__dirname, FILE_LOCATION,
+	   'instruments.json')
+	  
+	  
+	  let jsonObjCommodityFile= Path.resolve(__dirname, FILE_LOCATION, 'CommodityFile.json')
+	
+	  let f = await new Promise((res, rej) => {
+	
+	    Fs.writeFile(fileOutputName, JSON.stringify(jsonObj1), 'utf8',
+	      function (err) {
+	        if (err) {
+	          console.log("An error occured while writing JSON Object to File.");
+	          return console.log(err);
+	        }
+	        // console.log(fileOutputName + "JSON file has been saved.");
+	
+	        let targetDir = Path.join(__dirname, FILE_LOCATION+'/instruments.json');
+	
+	
+	        return Fs.copyFile(FILE_LOCATION+'/instruments.json', targetDir,
+	
+	          (err) => {
+	            if (err) throw err;
+	            // console.log(FILE_LOCATION+'/instruments.json was copied to ' + targetDir);
+	
+	
+	            Fs.writeFile(jsonObjCommodityFile, JSON.stringify(jsonObjCommodity), 'utf8', function (err) {
+	              if (err) {
+	                console.log("An error occured while writing JSON Object to File."+jsonObjCommodity);
+	                return console.log(err);
+	              }
+	            });
+	
+	          
+	
+	
+	
+	            return Fs.writeFile(instruAll, JSON.stringify(jsonObjAll), 'utf8', function (err) {
+	              if (err) {
+	                console.log("An error occured while writing JSON Object to File.");
+	                return console.log(err);
+	              }
+	
+	
+	// console.log('instruAll is copied to %s',instruAll)
+	
+	res(true);
+	
+	
+	
+	
+	            });
+	
+	
+	
+	
+	
+	          });
+	
+	      })
+	
+	  });
+	
+	  console.log('code block of downloading completed')
+	
+	
+	
+	  let jsonObj2 = [];
+	  let jsonObjWithOutCriteria = [];
+	
+	
+	  let a = await getSymbols();
+	
+	
+	
+	    let ohlcs = await ohlc(accessToken, a);
+	    let instruments1 = require(FILE_LOCATION+'/instruments.json');
+	    let instruments = instruments1//.slice(0,1000)
+	    let strikes = await getNearestStrikes_unoptimized(ohlcs, instruments)
+	
+	    let symbols = [];
+	    let len1 = strikes.length;
+	
+	    console.log('---------------code block of timer started total strikes',len1)
+	
+	    let len = len1;
+	    let intr = setInterval(async () => {
+	      // var a111=0;
+	
+	      let e = strikes.pop()
+	      // console.log(e,'e')
+	      //////////////////////////////////////////////
+	
+	
+	      if (typeof e == 'undefined') {
+	        clearInterval(intr);
+	
+	
+	        let jsonObj3 = await overnightScripts(jsonObj2)
+	
+	
+	        console.log(jsonObj2.length, 'json obj len')
+	        // console.log('Now starting new mint ');
+	
+	        let write = await writeFinalScriptsTofile(jsonObj3, jsonObjWithOutCriteria);
+	
+	        console.log('finished ');
+	        return;
+	        // fetchInstrumentsForNewMint(accessToken);
+	
+	        return false
+	      }
+	      len--;
+	
+	      //////////////////////////////////////////////
+	      let sec = len * TIMER / 1000;
+	      let min = sec / 60
+	      let sec1 = sec % 60
+	
+	      let t = secondsToHms(sec)
+	      overAllTimer=sec
+	
+	
+	      let progress=`${len}, 'left out of ', ${len1}, ' ', ${t}, ' time left', ${e.tradingsymbol}`;
+	
 
-
-
-
-  let dl = await Fetch.downloadInstruments();
-
-
-
-
-
-  let fileInputName = Path.resolve(__dirname, FILE_LOCATION, 'instruments.csv')
-
-
-
-  let csvresult = await csvToJson().fromFile(fileInputName)
-
-
-  Fs.unlink(fileInputName ,function(err){
-    if(err) return console.log(err);
-    // console.log('file deleted successfully');
-})
-
-
-  //  || j.exchange == 'NSE'
-  let jsonObjMultiple = 
-  csvresult.filter(j => (
-    (
-      
-      j.exchange == 'NFO' && j.expiry == EXPIRY
-      
-   
-      )
-    
-    
-    ))
-
-    // && j.instrument_type == "FUT"   && ( j.name== "NIFTY" || j.name== "BANKNIFTY") 
-
-  // let jsonObj1=jsonObjMultiple.filter((curr,index,arr)=>arr.indexOf(curr=>curr.instrument_token==)
+        cl(progress)
+	      // console.log(len, 'left out of ', len1, ' ', t, ' time left', e.tradingsymbol);
+	      // printProgress(progress)
+	
+	      if (e && typeof e != 'undefined') {
+	       
+	       
+	      try {
+	
+	          await setCurrentInstrumentParameters(e);
+	      
+	      
+	        } catch (error) {
+	        console.log(error)
+	
+	        strikes.push(e)
+	      }
+	
+	
+	      }
+	      
+	
+	
+	
+	    }, TIMER)
+	
+	
+	
+	
+	
+	
+	 
+	
+	
+	
+	  return true;
+	
+	
+	
+	  async function setCurrentInstrumentParameters(e) {
+	    let a = new pricePoint(e.instrument_token, accessToken);
+	
+	
+	    let c = await a.getPricePoints(30, 'day');
+	
+	
+	    e.pricePoints = c;
+	
+	
+	    e.SevenDayMaxMin = c.SevenDayMaxMin;
+	    e.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
+	    e.seletedBuyingMethod = 'MAX';
+	    e.enterNowToTrade = false;
+	    e.PlacedReverseOrder = false;
+	    e.hasLiveTarget = false;
+	    e.hasLivePosition = false;
+	
+	    e.previousPrice = 0;
+	    e.last_price = 0;
+	
+	    if (e.pricePoints) {
+	
+	      let { otherCriteriaCheck, otherCriteriaObj } = otherCriteria(e);
+	      e.otherCriteria = otherCriteriaObj;
+	      e.otherCriteriaCheck = otherCriteriaCheck;
+	      if (otherCriteriaCheck) {
+	        jsonObj2.push(e);
+	      } else {
+	        jsonObjWithOutCriteria.push(e);
+	      }
+	    } else {
+	      console.log(`${e.tradingsymbol}: pricePoints not set, so not pushing`, e.pricePoints);
+	    }
+	  }
+	
+	  async function FunctionProcedureForFutures(e) {
+	    let instruForFuture = require('.FILE_LOCATIONinstrumentsAll.json');
+	
+	    let niftyfut = instruForFuture.filter(i => i.name == 'NIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT")[0];
+	    let a = new pricePoint(niftyfut.instrument_token, accessToken);
+	    let c = await a.getPricePoints(7, 'day');
+	
+	    niftyfut.pricePoints = c;
+	    niftyfut.SevenDayMaxMin = c.SevenDayMaxMin;
+	
+	    niftyfut.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
+	    niftyfut.seletedBuyingMethod = 'MAX';
+	    niftyfut.enterNowToTrade = false;
+	    niftyfut.PlacedReverseOrder = false;
+	
+	
+	    //  console.log(niftyfut)
+	    jsonObj2.push(niftyfut);
+	    jsonObjWithOutCriteria.push(niftyfut);
+	
+	
+	    let bankniftyfut = instruForFuture.filter(i => i.name == 'BANKNIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT")[0];
+	
+	
+	
+	
+	    let abnf = new pricePoint(bankniftyfut.instrument_token, accessToken);
+	    let cbnf = await abnf.getPricePoints(7, 'day');
+	
+	    bankniftyfut.pricePoints = cbnf;
+	    bankniftyfut.SevenDayMaxMin = cbnf.SevenDayMaxMin;
+	
+	    bankniftyfut.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
+	    bankniftyfut.seletedBuyingMethod = 'MAX';
+	    bankniftyfut.enterNowToTrade = false;
+	    bankniftyfut.PlacedReverseOrder = false;
+	
+	    //  console.log(bankniftyfut)
+	    jsonObj2.push(bankniftyfut);
+	    jsonObjWithOutCriteria.push(bankniftyfut);
+	  }
+	
+} catch (error) {
+  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
   
-  
-  // ==index)
-
-
-  //   ;
-  // let jsonObj1=removeDuplicates(jsonObjMultiple)
-  let jsonObj1=jsonObjMultiple;
-
-  let jsonObjAll = csvresult//.filter(j => ((j.exchange == 'NFO') || j.exchange == 'NSE'));
-  
-  
-  let jsonObjCommodity = csvresult.filter(j => ((j.exchange == 'MCX') 
-  ));
-
-
-
-
-
-
-
-  let fileOutputName = Path.resolve(__dirname, FILE_LOCATION,
-   'instruments.json')
-  
-  
-  let jsonObjCommodityFile= Path.resolve(__dirname, FILE_LOCATION, 'CommodityFile.json')
-
-  let f = await new Promise((res, rej) => {
-
-    Fs.writeFile(fileOutputName, JSON.stringify(jsonObj1), 'utf8',
-      function (err) {
-        if (err) {
-          console.log("An error occured while writing JSON Object to File.");
-          return console.log(err);
-        }
-        // console.log(fileOutputName + "JSON file has been saved.");
-
-        let targetDir = Path.join(__dirname, FILE_LOCATION+'/instruments.json');
-
-
-        return Fs.copyFile(FILE_LOCATION+'/instruments.json', targetDir,
-
-          (err) => {
-            if (err) throw err;
-            // console.log(FILE_LOCATION+'/instruments.json was copied to ' + targetDir);
-
-
-            Fs.writeFile(jsonObjCommodityFile, JSON.stringify(jsonObjCommodity), 'utf8', function (err) {
-              if (err) {
-                console.log("An error occured while writing JSON Object to File."+jsonObjCommodity);
-                return console.log(err);
-              }
-            });
-
-          
-
-
-
-            return Fs.writeFile(instruAll, JSON.stringify(jsonObjAll), 'utf8', function (err) {
-              if (err) {
-                console.log("An error occured while writing JSON Object to File.");
-                return console.log(err);
-              }
-
-
-// console.log('instruAll is copied to %s',instruAll)
-
-res(true);
-
-
-
-
-            });
-
-
-
-
-
-          });
-
-      })
-
-  });
-
-  console.log('code block of downloading completed')
-
-
-
-  let jsonObj2 = [];
-  let jsonObjWithOutCriteria = [];
-
-
-  let a = await getSymbols();
-
-
-
-    let ohlcs = await ohlc(accessToken, a);
-    let instruments1 = require(FILE_LOCATION+'/instruments.json');
-    let instruments = instruments1//.slice(0,1000)
-    let strikes = await getNearestStrikes_unoptimized(ohlcs, instruments)
-
-    let symbols = [];
-    let len1 = strikes.length;
-
-    console.log('---------------code block of timer started total strikes',len1)
-
-    let len = len1;
-    let intr = setInterval(async () => {
-      // var a111=0;
-
-      let e = strikes.pop()
-      // console.log(e,'e')
-      //////////////////////////////////////////////
-
-
-      if (typeof e == 'undefined') {
-        clearInterval(intr);
-
-
-        let jsonObj3 = await overnightScripts(jsonObj2)
-
-
-        console.log(jsonObj2.length, 'json obj len')
-        // console.log('Now starting new mint ');
-
-        let write = await writeFinalScriptsTofile(jsonObj3, jsonObjWithOutCriteria);
-
-        console.log('finished ');
-        return;
-        // fetchInstrumentsForNewMint(accessToken);
-
-        return false
-      }
-      len--;
-
-      //////////////////////////////////////////////
-      let sec = len * TIMER / 1000;
-      let min = sec / 60
-      let sec1 = sec % 60
-
-      let t = secondsToHms(sec)
-      overAllTimer=sec
-
-
-      let progress=`${len}, 'left out of ', ${len1}, ' ', ${t}, ' time left', ${e.tradingsymbol}`;
-
-      // console.log(len, 'left out of ', len1, ' ', t, ' time left', e.tradingsymbol);
-      printProgress(progress)
-
-      // if (len == (len1 - 1))
-
-      if(false) 
-      if (e.length==0) 
-      
-     
-      {
-
-        // let instruForFuture = require('./appv3/public/instruments/instruments.json');
-        await FunctionProcedureForFutures(e);
-
-        // return false;
-      }
-
-
-
-      // if (len > 0)
-      if (e && typeof e != 'undefined') {
-       
-       
-      try {
-          let a = new pricePoint(e.instrument_token, accessToken);
-  
-  
-          let c = await a.getPricePoints(7, 'day');
-         
-         
-          e.pricePoints = c;
-  
-      
-          e.SevenDayMaxMin = c.SevenDayMaxMin;
-          e.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
-          e.seletedBuyingMethod = 'MAX';
-          e.enterNowToTrade = false;
-          e.PlacedReverseOrder = false;
-          e.hasLiveTarget = false;
-          e.hasLivePosition = false;
-  
-  // console.log(&& e.pricePoints.d0 && e.pricePoints.d0.date)
-  
-  // return;
-  // && e.pricePoints.length
-  
-  // cl(e.pricePoints);
-          if (e.pricePoints ) {
-  
-         
-            let { otherCriteriaCheck, otherCriteriaObj } = otherCriteria(e);
-            e.otherCriteria = otherCriteriaObj;
-            e.otherCriteriaCheck = otherCriteriaCheck;
-            if (otherCriteriaCheck) {
-              jsonObj2.push(e);
-            } else {
-              jsonObjWithOutCriteria.push(e);
-            }
-          } else {
-            console.log(`${e.tradingsymbol}: pricePoints not set, so not pushing` ,e.pricePoints);
-          }
-      } catch (error) {
-        console.log(error)
-
-        strikes.push(e)
-      }
-      }
-      
-
-
-
-    }, TIMER)
-
-
-
-
-
-
- 
-
-
-
-  return true;
-
-
-
-  async function FunctionProcedureForFutures(e) {
-    let instruForFuture = require('.FILE_LOCATIONinstrumentsAll.json');
-
-    let niftyfut = instruForFuture.filter(i => i.name == 'NIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT")[0];
-    let a = new pricePoint(niftyfut.instrument_token, accessToken);
-    let c = await a.getPricePoints(7, 'day');
-
-    niftyfut.pricePoints = c;
-    niftyfut.SevenDayMaxMin = c.SevenDayMaxMin;
-
-    niftyfut.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
-    niftyfut.seletedBuyingMethod = 'MAX';
-    niftyfut.enterNowToTrade = false;
-    niftyfut.PlacedReverseOrder = false;
-
-
-    //  console.log(niftyfut)
-    jsonObj2.push(niftyfut);
-    jsonObjWithOutCriteria.push(niftyfut);
-
-
-    let bankniftyfut = instruForFuture.filter(i => i.name == 'BANKNIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT")[0];
-
-
-
-
-    let abnf = new pricePoint(bankniftyfut.instrument_token, accessToken);
-    let cbnf = await abnf.getPricePoints(7, 'day');
-
-    bankniftyfut.pricePoints = cbnf;
-    bankniftyfut.SevenDayMaxMin = cbnf.SevenDayMaxMin;
-
-    bankniftyfut.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
-    bankniftyfut.seletedBuyingMethod = 'MAX';
-    bankniftyfut.enterNowToTrade = false;
-    bankniftyfut.PlacedReverseOrder = false;
-
-    //  console.log(bankniftyfut)
-    jsonObj2.push(bankniftyfut);
-    jsonObjWithOutCriteria.push(bankniftyfut);
-  }
-}
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+}}
 
 
 
@@ -473,8 +517,10 @@ function otherCriteria(e) {
 
   } catch (e) {
 
-
-    console.log('error', e)
+    const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+    const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
+    
+    console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
     return false;
 
   }
@@ -505,15 +551,22 @@ function otherCriteria(e) {
 
 
 function secondsToHms(d) {
-  d = Number(d);
-  var h = Math.floor(d / 3600);
-  var m = Math.floor(d % 3600 / 60);
-  var s = Math.floor(d % 3600 % 60);
-
-  var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-  var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-  var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
-  return hDisplay + mDisplay + sDisplay;
+  try {
+	d = Number(d);
+	  var h = Math.floor(d / 3600);
+	  var m = Math.floor(d % 3600 / 60);
+	  var s = Math.floor(d % 3600 % 60);
+	
+	  var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
+	  var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
+	  var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+	  return hDisplay + mDisplay + sDisplay;
+} catch (error) {
+  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
+  
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+}
 }
 
 
@@ -529,436 +582,460 @@ async function getHoldingInstruments(access_token) {
     const positions = await kc.getPositions();
     return positions.net.map(p => p.tradingsymbol);
   } catch (error) {
-    console.error(error);
+    const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
+  
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
   }
 }
 
 
 
-function getNearestStrikes(ohlc, instruments) {
-  const peUpperPercentage = 1;
-  const peLowerPercentage = .97;
-  const ceUpperPercentage = 1;
-  const ceLowerPercentage = .97;
+function getNearestStrikes(ohlc, instruments) {try {
+	
+	  const peUpperPercentage = 1;
+	  const peLowerPercentage = .97;
+	  const ceUpperPercentage = 1;
+	  const ceLowerPercentage = .97;
+	  
+	
+	
+	  return Promise.resolve(
+	    Object.entries(ohlc).reduce((currentInstruments, [item, value]) => {
+	
+	
+	      let symbol = item.split(':')[1];
+	      let lastPriceMax = value.last_price * peUpperPercentage;
+	      let lastPriceMin = value.last_price * peLowerPercentage;
+	      let lastPrice = value.last_price;
+	
+	      let curInstrument = instruments.find(i => {
+	        if (symbol === 'NIFTY 50') {
+	          symbol = 'NIFTY';
+	        }
+	        if (symbol === 'NIFTY BANK') {
+	          symbol = 'BANKNIFTY';
+	        }
+	        return i.name === symbol;
+	      });
+	
+	
+	
+	      console.log(instruments.length);
+	
+	      return;
+	      // console.log(curInstrument)
+	
+	     
+	
+	      if (curInstrument) {
+	
+	
+	        console.log()
+	
+	
+	        if (curInstrument.instrument_type === 'FUT' && (curInstrument.name === 'NIFTY' || curInstrument.name === 'BANKNIFTY')) {
+	          
+	          console.log(curInstrument.tradingsymbol)
+	         
+	
+	          curInstrument.spot_price = lastPrice;
+	          currentInstruments.push(curInstrument);
+	        } else if (curInstrument.instrument_type === 'CE' && curInstrument.strike > lastPrice /** ceLowerPercentage && curInstrument.strike < lastPrice * ceUpperPercentage*/) {
+	        
+	          console.log(curInstrument)
+	          
+	          curInstrument.spot_price = lastPrice;
+	          currentInstruments.push(curInstrument);
+	        } else if (curInstrument.instrument_type === 'PE' && curInstrument.strike < lastPrice /** peUpperPercentage && curInstrument.strike > lastPrice * peLowerPercentage*/) {
+	          curInstrument.spot_price = lastPrice;
+	
+	          console.log(curInstrument)
+	          currentInstruments.push(curInstrument);
+	        }
+	      }
+	    return currentInstruments;
+	    }, [])
+	
+	
+	
+	  );
+	
+} catch (error) {
+  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
   
-
-
-  return Promise.resolve(
-    Object.entries(ohlc).reduce((currentInstruments, [item, value]) => {
-
-
-      let symbol = item.split(':')[1];
-      let lastPriceMax = value.last_price * peUpperPercentage;
-      let lastPriceMin = value.last_price * peLowerPercentage;
-      let lastPrice = value.last_price;
-
-      let curInstrument = instruments.find(i => {
-        if (symbol === 'NIFTY 50') {
-          symbol = 'NIFTY';
-        }
-        if (symbol === 'NIFTY BANK') {
-          symbol = 'BANKNIFTY';
-        }
-        return i.name === symbol;
-      });
-
-
-
-      console.log(instruments.length);
-
-      return;
-      // console.log(curInstrument)
-
-     
-
-      if (curInstrument) {
-
-
-        console.log()
-
-
-        if (curInstrument.instrument_type === 'FUT' && (curInstrument.name === 'NIFTY' || curInstrument.name === 'BANKNIFTY')) {
-          
-          console.log(curInstrument.tradingsymbol)
-         
-
-          curInstrument.spot_price = lastPrice;
-          currentInstruments.push(curInstrument);
-        } else if (curInstrument.instrument_type === 'CE' && curInstrument.strike > lastPrice /** ceLowerPercentage && curInstrument.strike < lastPrice * ceUpperPercentage*/) {
-        
-          console.log(curInstrument)
-          
-          curInstrument.spot_price = lastPrice;
-          currentInstruments.push(curInstrument);
-        } else if (curInstrument.instrument_type === 'PE' && curInstrument.strike < lastPrice /** peUpperPercentage && curInstrument.strike > lastPrice * peLowerPercentage*/) {
-          curInstrument.spot_price = lastPrice;
-
-          console.log(curInstrument)
-          currentInstruments.push(curInstrument);
-        }
-      }
-    return currentInstruments;
-    }, [])
-
-
-
-  );
-}
-
-
-function getNearestStrikes_unoptimized(ohlc, instruments) {
-
-
-  return new Promise((resolve, reject) => {
-
-
-
-
-
-
-
-    // console.log('from neearest strikeds with ohlc1',ohlc)
-
-    currentInstruments = [];
-
-    let len = Object.keys(ohlc).length;
-
-    // console.log('objlen',len);
-
-    // return false;
-
-
-    Object.keys(ohlc).forEach(async item => {
-      // console.log('item',item)
-      let symbol = item.split(':')[1];
-
-      // console.log('symbol', symbol)
-
-
-
-
-
-      let last_price_max = ohlc[item].last_price * 1.03
-      let last_price_min = ohlc[item].last_price * .97
-
-      let last_price = ohlc[item].last_price;
-
-
-      if (symbol == 'NIFTY 50') {
-
-        // console.log('NIFTY 50', last_price)
-      }
-      if (symbol == 'NIFTY BANK') {
-
-        // console.log('NIFTY BANK', last_price)
-      }
-
-      let curInstrument = instruments.filter(
-
-
-        i => {
-
-          if (symbol == 'NIFTY 50') {
-
-            symbol = 'NIFTY'
-          }
-
-
-          if (symbol == 'NIFTY BANK') {
-
-            symbol = 'BANKNIFTY'
-          }
-
-          return i.name == symbol
-        }
-
-      ).filter(i => {
-
-        // console.log('i.name',i.name)
-
-        if (i.name == 'NIFTY') {
-
-          // console.log('NIFTY', i.tradingsymbol, last_price)
-        }
-        if (i.name == 'BANKNIFTY') {
-
-          // console.log('NIFTY BANK', i.tradingsymbol, last_price)
-        }
-
-
-
-        if (i.instrument_type == 'FUT') {
-
-          if (i.name == 'NIFTY' || i.name == 'BANKNIFTY') {
-
-            // console.log('its future', i.tradingsymbol)
-            return true
-
-          }
-        }
-
-        // console.log('i.instrument_type',i.instrument_type)
-        if (i.instrument_type == 'CE') {
-
-
-          /// if ce strike between 1.05 pc and 1.1 pc
-
-          //if pe between strike .95 to .9
-
-
-          //           console.log("variable", variable);
-          // if (i.strike < last_price_max && i.strike > last_price_min) 
-
-
-          // let ce_upper_percentage=1;
-          // let ce_lower_percentage=.97;
-          
-        
-
-
-
-          if (i.strike > last_price * ce_lower_percentage && 
-            i.strike < last_price * ce_upper_percentage)
-
-
-          // console.log('ceeeee yeee')
-          {
-
-
-            if (i.name == 'NIFTY') {
-
-              // console.log('NIFTY 50', i.tradingsymbol)
-            }
-            if (i.name == 'BANKNIFTY') {
-
-              // console.log('NIFTY BANK', i.tradingsymbol)
-            }
-
-            return true
-          }
-        }
-
-        else if (i.instrument_type == 'PE') {
-
-          // console.log('pee yeee')
-
-
-          // let pe_upper_percentage=1.03;
-          // let pe_lower_percentage=1;
-
-          // if (i.strike < last_price_max && i.strike > last_price_min) {
-          if (i.strike < last_price * pe_upper_percentage  && i.strike > last_price * pe_lower_percentage) {
-
-
-            if (i.name == 'NIFTY') {
-
-              // console.log('NIFTY 50', i.tradingsymbol)
-            }
-            if (i.name == 'BANKNIFTY') {
-
-              // console.log('NIFTY BANK', i.tradingsymbol)
-            }
-
-
-            return true
-          }
-        }
-
-      }).map(r => {
-
-
-
-
-        r.spot_price = last_price
-
-
-        return r
-
-
-
-
-
-
-
-      })
-      // console.log('curInstrument',curInstrument)
-
-      currentInstruments.push(...curInstrument);
-
-
-
-
-      len = len - 1;
-      if (len == 0) {
-        /// currrent positions
-
-        currentInstruments1 = currentInstruments.map(c => {
-
-          if (typeof c.tradingsymbol != 'undefined') return c
-
-        }
-
-
-
-
-
-        );
-
-
-        // console.log({currentInstruments1})
-
-        currentInstruments = [...currentInstruments1]
-
-
-
- let instruAll = require(FILE_LOCATION+'/instrumentsAll.json');
-
-
-  let needed=['NIFTY 50','INDIA VIX','NIFTY BANK'];
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+}}
+
+
+function getNearestStrikes_unoptimized(ohlc, instruments) {try {
+	
+	
+	
+	  return new Promise((resolve, reject) => {
+	
+	
+	
+	
+	
+	
+	
+	    // console.log('from neearest strikeds with ohlc1',ohlc)
+	
+	    currentInstruments = [];
+	
+	    let len = Object.keys(ohlc).length;
+	
+	    // console.log('objlen',len);
+	
+	    // return false;
+	
+	
+	    Object.keys(ohlc).forEach(async item => {
+	      // console.log('item',item)
+	      let symbol = item.split(':')[1];
+	
+	      // console.log('symbol', symbol)
+	
+	
+	
+	
+	
+	      let last_price_max = ohlc[item].last_price * 1.03
+	      let last_price_min = ohlc[item].last_price * .97
+	
+	      let last_price = ohlc[item].last_price;
+	
+	
+	      if (symbol == 'NIFTY 50') {
+	
+	        // console.log('NIFTY 50', last_price)
+	      }
+	      if (symbol == 'NIFTY BANK') {
+	
+	        // console.log('NIFTY BANK', last_price)
+	      }
+	
+	      let curInstrument = instruments.filter(
+	
+	
+	        i => {
+	
+	          if (symbol == 'NIFTY 50') {
+	
+	            symbol = 'NIFTY'
+	          }
+	
+	
+	          if (symbol == 'NIFTY BANK') {
+	
+	            symbol = 'BANKNIFTY'
+	          }
+	
+	          return i.name == symbol
+	        }
+	
+	      ).filter(i => {
+	
+	        // console.log('i.name',i.name)
+	
+	        if (i.name == 'NIFTY') {
+	
+	          // console.log('NIFTY', i.tradingsymbol, last_price)
+	        }
+	        if (i.name == 'BANKNIFTY') {
+	
+	          // console.log('NIFTY BANK', i.tradingsymbol, last_price)
+	        }
+	
+	
+	
+	        if (i.instrument_type == 'FUT') {
+	
+	          if (i.name == 'NIFTY' || i.name == 'BANKNIFTY') {
+	
+	            // console.log('its future', i.tradingsymbol)
+	            return true
+	
+	          }
+	        }
+	
+	        // console.log('i.instrument_type',i.instrument_type)
+	        if (i.instrument_type == 'CE') {
+	
+	
+	          /// if ce strike between 1.05 pc and 1.1 pc
+	
+	          //if pe between strike .95 to .9
+	
+	
+	          //           console.log("variable", variable);
+	          // if (i.strike < last_price_max && i.strike > last_price_min) 
+	
+	
+	          // let ce_upper_percentage=1;
+	          // let ce_lower_percentage=.97;
+	          
+	        
+	
+	
+	
+	          if (i.strike > last_price * ce_lower_percentage && 
+	            i.strike < last_price * ce_upper_percentage)
+	
+	
+	          // console.log('ceeeee yeee')
+	          {
+	
+	
+	            if (i.name == 'NIFTY') {
+	
+	              // console.log('NIFTY 50', i.tradingsymbol)
+	            }
+	            if (i.name == 'BANKNIFTY') {
+	
+	              // console.log('NIFTY BANK', i.tradingsymbol)
+	            }
+	
+	            return true
+	          }
+	        }
+	
+	        else if (i.instrument_type == 'PE') {
+	
+	          // console.log('pee yeee')
+	
+	
+	          // let pe_upper_percentage=1.03;
+	          // let pe_lower_percentage=1;
+	
+	          // if (i.strike < last_price_max && i.strike > last_price_min) {
+	          if (i.strike < last_price * pe_upper_percentage  && i.strike > last_price * pe_lower_percentage) {
+	
+	
+	            if (i.name == 'NIFTY') {
+	
+	              // console.log('NIFTY 50', i.tradingsymbol)
+	            }
+	            if (i.name == 'BANKNIFTY') {
+	
+	              // console.log('NIFTY BANK', i.tradingsymbol)
+	            }
+	
+	
+	            return true
+	          }
+	        }
+	
+	      }).map(r => {
+	
+	
+	
+	
+	        r.spot_price = last_price
+	
+	
+	        return r
+	
+	
+	
+	
+	
+	
+	
+	      })
+	      // console.log('curInstrument',curInstrument)
+	
+	      currentInstruments.push(...curInstrument);
+	
+	
+	
+	
+	      len = len - 1;
+	      if (len == 0) {
+	        /// currrent positions
+	
+	        currentInstruments1 = currentInstruments.map(c => {
+	
+	          if (typeof c.tradingsymbol != 'undefined') return c
+	
+	        }
+	
+	
+	
+	
+	
+	        );
+	
+	
+	        // console.log({currentInstruments1})
+	
+	        currentInstruments = [...currentInstruments1]
+	
+	
+	
+	 let instruAll = require(FILE_LOCATION+'/instrumentsAll.json');
+	
+	
+	  let needed=['NIFTY 50','INDIA VIX','NIFTY BANK'];
+	  
+	  
+	  let segments=instruAll .filter(i=>i.segment=='INDICES' && needed.includes(i.tradingsymbol))
+	
+	
+	    // .map(j=>j.instrument_token)
+	
+	
+	  // console.log(symboList.length,'Total stocks ')
+	  // console.log('segments length',segments.length)
+	
+	
+	  // console.log(segments,'here')
+	
+	
+	
+	  currentInstruments.push(...segments)
+	
+	        // console.log(currentInstruments,'cur instr');
+	
+	
+	
+	
+	        // tradingsymbol: 'OBEROIRLTY22FEB880PE',
+	
+	
+	        resolve(currentInstruments);
+	
+	return;
+	
+	
+	        // console.log(pos,'pos')
+	
+	      }
+	
+	    })
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	  })
+	
+	
+} catch (error) {
+  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
   
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+}}
+
+
+
+async function getSymbols() {try {
+	
+	
+	
+	  let instruments = require(FILE_LOCATION+'/instruments.json');
+	
+	  let st = instruments.filter(i => i.exchange == 'NFO')
+	    .map((i) => i.name)
+	    .filter((x, i, a) => a.indexOf(x) === i);
+	
+	  let st2 = instruments
+	    .map((i) => i.instrument_token)
+	    .filter((x, i, a) => a.indexOf(x) === i);
+	
+	  let instTockens = st.map((s) => {
+	  
+	    let ar = instruments.filter(
+	      (i) => i.tradingsymbol == s && i.exchange == "NSE"
+	    );
+	
+	    if (typeof ar[0] != "undefined") {
+	      let instrument_token1;
+	      if (ar.length) {
+	        let { instrument_token } = ar[0];
+	        instrument_token1 = instrument_token;
+	      } else {
+	        instrument_token1 = 0;
+	      }
+	
+	      return instrument_token1;
+	    }
+	
+	  });
+	
+	
+	  let symboList = st.map((s) => {
+	
+	    // console.log('from get symbls', s)
+	
+	    if (s == 'NIFTY') {
+	      s = "NIFTY 50"
+	
+	    }
+	
+	    if (s == 'BANKNIFTY') {
+	      s = "NIFTY BANK"
+	
+	    }
+	    return "NSE:" + s;
+	  }).filter((x, i, a) => a.indexOf(x) === i);;
+	
+	
+	
+	
+	  let instruAll = require(FILE_LOCATION+'/instrumentsAll.json');
+	
+	
+	  let needed=['NIFTY 50','INDIA VIX','NIFTY BANK'];
+	  
+	  
+	  let segments=instruAll .filter(i=>i.segment=='INDICES' && needed.includes(i.tradingsymbol))
+	
+	
+	    .map(j=>j.tradingsymbol)
+	
+	
+	  console.log(symboList.length,'Total stocks ')
+	  console.log('segments length',segments.length)
+	
+	
+	  // console.log(segments)
+	
+	
+	
+	  symboList.push(...segments)
+	
+	  // console.log(symboList.length,'Total stocks after ')
+	  return symboList;
+	
+	
+	
+	  // let f= await  this.getOHLC(this.accessToken, symboList);
+	  // let t=await  this.getNearestStrikes();
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	  // return st;
+	
+} catch (error) {
+  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
   
-  let segments=instruAll .filter(i=>i.segment=='INDICES' && needed.includes(i.tradingsymbol))
-
-
-    // .map(j=>j.instrument_token)
-
-
-  // console.log(symboList.length,'Total stocks ')
-  // console.log('segments length',segments.length)
-
-
-  console.log(segments,'here')
-
-
-
-  currentInstruments.push(...segments)
-
-        // console.log(currentInstruments,'cur instr');
-
-
-
-
-        // tradingsymbol: 'OBEROIRLTY22FEB880PE',
-
-
-        resolve(currentInstruments);
-
-return;
-
-
-        // console.log(pos,'pos')
-
-      }
-
-    })
-
-
-
-
-
-
-
-
-
-  })
-
-}
-
-
-
-async function getSymbols() {
-
-
-  let instruments = require(FILE_LOCATION+'/instruments.json');
-
-  let st = instruments.filter(i => i.exchange == 'NFO')
-    .map((i) => i.name)
-    .filter((x, i, a) => a.indexOf(x) === i);
-
-  let st2 = instruments
-    .map((i) => i.instrument_token)
-    .filter((x, i, a) => a.indexOf(x) === i);
-
-  let instTockens = st.map((s) => {
-  
-    let ar = instruments.filter(
-      (i) => i.tradingsymbol == s && i.exchange == "NSE"
-    );
-
-    if (typeof ar[0] != "undefined") {
-      let instrument_token1;
-      if (ar.length) {
-        let { instrument_token } = ar[0];
-        instrument_token1 = instrument_token;
-      } else {
-        instrument_token1 = 0;
-      }
-
-      return instrument_token1;
-    }
-
-  });
-
-
-  let symboList = st.map((s) => {
-
-    // console.log('from get symbls', s)
-
-    if (s == 'NIFTY') {
-      s = "NIFTY 50"
-
-    }
-
-    if (s == 'BANKNIFTY') {
-      s = "NIFTY BANK"
-
-    }
-    return "NSE:" + s;
-  }).filter((x, i, a) => a.indexOf(x) === i);;
-
-
-
-
-  let instruAll = require(FILE_LOCATION+'/instrumentsAll.json');
-
-
-  let needed=['NIFTY 50','INDIA VIX','NIFTY BANK'];
-  
-  
-  let segments=instruAll .filter(i=>i.segment=='INDICES' && needed.includes(i.tradingsymbol))
-
-
-    .map(j=>j.tradingsymbol)
-
-
-  console.log(symboList.length,'Total stocks ')
-  console.log('segments length',segments.length)
-
-
-  console.log(segments)
-
-
-
-  symboList.push(...segments)
-
-  console.log(symboList.length,'Total stocks after ')
-  return symboList;
-
-
-
-  // let f= await  this.getOHLC(this.accessToken, symboList);
-  // let t=await  this.getNearestStrikes();
-
-
-
-
-
-
-
-
-
-  // return st;
-}
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+}}
 // let access_token = 'WqDJozv3KifY6ZwVOUtF4R2kXvWXBkHA';
 
 
@@ -966,76 +1043,45 @@ async function getSymbols() {
 
 
 
-const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(r => {
-  // console.log(r)
-  return AccesTocken.findOne({ 'date': today }, 'access_token').then(async e => {
 
- 
-    access_token = e.access_token;
-   
-
-    // console.log('immidiate')
-    let t1 = await fetchInstrumentsForMining(access_token);
-
-// setInterval(async ()=>{
-
-//   console.log('from timer')
-
-//   let t = await fetchInstrumentsForMining(access_token);
-//   mongoose.disconnect();
-
-
-
-// },(overAllTimer+30*1000))
-
-   
-  
-
-
-
-
-   
-
-  });
-
-  ;
-
-
-  return;
-
-});
 
 
 async function writeFinalScriptsTofile(jsonObj2, jsonObjWithOutCriteria) {
 
 
-  return new Promise(async (res, rej) => {
-
-
-
-
-
-
-    let fileOutputName = FILE_LOCATION+'/instrumentsForMining.json';
-    let targetDir = Path.join(__dirname, FILE_LOCATION+'/instrumentsForMining.json');
-
-    let out = await createAndMoveFileFromJson(fileOutputName, jsonObj2, targetDir);
-
-
-    let fileOutputNameWithOutCriteria = FILE_LOCATION+'/instrumentsForMiningWithOutCriteria.json';
-    let out2 = await createAndMoveFileFromJson(fileOutputNameWithOutCriteria, jsonObjWithOutCriteria, targetDir);
-
-    res(out)
-    return;
-
-
-
-
-
-  })
-
-  return;
+ try {
+	 return new Promise(async (res, rej) => {
+	
+	
+	
+	
+	
+	
+	    let fileOutputName = FILE_LOCATION+'/instrumentsForMining.json';
+	    let targetDir = Path.join(__dirname, FILE_LOCATION+'/instrumentsForMining.json');
+	
+	    let out = await createAndMoveFileFromJson(fileOutputName, jsonObj2, targetDir);
+	
+	
+	    let fileOutputNameWithOutCriteria = FILE_LOCATION+'/instrumentsForMiningWithOutCriteria.json';
+	    let out2 = await createAndMoveFileFromJson(fileOutputNameWithOutCriteria, jsonObjWithOutCriteria, targetDir);
+	
+	    res(out)
+	    return;
+	
+	
+	
+	
+	
+	  })
+	
+	  return;
+} catch (error) {
+  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
+  
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+}
 
 }
 
@@ -1043,42 +1089,49 @@ async function writeFinalScriptsTofile(jsonObj2, jsonObjWithOutCriteria) {
 
 function createAndMoveFileFromJson(fileOutputName, jsonObj2, targetDir) {
 
-  return new Promise((res, rej) => {
-
-
-
-
-    Fs.writeFile(fileOutputName, JSON.stringify(jsonObj2), 'utf8',
-
-      function (err) {
-        if (err) {
-          console.log("An error occured while writing JSON Object to File.");
-          return console.log(err);
-        }
-        // console.log(fileOutputName + "JSON file has been saved.");
-
-
-        Fs.copyFile(FILE_LOCATION+'/instrumentsForMining.json', targetDir,
-          (err) => {
-            if (err) throw err;
-            // console.log('source.txt was copied to destination.txt');
-            res(true);
-            return;
-          });
-
-
-          res(true);
-          return;
-
-        
-
-      });
-      res(true);
-
-      return;
-
-  })
-
+try {
+	  return new Promise((res, rej) => {
+	
+	
+	
+	
+	    Fs.writeFile(fileOutputName, JSON.stringify(jsonObj2), 'utf8',
+	
+	      function (err) {
+	        if (err) {
+	          console.log("An error occured while writing JSON Object to File.");
+	          return console.log(err);
+	        }
+	        // console.log(fileOutputName + "JSON file has been saved.");
+	
+	
+	        Fs.copyFile(FILE_LOCATION+'/instrumentsForMining.json', targetDir,
+	          (err) => {
+	            if (err) throw err;
+	            // console.log('source.txt was copied to destination.txt');
+	            res(true);
+	            return;
+	          });
+	
+	
+	          res(true);
+	          return;
+	
+	        
+	
+	      });
+	      res(true);
+	
+	      return;
+	
+	  })
+	
+} catch (error) {
+  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
+  
+  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+}
 }
 
 function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
@@ -1165,7 +1218,10 @@ function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
 
       catch (error) {
 
-
+        const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+        const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
+        
+        console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
         console.log(error, 'error of position check')
       }
 
@@ -1247,5 +1303,8 @@ function getCurrentExpiryDate() {
 
   return d1
 }
+
+
+
 
 

@@ -1,58 +1,44 @@
 <template>
     <div>
-
+<!-- {{ indices }} -->
 
     <table class="table table compact table bordered">
         <thead>
             <th>#</th>
             <th>index</th>
             <th>LTP</th>
-            <th>Change</th>
-            <th>Change%</th>
+            <th>Range</th>
+            <!-- <th>Change%</th> -->
         </thead>
         <tbody>
             <tr v-for="(i,index) in indices" :key="index">
                 <td>{{index+1}}</td>
-                <td>{{i.tradingsymbol}}</td>
                 <td>
+                    
+                    {{i.tradingsymbol}}
+
+               ({{i.instrument_token }}) 
+
+            <!-- {{i.pricePoints.d1}} -->
+                
+            
+            </td>
+                <td>
+
 {{i.last_price}}
 
                 </td>
                 <td>
 
-              
-<!-- {{i.last_price-i.pricePoints.d0.open -->
-
-}}
-
-
-open
-
-<!-- {{i.pricePoints.d0.open}} -->
-<v-chip>
-
-    <!-- {{ checkNiftyStatus(i.tradingsymbol) }} -->
-    date
- 
-<!-- {{
-
- 
-checkNiftyStatus(i.tradingsymbol).normalDate}}//change -->
-
-
-<!-- {{checkNiftyStatus(i.tradingsymbol).change}}//
-{{checkNiftyStatus(i.tradingsymbol).changePc}}// changepc
-{{checkNiftyStatus(i.tradingsymbol).high}}// low
-
-
-{{checkNiftyStatus(i.tradingsymbol).low}}// -->
+                    {{i.pricePoints.d0.range}}
 
 
 
-</v-chip>
+
+
 
                 </td>
-                <td></td>
+                <!-- <td></td> -->
             </tr>
         </tbody>
     </table>
@@ -111,5 +97,10 @@ return {
 </script>
 
 <style lang="scss" scoped>
+table {
+  max-width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 </style>

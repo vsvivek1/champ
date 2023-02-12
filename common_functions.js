@@ -3,7 +3,15 @@ const ZerodhaAPI=require('./ZerodhaAPI');
 const Scraping=require("./scraping/index.js")
 const CI=require("./scraping/ci.js")
 var KiteConnect = require("kiteconnect").KiteConnect;
-
+async function executeCI(href,accessToken){
+    // console.log('href',href)
+  
+    let s= await CI.scrap(href,accessToken);
+  
+    console.log('s',s)
+    return s; 
+    return CI.scrap(href);
+    }
 
 function getHistoricalData(access_token,symbol='INE002A01018',start='2021-03-10',end='2019-03-10'){
 
@@ -189,6 +197,47 @@ return a;
       
       }
       
+      async function NrRange(req) {
+        let minRanges=[];
+        var kc2 = new KiteConnect({
+          api_key: api_key,
+          access_token: req.params.accessToken
+        });
+        var interval = 100; 
+        let eq=await GetStocks(req);
+        let eq1=eq.slice(0,100); 
+      
+        var d1= new Date();
+        let today=d1.toISOString().split('T')[0];   
+      
+        d1.setDate(d1.getDate()+2);
+      
+        let d2=new Date();
+        d2.setDate(d2.getDate() - 6);
+      
+       let promises=  eq1.map(async (e,index)=>{
+        setTimeout(function  () {
+        
+       return  kc2.getHistoricalData(e.instrument_token,'day',d2,d1,false,1)
+                                        
+          .then(
+      res=>{
+      
+        let mr=getMinRange(res,e);
+        // console.log('res',mr)
+        return mr
+      }).catch(e=>console.log('it happens inside',e));;
+          
+        },interval*index)
+      });
+      
+      
+      // console.log('promise from nr range',promises)
+      return promises;
+        
+      
+      }
+      
 
   
-  module.exports={getHistoricalData,getMinRange,GetStocks}
+  module.exports={getHistoricalData,getMinRange,GetStocks,executeCI,NrRange}

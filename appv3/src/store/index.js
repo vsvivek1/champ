@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -9,11 +10,19 @@ export default new Vuex.Store({
     accessToken:'',
     session:null,
     Instruments:[],
-    NrInstruments:[]
+    NrInstruments:[],
     
+    logs: [],
   },
   mutations: {
-
+    
+    
+    addLog(state, log) {
+      state.logs.push(log);
+    },
+    clearLogs(state) {
+      state.logs = [];
+    },
     setNrInstruments(state,payload){
 
       state.NrInstruments=payload;
@@ -41,6 +50,13 @@ export default new Vuex.Store({
     }
   },
   actions: {
+
+    addLog({ commit }, log) {
+      commit('addLog', log);
+    },
+    clearLogs({ commit }) {
+      commit('clearLogs');
+    },
   },
   modules: {
   }

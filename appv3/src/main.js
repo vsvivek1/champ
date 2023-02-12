@@ -70,9 +70,19 @@ Vue.config.productionTip = false
 Vue.mixin({
   methods: {
 
-   cl(i){
 
-      console.log(i)
+
+
+   cl(...params){
+
+
+    let out='';
+    for (let i = 0; i < params.length; i++) {
+     out=out+' '+ params[i]
+    }
+
+
+      console.log(out)
     },
 
 

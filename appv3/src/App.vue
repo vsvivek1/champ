@@ -72,10 +72,15 @@
   </template>
   
   <script>
+  // import LogWindow from './components/LogWindow.vue';
     import store from '@/store';
   
   
   export default {
+
+    components: {
+    // LogWindow,
+  },
       computed:{
   
                 session:{
