@@ -73,17 +73,17 @@ Vue.mixin({
 
 
 
-   cl(...params){
+  //  cl(...params){
 
 
-    let out='';
-    for (let i = 0; i < params.length; i++) {
-     out=out+' '+ params[i]
-    }
+  //   let out='';
+  //   for (let i = 0; i < params.length; i++) {
+  //    out=out+' '+ params[i]
+  //   }
 
 
-      console.log(out)
-    },
+  //     console.log(out)
+  //   },
 
 
     requireJson(url){
@@ -103,8 +103,18 @@ Vue.mixin({
 })
 
 
+// console.log(globalConsoleLogs,'globalConsoleLogs')
+
+// created() {
+//   this.$root.globalConsoleLogs = [];
+// },
+
 // vuetify,
 new Vue({
+
+
+
+
   router,
   store,
   vuetify,
