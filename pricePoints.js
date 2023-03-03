@@ -738,41 +738,53 @@ res(retOb)
   }
 
   async fetchHistoricalData(durationType, startDay, duration, kc2) {
-    if (durationType == 'month') {
-      startDay = this.dateBforeXMonths(duration);
+    
+    
+    
+  try {
+	  if (durationType == 'month') {
+	      startDay = this.dateBforeXMonths(duration);
+	
+	    } else if (durationType == 'day') {
+	
+	      startDay = this.dateBeforeXdays(duration);
+	
+	    }
+	
+	
+	
+	    // 
+	    let b = await kc2.getHistoricalData(this.stock_tocken, 'day',
+	      startDay, this.today(), false).then(async (res) => {
+	
+	        return res;
+	
+	      });
+	
+	
+	
+	    b.forEach(e => {
+	
+	      e.normalDate = this.convertIsoDateToIST(e.date);
+	
+	    });
+	
+	
+	
+	    let sorted = b.sort((a, b) => {
+	
+	
+	      return new Date(a.date) - new Date(b.date);
+	    });
+	    return { sorted, startDay };
+	
+	
+} catch (error) {
+	
 
-    } else if (durationType == 'day') {
+  console.log('error @ 785',error)
+}
 
-      startDay = this.dateBeforeXdays(duration);
-
-    }
-
-
-
-    // 
-    let b = await kc2.getHistoricalData(this.stock_tocken, 'day',
-      startDay, this.today(), false).then(async (res) => {
-
-        return res;
-
-      });
-
-
-
-    b.forEach(e => {
-
-      e.normalDate = this.convertIsoDateToIST(e.date);
-
-    });
-
-
-
-    let sorted = b.sort((a, b) => {
-
-
-      return new Date(a.date) - new Date(b.date);
-    });
-    return { sorted, startDay };
   }
 
   initiateKiteConnecct() {

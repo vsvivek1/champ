@@ -29,8 +29,9 @@
   
         <router-link  v-if="session!=null" to="/Mining">Mining</router-link> |
        
-       
+        <router-link   to="/Tester" >Tester</router-link> |
        <router-link  v-if="session!=null" to="/NewFutureMining/NFO" >New Future Mining</router-link> |
+      
   
    <!-- { name: 'NewFutureMining', params: { ITYPE: "NFO" } } -->
   

@@ -2,15 +2,33 @@
   <div>
 
 
+
     <!-- {{globalConsoleLogs}}globalConsoleLogs -->
     <!-- {{hourlyPricePointsofLiveDay.map(i=>i.instrument_token).length}}hourlyPricePointsofLiveDay length -->
 
   <!-- {{instrumentTokens}} -->
     <v-alert >Vikram
 
+      <button @click="callFunction">Call Function</button>
 
+      <ul>
+      <li v-for="(instance,index) in instances" :key="index">{{ instance }}</li>
+    </ul>
 <!-- {{indices}}indices -->
+
+
+
 <IndicesTable :indices="indices"></IndicesTable>
+
+
+
+
+
+<label>
+      <input type="checkbox" v-model="showLogs">
+      Show logs
+    </label>
+<!-- <IronCondor :instruments="instruments"></IronCondor> -->
 
 <!-- <Messages  :messages=userMessages ></Messages> -->
 
@@ -741,6 +759,9 @@ Has Live Position {{inst.hasLivePosition}}
 //   // originalConsoleLog.apply(console, args);
 // };
 
+import { tradingMixin } from './tadingMixin';
+
+
 import store from '@/store';
  import LogWindow from './LogWindow.vue';
 // let moment = require("moment");
@@ -750,6 +771,7 @@ import moment from 'moment';
 
 import Margin from '@/components/Margin.vue'
 import Messages from '@/components/Messages.vue'
+import IronCondor from '@/components/IronCondor.vue'
 // import axios from "axios";
 import axios from 'redaxios';
 import sessionMixin from "@/views/sessionMixin";
@@ -765,7 +787,10 @@ const socket = io("http://127.0.0.1:4000"
 }
 );
 socket.on("connect_error", (err) => {
-  this.cl(`connect_error due to ${err}`);
+
+  console.log(`connect_error due to ${err}`);
+
+  // this.cl(`connect_error due to ${err}`);
 });
 
 
@@ -796,9 +821,9 @@ import IndicesTable from "./IndicesTable.vue";
 var cl;
 
 export default {
-  components: { ClosedTrades, LiveTickView, LiveOrders,Margin,LivePos,IndicesTable,Messages  },
+  components: { ClosedTrades, LiveTickView, LiveOrders,Margin,LivePos,IndicesTable,Messages,IronCondor  },
 
-  mixins: [sessionMixin],
+  mixins: [sessionMixin,tradingMixin],
 
   watch: {
     orderArray(n, o) {
@@ -821,9 +846,9 @@ export default {
 
 
   mounted() {
-this.cl('mounted')
+// this.cl('mounted')
     cl=this.cl;
-    this.cl(this.$methods,'met');
+
 
    this.setTradingType();
 
@@ -953,11 +978,13 @@ this.nifty=this.instruments.filter(i=>i.segment=='INDICES');
       let times=[17,47,37,2]
            
 
-           if (this.hours<16 & times.includes(this.minutes) && this.seconds>56){
+           if (this.hours<16 & times.includes(this.minutes) && (this.seconds>56 && this.seconds<58)
+            
+            ){
 
             ///procedureTocancelEntryOrdersIfAny
 
-            this.$router.go()
+            // this.$router.go()
            }
 
 
@@ -1266,10 +1293,132 @@ if(typeof this.livePositions =='undefined' ){
 
   methods: {
 
- 
+    evaluateConditions(element, entry, cis, ts) {
+  let errorMessage = "";
+  // if (element.ohlc.high >= entry) {
+  //   errorMessage += "element.ohlc.high < entry is false. ";
+  // }
+  if (element.ohlc.open >= entry) {
+    errorMessage += "element.ohlc.open < entry is false. ";
+  }
+  if (element.last_price < entry) {
+    errorMessage += "element.last_price >= entry is false. ";
+  }
+  if (cis.previousPrice === 0) {
+    errorMessage += "cis.previousPrice != 0 is false. ";
+  }
+  if (errorMessage === "") {
+    errorMessage = "All conditions are true";
+  }
+  return errorMessage+' for '+ ts ;
+},
+    retrieveTradeDetailsInLocalStorage(tradingSymbol) {
+
+try {
+	
+	      const today = new Date().toISOString().slice(0, 10)
+	      const objectInStorage = localStorage.getItem(tradingSymbol)
+
+
+
+	      if (objectInStorage && objectInStorage[today]) {
+	        const parsedObject = JSON.parse(objectInStorage)
+	
+	        return parsedObject[today];
+	     
+	      
+	      
+	      } else {
+	       return false
+	      }
+} catch (error) {
+	
+console.log(error,'storage retrival error in 1332')
+  return false;
+}
+    
+    
+    
+    },
+
+    saveTradeDetailsInLocalStorage(tradingsymbol,entry,target,stopLoss,strategyName) {
+      const today = new Date().toISOString().slice(0, 10)
+      const objectToStore =
+      
+   {    [today]:
+    
+    {
+        entry: entry,
+        stopLoss: stopLoss,
+        target: target,
+        strategyName:strategyName
+      }}
+      let storedObjects = JSON.parse(localStorage.getItem(tradingsymbol)) || {}
+      if (storedObjects[today]) {
+        // alert(`Object for ${this.tradingSymbol} with date ${today} already exists.`)
+        return
+      }
+      storedObjects[today] = objectToStore
+      localStorage.setItem(tradingsymbol, JSON.stringify(storedObjects))
+
+    },
+
+
+
+    getAverageClosingValue(cis){
+      let {d1,d2,d3,d4,d5,d6,d7}=cis.pricePoints;
+      let mac=
+d1.close+
+d2.close+
+d3.close+
+d4.close
+
+// +
+// d5.close+
+// d6.close+
+// d7.close
+
+
+let mal=
+d1.low+
+d2.low+
+d3.low+
+d4.low
+// +
+// d5.low+
+// d6.low+
+// d7.low
+
+let entry1=mac/4;
+let entry=entry1.toFixed(1)
+
+let target1=entry*1.2;
+let target=target1.toFixed(1)
+let stopLoss1=mal/4;
+let stopLoss=stopLoss1.toFixed(1)
+
+return {entry,target,stopLoss};
+
+    },
+
+    callFunction() {
+      const funcString = this.cl.toString(); // replace yourFunction with your function name
+      const parameterNames = funcString.match(/function\s.*?\(([^)]*)\)/)[1].split(',').map((param) => param.trim());
+      const instance = {};
+      parameterNames.forEach((param) => {
+        instance[param] = null; // initialize the instance with null values for each parameter
+      });
+      this.instances.push(instance);
+    },
 
     cl(...args) {
 
+
+      if(!this.showLogs){
+
+return false;
+
+      }
       const result = args
     .map((arg) => {
       if (typeof arg === "object") {
@@ -1707,7 +1856,7 @@ let instrumentsForMining = instrumentsForMining1
           // this.hourlyPricePointsofLiveDay1[o].          instrument.instrument_type == "FUT"   &&
           
         
-          this.hourlyPricePointsofLiveDay1[o].instrument.tradingsymbol.includes( "NOV"       )
+          this.hourlyPricePointsofLiveDay1[o].instrument.tradingsymbol.includes( "FEB" )
         ) {
           // this.cl(this.hourlyPricePointsofLiveDay1[o].instrument.instrument_type,'inst type')
 
@@ -1900,6 +2049,17 @@ return a;
 	  
 	/// xyz
 	
+
+  if (	          typeof this.hourlyPricePointsofLiveDay.filter(
+	            (h) => h.instrument_token == instrument_token
+	          )[0] == "undefined"
+	        ) {
+	            this.cl('undefined houlpy price ',cis.tradingsymbol,instrument_token)
+	   
+	
+	return false
+	}
+
 	
 	        
 	        let cis=this.instruments.find(i=>i.instrument_token==instrument_token)
@@ -1925,23 +2085,7 @@ return a;
 
 
 	
-	        if (
-	          typeof this.hourlyPricePointsofLiveDay.filter(
-	            (h) => h.instrument_token == instrument_token
-	          )[0] == "undefined"
-	        ) {
-	
-            this.cl('undefined houlpy price ',cis.tradingsymbol,instrument_token)
-	
-	          // this.cl('this.hourlyPricePointsofLiveDay. missing @1878', instrument_token);
-	        
-	// if(this.livePositions.filter(a=>a.instrument_token==instrument_token).length>0){
-	
-	// }     
-	
-	
-	return false
-	}
+	    
 	        
 	        
 	        
@@ -3409,7 +3553,7 @@ this.stopLossForChild=a;
 
           this.cl(res.data.error_type, "@line 1283");
 
-          this.$router.go()
+          // this.$router.go()
           return false;
         }
         // this.cl(res.data,typeof res.data,'res.data @1284 line')
@@ -3731,16 +3875,26 @@ calculateMarketVolatility(cis) {
 },
 filterScripts(element){
 
+
+  let res=false;
 if(element && element.ohlc && element.ohlc.high && element.ohlc.open){
 
   if(element.ohlc.high == element.ohlc.open){
 
+this.cl('bcos this');
+    res=false;
+  }else{
 
-    return false
+    res=true;
   }
 
+  // this.cl(res)
+  this.cl('not bcos this means filter true');
+  return res;
+}else{
 
-  return true
+  this.cl('not bcos this');
+  return false;
 }
 
 },
@@ -3760,117 +3914,237 @@ checkCandlePattern(d0, d1) {
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
 
-        let filter=filterScripts(element);
+let utilisedMargin=liveMargin!=-1?liveMargin.equity.utilised.debits:-1;
 
+if(utilisedMargin==-1 ||utilisedMargin>4730000 ){
+
+
+  return false
+}
+
+        let ts=cis.tradingsymbol;
+        this.cl('reached starting')
+       
+
+        
+        let filter=this.filterScripts(element);
+
+
+        // this.cl('after filter')
         if(filter==false){
-this.cl('filter false')
+//  this.cl('filter false',ts)
           return false
         }
 
-        if(!isMarketBullish(element)){
+        // this.cl('inside trade entry1',ts)
 
-          this.cl('not bullish')
-return false;
+        if(!this.isMarketBullish(element)){
+
+          // this.cl('not bullish',ts)
+// return false;
 
         }
+        // this.cl('inside trade entry2',ts)
 
+        if(!this.estimateMarketTrend(element)){
 
-        if(!estimateMarketTrend(element)){
-
-          this.cl('trend not favorable')
-          return false;
+          // this.cl('trend not favorable',ts)
+          // return false;
         }
 
-
+        // this.cl('inside trade entry3',ts)
        if(!this.calculateMarketVolatility(cis)){
 
-        this.cl('volatality false')
-        return false;
+        // this.cl('volatality false',ts)
+        // return false;
        }
-
+      //  this.cl('inside trade entry4',ts)
 // this.cl(element)
 // return;
 
 
-let index;
+// let index;
 
 
 
-let proceed=this.checkProceedWithIndexChange(cis.tradingsymbol)
-this.cl(proceed,'proceed after nifty check')
+// let proceed=this.checkProceedWithIndexChange(cis.tradingsymbol)
+// this.cl(proceed,'proceed after nifty check',ts)
 // proceed=true;
 
-
+ this.cl('inside trade entry5')
       
-if(proceed==false){
-  return; 
+// if(proceed==false){
 
-}
+// // this.cl('proceed false',ts)
+//   // return; 
 
+// }
 
-        proceed=true;
+ this.cl('inside trade entry6')
+
+        // proceed=true;
          
 
-let list=[9,15]
+// let list=[9,15]
 
-          if(list.includes(this.hours)){
-
-
-          }
+          // if(list.includes(this.hours)){
 
 
+          // }
+
+          this.cl('after hours ');
+           this.cl('inside trade entry7')
 
 
 
 //  this.cl(cis.pricePoints.d0,'do reached here')
 
-this.cl('reaehed switch')
+// this.cl('reaehed switch')
 
-this.cl('condition 1 ',cis.pricePoints.d0.high<cis.pricePoints.d1.high)
-this.cl('connndition 2 ',cis.pricePoints.d0.open<cis.pricePoints.d1.high)
-this.cl('connndition 3 ',cis.previousPrice !=0)
-this.cl('connndition 4 ',cis.last_price >= cis.pricePoints.d1.high)
+// this.cl('condition 1 ',cis.pricePoints.d0.high<cis.pricePoints.d1.high)
+// this.cl('connndition 2 ',cis.pricePoints.d0.open<cis.pricePoints.d1.high)
+// this.cl('connndition 3 ',cis.previousPrice !=0)
+// this.cl('connndition 4 ',cis.last_price >= cis.pricePoints.d1.high)
 
 
+//// program working till hhere no issues  feb 17 2023
+
+let cond=cis.pricePoints.d0.high<cis.pricePoints.d1.high 
+&& cis.pricePoints.d0.open<cis.pricePoints.d1.high
+&& cis.previousPrice !=0 
+&& cis.last_price >= cis.pricePoints.d1.high;
+
+
+// this.cl('combined',ts,cond
+
+
+// )
+
+ this.cl('reached')
+
+
+
+ let {entry,target,stopLoss}= this.getAverageClosingValue(cis);
+
+
+
+//enterTrade
+//tradeSwitch
+
+///tradeEntrySwitch
+
+
+// this.cl('here',ts)
+
+let closingMovingAverageCondition=element.ohlc.open<entry &&
+element.last_price>=entry &&
+cis.previousPrice !=0;
+
+// let a=this.evaluateConditions(element, entry, cis, ts);
+
+// this.cl(a,element.last_price,closingMovingAverageCondition);
+
+let a=this.retrieveTradeDetailsInLocalStorage(cis.tradingsymbol);
+// console.log(a,'retrieveTradeDetailsInLocalStorage @4031');
+
+
+
+let strategyName;
+
+
+let ohlc=element.ohlc;
+let lp1=element.last_price;
+let isOpenLow=this.isOpenLow(ohlc,cis,lp1);
+
+
+this.console.log(isOpenLow,'isOpenLow=')
 switch(true){
+
+
+
+case(isOpenLow):
+
+ strategyName='openLowScriptFithFixedLoss';
+
+this.saveTradeDetailsInLocalStorage(ts,lp,lp*1.2,stopLoss,strategyName);
+entry=lp;
+
+ this.cl('openLowScriptFithFixedLoss strategy ',ts)
+
+this.proceedForEntry(
+              instrument_token,
+              cis,
+              element,
+              entry,
+              "long"
+            );
+
+break;
+
+
+
+
+
 
 //entryswitch
 
+// element.ohlc.high<entry &&
+
+case(closingMovingAverageCondition):
 
 
 
-case ( 
-//so run fetch instruments regularly
-cis.pricePoints.d0.high<cis.pricePoints.d1.high && ///so high not croseed before 
-cis.pricePoints.d0.open<cis.pricePoints.d1.high && ///so opened below yesterday high /// pvs case itself solve still
+ strategyName='=closingMovingAverageMethod'
 
-cis.previousPrice !=0 &&
+this.saveTradeDetailsInLocalStorage(ts,entry,target,stopLoss,strategyName);
+
+
+// this.cl('entering ',ts)
+
+this.proceedForEntry(
+              instrument_token,
+              cis,
+              element,
+              entry,
+              "long"
+            );
+
+
+break;
+
+
+// case ( false &&
+// //so run fetch instruments regularly
+// cis.pricePoints.d0.high<cis.pricePoints.d1.high && ///so high not croseed before 
+// cis.pricePoints.d0.open<cis.pricePoints.d1.high && ///so opened below yesterday high /// pvs case itself solve still
+
+// cis.previousPrice !=0 &&
   
 
 
 
- cis.last_price >= cis.pricePoints.d1.high
+//  cis.last_price >= cis.pricePoints.d1.high
             
             
             
-            ) :
+//             ) :
 
 
          
 
-            this.cl( 'y day high candle',cis.tradingsymbol)
+//             this.cl( 'y day high candle',cis.tradingsymbol)
 
-            let p1=cis.last_price;
+//             let p1=cis.last_price;
 
-            this.proceedForEntry(
-              instrument_token,
-              cis,
-              element,
-              cis.pricePoints.d1.high,
-              "long"
-            );
+//             this.proceedForEntry(
+//               instrument_token,
+//               cis,
+//               element,
+//               cis.pricePoints.d1.high,
+//               "long"
+//             );
 
-            break;
+//             break;
 
 
   // case ( inst.previousPrice < maxCandle &&
@@ -3990,13 +4264,13 @@ cis.previousPrice !=0 &&
 // let open1=open11.toFixed(1)
 
 // this.cl({open},cis.tradingsymbo,'hi')
-this.proceedForEntry(
-              instrument_token,
-              cis,
-              element,
-              open,
-              "short"
-            );
+// this.proceedForEntry(
+//               instrument_token,
+//               cis,
+//               element,
+//               open,
+//               "short"
+//             );
 
             //changed long to short
 
@@ -4105,20 +4379,27 @@ async setTargetPricesBasedOnQuantity(cis,element,low,high,instrument_token){
 
   return new Promise(async (res,rej)=>{
     
-
-
-  
-  let offerPrice, bidPrice, count,livePnlOffered;
+    let offerPrice, bidPrice, count,livePnlOffered;
   let stopLoss, target, lstPrice,quantity;
 
-  if(cis.PlacedReverseOrder==true){
+  bidPrice=-1,offerPrice=-1,count=-1,stopLoss=-1, target=-1, lstPrice=-1,livePnlOffered=-1,quantity
 
+    if(!element || !element.depth || !element.depth.buy || !element.depth.sell || cis.PlacedReverseOrder==true){
 
-bidPrice=-1,offerPrice=-1,count=-1,stopLoss=-1, target=-1, lstPrice=-1,livePnlOffered=-1,quantity
+      bidPrice=-1,offerPrice=-1,count=-1,stopLoss=-1, target=-1, lstPrice=-1,livePnlOffered=-1,quantity
 
 res( {offerPrice, bidPrice, count,livePnlOffered,stopLoss, target, lstPrice,quantity})
 return
-}
+    }
+
+  
+ 
+
+//   if(cis.PlacedReverseOrder==true){
+
+
+
+// }
 
   quantity = this.livePositions.filter(
             (lp) => lp.instrument_token == cis.instrument_token
@@ -4149,7 +4430,7 @@ return
               .price;
 
             lstPrice = offerPrice;
-            let p;
+      
 
             livePnlOffered = (offerPrice - buy_price) * buyQuantity;
 
@@ -5055,13 +5336,24 @@ return;
             targetPoint,
             PlacedReverseOrder;
 
-          let { upperBreakOutTarget, lowerBreakOutTarget } =
-            this.getLatestPricePoints(instrument_token);
+
+//             try{
+//               let { upperBreakOutTarget, lowerBreakOutTarget } =
+//             this.getLatestPricePoints(instrument_token);
 
 
-            let a=this.getLatestPricePoints(instrument_token);;
+//             }catch
+//             (er){
 
-          
+// console.log(this.getLatestPricePoints(instrument_token),'this.getLatestPricePoints(instrument_token)')
+//              this.cl(er.toString(),'@50658')
+//             }
+
+        
+
+            this.getLatestPricePoints(instrument_token);;
+
+          let lowerBreakOutTarget ,upperBreakOutTarget;
 
           PlacedReverseOrder = this.instruments.filter(
             (i) => i.instrument_token == instrument_token
@@ -5131,7 +5423,8 @@ targetPoint =Math.min(lowerBreakOutTarget)
           } else if (quantity > 0) {
             transaction_type = "SELL";
 
-            upperBreakOutTarget=cis.pricePoints.d1.rangeBreakOutTarget;
+            // upperBreakOutTarget=cis.pricePoints.d1.rangeBreakOutTarget;
+            upperBreakOutTarget=Math.round(cis.pricePoints.d1.high*1.1,1);
            
             quantity = Math.abs(e.quantity);
             count = this.liveOrders.filter(
@@ -5164,6 +5457,9 @@ if(typeof upperBreakOutTarget=='undefined'){
 
 }
 
+
+
+
 // this.cl(cis.pricePoints.d1,'cis.pricePoints.d1')       
 // this.cl(upperBreakOutTarget,cis.pricePoints.d0.high,'here dk uck todays high',uck,lck,cis.tradingsymbol)
 
@@ -5193,20 +5489,13 @@ if(typeof upperBreakOutTarget=='undefined'){
 
             this.placingReverseOrderInProgress == false;
 
-            this.cl('has reverse order for %s',cis.tradingsymbol)
+            // this.cl('has reverse order for %s',cis.tradingsymbol)
 
 
 
-  
 
 
-// this.stopLossTargetSwitch(quantity,last_price,high,
-//       low,bidPrice,
-//       offerPrice,cis,element,livePnlOffered)
-     
-
-
-this.cl('reverse order bening placed',{ReverseOrderPending},{PlacedReverseOrder },{hasLiveTarget })
+// this.cl('reverse order bening placed',{ReverseOrderPending},{PlacedReverseOrder },{hasLiveTarget })
 
 
 
@@ -5255,6 +5544,21 @@ return false
 // this.cl({targetPoint})
 
 // this.cl({targetPoint},'tpt')
+
+let {target}=this.getAverageClosingValue(cis);
+
+targetPoint=target;
+
+
+let storedTarget=this.retrieveTradeDetailsInLocalStorage(cis.tradingsymbol);
+
+if(storedTarget!==false){
+
+  console.log("taking target from stored ");
+
+targetPoint=storedTarget.target;
+
+}
 
           this.placetargetAndStopLoss(
             cis,
@@ -5604,20 +5908,20 @@ async proceedForReverseOrderPlacement(cis,instrument_token,orderUpdates){
 
 let upper_circuit_limit
 let lower_circuit_limit
-  if(this.instruments.filter(i=>i.instrument_token==instrument_token).length>0)
-  {
+//   if(this.instruments.filter(i=>i.instrument_token==instrument_token).length>0)
+//   {
 
-    if(typeof this.instruments.filter(i=>i.instrument_token==instrument_token)[0].quote!=undefined)
-  {
+//     if(typeof this.instruments.filter(i=>i.instrument_token==instrument_token)[0].quote!=undefined)
+//   {
 
-    let q= this.instruments.filter(i=>i.instrument_token==instrument_token)[0].quote;
-    upper_circuit_limit=q.upper_circuit_limit
-    lower_circuit_limit=q.lower_circuit_limit
+//     let q= this.instruments.filter(i=>i.instrument_token==instrument_token)[0].quote;
+//     upper_circuit_limit=q.upper_circuit_limit
+//     lower_circuit_limit=q.lower_circuit_limit
 
-  }
+//   }
 
 
-}
+// }
 
 
 
@@ -5654,9 +5958,8 @@ let e=orderUpdates;
             targetPoint,
             PlacedReverseOrder;
 
-          let { upperBreakOutTarget, lowerBreakOutTarget } =
-            this.getLatestPricePoints(instrument_token);
-
+          let  upperBreakOutTarget, lowerBreakOutTarget ;
+           
             lowerBreakOutTarget=cis.pricePoints.d1.rangeBreakDownTarget;
            
            
@@ -5670,6 +5973,10 @@ let e=orderUpdates;
                 
                 lower_circuit_limit
               )
+            }else{
+
+              lowerBreakOutTarget=cis.pricePoints.d1.rangeBreakDownTarget;
+
             }   
             
             
@@ -5679,6 +5986,10 @@ let e=orderUpdates;
                 cis.pricePoints.d1.rangeBreakOutTarget,
                 upper_circuit_limit
               )
+            }else{
+
+              upperBreakOutTarget= cis.pricePoints.d1.rangeBreakOutTarget;
+
             }
             
 
@@ -5985,8 +6296,8 @@ break;
       // this.cl(proposedStock,'proposedStock');
 
       if (this.liveOrderPlacedScripts.includes(proposedStock)) {
-        this.cl(proposedStock,
-        'stock already holding ordered')
+        // this.cl(proposedStock,
+        // 'stock already holding ordered')
 
       //  return false;
       }
@@ -6132,13 +6443,13 @@ break;
           if (direction == "long") {
             transaction_type = "BUY";
 
-            if (element.ohlc.high > cis.pricePoints.d1.high) {
+      //       if (element.ohlc.high > cis.pricePoints.d1.high) {
 
-              this.cl('hi hit already hit for %s, so no trade todayhigh %s yday-high %s ',
+      //         this.cl('hi hit already hit for %s, so no trade todayhigh %s yday-high %s ',
               
-              cis.tradingsymbol,element.ohlc.high,cis.pricePoints.d1.high)
-        return false;
-      }
+      //         cis.tradingsymbol,element.ohlc.high,cis.pricePoints.d1.high)
+      //   return false;
+      // }
 
           } else if (direction == "short") {
             transaction_type = "SELL";
@@ -6738,13 +7049,19 @@ if(this.livePositions.filter(
     },
 
   basicCheckers(element,cis,instrument_token,quantity,last_price ){
+
+    let out={}
 // this.cl(typeof  cis,'typeof cur instrument')
 
 let ci=cis;
 let ts=cis.tradingsymbol;
     if(typeof cis=='undefined' ){
-this.cl('issue inside bs @6683',ts )
-      return false;
+
+      out.msg='cis undefined';
+      out.bs=false
+      return out;
+// this.cl('issue inside bs @6683',ts )
+//       return false;
     }
       let inst=cis;
 
@@ -6754,11 +7071,15 @@ this.cl('issue inside bs @6683',ts )
 
       if (cis.previousPrice == 0) {
 
+
+        out.msg='cis.previousPrice';
+      out.bs=false
+      return out;
         // this.cl('issue inside bs pvs price 0 @6694')
           // this.cl("inst pvs price 0 line 3843");
 
-          this.cl('previos price issue',ts,)
-          return false;
+          // this.cl('previos price issue',ts,)
+          // return false;
         }
 
       // if (quantity == 0) {
@@ -6767,66 +7088,129 @@ this.cl('issue inside bs @6683',ts )
       //     }
 
       if (typeof element == "undefined") {
-          this.cl("element is not comming basic checkers 6705",ts);
+        out.msg='element undefined';
+      out.bs=false
+      return out;
+
+          // this.cl("element is not comming basic checkers 6705",ts);
           return false;
         }
 
-        if (typeof cis == "undefined") {
-          this.cl("cis=='undefined basic checkers 6710", instrument_token);
-
-          return false;
-        }
+   
 
         if(this.getLatestPricePoints(instrument_token)==false){
 
-          this.cl('latest price points issue @6717',ts)
 
-    return false;
+          out.msg='getLatestPricePoints false';
+      out.bs=false
+      return out;
+    //       this.cl('latest price points issue @6717',ts)
+
+    // return false;
              }
 
 
              this.setLiveScript(cis,last_price);
 
-             return true;
+
+
+             out.msg='ok';
+      out.bs=true;
+      return out;
+
+            //  return true;
 
     },
 
 
    
     stopLossTargetSwitch(quantity,last_price,high,low,bidPrice,offerPrice,cis,element,livePnlOffered){
-   //stoplossswitch 
-
-   //stopLossSwitch
-  //  this.cl('sl switch')
-   
-      // this.cl({quantity,last_price,high,low,
-    //   bidPrice,offerPrice,cis,element},'some isue')
-
-    if(
-      typeof high=='undefined' ||
-      typeof low=='undefined' ||
-      typeof last_price=='undefined'
-      
-      
-      ){
-
-        this.cl('abnormality pls check',{high},{low},{last_price},cis.tradingsymbol)
-      }
-     
-  
-
-    // this.cl('just near swithd @4538')
+       
+      //stopLossSwitch
+      //stoplossswitch
+  //updateStopLossTarget
 
     let squareoffPrice1=(bidPrice+offerPrice)/2
     let squareoffPrice=squareoffPrice1.toFixed(1)
+
+
+
+
+    let {stopLoss}=this.getAverageClosingValue(cis);
+
+
+
+
+    let maxOfYdayTodayLow=last_price<=
+Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low);
+
+let daySqOff=((this.hours==15) && (livePnlOffered>500));
+
+this.cl({daySqOff})
+    // let exiPrice=
 
     // this.cl({livePnlOffered},cis.tradingsymbol)
 
       switch (true) {
 
+
+        case daySqOff:
+
+console.log('daySqOff 5 sl at ',cis.tradingsymbol)
+
+         this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+      
+
+
+break;
+
+
+
+
         case livePnlOffered<-2500:
 
-// && false
+console.log('2500 sl at ',cis.tradingsymbol)
+
+         this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+      
+
+
+break;
+
+
+        case livePnlOffered<-2500:
+
+console.log('2500 sl at ',cis.tradingsymbol)
+
+         this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+      
+
+
+break;
+
+
+
+
+case (element.last_price<=stopLoss):
+
+
+
+console.log('stopLoss sl at  for averagge stop loss @ %s for %s ',stopLoss,cis.tradingsymbol)
 
          this.updateSquareOfforderWithDesiredPrice(
            cis,
@@ -6843,31 +7227,11 @@ break;
 
 
 
-        //stoploss switch
 
-  //       case (
-  
-  // last_price<=
-  // Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low
-  
-  
-  // )):
+case (maxOfYdayTodayLow):
 
 
-  // break;
-
-
-
-case (
-  
-last_price<=
-Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low
-
-
-)):
-
-
-this.cl('sltrigger  trigger for  %s at squareoffPrice of %s',
+this.cl('sltrigger  trigger minimum of y day low todays low for  %s at squareoffPrice of %s',
 cis.tradingsymbol,Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low))
        
 
@@ -6927,20 +7291,7 @@ this.cl('1000 trigger')
         break;
                
 
-        case livePnlOffered<-2500:
 
-        // && false
-
-                 this.updateSquareOfforderWithDesiredPrice(
-                   cis,
-                   element,
-                   false,
-                   last_price
-                 );
-              
-
-
-        break;
 
 
                case (quantity < 0 && last_price > high  && false):
@@ -7135,6 +7486,48 @@ return 'clean' ;
 
     },
 
+    calculateMovingAverage(cis) {
+
+      if(!cis){
+
+        return false;
+      }
+  const { d1, d2, d3, d4, d5, d6, d7 } = cis.pricePoints;
+  const sum = d1.close + d2.close + d3.close + d4.close + d5.close + d6.close + d7.close;
+  return sum / 7;
+},
+
+isOpenLow(ohlc,cis,lp){
+
+
+  this.cl(lp,cis,ohlc,'inside isOpenLow');
+  let {open,high,low,close}=ohlc;
+
+let openLow=open==low;
+
+
+let lossCheck= ((lp-low)*cis.lot_size)<2500
+
+
+if(openLow && lossCheck){
+
+
+  this.cl(cis.tradingsymbol,'for open low with 2500')
+
+  return true;
+
+}else{
+
+
+  return false;
+}
+
+
+
+},
+
+
+
     mutateWithLtp(s) {
 
      
@@ -7146,24 +7539,77 @@ return 'clean' ;
   }
      
       s.forEach(async (element) => {
-this.cl('here')
+
         let last_price;
+        let ohlc=element.ohlc;
+
+        
 
         this.setD0WithCurrentDayOhlc(element);
 
         
 
-    //  this.cl(element.instrument_token,element.last_price);
-
-// if(element.instrument_token==260105){
-
-
-// //  this.cl(element)
-// }
-      // this.cl(element.find(i=>i.instrument_token=="260105").last_price);
-
 let instrument_token = element.instrument_token;
 let cis = this.instruments.find(i => i.instrument_token == instrument_token);
+
+let lp1=element.last_price;
+// this.isOpenLow(ohlc,cis,lp1);
+
+
+let ma=this. calculateMovingAverage(cis);
+
+
+ let ep=ma;
+ let exit=element.ohlc.high*1.1;
+
+if(element.last_price && !this.scriptsWithCondition.find(i=>i.tradingsymbol==cis.tradingsymbol)){
+
+
+  if(
+
+false &&
+    element.ohlc.high>ep /// so that it means triggered
+
+    
+     &&   element.ohlc.open<ep // opened below the entry so that it can be trigred
+
+    && element.ohlc.open!=element.ohlc.high 
+    
+    ){
+
+
+      
+let ob={};
+
+ob.tradingsymbol=cis.tradingsymbol;
+
+
+ob.gain=(exit-ep)*cis.lot_size;
+ob.entry=ep;
+ob.last_price=element.last_price
+ob.exit=exit;
+this.scriptsWithCondition.push(ob)
+
+
+this.scriptsWithCondition = this.scriptsWithCondition //.filter(script => script.last_price !== undefined && script.last_price !== 0).
+
+.sort((a,b)=>{
+
+  b.gain-a.gain
+});
+
+
+this.scriptsWithConditionGain=this.scriptsWithCondition.reduce( (pvs,cur)=>pvs+cur.gain,0
+
+
+);
+}
+
+
+}
+
+
+
 
 if (!cis) {
   this.cl('cur instru type undefined frpn s so i am return nign false @7071', instrument_token);
@@ -7176,38 +7622,33 @@ if (!cis) {
 
 this.setPreviousPriceAndLastPrice(instrument_token,last_price);
 
-let bs= this.basicCheckers(element,cis,instrument_token,last_price);
+let {msg,bs}= this.basicCheckers(element,cis,instrument_token,last_price);
+
+// if(cis.tradingsymbol=='HINDPETRO23MAR227.5CE'){
+
+// // console.log({last_price},cis.tradingsymbol)
+// }
+
 
 if(bs==false){
 
- this.cl('basic cehckes issue',cis.tradingsymbol,instrument_token,cis.last_price,cis.previousPrice)
+  if(!msg=='cis.previousPrice'){
+
+    this.cl('basic cehckes issue',cis.tradingsymbol,instrument_token,cis.last_price,cis.previousPrice,msg)
+  }
  return false
 }
 
-
-
-        let hasCurrentPosition = this.livePositions.filter(
-          (lp) => lp.instrument_token == cis.instrument_token
-        ).length;
-
-           
+          
         let hasLivetargetFromcis=cis.hasLiveTarget;
    let hasLivePositionFromcis=cis.hasLivePosition;
 
-
-// this.cl({hasLivePositionFromcis},{hasLivetargetFromcis})
-       
-
-//  this.cl({hasLivePositionFromcis},'hasLivePositionFromcis')
  
-        if ( hasLivePositionFromcis==true) {
-  
-          let {product ,livePnl }=this.getProductAndLivePnl(cis)
-           
-
-                   
+        if ( hasLivePositionFromcis==true) {                            
 
 
+
+  // console.log(cis.tradingsymbol,cis.hasLivePosition,'h1');
 let ln1=this.livePositions.filter(
             (lp) => lp.instrument_token == cis.instrument_token
           ).length;
@@ -7221,6 +7662,7 @@ let ln1=this.livePositions.filter(
            return false;
           }
 
+         // console.log(cis.tradingsymbol,cis.hasLivePosition,'h2');
           let {bidPrice,offerPrice,count,stopLoss, target, lstPrice,livePnlOffered,quantity 
            }= await  this.setTargetPricesBasedOnQuantity(cis,element,low,high,instrument_token)
          
@@ -7228,18 +7670,12 @@ let ln1=this.livePositions.filter(
         
          
 
-           if(bidPrice==-1){
-// this.cl('some issue with setTargetPricesBasedOnQuantity PlacedReverseOrder seems true',cis.tradingsymbol);
- this.$router.go();
-            return false
-           }
+     
 
 
-           var { high, low, upperBreakOutTarget, lowerBreakOutTarget } = 
-           this.getLatestPricePoints(instrument_token);
 
-// this.cl('count for %s is %s @4649',cis.tradingsymbol,count);
-
+var {high,low}=cis.pricePoints.d1;
+// console.log(cis.tradingsymbol,cis.hasLivePosition,'h3');
           let hasLiveTarget;
           if (count > 0) {
             hasLiveTarget = true;
@@ -7247,6 +7683,8 @@ let ln1=this.livePositions.filter(
             hasLiveTarget = false;
           }
 
+
+         // console.log(cis.tradingsymbol,cis.hasLivePosition,'h4');
                         //there is a live position
 
           //check whether already a reverse order placed
@@ -7260,26 +7698,27 @@ let PlacedReverseOrder = this.instruments.filter(
           )[0].PlacedReverseOrder;
 
 
-
-
+         // console.log(cis.tradingsymbol,cis.hasLivePosition,'h5');
         
-          // if (PlacedReverseOrder == true || hasLiveTarget == true) {
+         
           if (hasLivePositionFromcis== true && 
            hasLivetargetFromcis == true) {
-                    //  if (hasLiveTarget == true) {
-                     if ( true) {
 
-                      // this.cl('has live tgt for trading symbol %s',cis.tradingsymbol,{PlacedReverseOrder},{hasLiveTarget})
+           // console.log(cis.tradingsymbol,cis.hasLivePosition,'h6');
+                     
+           
+      
 
-                        ///modification of placed orders here            
-              livePnl = livePnlOffered;
+             // console.log(cis.tradingsymbol,cis.hasLivePosition,'h7');
+
+              // console.log(livePnlOffered,'livePnlOffered',cis.tradingsymbol)
 
 
               this.stopLossTargetSwitch(quantity,last_price,high,
               low,bidPrice,
               offerPrice,cis,element,livePnlOffered)
              
-            }
+       
 
                        //return false;
           } else /// no live target or palced reverse order
@@ -7325,9 +7764,9 @@ if((PlacedReverseOrder!=true  &&  hasLiveTarget != true)){
         if (cis.enterNowToTrade == false) {
 
 
-          this.cl('inside trade entry ')
+          // this.cl('inside trade entry ')
 
-//  this.cl('inside trade entry ');
+ this.cl('inside trade entry ');
 let inst=cis;
 this.tradeEntry(instrument_token,inst,cis,element) 
 
@@ -7424,7 +7863,10 @@ this.tradeEntry(instrument_token,inst,cis,element)
 
   data() {
     return {
-
+      scriptsWithConditionGain:-1,
+      scriptsWithCondition:[],
+      instances: [],
+      showLogs:true,
       globalConsoleLogs:[],
       nifty:-1,
 

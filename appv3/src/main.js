@@ -12,6 +12,8 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import Vddl from 'vddl';
 
 import vuetify from './plugins/vuetify';
+
+import sessionMixin from "@/views/sessionMixin";
  
 
 // import ripple from 'vuetify/lib/directives/ripple';
@@ -56,6 +58,8 @@ Vue.use(Vddl);
 import VueCookie from 'vue-cookie';
 // Tell Vue to use the plugin
 Vue.use(VueCookie);
+
+Vue.use(sessionMixin);
 // Vue.use(axios);
 
 Vue.config.productionTip = false
@@ -65,8 +69,30 @@ Vue.config.productionTip = false
 
 
 // Vue.use(vuetify);
+Vue.prototype.$storeObjectInLocalStorage = function(key, value) {
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
+Vue.prototype.$getObjectFromLocalStorage = function(key) {
+  const value = localStorage.getItem(key);
+  return JSON.parse(value);
+};
 
 
+Vue.prototype.$getAllObjectsFromLocalStorage = function() {
+  const objects = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    const value = localStorage.getItem(key);
+    try {
+      const obj = JSON.parse(value);
+      objects.push(obj);
+    } catch (e) {
+      // Ignore non-JSON values
+    }
+  }
+  return objects;
+};
 Vue.mixin({
   methods: {
 

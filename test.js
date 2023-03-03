@@ -1,55 +1,74 @@
 
-const fs = require("fs");
-const instruments = require("./appv3/public/instruments/instrumentsForMining.json");
-var KiteConnect = require("kiteconnect").KiteConnect;
-let api_key=process.env.api_key;
-let access_token//=process.env.ACCESS_TOCKEN
+function a(){
 
-
-// let at=require( "./common-functions/getAccessToken");
-
-
-// main();
-
-async function main() {
-  let getAccessToken = require("./common-functions/getAccessToken");
-  // import StartServerConnections from "./StartServerConnections";
-  let a = await getAccessToken();
-  access_token=a;
-
-  var kc2 = new KiteConnect({
-    api_key: api_key,
-    access_token: access_token
-  });
-
-
+  const fs = require("fs");
+  const instruments = require("./appv3/public/instruments/instrumentsForMining.json");
+  var KiteConnect = require("kiteconnect").KiteConnect;
+  let api_key=process.env.api_key;
+  let access_token//=process.env.ACCESS_TOCKEN
+  
+  
+  // let at=require( "./common-functions/getAccessToken");
+  
+  
+  // main();
+  
+  async function main() {
+    let getAccessToken = require("./common-functions/getAccessToken");
+    // import StartServerConnections from "./StartServerConnections";
+    let a = await getAccessToken();
+    access_token=a;
+  
+    var kc2 = new KiteConnect({
+      api_key: api_key,
+      access_token: access_token
+    });
+  
+  
+    
+  
+    // kc2.getHistoricalData('12481538','day',,today(),false).
+  
+  
+    console.log(a);
+  
+    process.exit();
+  }
+  
+  function writeOutputToFile(filePath) {
+      let filteredInstruments = instruments.filter(i => i.segment == "NFO-OPT")[0].pricePoints;
+  
+      // console.log(filteredInstruments);
+  
+      // process.exit();
+  
+      let data = JSON.stringify(filteredInstruments, null, 2);
+  
+      fs.writeFile(filePath, data, function(err) {
+          if (err) {
+              return console.log(err);
+          }
+          console.log("The file was saved!");
+      });
+  }
+  
+  const filepath='./out.txt'
+  writeOutputToFile('./out.txt') 
   
 
-  // kc2.getHistoricalData('12481538','day',,today(),false).
-
-
-  console.log(a);
-
-  process.exit();
 }
 
-function writeOutputToFile(filePath) {
-    let filteredInstruments = instruments.filter(i => i.segment == "NFO-OPT")[0].pricePoints;
 
-    // console.log(filteredInstruments);
+const fs = require('fs');
 
-    // process.exit();
+function filterInstruments() {
+  const instruments = JSON.parse(fs.readFileSync('./appv3/public/instruments/instrumentsAll.json'));
 
-    let data = JSON.stringify(filteredInstruments, null, 2);
+  const filteredInstruments = instruments.filter(i=> {
+    return  i.segment=="NFO-OPT" && i.exchange=="NFO"
+  });
 
-    fs.writeFile(filePath, data, function(err) {
-        if (err) {
-            return console.log(err);
-        }
-        console.log("The file was saved!");
-    });
+  console.log(filteredInstruments);
 }
 
-const filepath='./out.txt'
-writeOutputToFile('./out.txt') 
-
+filterInstruments();
