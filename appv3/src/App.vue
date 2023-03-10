@@ -17,6 +17,7 @@
         <router-link  v-if="session!=null" to="/NarrowRange">NarrowRange</router-link> |
         <router-link  v-if="session!=null" to="/LongBuildUps">Long Build Ups</router-link> |
         <router-link  v-if="session!=null" to="/Strategies">Strategies</router-link> |
+        <router-link  v-if="session!=null" to="/FutureTrading">Future Trading</router-link> |
        
   
        
@@ -59,7 +60,7 @@
   
         <!-- <router-link  v-if="session!=null" to="/REACT">REACT</router-link> | -->
   
-        <a href="api/react">React</a> |
+        <!-- <a href="api/react">React</a> | -->
   
   
         <router-link v-if="session!=null" to="/logout">Log out</router-link> |
@@ -67,6 +68,21 @@
       
       </div>
       <router-view key="$route.params" />
+
+
+
+      <div class="row">
+        <div class="col">
+
+          <v-btn @click="FetchInstruments()">
+            Fetch Instruments
+            <v-icon></v-icon>
+          </v-btn>
+
+        </div>
+        <div class="col"></div>
+        <div class="col"></div>
+      </div>
   
       </v-app>
         </div>
@@ -78,6 +94,12 @@
   
   
   export default {
+
+    methods:{
+
+
+
+    },
 
     components: {
     // LogWindow,
