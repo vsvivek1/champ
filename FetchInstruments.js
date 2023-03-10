@@ -12,11 +12,11 @@ let moment= require('moment');
 const FILE_LOCATION='./appv3/public/instruments'
 
 
-let ce_upper_percentage=1.05;
+let ce_upper_percentage=1.1;
 let ce_lower_percentage=1;
 
 let pe_upper_percentage=1;
-let pe_lower_percentage=.95;
+let pe_lower_percentage=.9;
 const TIMER =400 ;
 
 
@@ -362,7 +362,41 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	
 	  return true;
 	
-	
+	  function   higherLowsCheck(pricePoints) {
+
+		// console.log('from fn')
+		// const pricePoints = cis.pricePoints;
+		
+		
+		let {d0,d1,d2,d3,d4,d5,d6,d7}=pricePoints;
+		
+		if(
+
+
+		(d1.low>d2.low &&
+		d2.low>d3.low ) 
+		||
+
+		(d1.high>d2.high &&
+			d2.high>d3.high)
+		
+		//&&
+		// d3.low>d4.low 
+		
+		
+		){
+		
+		return true
+		}else{
+		
+		
+		return false;
+		}
+		
+		
+		
+		
+		}
 	
 	  async function setCurrentInstrumentParameters(e) {
 	    let a = new pricePoint(e.instrument_token, accessToken);
@@ -371,6 +405,20 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	    let c = await a.getPricePoints(30, 'day');
 	
 	
+
+		// isHigerLows=higherLowsCheck(c)
+
+		// if(isHigerLows==false){
+
+
+			
+		// 	return false;
+		// }else{
+
+		// 	console.log(e.instrument_token,'passed higher lows')
+
+		// }
+
 	    e.pricePoints = c;
 	
 	

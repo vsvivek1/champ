@@ -1,6 +1,9 @@
 <template>
     <div>
+
+      <!-- {{ scriptsWithCondition }} -->
         <h2> total scritps {{scriptsWithCondition.length}}scriptsWithCondition. gain  {{ scriptsWithConditionGain }}</h2>
+        <!-- <h2> total scritps {{scriptsWithCondition.length}}scriptsWithCondition. gain  {{ scriptsWithConditionGain }}</h2> -->
 
         <h1>Gain ratio {{ gainRatio }}</h1>
         <vue-good-table :columns="columns" 
@@ -44,6 +47,8 @@ const socket = io("http://127.0.0.1:4000"
 
         methods:{
 
+
+  
             setInstrumentTokens() {
 
    
@@ -75,17 +80,104 @@ let tokn=this.instruments.map(i=>parseInt(i.instrument_token))
                 this.setInstrumentTokens();
 
             },
-generateSignals(s){
 
+
+
+            checkPricePoints(cis) {
+
+// console.log('from fn')
+const pricePoints = cis.pricePoints;
+
+
+let {d0,d1,d2,d3,d4,d5,d6,d7}=pricePoints;
+
+if(
+d1.low>d2.low 
+
+// &&
+// d2.low>d3.low &&
+// d3.low>d4.low 
+
+
+){
+
+return true
+}else{
+
+
+return false;
+}
+
+
+
+
+},
+
+
+async generateSignals(s){
+
+
+ await  fetch("../../../instruments/instrumentsForMining.json")
+      .then((response) => response.json())
+      .then((data) => 
+      {
+
+
+        // console.log(data,'data1')
+        this.instruments = data;
+      }
+    
+      
+      
+      
+      ); 
+
+      console.log(this.instruments,'this.instruments')
+
+  if(s.length==0){
+
+    this.scriptsWithCondition=this.instruments.filter(cis=>{
+// console.log(this.checkPricePoints(cis),'cis11')
+return  this.checkPricePoints(cis);
+
+    })
+
+console.log(this.scriptsWithCondition,'this.scriptsWithCondition')
+  }
+
+// console.log(s)
+
+if(typeof this.instruments=='undefined' || this.instruments.length==0){
+return;
+
+        }
 
     for(let l=0;l<s.length;l++){
 
 
 
-
         let element=s[l];
+
+     console.log(element)
     
         let cis=this.instruments.find(i=>i.instrument_token==element.instrument_token)
+if(!cis){
+
+  // return false;
+}
+
+        const allGreater = this.checkPricePoints(cis);
+
+
+console.log({allGreater},cis.tradingsymbol); // true
+
+
+if(allGreater ==false){
+
+
+  return false
+}
+
 
 let {d1,d2,d3,d4,d5,d6,d7}=cis.pricePoints;
 
@@ -135,7 +227,8 @@ let avg=mac/7;
 
 
     // let ep=cis.pricePoints.d1.high;
-    let ep=avg
+    // let ep=avg
+    let ep=d1.close
 //  let exit=element.ohlc.high*1.1;
 //  let exit1=element.last_price;
  let exit1=ep*1.2;
@@ -145,28 +238,21 @@ let avg=mac/7;
  let lp=element.last_price;
 
 
-let exit=(exit1<high?exit1:lp);
+// let exit=(exit1<high?exit1:lp);
+let exit=lp;
 
 if(element.last_price && !this.scriptsWithCondition.find(i=>i.tradingsymbol==cis.tradingsymbol)){
 
-
+  // !(open==high) &&
   if(
 
 
-//  high>ep /// so that it means triggered
-
+  low<ep &&
+allGreater
     
-//      &&   element.ohlc.open<ep // opened below the entry so that it can be trigred
-
-//     && element.ohlc.open!=element.ohlc.high 
-
-
-
-// ||
- low==open && ( (lp-open)*cis.lot_size<2500 && (lp-open)*cis.lot_size>0 )
-
-    
-    ){
+    )
+    // low==open && ( (lp-open)*cis.lot_size<2500 && (lp-open)*cis.lot_size>0 )
+    {
 
 
         if(low==open){
@@ -308,12 +394,14 @@ columns: [
      },
         mounted(){
 
-            this.fetchInstruments(); 
+          this.fetchInstruments(); 
+          this.generateSignals([])
+       
              
 
  socket.on("send-realtime-subscription", (s) => {
 
-this.generateSignals(s)
+// this.generateSignals(s)
 this.CurrentTick = [...s];
 });
         }

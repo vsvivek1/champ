@@ -2,7 +2,7 @@
 function a(){
 
   const fs = require("fs");
-  const instruments = require("./appv3/public/instruments/instrumentsForMining.json");
+  const instruments = require("./appv3/public/instruments/instrumentsAll.json");
   var KiteConnect = require("kiteconnect").KiteConnect;
   let api_key=process.env.api_key;
   let access_token//=process.env.ACCESS_TOCKEN
@@ -59,7 +59,9 @@ function a(){
 }
 
 
+const { Console } = require("console");
 const fs = require('fs');
+const { indexOf } = require("lodash");
 
 function filterInstruments() {
   const instruments = JSON.parse(fs.readFileSync('./appv3/public/instruments/instrumentsAll.json'));
@@ -71,4 +73,38 @@ function filterInstruments() {
   console.log(filteredInstruments);
 }
 
-filterInstruments();
+// filterInstruments();
+
+function b(){
+
+  const fs = require("fs");
+  // const instruments = require("./appv3/public/instruments/instrumentsAll.json");
+  const instruments = require("./appv3/public/instruments/instrumentsForMining.json");
+
+
+  console.log(instruments.length);
+
+  return;
+  let a1=instruments.map(i=>i.expiry).filter((i,index,arr)=>{
+
+let m=new Date()
+let month=m.getMonth()+1;
+
+if(month<10){
+
+  month="0"+month;
+}
+// console.log(month);
+
+return arr.indexOf(i)===index && i.includes("-"+month+"-")
+
+  })
+  
+  // filter(i=>i.exchange=='MCX')[0]
+
+
+  console.log(a1);
+
+}
+
+b();

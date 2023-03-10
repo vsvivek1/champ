@@ -396,47 +396,47 @@ try {
 
 // process.exit();
 
-// (async function(){
+(async function(){
    
-    // setInterval(()=>{
+    setInterval(()=>{
        
         
-    //      var d = new Date();
-    //                 let hours = d.getHours();
-    //                 let minutes = d.getMinutes();
-    //                 let seconds = d.getSeconds();
+         var d = new Date();
+                    let hours = d.getHours();
+                    let minutes = d.getMinutes();
+                    let seconds = d.getSeconds();
                 
-    //                 let times=[16,36,46,1]
+                    let times=[16,36,46,1]
                    
         
-    //                  if (hours<16 & times.includes(minutes))
+                     if (hours<16 & times.includes(minutes))
         
-    //                 //  if(1)
+                    //  if(1)
                     
-    //                 {
-    //       (async function(){
-    //         console.log('starting inside loop %s hours %s minutes',hours,minutes);
-    //         let a = new HourlyData()
-    //        let b =await  a.updateAccessToken();
+                    {
+          (async function(){
+            console.log('starting inside loop %s hours %s minutes',hours,minutes);
+            let a = new HourlyData()
+           let b =await  a.updateAccessToken();
         
           
-    //       let c= await  a.fetchHourlyData()
+          let c= await  a.fetchHourlyData()
         
         
         
-    //        mongoose.disconnect()
+           mongoose.disconnect()
         
            
         
-    //     })()
+        })()
         
         
-    //                 }
+                    }
         
-    //     },1*60*1000)  ///main loop of timers that is when to start
+        },1*60*1000)  ///main loop of timers that is when to start
         
     
-// })()
+})()
 
 
 

@@ -24,6 +24,7 @@ import Strategies from '@/components/Strategies.vue'
 // import MiningMis from '@/components/MiningMis.vue'
 import GTT from '@/components/GTT.vue'
 import Tester from '@/components/Tester.vue'
+import FutureTrading from '@/components/FutureTrading.vue'
 // import BTST from '@/components/Btst.vue'
 // import dailyGainers from '@/components/dailyGainers.vue'
 
@@ -42,6 +43,10 @@ Vue.use(VueRouter)
 const routes = [
 
   {
+    path: '/FutureTrading',
+    name: 'FutureTrading',
+    component: FutureTrading
+  },   {
     path: '/testWebSocket',
     name: 'testWebSocket',
     component: testWebSocket
