@@ -113,11 +113,25 @@ Vue.mixin({
 
 
     requireJson(url){
-
+console.log(url)
       return new Promise(async (res,rej)=>{
       
       let a =  await fetch
-      (url).then(r=>r.json());
+      (url).then(
+        
+        r=>{
+
+if(r){
+  return   r.json()
+}
+
+       
+        }
+        
+        
+       
+        
+        );
       
       res(a);
       })
@@ -125,7 +139,10 @@ Vue.mixin({
       
       
       }
-  },
+  
+  
+  
+    },
 })
 
 

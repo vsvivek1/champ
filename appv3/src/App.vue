@@ -74,7 +74,7 @@
       <div class="row">
         <div class="col">
 
-          <v-btn @click="FetchInstruments()">
+          <v-btn @click="fetchInstruments()">
             Fetch Instruments
             <v-icon></v-icon>
           </v-btn>
@@ -91,12 +91,24 @@
   <script>
   // import LogWindow from './components/LogWindow.vue';
     import store from '@/store';
+    import axios from 'axios'
   
   
   export default {
 
     methods:{
 
+        fetchInstruments() {
+      axios.post('/api/fetch-instruments')
+        .then(response => {
+          console.log(response.data);
+        })
+        .catch(error => {
+          console.error(error);
+        });
+    }
+
+      
 
 
     },

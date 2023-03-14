@@ -134,10 +134,25 @@ async generateSignals(s){
 
       console.log(this.instruments,'this.instruments')
 
+   
+
   if(s.length==0){
 
     this.scriptsWithCondition=this.instruments.filter(cis=>{
 // console.log(this.checkPricePoints(cis),'cis11')
+
+let currentTick=s.find(s1=>s1.instrument_token==cis.instrument_token);
+
+if(currentTick && currentTick.ohlc.high==currentTick.last_price){
+
+return true
+
+}else{
+
+
+  return false;
+}
+
 return  this.checkPricePoints(cis);
 
     })
