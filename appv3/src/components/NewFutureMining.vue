@@ -2083,13 +2083,13 @@ return a;
       try {
 
 
-     let   instrument_token=instrument_token1?? -1
+     let   instrument_token=instrument_token1 ?? -1
         // console.log(typeof instrument_token);
 	
 	if(instrument_token ==-1){
 
 
-    // this.cl('empty instrument token',instrument_token)
+    this.cl('empty instrument token',instrument_token)
     return false;
   }
 
@@ -2097,9 +2097,26 @@ return a;
 
 let CurrentPricesOfScript=this.CurrentTick.find(i=>i.instrument_token==instrument_token);
 
+
+
+if(!CurrentPricesOfScript){
+
+  let b={};
+
+b.todaysHigh=d1.high
+	b.todaysLow=d1.high
+	b.yesterdayHigh=d1.high
+	b.yesterdayLow=d1.low
+	b.prices=[]
+  b.dateIST=this.convertIsoDateToIST(last_trade_time);
+
+}
+
+
 let cis1=this.instruments.find(i=>i.instrument_token==instrument_token);
 
-if(!cis1 || !CurrentPricesOfScript ){
+// if(!cis1 || !CurrentPricesOfScript ){
+if(!cis1 ){
 
   return false;
 }
@@ -2146,254 +2163,10 @@ a.todaysHigh=CurrentPricesOfScript.ohlc.high
   a.dateIST=this.convertIsoDateToIST(last_trade_time);
 
 
-
 	          return a;
 
+     
 
-
-
-
-
-    
-/// 
-
-
-	/// xyz
-	
-
-  if (	          typeof this.hourlyPricePointsofLiveDay.filter(
-	            (h) => h.instrument_token == instrument_token
-	          )[0] == "undefined"
-	        ) {
-	            this.cl('undefined houlpy price ',cis.tradingsymbol,instrument_token)
-	   
-	
-	return false
-	}
-
-	
-	        
-	        let cis=this.instruments.find(i=>i.instrument_token==instrument_token)
-	        
-	        let todaysHigh=cis.pricePoints.d0.high;
-	        let todaysLow=cis.pricePoints.d0.low;
-	        
-	        let yesterdayHigh=cis.pricePoints.d1.high;
-	        let yesterdayLow=cis.pricePoints.d1.low;
-	
-	        //  this.hourlyPricePointsofLiveDay = hourlyPricePointsofLiveDay;
-	
-	
-	        if(typeof cis=='undefined'){
-	  
-	
-	          this.cl("typeof cis=='undefined'")
-	           return false;
-	
-	        }
-	        
-
-
-
-	
-	    
-	        
-	        
-	        
-	        
-	        
-	         
-	
-	          
-	          let prices = this.hourlyPricePointsofLiveDay.filter(
-	            (h) => h.instrument_token == instrument_token
-	          )[0].prices;
-	
-	
-	                   
-	
-	
-	        
-	          if (typeof prices == "undefined" || prices.length==0) {
-	// 
-	            // this.cl('prices undefined')
-	            return false;
-	            // this.$router.go()
-	          }
-	
-	          // if (prices.length < 3) {
-	
-	          // //  this.cl('prices length less than 3');
-	          //   // return false;
-	
-	     
-	          // }
-	          
-	
-	          let p=prices[0];
-	
-	    
-	
-	          let ln = prices.length;
-	          // let a = prices[ln];
-	        
-	          let a1;
-	// this.cl(prices[ln-1])
-	
-	if(typeof prices[ln-1]=='undefined'){
-	
-	  this.cl(prices[ln-1],'prices[ln-1]=',ln)
-	
-	  a= prices[ln-1];
-	}else{
-	
-	  a=prices[ln-2]
-	 
-	          
-	
-	}
-	a=prices[ln-1]
-	
-	
-	          // a.high=a.high+5
-	          // a.low=a.low-5
-	
-	          // this.cl({prices},{ln})
-	
-	          // this.cl({a},'a prices')
-	
-	
-	
-	        //  a.previousVolume=b.volume
-	        //  a.previousVolume=0;
-	        
-	          let range = a.high - a.low; 
-	          a.range = Number(range).toFixed(1); 
-	          
-	          
-	          //.toFixed(1);
-	
-	          let halfrange=range/ 2;
-	          a.halfRange = halfrange //.toFixed(1)
-	
-	          let upperBreakOutTarget1 = a.high + a.range;
-	          // a.upperBreakOutTarget = upperBreakOutTarget1.toFixed(1);
-	          let lowerBreakOutTarget1 = a.low - a.range;
-	          a.lowerBreakOutTarget = lowerBreakOutTarget1.toFixed(1);
-	
-	
-	
-	          
-	          if(cis.instrument_type=="FUT"){
-	
-	            if(cis.tradingsymbol.includes('BANK')){
-	
-	
-	
-	a.upperBreakOutTarget = a.high+ 40;
-	
-	a.lowerBreakOutTarget = a.low-40;  
-	  
-	}else{
-	
-	
-	a.upperBreakOutTarget = a.high+20;
-	a.lowerBreakOutTarget = a.low-20;
-	}
-	
-	
-	          }
-	
-	          else{
-	
-	
-	let percentage;
-	switch(true){
-	
-	  case this.hours>9 && this.hours<10:
-	  percentage=.12
-	  break;
-	  case this.hours>10 && this.hours<11:
-	  percentage=.11
-	  break;
-	
-	  case this.hours>11 && this.hours<12:
-	  percentage=.10
-	  break;
-	
-	   case this.hours>12 && this.hours<13:
-	  percentage=.09
-	  break;
-	
-	  case this.hours>13 && this.hours<14:
-	  percentage=.08
-	  break;
-	case this.hours>14 && this.hours<15:
-	  percentage=.07
-	  break;
-	case this.hours>11 && this.hours<16:
-	  percentage=.04
-	  break;
-	
-	  default:
-	  percentage=.02
-	  break;
-	
-	
-	
-	
-	}
-	percentage=.9;
-	
-	            let tmpUpper=a.high+ a.high*percentage
-	
-	            // this.cl(a.high, a.high*percentage,'a.high, a.high*percentage,',cis.tradingsymbol)
-	
-	            let tmpLower=a.low-a.low*percentage
-	
-	
-	            let uck=cis          
-	            // let lck=cis.pricePoints.quote.lower_circuit_limit;
-	            
-	            //this.cl(uck,'uck-lck')
-	
-	            a.upperBreakOutTarget = tmpUpper.toFixed(1)
-	
-	a.lowerBreakOutTarget = tmpLower.toFixed(1) 
-	
-	// this.cl(a.upperBreakOutTarget,a.lowerBreakOutTarget ,'prices',{percentage})
-	
-	          }
-	
-	       
-	          
-	          
-	
-	
-	a.dateIST=this.convertIsoDateToIST(a.date)
-	
-	
-	if(this.livePositions.filter(a=>a.instrument_token==instrument_token).length>0){
-	
-	  this.$set(
-	  this.livePositions.filter(a=>a.instrument_token==instrument_token)[0],
-	'noScriptInHourlyCandle',false
-	
-	
-	)
-	}
-	
-	
-	
-	a.todaysHigh=todaysHigh
-	a.todaysLow=todaysLow
-	a.yesterdayHigh=yesterdayHigh
-	a.yesterdayLow=yesterdayLow
-	a.prices=prices
-	
-	          return a;
-	
-	
 	    
 	    
 } catch (error) {
@@ -2402,7 +2175,6 @@ a.todaysHigh=CurrentPricesOfScript.ohlc.high
   
 console.log('get latestpricepoints errr @2294',error);
   this.cl(error,'@2128')
-  // console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
 }},
     convertIsoDateToISTChild(val){
 
@@ -7107,7 +6879,7 @@ let ts=cis.tradingsymbol;
       out.bs=false
       return out;
 // this.cl('issue inside bs @6683',ts )
-//       return false;
+//    
     }
       let inst=cis;
 
@@ -7118,9 +6890,9 @@ let ts=cis.tradingsymbol;
       if (cis.previousPrice == 0) {
 
 
-        out.msg='cis.previousPrice';
-      out.bs=false
-      return out;
+      //   out.msg='cis.previousPrice';
+      // out.bs=false
+      // return out;
         // this.cl('issue inside bs pvs price 0 @6694')
           // this.cl("inst pvs price 0 line 3843");
 
@@ -7753,51 +7525,7 @@ let ma=this. calculateMovingAverage(cis);
  let ep=ma;
  let exit=element.ohlc.high*1.1;
 
-if(element.last_price && !this.scriptsWithCondition.find(i=>i.tradingsymbol==cis.tradingsymbol)){
 
-
-  if(
-
-false &&
-    element.ohlc.high>ep /// so that it means triggered
-
-    
-     &&   element.ohlc.open<ep // opened below the entry so that it can be trigred
-
-    && element.ohlc.open!=element.ohlc.high 
-    
-    ){
-
-
-      
-let ob={};
-
-ob.tradingsymbol=cis.tradingsymbol;
-
-
-ob.gain=(exit-ep)*cis.lot_size;
-ob.entry=ep;
-ob.last_price=element.last_price
-ob.exit=exit;
-this.scriptsWithCondition.push(ob)
-
-
-this.scriptsWithCondition = this.scriptsWithCondition //.filter(script => script.last_price !== undefined && script.last_price !== 0).
-
-.sort((a,b)=>{
-
-  b.gain-a.gain
-});
-
-
-this.scriptsWithConditionGain=this.scriptsWithCondition.reduce( (pvs,cur)=>pvs+cur.gain,0
-
-
-);
-}
-
-
-}
 
 
 
@@ -7815,10 +7543,6 @@ this.setPreviousPriceAndLastPrice(instrument_token,last_price);
 
 let {msg,bs}= this.basicCheckers(element,cis,instrument_token,last_price);
 
-// if(cis.tradingsymbol=='HINDPETRO23MAR227.5CE'){
-
-// // console.log({last_price},cis.tradingsymbol)
-// }
 
 
 if(bs==false){
