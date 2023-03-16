@@ -4037,7 +4037,7 @@ let cond=cis.pricePoints.d0.high<cis.pricePoints.d1.high
 
 // )
 
- this.cl('reached')
+ this.cl('reached inside trade entry')
 
 
 
@@ -4058,7 +4058,7 @@ let closingMovingAverageCondition=element.ohlc.open<entry &&
 element.last_price>=entry &&
 cis.previousPrice !=0;
 
-
+this.cl(closingMovingAverageCondition,'closingMovingAverageCondition2')
 
 // let a=this.evaluateConditions(element, entry, cis, ts);
 
@@ -4118,26 +4118,29 @@ if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.
 
 // this.cl('before yesterDayCloseStrategy')
 
-let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high && element.last_price.d1.high<element.ohlc.high)
-let newTradingObj=this.newTradingObj;
-newTradingObj.tradingsymbol=ts;
-newTradingObj.buyTime=new Date();
-newTradingObj.buyPrice=Math.min(secondLowestOrdersPrice,element.last_price);
 
-this.cl('reaehed switch333')
+let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high && element.last_price.d1.high<element.ohlc.high)
+// let newTradingObj=this.newTradingObj;
+// newTradingObj.tradingsymbol=ts;
+// newTradingObj.buyTime=new Date();
+// newTradingObj.buyPrice=Math.min(secondLowestOrdersPrice,element.last_price);
+
+this.cl('reaehed switch3331')
+
+// console.log(typeof yesterDayCloseStrategy,ts)
 
 switch(true){
 
 
-  case(yesterDayCloseStrategy):
+  case yesterDayCloseStrategy:
 
  
 
-  newTradingObj.strategy='yesterDayCloseStrategy';
+  // newTradingObj.strategy='yesterDayCloseStrategy';
 
-  newTradingObj.targetPrice=cis.pricePoints.d1.rangeBreakOutTarget;
+  // newTradingObj.targetPrice=cis.pricePoints.d1.rangeBreakOutTarget;
 
-  this.storeTradeDataInLocalStrorage(newTradingObj)
+  // this.storeTradeDataInLocalStrorage(newTradingObj)
 
   this.cl('safe','yesterDayCloseStrategy')
 
@@ -4160,14 +4163,14 @@ this.proceedForEntry(
 
 
 
-  case (todayLastPriceHigh):
+  case todayLastPriceHigh:
 
 
-  newTradingObj.strategy='todayLastPriceHigh';
+  // newTradingObj.strategy='todayLastPriceHigh';
 
-  newTradingObj.targetPrice=newTradingObj.buyPrice*1.2
+  // newTradingObj.targetPrice=newTradingObj.buyPrice*1.2
 
-  this.storeTradeDataInLocalStrorage(newTradingObj)
+  // this.storeTradeDataInLocalStrorage(newTradingObj)
 
 
 
@@ -4189,23 +4192,26 @@ this.proceedForEntry(
 
 
 
-case(isOpenLow):
+case isOpenLow:
 
- strategyName='openLowScriptFithFixedLoss';
+//  strategyName='openLowScriptFithFixedLoss';
 
-newTradingObj.strategy='isOpenLow';
+// newTradingObj.strategy='isOpenLow';
 
-newTradingObj.targetPrice=newTradingObj.buyPrice*1.2
+// newTradingObj.targetPrice=newTradingObj.buyPrice*1.2
 
-this.storeTradeDataInLocalStrorage(newTradingObj)
+// this.storeTradeDataInLocalStrorage(newTradingObj)
 
 
-this.saveTradeDetailsInLocalStorage(ts,lp,lp*1.2,stopLoss,strategyName);
-// entry=lp;
+// this.saveTradeDetailsInLocalStorage(ts,lp,lp*1.2,stopLoss,strategyName);
+// // entry=lp;
 
 // let e1=element.last_price;
-let e1=Math.min(secondLowestOrdersPrice,element.last_price);
 
+console.log({secondLowestOrdersPrice},secondLowestOrdersPrice)
+
+let e1=Math.min(secondLowestOrdersPrice,element.last_price);
+console.log({e1},'e1')
 
  this.cl('openLowScriptFithFixedLoss strategy ',ts,e1,'e1')
 
@@ -4228,17 +4234,19 @@ break;
 
 // element.ohlc.high<entry &&
 
-case(closingMovingAverageCondition):
+case  closingMovingAverageCondition:
 
-newTradingObj.strategy='isOpenLow';
+this.cl('closingMovingAverageCondition')
 
-newTradingObj.targetPrice=newTradingObj.buyPrice*1.2
+// newTradingObj.strategy='isOpenLow';
 
-this.storeTradeDataInLocalStrorage(newTradingObj)
+// newTradingObj.targetPrice=newTradingObj.buyPrice*1.2
 
- strategyName='=closingMovingAverageMethod'
+// this.storeTradeDataInLocalStrorage(newTradingObj)
 
-this.saveTradeDetailsInLocalStorage(ts,entry,target,stopLoss,strategyName);
+//  strategyName='=closingMovingAverageMethod'
+
+// this.saveTradeDetailsInLocalStorage(ts,entry,target,stopLoss,strategyName);
 
 this.cl('entering  closingMovingAverageCondition',ts)
 
@@ -4510,7 +4518,7 @@ break;
 
 
 } catch (e) {
-            // this.cl("trade entry function", e);
+         console.log("trade entry function", e);
             return false;
           }
 
@@ -5352,6 +5360,8 @@ this.placingReverseOrderInProgres=true;
 
 //// reverseOrder //reverseorder
 let o=await this.getOrders();
+
+console.log(o,'o')
 let liveOrderInstruments=o.filter(o2=>o2.transaction_type=="SELL").map(o1=>o1.instrument_token);
 
 // console.log(o,'live orders');
