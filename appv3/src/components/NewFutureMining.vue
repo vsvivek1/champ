@@ -1119,16 +1119,6 @@ this.nifty=this.instruments.filter(i=>i.segment=='INDICES');
     this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
 
 
-    // this.cl(this.instruments.length ,'lm# 1172')
-    // this.cl(this.instrumentTokens,'this.instrumentTokens @ 1168')
-
-// this.cl(JSON.stringify(this.instrumentTokens));
-
-
-// this.instrumentTokens=this.hourlyPricePointsofLiveDay.map(i=>i.instrument_token)
-    // socket.emit("subscribe-orders", JSON.stringify(this.instrumentTokens));
-
-    // this.setInstrumentTokens()
 
 })()
     
@@ -3928,6 +3918,14 @@ checkCandlePattern(d0, d1) {
       try {
 
 
+if(!cis || !cis.pricePoints || !cis.pricePoints.d1 || !cis.pricePoints.d1.high){
+
+  this.cl('cis undefined for',instrument_token);
+
+  return false;
+}
+
+
         // return;
 
         this.cl('inside trade entry')
@@ -4119,7 +4117,7 @@ if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.
 // this.cl('before yesterDayCloseStrategy')
 
 
-let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high && element.last_price.d1.high<element.ohlc.high)
+let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high )//&& element.last_price<element.ohlc.high)
 // let newTradingObj=this.newTradingObj;
 // newTradingObj.tradingsymbol=ts;
 // newTradingObj.buyTime=new Date();
