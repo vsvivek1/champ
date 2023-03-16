@@ -1,7 +1,32 @@
 <template>
   <div>
 
+<v-btn @click="getAllOrders()">get all orders</v-btn>
 
+<h2>Executed Trades</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Buy Price</th>
+          <th>Buy Time</th>
+          <th>Sell Price</th>
+          <th>Sell Time</th>
+          <th>Profit/Loss</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(trade, index) in executedTrades" :key="index">
+          <td>{{ trade.tradingsymbol }}</td>
+          <td>{{ trade.buyPrice }}</td>
+          <td>{{ trade.buyTime }}</td>
+          <td>{{ trade.sellPrice }}</td>
+          <td>{{ trade.sellTime }}</td>
+          <td>{{ trade.profit }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <!-- <vue-good-table :columns="columns" :rows="rows" :paginate="true" :lineNumbers="true" /> -->
 
     <!-- {{ currentTradingsymbolAverage}}currentTradingsymbolAverage= -->
     <!-- {{CurrentTick}} -->
@@ -763,6 +788,8 @@ Has Live Position {{inst.hasLivePosition}}
 // };
 
 import { tradingMixin } from './tadingMixin';
+import VueGoodTable from "vue-good-table";
+import "vue-good-table/dist/vue-good-table.css";
 
 
 import store from '@/store';
@@ -824,7 +851,7 @@ import IndicesTable from "./IndicesTable.vue";
 var cl;
 
 export default {
-  components: { ClosedTrades, LiveTickView, LiveOrders,Margin,LivePos,IndicesTable,Messages,IronCondor  },
+  components: { ClosedTrades, LiveTickView, LiveOrders,Margin,LivePos,IndicesTable,Messages,IronCondor , VueGoodTable, },
 
   mixins: [sessionMixin,tradingMixin],
 
@@ -1202,6 +1229,19 @@ this.processOrderUpdate(orderUpdates)
   },
 
   computed: {
+
+    rows() {
+      return this.executedTrades.map((trade) => {
+        return {
+          tradingsymbol: trade.tradingsymbol,
+          buyPrice: trade.buyPrice,
+          buyTime: trade.buyTime,
+          sellPrice: trade.sellPrice,
+          sellTime: trade.sellTime,
+          profit: trade.profit,
+        };
+      });
+    },
 
     indices(){
 
@@ -2094,12 +2134,13 @@ return a;
   }
 
 
-
+  let cis1=this.instruments.find(i=>i.instrument_token==instrument_token);
 let CurrentPricesOfScript=this.CurrentTick.find(i=>i.instrument_token==instrument_token);
 
 
-
 if(!CurrentPricesOfScript){
+
+  let d1=cis1.pricePoints.d1;
 
   let b={};
 
@@ -2108,15 +2149,15 @@ b.todaysHigh=d1.high
 	b.yesterdayHigh=d1.high
 	b.yesterdayLow=d1.low
 	b.prices=[]
-  b.dateIST=this.convertIsoDateToIST(last_trade_time);
+  b.dateIST='';//this.convertIsoDateToIST(last_trade_time);
 
 }
 
 
-let cis1=this.instruments.find(i=>i.instrument_token==instrument_token);
 
-// if(!cis1 || !CurrentPricesOfScript ){
-if(!cis1 ){
+
+if(!cis1 || !CurrentPricesOfScript ){
+// if(!cis1 ){
 
   return false;
 }
@@ -3419,6 +3460,72 @@ this.stopLossForChild=a;
       let {livePositions,liveOrders} =  this.refreshTradeStatus();
     },
 
+
+    async getAllOrders(){
+
+      this.hasStartedGetOrders=true;
+      let obj = {};
+      obj.accessToken = this.accessToken;
+      let url = "/api/getOrdersPost";
+
+      let res=await axios.post(url, obj).then(r=>r.data);
+
+      let exeOrders=res.filter(o1=>o1.status=="COMPLETE");
+
+
+    let buyExeOrders=exeOrders.filter(r2=>r2.transaction_type=="BUY");
+    let sellExeOrders=exeOrders.filter(r2=>r2.transaction_type=="SELL");
+
+let completeArray=sellExeOrders.map(se=>{
+
+let {instrument_token,price,tradingsymbol,quantity,exchange_update_timestamp
+
+}=se;
+
+
+let ob={}
+
+ob.buyTime=exchange_update_timestamp;
+
+ob.buyPrice=se.price;
+let buyPrice=se.price;
+
+ob.tradingsymbol=se.tradingsymbol
+
+
+
+let seo1=sellExeOrders.find(seo=>seo.instrument_token==instrument_token);
+
+
+if(seo1){
+ ob.sellPrice=seo1.price;
+ob.sellTime=seo1.exchange_update_timestamp;
+
+ob.profit=(ob.sellPrice-ob.buyPrice)*quantity
+
+return ob
+}
+
+
+
+
+
+
+})
+
+    this.executedTrades=completeArray;
+      // console.log(completeArray,'completeArray');
+
+
+      this.hasStartedGetOrders=false;
+return false
+
+
+
+    },
+
+
+
     async getOrders() {
 
       this.hasStartedGetOrders=true;
@@ -3993,7 +4100,8 @@ let todayLastPriceHigh=false;
 // console.log(this.hours)
 
 if( (this.hours==15) && this.minutes>15 ){
-  todayLastPriceHigh=true
+
+
 
 console.log(element.last_price==element.ohlc.high,ts)
 
@@ -4008,9 +4116,9 @@ if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.
 
 }
 
-this.cl('before yesterDayCloseStrategy')
+// this.cl('before yesterDayCloseStrategy')
 
-let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high)
+let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high && element.last_price.d1.high<element.ohlc.high)
 let newTradingObj=this.newTradingObj;
 newTradingObj.tradingsymbol=ts;
 newTradingObj.buyTime=new Date();
@@ -4036,7 +4144,7 @@ switch(true){
   let e3=Math.min(secondLowestOrdersPrice,element.last_price);
 
 
-// this.cl('days high strategy ',ts)
+this.cl('days high strategy ',ts)
 
 this.proceedForEntry(
              instrument_token,
@@ -4132,8 +4240,7 @@ this.storeTradeDataInLocalStrorage(newTradingObj)
 
 this.saveTradeDetailsInLocalStorage(ts,entry,target,stopLoss,strategyName);
 
-
-// this.cl('entering ',ts)
+this.cl('entering  closingMovingAverageCondition',ts)
 
 entry=Math.min(secondLowestOrdersPrice,element.last_price);
 
@@ -5230,8 +5337,28 @@ if(noTargetArray.length==0){
 // return ;
 
 
+if(this.placingReverseOrderInProgress==true){
+
+// this.cl('reverse order is being placed please wait...');
+
+  let code='reverseOrderBeingPlaced';
+  let msg='reverse order is being placed please wait...'
+  this.triggerAlert(code,msg)
+  
+  return false;
+}
+
+this.placingReverseOrderInProgres=true;
+
 //// reverseOrder //reverseorder
-await this.getOrders();
+let o=await this.getOrders();
+let liveOrderInstruments=o.filter(o2=>o2.transaction_type=="SELL").map(o1=>o1.instrument_token);
+
+// console.log(o,'live orders');
+// console.log(liveOrderInstruments,'liveOrderInstruments');
+
+
+// return;
 
       let liveInstrumentSymbols = this.livePositions.map(
               (a) => a.instrument_token
@@ -5243,6 +5370,8 @@ await this.getOrders();
 
 
 await this.getPositions();  
+
+
         
         let pos=this.livePositions.length;
 
@@ -5275,20 +5404,11 @@ this.cl('reverse order tallied')  /// change with oindividual
       // }
 
 
-      if(this.placingReverseOrderInProgress==true){
+   
 
-      this.cl('reverse order is being placed please wait...');
+      
 
-        let code='reverseOrderBeingPlaced';
-        let msg='reverse order is being placed please wait...'
-        this.triggerAlert(code,msg)
-        
-        return false;
-      }
-
-      this.placingReverseOrderInProgress = true;
-
-      let symbols = [...this.livePositions];
+      let symbols = [...this.livePositions.filter(lp=>lp.quantity>0)];
 // this.cl(symbols,'symbols here');
       let ln = symbols.length;
 
@@ -5323,15 +5443,24 @@ return;
 
           if (typeof e == "undefined") {
           
-            this.placingReverseOrderInProgress = false;
+            
             clearInterval(timer);
-
+            this.placingReverseOrderInProgress = false;
             res(output);
             return;
           }
+
           let instrument_token = e.instrument_token;
 
+          if(liveOrderInstruments.includes(instrument_token)){
 
+//this.cl('alrady have reverse order',instrument_token)
+          }
+
+          if(!liveOrderInstruments.includes(instrument_token)){
+
+
+         
 
    
 
@@ -5358,7 +5487,7 @@ return;
           ///if has liver order or has reverse order placed /// return
 
           /// fire a target
-          let count,
+          let
             transaction_type,
             rangeBreakOut,
             high,
@@ -5369,15 +5498,14 @@ return;
 
         
 
-            this.getLatestPricePoints(instrument_token);;
+            // this.getLatestPricePoints(instrument_token);;
 
-          let lowerBreakOutTarget ,upperBreakOutTarget;
+          let upperBreakOutTarget;
 
-          PlacedReverseOrder = this.instruments.filter(
+          PlacedReverseOrder = this.instruments.find(
             (i) => i.instrument_token == instrument_token
-          )[0].PlacedReverseOrder;
+          ).PlacedReverseOrder;
 
-          quantity = e.quantity;
 
           // let upper_circuit_limit = e.quotes.upper_circuit_limit;
 
@@ -5387,6 +5515,7 @@ let uck=e.quotes.upper_circuit_limit;
 
           // return;
           let hasLiveTarget;
+
        if (quantity > 0) {
             transaction_type = "SELL";
 
@@ -5581,6 +5710,8 @@ this.instruments.filter(i=>i.instrument_token==instrument_token)[0].
 }
 
 
+
+        }
 
         }, 333);
       });
@@ -6982,10 +7113,13 @@ let livePnlHere=(last_price-average_price)*qty;
     let maxOfYdayTodayLow=last_price<=
 Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low);
 
-let daySqOff=((this.hours==15) && (livePnlOffered>500));
+let daySqOff=((this.hours==15) && (livePnlOffered>500) && false);
 
 
 let quickProfit= (livePnlHere>500);
+
+
+let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low)
 
 
 // this.cl(livePnlHere,'livePnlOffered');
@@ -6993,7 +7127,7 @@ let quickProfit= (livePnlHere>500);
 // console.log({quickProfit})
 // this.cl(quickProfit);
 
-// this.cl({daySqOff})
+
     // let exiPrice=
 
     // this.cl({livePnlOffered},cis.tradingsymbol)
@@ -7001,7 +7135,24 @@ let quickProfit= (livePnlHere>500);
       switch (true) {
 
 
-        case daySqOff:
+        case yesterDayLowStopLoss:
+
+console.log('yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol)
+
+         this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+      
+
+
+break;  
+
+
+
+case daySqOff:
 
 console.log('daySqOff 5 sl at ',cis.tradingsymbol)
 
@@ -7034,20 +7185,20 @@ break;
 
 
         // case livePnlOffe<-500:
-        case (livePnlHere <- 500):
+//         case (livePnlHere <- 500):
 
-console.log('-500 sl at ',cis.tradingsymbol)
+// console.log('-500 sl at ',cis.tradingsymbol)
 
-         this.updateSquareOfforderWithDesiredPrice(
-           cis,
-           element,
-           false,
-           last_price
-         );
+//          this.updateSquareOfforderWithDesiredPrice(
+//            cis,
+//            element,
+//            false,
+//            last_price
+//          );
       
 
 
-break;
+// break;
 
 
         case livePnlOffered<-2500:
@@ -7368,9 +7519,9 @@ isOpenLow(ohlc,cis,lp){
 let openLow=open==low;
 
 
-let lossCheck= ((lp-low)*cis.lot_size)<2500
+let lossCheck= ((lp-low)*cis.lot_size)<1000
 
-let hrsCheck=this.hours>=10;
+let hrsCheck=this.hours>=12;
 
 
 if(openLow && lossCheck && hrsCheck){
@@ -7482,7 +7633,7 @@ getLowestOrdersPrice(buys) {
 
 
     mutateWithLtp(s) {
-
+//  return;
      
        this.heartBeatAndCurrentCheckDigit()
 
@@ -7492,6 +7643,11 @@ getLowestOrdersPrice(buys) {
   }
      
       s.forEach(async (element) => {
+
+        if(!element || !element.instrument_token ){
+
+          return false;
+        }
         // this.cl('inside s of mutate with  ltp');
         let last_price;
         let ohlc=element.ohlc;
@@ -7500,13 +7656,23 @@ getLowestOrdersPrice(buys) {
 
         this.setD0WithCurrentDayOhlc(element);
 
-        
+        if(!element){
+
+          return false;
+        }
+
+      
 
 let instrument_token = element.instrument_token;
 let cis = this.instruments.find(i => i.instrument_token == instrument_token);
+if(!cis){
 
+  return false;
+}
 
 this.currentTradingsymbol=cis.tradingsymbol
+
+
 let lp1=element.last_price;
 // this.isOpenLow(ohlc,cis,lp1);
 
@@ -7570,8 +7736,19 @@ if(bs==false){
 let ln1=this.livePositions.some(
             (lp) => lp.instrument_token == cis.instrument_token
           )
+          let average_price=-1
 
-let average_price=lpCurrent.average_price;
+          if(lpCurrent){
+
+            average_price=lpCurrent.average_price;
+
+          }else{
+
+            
+            this.cl('avaerage price not defined for',cis.tradingsymbol)
+            average_price=cis.pricePoints.d1.high;
+
+          }
           let tradingsymbol=cis.tradingsymbol;
           this.currentTradingsymbolAverage={instrument_token,tradingsymbol,average_price}
 
@@ -7721,8 +7898,9 @@ const pricePoints = cis.pricePoints;
 
 
 
-// this.cl('d1',cis.pricePoints.d1.normalDate)
-// this.cl('d2',cis.pricePoints.d2.normalDate)
+this.cl('d0',cis.pricePoints.d0.normalDate)
+this.cl('d1',cis.pricePoints.d1.normalDate)
+this.cl('d2',cis.pricePoints.d2.normalDate)
 let {d0,d1,d2,d3,d4,d5,d6,d7}=pricePoints;
 
 if(
@@ -7833,6 +8011,41 @@ return false;
 
   data() {
     return {
+      columns: [
+        {
+          label: "Symbol",
+          field: "tradingsymbol",
+        },
+        {
+          label: "Buy Price",
+          field: "buyPrice",
+          type: "number",
+          sortable: true,
+        },
+        {
+          label: "Buy Time",
+          field: "buyTime",
+          sortable: true,
+        },
+        {
+          label: "Sell Price",
+          field: "sellPrice",
+          type: "number",
+          sortable: true,
+        },
+        {
+          label: "Sell Time",
+          field: "sellTime",
+          sortable: true,
+        },
+        {
+          label: "Profit/Loss",
+          field: "profit",
+          type: "number",
+          sortable: true,
+        },
+      ],
+      executedTrades:[],
       currentTradingsymbol:'',
       currentTradingsymbolAverage:-1,
 
