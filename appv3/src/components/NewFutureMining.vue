@@ -1,6 +1,6 @@
 <template>
   <div>
-
+{{ instrumentTokens }} instrumentTokens
 <v-btn @click="getAllOrders()">get all orders</v-btn>
 
 <!-- <h2>Executed Trades</h2> -->
@@ -854,12 +854,12 @@ import IndicesTable from "./IndicesTable.vue";
 
 
 const urlForMiningInstruments="../../../instruments/instrumentsForMining.json"
-
+var instruments;
 fetch(urlForMiningInstruments)
   .then(response => response.json()) // Convert the response to a JSON object
   .then(data => {
     // Store the JSON data in a variable
-    var instruments = data;
+    instruments = data;
 
     // Do something with the jsonData variable
     console.log(instruments);
@@ -867,15 +867,15 @@ fetch(urlForMiningInstruments)
   .catch(error => console.error(error));
 
 const urlForHourlyCandles="../../../instruments/hourlyCandleData.json"
-
+var hourlyPricePointsofLiveDay1 ;
 fetch(urlForHourlyCandles)
   .then(response => response.json()) // Convert the response to a JSON object
   .then(data => {
     // Store the JSON data in a variable
-    var hourlyPricePointsofLiveDay1 = data;
+     hourlyPricePointsofLiveDay1 = data;
 
     // Do something with the jsonData variable
-    console.log(instruments);
+    // console.log(instruments);
   })
   .catch(error => console.error(error));
 
@@ -1919,6 +1919,11 @@ else{
     async setTradingType(){
 
   
+
+      if(!instruments || !hourlyPricePointsofLiveDay1){
+
+        return false;
+      }
 
 
 
@@ -3942,7 +3947,7 @@ checkCandlePattern(d0, d1) {
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
 
-        return;
+        // return;
 
 if(!cis || !cis.pricePoints || !cis.pricePoints.d1 || !cis.pricePoints.d1.high){
 
@@ -4079,8 +4084,7 @@ let cond=cis.pricePoints.d0.high<cis.pricePoints.d1.high
 // this.cl('here',ts)
 
 let closingMovingAverageCondition=element.ohlc.open<entry &&
-element.last_price>=entry &&
-cis.previousPrice !=0;
+element.last_price>=entry && false;
 
 this.cl(closingMovingAverageCondition,'closingMovingAverageCondition2')
 
@@ -4148,7 +4152,7 @@ if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.
 // this.cl('before yesterDayCloseStrategy')
 
 
-let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high )//&& element.last_price<element.ohlc.high)
+let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high && false ) //ned some other cond//&& element.last_price<element.ohlc.high)
 // let newTradingObj=this.newTradingObj;
 // newTradingObj.tradingsymbol=ts;
 // newTradingObj.buyTime=new Date();
@@ -7690,7 +7694,7 @@ getLowestOrdersPrice(buys) {
 
 
     mutateWithLtp(s) {
- return;
+//  return;
      
        this.heartBeatAndCurrentCheckDigit()
 
