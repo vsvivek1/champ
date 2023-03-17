@@ -1100,27 +1100,27 @@ this.nifty=this.instruments.filter(i=>i.segment=='INDICES');
     //  this.cl(this.instrumentTokens,111);
 
   
-(async ()=>{
+// (async ()=>{
 
 
-  // let instrumentsForMining1 =await this.requireJson("../../../instruments/" + this.setter)//.then(r=>r.json())
-  let instrumentsForMining1 =await this.requireJson("../../../instruments/instrumentsForMining.json")//.then(r=>r.json())
+//   // let instrumentsForMining1 =await this.requireJson("../../../instruments/" + this.setter)//.then(r=>r.json())
+//   let instrumentsForMining1 =await this.requireJson("../../../instruments/instrumentsForMining.json")//.then(r=>r.json())
 
 
-  let instrumentsForMining = instrumentsForMining1
-  .filter(
-    (i) =>  true
+//   let instrumentsForMining = instrumentsForMining1
+//   .filter(
+//     (i) =>  true
     
-  )
-  .filter((item, index, arr) => arr.indexOf(item) === index);
+//   )
+//   .filter((item, index, arr) => arr.indexOf(item) === index);
 
 
-  this.instruments=[...instrumentsForMining];
-    this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
+//   this.instruments=[...instrumentsForMining];
+//     this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
 
 
 
-})()
+// })()
     
 
   
@@ -3530,17 +3530,7 @@ return false
           this.liveOrders = ["no_live_orders"];
         }
 
-        // if(res.data.data==null){
-
-        //   return new Promise((res,rej)=>
-        //   {
-
-        //     this.liveOrders=0;
-        //  res([])
-
-        //   }
-        //  )
-        // }
+     
 
         if (res.data.status == "error") {
           this.liveOrders = [0];
@@ -3559,8 +3549,7 @@ return false
           // this.$router.go()
           return false;
         }
-        // this.cl(res.data,typeof res.data,'res.data @1284 line')
-        // exchange_update_timestamp
+        
         this.executedOrders = res.data.filter(
           (r) => r.quantity==0
         );
@@ -3680,6 +3669,8 @@ if(this.instruments.filter(i=>i.instrument_token==e.instrument_token).length!=0)
 
         this.hasStartedGetOrders=false;
         return this.liveOrders;
+      
+      
       });
 
 
@@ -4082,6 +4073,11 @@ let buys=element.depth.buy;
 
 // let {highestOrdersPrice, secondHighestOrdersPrice}=this. getHighestOrdersPrice(sells);
 let { secondLowestOrdersPrice}=this. getLowestOrdersPrice(buys);
+
+if(secondLowestOrdersPrice==-1){
+this.cl('issue with secondLowestOrdersPrice for',cis.tradingsymbol)
+  return false;
+}
 
 // this.cl('below lowest price orders')
 
@@ -5359,10 +5355,12 @@ this.placingReverseOrderInProgres=true;
 //// reverseOrder //reverseorder
 let o=await this.getOrders();
 
-console.log(o,'o')
-let liveOrderInstruments=o.filter(o2=>o2.transaction_type=="SELL").map(o1=>o1.instrument_token);
+// console.log(o,'o')
+let liveOrderInstruments=this.liveOrders.filter(o2=>o2.transaction_type=="SELL").map(o1=>o1.instrument_token);
 
-// console.log(o,'live orders');
+// console.log(this.liveOrders,'live orders');
+
+// return;
 // console.log(liveOrderInstruments,'liveOrderInstruments');
 
 
@@ -5899,6 +5897,8 @@ if(reverseOrder==true){
           this.hours < 9 ||
           (this.hours == 9 && this.minutes < 15)
         ) {
+
+
           order.variety = "amo";
 
           console.log(order.variety,'ov')
@@ -5930,6 +5930,11 @@ this.cl(this.hours,'hours');
 
         this.cl('amo')
 
+      }
+
+      if(transaction_type=='BUY'){
+
+        order.variety = "regular";// prevent buy amos 
       }
 
       order.params = {};
@@ -7625,6 +7630,15 @@ getLowestOrdersPrice(buys) {
     let  p=buys.filter(b=>b.price<lowestOrdersPrice ).map(a=>a.price);
 
 
+      if (p.length==0){
+        return {
+      lowestOrdersPrice,
+      secondLowestOrdersPrice
+    };
+        
+      }
+
+// console.log(p,'p')
    
       secondLowestOrdersPrice=Math.max(...p);
       // this.cl(p,'p',secondLowestOrdersPrice,'secondLowestOrdersPrice',lowestOrdersPrice,'lowestOrdersPrice')
@@ -7883,7 +7897,15 @@ if(!isHigherLows){
   return false
 }
 
-// return;
+
+
+
+if(this.hours<10){
+
+  this.cl('no buying  before 10 am');
+
+  return;
+}
 this.tradeEntry(instrument_token,inst,cis,element) 
 
 // return ;
