@@ -3,7 +3,7 @@
 
 <v-btn @click="getAllOrders()">get all orders</v-btn>
 
-<h2>Executed Trades</h2>
+<!-- <h2>Executed Trades</h2> -->
     <table>
       <thead>
         <tr>
@@ -847,6 +847,42 @@ import LiveOrders from "./LiveOrders.vue";
 import LivePos from "./LivePos.vue";
 import IndicesTable from "./IndicesTable.vue";
 
+
+
+// appv3/public/instruments/instrumentsForMining.json
+
+
+
+const urlForMiningInstruments="../../../instruments/instrumentsForMining.json"
+
+fetch(urlForMiningInstruments)
+  .then(response => response.json()) // Convert the response to a JSON object
+  .then(data => {
+    // Store the JSON data in a variable
+    var instruments = data;
+
+    // Do something with the jsonData variable
+    console.log(instruments);
+  })
+  .catch(error => console.error(error));
+
+const urlForHourlyCandles="../../../instruments/hourlyCandleData.json"
+
+fetch(urlForHourlyCandles)
+  .then(response => response.json()) // Convert the response to a JSON object
+  .then(data => {
+    // Store the JSON data in a variable
+    var hourlyPricePointsofLiveDay1 = data;
+
+    // Do something with the jsonData variable
+    console.log(instruments);
+  })
+  .catch(error => console.error(error));
+
+
+
+// var hourlyPricePointsofLiveDay1 =
+//        ("../../../instruments/hourlyCandleDataCommodity.json");
 
 var cl;
 
@@ -1882,11 +1918,11 @@ else{
 
     async setTradingType(){
 
-      // return new Promise((res,rej)=>{
+  
 
 
 
-        try{
+ 
     
           this.itype = this.$route.params.itype;
 
@@ -1946,10 +1982,10 @@ this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
 
 
 
-let instrumentsForMining1 =await this.requireJson("../../../instruments/" + this.setter)//.then(r=>r.json())
+// let instrumentsForMining1 =instruments;
 
 
-  let instrumentsForMining = instrumentsForMining1
+  let instrumentsForMining = instruments
   .filter(
     (i) =>  true
     
@@ -1958,7 +1994,7 @@ let instrumentsForMining1 =await this.requireJson("../../../instruments/" + this
 
 
 
-  this.hourlyPricePointsofLiveDay1 =await this.requireJson("../../../instruments/hourlyCandleData.json");
+  this.hourlyPricePointsofLiveDay1 =hourlyPricePointsofLiveDay1;
 
       // this.cl('this.hourlyPricePointsofLiveDay23',this.hourlyPricePointsofLiveDay)
   
@@ -1978,7 +2014,8 @@ let instrumentsForMining1 =await this.requireJson("../../../instruments/" + this
     
 
 
-this.instruments = [...instrumentsForMining];
+
+this.instruments =instrumentsForMining;
 this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
 
 this.setInstrumentTokens()
@@ -2037,12 +2074,9 @@ await this.requireJson("../../../instruments/" + this.setter);
 
   //   res(true)
 
-}
 
-    catch(e){
-this.cl('error',e)
-      // rej(false)
-    }
+
+
   // }) 
     },
 
@@ -3908,6 +3942,7 @@ checkCandlePattern(d0, d1) {
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
 
+        return;
 
 if(!cis || !cis.pricePoints || !cis.pricePoints.d1 || !cis.pricePoints.d1.high){
 
@@ -4141,7 +4176,7 @@ switch(true){
   let e3=Math.min(secondLowestOrdersPrice,element.last_price);
 
 
-this.cl('days high strategy ',ts)
+this.cl('yester day yesterDayCloseStrategy ',ts)
 
 this.proceedForEntry(
              instrument_token,
@@ -4170,7 +4205,7 @@ this.proceedForEntry(
 
   let e2=Math.min(secondLowestOrdersPrice,element.last_price);
 
-this.cl('days high strategy ',ts)
+this.cl('todayLastPriceHigh',ts)
 
 this.proceedForEntry(
              instrument_token,
@@ -7655,7 +7690,7 @@ getLowestOrdersPrice(buys) {
 
 
     mutateWithLtp(s) {
-//  return;
+ return;
      
        this.heartBeatAndCurrentCheckDigit()
 
