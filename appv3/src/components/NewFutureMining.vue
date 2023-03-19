@@ -1,6 +1,6 @@
 <template>
   <div>
-{{ instrumentTokens }} instrumentTokens
+<!-- {{ instrumentTokens }} instrumentTokens -->
 <v-btn @click="getAllOrders()">get all orders</v-btn>
 
 <!-- <h2>Executed Trades</h2> -->
@@ -862,7 +862,7 @@ fetch(urlForMiningInstruments)
     instruments = data;
 
     // Do something with the jsonData variable
-    console.log(instruments);
+    // console.log(instruments);
   })
   .catch(error => console.error(error));
 
