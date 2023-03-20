@@ -3659,7 +3659,7 @@ let k=await this.updateMissingScriptInInstrumetsFile(e.instrument_token)
 
 if(this.instruments.some(i=>i.instrument_token==e.instrument_token)){
 
-  this.instruments.find(i=>i.instrument_token==e.instrument_token)ß.PlacedReverseOrder=false
+  this.instruments.find(i=>i.instrument_token==e.instrument_token).PlacedReverseOrder=false
 
   this.liveOrderScripts = t
           .filter((t1) => t1.transaction_type == "BUY")
