@@ -3659,7 +3659,7 @@ let k=await this.updateMissingScriptInInstrumetsFile(e.instrument_token)
 
 if(this.instruments.some(i=>i.instrument_token==e.instrument_token)){
 
-  this.instruments.find(i=>i.instrument_token==e.instrument_token).PlacedReverseOrder=false
+  this.instruments.find(i=>i.instrument_token==e.instrument_token)[0].PlacedReverseOrder=false
 
   this.liveOrderScripts = t
           .filter((t1) => t1.transaction_type == "BUY")
@@ -7176,7 +7176,9 @@ let daySqOff=((this.hours==15) && (livePnlOffered>500) && false);
 let quickProfit= (livePnlHere>500);
 
 
-let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low)
+
+/// login last price less than yesterdays lows and todays opening price greater than yesterdays low this is to ensure that opening trade issues
+let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low && element.ohlc.open>cis.pricePoints.d1.low)
 
 
 // this.cl(livePnlHere,'livePnlOffered');
@@ -7209,20 +7211,20 @@ break;
 
 
 
-// case daySqOff:
+case daySqOff:
 
-// console.log('daySqOff 5 sl at ',cis.tradingsymbol)
+console.log('daySqOff 5 sl at ',cis.tradingsymbol)
 
-//          this.updateSquareOfforderWithDesiredPrice(
-//            cis,
-//            element,
-//            false,
-//            last_price
-//          );
+         this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
       
 
 
-// break;
+break;
 
 
 // case quickProfit:
@@ -7298,22 +7300,22 @@ break;
 
 
 
-// case (maxOfYdayTodayLow):
+case (maxOfYdayTodayLow):
 
 
-// this.cl('sltrigger  trigger minimum of y day low todays low for  %s at squareoffPrice of %s',
-// cis.tradingsymbol,Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low))
+this.cl('sltrigger  trigger minimum of y day low todays low for  %s at squareoffPrice of %s',
+cis.tradingsymbol,Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low))
        
 
-// this.updateSquareOfforderWithDesiredPrice(
-//                    cis,
-//                    element,
-//                    false,
-//                    Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low)
-//                  );
+this.updateSquareOfforderWithDesiredPrice(
+                   cis,
+                   element,
+                   false,
+                   Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low)
+                 );
               
 
-//         break;
+        break;
 
 
 
