@@ -2506,13 +2506,16 @@ price=element.last_price;
   async   updateSelectedSellorderWithLtp(){
 
       
+
+    console.log('from this fumnction');
       await this.getOrders();
       await this.getPositions();
 // this.SelectedSellorder=
 // this.newOrder=
 // o.selected==true &&
 
-
+// console.log(this.liveOrders.length);
+console.log(this.allOrders,'allorders');
 
 this.newOrder =
 this.liveOrders.filter(o=> o.transaction_type=="SELL").map(i=>{
@@ -2526,7 +2529,7 @@ if(lp){
 
 let {buy_price,buy_quantity,pnl}=lp;
 
-if(pnl>1000){
+if(true){
 
 let o={};
     // o.variety=i.variety;
@@ -2547,9 +2550,9 @@ params.order_type="SL"
 
 }).filter(k=>k!=null);
 
-this.cl(this.newOrder,'as');
+this.cl(this.newOrder,'as2');
 
-this.updateOrder();
+// this.updateOrder();
 
 // let t = await this.getOrders();
 //       let tmp = this.updatingInProgress;
@@ -3595,6 +3598,8 @@ return false
        
        
         this.allOrders = res.data;
+
+
         let t = res.data.filter((o) => {
           // this.cl(o.status,'o.status');
           let result =
@@ -3652,9 +3657,9 @@ let k=await this.updateMissingScriptInInstrumetsFile(e.instrument_token)
        
         this.liveOrders.forEach(e=>{
 
-if(this.instruments.filter(i=>i.instrument_token==e.instrument_token).length!=0){
+if(this.instruments.some(i=>i.instrument_token==e.instrument_token)){
 
-  this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0].PlacedReverseOrder=false
+  this.instruments.find(i=>i.instrument_token==e.instrument_token)[0].PlacedReverseOrder=false
 
   this.liveOrderScripts = t
           .filter((t1) => t1.transaction_type == "BUY")
@@ -7204,20 +7209,20 @@ break;
 
 
 
-case daySqOff:
+// case daySqOff:
 
-console.log('daySqOff 5 sl at ',cis.tradingsymbol)
+// console.log('daySqOff 5 sl at ',cis.tradingsymbol)
 
-         this.updateSquareOfforderWithDesiredPrice(
-           cis,
-           element,
-           false,
-           last_price
-         );
+//          this.updateSquareOfforderWithDesiredPrice(
+//            cis,
+//            element,
+//            false,
+//            last_price
+//          );
       
 
 
-break;
+// break;
 
 
 // case quickProfit:
@@ -7253,62 +7258,62 @@ break;
 // break;
 
 
-        case livePnlOffered<-2500:
+//         case livePnlOffered<-2500:
 
-console.log('2500 sl at ',cis.tradingsymbol)
+// console.log('2500 sl at ',cis.tradingsymbol)
 
-         this.updateSquareOfforderWithDesiredPrice(
-           cis,
-           element,
-           false,
-           last_price
-         );
+//          this.updateSquareOfforderWithDesiredPrice(
+//            cis,
+//            element,
+//            false,
+//            last_price
+//          );
       
 
 
-break;
+// break;
 
 
 
 
-case (element.last_price<=stopLoss):
+// case (element.last_price<=stopLoss):
 
 
 
-console.log('stopLoss sl at  for averagge stop loss @ %s for %s ',stopLoss,cis.tradingsymbol)
+// console.log('stopLoss sl at  for averagge stop loss @ %s for %s ',stopLoss,cis.tradingsymbol)
 
-         this.updateSquareOfforderWithDesiredPrice(
-           cis,
-           element,
-           false,
-           last_price
-         );
+//          this.updateSquareOfforderWithDesiredPrice(
+//            cis,
+//            element,
+//            false,
+//            last_price
+//          );
       
 
 
-break;
+// break;
 
 
 
 
 
 
-case (maxOfYdayTodayLow):
+// case (maxOfYdayTodayLow):
 
 
-this.cl('sltrigger  trigger minimum of y day low todays low for  %s at squareoffPrice of %s',
-cis.tradingsymbol,Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low))
+// this.cl('sltrigger  trigger minimum of y day low todays low for  %s at squareoffPrice of %s',
+// cis.tradingsymbol,Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low))
        
 
-this.updateSquareOfforderWithDesiredPrice(
-                   cis,
-                   element,
-                   false,
-                   Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low)
-                 );
+// this.updateSquareOfforderWithDesiredPrice(
+//                    cis,
+//                    element,
+//                    false,
+//                    Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low)
+//                  );
               
 
-        break;
+//         break;
 
 
 
