@@ -30,6 +30,24 @@ const socket = io("http://127.0.0.1:4000"
 }
 );
 
+
+var instruments;
+await  fetch("../../../instruments/instrumentsForMining.json")
+      .then((response) => response.json())
+      .then((data) => 
+      {
+
+
+        // console.log(data,'data1')
+        instruments = data;
+      }
+    
+      
+      
+      
+      ); 
+
+
     export default {
 
         computed:{
@@ -76,7 +94,7 @@ let tokn=this.instruments.map(i=>parseInt(i.instrument_token))
 },
 
             async fetchInstruments(){
-                this.instruments =await this.requireJson("../../../instruments/instrumentsForMining.json");
+                this.instruments =instruments;
                 this.setInstrumentTokens();
 
             },
@@ -117,22 +135,13 @@ return false;
 async generateSignals(s){
 
 
- await  fetch("../../../instruments/instrumentsForMining.json")
-      .then((response) => response.json())
-      .then((data) => 
-      {
-
-
-        // console.log(data,'data1')
-        this.instruments = data;
-      }
-    
-      
-      
-      
-      ); 
 
       console.log(this.instruments,'this.instruments')
+
+
+
+
+
 
    
 
@@ -173,7 +182,10 @@ return;
 
         let element=s[l];
 
-     console.log(element)
+     console.log(element,'element')
+
+
+ 
     
         let cis=this.instruments.find(i=>i.instrument_token==element.instrument_token)
 if(!cis){
@@ -256,7 +268,33 @@ let avg=mac/7;
 // let exit=(exit1<high?exit1:lp);
 let exit=lp;
 
-if(element.last_price && !this.scriptsWithCondition.find(i=>i.tradingsymbol==cis.tradingsymbol)){
+
+if(element.ohlc.close<element.ohlc.open 
+     
+     && element.last_price>element.ohlc.open
+     
+     ){
+
+      let ob={};
+
+ob.tradingsymbol=cis.tradingsymbol;
+
+
+ob.gain=(open-lp)*cis.lot_size;
+
+ob.entry=lp;
+ob.last_price=element.last_price
+ob.exit=lp*1.2
+this.scriptsWithCondition.push(ob)
+
+
+     }
+
+return;
+// if(element.last_price && !this.scriptsWithCondition.find(i=>i.tradingsymbol==cis.tradingsymbol))
+
+
+{
 
   // !(open==high) &&
   if(
@@ -410,13 +448,13 @@ columns: [
         mounted(){
 
           this.fetchInstruments(); 
-          this.generateSignals([])
+          // this.generateSignals([])
        
              
 
  socket.on("send-realtime-subscription", (s) => {
 
-// this.generateSignals(s)
+this.generateSignals(s)
 this.CurrentTick = [...s];
 });
         }
