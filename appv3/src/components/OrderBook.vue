@@ -345,8 +345,10 @@ return this.NotCompletedBuyOrders.map(o=>o.exchange+":"+o.tradingsymbol)
 
 NotCompletedBuyOrders(){
 return this.orders.filter(o=>{
+
+  //console.log(o,'o');
   
-  return o.transaction_type=='BUY' && o.status=='OPEN'
+  return o.transaction_type=='BUY' && o.exchange=='NSE'   && o.status=='OPEN'
   }
   );
 
@@ -1002,11 +1004,17 @@ let url="/api/getLTP/accessToken";
 let ob={};
 ob.accessToken=this.accessToken;
 ob.instruments=this.stringifiedInstruments;
+
+console.log(ob)
 axios.post(url,ob).then(
 // axios.get(url).then(
 
 res=>{
+
+  // console.log(res,'res')
   this.ltps=res.data;
+
+  // console.log(this.ltps,'ltps')
   this.newOrder=[];
 this.newOrder=this.NotCompletedBuyOrders.map(
 
@@ -1033,6 +1041,8 @@ this.newOrder=this.NotCompletedBuyOrders.map(
 return this.newOrder;
 }
 ).then(r=>{
+
+  console.log(this.newOrder,'new order')
 this.updateOrder();
 
 })
