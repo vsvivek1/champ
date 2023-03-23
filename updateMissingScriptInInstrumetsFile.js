@@ -66,12 +66,27 @@ function otherCriteria(e) {
 }
 module.exports=
 
-async function updateMissingScriptInInstrumetsFile(instrument_token,accessToken){
+async function updateMissingScriptInInstrumetsFile(instrument_token_arr,accessToken){
+
+
+let instrus=JSON.parse(instrument_token_arr);
+
+
+console.log(instrus,'instrus');
+
+return;
+
 
 let targetInstru=require('./appv3/public/instruments/instrumentsForMining.json');
 let sourceInstru=require('./appv3/public/instruments/instrumentsAll.json');
 
 /// check if its already there
+
+
+instrus.forEach(async instrument_token=>{
+
+
+
 
 
 console.log(instrument_token,'here')
@@ -80,7 +95,10 @@ if(typeof instrument_token=='undefined'){
 
   return false;
 }
+
+
 let ln=targetInstru.filter(i=>i.instrument_token==instrument_token).length
+
 console.log('updating trading symbol',instrument_token)
 
 
@@ -121,8 +139,12 @@ instrument.otherCriteriaCheck = otherCriteriaCheck;
 targetInstru.push(instrument);
 
 
+})
+
+
+
 let fileOutputName='./appv3/public/instruments/instrumentsForMining.json'
-let targetDir='./app'
+let targetDir='./appv3/public/instruments/instrumentsForMining.json'
 let t=await createAndMoveFileFromJson(fileOutputName,targetInstru,
     targetDir)
 

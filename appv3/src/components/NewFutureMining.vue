@@ -1,10 +1,12 @@
 <template>
   <div>
+
+
 <!-- {{ instrumentTokens }} instrumentTokens -->
-<v-btn @click="getAllOrders()">get all orders</v-btn>
+<!-- <v-btn @click="getAllOrders()">get all orders</v-btn> -->
 
 <!-- <h2>Executed Trades</h2> -->
-    <table>
+    <!-- <table>
       <thead>
         <tr>
           <th>Symbol</th>
@@ -25,7 +27,7 @@
           <td>{{ trade.profit }}</td>
         </tr>
       </tbody>
-    </table>
+    </table> -->
     <!-- <vue-good-table :columns="columns" :rows="rows" :paginate="true" :lineNumbers="true" /> -->
 
     <!-- {{ currentTradingsymbolAverage}}currentTradingsymbolAverage= -->
@@ -88,13 +90,40 @@
         </v-row>
       </v-col>
       <v-col>
+
+<v-icon>
+
+</v-icon>
+
+
         <v-icon
-          color="red"
-          v-if="heartBeat"
+          v-bind:class="{
+            
+            'text-danger':stopLossSwitchHealth,
+            'text-white':!stopLossSwitchHealth,
+        
+        
+        }"
           title="if This symbol changes color switches between red and blue system is conencted to market"
         >
-        1
-          mdi-heart
+        SLß
+          mdi-circle
+        </v-icon>
+
+
+        <v-icon
+          v-bind:class="{
+            
+            'text-primary':tradeEntrySwitchHealth,
+            'text-white':!tradeEntrySwitchHealth,
+        
+        
+        }"
+          title="if This symbol changes color switches between red and blue system is conencted to market"
+        >
+        
+        TE
+          mdi-ci
         </v-icon>
 
         <v-icon
@@ -854,22 +883,46 @@ import IndicesTable from "./IndicesTable.vue";
 
 
 
-const urlForMiningInstruments="../../../instruments/instrumentsForMining.json"
-var instruments;
-fetch(urlForMiningInstruments)
-  .then(response => response.json()) // Convert the response to a JSON object
-  .then(data => {
-    // Store the JSON data in a variable
-    instruments = data;
 
-    // Do something with the jsonData variable
-    // console.log(instruments);
-  })
-  .catch(error => console.error(error));
 
-const urlForHourlyCandles="../../../instruments/hourlyCandleData.json"
+
+
+
+
 var hourlyPricePointsofLiveDay1 ;
-fetch(urlForHourlyCandles)
+
+
+
+
+// var hourlyPricePointsofLiveDay1 =
+//        ("../../../instruments/hourlyCandleDataCommodity.json");
+
+var cl;
+
+import newFutureMiningMixin from './newFutureMiningMixin';
+
+export default {
+  
+mounted(){
+  const urlForMiningInstruments="../../../instruments/instrumentsForMining.json"
+  fetch(urlForMiningInstruments).then(r=>r.json()).then(d=>
+  {
+
+    this.instruments=d;
+
+    this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
+
+    socket.emit("subscribe-orders", JSON.stringify(this.instrumentTokens));
+
+  }
+ 
+  
+  
+  )
+
+  var urlForHourlyCandles="../../../instruments/hourlyCandleData.json";
+
+  fetch(urlForHourlyCandles)
   .then(response => response.json()) // Convert the response to a JSON object
   .then(data => {
     // Store the JSON data in a variable
@@ -879,17 +932,348 @@ fetch(urlForHourlyCandles)
     // console.log(instruments);
   })
   .catch(error => console.error(error));
+       // this.cl('mounted')
+       var cl=this.cl;
+        
+        
+        this.setTradingType();
+     
+         this.itype = this.$route.params.itype;
+         this.loopGetQuotesAndMutateInstruments();
+     
+         this.nifty=this.instruments.filter(i=>i.segment=='INDICES');
+     
+     
+         this.getMargins();
+         setInterval(()=>{
+     
+     this.getMargins();
+     
+     
+     this.loopGetQuotesAndMutateInstruments();
+     this.nifty=this.instruments.filter(i=>i.segment=='INDICES');
+     
+     },20*60*1000)  
+     
+     
+     
+     
+     
+     
+     
+     
+         var d = new Date();
+         this.hours = d.getHours();
+         this.minutes = d.getMinutes();
+         this.seconds = d.getSeconds();
+     
+     
+         (async()=>{
+     
+           await this.refreshTradeStatus();
+     
+           this. placeTargetsForLiveScripts()
+     
+         })()
+     
+     
+     
+         let fifteenSeconds = 15* 1000;
+         let fifteenSecondsTimer = setInterval(() => {
+     
+     
+           this.globalConsoleLogs=[];
+           //this.$router.go();
+         }, fifteenSeconds);
+     
+     
+       
+     
+         let TenMinutes = 10 * 60 * 1000;
+         let FiveMinutesTimer = setInterval(() => {
+     
+     
+           this.globalConsoleLogs=[];
+           //this.$router.go();
+         }, TenMinutes);
+     
+         let thirtyMinute = 25 * 60 * 1000;
+     
+         let thirtyMinuteTimer = setInterval(async () => {
+           let thirtyMiniutesBefore = new Date();
+           thirtyMiniutesBefore.setMinutes(thirtyMiniutesBefore.getMinutes() - 2);
+     
+      
+          
+          
+       
+         
+     
+           return;
+           // let iso=now.toISOString()
+     
+           //  & lo.order_timestamp>0
+     
+           let order_ids = this.liveOrders
+             .filter((lo) => {
+               return (
+                 lo.status == "OPEN" &&
+                 lo.exchange == this.itype &&
+                 // lo.tradingsymbol.includes("FUT") &&
+                 lo.transaction_type == "BUY" &&
+                 thirtyMiniutesBefore - new Date(lo.order_timestamp) > 0
+               );
+             })
+             .map((o) => {
+               let ob = {};
+               ob.order_id = o.order_id;
+               ob.variety = o.variety;
+     
+               return ob;
+             });
+     
+           this.cl(order_ids, "live orderss to be canceled");
+     
+           if (order_ids.length > 0) {
+             // this.CancelOrders(order_ids);
+           }
+         }, thirtyMinute);
+     
+         let fifteenSecTimer = setInterval(async () => {
+     
+           let a = await this.refreshTradeStatus();
+          
+         }, 60 * 1000);
+     
+         let placingTimer = window.setInterval(async () => {
+     
+        
+           
+          
+     
+           let ln = this.orderArray.length;
+     
+           // this.cl('order array length1',ln,JSON.stringify(this.orderArray))
+     
+           // this.cl('this.orderArray.',this.orderArray)
+     
+           // clock
+     
+           if (this.laggingCheckDigit == this.CurrentCheckDigit) {
+             this.webSocketNotActive = true;
+     
+             //reload window
+     
+             this.$router.go();
+           } else {
+             this.webSocketNotActive = false;
+           }
+           this.laggingCheckDigit = this.CurrentCheckDigit;
+           var d = new Date();
+           this.hours = d.getHours();
+           this.minutes = d.getMinutes();
+           this.seconds = d.getSeconds();
+     
+           let times=[17,47,37,2]
+                
+     
+                if (this.hours<16 & times.includes(this.minutes) && (this.seconds>56 && this.seconds<58)
+                 
+                 ){
+     
+                 ///procedureTocancelEntryOrdersIfAny
+     
+                 // this.$router.go()
+                }
+     
+     
+                this.placeTargetsForLiveScripts()
+     
+           // if (this.livePositions.length > 0) {
+           //   // let r = await this.getHourlyCandleLows();
+           // }
+     
+           let hourlyhandleFetchingMinutes = [1, 16, 31, 46];
+           if (hourlyhandleFetchingMinutes.includes(this.minutes)) {
+             // if (this.livePositions.length > 0)
+             if (true) {
+               // let r = await this.getHourlyCandleLows();
+             }
+     
+             if ((this.hours < 15) & this.times.includes(this.minutes)) {
+               //geting candle data in 31 st minutes of each hour
+             }
+           }
+         }, 2*60 * 1000);
+     
+         // *Math.max(this.orderArray.length,1)
+     
+         if (this.chat_id == -1) {
+           this.getChatId().then((chat_id) => {
+             var d = new Date();
+     
+             let today = d.toLocaleString().slice(0, 10);
+     
+             var txt = "Welcome to Trading on " + today;
+             this.sendToTelegramGroup(txt);
+           });
+         }
+         // this.triggerWebsocktsInServer();
+     
+         //  window.setInterval(() => {
+         //   console.clear();
+     
+         //    },250000)
+     
+         // window. setInterval(() => {
+         //     var d = new Date();
+         //     this.hours = d.getHours();
+         //     this.minutes = d.getMinutes();
+         //     this.seconds = d.getSeconds();
+     
+         //  },1000)
+     
+         // this.getOrders();
+     
+         // if (this.livePositions.length > 0) {
+         //   // this.getHourlyCandleLows();
+         // }
+        
+     
+     // (async ()=>{
+     
+     //   let kk=await    this.setInstrumentTokens();
+     
+     // })();
+     
+     
+         
+     
+         //  let tmp=[...this.instrument_tokens,14523906]
+     
+         //  this.cl(this.instrumentTokens,111);
+     
+       
+     // (async ()=>{
+     
+     
+     //   // let instrumentsForMining1 =await this.requireJson("../../../instruments/" + this.setter)//.then(r=>r.json())
+     //   let instrumentsForMining1 =await this.requireJson("../../../instruments/instrumentsForMining.json")//.then(r=>r.json())
+     
+     
+     //   let instrumentsForMining = instrumentsForMining1
+     //   .filter(
+     //     (i) =>  true
+         
+     //   )
+     //   .filter((item, index, arr) => arr.indexOf(item) === index);
+     
+     
+     //   this.instruments=[...instrumentsForMining];
+     //     this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
+     
+     
+     
+     // })()
+         
+     
+       
+     
+         socket.on("send-realtime-subscription", (s) => {
+     
+     
+           // this.cl('inside send-realtime-subscription');
+           this.mutateWithLtp(s);
+     
+           this.CurrentTick = [...s];
+         });
+     
+         socket.on("order_update", async (orderUpdates) => {
+     
+           let temp1,tmp2
+           if(orderUpdates.status=="UPDATE" || orderUpdates.pending_quantity!==0 ){
+     
+     
+             let temp1=JSON.stringify(orderUpdates);
+         let tmp2=JSON.stringify(this.previousOrderUpdate);
+     
+         if(temp1==tmp2){
+     
+           // this.cl('same order update');
+           this.previousOrderUpdate=orderUpdates;
+           return false
+         }
+         this.previousOrderUpdate=orderUpdates
+     
+     
+       let k=await  this.procedureTocancelEntryOrdersIfAny();
+       cansole.log('cancelling orders',a)
+             let a  = await this.refreshTradeStatus();
+     
+     this.cl('update order uodate',orderUpdates,{a});
+     
+     
+     
+     return false
+           }
+           
+      temp1=JSON.stringify(orderUpdates);
+          tmp2=JSON.stringify(this.previousOrderUpdate);
+     
+         if(temp1==tmp2){
+     
+           // this.cl('same order update');
+           this.previousOrderUpdate=orderUpdates;
+           return false
+         }
+         this.previousOrderUpdate=orderUpdates;
+     
+         
+     
+     this.processOrderUpdate(orderUpdates)
+     
+        
+     
+     //// if entry order executed 
+     ///placce reverse order
+     
+     //if reverse order executed 
+     
+     ///rest everything 
+     
+     
+     //       if (true) {
+            
+     
+     //         if (this.refreshingStatus == true) {
+     //           this.cl("update in progress");
+     
+     //           return false;
+     //         }
+     //         this.refreshingStatus = true;
+     
+     // // let t = await this.refreshTradeStatus();
+     
+     // if(orderUpdates.status=="COMPLETE" || orderUpdates.status=="CANCELLED"){
+     
+     // // let t = await this.placeTargetsForLiveScripts();
+     // }
+             
+     
+     //         this.refreshingStatus = false;
+     //       }
+     
+     
+         });
+     
+         //   setInterval(async () => {
+         //  this.getOrders;
+     
+         //   }, 30000);
+
+},
 
 
-
-// var hourlyPricePointsofLiveDay1 =
-//        ("../../../instruments/hourlyCandleDataCommodity.json");
-
-var cl;
-import newFutureMiningMixin from './newFutureMiningMixin.js'
-
-export default {
-  
 
   mixins: [newFutureMiningMixin,sessionMixin,tradingMixin],
 
@@ -1506,6 +1890,8 @@ axios.post(url,ob).then(res=>{
 
  async    forceUpdateMissingScripts(){
 
+  let instru_arr=[];
+
       // let loCopy=[...this.liveOrders];
 
       this.cl('from force update')
@@ -1533,19 +1919,28 @@ let i1=setInterval(async ()=>{
 
   this.cl(loCopy.length,'ln inside')
 let cur=loCopy.pop();
+
+console.log(cur,'cur')
 if(typeof cur=='undefined'){
-this.cl('clearing live order missing script pupp')
+
+  this.cl('updating lo missing script')
+let k=await this.updateMissingScriptInInstrumetsFile(JSON.stringify(instru_arr))
+this.cl(k,'k')
+
+
+this.cl('clearing live order missing script pupp after pushing')
 clearInterval(i1)
+
+return;
 }
 
 
-if(this.instruments.filter(i=>i.instrument_token==cur.instrument_token).length==0){
+if(cur.instrument_token && this.instruments.filter(i=>i.instrument_token==cur.instrument_token).length==0){
 
+  instru_arr.push(cur.instrument_token);
  
 
-this.cl('updating lo missing script')
-let k=await this.updateMissingScriptInInstrumetsFile(cur.instrument_token)
-this.cl(k,'k')
+
 ///  push new current instruments here
 
 }
@@ -1631,7 +2026,23 @@ this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
 }else if(this.itype=="NFO"){
   this.setter = shareF;
 
+  const urlForMiningInstruments="../../../instruments/instrumentsForMining.json"
+var instruments=await requireJson(urlForMiningInstruments);
 
+console.log(instruments,'inst')
+
+// await fetch(urlForMiningInstruments)
+//   .then(response => response.json()) // Convert the response to a JSON object
+//   .then(data => {
+//     // Store the JSON data in a variable
+
+  
+//     instruments = data;
+
+//     // Do something with the jsonData variable
+//     // console.log(instruments);
+//   })
+//   .catch(error => console.error(error));
 
 // let instrumentsForMining1 =instruments;
 
@@ -2362,18 +2773,27 @@ this.cl(this.newOrder,'as2');
       }
     },
     async updateMissingScriptInInstrumetsFile(instrument_token) {
+
+// console.log(instrument_token,'from update script')
+
       let params = {
         accessToken: this.accessToken,
         instrument_token: instrument_token,
       };
+
+      // return; //some issue in fetching letc 
 
       let url = "/api/updateMissingScriptInInstrumetsFile";
 
 
 
      return  axios.post(url, params).then(async (r) => {
-        // let instruments = await this.requireJson("../../../instruments/" + this.setter);
 
+      
+       let instruments = await fetch("../../../instruments/instrumentsForMining.json").then(r=>r.json());
+
+
+       console.log(instruments,'from here')
         this.$set(this.instruments, instruments);
         //  Object.assign(this.instruments, instruments)
 
@@ -2835,6 +3255,7 @@ this.stopLossForChild=a;
 
       let quoteData = [];
       obj.arryOfInstruments = livePositionsInstrumentTokens;
+      obj.accessToken=this.accessToken;
 
       return await axios.post(url, obj).then((r) => {
         return r.data;
@@ -3288,7 +3709,9 @@ return ;
 
 if(typeof this.instruments.filter(i=>i.instrument_token==cur.instrument_token).length==0){
 this.cl('updating lo missing script')
-let k=await this.updateMissingScriptInInstrumetsFile(e.instrument_token)
+
+let tmp=JSON.stringify(e.instrument_token)
+let k=await this.updateMissingScriptInInstrumetsFile(tmp)
 
 ///  push new current instruments here
 }
@@ -3758,6 +4181,18 @@ let isOpenLow=this.isOpenLow(ohlc,cis,lp1);
 
 
 // let sells=element.depth.sell;
+// this.cl(element,'element');
+
+
+if(!element || !element.depth || !element.depth.buy )
+{
+
+return;
+ 
+
+}
+
+
 let buys=element.depth.buy;
 // console.log('buys');
 
@@ -3787,12 +4222,12 @@ if( (this.hours==15) && this.minutes>15 ){
 
 
 
-console.log(element.last_price==element.ohlc.high,ts)
+// console.log(element.last_price==element.ohlc.high,ts)
 
 
 if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99){
 
-  console.log(ts,'is seems to be at higest price close');
+  // console.log(ts,'is seems to be at higest price close');
 
   todayLastPriceHigh=true
 }
@@ -3812,6 +4247,9 @@ let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high && false 
 this.cl('reaehed switch3331')
 
 // console.log(typeof yesterDayCloseStrategy,ts)
+
+
+this.tradeEntrySwitchHealth=!this.tradeEntrySwitchHealth;
 
 switch(true){
 
@@ -3864,13 +4302,13 @@ this.cl('todayLastPriceHigh',ts)
 
 
 
-// this.proceedForEntry(
-//              instrument_token,
-//              cis,
-//              element,
-//              e2,
-//              "long"
-//            );
+this.proceedForEntry(
+             instrument_token,
+             cis,
+             element,
+             e2,
+             "long"
+           );
 
            this.cl('safe','todayLastPriceHigh')
 
@@ -3894,10 +4332,10 @@ case isOpenLow:
 
 // let e1=element.last_price;
 
-console.log({secondLowestOrdersPrice},secondLowestOrdersPrice)
+// console.log({secondLowestOrdersPrice},secondLowestOrdersPrice)
 
 let e1=Math.min(secondLowestOrdersPrice,element.last_price);
-console.log({e1},'e1')
+// console.log({e1},'e1')
 
  this.cl('openLowScriptFithFixedLoss strategy ',ts,e1,'e1')
 
@@ -4761,7 +5199,9 @@ if(   this.instruments.filter(
         (i) => i.instrument_token == l.instrument_token
       )[0] == "undefined"
     ) {
-      let k=await this.updateMissingScriptInInstrumetsFile(l.instrument_token);
+
+      let tmp=JSON.stringify(l.instrument_token)
+      let k=await this.updateMissingScriptInInstrumetsFile(tmp);
 
       this.cl(
         "l.instrument_token absent",
@@ -4775,13 +5215,13 @@ if(   this.instruments.filter(
 
 
   this.hasStartedGetLivePositions=false;
-        return this.livePositions;
-        res.data.net.forEach((e) => {
-          // let tsl = this.getTrailingStopLoss(e.instrument_token, e.pnl);
+        
+  
+  return this.livePositions;
 
-          // this.cl(tsl,'tsl')
-          this.$set(e, "trailingStopLoss", tsl);
-        });
+
+
+     
 
   
       });
@@ -5061,22 +5501,31 @@ let liveOrderInstruments=this.liveOrders.filter(o2=>o2.transaction_type=="SELL")
 
 // return;
 
+let lp=await this.getPositions();
+
+
+// console.log(lp,'lp');
+
       let liveInstrumentSymbols = this.livePositions.map(
-              (a) => a.instrument_token
+              (a) => parseInt(a.instrument_token)
             ); 
+
+
+      
             
           this.liveInstrumentSymbols = liveInstrumentSymbols
 
- await this.getQuoteFromZerodha(liveInstrumentSymbols);
+
+
+ let quotes=await this.getQuoteFromZerodha(liveInstrumentSymbols);
+
+
 
 
 await this.getPositions();  
 
 
-// console.log(this.livePositionScripts,'this.livePositionScripts')
 
-// let q=await this.getQuoteFromZerodha(this.livePositionScripts);
-// console.log(q,'q')
 
         
         let pos=this.livePositions.length;
@@ -5142,6 +5591,12 @@ return;
 }
           let e = symbols.pop();
 
+
+          // console.log(e,'e');
+
+          let quote=quotes[e.instrument_token];
+
+          // console.log(quote,'quote,e')
          
 
 
@@ -5213,9 +5668,10 @@ return;
           ).PlacedReverseOrder;
 
 
-          // let upper_circuit_limit = e.quotes.upper_circuit_limit;
+          // let upper_circuit_limit = e.quotes.upper_circuit_limit
+          ;
 
-let uck=e.quotes.upper_circuit_limit;
+let uck=quote.upper_circuit_limit;
 
           // this.cl(e.quotes,'e.quotes');
 
@@ -5368,7 +5824,9 @@ try {
  
   let tgt=tgt1.toFixed(1)
  
-  targetPoint=tgt;
+
+  // this.cl(uck,'uck');
+  targetPoint=Math.min(tgt,uck);
 
 } catch (error) {
 
@@ -6720,7 +7178,11 @@ let ts=cis.tradingsymbol;
     if(typeof cis=='undefined' ){
 
       out.msg='cis undefined';
-      out.bs=false
+      out.bs=false;
+
+      let tmp=JSON.stringify(instrument_token)
+
+      this.updateMissingScriptInInstrumetsFile(tmp);
       return out;
 // this.cl('issue inside bs @6683',ts )
 //    
@@ -6803,7 +7265,7 @@ let lp=this.livePositions.find(i=>i.instrument_token==cis.instrument_token)
 this.cl('inside stop loss switch fbefore return')
 // console.log(lp);
 
-return;
+// return;
 
 let average_price=lp.average_price;
 
@@ -6850,6 +7312,10 @@ let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low && element.o
     // let exiPrice=
 
     // this.cl({livePnlOffered},cis.tradingsymbol)
+
+
+
+    this.stopLossSwitchHealth=!this.stopLossSwitchHealth;
 
       switch (true) {
 
@@ -7391,19 +7857,24 @@ getLowestOrdersPrice(buys) {
 
       
 
-        this.cl('check point 2')
+        this.cl('check point 3')
 
 let instrument_token = element.instrument_token;
 
-this.cl(instrument_token)
-let cis = this.instruments.find(i => i.instrument_token == instrument_token);
-if(!cis){
+// this.cl(instrument_token)
+
+// console.log(this.instruments.length)
+let cis = this.instruments.filter(i => i.instrument_token == instrument_token)[0];
+// this.cl(cis,'cis')
+if(typeof cis=='undefined'){
+
+  this.cl('cis undefined')
 
   return false;
 }
 
 
-this.cl('check point 2')
+this.cl('check point 4a')
 this.currentTradingsymbol=cis.tradingsymbol
 
 
@@ -7456,7 +7927,7 @@ if(bs==false){
 }
 
 
-this.cl('checkpoint 4');
+this.cl('checkpoint 4c');
           
         let hasLivetargetFromcis=cis.hasLiveTarget;
    let hasLivePositionFromcis=cis.hasLivePosition;
@@ -7756,6 +8227,8 @@ return false;
 
   data() {
     return {
+      stopLossSwitchHealth:false,
+      tradeEntrySwitchHealth:false,
       columns: [
         {
           label: "Symbol",

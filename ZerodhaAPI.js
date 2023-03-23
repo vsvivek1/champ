@@ -96,6 +96,8 @@ if(typeof o=='undefined'){
 }
 //04952355442
       try {
+
+        /// trading symbol is not there check that
         console.log('order string',o.variety,o.order_id,o.params,o.tradingsymbol,'\n','\n','\n','\n',);
 
         let modifiedOrderResult= await  kc.modifyOrder(o.variety, o.order_id, o.params) ;
