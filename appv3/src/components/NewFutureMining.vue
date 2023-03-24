@@ -2,6 +2,8 @@
   <div>
 
 
+
+
 <!-- {{ instrumentTokens }} instrumentTokens -->
 <!-- <v-btn @click="getAllOrders()">get all orders</v-btn> -->
 
@@ -1718,6 +1720,8 @@ setInterval(()=>{
     },
 
     orderCompleteProcedure(livePositions,liveOrders,cis,instrument_token,orderUpdates){
+
+      return;
 
 
       let hasLivePosition=this.livePositions.filter(i=>i.instrument_token==instrument_token).
