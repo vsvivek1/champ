@@ -3,6 +3,22 @@
 
 
 
+    <v-row>
+      <v-col>D0 &nbsp;{{instruments[0].pricePoints.d1.normalDate}}</v-col>
+     
+    </v-row>
+    <v-row>
+      <v-col>D1 &nbsp;
+
+        {{instruments[0].pricePoints.d2.normalDate}}
+      </v-col>
+  
+    </v-row>
+    <v-row>
+ 
+    </v-row>
+
+
 
 <!-- {{ instrumentTokens }} instrumentTokens -->
 <!-- <v-btn @click="getAllOrders()">get all orders</v-btn> -->
