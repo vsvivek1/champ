@@ -5243,6 +5243,8 @@ if(   this.instruments.filter(
     
     async placeTargetsForSingleScript(instrument_token,quantity) {
 
+      return;
+
 
       //fetch live orders
 
