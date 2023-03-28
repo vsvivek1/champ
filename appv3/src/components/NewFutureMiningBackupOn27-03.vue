@@ -1,6 +1,6 @@
 <template>
   <div>
-
+,
 
     <v-row v-if="instruments.length!=0 && instruments[instruments.length-2] && 
     instruments[instruments.length-2].pricePoints &&
@@ -59,16 +59,49 @@
 
 
 
+<!-- {{ instrumentTokens }} instrumentTokens -->
+<!-- <v-btn @click="getAllOrders()">get all orders</v-btn> -->
+
+<!-- <h2>Executed Trades</h2> -->
+    <!-- <table>
+      <thead>
+        <tr>
+          <th>Symbol</th>
+          <th>Buy Price</th>
+          <th>Buy Time</th>
+          <th>Sell Price</th>
+          <th>Sell Time</th>
+          <th>Profit/Loss</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(trade, index) in executedTrades" :key="index">
+          <td>{{ trade.tradingsymbol }}</td>
+          <td>{{ trade.buyPrice }}</td>
+          <td>{{ trade.buyTime }}</td>
+          <td>{{ trade.sellPrice }}</td>
+          <td>{{ trade.sellTime }}</td>
+          <td>{{ trade.profit }}</td>
+        </tr>
+      </tbody>
+    </table> -->
+    <!-- <vue-good-table :columns="columns" :rows="rows" :paginate="true" :lineNumbers="true" /> -->
+
+    <!-- {{ currentTradingsymbolAverage}}currentTradingsymbolAverage= -->
+    <!-- {{CurrentTick}} -->
 
     {{globalConsoleLogs.length}}globalConsoleLogs
     <!-- {{hourlyPricePointsofLiveDay.map(i=>i.instrument_token).length}}hourlyPricePointsofLiveDay length -->
 
-
+  <!-- {{instrumentTokens}} -->
     <v-alert >Vikram
 
+      <!-- <button @click="callFunction">Call Function</button> -->
 
-  
->
+      <ul>
+      <li v-for="(instance,index) in instances" :key="index">{{ instance }}</li>
+    </ul>
+<!-- {{indices}}indices -->
 
 
 
@@ -84,7 +117,7 @@
     </label>
 <!-- <IronCondor :instruments="instruments"></IronCondor> -->
 
-
+<!-- <Messages  :messages=userMessages ></Messages> -->
 
 
       <v-chip color="green" title="Current Check Digit">
@@ -193,19 +226,66 @@
       </div>
     </v-alert>
 
+    <!-- {{liveMargin}} -->
+<!-- {{hourlyPricePointsofLiveDay}}hourlyPricePointsofLiveDay -->
 
 
 
+<!-- {{currentTick[0]}} -->
 
 
+<v-btn @click="getProxyTotal()">get proxy total</v-btn>
 
+proxyTotal {{ proxyTotal }}
+
+{{hourlyPricePointsofLiveDay.length}}hourlyPricePointsofLiveDay.length
 
 <Margin @margin-updated="marginUpdated"></Margin>
 
 <div>
 
 
+  <table class="table">
+    <tr v-for ="(item,index) in proxyPositions1" :key="index">
+      <td>{{index+1}}</td>
+      <td> {{item.instrument.tradingsymbol}}</td>
+      <td> {{item.entryPrice}}</td>
+      <td> {{item.squaredOff}}</td>
+      
 
+      <td>
+{{item.last_price}} /
+{{item.exitPrice}} /
+{{item.instrument.lot_size}} /
+{{item.entryPrice}} /
+
+{{item.squaredOff}}
+
+
+      </td>
+      <td v-if="item.squaredOff">
+
+        {{
+          
+          
+          
+          (item.exitPrice-item.entryPrice)*item.instrument.lot_size}}
+
+      </td>
+       <td v-if="!item.squaredOff && !item.last_price==0">
+
+        {{(item.last_price-item.entryPrice)*item.instrument.lot_size}}
+
+      </td>
+
+      <td v-else> 
+        0
+      </td>
+
+
+      <td></td>
+    </tr>
+  </table>
  
 
 
@@ -232,6 +312,9 @@
 @click="placeTargetsForLiveScripts()"
 >PLACE TARGETS FOR LIVE SCRIPTS</v-btn>
 
+<v-btn @click="showStatusTable=!showStatusTable">Toggle Status table</v-btn>
+<v-btn @click="showStrategiesTable=!showStrategiesTable">Toggle Strategies table</v-btn>
+<v-btn @click="showLongtradeShortTradeTable=!showLongtradeShortTradeTable">Toggle Long trade Short Trade Table</v-btn>
 
 <v-btn @click="forceUpdateMissingScripts()">Force update Missing scripts</v-btn>
    
@@ -241,7 +324,13 @@
       Loaiding Hourly candles
     </v-alert>
     <div class="row">
- 
+      <!-- <div class="col" style="width: 50px; overflow-y: 'auto'">
+        <LiveTickView :liveScript="liveScript"></LiveTickView>
+      </div> -->
+
+      <!-- <div class="col" style="width: 50px; overflow-y: 'auto'">
+       
+      </div> -->
 
       <v-chip
         >FORGONE :{{ totalForgone.toFixed(1) }} FORGONE TARGET :{{
@@ -254,6 +343,15 @@
 
    
 
+    <!-- {{hourlyPricePointsofLiveDay}}hourlyPricePointsofLiveDay -->
+<!-- {{hourlyPricePointsofLiveDay}}hourlyPricePointsofLiveDay -->
+
+<!-- {{livePositions}}livePositions -->
+
+
+<!-- {{instrumentsDisplay}}instrumentsDisplay -->
+
+<!-- {{instruments}}instruments -->
 
 
 
@@ -272,8 +370,131 @@
 
 
 
+<table v-if="showStatusTable && instruments.length>0">
+  <tr v-for="(inst,index) in instruments" :key="index" >
+    <td>{{inst.tradingsymbol}}</td>
+
+    <td 
+    :class="{
+      'bg-danger':inst.hasLiveTarget==false,
+      'bg-success':inst.hasLiveTarget==true,
+  
+  }"
+    
+    >
+
+    hasLiveTarget
+Has Live Target {{inst.hasLiveTarget}}
+
+    </td>  <td 
+    :class="{
+      'bg-danger':inst.hasLivePosition==false,
+      'bg-success':inst.hasLivePosition==true,
+  
+  }"
+    
+    >
+Has Live Position {{inst.hasLivePosition}}
+
+    </td>
+    <td
+
+   
+    :class="{
+      'bg-danger':inst.enterNowToTrade==false,
+      'bg-success':inst.enterNowToTrade==true,
+  
+  }"
+    > 
+    <!-- {{inst.enterNowToTrade}}inst.enterNowToTrade -->
+    
+    ENTER NOW TO TRADE {{inst.enterNowToTrade}}</td>
+    <td
+    :class="{
+      'bg-danger':inst.PlacedReverseOrder==false,
+      'bg-success':inst.PlacedReverseOrder==true,
+  
+  }"
+    
+    > Placed Reverse order 
+    {{inst.PlacedReverseOrder}}
+  
+  </td>
+  </tr>
+</table>
+
+    <table v-if="typeof hourlyPricePointsofLiveDay=='object'">
+      <table v-if="showStrategiesTable">
+        <thead>
+          <th>symbol</th>
+          <th>Current long</th>
+          <th>Currlong target</th>
+          <th>Current long Stop loss</th>
+          <th>Current short</th>
+          <th>Curr short target</th>
+          <th>Current short Stop loss</th>
+        </thead>
+        <tr
+          v-for="(script, index) in hourlyPricePointsofLiveDay"
+          :key="index"
+          class="col-small"
+        >
+          <td>{{ script.instrument.tradingsymbol }}
+         <v-chip>Time
+            {{ getLatestPricePoints(script.instrument.instrument_token).dateIST}}</v-chip> 
+
+            <!-- <v-chip>LTP{{instrumentsDisplay.filter(i=>i.tradingsymbol==script.instrument.tradingsymbol)[0].last_price}}</v-chip> -->
 
 
+          </td>
+          <td>
+            {{ getLatestPricePoints(script.instrument.instrument_token).high }}
+          </td>
+          <td>
+            {{
+              getLatestPricePoints(script.instrument.instrument_token)
+                .upperBreakOutTarget
+            }}
+          </td>
+          <td>
+            {{ getLatestPricePoints(script.instrument.instrument_token).low }}
+          </td>
+
+          <td>
+            {{ getLatestPricePoints(script.instrument.instrument_token).low }}
+          </td>
+          <td>
+            {{
+              getLatestPricePoints(script.instrument.instrument_token)
+                .lowerBreakOutTarget
+            }}
+          </td>
+          <td>
+            {{ getLatestPricePoints(script.instrument.instrument_token).high }}
+          </td>
+        </tr>
+        <!-- <tr>
+          <td>NIFTY</td>
+          <td>{{ getLatestPricePoints(9604098).high }}</td>
+          <td>{{ getLatestPricePoints(9604098).upperBreakOutTarget }}</td>
+          <td>{{ getLatestPricePoints(9604098).low }}</td>
+
+       <td>{{ getLatestPricePoints(9604098).low }}</td>
+         <td>{{ getLatestPricePoints(9604098).lowerBreakOutTarget }}</td>
+          <td>{{ getLatestPricePoints(9604098).high }}</td>
+        </tr> 
+      
+      --></table>
+    </table>
+
+    <!-- NIFTY Current Long Entry {{ getLatestPricePoints(9604354).high }}
+
+    {{ getLatestPricePoints(9604354) }}
+    <hr />
+    bank nifty
+    {{ getLatestPricePoints(9604098) }} -->
+
+    <!-- v-if="typeof hourlyPricePointsofLiveDay=='object'" -->
 
     <div >
       <table v-if="false">
@@ -319,8 +540,72 @@
       </table>
     </div>
 
-  
+    <div class="row">
+      <div class="col"></div>
+      <div class="col"></div>
+    </div>
+    <table class="table table-striped" v-if="showLongtradeShortTradeTable">
+      <thead>
+        <th>#</th>
+        <th>Symbol</th>
+        <th>LTP</th>
+        <th>Long Trade</th>
+        <th>Short trade</th>
 
+       
+     
+      </thead>
+      <tbody>
+        <tr
+          v-for="(script, index) in instrumentsDisplay"
+          :key="script.instrument_token"
+        >
+          <td >
+            {{ index + 1 }}
+          </td>
+          <td v-if="script.pricePoints"
+            :class="{
+              'bg-danger':
+                script.last_price < script.pricePoints.d1.low &&
+                script.last_price != 0,
+              'bg-success': script.last_price > script.pricePoints.d1.high,
+            }"
+          >
+            {{ script.tradingsymbol }}
+          </td>
+
+          <td>
+            {{ script.last_price }}
+            
+           {{convertIsoDateToIST(getLatestPricePoints(script.instrument_token).date)}} 
+            
+            
+          </td>
+          <td>
+            Entry <small>{{ getLatestPricePoints(script.instrument_token).high }}</small> Target
+            <small>{{ getLatestPricePoints(script.instrument_token).rangeBreakOutTarget }}</small> SL
+            <small>{{ getLatestPricePoints(script.instrument_token).low }}</small> 
+            profit points
+            <small>
+              {{ getLatestPricePoints(script.instrument_token).range }}
+            </small>
+          </td>
+          <td>
+            Entry <small>{{ getLatestPricePoints(script.instrument_token).low }}</small> Target
+            <small>{{
+              getLatestPricePoints(script.instrument_token).low -getLatestPricePoints(script.instrument_token).range
+            }}</small>
+            SL <small>{{getLatestPricePoints(script.instrument_token).high }}</small>
+
+
+          Loss Points  <small>
+              {{ getLatestPricePoints(script.instrument_token).range }}
+            </small>
+          </td>
+          
+        </tr>
+      </tbody>
+    </table>
 
  
 
@@ -336,10 +621,31 @@
 
    
 
+    <!-- <div class="user-messages" v-if="userMessages.length">
+
+   
+
+     
+      
+     
+      <ul>
+        <li v-for='(msg,index) in userMessages' :key="index">
+
+          {{msg}}
+        </li>
+      </ul>
+
+
+    </div> -->
 
     {{ instrumentsFiltered.length }} out of {{ instrumentTokens.length }}
 
-
+    <!-- <input
+      type="text"
+      class="form-control"
+      v-model="targetPc"
+      placeholder="Enter the Target %"
+    /> -->
 
     <div class="row">
       <div class="col offset">
@@ -485,11 +791,51 @@
     </div>
 
    
+    <!-- :class="{ 'red': pos.candle_color=='red', 'green': pos.candle_color=='green' }" -->
+    <!-- <ul>
+      <li v-for="i in instruments" :key="i.instrument_tocken">
+        {{ i }} 
+      </li>
+    </ul> -->
+
+    <!-- <b-modal v-model="modalShow">
+      <slot name="header"> geader </slot>
+      <slot name="body">
+        <table>
+          <tr v-for="(symbol, index) in livePositionsSelected" :key="index">
+            <td>{{ index + 1 }}</td>
+            <td>{{ symbol.tradingsymbol }}</td>
+            <td>{{ symbol.pnl }}</td>
+            <td>
+              <input
+                type="checkbox"
+                name=""
+                id=""
+                class="form-control"
+                v-model="symbol.selected"
+              />
+
+              {{ symbol.selected }}
+            </td>
+          </tr>
+        </table>
+      </slot>
+
+      <slot name="footer">
+        <v-btn @click="squareoffAll()">Proceed </v-btn>
+      </slot>
+    </b-modal> -->
+
+    <!-- <LogWindow /> -->
   </div>
 </template>
 
 <script>
-
+// const originalConsoleLog = console.log;
+// console.log = (...args) => {
+//   store.dispatch('addLog', args.join(', '));
+//   // originalConsoleLog.apply(console, args);
+// };
 
 import { tradingMixin } from './tadingMixin';
 import VueGoodTable from "vue-good-table";
@@ -575,7 +921,6 @@ var hourlyPricePointsofLiveDay1 ;
 var cl;
 
 import newFutureMiningMixin from './newFutureMiningMixin';
-// import { timingSafeEqual } from 'crypto';
 
 export default {
   
@@ -794,10 +1139,63 @@ mounted(){
              this.sendToTelegramGroup(txt);
            });
          }
+         // this.triggerWebsocktsInServer();
+     
+         //  window.setInterval(() => {
+         //   console.clear();
+     
+         //    },250000)
+     
+         // window. setInterval(() => {
+         //     var d = new Date();
+         //     this.hours = d.getHours();
+         //     this.minutes = d.getMinutes();
+         //     this.seconds = d.getSeconds();
+     
+         //  },1000)
+     
+         // this.getOrders();
+     
+         // if (this.livePositions.length > 0) {
+         //   // this.getHourlyCandleLows();
+         // }
         
+     
+     // (async ()=>{
+     
+     //   let kk=await    this.setInstrumentTokens();
+     
+     // })();
+     
      
          
      
+         //  let tmp=[...this.instrument_tokens,14523906]
+     
+         //  this.cl(this.instrumentTokens,111);
+     
+       
+     // (async ()=>{
+     
+     
+     //   // let instrumentsForMining1 =await this.requireJson("../../../instruments/" + this.setter)//.then(r=>r.json())
+     //   let instrumentsForMining1 =await this.requireJson("../../../instruments/instrumentsForMining.json")//.then(r=>r.json())
+     
+     
+     //   let instrumentsForMining = instrumentsForMining1
+     //   .filter(
+     //     (i) =>  true
+         
+     //   )
+     //   .filter((item, index, arr) => arr.indexOf(item) === index);
+     
+     
+     //   this.instruments=[...instrumentsForMining];
+     //     this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
+     
+     
+     
+     // })()
          
      
        
@@ -805,7 +1203,7 @@ mounted(){
          socket.on("send-realtime-subscription", (s) => {
      
      
- 
+           // this.cl('inside send-realtime-subscription');
            this.mutateWithLtp(s);
      
            this.CurrentTick = [...s];
@@ -857,13 +1255,42 @@ mounted(){
      
         
      
+     //// if entry order executed 
+     ///placce reverse order
      
+     //if reverse order executed 
+     
+     ///rest everything 
+     
+     
+     //       if (true) {
+            
+     
+     //         if (this.refreshingStatus == true) {
+     //           this.cl("update in progress");
+     
+     //           return false;
+     //         }
+     //         this.refreshingStatus = true;
+     
+     // // let t = await this.refreshTradeStatus();
+     
+     // if(orderUpdates.status=="COMPLETE" || orderUpdates.status=="CANCELLED"){
+     
+     // // let t = await this.placeTargetsForLiveScripts();
+     // }
+             
+     
+     //         this.refreshingStatus = false;
+     //       }
      
      
          });
      
-    
-
+         //   setInterval(async () => {
+         //  this.getOrders;
+     
+         //   }, 30000);
 
 },
 
@@ -1002,28 +1429,6 @@ if(typeof this.livePositions =='undefined' ){
 
   components: { ClosedTrades, LiveTickView, LiveOrders,Margin,LivePos,IndicesTable,Messages,IronCondor , VueGoodTable, },
   methods: {
-
-    async sendTradeStrategy(tradingSymbol,buyPrice,quantity,strategyName) {
-    const now = new Date(); // Get the current date and time
-    const date = now.toISOString().slice(0, 10); // Get today's date in yyyy-mm-dd format
-    const timeOfBuy = now.toLocaleString('en-US', { hour12: false }); // Get the current time in 24-hour format as hh:mm:ss
-    const url = '/api/writeTradeStrategy';
-    const params = {
-      accessToken: this.accessToken,
-      tradingSymbol: tradingSymbol,
-      timeOfBuy: timeOfBuy,
-      buyPrice: buyPrice,
-      quantity: quantity,
-      strategyName: strategyName,
-      Date: date
-    };
-    try {
-      const response = await axios.post(url, params);
-      console.log(response.data,'rsult of mongose save of trade');
-    } catch (error) {
-      console.error(error);
-    }
-  },
 
 storeTradeDataInLocalStrorage(newTradingObj){
   let today = new Date().toISOString().slice(0, 10);
@@ -3643,7 +4048,7 @@ checkCandlePattern(d0, d1) {
 
 if( !element  || !cis || !cis.pricePoints || !cis.pricePoints.d1 || !cis.pricePoints.d1.high){
 
-  this.cl('cis or element undefined for inside trade entry',instrument_token);
+  this.cl('cis or element undefined for',instrument_token);
 
   return false;
 }
@@ -3671,7 +4076,7 @@ if( !element  || !cis || !cis.pricePoints || !cis.pricePoints.d1 || !cis.pricePo
 
         
         if(filter==false){
- this.cl('filter false',ts)
+//  this.cl('filter false',ts)
           return false
         }
 //  this.cl('after filter')
@@ -3806,7 +4211,7 @@ if(!element || !element.depth || !element.depth.buy )
 {
 
 
-  this.cl('element issue inside trade entry')
+  this.cl('element issue')
 return;
  
 
@@ -3814,20 +4219,13 @@ return;
 
 
 let buys=element.depth.buy;
-
-if(buys =='undefined'){
-
-  this.cl(element,'element no bus ibside trade entry',instrument_token);
-}
 // console.log('buys');
 
 // let {highestOrdersPrice, secondHighestOrdersPrice}=this. getHighestOrdersPrice(sells);
 let { secondLowestOrdersPrice}=this. getLowestOrdersPrice(buys);
 
 if(secondLowestOrdersPrice==-1){
-
-
-this.cl('issue with secondLowestOrdersPrice for inside trade entry function',cis.tradingsymbol,element.depth.buy)
+this.cl('issue with secondLowestOrdersPrice for',cis.tradingsymbol)
   return false;
 }
 
@@ -3854,7 +4252,7 @@ if( (this.hours==15) && this.minutes>15 ){
 
 if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99){
 
-  console.log(ts,'is seems to be at higest price close from inside trade entry function');
+  // console.log(ts,'is seems to be at higest price close');
 
   todayLastPriceHigh=true
 }
@@ -3877,7 +4275,6 @@ this.cl('reaehed switch3331')
 
 
 this.tradeEntrySwitchHealth=!this.tradeEntrySwitchHealth;
-
 
 switch(true){
 
@@ -3907,8 +4304,6 @@ this.proceedForEntry(
              "long"
            );
 
-
-this.sendTradeStrategy(cis.tradingsymbol,e3,cis.lot_size,'yesterDayCloseStrategy')
 
 
   break;
@@ -3941,9 +4336,6 @@ this.proceedForEntry(
            );
 
            this.cl('safe','todayLastPriceHigh')
-
-           this.sendTradeStrategy(cis.tradingsymbol,e2,cis.lot_size,'todayLastPriceHigh')
-
 
   break;
 
@@ -3980,8 +4372,6 @@ this.proceedForEntry(
               "long"
             );
             this.cl('safe','todayLastPriceHigh')
-
-            this.sendTradeStrategy(cis.tradingsymbol,e1,cis.lot_size,'todayLastPriceHigh')
 break;
 
 
@@ -4019,8 +4409,6 @@ entry=Math.min(secondLowestOrdersPrice,element.last_price);
 //               "long"
 //             );
 //             this.cl('safe','closingMovingAverageCondition')
-
-this.sendTradeStrategy(cis.tradingsymbol,entry,cis.lot_size,'closingMovingAverageCondition')
 
 break;
 
@@ -6928,8 +7316,8 @@ let livePnlHere=(last_price-average_price)*qty;
 
 
 
-    let maxOfYdayTodayLow=(last_price<=
-Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) && this.hours>10);
+    let maxOfYdayTodayLow=last_price<=
+Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low);
 
 // let daySqOff=((this.hours==15) && (livePnlOffered>500) && false);
 
@@ -7420,7 +7808,6 @@ getLowestOrdersPrice(buys) {
 
   if(typeof buys =='undefined'){
 
-this.cl('buys undefined so -1');
     return {
       lowestOrdersPrice,
       secondLowestOrdersPrice
@@ -7447,8 +7834,6 @@ this.cl('buys undefined so -1');
 
 
       if (p.length==0){
-        secondLowestOrdersPrice=lowestOrdersPrice;
-
         return {
       lowestOrdersPrice,
       secondLowestOrdersPrice
