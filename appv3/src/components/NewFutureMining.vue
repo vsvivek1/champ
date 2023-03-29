@@ -3460,6 +3460,8 @@ let pp= this.indices.find(i=>i.tradingsymbol==index)
 
 // return pp.pricePoints.d0;
 // this.cl(pp.last_price);
+
+let res={};
 if(pp.last_price!=0){
 
   
@@ -3475,10 +3477,10 @@ if(pp.last_price!=0){
         let changePc=changePc1.toFixed(2)
 
 
-        let res={};
+      
 
         res.changePc=changePc
-        res.change=change
+        res.change=Math.abs(change)
         res.open=pp.pricePoints.d0.open
         res.low=pp.pricePoints.d0.low
         res.high=pp.pricePoints.d0.high
@@ -3491,28 +3493,24 @@ return res
 
 }else{
 
+  let changePc=0
 
 
-{
-  
-  // this.cl(res,'from nifty status');
+      
+
+res.changePc=0
+res.change=0
+res.open=0
+res.low=0
+res.high=0
+res.close=0
+
+// this.cl(res,'from nifty status')
+
+this.$set(pp,'indexStatus',res)
+return res
 
 
-  let o=
-   {
-
-
-
-    changePc:'na',
-    change:'na',
-
-}
-this.$set(pp,'indexStatus',o)
-
-
-return ob;
-
-}
 
 }
 
@@ -3644,6 +3642,10 @@ checkCandlePattern(d0, d1) {
 },
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
+
+      let a=  this.checkNiftyStatus("NIFTY 50");
+      this.cl(a,'index status')
+
 
         // return;
 
