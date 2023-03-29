@@ -2,46 +2,21 @@
     <div>
 <!-- {{ indices }} -->
 
-    <table class="table table compact table bordered">
-        <thead>
-            <th>#</th>
-            <th>index</th>
-            <th>LTP</th>
-            <th>Range</th>
-            <!-- <th>Change%</th> -->
-        </thead>
-        <tbody>
-            <tr v-for="(i,index) in indices" :key="index">
-                <td>{{index+1}}</td>
-                <td>
-                    
-                    {{i.tradingsymbol}}
-
-               ({{i.instrument_token }}) 
-
-            <!-- {{i.pricePoints.d1}} -->
-                
-            
-            </td>
-                <td>
-
-{{i.last_price}}
-
-                </td>
-                <td>
-
-                    {{i.pricePoints.d0.range}}
 
 
+<ul>
 
+  <li v-for="(i, index) in indices" :key="index">
+ 
+   {{index+1}} 
+        {{i.tradingsymbol}} -
+        ({{i.instrument_token}}) -
+     {{i.last_price}} -
+   {{i.pricePoints.d0.range}}
+  
+  </li>
+</ul>
 
-
-
-                </td>
-                <!-- <td></td> -->
-            </tr>
-        </tbody>
-    </table>
 
     </div>
 </template>

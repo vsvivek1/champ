@@ -246,6 +246,29 @@ app.post('/api/getHourlyCandleLows', async (req,res) =>{
 });
 
 
+const TradeStrategy = require('./models/tradeStrategy');
+
+app.post('/api/writeTradeStrategy', async (req, res) => {
+  const { accessToken, tradingSymbol, timeOfBuy, buyPrice, quantity, strategyName, Date } = req.body;
+
+
+  try {
+    const tradeStrategy = new TradeStrategy({
+      accessToken,
+      tradingSymbol,
+      timeOfBuy,
+      buyPrice,
+      quantity,
+      strategyName,
+      Date
+    });
+    await tradeStrategy.save();
+    res.status(201).send('Trade strategy saved successfully');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal server error');
+  }
+});
 
 
 

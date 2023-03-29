@@ -3291,7 +3291,13 @@ return false
             o.exchange == this.itype &&
             (o.status == "OPEN" ||
               o.status == "AMO" ||
-              o.status == "AMO REQ RECEIVED");
+              o.status == "AMO REQ RECEIVED"
+
+              || o.status=="MODIFY AMO REQ RECEIVED"
+              
+              
+              
+              );
 
           return result;
         });
@@ -5116,7 +5122,7 @@ if(this.placingReverseOrderInProgress==true){
 
   let code='reverseOrderBeingPlaced';
   let msg='reverse order is being placed please wait...'
-  this.triggerAlert(code,msg)
+  // this.triggerAlert(code,msg)
   
   return false;
 }
@@ -5161,7 +5167,7 @@ let lp=await this.getPositions();
 
 
 
-await this.getPositions();  
+// await this.getPositions();  
 
 
 
@@ -5254,7 +5260,9 @@ return;
 
           if(liveOrderInstruments.includes(instrument_token)){
 
-//this.cl('alrady have reverse order',instrument_token)
+this.cl('alrady have reverse order',instrument_token)
+
+// continue;
           }
 
           if(!liveOrderInstruments.includes(instrument_token)){
