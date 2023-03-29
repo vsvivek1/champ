@@ -3643,9 +3643,18 @@ checkCandlePattern(d0, d1) {
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
 
-      let a=  this.checkNiftyStatus("NIFTY 50");
+        let a=  this.checkNiftyStatus("NIFTY 50");
       this.cl(a,'index status')
 
+      let niftyFavorable=false
+      if(a.change>100){
+
+        niftyFavorable=true;
+
+      
+      }
+
+      this.cl('nifty favorable',niftyFavorable)
 
         // return;
 
@@ -3802,7 +3811,8 @@ this.cl(closingMovingAverageCondition,'closingMovingAverageCondition2')
 
 let ohlc=element.ohlc;
 let lp1=element.last_price;
-let isOpenLow=this.isOpenLow(ohlc,cis,lp1);
+let isOpenLow1 =this.isOpenLow(ohlc,cis,lp1);
+let isOpenLow =isOpenLow1 && niftyFavorable;
 
 
 
@@ -3873,7 +3883,8 @@ if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.
 // this.cl('before yesterDayCloseStrategy')
 
 
-let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high && false ) //ned some other cond//&& element.last_price<element.ohlc.high)
+let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high &&
+ niftyFavorable ) //ned some other cond//&& element.last_price<element.ohlc.high)
 // let newTradingObj=this.newTradingObj;
 // newTradingObj.tradingsymbol=ts;
 // newTradingObj.buyTime=new Date();
@@ -3881,16 +3892,19 @@ let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high && false 
 
 this.cl('reaehed switch3331')
 
+
+
 // console.log(typeof yesterDayCloseStrategy,ts)
 
 
 this.tradeEntrySwitchHealth=!this.tradeEntrySwitchHealth;
 
 
+
 switch(true){
 
 
-  case yesterDayCloseStrategy:
+  case yesterDayCloseStrategy :
 
  
 
