@@ -7790,11 +7790,11 @@ if((PlacedReverseOrder!=true  &&  hasLiveTarget != true)){
 
 
 
-
+        this.cl('here before entre trade',cis.enterNowToTrade)
         if (cis.enterNowToTrade == false) {
 
 
-          // this.cl('inside trade entry ')
+           this.cl('inside trade entry after cis entry trade ')
 
 //  this.cl('inside trade entry ');
 let inst=cis;
@@ -7803,13 +7803,15 @@ let isHigherLows=this.higherLowsCheck(cis);
 
 
 
+this.cl('higher lows check',isHigherLows)
+
 if(!isHigherLows){
 
   return false
 }
 
 
-
+this.cl('before hours chk 7812')
 
 if(this.hours<10){
 
@@ -7817,6 +7819,8 @@ if(this.hours<10){
 
   return;
 }
+
+this.cl('reached before trade entry fn')
 this.tradeEntry(instrument_token,inst,cis,element) 
 
 // return ;

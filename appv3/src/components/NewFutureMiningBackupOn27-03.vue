@@ -2587,7 +2587,7 @@ price=element.last_price;
 
       
 
-    console.log('from this fumnction');
+    console.log('from this fumnction uptred sell order withltp');
       await this.getOrders();
       await this.getPositions();
 // this.SelectedSellorder=
@@ -2631,8 +2631,7 @@ params.order_type="SL"
 }).filter(k=>k!=null);
 
 this.cl(this.newOrder,'as2');
-
-// this.updateOrder();
+this.updateOrder();
 
 // let t = await this.getOrders();
 //       let tmp = this.updatingInProgress;
@@ -2657,12 +2656,14 @@ this.cl(this.newOrder,'as2');
       params.ordersString = ordersString;
       let url = "/api/modifyOrders";
 
+      console.log(url,'url');
+
       axios.post(url, params).then((res) => {
 
 
-      //  console.l
+     console.lof(res,'update order res')
       
-      // this.cl('orders modify reply',res.data)
+   this.cl('orders modify reply',res.data)
 
         this.getOrders(); //refreshing orders
       });
