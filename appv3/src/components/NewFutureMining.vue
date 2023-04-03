@@ -2211,9 +2211,9 @@ let o={};
     o.variety='regular';
     o.order_id=i.order_id;
     let params={};
-      params.price=lp.last_price-.15;
+      params.price=lp.last_price//-.15;
 
-params.trigger_price=lp.last_price-15;
+params.trigger_price=lp.last_price//-15;
 params.order_type="SL"
     o.params=params;
     // this.cl('o',o)
@@ -2226,6 +2226,8 @@ params.order_type="SL"
 }).filter(k=>k!=null);
 
 this.cl(this.newOrder,'as2');
+
+console.log(this.newOrder.length,'new order length')
 
 // this.updateOrder();
 
@@ -3900,7 +3902,7 @@ this.cl('reaehed switch3331')
 this.tradeEntrySwitchHealth=!this.tradeEntrySwitchHealth;
 
 
-let dailyRangeBreakOut=(this.hours>10 && element.last_price>=cis.pricePoints.d0.high);
+let dailyRangeBreakOut=(this.hours>9 && element.last_price>=cis.pricePoints.d0.high && cis.pricePoints.d0.high!=0);
 
 if(dailyRangeBreakOut)
 {
@@ -3908,11 +3910,42 @@ if(dailyRangeBreakOut)
   this.cl('daily range break out',ts)
 }
 
+if(element.last_price<1){
+
+  this.cl('no trading of sub 1 scripts')
+
+return ;
+}
+
 
 
 
 
 switch(true){
+
+
+  case dailyRangeBreakOut:  this.cl('safe','daily range break out')
+
+let e4=Math.min(secondLowestOrdersPrice,element.last_price,cis.pricePoints.d0.high);
+
+
+this.cl('daily range break out ',ts)
+
+this.proceedForEntry(
+           instrument_token,
+           cis,
+           element,
+           e4,
+           "long"
+         );
+
+
+this.sendTradeStrategy(cis.tradingsymbol,e3,cis.lot_size,'daily range break out')
+
+
+
+
+  break;
 
 
   case yesterDayCloseStrategy :
@@ -5287,7 +5320,7 @@ return;
 
           if(liveOrderInstruments.includes(instrument_token)){
 
-this.cl('alrady have reverse order',instrument_token)
+// this.cl('alrady have reverse order',instrument_token)
 
 // continue;
           }
