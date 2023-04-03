@@ -3900,6 +3900,17 @@ this.cl('reaehed switch3331')
 this.tradeEntrySwitchHealth=!this.tradeEntrySwitchHealth;
 
 
+let dailyRangeBreakOut=(this.hours>10 && element.last_price>=cis.pricePoints.d0.high);
+
+if(dailyRangeBreakOut)
+{
+
+  this.cl('daily range break out',ts)
+}
+
+
+
+
 
 switch(true){
 
@@ -6982,6 +6993,13 @@ let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low && element.o
 
     this.stopLossSwitchHealth=!this.stopLossSwitchHealth;
 
+if(this.hours<10){
+
+
+  this.cl('stop loss switch not active before 10')
+  return false
+}
+
 
     this.cl('stop loss switchx')
       switch (true) {
@@ -7373,7 +7391,7 @@ let openLow=open==low;
 
 let lossCheck= ((lp-low)*cis.lot_size)<1000
 
-let hrsCheck=this.hours>=12;
+let hrsCheck=this.hours>=10;
 
 
 if(openLow && lossCheck && hrsCheck){

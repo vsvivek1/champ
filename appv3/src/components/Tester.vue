@@ -2,15 +2,49 @@
     <div>
 
       <!-- {{ scriptsWithCondition }} -->
-        <h2> total scritps {{scriptsWithCondition.length}}scriptsWithCondition. gain  {{ scriptsWithConditionGain }}</h2>
+        <!-- <h2> total scritps {{scriptsWithCondition.length}}scriptsWithCondition. gain  {{ scriptsWithConditionGain }}</h2> -->
+    
+    
+    
+    
         <!-- <h2> total scritps {{scriptsWithCondition.length}}scriptsWithCondition. gain  {{ scriptsWithConditionGain }}</h2> -->
 
-        <h1>Gain ratio {{ gainRatio }}</h1>
+        <!-- <h1>Gain ratio {{ gainRatio }}</h1>
         <vue-good-table :columns="columns" 
         
-        :rows="scriptsWithCondition" :paginate="true" :lineNumbers="true" />
+        :rows="scriptsWithCondition" :paginate="true" :lineNumbers="true" /> -->
 
 
+
+
+        <table>
+          <tr v-for="(win,index) in winners1" :key="win.instrument_token">
+            <td>
+{{ index+1 }}
+
+            </td>
+            <td>
+
+              <a :href="win.chart" target="_blank">{{ win.tradingsymbol }}</a>
+              
+            </td>
+            <td>
+
+              {{ win.ohlc.open }}
+
+            </td>
+            <td>
+              {{ win.last_price }}
+
+
+            </td>
+            <td>
+
+{{ (win.last_price-win.ohlc.open)*win.lot_size }}
+
+            </td>
+          </tr>
+        </table>
 
     </div>
 </template>
@@ -51,6 +85,14 @@ await  fetch("../../../instruments/instrumentsForMining.json")
     export default {
 
         computed:{
+
+
+          winners1(){
+
+            return this.winners.sort((a,b)=>b.gain-a.gain)
+
+
+          },
             gainRatio() {
     const numObjects = this.scriptsWithCondition.length;
     const numGains = this.scriptsWithCondition.filter(object => object.gain >= 0).length;
@@ -65,31 +107,58 @@ await  fetch("../../../instruments/instrumentsForMining.json")
 
         methods:{
 
+gainers(s){
 
+s.forEach(e=>{
+
+
+  let cis=this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0];
+  if(
+    
+  e.last_price>e.ohlc.open
+  
+  && e.ohlc.open!=0
+
+  && cis.pricePoints.d1.high<e.last_price
+  ){
+
+
+
+    cis.ohlc=e.ohlc;
+    cis.last_price=e.last_price
+    cis.gain=(e.last_price-e.ohlc.open) *cis.lot_size
+    if(!this.winners.includes(cis)){
+
+      
+      {
+
+
+        this.winners.push(cis)
+
+      }
+
+
+    }
+
+
+  }
+
+
+})
+
+
+},
   
             setInstrumentTokens() {
 
    
 
     
-// return new Promise((res, rej) => {
-
-//     this.instrumentTokens = this.hourlyPricePointsofLiveDay.map((i) =>
-//     parseInt(i.instrument_token)
-//   );
 
 
 let tokn=this.instruments.map(i=>parseInt(i.instrument_token))
 
   socket.emit("subscribe-orders", JSON.stringify(tokn));
-
-//   res(true);
-//      return;
-
-
-  
-// });
-
 
 },
 
@@ -136,7 +205,7 @@ async generateSignals(s){
 
 
 
-      console.log(this.instruments,'this.instruments')
+      // console.log(this.instruments,'this.instruments')
 
 
 
@@ -384,6 +453,8 @@ this.scriptsWithConditionGain=this.scriptsWithCondition.reduce( (pvs,cur)=>pvs+c
 
         return{
 
+          winners:[],
+
             gainLoss:-1,
             scriptsWithCondition:[],
             scriptsWithConditionGain:-1,
@@ -454,7 +525,9 @@ columns: [
 
  socket.on("send-realtime-subscription", (s) => {
 
-this.generateSignals(s)
+// this.generateSignals(s)
+
+this.gainers(s);
 this.CurrentTick = [...s];
 });
         }
