@@ -74,7 +74,7 @@ let instrus=JSON.parse(instrument_token_arr);
 
 console.log(instrus,'instrus');
 
-return;
+// return;
 
 
 let targetInstru=require('./appv3/public/instruments/instrumentsForMining.json');

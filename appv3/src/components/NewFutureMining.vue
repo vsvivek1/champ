@@ -2,10 +2,18 @@
   <div>
 
 
-    <v-row v-if="instruments.length!=0 && instruments[instruments.length-2] && 
-    instruments[instruments.length-2].pricePoints &&
-    instruments[instruments.length-2].pricePoints.d1">
-      <v-col>D0 &nbsp;{{instruments[instruments.length-2].pricePoints.d1.normalDate}}</v-col>
+    {{ instruments.length }} ln
+
+    <v-row v-if="instruments.length!=0 && instruments[0] && 
+    instruments[0].pricePoints &&
+    instruments[0].pricePoints.d1">
+      <v-col>
+        {{ instruments[0].tradingsymbol }}
+        
+        D0
+        
+        
+        &nbsp;{{instruments[0].pricePoints.d1.normalDate}}</v-col>
 
       <v-col>D1 &nbsp;
 
@@ -580,21 +588,31 @@ import newFutureMiningMixin from './newFutureMiningMixin';
 export default {
   
 mounted(){
-  const urlForMiningInstruments="../../../instruments/instrumentsForMining.json"
-  fetch(urlForMiningInstruments).then(r=>r.json()).then(d=>
-  {
 
-    this.instruments=d;
+  this.fetchInstruments(); 
 
-    this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
+  setInterval(()=>{
 
-    socket.emit("subscribe-orders", JSON.stringify(this.instrumentTokens));
+this.updateSelectedSellorderWithLtp();
 
-  }
+  },10*60*1000)
+
+
+  // const urlForMiningInstruments="../../../instruments/instrumentsForMining.json"
+  // fetch(urlForMiningInstruments).then(r=>r.json()).then(d=>
+  // {
+
+  //   this.instruments=d;
+
+  //   this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
+
+  //   socket.emit("subscribe-orders", JSON.stringify(this.instrumentTokens));
+
+  // }
  
   
   
-  )
+  // )
 
   var urlForHourlyCandles="../../../instruments/hourlyCandleData.json";
 
@@ -1649,20 +1667,7 @@ var instruments=await requireJson(urlForMiningInstruments);
 
 console.log(instruments,'inst')
 
-// await fetch(urlForMiningInstruments)
-//   .then(response => response.json()) // Convert the response to a JSON object
-//   .then(data => {
-//     // Store the JSON data in a variable
 
-  
-//     instruments = data;
-
-//     // Do something with the jsonData variable
-//     // console.log(instruments);
-//   })
-//   .catch(error => console.error(error));
-
-// let instrumentsForMining1 =instruments;
 
 
   let instrumentsForMining = instruments
@@ -2178,6 +2183,17 @@ price=element.last_price;
       // .map(o=>{});
     },
 
+    checkStopLossPriceRange(price, reducedPrice) {
+  var lowerRange = reducedPrice - (reducedPrice * 0.04);
+  var upperRange = reducedPrice + (reducedPrice * 0.04);
+  
+  if (price >= lowerRange && price <= upperRange) {
+    return true;
+  } else {
+    return false;
+  }
+},
+
   async   updateSelectedSellorderWithLtp(){
 
       
@@ -2185,59 +2201,116 @@ price=element.last_price;
     console.log('from this fumnction');
       await this.getOrders();
       await this.getPositions();
-// this.SelectedSellorder=
-// this.newOrder=
-// o.selected==true &&
 
-// console.log(this.liveOrders.length);
-console.log(this.allOrders,'allorders');
 
+let validOrders=this.allOrders.filter(lo=>
+{
+
+  let st=(lo.status=='COMPLETE' ||
+lo.status=='REJECTED' ||
+lo.status=='CANCELLED' ||
+lo.status=='CANCEL PENDING' 
+)
+
+
+
+return !st;
+
+}
+
+
+
+
+)
+
+
+
+const count = this.livePositions.filter(pos => pos.pnl > 2000).length;
+console.log(`Number of positions with PnL greater than 2000: ${count}`);
 this.newOrder =
-this.liveOrders.filter(o=> o.transaction_type=="SELL").map(i=>{
+// this.liveOrders.filter(o=> o.transaction_type=="SELL").map(i=>{
+  validOrders.filter(o=> o.transaction_type=="SELL").map(i=>{
 
-// console.log(i,'i')
+
 let lp =this.livePositions.find(j=>j.instrument_token==i.instrument_token)
 
-// console.log(lp,'lp')
 
-if(lp){
+
+
+
+
+const reducedPrice = (lp.last_price * 0.95).toFixed(1);
+  let inRange=false;
+  if(i.status=='TRIGGER PENDING'){
+
+    let inRange=true;
+    let currentStopLossPrice=i.price;
+    let proposedSopLossPrice=reducedPrice;
+
+    if(
+      // proposedSopLossPrice>=currentStopLossPrice*.95 &&
+      proposedSopLossPrice<=currentStopLossPrice*1.04 
+      
+      ){
+        inRange=true
+
+      }else{
+
+        inRange=false
+      }
+
+
+    console.log(i.tradingsymbol,'order in range is is',inRange,
+    
+    'that is ',proposedSopLossPrice,'is less than higher range of ',currentStopLossPrice*1.04,' and current stop loss is',
+    currentStopLossPrice
+
+    )
+  
+
+
+  }
+
+
+if(lp.pnl>1000 && !inRange){
 
 let {buy_price,buy_quantity,pnl}=lp;
 
-if(true){
+ 
 
 let o={};
     // o.variety=i.variety;
     o.variety='regular';
     o.order_id=i.order_id;
     let params={};
-      params.price=lp.last_price//-.15;
+      params.price=reducedPrice;
 
-params.trigger_price=lp.last_price//-15;
+params.trigger_price=reducedPrice;
 params.order_type="SL"
     o.params=params;
+
+
+    console.log(lp.tradingsymbol,lp.pnl,o)
     // this.cl('o',o)
     return o;
-}
+
  
 }
 
 
 }).filter(k=>k!=null);
 
-this.cl(this.newOrder,'as2');
+// this.cl(this.newOrder,'as2');
 
 console.log(this.newOrder.length,'new order length')
+  // this.updateOrder();
 
-// this.updateOrder();
-
-// let t = await this.getOrders();
-//       let tmp = this.updatingInProgress;
+ let t = await this.getOrders();
+//  this.updatingInProgress;
 
 // this.cl(a,'as');
 
-
-// this.updateOrder();
+  this.updateOrder();
 
 // .map(o=>{});
 
@@ -2410,11 +2483,11 @@ console.log(this.newOrder.length,'new order length')
      return  axios.post(url, params).then(async (r) => {
 
       
-       let instruments = await fetch("../../../instruments/instrumentsForMining.json").then(r=>r.json());
+      //  let instruments = await fetch("../../../instruments/instrumentsForMining.json").then(r=>r.json());
 
 
-       console.log(instruments,'from here')
-        this.$set(this.instruments, instruments);
+      //  console.log(instruments,'from here')
+      //   this.$set(this.instruments, instruments);
         //  Object.assign(this.instruments, instruments)
 
         this.livePositions.forEach((e) => {
@@ -3297,6 +3370,7 @@ return false
 
               || o.status=="MODIFY AMO REQ RECEIVED"
               
+              ||o.status === "PUT ORDER REQ RECEIVED" || o.status === "VALIDATION PENDING" || o.status === "OPEN PENDING" || o.status === "MODIFY VALIDATION PENDING" || o.status === "MODIFY PENDING" || o.status === "TRIGGER PENDING"  || o.status === "AMO REQ RECEIVED"
               
               
               );
@@ -4942,7 +5016,7 @@ if(   this.instruments.filter(
     
     async placeTargetsForSingleScript(instrument_token,quantity) {
 
-      return;
+       return;
 
 
       //fetch live orders
@@ -4989,10 +5063,13 @@ if(e1.length==0){
 let e=e1[0]
 
   // this.cl({lo})
-      let liveReverseOrder=this.liveOrders.filter(i=>i.instrument_token==instrument_token 
+      let liveReverseOrder=this.allOrders.filter(i=>i.instrument_token==instrument_token 
  && i.quantity!=0
 );
 
+let allOrders=this.allOrders;
+console.log({allOrders})
+return;
 
 // this.cl({liveReverseOrder})
 if (liveReverseOrder.length>0){
@@ -5173,7 +5250,11 @@ if(noTargetArray.length==0){
 },
 
     async placeTargetsForLiveScripts() {
-// return ;
+
+      //TARGETSFORLIVESCRIPTS
+
+      //TARGETS
+//  return ;
 
 
 if(this.placingReverseOrderInProgress==true){
@@ -5257,19 +5338,14 @@ this.cl('reverse order tallied')  /// change with oindividual
          return false;
       }
 
-      // if (this.refreshingTradeStatus == true) {
-      //    this.cl("trade status is being refreshe before placing order");
-      //   this.placingReverseOrderInProgress=false;
-      // return false
-      // }
-
+ 
 
    
 
       
 
       let symbols = [...this.livePositions.filter(lp=>lp.quantity>0)];
-// this.cl(symbols,'symbols here');
+
       let ln = symbols.length;
 
       if (ln == 0) {
@@ -5278,9 +5354,8 @@ this.cl('reverse order tallied')  /// change with oindividual
         return false;
       }
 
-      // this.cl(this.livePositions,'this.livePositions')
 
-      //  this.cl(symbols, "symbols");
+
       if (typeof symbols == "undefined") return false;
      
 
@@ -5635,14 +5710,26 @@ new Promise(async (res,rej)=>{
       axios.post(url, obj);
     },
 
-    FetchInstruments() {
-      const url = "/api/FetchInstruments";
 
-      let obj = {};
-      obj.accessToken = this.accessToken;
+    fetchInstruments() {
+      // Fetch instruments from back end API
+      axios.post('/api/FetchInstruments')
+      .then(response => {
+        this.instruments = response.data;
+      })
+      .catch(error => {
+        console.log(error);
+      });
+      },
 
-      axios.post(url, obj);
-    },
+    // FetchInstruments() {
+    //   const url = "/api/FetchInstruments";
+
+    //   let obj = {};
+    //   obj.accessToken = this.accessToken;
+
+    //   axios.post(url, obj);
+    // },
     async enterNowToTrade(i) {
       let tradingsymbol = i.tradingsymbol;
       let lot_size = i.lot_size;
@@ -6957,6 +7044,7 @@ let ts=cis.tradingsymbol;
    
     stopLossTargetSwitch(quantity,last_price,high,low,bidPrice,offerPrice,cis,element,livePnlOffered){
        
+      // return;
       //stopLossSwitch
       //stoplossswitch
   //updateStopLossTarget
@@ -7046,7 +7134,7 @@ console.log('yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol)
            cis,
            element,
            false,
-           last_price
+           cis.pricePoints.d1.low
          );
       
 
@@ -7548,7 +7636,7 @@ this.cl('buys undefined so -1');
 
 
     mutateWithLtp(s) {
-//  return;
+  // return;
      
        this.heartBeatAndCurrentCheckDigit()
 
@@ -7593,7 +7681,7 @@ let cis = this.instruments.filter(i => i.instrument_token == instrument_token)[0
 // this.cl(cis,'cis')
 if(typeof cis=='undefined'){
 
-  this.cl('cis undefined')
+  this.cl('cis undefined',instrument_token)
 
   return false;
 }
