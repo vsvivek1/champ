@@ -175,16 +175,7 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	    
 	    ))
 	
-	    // && j.instrument_type == "FUT"   && ( j.name== "NIFTY" || j.name== "BANKNIFTY") 
-	
-	  // let jsonObj1=jsonObjMultiple.filter((curr,index,arr)=>arr.indexOf(curr=>curr.instrument_token==)
-	  
-	  
-	  // ==index)
-	
-	
-	  //   ;
-	  // let jsonObj1=removeDuplicates(jsonObjMultiple)
+
 	  let jsonObj1=jsonObjMultiple;
 	
 	  let jsonObjAll = csvresult//.filter(j => ((j.exchange == 'NFO') || j.exchange == 'NSE'));
@@ -1182,23 +1173,24 @@ try {
 }
 }
 
-function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
+function overnightScripts(jsonObj2) {
 
 
   return new Promise(async (res, rej) => {
 
 
 
-    console.log(access_token, 'access_token')
+
 
 
     let overNights = []
     let pos = await getHoldingInstruments(access_token);
 
+
     if(typeof pos=='undefined'){
 
       console.log('failed to load holdings line@1002');
-      return ;node 
+      return ;
     }
 
     let posln = pos.length
@@ -1228,12 +1220,12 @@ function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
         console.log(' overnight left', posln, 'e', e);
         let instruAll = require(FILE_LOCATION+'/instrumentsAll.json');
 
-        let ln = jsonObj2.filter(ci => ci.tradingsymbol == e).length;
+        let ln = jsonObj2.find(ci => ci.tradingsymbol == e)
 
-        console.log(ln, 'is presnett', e);
-        if (ln == 0) {
+        console.log( 'is present in ',ln, e);
+        if (ln) {
 
-          // console.log(e,'Holding instrument Not Found');
+   
           let i = instruAll.filter(i => i.tradingsymbol == e)[0];
           let a = new pricePoint(i.instrument_token, access_token);
           let c = await a.getPricePoints(7, 'day');
@@ -1253,7 +1245,7 @@ function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
           i.enterNowToTrade = false;
           i.PlacedReverseOrder = false;
 
-          console.log('pushing', e)
+          console.log('pushing ', e, 'the overnight script');
           jsonObj2.push(i);
 
 
