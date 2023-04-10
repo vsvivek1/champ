@@ -235,6 +235,23 @@ app.get('/Validate', (req,res) => {
 });
 
 
+app.post('/api/FetchInstruments', (req, res) => {
+  // Read the JSON file from the specified path
+
+  console.log('got it');
+  const filePath = path.join(__dirname, '/appv3/public/instruments/instrumentsForMining.json');
+  fs.readFile(filePath, 'utf8', (err, data) => {
+    if (err) {
+      console.error('Failed to read file:', err);
+      res.status(500).json({ error: 'Failed to fetch instruments' });
+    } else {
+      // Parse the JSON data and send it as response
+      const instruments = JSON.parse(data);
+      res.json(instruments);
+    }
+  });
+});
+
 app.post('/api/getHourlyCandleLows', async (req,res) =>{
   let access_token=req.body.accessToken;
   let symbols_json=req.body.symbols_json;
@@ -483,6 +500,8 @@ app.post('/api/updateMissingScriptInInstrumetsFile/',
 
   let instrument_token=req.body.instrument_token
   let accessToken=req.body.accessToken
+
+  console.log(instrument_token,'instrument_token from update mssing script')
   updateMissingScriptInInstrumetsFile(instrument_token,accessToken)
   
   // res.send('hi /')
@@ -553,14 +572,14 @@ arr.forEach(async a=>{
   })
 });
 
-app.post('/api/FetchInstruments', async (req,res) => {
+// app.post('/api/FetchInstruments', async (req,res) => {
   
  
- let accessToken=req.body.accessToken;
+//  let accessToken=req.body.accessToken;
 
- console.log('this is from fetch instruments route ',accessToken)
- //fetchInstrumentsForMining(accessToken)
-});
+//  console.log('this is from fetch instruments route ',accessToken)
+//  //fetchInstrumentsForMining(accessToken)
+// });
 
 
 
@@ -658,7 +677,7 @@ try {
   params.trigger_type=kc.GTT_TYPE_SINGLE;
 
 
-  console.log(accessToken,'accessToken')
+
   let out=await kc.placeGTT(params);
 
   res.send(out);

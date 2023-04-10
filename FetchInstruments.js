@@ -1230,6 +1230,8 @@ function overnightScripts(jsonObj2) {
           let a = new pricePoint(i.instrument_token, access_token);
           let c = await a.getPricePoints(7, 'day');
 
+	
+
           if (typeof c == 'undefined') {
 
             console.log('big problem with price points')
