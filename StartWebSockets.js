@@ -13,14 +13,14 @@ module.exports=function StartWebSockets(socket,io,access_token){
 
 
     if(startedWebSockets==true){
-        console.log('from webscokets');
+        console.log('websockets alrady started');
 
 //         console.log(socket);
 
 // return;
         // return false;
     }
-    startedWebSockets=true;
+   
  
 
 
@@ -92,7 +92,7 @@ module.exports=function StartWebSockets(socket,io,access_token){
             var items =JSON.parse(r);
     
     
-            // console.log(r,'items')
+            console.warn('NUMBER OF SCRIPTS FOR WEBSOCKETS IS %s ',r.length)
     
              
             ticker.subscribe(items);
@@ -110,7 +110,12 @@ module.exports=function StartWebSockets(socket,io,access_token){
             ticker.on("ticks", (ticks)=>{
     
            
-     
+              
+
+              if(! startedWebSockets){
+
+                startedWebSockets=true;
+              }
     
                 io.emit('send-realtime-subscription',ticks)
     
@@ -125,7 +130,7 @@ module.exports=function StartWebSockets(socket,io,access_token){
     
               io.emit('order_update',orderUpdates)
           
-              // console.log('orderupdates',orderUpdates)
+  
           
           
            

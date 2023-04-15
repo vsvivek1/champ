@@ -48,9 +48,13 @@ class Gtt {
 const AccessToken=require('./AccessToken')
 let at1=new AccessToken();
 
+console.log(at1,'at1z')
+
+
+
 let result=[]
 
-    this.accessToken=await at1.getAccessToken()
+    //this.accessToken=//await at1.getAccessToken()
         return new Promise((res,rej)=>{
 
 

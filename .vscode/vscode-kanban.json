@@ -1,0 +1,84 @@
+{
+  "todo": [
+    {
+      "assignedTo": {
+        "name": "vsvivek1"
+      },
+      "category": "new feature",
+      "creation_time": "2023-04-08T00:49:19.948Z",
+      "description": {
+        "content": "issue with gtt not triggering",
+        "mime": "text/markdown"
+      },
+      "id": "3",
+      "references": [],
+      "title": "gtt error issue"
+    },
+    {
+      "assignedTo": {
+        "name": "vsvivek1"
+      },
+      "category": "NEW LOOKS",
+      "creation_time": "2023-04-08T01:22:12.409Z",
+      "id": "5",
+      "references": [],
+      "title": "GUI INTEGRATION"
+    },
+    {
+      "assignedTo": {
+        "name": "vsvivek1"
+      },
+      "category": "new feature",
+      "creation_time": "2023-04-08T00:48:43.302Z",
+      "description": {
+        "content": "intraday brakout at each point of time highs and lows\n",
+        "mime": "text/markdown"
+      },
+      "id": "2",
+      "references": [],
+      "title": "important hour highs and lows intraday do"
+    },
+    {
+      "assignedTo": {
+        "name": "vsvivek1"
+      },
+      "creation_time": "2023-04-08T00:47:25.819Z",
+      "description": {
+        "content": "status indiacator for gui in each place of mutate ltp",
+        "mime": "text/markdown"
+      },
+      "id": "1",
+      "references": [],
+      "title": "status indiacator for gui in each place of mutate ltp"
+    }
+  ],
+  "in-progress": [
+    {
+      "assignedTo": {
+        "name": "vsvivek1"
+      },
+      "category": "new feature",
+      "creation_time": "2023-04-08T00:50:59.834Z",
+      "description": {
+        "content": "number of options perscripts limits to a certain number only",
+        "mime": "text/markdown"
+      },
+      "id": "4",
+      "references": [],
+      "title": "number of options perscripts limits to a certain number"
+    }
+  ],
+  "testing": [],
+  "done": [
+    {
+      "assignedTo": {
+        "name": "vsvivek1"
+      },
+      "category": "NEW LOOKS",
+      "creation_time": "2023-04-10T05:29:29.358Z",
+      "id": "6",
+      "references": [],
+      "title": "IF OPEN IS LESS THAN YESTERDAY LOW NO SL TRIGGERING"
+    }
+  ]
+}

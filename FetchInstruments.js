@@ -17,7 +17,7 @@ let ce_lower_percentage=1;
 
 let pe_upper_percentage=1;
 let pe_lower_percentage=.9;
-const TIMER =400 ;
+const TIMER =200 ;
 
 
 
@@ -268,8 +268,10 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	    let ohlcs = await ohlc(accessToken, a);
 	    let instruments1 = require(FILE_LOCATION+'/instruments.json');
 	    let instruments = instruments1//.slice(0,1000)
-	    let strikes = await getNearestStrikes_unoptimized(ohlcs, instruments)
+	    let strikes1 = await getNearestStrikes_unoptimized(ohlcs, instruments)//.slice(1,50);
 	
+
+		let strikes=strikes1//.slice(1,100);
 	    let symbols = [];
 	    let len1 = strikes.length;
 	
@@ -316,7 +318,7 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	      let progress=`${len}, 'left out of ', ${len1}, ' ', ${t}, ' time left', ${e.tradingsymbol}`;
 	
 
-        cl(progress)
+         cl(progress)
 	      // console.log(len, 'left out of ', len1, ' ', t, ' time left', e.tradingsymbol);
 	      // printProgress(progress)
 	

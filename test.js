@@ -15,7 +15,7 @@ function a(){
   
   async function main() {
     let getAccessToken = require("./common-functions/getAccessToken");
-    // import StartServerConnections from "./StartServerConnections";
+
     let a = await getAccessToken();
     access_token=a;
   

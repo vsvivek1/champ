@@ -1,6 +1,8 @@
 <template>
   <div>
 
+    instruments len{{ instruments.length }}
+    tradeEntryFlowStatus {{ tradeEntryFlowStatus }}
 
     {{ instruments.length }} ln
 
@@ -574,7 +576,7 @@ import IndicesTable from "./IndicesTable.vue";
 
 var hourlyPricePointsofLiveDay1 ;
 
-
+var instruments;
 
 
 // var hourlyPricePointsofLiveDay1 =
@@ -595,7 +597,7 @@ mounted(){
 
 this.updateSelectedSellorderWithLtp();
 
-  },10*60*1000)
+  },60*1000)
 
 
   // const urlForMiningInstruments="../../../instruments/instrumentsForMining.json"
@@ -1019,7 +1021,11 @@ if(typeof this.livePositions =='undefined' ){
 
 
   components: { ClosedTrades, LiveTickView, LiveOrders,Margin,LivePos,IndicesTable,Messages,IronCondor , VueGoodTable, },
+  
+
   methods: {
+
+
 
     async sendTradeStrategy(tradingSymbol,buyPrice,quantity,strategyName) {
     const now = new Date(); // Get the current date and time
@@ -1551,13 +1557,17 @@ return false
 
       this.cl(loCopy.length,'ln')
 
+
+
+
+
 let i1=setInterval(async ()=>{
 
   this.cl(loCopy.length,'ln inside')
 let cur=loCopy.pop();
 
-console.log(cur,'cur')
-if(typeof cur=='undefined'){
+console.log(typeof cur,'cur type of cur')
+if(typeof cur =='undefined'){
 
   this.cl('updating lo missing script')
 let k=await this.updateMissingScriptInInstrumetsFile(JSON.stringify(instru_arr))
@@ -1595,10 +1605,14 @@ else{
 
     async setTradingType(){
 
+      this.itype = this.$route.params.itype;
+
   
 
       if(!instruments || !hourlyPricePointsofLiveDay1){
 
+
+        console.log('instruments not loaded fro setting trading type')
         return false;
       }
 
@@ -1606,7 +1620,6 @@ else{
 
  
     
-          this.itype = this.$route.params.itype;
 
 
 
@@ -1663,7 +1676,7 @@ this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
   this.setter = shareF;
 
   const urlForMiningInstruments="../../../instruments/instrumentsForMining.json"
-var instruments=await requireJson(urlForMiningInstruments);
+instruments=await requireJson(urlForMiningInstruments);
 
 console.log(instruments,'inst')
 
@@ -2198,7 +2211,7 @@ price=element.last_price;
 
       
 
-    console.log('from this fumnction');
+    this.cl('FROM UPDATE SELECTED SELL ORDERS WITH LTP')
       await this.getOrders();
       await this.getPositions();
 
@@ -2467,7 +2480,17 @@ console.log(this.newOrder.length,'new order length')
     },
     async updateMissingScriptInInstrumetsFile(instrument_token) {
 
-// console.log(instrument_token,'from update script')
+
+      if(this.missingScriptUpdating==true){
+
+      this.cl('updating missing scripts');
+        return false;
+      }
+
+      this.missingScriptUpdating=true
+      
+
+//  console.log(instrument_token,'from update script')
 
       let params = {
         accessToken: this.accessToken,
@@ -2479,16 +2502,15 @@ console.log(this.newOrder.length,'new order length')
       let url = "/api/updateMissingScriptInInstrumetsFile";
 
 
-
-     return  axios.post(url, params).then(async (r) => {
-
       
-      //  let instruments = await fetch("../../../instruments/instrumentsForMining.json").then(r=>r.json());
+     let a= await axios.post(url, params);
+     
 
+      this.missingScriptUpdating=false;
 
-      //  console.log(instruments,'from here')
-      //   this.$set(this.instruments, instruments);
-        //  Object.assign(this.instruments, instruments)
+      console.warn('missing script updated',this.missingScriptUpdating)
+      
+     
 
         this.livePositions.forEach((e) => {
           let instrument = this.instruments.filter(
@@ -2500,16 +2522,15 @@ console.log(this.newOrder.length,'new order length')
 
         this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
 
-        // let kk1=await   this.setInstrumentTokens();
+       
 
-        // this.cl(this.instrumentTokens,'this.instrumentTokens @2621')
+    
 
-        // this.instrumentTokens=this.hourlyPricePointsofLiveDay.map(i=>i.instrument_token)
+        this.$router.go();
 
-        // this.setInstrumentTokens()
+  
 
-        // socket.emit("subscribe-orders", JSON.stringify(this.instrumentTokens));
-      });
+      return a;
     },
 
     getHourlySupportPointsBelowReference(instrument_token, ref) {
@@ -3764,7 +3785,7 @@ if( !element  || !cis || !cis.pricePoints || !cis.pricePoints.d1 || !cis.pricePo
 
         
         if(filter==false){
- this.cl('filter false',ts)
+//  this.cl('filter false',ts)
           return false
         }
 //  this.cl('after filter')
@@ -3969,6 +3990,10 @@ let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high &&
 this.cl('reaehed switch3331')
 
 
+// let noOfOptionsOfScript=this.livePositions.
+
+let livePositionInstrumentTokens=this.livePositions.map(lp=>lp.instrument_token);
+
 
 // console.log(typeof yesterDayCloseStrategy,ts)
 
@@ -4014,7 +4039,7 @@ this.proceedForEntry(
          );
 
 
-this.sendTradeStrategy(cis.tradingsymbol,e3,cis.lot_size,'daily range break out')
+this.sendTradeStrategy(cis.tradingsymbol,e4,cis.lot_size,'daily range break out')
 
 
 
@@ -5016,7 +5041,7 @@ if(   this.instruments.filter(
     
     async placeTargetsForSingleScript(instrument_token,quantity) {
 
-       return;
+      //  return;
 
 
       //fetch live orders
@@ -5251,6 +5276,8 @@ if(noTargetArray.length==0){
 
     async placeTargetsForLiveScripts() {
 
+
+      // return;
       //TARGETSFORLIVESCRIPTS
 
       //TARGETS
@@ -5372,11 +5399,10 @@ return;
           let e = symbols.pop();
 
 
-          // console.log(e,'e');
+       
 
           let quote=quotes[e.instrument_token];
 
-          // console.log(quote,'quote,e')
          
 
 
@@ -5711,11 +5737,13 @@ new Promise(async (res,rej)=>{
     },
 
 
-    fetchInstruments() {
+   async  fetchInstruments() {
       // Fetch instruments from back end API
       axios.post('/api/FetchInstruments')
-      .then(response => {
+      .then(async response => {
         this.instruments = response.data;
+ instruments=this.instruments;
+  this.setInstrumentTokens()
       })
       .catch(error => {
         console.log(error);
@@ -6974,7 +7002,7 @@ let ts=cis.tradingsymbol;
       out.msg='cis undefined';
       out.bs=false;
 
-      let tmp=JSON.stringify(instrument_token)
+      let tmp=JSON.stringify([instrument_token]);
 
     await  this.updateMissingScriptInInstrumetsFile(tmp);
       return out;
@@ -7050,6 +7078,16 @@ let ts=cis.tradingsymbol;
   //updateStopLossTarget
 
 
+
+  if(element.ohlc.open<cis.pricePoints.d1.low){
+
+this.cl('OPEN ITSELF IS YESTERDAYS LOW FOR %s SO AVIODING SL ALERT',cis.tradingsymbol)
+  }
+
+  if(this.hours<10){
+
+    return false
+  }
 
 
 
@@ -7128,7 +7166,7 @@ if(this.hours<10){
 
         case yesterDayLowStopLoss:
 
-console.log('yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol)
+// console.log('yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol)
 
          this.updateSquareOfforderWithDesiredPrice(
            cis,
@@ -7636,13 +7674,14 @@ this.cl('buys undefined so -1');
 
 
     mutateWithLtp(s) {
-  // return;
      
        this.heartBeatAndCurrentCheckDigit()
 
+      
 
        if (this.hasStartedGetOrders || this.hasStartedGetLivePositions || this.refreshingTradeStatus) {
 
+        this.tradeEntryFlowStatus='updating variuos status on Mount 1'
         this.cl('various status updates')
     return false;
   }
@@ -7651,11 +7690,14 @@ this.cl('buys undefined so -1');
 
         if(!element || !element.instrument_token ){
 
+
+          this.tradeEntryFlowStatus='Element issue near S loop 2'
           this.cl('element issue near s loop')
 
           return false;
         }
         this.cl('inside s of mutate with  ltp');
+        this.tradeEntryFlowStatus='Inside mutate with ltp 3'
         let last_price;
         let ohlc=element.ohlc;
 
@@ -7665,23 +7707,32 @@ this.cl('buys undefined so -1');
 
         if(!element){
 
+
+          this.tradeEntryFlowStatus='Element null  4'
           return false;
         }
 
       
 
-        this.cl('check point 3')
+        
 
 let instrument_token = element.instrument_token;
 
-// this.cl(instrument_token)
 
-// console.log(this.instruments.length)
 let cis = this.instruments.filter(i => i.instrument_token == instrument_token)[0];
 // this.cl(cis,'cis')
+
+
 if(typeof cis=='undefined'){
 
+  this.tradeEntryFlowStatus='CIS undefined 5'
+
+  let i=[];
+  i.push(instrument_token)
+
   this.cl('cis undefined',instrument_token)
+
+  let k=await this.updateMissingScriptInInstrumetsFile(JSON.stringify(i))
 
   return false;
 }
@@ -7715,6 +7766,8 @@ let ma=this. calculateMovingAverage(cis);
 
 
 if (!cis) {
+
+  this.tradeEntryFlowStatus='CIS undefined 6'
   this.cl('cur instru type undefined frpn s so i am return nign false @7071', instrument_token);
   return false;
 }
@@ -7732,6 +7785,7 @@ let {msg,bs}= this.basicCheckers(element,cis,instrument_token,last_price);
 
 if(bs==false){
 
+  this.tradeEntryFlowStatus='BASIC CHECKERS FALSE 6'
   if(!msg=='cis.previousPrice'){
 
     this.cl('basic cehckes issue',cis.tradingsymbol,instrument_token,cis.last_price,cis.previousPrice,msg)
@@ -7746,9 +7800,13 @@ this.cl('checkpoint 4c');
    let hasLivePositionFromcis=cis.hasLivePosition;
 
  this.cl('here after haslivepos')
+
+
+ this.tradeEntryFlowStatus='HAS LIVE POSITION CHECK 7'
+
         if ( hasLivePositionFromcis==true) {                            
 
-
+       
 
           let lpCurrent=this.livePositions.find(
             (lp) => lp.instrument_token == cis.instrument_token
@@ -7882,7 +7940,9 @@ if((PlacedReverseOrder!=true  &&  hasLiveTarget != true)){
         if (cis.enterNowToTrade == false) {
 
 
-           this.cl('inside trade entry after cis entry trade ')
+           this.cl('inside trade entry after cis entry trade 8')
+
+           this.tradeEntryFlowStatus='INSIDE ENTER NOW TO TRADE 8'
 
 //  this.cl('inside trade entry ');
 let inst=cis;
@@ -7891,10 +7951,12 @@ let isHigherLows=this.higherLowsCheck(cis);
 
 
 
-this.cl('higher lows check',isHigherLows)
+// this.cl('higher lows check',isHigherLows,cis.tradingsymbol)
 
 if(!isHigherLows){
 
+
+  this.tradeEntryFlowStatus='HIGHER LOW CHECK FALSE 9'
   return false
 }
 
@@ -7903,6 +7965,8 @@ this.cl('before hours chk 7812')
 
 if(this.hours<10){
 
+
+  this.tradeEntryFlowStatus='LESS THAN 10 HOURS NO TRADE ZONE 10'
   this.cl('no buying  before 10 am');
 
   return;
@@ -7937,8 +8001,10 @@ this.cl('d2',cis.pricePoints.d2.normalDate)
 let {d0,d1,d2,d3,d4,d5,d6,d7}=pricePoints;
 
 if(
-d1.low>d2.low &&
-d0.low>d1.low
+d1.low>d2.low 
+
+// &&
+// d0.low>d1.low
 
 // &&
 // d3.low>d4.low 
@@ -7950,6 +8016,8 @@ return true
 }else{
 
 
+
+// this.cl(d1.low,d2.low,'d1low,d2low')
 return false;
 }
 
@@ -7960,22 +8028,24 @@ return false;
 
     setInstrumentTokens() {
 
-  //  console.log('inside set instrument token')
-// this.cl('inside set instrument tokens');
+
     
       return new Promise((res, rej) => {
 
-          this.instrumentTokens = this.hourlyPricePointsofLiveDay.map((i) =>
-          parseInt(i.instrument_token)
-        );
+        //   this.instrumentTokens = this.hourlyPricePointsofLiveDay.map((i) =>
+        //   parseInt(i.instrument_token)
+        // );
 
 
+
+        this.instrumentTokens=this.instruments.map(i=>parseInt(i.instrument_token));
         let j=JSON.stringify(this.instrumentTokens);
+
+        console.log('Number of scripts for Ticks is %s',this.instrumentTokens.length)
 
         socket.emit("subscribe-orders", j);
 
-        // console.log('inside set instrument token',j)
-        // this.cl(j);
+      
         res(true);
            return;
    
@@ -8044,6 +8114,8 @@ return false;
 
   data() {
     return {
+      tradeEntryFlowStatus:'Ticker not Started 0',
+      missingScriptUpdating:false,
       stopLossSwitchHealth:false,
       tradeEntrySwitchHealth:false,
       columns: [

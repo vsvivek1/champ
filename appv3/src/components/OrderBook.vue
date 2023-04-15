@@ -227,6 +227,16 @@ import store from '@/store';
         mounted(){
 
 
+          setInterval(() => {
+      const now = new Date()
+      const hours = now.getHours()
+      const minutes = now.getMinutes()
+      if (hours === 3 && ((minutes === 20) || (minutes === 26))) {
+        this.getLTP(); //function to execute retry orders
+      }
+    }, 1000)
+
+
          this. clock();
 
          this.retryOrdersDayEndWithLtps();

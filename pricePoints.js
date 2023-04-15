@@ -14,7 +14,7 @@ class pricePoint {
     this.counter=0;
 
 
-
+ 
 
     this.stock_tocken = stock_tocken;
 
@@ -322,7 +322,187 @@ try {
 // publicHolidays = ["2023-01-26"];
 
 
-get7DaysData = (data, today) => {
+get7DaysData1(data,today){
+
+
+// Sample array of holidays
+const holidays = [
+  "2023-01-26",
+  "2023-03-07",
+  "2023-03-30",
+  "2023-04-04",
+  "2023-04-07",
+  "2023-04-14",
+  "2023-04-22",
+  "2023-05-01",
+  "2023-06-28",
+  "2023-08-15",
+  "2023-09-19",
+  "2023-10-02",
+  "2023-10-24",
+  "2023-11-14",
+  "2023-11-27",
+  "2023-12-25"
+  ]
+
+// Get the current date and time
+const now = new Date();
+
+// Check if it's a weekday and not a holiday
+if (now.getDay() >= 1 && now.getDay() <= 5 && !holidays.includes(now.toISOString().substring(0, 10))) {
+  // Check if it's within the allowed execution time
+  const start = new Date(now.toISOString().substring(0, 10) + 'T09:15:00.000Z');
+  const end = new Date(now.toISOString().substring(0, 10) + 'T15:30:00.000Z');
+  if (now >= start && now <= end) {
+    // Filter the data to get the last 7 entries by date
+
+    console.log(data[0]);
+    return
+    const filteredData = data.filter((item) => item.date.substring(0, 10) <= now.toISOString().substring(0, 10)).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7);
+
+    // Assign the data to d0 to d7 variables
+    const [d0, d1, d2, d3, d4, d5, d6] = filteredData;
+
+  console.log({d0}); // Latest data
+    console.log({d1}); // Second latest data
+    console.log({d2}); // Third latest data
+    console.log({d3}); // ...
+    console.log({d4});
+    console.log({d5});
+    console.log({d6});
+  } else {
+    // The execution time is not within the allowed range
+   
+    console.log(data[0],'elese');
+    return
+   
+    const [, d1, d2, d3, d4, d5, d6, d7] = data.filter((item) => item.date.substring(0, 10) <= now.toISOString().substring(0, 10)).sort((a, b) => b.date.localeCompare(a.date)).slice(0, 8);
+
+    console.log(d0); // undefined
+    console.log(d1); // Latest data
+    console.log(d2); // Second latest data
+    console.log(d3); // ...
+    console.log(d4);
+    console.log(d5);
+   
+
+
+
+}
+}
+}
+
+
+
+get7DaysData(data,today){
+  let ob={};
+
+  let publicHolidays = [
+    "2023-01-26",
+    "2023-03-07",
+    "2023-03-30",
+    "2023-04-04",
+    "2023-04-07",
+    "2023-04-14",
+    "2023-04-22",
+    "2023-05-01",
+    "2023-06-28",
+    "2023-08-15",
+    "2023-09-19",
+    "2023-10-02",
+    "2023-10-24",
+    "2023-11-14",
+    "2023-11-27",
+    "2023-12-25"
+    ]
+
+
+  let data1=  data.sort( (a,b)=>{
+
+
+    return b.date-a.date
+  })
+
+
+
+  let date = new Date();
+let momentDate = moment(date);
+let formattedDate = momentDate.format('YYYY-MM-DD HH:mm:ss');
+console.log(formattedDate);
+  let hrs = date.getHours();
+  let mnts = date.getMinutes();
+
+  let day=date.getDay();
+
+  // console.log(date,hrs,day,'date hrs day');
+
+let isMarketTime=false;
+
+
+
+  if(day!=0 && day!=6 && (hrs>9 || (hrs==9 && mnts>=15 )) && (hrs<15 || (hrs==15 && mnts<=30 ))    ){
+
+   
+isMarketTime=true
+
+  }else{
+
+    isMarketTime=false
+  }
+
+
+
+
+
+
+  // console.log({isMarketTime})
+
+  // return;
+
+
+  for(let i=0;i<9;i++){
+
+
+if(!isMarketTime){
+
+  let j=i+1
+
+  if(i==0){
+
+    ob.d0={}
+
+  }
+
+ob[('d'+j+'data')]=data1[i];
+
+}else if (isMarketTime){
+
+  let j=i
+
+
+ 
+
+
+  ob[('d'+j+'data')]=data1[i];
+
+  
+}
+
+    // console.log(ob);
+ 
+ 
+ 
+  }
+
+  // console.log(ob)
+
+  return ob;
+
+}
+
+
+
+get7DaysData1x = (data, today) => {
 
 
 
@@ -330,7 +510,24 @@ let refNo;
 let refHr=16;
   let tradingsymbol=instruAll.find(i=>i.instrument_token==this.stock_tocken).tradingsymbol
 
-  let publicHolidays = ["2023-01-26","2023-01-27"]
+  let publicHolidays = [
+    "2023-01-26",
+    "2023-03-07",
+    "2023-03-30",
+    "2023-04-04",
+    "2023-04-07",
+    "2023-04-14",
+    "2023-04-22",
+    "2023-05-01",
+    "2023-06-28",
+    "2023-08-15",
+    "2023-09-19",
+    "2023-10-02",
+    "2023-10-24",
+    "2023-11-14",
+    "2023-11-27",
+    "2023-12-25"
+    ]
   const result = {};
   let currentDate = moment(today);
 
@@ -377,6 +574,8 @@ refNo=8
       currentDate.subtract(1, "days");
     }
     const dateToFind = currentDate.format("YYYY-MM-DD");
+
+
     const matchingData = data.find(item => {
       
 item.tradingsymbol=tradingsymbol
@@ -386,6 +585,8 @@ item.instrument_token=this.stock_tocken
    
    
       let itemDate=moment(item.date).format("YYYY-MM-DD");
+
+      console.log({itemDate},'itemdate')
      
       return itemDate == dateToFind
     
@@ -437,20 +638,24 @@ getPreviousDate = (date, daysAgo) => {
   async getPricePoints(duration=34,durationType='month') {
 
 
+    var kc2 = await this.initiateKiteConnect();
+
+    // console.log(kc2);
+
     return new Promise(async (res,rej)  =>{
 
 
    
 
-    var kc2 = this.initiateKiteConnecct();
+  
 
 
     let retOb = {};
     let startDay;
 
     let sorted;
-      ({ sorted, startDay } = await this.fetchHistoricalData(durationType, startDay, duration, kc2));
-
+      ({ sorted, startDay } = await this.fetchHistoricalData
+        (durationType, startDay, duration, kc2));
 
 
 
@@ -787,10 +992,27 @@ res(retOb)
 
   }
 
-  initiateKiteConnecct() {
+  async initiateKiteConnect() {
+
+    let today=moment().format('Y-MM-DD');
+
+
+    let AccesTocken=require('./models/AccessTokens');
+    let at1= await AccesTocken.findOne({ 'date': today },'access_token')//.
+   // then(e=>e.access_token);
+
+   let access_token=at1.access_token;
+
+   this.accessToken=at1.access_token;
+
+  //  console.log(access_token,'at',today);
+
+  //  return;
+
+
     return new KiteConnect({
-      api_key: process.env.api_key,
-      access_token: this.accessToken
+      api_key: 'wkcurst2vu5obug7',
+      access_token: access_token
     });
   }
 }
