@@ -4017,7 +4017,10 @@ return ;
 }
 
 
+if(!niftyFavorable){
 
+  this.cl('NIFTY NOT FAVORABLE NO TRADE',niftyFavorable)
+}
 
 
 switch(true){
@@ -5622,11 +5625,11 @@ try {
   
   ){
 
-    tgt1=avg*1.8;
+    tgt1=avg*2.5;
 
   }else{
 
-     tgt1=avg*1.5;
+     tgt1=avg*2;
 
   }
  
