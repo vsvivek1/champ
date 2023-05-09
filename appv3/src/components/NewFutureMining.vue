@@ -3791,6 +3791,15 @@ checkCandlePattern(d0, d1) {
       
       }
 
+
+      if(niftyFavorable==false){
+
+      let t=  moment.hours()
+        this.cl('NIFTY NOT FAVORABLE',t);
+
+        return false
+      }
+
       this.cl('nifty favorable',niftyFavorable)
 
         // return;
