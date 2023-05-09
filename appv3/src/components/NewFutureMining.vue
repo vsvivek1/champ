@@ -4029,8 +4029,18 @@ if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.
 // this.cl('before yesterDayCloseStrategy')
 
 
-let yesterDayCloseStrategy=(element.last_price>cis.pricePoints.d1.high &&
- niftyFavorable ) //ned some other cond//&& element.last_price<element.ohlc.high)
+let yesterDayCloseStrategy=(element.last_price>=cis.pricePoints.d1.high &&
+ niftyFavorable
+ 
+ && element.ohlc.high< cis.pricePoints.d1.high*1.05
+
+
+ 
+ )
+ 
+ 
+ 
+ //ned some other cond//&& element.last_price<element.ohlc.high)
 // let newTradingObj=this.newTradingObj;
 // newTradingObj.tradingsymbol=ts;
 // newTradingObj.buyTime=new Date();
@@ -4050,7 +4060,13 @@ let livePositionInstrumentTokens=this.livePositions.map(lp=>lp.instrument_token)
 this.tradeEntrySwitchHealth=!this.tradeEntrySwitchHealth;
 
 
-let dailyRangeBreakOut=(this.hours>9 && element.last_price>=cis.pricePoints.d0.high && cis.pricePoints.d0.high!=0);
+let dailyRangeBreakOut=(this.hours>9 && element.last_price>=cis.pricePoints.d0.high
+
+
+&& element.last_price< cis.pricePoints.d0.high*1.05
+
+
+&& cis.pricePoints.d0.high!=0);
 
 if(dailyRangeBreakOut)
 {
@@ -4084,7 +4100,9 @@ cis.tradingsymbol.includes("NIFTY")
 switch(true){
 
 
-  case dailyRangeBreakOut:  this.cl('safe','daily range break out')
+  case dailyRangeBreakOut: 
+  
+  this.cl('safe','daily range break out')
 
 let e4=Math.min(secondLowestOrdersPrice,element.last_price,cis.pricePoints.d0.high);
 
@@ -4144,11 +4162,7 @@ this.sendTradeStrategy(cis.tradingsymbol,e3,cis.lot_size,'yesterDayCloseStrategy
   case todayLastPriceHigh:
 
 
-  // newTradingObj.strategy='todayLastPriceHigh';
-
-  // newTradingObj.targetPrice=newTradingObj.buyPrice*1.2
-
-  // this.storeTradeDataInLocalStrorage(newTradingObj)
+  
 
 
 
@@ -4177,21 +4191,7 @@ this.proceedForEntry(
 
 case isOpenLow:
 
-//  strategyName='openLowScriptFithFixedLoss';
 
-// newTradingObj.strategy='isOpenLow';
-
-// newTradingObj.targetPrice=newTradingObj.buyPrice*1.2
-
-// this.storeTradeDataInLocalStrorage(newTradingObj)
-
-
-// this.saveTradeDetailsInLocalStorage(ts,lp,lp*1.2,stopLoss,strategyName);
-// // entry=lp;
-
-// let e1=element.last_price;
-
-// console.log({secondLowestOrdersPrice},secondLowestOrdersPrice)
 
 let e1=Math.min(secondLowestOrdersPrice,element.last_price);
 // console.log({e1},'e1')
@@ -4215,23 +4215,13 @@ break;
 
 
 
-//entryswitch
 
-// element.ohlc.high<entry &&
 
-case  closingMovingAverageCondition:
+case  (closingMovingAverageCondition && false):
 
 this.cl('closingMovingAverageCondition')
 
-// newTradingObj.strategy='isOpenLow';
 
-// newTradingObj.targetPrice=newTradingObj.buyPrice*1.2
-
-// this.storeTradeDataInLocalStrorage(newTradingObj)
-
-//  strategyName='=closingMovingAverageMethod'
-
-// this.saveTradeDetailsInLocalStorage(ts,entry,target,stopLoss,strategyName);
 
 this.cl('entering  closingMovingAverageCondition',ts)
 
@@ -4250,191 +4240,6 @@ this.sendTradeStrategy(cis.tradingsymbol,entry,cis.lot_size,'closingMovingAverag
 
 break;
 
-
-// case ( false &&
-// //so run fetch instruments regularly
-// cis.pricePoints.d0.high<cis.pricePoints.d1.high && ///so high not croseed before 
-// cis.pricePoints.d0.open<cis.pricePoints.d1.high && ///so opened below yesterday high /// pvs case itself solve still
-
-// cis.previousPrice !=0 &&
-  
-
-
-
-//  cis.last_price >= cis.pricePoints.d1.high
-            
-            
-            
-//             ) :
-
-
-         
-
-//             this.cl( 'y day high candle',cis.tradingsymbol)
-
-//             let p1=cis.last_price;
-
-//             this.proceedForEntry(
-//               instrument_token,
-//               cis,
-//               element,
-//               cis.pricePoints.d1.high,
-//               "long"
-//             );
-
-//             break;
-
-
-  // case ( inst.previousPrice < maxCandle &&
-  //           cis.last_price >= maxCandle) :
-
-  //           this.cl('max candle trade',cis.tradingsymbol)
-
-  //           this.proceedForEntry(
-  //             instrument_token,
-  //             cis,
-  //             element,
-  //             maxCandle,
-  //             "long"
-  //           );
-
-  //           break;
-
-
-
-//  case ( inst.previousPrice < high &&
-//             cis.last_price > high) :
-
-
-
-//             let ep1=Math.max(open,close)
-//             this.proceedForEntry(
-//               instrument_token,
-//               cis,
-//               element,
-//               ep1,
-//               "long"
-//             );
-
-//             //entry above candle high 
-
-//             //entry point 5 % less
-
-//   ///closing point below sell
-
-//   return;
-
-//   break;
-
-
-
-
-
-  // case ( inst.previousPrice > close &&
-  //           cis.last_price <= close) :
-
-  // ///closing point below sell
-
-  // return;
-
-
-  // if(this.instruments.
-  //         filter(i=>i.instrument_token==instrument_token)[0].
-  //         hasLivePosition){
-
-  //           return false
-  //         }
-  // this.proceedForEntry(
-  //             instrument_token,
-  //             cis,
-  //             element,
-  //             close,
-  //             "short"
-  //           );
-
-  // break;
-
-  // case ( inst.previousPrice < close &&
-  //           cis.last_price > close) :
-  //           if(this.instruments.
-  //         filter(i=>i.instrument_token==instrument_token)[0].
-  //         hasLivePosition){
-
-  //           return false
-  //         }
-
-  //         return;
-///closing point abouve buy
-
-// this.cl({close},cis.tradingsymbo,'hi')
-
-
-// let close11=close*.95
-// let close1=close11.toFixed(1)
-
-
-// this.proceedForEntry(
-//               instrument_token,
-//               cis,
-//               element,
-//               close,
-//               "short"
-//             );
-// //changed long to short
-// break;
-
-
-// case ( inst.previousPrice < open &&
-//             cis.last_price > open) :
-            
-            
-//             if(this.instruments.
-//           filter(i=>i.instrument_token==instrument_token)[0].
-//           hasLivePosition){
-
-//             return false
-//           }
-
-//           return;
-// ///opening point   abouve buy
-
-// let open11=open*.95
-// let open1=open11.toFixed(1)
-
-// this.cl({open},cis.tradingsymbo,'hi')
-// this.proceedForEntry(
-//               instrument_token,
-//               cis,
-//               element,
-//               open,
-//               "short"
-//             );
-
-            //changed long to short
-
-// break;
-
-
-// case ( inst.previousPrice > open &&
-//             cis.last_price < open) :
-//             if(this.instruments.
-//           filter(i=>i.instrument_token==instrument_token)[0].
-//           hasLivePosition){
-
-//             return false
-//           }
-
-//           return ;
-///opening point below sell
-// this.proceedForEntry(
-//               instrument_token,
-//               cis,
-//               element,
-//               open,
-//               "short"
-//             );
-
-// break;
 
 
 
@@ -7209,10 +7014,16 @@ let openLow=open==low;
 
 let lossCheck= ((lp-low)*cis.lot_size)<1000
 
+let upperRangeCheck=false;
+
+upperRangeCheck=ohlc.high<lp*1.05;
+
+
+
 let hrsCheck=this.hours>=10;
 
 
-if(openLow && lossCheck && hrsCheck){
+if(openLow && lossCheck && hrsCheck && upperRangeCheck){
 
 
   this.cl('for open low with 2500',cis.tradingsymbol)
