@@ -3781,6 +3781,13 @@ checkCandlePattern(d0, d1) {
       try {
 
 
+        if(cis.pricePoints.d1.high==cis.pricePoints.d1.open){
+
+          this.cl(`YESTERDAYS OPEN WAS HIGH FOR ${cis.tradingsymbol} NO TRADE yday high ${cis.pricePoints.d1.high} and Yday open ${cis.pricePoints.d1.open} `)
+return;
+
+        }
+
         
         if(element.ohlc.high>=element.last_price*1.3 &&
         
@@ -3788,7 +3795,7 @@ checkCandlePattern(d0, d1) {
         
         ){
 
-this.cl(`SO MUCH  MOVE OF 30% IN BOTH DIRECTION ALREADY HAPPEENED  SO IGNORING  ${cis.tradingsymbol} NO TRADE`)
+this.cl(`SO MUCH  MOVE OF 30% IN BOTH DIRECTION ALREADY HAPPEENED  SO IGNORING  ${cis.tradingsymbol} NO TRADE yday high ${cis.pricePoints.d1.high}`)
 return;
 }
 
