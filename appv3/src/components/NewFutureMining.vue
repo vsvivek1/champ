@@ -3780,6 +3780,32 @@ checkCandlePattern(d0, d1) {
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
 
+
+        
+        if(element.ohlc.high>=element.last_price*1.3 &&
+        
+        element.ohlc.low<=element.last_price*1.3 
+        
+        ){
+
+this.cl(`SO MUCH  MOVE OF 30% IN BOTH DIRECTION ALREADY HAPPEENED  SO IGNORING  ${cis.tradingsymbol} NO TRADE`)
+return;
+}
+
+
+
+        if(element.ohlc.high>=cis.pricePoints.d1.high*1.1){
+
+this.cl(`TODAYS HIGH OF  ${cis.tradingsymbol} IS  GREATER THAN YESTERDAYS HIGH *1.1  SO  NO TRADE`)
+return;
+}
+
+        if(element.ohlc.open>=cis.pricePoints.d1.high){
+
+          this.cl(`OPEN OF ${cis.tradingsymbol} GREATER THAN YESTERDAYS HIGH SO  NO TRADE`)
+          return;
+        }
+
         let a=  this.checkNiftyStatus("NIFTY 50");
       this.cl(a,'index status')
 
@@ -3794,8 +3820,8 @@ checkCandlePattern(d0, d1) {
 
       if(niftyFavorable==false){
 
-      let t=  moment.hours()
-        this.cl('NIFTY NOT FAVORABLE',t);
+      let t=  moment()
+        this.cl('NIFTY NOT FAVORABLE',t.hours());
 
         return false
       }
