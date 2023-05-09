@@ -12,11 +12,11 @@ let moment= require('moment');
 const FILE_LOCATION='./appv3/public/instruments'
 
 
-let ce_upper_percentage=1.1;
-let ce_lower_percentage=1;
+let ce_upper_percentage=1.04;
+let ce_lower_percentage=1.01;
 
-let pe_upper_percentage=1;
-let pe_lower_percentage=.9;
+let pe_upper_percentage=.99;
+let pe_lower_percentage=.96;
 const TIMER =200 ;
 
 
