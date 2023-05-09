@@ -1315,7 +1315,7 @@ function getCurrentExpiryDate() {
 	
 // let m=moment();
 
-return "2023-04-27";
+return "2023-05-25";
 	
 	const lastThursday = getLastThursdayOfMonth(m);
 	console.log(`Last Thursday of the month: ${lastThursday}`);
