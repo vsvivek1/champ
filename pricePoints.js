@@ -428,7 +428,7 @@ get7DaysData(data,today){
   let date = new Date();
 let momentDate = moment(date);
 let formattedDate = momentDate.format('YYYY-MM-DD HH:mm:ss');
-console.log(formattedDate);
+// console.log(formattedDate);
   let hrs = date.getHours();
   let mnts = date.getMinutes();
 

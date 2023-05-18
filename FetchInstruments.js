@@ -18,6 +18,10 @@ let ce_lower_percentage=1.01;
 let pe_upper_percentage=.99;
 let pe_lower_percentage=.96;
 const TIMER =200 ;
+let today = new Date().toISOString().slice(0,10)
+
+// console.log(today);
+// return;
 
 
 
@@ -29,6 +33,8 @@ process.on('unhandledRejection', (reason, p) => {
 
 
 function main() {
+
+	try{
   const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
   mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(r => {
     // console.log(r)
@@ -47,6 +53,10 @@ function main() {
 
 
   });
+}catch(e){
+
+	console.log('ERROR AT MAIN FUNCTION ',e)
+}
 }
 
 function printProgress(progress){
@@ -91,7 +101,7 @@ const pricePoint = require('./pricePoints');
 const ZerodhaAPI = require('./ZerodhaAPI');
 
 const ohlc = require('./scraping/ohlc')
-let today = new Date().toISOString().slice(0, 10);
+// let today = new Date().toISOString()//.slice(0, 10);
 // const fetchInstrumentsForNewMint=require('./FetchInstrumentsForNewMint.js')
 
 const instruAll = './'+FILE_LOCATION+'/instrumentsAll.json';
@@ -162,7 +172,7 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	})
 	
 	
-	  //  || j.exchange == 'NSE'
+	 
 	  let jsonObjMultiple = 
 	  csvresult.filter(j => (
 	    (
@@ -213,7 +223,7 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	
 	          (err) => {
 	            if (err) throw err;
-	            // console.log(FILE_LOCATION+'/instruments.json was copied to ' + targetDir);
+	            
 	
 	
 	            Fs.writeFile(jsonObjCommodityFile, JSON.stringify(jsonObjCommodity), 'utf8', function (err) {
@@ -267,7 +277,7 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	
 	    let ohlcs = await ohlc(accessToken, a);
 	    let instruments1 = require(FILE_LOCATION+'/instruments.json');
-	    let instruments = instruments1//.slice(0,1000)
+	    let instruments = instruments1//.slice(0,10)
 	    let strikes1 = await getNearestStrikes_unoptimized(ohlcs, instruments)//.slice(1,50);
 	
 
@@ -1209,7 +1219,7 @@ function overnightScripts(jsonObj2) {
 
 
       if (typeof e == 'undefined') {
-        console.warn('clearing postion timer')
+        console.warn('CLEARING POSITION FOR OVERNIGHT SCRIPTS')
         clearInterval(PostionsTimer)
 
         res(jsonObj2)
@@ -1224,9 +1234,13 @@ function overnightScripts(jsonObj2) {
 
         let ln = jsonObj2.find(ci => ci.tradingsymbol == e)
 
-        console.log( 'is present in ',ln, e);
-        if (ln) {
+       
 
+		
+        if (typeof ln=='undefined') {
+
+
+			console.log( ' %s ABSENT IN TODAYS SCRIPT  ',e);
    
           let i = instruAll.filter(i => i.tradingsymbol == e)[0];
           let a = new pricePoint(i.instrument_token, access_token);

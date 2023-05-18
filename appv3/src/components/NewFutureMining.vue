@@ -3,7 +3,8 @@
 
     <v-alert>{{ liveMargin }}</v-alert>
 
-    <button @click="downloadLogs">Download Logs</button>
+    <!-- <button @click="downloadLogs">Download Logs</button> -->
+    <button @click="openWindow()">View Logs</button>
     <a :href="logFileUrl" target="_blank" v-if="logFileUrl">View Logs</a>
     <button class="btn-primary" @click="viewLogs"> toggle  view logs</button>
     <p v-if="logs.length  && viewLogs">Logs:</p>
@@ -768,11 +769,7 @@ this.updateSelectedSellorderWithLtp();
      
            let ln = this.orderArray.length;
      
-           // this.cl('order array length1',ln,JSON.stringify(this.orderArray))
-     
-           // this.cl('this.orderArray.',this.orderArray)
-     
-           // clock
+         
      
            if (this.laggingCheckDigit == this.CurrentCheckDigit) {
              this.webSocketNotActive = true;
@@ -819,7 +816,7 @@ this.updateSelectedSellorderWithLtp();
                //geting candle data in 31 st minutes of each hour
              }
            }
-         }, 2*60 * 1000);
+         }, 3*60 * 1000);
      
          // *Math.max(this.orderArray.length,1)
      
@@ -1221,6 +1218,21 @@ return {entry,target,stopLoss};
       this.instances.push(instance);
     },
 
+    openWindow() {
+  const currentDate = new Date().toISOString().split('T')[0];
+  const data = JSON.parse(localStorage.getItem(currentDate));
+
+  if (data) {
+    const content = Object.entries(data).map(([key, value]) => `${new Date(parseInt(key))}: ${value}`).join('\n');
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `data_${currentDate}.txt`;
+    link.click();
+  }
+},
+
     cl(...args) {
 
       // console.log(childFunction.caller.name,'console.log(childFunction.caller.name)');
@@ -1248,6 +1260,15 @@ return {entry,target,stopLoss};
 
       console.log(result)
         this.globalConsoleLogs.push(result);
+
+        const currentDate = new Date().toISOString().split('T')[0]; // Get the current date in "yyyy-mm-dd" format
+      const timestamp = new Date().getTime(); // Get the current timestamp
+      const existingData = JSON.parse(localStorage.getItem(currentDate)) || {};
+
+      existingData[timestamp] = result;
+
+      localStorage.setItem(currentDate, JSON.stringify(existingData));
+
         return false;
       }
     },
@@ -2293,6 +2314,8 @@ let lp =this.livePositions.find(j=>j.instrument_token==i.instrument_token)
 
 
 const reducedPrice = (lp.last_price * 0.95).toFixed(1);
+
+
   let inRange=false;
   if(i.status=='TRIGGER PENDING'){
 
@@ -2566,7 +2589,7 @@ console.log(this.newOrder.length,'new order length')
 
     
 
-        this.$router.go();
+        // this.$router.go();
 
   
 
@@ -3777,44 +3800,59 @@ checkCandlePattern(d0, d1) {
   
   return pattern;
 },
-    tradeEntry(instrument_token,inst=cis,cis,element){
-      try {
 
 
-        if(cis.pricePoints.d1.high==cis.pricePoints.d1.open){
+specialChecks(element,cis,txt=''){
 
-          this.cl(`YESTERDAYS OPEN WAS HIGH FOR ${cis.tradingsymbol} NO TRADE yday high ${cis.pricePoints.d1.high} and Yday open ${cis.pricePoints.d1.open} `)
-return;
-
-        }
-
+  if(element.ohlc.high>=element.last_price*1.4 &&
         
-        if(element.ohlc.high>=element.last_price*1.3 &&
-        
-        element.ohlc.low<=element.last_price*1.3 
+        element.ohlc.low<=element.last_price*1.4 
         
         ){
 
-this.cl(`SO MUCH  MOVE OF 30% IN BOTH DIRECTION ALREADY HAPPEENED  SO IGNORING  ${cis.tradingsymbol} NO TRADE yday high ${cis.pricePoints.d1.high}`)
-return;
+this.cl(`SO MUCH  MOVE OF 40% IN BOTH DIRECTION ALREADY HAPPEENED  SO IGNORING  ${cis.tradingsymbol} NO TRADE yday high :${cis.pricePoints.d1.high}  low ${cis.pricePoints.d1.low} ${txt}`)
+return false;
 }
 
 
 
         if(element.ohlc.high>=cis.pricePoints.d1.high*1.1){
 
-this.cl(`TODAYS HIGH OF  ${cis.tradingsymbol} IS  GREATER THAN YESTERDAYS HIGH *1.1  SO  NO TRADE`)
-return;
+this.cl(`TODAYS HIGH OF  ${cis.tradingsymbol} IS  GREATER THAN YESTERDAYS HIGH *1.2  SO  NO TRADE`)
+return false;
 }
 
         if(element.ohlc.open>=cis.pricePoints.d1.high){
 
           this.cl(`OPEN OF ${cis.tradingsymbol} GREATER THAN YESTERDAYS HIGH SO  NO TRADE`)
-          return;
+          return false;
         }
 
+        return true;
+},
+    tradeEntry(instrument_token,inst=cis,cis,element){
+      try {
+
+
+        if(!this.checkSidewaysMovementTime() ){
+
+this.cl('NO TRADING TIME SIDE WISE TIME')
+
+return false;
+}
+
+        if(cis.pricePoints.d1.high==cis.pricePoints.d1.open){
+
+          this.cl(`YESTERDAYS ( ${cis.pricePoints.d1.normalDate}) OPEN WAS HIGH FOR ${cis.tradingsymbol} NO TRADE yday high ${cis.pricePoints.d1.high} and Yday open ${cis.pricePoints.d1.open} `)
+return;
+
+        }
+
+        
+   
+
         let a=  this.checkNiftyStatus("NIFTY 50");
-      this.cl(a,'index status')
+      // this.cl(a,'index status')
 
       let niftyFavorable=false
       if(a.change>75){
@@ -3902,32 +3940,10 @@ if( !element  || !cis || !cis.pricePoints || !cis.pricePoints.d1 || !cis.pricePo
 
 
 
-// let proceed=this.checkProceedWithIndexChange(cis.tradingsymbol)
-// this.cl(proceed,'proceed after nifty check',ts)
-// proceed=true;
-
-//  this.cl('inside trade entry5')
-      
-// if(proceed==false){
-
-// // this.cl('proceed false',ts)
-//   // return; 
-
-// }
-
-//  this.cl('inside trade entry6')
-
-        // proceed=true;
-         
-
-// let list=[9,15]
-
-          // if(list.includes(this.hours)){
 
 
-          // }
 
-          // this.cl('after hours ');
+
            this.cl('inside trade entry7')
 
 
@@ -3935,10 +3951,7 @@ if( !element  || !cis || !cis.pricePoints || !cis.pricePoints.d1 || !cis.pricePo
 
 
 
-// this.cl('condition 1 ',cis.pricePoints.d0.high<cis.pricePoints.d1.high)
-// this.cl('connndition 2 ',cis.pricePoints.d0.open<cis.pricePoints.d1.high)
-// this.cl('connndition 3 ',cis.previousPrice !=0)
-//  this.cl('connndition 4 ',cis.last_price >= cis.pricePoints.d1.high)
+
 
 
 //// program working till hhere no issues  feb 17 2023
@@ -4093,7 +4106,14 @@ let livePositionInstrumentTokens=this.livePositions.map(lp=>lp.instrument_token)
 this.tradeEntrySwitchHealth=!this.tradeEntrySwitchHealth;
 
 
-let dailyRangeBreakOut=(this.hours>9 && element.last_price>=cis.pricePoints.d0.high
+let dailyRangeBreakOut=(
+  
+
+
+(this.hours>9 || (this.hours==9 && this.minutes>20) )
+
+
+&& element.last_price>=cis.pricePoints.d0.high
 
 
 && element.last_price< cis.pricePoints.d0.high*1.05
@@ -4129,11 +4149,19 @@ cis.tradingsymbol.includes("NIFTY")
   return ;//false;
 }
 
-
+let specialCheck;
 switch(true){
 
 
   case dailyRangeBreakOut: 
+
+
+   specialCheck=this.specialChecks(element,cis,'FROM DAILY RANGE BRAK OUT');
+
+  if(specialCheck==false){
+
+    return false
+  }
   
   this.cl('safe','daily range break out')
 
@@ -4161,7 +4189,12 @@ this.sendTradeStrategy(cis.tradingsymbol,e4,cis.lot_size,'daily range break out'
 
   case yesterDayCloseStrategy :
 
- 
+  specialCheck=this.specialChecks(element,cis,'FROM YDAY HIGH STRATEGY');
+
+if(specialCheck==false){
+
+  return false
+}
 
   // newTradingObj.strategy='yesterDayCloseStrategy';
 
@@ -4225,6 +4258,13 @@ this.proceedForEntry(
 case isOpenLow:
 
 
+specialCheck=this.specialChecks(element,cis);
+
+if(specialCheck==false){
+
+  return false
+}
+
 
 let e1=Math.min(secondLowestOrdersPrice,element.last_price);
 // console.log({e1},'e1')
@@ -4260,86 +4300,23 @@ this.cl('entering  closingMovingAverageCondition',ts)
 
 entry=Math.min(secondLowestOrdersPrice,element.last_price);
 
-// this.proceedForEntry(
-//               instrument_token,
-//               cis,
-//               element,
-//               entry,
-//               "long"
-//             );
-//             this.cl('safe','closingMovingAverageCondition')
+this.proceedForEntry(
+              instrument_token,
+              cis,
+              element,
+              entry,
+              "long"
+            );
+            this.cl('safe','closingMovingAverageCondition')
 
 this.sendTradeStrategy(cis.tradingsymbol,entry,cis.lot_size,'closingMovingAverageCondition')
 
 break;
 
 
-
-
 }
 
 
-
-
-
-
-          
-//           if (
-//             inst.previousPrice <= entryLong &&
-//             cis.last_price >= entryLong ///day entry
-         
-//             ) {
-//             ///long entry
-
-//             entryLong = high;
-
-
-//           if(this.instruments.
-//           filter(i=>i.instrument_token==instrument_token)[0].
-//           hasLivePosition){
-
-//             return false
-//           }
-
-
-//             this.proceedForEntry(
-//               instrument_token,
-//               cis,
-//               element,
-//               entryLong,
-//               "long"
-//             );
-
-//             // this.cl('trade entry  long for %s @ %s',cis.tradingsymbol,entryLong)
-//             // return true;
-//           } else if (
-//             inst.previousPrice >= entryShort &&
-//             cis.last_price <= entryShort
-//           ) {
-//             ///short entry
-
-//             if(this.instruments.filter(i=>i.instrument_token==instrument_token)[0].hasLivePosition){
-
-// return false
-// }
-
-           
-           
-//             this.proceedForEntry(
-//               instrument_token,
-//               cis,
-//               element,
-//               entryShort,
-//               "short"
-//             );
-
-//             // this.cl('trade entry  short for %s @ %s',cis.tradingsymbol,entryShort)
-
-//             // return true;
-//           }
-
-
-          
 
 
 } catch (e) {
@@ -6554,10 +6531,49 @@ let ts=cis.tradingsymbol;
 
     },
 
+    checkSidewaysMovementTime() {
+      // Extract hours and minutes from data properties
+      const { hours, minutes } = this;
+      
+      // Opening Period: 9:15 AM to 10:00 AM IST
+      if (hours === 9 && minutes >= 15 && minutes < 60) {
+        return false;
+      }
+
+      // Mid-Morning Session: 10:00 AM to 11:30 AM IST
+      if (hours === 10 && minutes >= 0 && minutes < 60) {
+        return false;
+      }
+
+      // Post-Lunch Session: 1:00 PM to 2:30 PM IST
+      if (hours === 13 && minutes >= 0 && minutes < 60) {
+        return false;
+      }
+
+      // Closing Period: 2:30 PM to 3:30 PM IST
+      if (hours === 14 && minutes >= 30 && minutes < 60) {
+        return false;
+      }
+
+      // If none of the above conditions are met, consider it as sideways movement time
+      return true;
+    },
 
    
     stopLossTargetSwitch(quantity,last_price,high,low,bidPrice,offerPrice,cis,element,livePnlOffered){
        
+
+
+      if((this.hours==9 && this.minutes>45) || this.hours>9 && this.hours<12 ){
+
+        this.cl('NO TRADING TIME ZOnE new')
+
+        return false;
+      }else{
+
+        this.cl(' TRADING TIME ZOnE new now')
+
+      }
       // return;
       //stopLossSwitch
       //stoplossswitch
@@ -6581,8 +6597,16 @@ let ts=cis.tradingsymbol;
 this.cl('OPEN ITSELF IS YESTERDAYS LOW FOR %s SO AVIODING SL ALERT',cis.tradingsymbol)
   }
 
-  if(this.hours<10){
+  if(
+    
 
+
+ ! this.checkSidewaysMovementTime()
+  
+  ){
+
+
+    this.cl('NON TRADING TIME SIDE WAYS TIME');
     return false
   }
 
@@ -6620,7 +6644,13 @@ let livePnlHere=(last_price-average_price)*qty;
 
 
     let maxOfYdayTodayLow=(last_price<=
-Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) && this.hours>10);
+Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) && 
+
+
+
+(this.hours>9 || (this.hours==9 && this.minutes>20) )
+
+);
 
 // let daySqOff=((this.hours==15) && (livePnlOffered>500) && false);
 
@@ -6649,7 +6679,15 @@ let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low && element.o
 
     this.stopLossSwitchHealth=!this.stopLossSwitchHealth;
 
-if(this.hours<10){
+if(
+  
+
+
+
+!(this.hours>9 || (this.hours==9 && this.minutes>20) )
+
+
+){
 
 
   this.cl('stop loss switch not active before 10')
@@ -7053,7 +7091,9 @@ upperRangeCheck=ohlc.high<lp*1.05;
 
 
 
-let hrsCheck=this.hours>=10;
+let hrsCheck=(this.hours>9 || (this.hours==9 && this.minutes>20) )
+
+// this.hours>=10;
 
 
 if(openLow && lossCheck && hrsCheck && upperRangeCheck){
@@ -7466,11 +7506,16 @@ if(!isHigherLows){
 
 this.cl('before hours chk 7812')
 
-if(this.hours<10){
+if(
+  
+!(this.hours>9 || (this.hours==9 && this.minutes>20) )
+
+
+){
 
 
   this.tradeEntryFlowStatus='LESS THAN 10 HOURS NO TRADE ZONE 10'
-  this.cl('no buying  before 10 am');
+  this.cl('NO TRADING TIME');
 
   return;
 }
