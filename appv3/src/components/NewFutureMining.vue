@@ -3834,7 +3834,7 @@ return false;
       try {
 
 
-        if(!this.checkSidewaysMovementTime() ){
+        if(this.checkSidewaysMovementTime() ){
 
 this.cl('NO TRADING TIME SIDE WISE TIME')
 
@@ -3861,14 +3861,14 @@ return;
 
       
       }
-
+      niftyFavorable=true;
 
       if(niftyFavorable==false){
 
       let t=  moment()
         this.cl('NIFTY NOT FAVORABLE',t.hours());
 
-        return false
+        // return false
       }
 
       this.cl('nifty favorable',niftyFavorable)
@@ -4150,6 +4150,12 @@ cis.tradingsymbol.includes("NIFTY")
 }
 
 let specialCheck;
+
+var msg;
+
+var now = moment();
+
+var formattedTime = now.format("DD-MM-YY H:mm");
 switch(true){
 
 
@@ -4165,6 +4171,8 @@ switch(true){
   
   this.cl('safe','daily range break out')
 
+  this.cl(secondLowestOrdersPrice,'secondLowestOrdersPrice',ts)
+
 let e4=Math.min(secondLowestOrdersPrice,element.last_price,cis.pricePoints.d0.high);
 
 
@@ -4178,6 +4186,10 @@ this.proceedForEntry(
            "long"
          );
 
+
+
+          msg=`TRADE EXECUTION SEND BY  DAILY RANGE BREAKOUT STRATEGY FOR ${ts}  for ${e4} at ${formattedTime}`
+         this.cl(msg)
 
 this.sendTradeStrategy(cis.tradingsymbol,e4,cis.lot_size,'daily range break out')
 
@@ -4213,9 +4225,15 @@ this.proceedForEntry(
              instrument_token,
              cis,
              element,
-             e3,
+             e3,ß
              "long"
            );
+
+
+    
+
+          msg=`TRADE EXECUTION SEND BY yesterDayCloseStrategy FOR ${ts}  for ${e3} at ${formattedTime}`
+         this.cl(msg)
 
 
 this.sendTradeStrategy(cis.tradingsymbol,e3,cis.lot_size,'yesterDayCloseStrategy')
@@ -4250,6 +4268,9 @@ this.proceedForEntry(
 
            this.sendTradeStrategy(cis.tradingsymbol,e2,cis.lot_size,'todayLastPriceHigh')
 
+           msg=`TRADE EXECUTION SEND BY  DAILY todayLastPriceHigh STRATEGY FOR ${ts}  for ${e2} at ${formattedTime}`
+         this.cl(msg)
+
 
   break;
 
@@ -4279,6 +4300,9 @@ this.proceedForEntry(
               "long"
             );
             this.cl('safe','todayLastPriceHigh')
+
+            msg=`TRADE EXECUTION SEND BY  DAILY isOpenLow STRATEGY FOR ${ts}  for ${e1} at ${formattedTime}`
+         this.cl(msg)
 
             this.sendTradeStrategy(cis.tradingsymbol,e1,cis.lot_size,'todayLastPriceHigh')
 break;
@@ -6034,8 +6058,8 @@ break;
         if (true) {
 
 
-          // var audio = new Audio("/sounds/mixkit-sci-fi-confirmation-914.wav");
-          //audio.play();
+          var audio = new Audio("/sounds/mixkit-sci-fi-confirmation-914.wav");
+          audio.play();
           let transaction_type;
 
           if (direction == "long") {
@@ -6090,7 +6114,7 @@ return false;
 
           this.proposedBuyAmount = 0;
           //  let Price=priceSell1;
-          let product = "NRML";
+          let product = "NRML";  
 
           let reverseOrder=false;
           let arr = this.buildOrderArray(
@@ -6555,6 +6579,11 @@ let ts=cis.tradingsymbol;
         return false;
       }
 
+
+      if (hours === 15 && minutes >= 0 && minutes < 30) {
+        return false;
+      }
+
       // If none of the above conditions are met, consider it as sideways movement time
       return true;
     },
@@ -6564,7 +6593,19 @@ let ts=cis.tradingsymbol;
        
 
 
-      if((this.hours==9 && this.minutes>45) || this.hours>9 && this.hours<12 ){
+      //vs
+      let hrsForSqoff=[9,15,14,10,13];
+
+      let sqmin=[58,59]
+
+      let momentFire=livePnlOffered>1000 && hrsForSqoff.includes(this.hours) && (this.minutes>58);
+
+
+      // if((this.hours==9 && this.minutes>45) || this.hours>9 && this.hours<12 ){
+      if(this.checkSidewaysMovementTime() ){
+
+        
+
 
         this.cl('NO TRADING TIME ZOnE new')
 
@@ -6581,15 +6622,17 @@ let ts=cis.tradingsymbol;
 
 
   let a=  this.checkNiftyStatus("NIFTY 50");
-      this.cl(a,'index status')
+      // this.cl(a,'index status')
 
       let niftyFavorable=false
-      if(a.change>75){
+      // if(a.change>75){
 
-        niftyFavorable=true;
+      //   niftyFavorable=true;
 
       
-      }
+      // }
+
+      niftyFavorable=true;  //just over riding
 
 
   if(element.ohlc.open<cis.pricePoints.d1.low){
@@ -6601,12 +6644,12 @@ this.cl('OPEN ITSELF IS YESTERDAYS LOW FOR %s SO AVIODING SL ALERT',cis.tradings
     
 
 
- ! this.checkSidewaysMovementTime()
+ this.checkSidewaysMovementTime()
   
   ){
 
 
-    this.cl('NON TRADING TIME SIDE WAYS TIME');
+    this.cl('NON TRADING TIME SIDE WAYS TIME',this.checkSidewaysMovementTime());
     return false
   }
 
@@ -6679,29 +6722,53 @@ let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low && element.o
 
     this.stopLossSwitchHealth=!this.stopLossSwitchHealth;
 
-if(
+// if(
   
 
 
 
-!(this.hours>9 || (this.hours==9 && this.minutes>20) )
+// !(this.hours>9 || (this.hours==9 && this.minutes>20) )
 
 
-){
+// ){
 
 
-  this.cl('stop loss switch not active before 10')
-  return false
-}
+//   this.cl('stop loss switch not active before 10')
+//   return false
+// }
 
 
     this.cl('stop loss switchx')
+
+    var msg;
+
+var now = moment();
+
+var formattedTime = now.format("DD-MM-YY H:mm");
       switch (true) {
+
+        case(momentFire):
+
+
+
+         this.cl('FIRING TARGETED PRFIT BOOKING FOR',cis.tradingsymbol,'at', last_price,'FOR PROFIT',livePnlOffered);
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+
+        break;
 
 
         case (yesterDayLowStopLoss && niftyFavorable):
 
 // console.log('yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol)
+
+
+msg=`STOP LOSS  EXECUTION SEND BY  DAILY isOpenLow STRATEGY FOR ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
 
          this.updateSquareOfforderWithDesiredPrice(
            cis,
@@ -6818,6 +6885,9 @@ this.updateSquareOfforderWithDesiredPrice(
                    false,
                    Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low)
                  );
+
+                 msg=`STOP LOSS  EXECUTION SEND BY  DAILY maxOfYdayTodayLow  STRATEGY FOR ${cis.tradingsymbol}  for ${Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low)} at ${formattedTime}`
+         this.cl(msg)
               
 
         break;
@@ -6914,6 +6984,11 @@ this.updateSquareOfforderWithDesiredPrice(
                    false,
                    squareoffPrice
                  );
+
+
+                 msg=`STOP LOSS  EXECUTION SEND BY  DAILY quantity > 0 && last_price < low  STRATEGY FOR ${cis.tradingsymbol}  for ${squareoffPrice} at ${formattedTime}`
+         this.cl(msg)
+              
 
                  break;
 
