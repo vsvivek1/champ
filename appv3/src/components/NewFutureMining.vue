@@ -1,7 +1,12 @@
 <template>
   <div>
 
-    <v-alert>{{ liveMargin }}</v-alert>
+    <p v-if="liveMargin && liveMargin.equity && liveMargin.equity.utilised && liveMargin.equity.utilised.debits">
+      Margin: {{ liveMargin.equity.utilised.debits }}
+    </p>
+    <p v-else>
+      Margin is not available yet.
+    </p>
 
     <!-- <button @click="downloadLogs">Download Logs</button> -->
     <button @click="openWindow()">View Logs</button>
@@ -3833,7 +3838,12 @@ return false;
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
 
+if(this.liveMargin.equity.utilised.debits>200000){
 
+  this.cl('DEBITS MORE THAN 200000 NO TRADING FURTER');
+
+  return false;
+}
         if(this.checkSidewaysMovementTime() ){
 
 this.cl('NO TRADING TIME SIDE WISE TIME')
@@ -4225,7 +4235,7 @@ this.proceedForEntry(
              instrument_token,
              cis,
              element,
-             e3,ß
+             e3,
              "long"
            );
 
@@ -6557,6 +6567,10 @@ let ts=cis.tradingsymbol;
 
     checkSidewaysMovementTime() {
       // Extract hours and minutes from data properties
+
+      /// true =no trade
+
+      //false =trade
       const { hours, minutes } = this;
       
       // Opening Period: 9:15 AM to 10:00 AM IST
@@ -6566,12 +6580,23 @@ let ts=cis.tradingsymbol;
 
       // Mid-Morning Session: 10:00 AM to 11:30 AM IST
       if (hours === 10 && minutes >= 0 && minutes < 60) {
+        return true;
+      }
+
+      if (hours === 11 && minutes >= 30 && minutes < 60) {
         return false;
       }
 
+
+      if (hours === 12 && minutes >= 0 && minutes < 30) {
+        return false;
+      }
+
+    
+
       // Post-Lunch Session: 1:00 PM to 2:30 PM IST
       if (hours === 13 && minutes >= 0 && minutes < 60) {
-        return false;
+        return true;
       }
 
       // Closing Period: 2:30 PM to 3:30 PM IST
@@ -6591,6 +6616,12 @@ let ts=cis.tradingsymbol;
    
     stopLossTargetSwitch(quantity,last_price,high,low,bidPrice,offerPrice,cis,element,livePnlOffered){
        
+
+
+      /// gapped up yesteddays high then going below 5% of yesterddays high stop loss
+
+let todayOpenYesterDayhigh=element.ohlc.open>cis.pricePoints.d1.high && element.last_price<(math.round(cis.pricePoints.d1.high*.95,1))
+let todayOpenYesterDayClose=element.ohlc.open>cis.pricePoints.d1.close && element.last_price<(math.round(cis.pricePoints.d1.close*.95,1))
 
 
       //vs
@@ -6747,6 +6778,34 @@ var now = moment();
 var formattedTime = now.format("DD-MM-YY H:mm");
       switch (true) {
 
+        
+
+        case(todayOpenYesterDayhigh):
+        msg=`STOP LOSS  EXECUTION  BY  GAP UP YESTERDAY HIGH , THEN FALLED BELOW 5% OF YESTERDAY HIGH ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+
+        break;
+
+
+        case(todayOpenYesterDayClose):
+        msg=`STOP LOSS  EXECUTION  BY  GAP UP YESTERDAY close , THEN FALLED BELOW 5% OF YESTERDAY close ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+
+        break;
+
+
         case(momentFire):
 
 
@@ -6767,7 +6826,7 @@ var formattedTime = now.format("DD-MM-YY H:mm");
 // console.log('yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol)
 
 
-msg=`STOP LOSS  EXECUTION SEND BY  DAILY isOpenLow STRATEGY FOR ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+msg=`STOP LOSS  EXECUTION SEND BY  DAILY yesterDayLowStopLoss STRATEGY FOR ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
 
          this.updateSquareOfforderWithDesiredPrice(

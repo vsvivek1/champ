@@ -4,8 +4,9 @@ require('dotenv').config({path:'../../findiserver/.env'});
 const Path = require('path');
 const Fs = require('fs')
 
-;
-
+let moment=require('moment');
+const mongoose=require('mongoose');
+let AccesTocken=require('../models/AccessTokens');
 
 
 
@@ -45,19 +46,30 @@ class Gtt {
 
 
   async  getPricePointsOfStocks(){
-const AccessToken=require('./AccessToken')
-let at1=new AccessToken();
 
-console.log(at1,'at1z')
 
 
 
 let result=[]
 
-    //this.accessToken=//await at1.getAccessToken()
-        return new Promise((res,rej)=>{
+  
+        return new Promise(async (res,rej)=>{
 
-
+            const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+            let mongo=await mongoose.connect(uri,{ useNewUrlParser: true, useUnifiedTopology: true });
+            
+            
+            let today= moment().format('Y-MM-DD');
+            let at1  = await AccesTocken.
+            findOne({ 'date': today },'access_token').then(e=>e.access_token);
+    
+    
+      
+        
+            this.accessToken=at1;      
+    
+    console.log(at1,'ACCEESS TOKEN',today)
+    
 
         
         let pricePoint=require('./../pricePoints');
@@ -70,8 +82,13 @@ let result=[]
 
     let ln=this.stocks.length;
 
+
+
    
 let count=1;
+
+
+
 if(true){
     let t=setInterval(async ()=>{
 
@@ -98,7 +115,12 @@ if(true){
 
             let tradingsymbol=instrument.tradingsymbol;
 
+            console.log(stock,'stock',this.accessToken);
+
         let pp=new pricePoint(stock, this.accessToken);
+
+        // pp.initiateKiteConnect();
+        pp.initiateKiteConnect();
         
 
         let pp2=await pp.getPricePoints()
@@ -205,7 +227,7 @@ let n2=n.getGttStocks();
 n.getPricePointsOfStocks()
 
 
-console.log(n2)
+// console.log(n2)
 
 
 //  module.exports = Gtt;;

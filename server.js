@@ -668,6 +668,8 @@ app.post('/api/PlaceGTT', async (req,res) => {
  let params=req.body.params;
  let accessToken=req.body.accessToken;
 
+
+ print(params);
  
 try {
   var kc = new KiteConnect({
