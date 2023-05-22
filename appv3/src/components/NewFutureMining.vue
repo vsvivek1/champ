@@ -2319,21 +2319,26 @@ let lp =this.livePositions.find(j=>j.instrument_token==i.instrument_token)
 
 
 const reducedPrice = (lp.last_price * 0.95).toFixed(1);
-
+let currentStopLossPrice=i.price;
+    let proposedSopLossPrice=reducedPrice;
 
   let inRange=false;
   if(i.status=='TRIGGER PENDING'){
 
     let inRange=true;
-    let currentStopLossPrice=i.price;
-    let proposedSopLossPrice=reducedPrice;
+  
 
     if(
       // proposedSopLossPrice>=currentStopLossPrice*.95 &&
-      proposedSopLossPrice<=currentStopLossPrice*1.04 
+      proposedSopLossPrice<currentStopLossPrice
       
       ){
+/// measns new sl price based on ltp is less than curent stop loss /// means do not modify
+
+
         inRange=true
+
+        return false;
 
       }else{
 
@@ -2353,6 +2358,12 @@ const reducedPrice = (lp.last_price * 0.95).toFixed(1);
   }
 
 
+
+  if( proposedSopLossPrice<currentStopLossPrice){
+
+    return false;
+  }
+
 if(lp.pnl>1000 && !inRange){
 
 let {buy_price,buy_quantity,pnl}=lp;
@@ -2364,9 +2375,9 @@ let o={};
     o.variety='regular';
     o.order_id=i.order_id;
     let params={};
-      params.price=reducedPrice;
+      params.price=proposedSopLossPrice
 
-params.trigger_price=reducedPrice;
+params.trigger_price=proposedSopLossPrice
 params.order_type="SL"
     o.params=params;
 
@@ -6620,8 +6631,8 @@ let ts=cis.tradingsymbol;
 
       /// gapped up yesteddays high then going below 5% of yesterddays high stop loss
 
-let todayOpenYesterDayhigh=element.ohlc.open>cis.pricePoints.d1.high && element.last_price<(math.round(cis.pricePoints.d1.high*.95,1))
-let todayOpenYesterDayClose=element.ohlc.open>cis.pricePoints.d1.close && element.last_price<(math.round(cis.pricePoints.d1.close*.95,1))
+let todayOpenYesterDayhigh=element.ohlc.open>cis.pricePoints.d1.high && element.last_price<(Math.round(cis.pricePoints.d1.high*.95,1))
+let todayOpenYesterDayClose=element.ohlc.open>cis.pricePoints.d1.close && element.last_price<(Math.round(cis.pricePoints.d1.close*.95,1))
 
 
       //vs
@@ -6722,7 +6733,7 @@ Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) &&
 
 
 
-(this.hours>9 || (this.hours==9 && this.minutes>20) )
+(this.hours>9 || (this.hours==9 && this.minutes>18) )
 
 );
 

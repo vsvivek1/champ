@@ -3,6 +3,7 @@ var moment=require('moment');
 const FILE_LOCATION='./appv3/public/instruments'
 const instruAll = require('./'+FILE_LOCATION+'/instrumentsAll.json');
 
+var api_key_final= 'wkcurst2vu5obug7';
 module.exports = 
 class pricePoint {
 
@@ -19,6 +20,8 @@ class pricePoint {
     this.stock_tocken = stock_tocken;
 
     this.accessToken = accessToken;
+
+    console.log('ACCESS TOKEN FROM PRICE POINTS', this.accessToken)
 
     this.pricePointData = []
     // this.getPricePoints();
@@ -253,8 +256,10 @@ return new Promise(async (res,rej)=>{
   
 
 async getXDaysPricePoints(days,stock_tocken){
+
+  console.log(api_key_final,'api key fromgetXDaysPricePoints')
   var kc2 = new KiteConnect({
-    api_key: process.env.api_key,
+    api_key: api_key_final,
     access_token: this.accessToken
   });
 
@@ -1005,13 +1010,15 @@ res(retOb)
 
    this.accessToken=at1.access_token;
 
-  //  console.log(access_token,'at',today);
+   console.log(access_token,'access token from price poits',today);
 
   //  return;
 
+console.log(`API KEY FROM `,api_key_final)
 
+console.log(api_key_final,'api key from initiate kite connect')
     return new KiteConnect({
-      api_key: 'wkcurst2vu5obug7',
+      api_key: api_key_final,
       access_token: access_token
     });
   }

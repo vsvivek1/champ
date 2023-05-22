@@ -42,6 +42,8 @@ function main() {
 
       access_token = e.access_token;
 
+
+	  console.log(access_token,'access token from here')
       await fetchInstrumentsForMining(access_token);
 
 
