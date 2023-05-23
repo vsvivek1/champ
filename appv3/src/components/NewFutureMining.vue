@@ -1,8 +1,12 @@
 <template>
   <div>
 
+
     <p v-if="liveMargin && liveMargin.equity && liveMargin.equity.utilised && liveMargin.equity.utilised.debits">
-      Margin: {{ liveMargin.equity.utilised.debits }}
+ 
+      Margin: {{ liveMargin.equity.utilised.margin }}
+     TOTAL OPTION PRICE: {{ totalOptionPrice }}
+     OPTION PREMIUM :{{ liveMargin.equity.utilised.option_premium}}
     </p>
     <p v-else>
       Margin is not available yet.
@@ -918,6 +922,35 @@ this.updateSelectedSellorderWithLtp();
  
 
   computed: {
+
+    totalOptionPrice() {
+    let positionTotal = -1;
+    let orderTotal = -1;
+
+    if (this.livePositions && this.livePositions.length > 0) {
+      positionTotal = this.livePositions.filter(lp=>lp.instrument.segment=='NFO-OPT').
+      
+      reduce((total, position) => {
+        const { buy_price, price, quantity } = position;
+        total += (buy_price) * quantity;
+        return total;
+      }, 0);
+    }
+
+    if (this.liveOrders && this.liveOrders.length > 0) {
+      orderTotal = this.liveOrders.filter(lo=>!lo.tradingsymbol.includes('FUT') && lo.transaction_type=='BUY').
+      
+      reduce((total, order) => {
+        const { buy_price, price, quantity } = order;
+        total += ( price) * quantity;
+        return total;
+      }, 0);
+    }
+
+    return positionTotal + orderTotal;
+  },
+
+
     logFileUrl() {
     if (this.logs.length) {
       const allLogs = this.logs.join('\n');
@@ -3876,7 +3909,14 @@ return false;
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
 
-if(this.liveMargin.equity.utilised.debits>200000){
+if( this.totalOptionPrice &&
+this.totalOptionPrice.isNaN
+&&
+
+this.totalOptionPrice!=-2 
+
+&&
+this.totalOptionPrice>200000){
 
   this.cl('DEBITS MORE THAN 200000 NO TRADING FURTER');
 
@@ -4112,13 +4152,43 @@ if( (this.hours==15) && this.minutes>15 ){
 
 if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99){
 
-  console.log(ts,'is seems to be at higest price close from inside trade entry function');
+ this.cl(ts,'is seems to be at higest price close from inside trade entry function');
 
   todayLastPriceHigh=true
 }
 
 
+
+
+
+
 }
+
+
+let todayLastPriceClosing=false
+if( (this.hours==15) && this.minutes>25 ){
+
+
+
+// console.log(element.last_price==element.ohlc.high,ts)
+
+
+if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99){
+
+  console.log(ts,'is seems to be at higest price close todayLastPriceClosing from inside trade entry function');
+
+  todayLastPriceClosing=true
+}
+
+
+
+
+
+
+}
+
+
+
 
 // this.cl('before yesterDayCloseStrategy')
 
@@ -4323,6 +4393,38 @@ this.proceedForEntry(
            this.sendTradeStrategy(cis.tradingsymbol,e2,cis.lot_size,'todayLastPriceHigh')
 
            msg=`TRADE EXECUTION SEND BY  DAILY todayLastPriceHigh STRATEGY FOR ${ts}  for ${e2} at ${formattedTime}`
+         this.cl(msg)
+
+
+  break; 
+  
+  
+  // case todayLastPriceClosing:
+
+
+  
+
+
+  case todayLastPriceClosing:
+  // let e2=Math.min(secondLowestOrdersPrice,element.last_price);
+
+this.cl('todayLastPriceClosing high',ts)
+
+
+
+this.proceedForEntry(
+             instrument_token,
+             cis,
+             element,
+             last_price,
+             "long"
+           );
+
+          //  this.cl('safe','todayLastPriceHigh')
+
+          //  this.sendTradeStrategy(cis.tradingsymbol,e2,cis.lot_size,'todayLastPriceHigh')
+
+           msg=`TRADE EXECUTION SEND BY  DAILY todayLastPriceClosing STRATEGY FOR ${ts}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
 
 
