@@ -6824,6 +6824,23 @@ var now = moment();
 var formattedTime = now.format("DD-MM-YY H:mm");
       switch (true) {
 
+
+
+case ((element.last_price<element.ohlc.open) && this.hours>14):
+
+
+msg=`STOP LOSS  EXECUTION  PRICE AFTER 3 PM WAS BELOW TODAYS OPEN EXIT FOR , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+
+break;
+
+
         case(element.ohlc.low<=cis.pricePoints.d1.low):
         msg=`STOP LOSS  EXECUTION TODAYS LOW CROESSED AT SOME TIME YESTERDAYS LOW DANGER EXIT , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
