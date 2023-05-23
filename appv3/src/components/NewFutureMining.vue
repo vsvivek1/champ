@@ -4160,6 +4160,10 @@ let dailyRangeBreakOut=(
 
 (this.hours>10 )
 
+&& element.open>cis.pricePoints.d1.low
+
+&& cis.pricePoints.d1.high!=cis.pricePoints.d1.open
+
 
 && element.last_price>=cis.pricePoints.d0.high
 
