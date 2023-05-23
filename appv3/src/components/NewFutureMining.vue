@@ -4169,10 +4169,12 @@ let dailyRangeBreakOut=(
 
 && cis.pricePoints.d0.high!=0);
 
+
+
 if(dailyRangeBreakOut)
 {
 
-  this.cl('daily range break out',ts)
+  this.cl('DAILY RANGE BREAK OUT AFTER 11 OF ',ts,'AT ',element.last_price,'TIME',this.hours,':',this.minutes)
 }
 
 if(element.last_price<1){
