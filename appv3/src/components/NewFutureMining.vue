@@ -6815,7 +6815,7 @@ let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low )
 // }
 
 
-    this.cl('stop loss switchx')
+    this.cl('NEAR STOP LOSS SWITCH FOR HEALTH CHECK ONLY')
 
     var msg;
 
@@ -6824,7 +6824,22 @@ var now = moment();
 var formattedTime = now.format("DD-MM-YY H:mm");
       switch (true) {
 
-        
+        case(element.ohlc.low<=cis.pricePoints.d1.low):
+        msg=`STOP LOSS  EXECUTION TODAYS LOW CROESSED AT SOME TIME YESTERDAYS LOW DANGER EXIT , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+
+        break;
+
+
+
+
+
 
         case(todayOpenYesterDayhigh):
         msg=`STOP LOSS  EXECUTION  BY  GAP UP YESTERDAY HIGH , THEN FALLED BELOW 5% OF YESTERDAY HIGH ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
@@ -6867,7 +6882,7 @@ var formattedTime = now.format("DD-MM-YY H:mm");
         break;
 
 
-        case (yesterDayLowStopLoss && niftyFavorable):
+        case (yesterDayLowStopLoss):
 
 // console.log('yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol)
 
@@ -6977,7 +6992,7 @@ break;
 
 
 
-case (maxOfYdayTodayLow && niftyFavorable):
+case (maxOfYdayTodayLow ):
 
 
 this.cl('sltrigger  trigger minimum of y day low todays low for  %s at squareoffPrice of %s',
