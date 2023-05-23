@@ -6682,12 +6682,12 @@ let todayOpenYesterDayClose=element.ohlc.open>cis.pricePoints.d1.close && elemen
         
 
 
-        this.cl('NO TRADING TIME ZOnE new')
+        this.cl('NO TRADING TIME ',this.hours,this.minutes)
 
         return false;
       }else{
 
-        this.cl(' TRADING TIME ZOnE new now')
+        this.cl(' TRADING TIME STARTS ',this.hours,this.minutes)
 
       }
       // return;
@@ -6710,10 +6710,10 @@ let todayOpenYesterDayClose=element.ohlc.open>cis.pricePoints.d1.close && elemen
       niftyFavorable=true;  //just over riding
 
 
-  if(element.ohlc.open<cis.pricePoints.d1.low){
+//   if(element.ohlc.open<cis.pricePoints.d1.low){
 
-this.cl('OPEN ITSELF IS YESTERDAYS LOW FOR %s SO AVIODING SL ALERT',cis.tradingsymbol)
-  }
+// // this.cl('OPEN ITSELF IS YESTERDAYS LOW FOR %s SO AVIODING SL ALERT',cis.tradingsymbol)
+//   }
 
   if(
     
@@ -6766,7 +6766,7 @@ Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) &&
 
 
 
-(this.hours>9 || (this.hours==9 && this.minutes>18) )
+(this.hours>10  )
 
 );
 
