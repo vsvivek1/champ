@@ -4158,13 +4158,13 @@ let dailyRangeBreakOut=(
   
 
 
-(this.hours>9 || (this.hours==9 && this.minutes>20) )
+(this.hours>10 )
 
 
 && element.last_price>=cis.pricePoints.d0.high
 
 
-&& element.last_price< cis.pricePoints.d0.high*1.05
+&& element.last_price<= cis.pricePoints.d0.high*1.05
 
 
 && cis.pricePoints.d0.high!=0);
@@ -4177,7 +4177,7 @@ if(dailyRangeBreakOut)
 
 if(element.last_price<1){
 
-  this.cl('no trading of sub 1 scripts')
+  this.cl(' NO TRADING IN SCRIPT PRICE LESS THAN 1 RS',ts)
 
 return ;
 }
