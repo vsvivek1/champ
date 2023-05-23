@@ -33,7 +33,8 @@ var KiteConnect = require("kiteconnect").KiteConnect;
 // console.log('ACCESS_TOCKEN',process.env.ACCESS_TOCKEN)
 // return false;
 
-let api_key=process.env.api_key;
+// let api_key=process.env.api_key;
+const api_key = 'wkcurst2vu5obug7'
 let access_token=process.env.ACCESS_TOCKEN;
 
 var kc2 = new KiteConnect({

@@ -25,7 +25,8 @@ async function  dayLevelUpdates()
 
 
     var KiteConnect = require("kiteconnect").KiteConnect;
-    let api_key=process.env.api_key;
+    // let api_key=process.env.api_key;
+    const api_key = 'wkcurst2vu5obug7'
      api_key='wkcurst2vu5obug7'
     ob={}
 

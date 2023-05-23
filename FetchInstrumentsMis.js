@@ -12,7 +12,8 @@ var KiteConnect = require("kiteconnect").KiteConnect;
 require('dotenv').config()
 let access_token;
 let AccesTocken=require('./models/AccessTokens');
-const api_key=process.env.api_key;
+// const api_key=process.env.api_key;
+const api_key = 'wkcurst2vu5obug7'
 
 const pricePoint = require('./pricePoints');
 

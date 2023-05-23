@@ -70,9 +70,9 @@ module.exports = class misPricePoints {
 
   async getXDaysPricePoints(days){
 
-   
+    const api_key = 'wkcurst2vu5obug7'
     var kc2 = new KiteConnect({
-      api_key: process.env.api_key,
+      api_key: api_key,
       access_token: this.accessToken
     });
   

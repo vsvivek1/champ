@@ -2359,19 +2359,46 @@ let currentStopLossPrice=i.price;
 
 
 
-  if( proposedSopLossPrice<currentStopLossPrice){
+if(lp.pnl>1500){
 
-    return false;
+
+  if(i.status=='TRIGGER PENDING'){
+
+    /// code for updating
+
+    if(proposedSopLossPrice>=(currentStopLossPrice*1.1)){
+      let o={};
+   
+   o.variety='regular';
+   o.order_id=i.order_id;
+   let params={};
+     params.price=proposedSopLossPrice
+
+params.trigger_price=proposedSopLossPrice
+params.order_type="SL"
+   o.params=params;
+
+
+  //  console.log(lp.tradingsymbol,lp.pnl,o)
+ 
+   return o;
+
+
+    }
+
+
+    // return false;
+
   }
 
-if(lp.pnl>1000 && !inRange){
+/// rest code for fresh sl 
 
 let {buy_price,buy_quantity,pnl}=lp;
 
  
 
 let o={};
-    // o.variety=i.variety;
+   
     o.variety='regular';
     o.order_id=i.order_id;
     let params={};
@@ -2382,8 +2409,10 @@ params.order_type="SL"
     o.params=params;
 
 
-    console.log(lp.tradingsymbol,lp.pnl,o)
-    // this.cl('o',o)
+    this.cl('PLACING STOP LOSS FOR GAIN ',)
+
+    // console.log(lp.tradingsymbol,lp.pnl,o)
+  
     return o;
 
  
@@ -2392,19 +2421,17 @@ params.order_type="SL"
 
 }).filter(k=>k!=null);
 
-// this.cl(this.newOrder,'as2');
 
-console.log(this.newOrder.length,'new order length')
-  // this.updateOrder();
+
+ console.log(this.newOrder.length,'new order length')
+
 
  let t = await this.getOrders();
-//  this.updatingInProgress;
 
-// this.cl(a,'as');
 
   this.updateOrder();
 
-// .map(o=>{});
+
 
           },
 
@@ -7365,6 +7392,8 @@ this.cl('buys undefined so -1');
      
        this.heartBeatAndCurrentCheckDigit()
 
+
+
       
 
        if (this.hasStartedGetOrders || this.hasStartedGetLivePositions || this.refreshingTradeStatus) {
@@ -7390,6 +7419,8 @@ this.cl('buys undefined so -1');
         let ohlc=element.ohlc;
 
         
+
+
 
         this.setD0WithCurrentDayOhlc(element);
 
@@ -7424,6 +7455,16 @@ if(typeof cis=='undefined'){
 
   return false;
 }
+
+let mar=(element.ohlc==element.ohlc.low && (element.last_price*1.1<=element.ohlc.high || element.last_price==element.ohlc.high)  && this.hours>=14);
+
+
+if(mar){
+
+
+this.cl("MARUBOZU CANDLE FOR",cis.tradingsymbol)
+}
+
 
 
 this.cl('check point 4a')

@@ -113,9 +113,9 @@ daysToAdvance=daysToAdvance+5
     // return d.toLocaleString('sv').slice(0, 10);
 
 
-
+// moment().add(1,'day')
     
-    return moment().format('Y-MM-DD')
+    return moment().add(1,'day').format('Y-MM-DD')
   }
 
   getHeikinAshiValues(dayBeforeYesterdayData,yesterdayData){

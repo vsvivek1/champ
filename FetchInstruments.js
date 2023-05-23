@@ -9,7 +9,10 @@ const Fetch = require('./fetch.js')
 const csvToJson = require("csvtojson");
 
 let moment= require('moment');
-const FILE_LOCATION='./appv3/public/instruments'
+// const FILE_LOCATION='./appv3/public/instruments'
+
+const scriptDirectory = Path.dirname(process.argv[1]);
+const FILE_LOCATION = Path.join(scriptDirectory, 'appv3', 'public', 'instruments');
 
 
 let ce_upper_percentage=1.04;
@@ -96,7 +99,10 @@ var KiteConnect = require("kiteconnect").KiteConnect;
 require('dotenv').config()
 let access_token;
 let AccesTocken = require('./models/AccessTokens');
-const api_key = process.env.api_key;
+// const api_key = process.env.api_key;
+const api_key = 'wkcurst2vu5obug7'
+
+
 
 const pricePoint = require('./pricePoints');
 
@@ -106,7 +112,7 @@ const ohlc = require('./scraping/ohlc')
 // let today = new Date().toISOString()//.slice(0, 10);
 // const fetchInstrumentsForNewMint=require('./FetchInstrumentsForNewMint.js')
 
-const instruAll = './'+FILE_LOCATION+'/instrumentsAll.json';
+const instruAll = FILE_LOCATION+'/instrumentsAll.json';
 
 const EXPIRY = getCurrentExpiryDate();
 
@@ -151,9 +157,7 @@ try {
 
 async function fetchInstrumentsForMining(accessToken) {try {
 	
-	
-	
-	
+
 	
 	  let dl = await Fetch.downloadInstruments();
 	
@@ -202,11 +206,16 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	
 	
 	
-	  let fileOutputName = Path.resolve(__dirname, FILE_LOCATION,
+	//   let fileOutputName = Path.resolve(__dirname, FILE_LOCATION,
+	//    'instruments.json')
+	   
+	 
+	   let fileOutputName = Path.resolve( FILE_LOCATION,
 	   'instruments.json')
 	  
 	  
-	  let jsonObjCommodityFile= Path.resolve(__dirname, FILE_LOCATION, 'CommodityFile.json')
+	//   let jsonObjCommodityFile= Path.resolve(__dirname, FILE_LOCATION, 'CommodityFile.json')
+	  let jsonObjCommodityFile= Path.resolve(FILE_LOCATION, 'CommodityFile.json')
 	
 	  let f = await new Promise((res, rej) => {
 	
@@ -218,7 +227,8 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	        }
 	        // console.log(fileOutputName + "JSON file has been saved.");
 	
-	        let targetDir = Path.join(__dirname, FILE_LOCATION+'/instruments.json');
+	        // let targetDir = Path.join(__dirname, FILE_LOCATION+'/instruments.json');
+	        let targetDir = Path.join(FILE_LOCATION+'/instruments.json');
 	
 	
 	        return Fs.copyFile(FILE_LOCATION+'/instruments.json', targetDir,
@@ -276,8 +286,15 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	  let a = await getSymbols();
 	
 	
+		
+	  console.log(accessToken,'ACCESS TOKEN @285')
 	
 	    let ohlcs = await ohlc(accessToken, a);
+
+		// console.log(ohlcs);
+
+
+
 	    let instruments1 = require(FILE_LOCATION+'/instruments.json');
 	    let instruments = instruments1//.slice(0,10)
 	    let strikes1 = await getNearestStrikes_unoptimized(ohlcs, instruments)//.slice(1,50);
@@ -343,7 +360,7 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	      
 	      
 	        } catch (error) {
-	        console.log(error)
+	        console.log(error,'LINE 353')
 	
 	        strikes.push(e)
 	      }
@@ -404,6 +421,8 @@ async function fetchInstrumentsForMining(accessToken) {try {
 		}
 	
 	  async function setCurrentInstrumentParameters(e) {
+
+		console.log(accessToken,'accessToken @ 415')
 	    let a = new pricePoint(e.instrument_token, accessToken);
 	
 	
@@ -454,7 +473,7 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	  }
 	
 	  async function FunctionProcedureForFutures(e) {
-	    let instruForFuture = require('.FILE_LOCATIONinstrumentsAll.json');
+	    let instruForFuture = require(FILE_LOCATION+'/instrumentsAll.json');
 	
 	    let niftyfut = instruForFuture.filter(i => i.name == 'NIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT")[0];
 	    let a = new pricePoint(niftyfut.instrument_token, accessToken);
@@ -496,10 +515,11 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	  }
 	
 } catch (error) {
-  const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
-  const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
+	console.log(error)
+//   const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
+//   const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
   
-  console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
+//   console.error(`Error occurred in function "${functionName}" on line ${lineNumber}`);
 }}
 
 
@@ -941,7 +961,7 @@ function getNearestStrikes_unoptimized(ohlc, instruments) {try {
 	
 	
 	  // console.log(symboList.length,'Total stocks ')
-	  // console.log('segments length',segments.length)
+
 	
 	
 	  // console.log(segments,'here')
@@ -1111,7 +1131,7 @@ async function writeFinalScriptsTofile(jsonObj2, jsonObjWithOutCriteria) {
 	
 	
 	    let fileOutputName = FILE_LOCATION+'/instrumentsForMining.json';
-	    let targetDir = Path.join(__dirname, FILE_LOCATION+'/instrumentsForMining.json');
+	    let targetDir = Path.join(FILE_LOCATION+'/instrumentsForMining.json');
 	
 	    let out = await createAndMoveFileFromJson(fileOutputName, jsonObj2, targetDir);
 	
