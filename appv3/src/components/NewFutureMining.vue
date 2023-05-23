@@ -6778,7 +6778,9 @@ Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) &&
 
 
 /// login last price less than yesterdays lows and todays opening price greater than yesterdays low this is to ensure that opening trade issues
-let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low && element.ohlc.open>cis.pricePoints.d1.low)
+let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low )
+
+// && element.ohlc.open>cis.pricePoints.d1.low)
 
 
 // this.cl(livePnlHere,'livePnlOffered');
