@@ -3945,7 +3945,7 @@ return false;
 
         if(cis.pricePoints.d1.high==cis.pricePoints.d1.open){
 
-          this.cl(`YESTERDAYS ( ${cis.pricePoints.d1.normalDate}) OPEN WAS HIGH FOR ${cis.tradingsymbol} NO TRADE yday high ${cis.pricePoints.d1.high} and Yday open ${cis.pricePoints.d1.open} `)
+          // this.cl(`YESTERDAYS ( ${cis.pricePoints.d1.normalDate}) OPEN WAS HIGH FOR ${cis.tradingsymbol} NO TRADE yday high ${cis.pricePoints.d1.high} and Yday open ${cis.pricePoints.d1.open} `)
 return;
 
         }
@@ -4327,6 +4327,13 @@ var msg;
 var now = moment();
 
 var formattedTime = now.format("DD-MM-YY H:mm");
+
+if(element.ohlc.open==element.ohlc .high){
+this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
+  return false
+}
+
+
 switch(true){
 
 
@@ -6975,10 +6982,10 @@ var formattedTime = now.format("DD-MM-YY H:mm");
 
 
 
-case ((element.last_price<element.ohlc.open) && this.hours>14):
+case ((element.last_price<element.ohlc.open) && this.hours>13):
 
 
-msg=`STOP LOSS  EXECUTION  PRICE AFTER 3 PM WAS BELOW TODAYS OPEN EXIT FOR , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+msg=`STOP LOSS  EXECUTION  PRICE AFTER 2 PM WAS BELOW TODAYS OPEN EXIT FOR , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
         this.updateSquareOfforderWithDesiredPrice(
            cis,
