@@ -4328,10 +4328,9 @@ var now = moment();
 
 var formattedTime = now.format("DD-MM-YY H:mm");
 
-if(element.ohlc.open==element.ohlc .high){
-this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
-  return false
-}
+
+let openHigh=element.ohlc.open==element.ohlc .high;
+
 
 
 switch(true){
@@ -4347,6 +4346,11 @@ switch(true){
     return false
   }
   
+
+  if(openHigh){
+this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
+  return false
+}
   this.cl('safe','daily range break out')
 
   this.cl(secondLowestOrdersPrice,'secondLowestOrdersPrice',ts)
@@ -4383,6 +4387,11 @@ this.sendTradeStrategy(cis.tradingsymbol,e4,cis.lot_size,'daily range break out'
 
 if(specialCheck==false){
 
+  return false
+}
+
+if(openHigh){
+this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
   return false
 }
 
@@ -4425,7 +4434,10 @@ this.sendTradeStrategy(cis.tradingsymbol,e3,cis.lot_size,'yesterDayCloseStrategy
 
 
   
-
+  if(openHigh){
+this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
+  return false
+}
 
 
   let e2=Math.min(secondLowestOrdersPrice,element.last_price);
@@ -4460,6 +4472,11 @@ this.proceedForEntry(
 
 
   case todayLastPriceClosing:
+
+  if(openHigh){
+this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
+  return false
+}
   // let e2=Math.min(secondLowestOrdersPrice,element.last_price);
 
 this.cl('todayLastPriceClosing high',ts)
