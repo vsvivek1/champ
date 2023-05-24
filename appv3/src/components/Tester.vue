@@ -15,13 +15,18 @@
         :rows="scriptsWithCondition" :paginate="true" :lineNumbers="true" /> -->
 
 
-
+<!-- {{ winners }} -->
 
         <table>
-          <tr v-for="(win,index) in winners1" :key="win.instrument_token">
+          <tr v-for="(win,index) in winners1" :key="index">
             <td>
 {{ index+1 }}
 
+            </td>
+
+            <td>
+
+              {{ win.pricePoints.d2.normalDate }}
             </td>
             <td>
 
@@ -89,7 +94,7 @@ await  fetch("../../../instruments/instrumentsForMining.json")
 
           winners1(){
 
-            return this.winners.sort((a,b)=>b.gain-a.gain)
+            return this.winners.sort((a,b)=>a.gain-b.gain)
 
 
           },
@@ -111,15 +116,43 @@ gainers(s){
 
 s.forEach(e=>{
 
-
+// console.log(s,'s')
   let cis=this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0];
+
+  let {d2}=cis.pricePoints;
+  if(!d2){
+
+    return false;
+  }
+ 
+
+ 
+
+
+  //  console.log(cis.pricePoints.d2.high,e.last_price, cis.pricePoints.d2.high<e.last_price,d2.normalDate)
+
+  let {d1,d3}=cis.pricePoints;
   if(
     
-  e.last_price>e.ohlc.open
-  
-  && e.ohlc.open!=0
+  //  e.last_price<e.ohlc.open  &&
 
-  && cis.pricePoints.d1.high<e.last_price
+
+  e.ohlc.open>e.ohlc.close*2
+
+  // && e.ohlc.open==e.ohlc.high
+  
+ &&
+  e.ohlc.open!=0  
+
+
+  && d3.open!=d3.close
+  
+  // && cis.pricePoints.d3.volume<cis.pricePoints.d2.volume
+  
+  
+//   &&
+
+//  cis.pricePoints.d2.high<e.last_price
   ){
 
 
@@ -127,15 +160,21 @@ s.forEach(e=>{
     cis.ohlc=e.ohlc;
     cis.last_price=e.last_price
     cis.gain=(e.last_price-e.ohlc.open) *cis.lot_size
-    if(!this.winners.includes(cis)){
+    
+
+    this.winners.push(cis)
+    
+
+    let present=this.winners.some(w=>w.instrument_token==cis.instrument_token)
+    if(!present){
 
       
-      {
+      
 
-
+// 
         this.winners.push(cis)
 
-      }
+      
 
 
     }
@@ -322,7 +361,7 @@ d7.low
 let avg=mac/7;
 
 
-    // let ep=cis.pricePoints.d1.high;
+    // let ep=cis.pricePoints.d2.high;
     // let ep=avg
     let ep=d1.close
 //  let exit=element.ohlc.high*1.1;

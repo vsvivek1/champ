@@ -4227,21 +4227,24 @@ this.tradeEntrySwitchHealth=!this.tradeEntrySwitchHealth;
 let dailyRangeBreakOut=(
   
 
+(cis.pricePoints.d1.close- cis.pricePoints.d1.open)> 0 /// yesterday not red candle
 
-(this.hours>10 )
+(this.hours>10 ) //after 11 
 
-&& element.open>cis.pricePoints.d1.low
+&& element.open>cis.pricePoints.d1.low    //open greater thabn yesterday low
 
-&& cis.pricePoints.d1.high!=cis.pricePoints.d1.open
-
-
-&& element.last_price>=cis.pricePoints.d0.high
+&& cis.pricePoints.d1.high!=cis.pricePoints.d1.open  //yesterday high not open
 
 
-&& element.last_price<= cis.pricePoints.d0.high*1.05
+&& element.last_price>=cis.pricePoints.d0.high  //entry criteria
 
 
-&& cis.pricePoints.d0.high!=0);
+&& element.last_price<= cis.pricePoints.d0.high*1.05  /// limiting criteria
+
+
+&& cis.pricePoints.d0.high!=0 // today high not zero
+
+);
 
 
 
@@ -6943,7 +6946,7 @@ msg=`STOP LOSS  EXECUTION  PRICE AFTER 3 PM WAS BELOW TODAYS OPEN EXIT FOR , ${c
 break;
 
 
-        case(element.ohlc.low<=cis.pricePoints.d1.low):
+        case(element.ohlc.low<=cis.pricePoints.d1.low && this.hours>10):
         msg=`STOP LOSS  EXECUTION TODAYS LOW CROESSED AT SOME TIME YESTERDAYS LOW DANGER EXIT , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
         this.updateSquareOfforderWithDesiredPrice(
