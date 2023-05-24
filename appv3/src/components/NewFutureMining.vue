@@ -2351,7 +2351,7 @@ let lp =this.livePositions.find(j=>j.instrument_token==i.instrument_token)
 
 
 
-const reducedPrice = (lp.last_price * 0.95).toFixed(1);
+const reducedPrice = (lp.last_price * (1-.25)).toFixed(1);  //changing trailing  stop loss price to below fibanoci retracement price of 23.6 %
 let currentStopLossPrice=i.price;
     let proposedSopLossPrice=reducedPrice;
 

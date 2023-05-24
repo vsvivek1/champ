@@ -137,7 +137,7 @@ s.forEach(e=>{
   //  e.last_price<e.ohlc.open  &&
 
 
-  e.ohlc.open>e.ohlc.close*2
+  e.ohlc.open>e.ohlc.close*1.5
 
   // && e.ohlc.open==e.ohlc.high
   
@@ -162,7 +162,7 @@ s.forEach(e=>{
     cis.gain=(e.last_price-e.ohlc.open) *cis.lot_size
     
 
-    this.winners.push(cis)
+    // this.winners.push(cis)
     
 
     let present=this.winners.some(w=>w.instrument_token==cis.instrument_token)
