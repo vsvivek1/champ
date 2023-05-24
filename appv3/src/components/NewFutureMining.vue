@@ -2353,10 +2353,12 @@ let cis=this.instruments.find(k=>i.instrument_token==i.instrument_token);
 let {d0}=cis.pricePoints;
 
 let d0High=d0.high;
-let refPrice=Math.max(d0High,lp.last_price);
+
+let febprice=d0High-(Math.abs(d0.open-d0.high)*(1-.25));
+let refPrice=Math.min(febprice,lp.last_price*.95);
 
 
-const reducedPrice = (refPrice * (1-.25)).toFixed(1);  //changing trailing  stop loss price to below fibanoci retracement price of 23.6 %
+const reducedPrice = (refPrice ).toFixed(1);  //changing trailing  stop loss price to below fibanoci retracement price of 23.6 %
 let currentStopLossPrice=i.price;
     let proposedSopLossPrice=reducedPrice;
 
