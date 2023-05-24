@@ -722,11 +722,11 @@ this.updateSelectedSellorderWithLtp();
            //this.$router.go();
          }, TenMinutes);
      
-         let thirtyMinute = 25 * 60 * 1000;
+         let twoMinute = 2 * 60 * 1000;
      
          let thirtyMinuteTimer = setInterval(async () => {
            let thirtyMiniutesBefore = new Date();
-           thirtyMiniutesBefore.setMinutes(thirtyMiniutesBefore.getMinutes() - 2);
+           thirtyMiniutesBefore.setMinutes(thirtyMiniutesBefore.getMinutes() - 30);
      
       
           
@@ -734,10 +734,8 @@ this.updateSelectedSellorderWithLtp();
        
          
      
-           return;
-           // let iso=now.toISOString()
-     
-           //  & lo.order_timestamp>0
+          //  return;
+          
      
            let order_ids = this.liveOrders
              .filter((lo) => {
@@ -762,7 +760,10 @@ this.updateSelectedSellorderWithLtp();
            if (order_ids.length > 0) {
              // this.CancelOrders(order_ids);
            }
-         }, thirtyMinute);
+
+
+
+         }, twoMinute);
      
          let fifteenSecTimer = setInterval(async () => {
      
@@ -3916,6 +3917,12 @@ return false;
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
 
+
+
+
+
+
+
 if( this.totalOptionPrice &&
 this.totalOptionPrice.isNaN
 &&
@@ -4204,15 +4211,36 @@ let {d2,d1}=cis.pricePoints;
 let d2Range=d2.high-d2.low;
 let d1Range=d1.high-d1.low;
 
+let d1UpperShadow=d1.high-Math.max(d1.close,d1.open);
+let d1LowerShadow=Math.min(d1.close,d1.open)-d1.low;
+
+let d1Body=Math.abs(d1.open-d1.close);
+
+
+
+
 let largeYesterdayCandle=d1Range>=d2Range*2
 
+
+
+/// yesterday small body filter  
+
+
+// if(d1Body<d1LowerShadow/4 || d1Body<d1UpperShadow){
+
+// this.cl('UPPER OR LOWER SHADOW OF YESTERDAY CANDLE IS DOUBLE COMPARED TO BODY . RISKY TRADE AVOIDING FOR ',cis.tradingsymbol)
+
+// // return false
+// }
 
 let yesterDayCloseStrategy=(element.last_price>=cis.pricePoints.d1.high &&
 
  
   element.ohlc.high< cis.pricePoints.d1.high*1.05
 
-  && largeYesterdayCandle
+  && largeYesterdayCandle && 
+
+  (d1Body<d1LowerShadow/4 || d1Body<d1UpperShadow)
 
 
  
