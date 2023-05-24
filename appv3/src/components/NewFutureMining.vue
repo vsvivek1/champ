@@ -4192,11 +4192,20 @@ if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.
 
 // this.cl('before yesterDayCloseStrategy')
 
+let {d2,d1}=cis.pricePoints;
+
+let d2range=d2.high-d2.low;
+let d1range=d1.high-d1.low;
+
+let largeYesterdayCandle=d1Range>=d2Range*2
+
 
 let yesterDayCloseStrategy=(element.last_price>=cis.pricePoints.d1.high &&
 
  
   element.ohlc.high< cis.pricePoints.d1.high*1.05
+
+  && largeYesterdayCandle
 
 
  
