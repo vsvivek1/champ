@@ -3985,20 +3985,9 @@ if( !element  || !cis || !cis.pricePoints || !cis.pricePoints.d1 || !cis.pricePo
 }
 
 
-        // return;
 
-        this.cl('inside trade entry')
-
-// let utilisedMargin=liveMargin!=-1?liveMargin.equity.utilised.debits:-1;
-
-// if(utilisedMargin==-1 ||utilisedMargin>4730000 ){
-
-// this.cl('margin issue');
-//   return false
-// }
-// this.cl('inside trade entry2')
         let ts=cis.tradingsymbol;
-        // this.cl('reached starting')
+     
        
 
         
@@ -4010,35 +3999,7 @@ if( !element  || !cis || !cis.pricePoints || !cis.pricePoints.d1 || !cis.pricePo
 //  this.cl('filter false',ts)
           return false
         }
-//  this.cl('after filter')
-        // this.cl('inside trade entry1',ts)
 
-//         if(!this.isMarketBullish(element)){
-
-//           // this.cl('not bullish',ts)
-// // return false;
-
-//         }
-        // this.cl('inside trade entry2',ts)
-
-        // if(!this.estimateMarketTrend(element)){
-
-        //   this.cl('trend not favorable',ts)
-        //   return false;
-        // }
-
-        // this.cl('inside trade entry3',ts)
-      //  if(!this.calculateMarketVolatility(cis)){
-
-      //   // this.cl('volatality false',ts)
-      //   // return false;
-      //  }
-      // this.cl('inside trade entry4')
-// this.cl(element)
-// return;
-
-
-// let index;
 
 
 
@@ -4143,19 +4104,12 @@ this.cl('issue with secondLowestOrdersPrice for inside trade entry function',cis
   return false;
 }
 
-// this.cl('below lowest price orders')
 
-// console.log({secondHighestOrdersPrice},'secondHighestOrdersPrice')
-// this.cl(isOpenLow,'isOpenLow',ts);
-
-// let chk=secondLowestOrdersPrice<element.last_price;
-// let o=`Second highset price is ${secondHighestOrdersPrice} and last price is ${element.last_price} and secondhighest price is less than last_price is ${chk} for ${ts}`;
-// // this.cl(o)
 
 
 let todayLastPriceHigh=false;
 
-// console.log(this.hours)
+
 
 if( (this.hours==15) && this.minutes>15 ){
 
@@ -4164,9 +4118,9 @@ if( (this.hours==15) && this.minutes>15 ){
 // console.log(element.last_price==element.ohlc.high,ts)
 
 
-if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99){
+if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99 && !cis.tradingsymbol.includes('FUT')){
 
- this.cl(ts,'is seems to be at higest price close from inside trade entry function');
+ this.cl(ts,'is seems to be at HIGHEST PRICE ');
 
   todayLastPriceHigh=true
 }
