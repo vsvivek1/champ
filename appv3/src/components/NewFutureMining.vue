@@ -2348,10 +2348,15 @@ let lp =this.livePositions.find(j=>j.instrument_token==i.instrument_token)
 
 
 
+let cis=this.instruments.find(k=>i.instrument_token==i.instrument_token);
+
+let {d0}=cis.pricePoints;
+
+let d0High=d0.high;
+let refPrice=Math.max(d0High,lp.last_price);
 
 
-
-const reducedPrice = (lp.last_price * (1-.25)).toFixed(1);  //changing trailing  stop loss price to below fibanoci retracement price of 23.6 %
+const reducedPrice = (refPrice * (1-.25)).toFixed(1);  //changing trailing  stop loss price to below fibanoci retracement price of 23.6 %
 let currentStopLossPrice=i.price;
     let proposedSopLossPrice=reducedPrice;
 
@@ -4194,8 +4199,8 @@ if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.
 
 let {d2,d1}=cis.pricePoints;
 
-let d2range=d2.high-d2.low;
-let d1range=d1.high-d1.low;
+let d2Range=d2.high-d2.low;
+let d1Range=d1.high-d1.low;
 
 let largeYesterdayCandle=d1Range>=d2Range*2
 
@@ -4238,7 +4243,7 @@ let dailyRangeBreakOut=(
 
 (cis.pricePoints.d1.close- cis.pricePoints.d1.open)> 0 /// yesterday not red candle
 
-(this.hours>10 ) //after 11 
+&& (this.hours>10 ) //after 11 
 
 && element.open>cis.pricePoints.d1.low    //open greater thabn yesterday low
 
