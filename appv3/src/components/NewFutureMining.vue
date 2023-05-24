@@ -4194,9 +4194,9 @@ if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.
 
 
 let yesterDayCloseStrategy=(element.last_price>=cis.pricePoints.d1.high &&
- niftyFavorable
+
  
- && element.ohlc.high< cis.pricePoints.d1.high*1.05
+  element.ohlc.high< cis.pricePoints.d1.high*1.05
 
 
  
