@@ -3936,10 +3936,52 @@ return false;
       try {
 
 
+        const lastTradedDate = new Date(element.last_traded_time);
+
+// Get the current time
+const currentTime = new Date();
+
+// Calculate the difference in minutes
+var timeDiffInMinutes = Math.floor((currentTime - lastTradedDate) / (1000 * 60));
+
+// Check if the time difference is less than or equal to 15 minutes
+var isBefore15Minutes = timeDiffInMinutes > 15;
+
+
+let depthBuy=element.depth.buy
+
+let lowestPrice = Number.MAX_VALUE;
+let highestPrice = Number.MIN_VALUE;
+
+for (let i = 0; i < depthBuy.length; i++) {
+  const { price } = depthBuy[i];
+  
+  if (price < lowestPrice) {
+    lowestPrice = price;
+  }
+  
+  if (price > highestPrice) {
+    highestPrice = price;
+  }
+}
+
+
+
+// console.log("Lowest Price:", lowestPrice,'highestPrice',highestPrice,'last_price',element.last_price,'astPriceForBuying',lastPriceForBuying);
+// console.log("Highest Price:", highestPrice);
 
 
 
 
+if(isBefore15Minutes){
+
+
+  this.cl('LAST TRADED TIME IS BEFORE 15 MINUTES IGNORING TRADE ENTRY DUR TO LIQUIDITY ISSUE FOR',cis.tradingsymbol,'traded before ',timeDiffInMinutes,' minutes');
+
+  return false;
+
+
+}
 
 if( this.totalOptionPrice &&
 this.totalOptionPrice.isNaN
@@ -4322,7 +4364,7 @@ let openHigh=element.ohlc.open==element.ohlc .high;
 
 
 
-console.log(element)
+let lastPriceForBuying=Math.min(highestPrice,element.last_price)
 
 switch(true){
 
@@ -4365,7 +4407,7 @@ this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
 
   this.cl(secondLowestOrdersPrice,'secondLowestOrdersPrice',ts)
 
-let e4=Math.min(secondLowestOrdersPrice,element.last_price,cis.pricePoints.d0.high);
+let e4=Math.min(secondLowestOrdersPrice,lastPriceForBuying,cis.pricePoints.d0.high);
 
 
 this.cl('daily range break out ',ts)
@@ -4413,7 +4455,7 @@ this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
 
   this.cl('safe','yesterDayCloseStrategy')
 
-  let e3=Math.min(secondLowestOrdersPrice,element.last_price,cis.pricePoints.d1.high);
+  let e3=Math.min(secondLowestOrdersPrice,lastPriceForBuying,cis.pricePoints.d1.high);
 
 
 this.cl('yester day yesterDayCloseStrategy ',ts)
@@ -4450,7 +4492,7 @@ this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
 }
 
 
-  let e2=Math.min(secondLowestOrdersPrice,element.last_price);
+  let e2=Math.min(secondLowestOrdersPrice,lastPriceForBuying);
 
 this.cl('todayLastPriceHigh',ts)
 
@@ -4460,7 +4502,7 @@ this.proceedForEntry(
              instrument_token,
              cis,
              element,
-             last_price,
+             lastPriceForBuying,
              "long"
            );
 
@@ -4497,7 +4539,7 @@ this.proceedForEntry(
              instrument_token,
              cis,
              element,
-             element.last_price,
+             lastPriceForBuying,
              "long"
            );
 
@@ -4533,7 +4575,7 @@ this.proceedForEntry(
               instrument_token,
               cis,
               element,
-              last_price,
+              lastPriceForBuying,
               "long"
             );
             this.cl('safe','todayLastPriceHigh')
@@ -6842,6 +6884,8 @@ let ts=cis.tradingsymbol;
 
    
     stopLossTargetSwitch(quantity,last_price,high,low,bidPrice,offerPrice,cis,element,livePnlOffered,positionObj){
+
+      console.log(element)
        
       if(this.hours>15 || (this.hours==15 && this.minutes>29)){
 
