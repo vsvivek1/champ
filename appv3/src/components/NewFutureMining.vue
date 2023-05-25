@@ -7006,7 +7006,7 @@ Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) &&
 
 
 /// login last price less than yesterdays lows and todays opening price greater than yesterdays low this is to ensure that opening trade issues
-let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low )
+let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low  )
 
 // && element.ohlc.open>cis.pricePoints.d1.low)
 
@@ -7058,7 +7058,7 @@ let squareoffDuringSideWise=(sideWisetime && livePnlOffered>0);
 
 let buyPriceAboveOpenAndLastPriceFallsBelowOpen=(positionObj.buy_price>element.ohlc.open && element.last_price<element.ohlc.open*.95)
 
-let NineFiftySquareOff=(this.hours==9 && this.minutes>55 && this.minutes<60 && livePnlOffered>500);
+let NineFiftySquareOff=(this.hours==9 && this.minutes>50 && this.minutes<60 && livePnlOffered>500);
 
       switch (true) {
 
@@ -7113,10 +7113,10 @@ break;
 
 
 
-case ((element.last_price<element.ohlc.open) && this.hours>13):
+case ((element.last_price<element.ohlc.open && (this.hours==15 && this.minutes>15) && positionObj.buy_price>=element.ohlc.open) ):
 
 
-msg=`STOP LOSS  EXECUTION  PRICE AFTER 2 PM WAS BELOW TODAYS OPEN EXIT FOR , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+msg=`STOP LOSS  EXECUTION  PRICE AFTER 3 :15 PM WAS BELOW TODAYS OPEN EXIT FOR , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
         this.updateSquareOfforderWithDesiredPrice(
            cis,
@@ -7128,7 +7128,7 @@ msg=`STOP LOSS  EXECUTION  PRICE AFTER 2 PM WAS BELOW TODAYS OPEN EXIT FOR , ${c
 break;
 
 
-        case(element.ohlc.low<=cis.pricePoints.d1.low && this.hours>10):
+        case(element.ohlc.low<=cis.pricePoints.d1.low && (this.hours==15 && this.minutes>15) && positionObj.buy_price>=element.ohlc.low):
         msg=`STOP LOSS  EXECUTION TODAYS LOW CROESSED AT SOME TIME YESTERDAYS LOW DANGER EXIT , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
         this.updateSquareOfforderWithDesiredPrice(
@@ -7171,7 +7171,7 @@ break;
         break;
 
 
-        case(momentFire):
+        case(momentFire && false):
 
 
 
@@ -7186,7 +7186,7 @@ break;
         break;
 
 
-        case (yesterDayLowStopLoss):
+        case (yesterDayLowStopLoss && positionObj.buy_price>cis.pricePoints.d1.low):
 
 // console.log('yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol)
 
@@ -7198,7 +7198,7 @@ msg=`STOP LOSS  EXECUTION SEND BY  DAILY yesterDayLowStopLoss STRATEGY FOR ${cis
            cis,
            element,
            false,
-           cis.pricePoints.d1.low
+           element.last_price
          );
       
 
@@ -7296,7 +7296,7 @@ break;
 
 
 
-case (maxOfYdayTodayLow ):
+case (maxOfYdayTodayLow && positionObj.buy_price>=Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) ):
 
 
 this.cl('sltrigger  trigger minimum of y day low todays low for  %s at squareoffPrice of %s',
@@ -7385,7 +7385,7 @@ this.updateSquareOfforderWithDesiredPrice(
 
                  break;
 
-               case quantity > 0 && last_price < low:
+               case (quantity > 0 && last_price < low  && positionObj.buy_price>low):
 
                  this.cl(
                   "Firing long cover stop loss order for %s bidprice is %s and low  is %s  and last price is %s",
