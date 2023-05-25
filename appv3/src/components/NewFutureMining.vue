@@ -7465,8 +7465,10 @@ return 'clean' ;
 isOpenLow(ohlc,cis,lp){
 
 
-  // this.cl(lp,cis,ohlc,'inside isOpenLow');
+   
   let {open,high,low,close}=ohlc;
+
+  this.cl(open,low,'inside isOpenLow open and low');
 
 let openLow=open==low;
 
@@ -7624,6 +7626,7 @@ this.cl('buys undefined so -1');
         if(!element || !element.instrument_token ){
 
 
+
           this.tradeEntryFlowStatus='Element issue near S loop 2'
           this.cl('element issue near s loop')
 
@@ -7636,9 +7639,12 @@ this.cl('buys undefined so -1');
 
         
 
+let minutes=[16,31,46,1]
+if(minutes.includes(this.minues)){
 
-
-        this.setD0WithCurrentDayOhlc(element);
+  this.setD0WithCurrentDayOhlc(element);
+}
+      
 
         if(!element){
 
