@@ -4518,7 +4518,7 @@ if(specialCheck==false){
 }
 
 
-let e1=Math.min(secondLowestOrdersPrice,element.last_price);
+// let e1=Math.min(secondLowestOrdersPrice,element.last_price);
 // console.log({e1},'e1')
 
  this.cl('openLowScrßiptFithFixedLoss strategy ',ts,e1,'e1')
@@ -4527,7 +4527,7 @@ this.proceedForEntry(
               instrument_token,
               cis,
               element,
-              e1,
+              last_price,
               "long"
             );
             this.cl('safe','todayLastPriceHigh')
