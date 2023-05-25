@@ -4322,6 +4322,8 @@ let openHigh=element.ohlc.open==element.ohlc .high;
 
 
 
+console.log(element)
+
 switch(true){
 
 
@@ -6841,7 +6843,12 @@ let ts=cis.tradingsymbol;
    
     stopLossTargetSwitch(quantity,last_price,high,low,bidPrice,offerPrice,cis,element,livePnlOffered,positionObj){
        
+      if(this.hours>15 || (this.hours==15 && this.minutes>29)){
 
+return false;
+
+//to prevent accidental modifications of amo
+}
 
     let sideWisetime=this.checkSidewaysMovementTime();
 
@@ -7045,6 +7052,8 @@ break;
 
         case  squareoffDuringSideWise:
 
+
+       
 
         msg=`SQUARING OFF DURING SIDE WISE TIME WITH AVAILABLE PROFIT , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
