@@ -367,6 +367,8 @@ ob.params.trigger_values=[level];
 ob.params.last_price=stockPpItem.last_price;
 
 
+
+console.log(JSON.stringify(ob.params),'ob params');
 let order={};
 order.transaction_type='BUY'
 order.quantity=(this.gttAmountPerManualOrder/level).toFixed(0)

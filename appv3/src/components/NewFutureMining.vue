@@ -1,6 +1,7 @@
 <template>
   <div>
 
+    <!-- {{ liveOrders }} -->
 
     <p v-if="liveMargin && liveMargin.equity && liveMargin.equity.utilised && liveMargin.equity.utilised.debits">
  
@@ -758,7 +759,7 @@ this.updateSelectedSellorderWithLtp();
            this.cl(order_ids, "live orderss to be canceled");
      
            if (order_ids.length > 0) {
-             // this.CancelOrders(order_ids);
+             this.CancelOrders(order_ids);
            }
 
 
@@ -4120,7 +4121,7 @@ if( (this.hours==15) && this.minutes>15 ){
 
 if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99 && !cis.tradingsymbol.includes('FUT')){
 
- this.cl(ts,'is seems to be at HIGHEST PRICE ');
+ this.cl(ts,'is seems to be at HIGHEST PRICE OF THE DAY ');
 
   todayLastPriceHigh=true
 }
@@ -4141,7 +4142,7 @@ if( (this.hours==15) && this.minutes>25 ){
 // console.log(element.last_price==element.ohlc.high,ts)
 
 
-if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99){
+if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99 && !cis.tradingsymbol.includes('FUT')){
 
   console.log(ts,'is seems to be at higest price close todayLastPriceClosing from inside trade entry function');
 
@@ -4174,6 +4175,21 @@ let d1Body=Math.abs(d1.open-d1.close);
 
 
 let largeYesterdayCandle=d1Range>=d2Range*2
+
+
+
+
+let shortGapUpOpen=(
+  this.hours==9 && this.minutes<17 && this.minutes>15 // trigger only at 9:16
+    
+    && element.ohlc.open>element.ohlc.close*1.5  //open 1.5 times greater than yesterdays close price
+  
+    && e.ohlc.open!=0 
+    
+    && d1.high!=d1.low
+
+  
+  );
 
 
 
@@ -4289,6 +4305,25 @@ let openHigh=element.ohlc.open==element.ohlc .high;
 
 switch(true){
 
+
+
+  case shortGapUpOpen:
+
+  let entryPriceForShort=(element.ohlc.close*2).toFixed(1);
+
+
+
+  this.cl('SHORTING FOR GAP UP OPEN FOR ',ts ,'AT ',entryPriceForShort)
+  this.proceedForEntry(
+           instrument_token,
+           cis,
+           element,
+           entryPriceForShort,
+           "short"
+         );
+
+
+  break;
 
   case dailyRangeBreakOut: 
 
@@ -6789,6 +6824,8 @@ let ts=cis.tradingsymbol;
        
 
 
+    let sideWisetime=this.checkSidewaysMovementTime();
+
       /// gapped up yesteddays high then going below 5% of yesterddays high stop loss
 
 let todayOpenYesterDayhigh=element.ohlc.open>cis.pricePoints.d1.high && element.last_price<(Math.round(cis.pricePoints.d1.high*.95,1))
@@ -6811,7 +6848,7 @@ let todayOpenYesterDayClose=element.ohlc.open>cis.pricePoints.d1.close && elemen
 
         this.cl('NO TRADING TIME ',this.hours,this.minutes)
 
-        return false;
+        // return false;
       }else{
 
         this.cl(' TRADING TIME STARTS ',this.hours,this.minutes)
@@ -6842,18 +6879,7 @@ let todayOpenYesterDayClose=element.ohlc.open>cis.pricePoints.d1.close && elemen
 // // this.cl('OPEN ITSELF IS YESTERDAYS LOW FOR %s SO AVIODING SL ALERT',cis.tradingsymbol)
 //   }
 
-  if(
-    
-
-
- this.checkSidewaysMovementTime()
-  
-  ){
-
-
-    this.cl('NON TRADING TIME SIDE WAYS TIME',this.checkSidewaysMovementTime());
-    return false
-  }
+ 
 
 
 
@@ -6949,7 +6975,30 @@ let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low )
 var now = moment();
 
 var formattedTime = now.format("DD-MM-YY H:mm");
+
+sideWisetime
+
+let squareoffDuringSideWise=(sideWisetime && livePnlOffered>0);
+
+
+
       switch (true) {
+
+
+        case  squareoffDuringSideWise:
+
+
+        msg=`SQUARING OFF DURING SIDE WISE TIME WITH AVAILABLE PROFIT , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+
+        break;
+
 
 
 
@@ -7861,7 +7910,7 @@ this.cl('before hours chk 7812')
 
 if(
   
-!(this.hours>9 || (this.hours==9 && this.minutes>20) )
+!(this.hours>9 || (this.hours==9 && this.minutes>15) )
 
 
 ){

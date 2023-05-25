@@ -137,7 +137,11 @@ s.forEach(e=>{
   //  e.last_price<e.ohlc.open  &&
 
 
-  e.ohlc.open>e.ohlc.close*1.5
+  e.ohlc.open>e.ohlc.close*1.2
+
+//  &&  e.ohlc.low< e.ohlc.open*.8
+
+//  && e.ohlc.close>e.ohlc.low*1.2
 
   // && e.ohlc.open==e.ohlc.high
   
@@ -156,7 +160,7 @@ s.forEach(e=>{
   ){
 
 
-
+console.log(e)
     cis.ohlc=e.ohlc;
     cis.last_price=e.last_price
     cis.gain=(e.last_price-e.ohlc.open) *cis.lot_size

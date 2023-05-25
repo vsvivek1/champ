@@ -643,6 +643,8 @@ getPreviousDate = (date, daysAgo) => {
   async getPricePoints(duration=34,durationType='month') {
 
 
+    try{
+
     var kc2 = await this.initiateKiteConnect();
 
     // console.log(kc2);
@@ -851,6 +853,16 @@ res(retOb)
 
 
   })//end of promise
+
+    } catch(e){
+
+      
+console.log(e,'ERROR AT LINE 859',e);
+
+return new Promise.resolve({});
+
+    }
+
   }
 
 
