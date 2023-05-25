@@ -953,7 +953,11 @@ this.updateSelectedSellorderWithLtp();
     }
 
     if (this.liveOrders && this.liveOrders.length > 0) {
-      orderTotal = this.liveOrders.filter(lo=>!lo.tradingsymbol.includes('FUT') && lo.transaction_type=='BUY').
+      orderTotal = this.liveOrders.filter(lo=>
+      
+      // !lo.tradingsymbol.includes('FUT') && 
+      
+      lo.transaction_type=='BUY').
       
       reduce((total, order) => {
         const { buy_price, price, quantity } = order;
@@ -1311,7 +1315,7 @@ return {entry,target,stopLoss};
         return true;
       } else {
 
-      console.log(result)
+      console.log(result.toLocaleUpperCase())
         this.globalConsoleLogs.push(result);
 
         const currentDate = new Date().toISOString().split('T')[0]; // Get the current date in "yyyy-mm-dd" format
@@ -4093,7 +4097,7 @@ if(!element || !element.depth || !element.depth.buy )
 {
 
 
-  this.cl('element issue inside trade entry')
+  this.cl('element issue inside trade entry for',cis.tradingsymbol)
 return;
  
 
@@ -4132,12 +4136,12 @@ if( (this.hours==15) && this.minutes>15 ){
 // console.log(element.last_price==element.ohlc.high,ts)
 
 
-if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99 && !cis.tradingsymbol.includes('FUT')){
+// if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99 && !cis.tradingsymbol.includes('FUT')){
 
- this.cl(ts,'is seems to be at HIGHEST PRICE OF THE DAY ');
+//  this.cl(ts,'is seems to be at HIGHEST PRICE OF THE DAY ');
 
-  // todayLastPriceHigh=true
-}
+//    todayLastPriceHigh=true
+// }
 
 
 
@@ -4491,7 +4495,7 @@ this.proceedForEntry(
              instrument_token,
              cis,
              element,
-             last_price,
+             element.last_price,
              "long"
            );
 
@@ -4499,7 +4503,7 @@ this.proceedForEntry(
 
           //  this.sendTradeStrategy(cis.tradingsymbol,e2,cis.lot_size,'todayLastPriceHigh')
 
-           msg=`TRADE EXECUTION SEND BY  DAILY todayLastPriceClosing STRATEGY FOR ${ts}  for ${last_price} at ${formattedTime}`
+           msg=`TRADE EXECUTION SEND BY  DAILY todayLastPriceClosing STRATEGY FOR ${ts}  for ${element.last_price} at ${formattedTime}`
          this.cl(msg)
 
 
