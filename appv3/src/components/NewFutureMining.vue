@@ -4,6 +4,19 @@
     <!-- {{ liveOrders }} -->
 
     <p v-if="liveMargin && liveMargin.equity && liveMargin.equity.utilised && liveMargin.equity.utilised.debits">
+
+
+      <v-alert color="red" v-if="checkSidewaysMovementTime()">
+
+SIDE WISE TIME
+
+      </v-alert>
+
+      <v-alert color="green" v-if="!checkSidewaysMovementTime()">
+
+TRADING TIME
+
+      </v-alert>
  
       Margin: {{ liveMargin.equity.utilised.margin }}
      TOTAL OPTION PRICE: {{ totalOptionPrice }}
@@ -4123,7 +4136,7 @@ if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.
 
  this.cl(ts,'is seems to be at HIGHEST PRICE OF THE DAY ');
 
-  todayLastPriceHigh=true
+  // todayLastPriceHigh=true
 }
 
 
@@ -4212,6 +4225,8 @@ let yesterDayCloseStrategy=(element.last_price>=cis.pricePoints.d1.high &&
 
   (d1Body<d1LowerShadow/4 || d1Body<d1UpperShadow)
 
+  && this.hours<10
+
 
  
  )
@@ -4253,7 +4268,7 @@ let dailyRangeBreakOut=(
 && element.last_price>=cis.pricePoints.d0.high  //entry criteria
 
 
-&& element.last_price<= cis.pricePoints.d0.high*1.05  /// limiting criteria
+// && element.last_price<= cis.pricePoints.d0.high*1.05  /// limiting criteria
 
 
 && cis.pricePoints.d0.high!=0 // today high not zero
@@ -4439,7 +4454,7 @@ this.proceedForEntry(
              instrument_token,
              cis,
              element,
-             e2,
+             last_price,
              "long"
            );
 
@@ -6820,13 +6835,18 @@ let ts=cis.tradingsymbol;
     },
 
    
-    stopLossTargetSwitch(quantity,last_price,high,low,bidPrice,offerPrice,cis,element,livePnlOffered){
+    stopLossTargetSwitch(quantity,last_price,high,low,bidPrice,offerPrice,cis,element,livePnlOffered,positionObj){
        
 
 
     let sideWisetime=this.checkSidewaysMovementTime();
 
       /// gapped up yesteddays high then going below 5% of yesterddays high stop loss
+
+
+
+      
+
 
 let todayOpenYesterDayhigh=element.ohlc.open>cis.pricePoints.d1.high && element.last_price<(Math.round(cis.pricePoints.d1.high*.95,1))
 let todayOpenYesterDayClose=element.ohlc.open>cis.pricePoints.d1.close && element.last_price<(Math.round(cis.pricePoints.d1.close*.95,1))
@@ -6981,8 +7001,42 @@ sideWisetime
 let squareoffDuringSideWise=(sideWisetime && livePnlOffered>0);
 
 
+let buyPriceAboveOpenAndLastPriceFallsBelowOpen=(positionObj.buy_price>element.ohlc.open && element.last_price<element.ohlc.open*.95)
+
+let NineFiftySquareOff=(this.hours==9 && this.minutes>55 && this.minutes<60 && livePnlOffered>500);
 
       switch (true) {
+
+
+        case (NineFiftySquareOff):
+
+
+        msg=`SQUARING OFF ALL GREENS AT 9 :58 , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+
+        break;
+
+case (buyPriceAboveOpenAndLastPriceFallsBelowOpen):
+
+msg=`SQUARING OFF IF BUY PRICE ABOVE OPEN AND LAST PRICE FELL BELOW 5% OPEN , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+
+break;
+
+
+
 
 
         case  squareoffDuringSideWise:
@@ -7468,7 +7522,7 @@ isOpenLow(ohlc,cis,lp){
    
   let {open,high,low,close}=ohlc;
 
-  this.cl(open,low,'inside isOpenLow open and low');
+  // this.cl(open,low,'inside isOpenLow open and low');
 
 let openLow=open==low;
 
@@ -7762,6 +7816,9 @@ this.cl('checkpoint 4c');
           let lpCurrent=this.livePositions.find(
             (lp) => lp.instrument_token == cis.instrument_token
           );
+// console.log(lpCurrent,'LP CURRENT');
+
+
 
 let ln1=this.livePositions.some(
             (lp) => lp.instrument_token == cis.instrument_token
@@ -7843,7 +7900,7 @@ let PlacedReverseOrder = this.instruments.find(
 
               this.stopLossTargetSwitch(quantity,last_price,high,
               low,bidPrice,
-              offerPrice,cis,element,livePnlOffered)
+              offerPrice,cis,element,livePnlOffered,lpCurrent)
              
        
 
