@@ -19,7 +19,7 @@ class Gtt {
         this.instruments=require('../appv3/public/instruments/instrumentsAll.json');
 
      let tmp =this.getGttStocks();
-        this.stocks=tmp.slice(1,10)
+        this.stocks=tmp//.slice(1,10)
 
         this.accessToken;
 

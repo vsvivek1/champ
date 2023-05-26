@@ -137,7 +137,7 @@ s.forEach(e=>{
   //  e.last_price<e.ohlc.open  &&
 
 
-  e.ohlc.open>e.ohlc.close*1.2
+  e.ohlc.open>e.ohlc.close*2
 
 //  &&  e.ohlc.low< e.ohlc.open*.8
 

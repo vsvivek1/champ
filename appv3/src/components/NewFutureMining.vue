@@ -2364,17 +2364,37 @@ this.newOrder =
 
 
 let lp =this.livePositions.find(j=>j.instrument_token==i.instrument_token)
-
-
-
 let cis=this.instruments.find(k=>i.instrument_token==i.instrument_token);
+if(typeof lp== 'undefined'){
+
+  this.cl('INSTRUMENT NOT FOUND IN VALID POSTIONS WTF ',cis.tradingsymbol);
+
+  return ;
+}
+
+
+
+
 
 let {d0}=cis.pricePoints;
 
 let d0High=d0.high;
 
 let febprice=d0High-(Math.abs(d0.open-d0.high)*(1-.25));
-let refPrice=Math.min(febprice,lp.last_price*.95);
+
+console.log(cis.last_price,'cis.last_price @ 2378')
+
+
+console.log(lp.last_price,ts,'lp_last_price @2381')
+
+let refPrice;
+if(cis.last_price!=0)
+{
+   refPrice=Math.min(febprice,cis.last_price*.95);
+
+}
+
+
 
 
 const reducedPrice = (refPrice ).toFixed(1);  //changing trailing  stop loss price to below fibanoci retracement price of 23.6 %
@@ -4127,7 +4147,7 @@ this.cl(closingMovingAverageCondition,'closingMovingAverageCondition2')
 let ohlc=element.ohlc;
 let lp1=element.last_price;
 let isOpenLow1 =this.isOpenLow(ohlc,cis,lp1);
-let isOpenLow =isOpenLow1 && niftyFavorable;
+let isOpenLow =isOpenLow1 /// && niftyFavorable;
 
 
 
@@ -4569,7 +4589,7 @@ if(specialCheck==false){
 // let e1=Math.min(secondLowestOrdersPrice,element.last_price);
 // console.log({e1},'e1')
 
- this.cl('openLowScrßiptFithFixedLoss strategy ',ts,e1,'e1')
+ this.cl('openLowScrßiptFithFixedLoss strategy ',ts,lastPriceForBuying,'lastPriceForBuying')
 
 this.proceedForEntry(
               instrument_token,
@@ -4580,7 +4600,7 @@ this.proceedForEntry(
             );
             this.cl('safe','todayLastPriceHigh')
 
-            msg=`TRADE EXECUTION SEND BY  DAILY isOpenLow STRATEGY FOR ${ts}  for ${e1} at ${formattedTime}`
+            msg=`TRADE EXECUTION SEND BY  DAILY isOpenLow STRATEGY FOR ${ts}  for ${lastPriceForBuying} at ${formattedTime}`
          this.cl(msg)
 
             this.sendTradeStrategy(cis.tradingsymbol,e1,cis.lot_size,'todayLastPriceHigh')
@@ -6885,7 +6905,7 @@ let ts=cis.tradingsymbol;
    
     stopLossTargetSwitch(quantity,last_price,high,low,bidPrice,offerPrice,cis,element,livePnlOffered,positionObj){
 
-      console.log(element)
+      // console.log(element)
        
       if(this.hours>15 || (this.hours==15 && this.minutes>29)){
 
@@ -7054,11 +7074,12 @@ var formattedTime = now.format("DD-MM-YY H:mm");
 sideWisetime
 
 let squareoffDuringSideWise=(sideWisetime && livePnlOffered>0);
+// let squareoffDuringSideWise=(sideWisetime && livePnlOffered>0);
 
 
 let buyPriceAboveOpenAndLastPriceFallsBelowOpen=(positionObj.buy_price>element.ohlc.open && element.last_price<element.ohlc.open*.95)
 
-let NineFiftySquareOff=(this.hours==9 && this.minutes>50 && this.minutes<60 && livePnlOffered>500);
+let NineFiftySquareOff=(this.hours==9 && this.minutes>45 && this.minutes<60 && livePnlOffered>500);
 
       switch (true) {
 
