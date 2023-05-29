@@ -30,7 +30,17 @@
             </td>
             <td>
 
-              <a :href="win.chart" target="_blank">{{ win.tradingsymbol }}</a>
+              <a v-bind:style="{ color: linkColor }" v-on:click="changeColor"
+              
+              :href="win.chart" target="_blank">{{ win.tradingsymbol }}</a>
+              
+            </td>
+            
+            <td>
+
+              <a v-bind:style="{ color: linkColor }" v-on:click="changeColor"
+              
+               :href="win.stockChart" target="_blank">{{win.name  }}</a>
               
             </td>
             <td>
@@ -43,6 +53,8 @@
 
 
             </td>
+
+
             <td>
 
 {{ (win.last_price-win.ohlc.open)*win.lot_size }}
@@ -71,6 +83,9 @@ const socket = io("http://127.0.0.1:4000"
 
 
 var instruments;
+
+var instrumentsAll;
+
 await  fetch("../../../instruments/instrumentsForMining.json")
       .then((response) => response.json())
       .then((data) => 
@@ -85,6 +100,24 @@ await  fetch("../../../instruments/instrumentsForMining.json")
       
       
       ); 
+
+
+      await  fetch("../../../instruments/instrumentsAll.json")
+      .then((response) => response.json())
+      .then((data) => 
+      {
+
+
+        // console.log(data,'data1')
+        instrumentsAll = data;
+      }
+    
+      
+      
+      
+      ); 
+
+
 
 
     export default {
@@ -112,12 +145,18 @@ await  fetch("../../../instruments/instrumentsForMining.json")
 
         methods:{
 
+          changeColor() {
+      this.linkColor = "red";
+    },
+
 gainers(s){
 
 s.forEach(e=>{
 
 // console.log(s,'s')
-  let cis=this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0];
+  let cis=this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0];;
+
+
 
   let {d2}=cis.pricePoints;
   if(!d2){
@@ -137,7 +176,8 @@ s.forEach(e=>{
   //  e.last_price<e.ohlc.open  &&
 
 
-  e.ohlc.open>e.ohlc.close*2
+  // e.ohlc.open>e.ohlc.close*1.5
+  e.ohlc.open>e.ohlc.close*1.5
 
 //  &&  e.ohlc.low< e.ohlc.open*.8
 
@@ -149,7 +189,7 @@ s.forEach(e=>{
   e.ohlc.open!=0  
 
 
-  && d3.open!=d3.close
+  // && d3.open!=d3.close
   
   // && cis.pricePoints.d3.volume<cis.pricePoints.d2.volume
   
@@ -159,17 +199,33 @@ s.forEach(e=>{
 //  cis.pricePoints.d2.high<e.last_price
   ){
 
+    let present;
 
-console.log(e)
+    if(! this.instrumentsAll.any(i=>i.tradingsymbol==cis.name)){
+
+      return false;
+    }
+try{
     cis.ohlc=e.ohlc;
     cis.last_price=e.last_price
     cis.gain=(e.last_price-e.ohlc.open) *cis.lot_size
+
+    let name=cis.name
+
     
+    let nameinstrumentToken=this.instrumentsAll.find(i=>i.tradingsymbol==cis.name).instrument_token;
+    let stockChart=`https://kite.zerodha.com/chart/ext/ciq/NSE/${name}/${nameinstrumentToken}`;
+    cis.stockChart=stockChart;
 
     // this.winners.push(cis)
     
 
-    let present=this.winners.some(w=>w.instrument_token==cis.instrument_token)
+     present=this.winners.some(w=>w.instrument_token==cis.instrument_token)
+
+}catch(e){
+
+  console.log(e,'error at 222');
+}
     if(!present){
 
       
@@ -207,7 +263,11 @@ let tokn=this.instruments.map(i=>parseInt(i.instrument_token))
 
             async fetchInstruments(){
                 this.instruments =instruments;
+
+                this.instrumentsAll=instrumentsAll;
                 this.setInstrumentTokens();
+
+
 
             },
 
@@ -300,6 +360,8 @@ return;
  
     
         let cis=this.instruments.find(i=>i.instrument_token==element.instrument_token)
+
+        
 if(!cis){
 
   // return false;
@@ -495,7 +557,8 @@ this.scriptsWithConditionGain=this.scriptsWithCondition.reduce( (pvs,cur)=>pvs+c
      data(){
 
         return{
-
+linkColor:'grey',
+          instrumentsAll:[],
           winners:[],
 
             gainLoss:-1,

@@ -421,6 +421,7 @@ async function fetchInstrumentsForMining(accessToken) {try {
 		}
 	
 	  async function setCurrentInstrumentParameters(e) {
+		let instruAll = require(FILE_LOCATION+'/instrumentsAll.json');
 
 		console.log(accessToken,'accessToken @ 415')
 	    let a = new pricePoint(e.instrument_token, accessToken);
@@ -448,6 +449,21 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	
 	    e.SevenDayMaxMin = c.SevenDayMaxMin;
 	    e.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${e.tradingsymbol}/${e.instrument_token}`;
+
+		let name=e.name;
+
+	
+
+		if(typeof instruAll.find(i=>i.tradingsymbol==e.name)!=='undefined'){
+
+			let nameinstrumentToken=instruAll.find(i=>i.tradingsymbol==e.name).instrument_token;
+			let stockChart=`https://kite.zerodha.com/chart/ext/ciq/NSE/${name}/${nameinstrumentToken}`;
+			e.stockChart=stockChart;
+	
+
+		}
+		
+
 	    e.seletedBuyingMethod = 'MAX';
 	    e.enterNowToTrade = false;
 	    e.PlacedReverseOrder = false;

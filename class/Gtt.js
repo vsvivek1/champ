@@ -115,7 +115,7 @@ if(true){
 
             let tradingsymbol=instrument.tradingsymbol;
 
-            console.log(stock,'stock',this.accessToken);
+            // console.log(stock,'stock',this.accessToken);
 
         let pp=new pricePoint(stock, this.accessToken);
 
@@ -220,11 +220,19 @@ async function writeFinalScriptsTofile(result){
 
 
 
-let n=new Gtt();
 
-let n2=n.getGttStocks();
+try{
+    // const element = array[index];
+    let n=new Gtt();
+    
+    let n2=n.getGttStocks();
+    
+    n.getPricePointsOfStocks()
+}catch(e){
 
-n.getPricePointsOfStocks()
+
+    console.log('GETTING SOME ERROR',e)
+}
 
 
 // console.log(n2)

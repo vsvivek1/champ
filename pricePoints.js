@@ -21,7 +21,7 @@ class pricePoint {
 
     this.accessToken = accessToken;
 
-    console.log('ACCESS TOKEN FROM PRICE POINTS', this.accessToken)
+    // console.log('ACCESS TOKEN FROM PRICE POINTS', this.accessToken)
 
     this.pricePointData = []
     // this.getPricePoints();
@@ -1022,13 +1022,13 @@ return new Promise.resolve({});
 
    this.accessToken=at1.access_token;
 
-   console.log(access_token,'access token from price poits',today);
+  //  console.log(access_token,'access token from price poits',today);
 
   //  return;
 
-console.log(`API KEY FROM `,api_key_final)
+// console.log(`API KEY FROM `,api_key_final)
 
-console.log(api_key_final,'api key from initiate kite connect')
+// console.log(api_key_final,'api key from initiate kite connect')
     return new KiteConnect({
       api_key: api_key_final,
       access_token: access_token
