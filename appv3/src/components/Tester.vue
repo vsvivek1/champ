@@ -1,6 +1,8 @@
 <template>
     <div>
 
+  {{ shortCovering }}
+
       <!-- {{ scriptsWithCondition }} -->
         <!-- <h2> total scritps {{scriptsWithCondition.length}}scriptsWithCondition. gain  {{ scriptsWithConditionGain }}</h2> -->
     
@@ -153,9 +155,75 @@ gainers(s){
 
 s.forEach(e=>{
 
-// console.log(s,'s')
+// console.log(e,'s')
   let cis=this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0];;
 
+
+
+
+
+
+if(this.minuteEnd){
+
+  
+
+if(this.minuteCounter==4){
+
+  this.minuteCounter=0;
+
+  console.log('here2')
+for (let k=0;k<4;k++){
+
+  console.log('here3')
+
+  this.$set(this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0],
+  `m${k}`,0
+  )
+
+  this.$set(this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0],
+  `OI-${k}`,0
+  )
+
+}
+
+
+}
+
+
+
+this.$set(this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0],
+  `m${this.minuteCounter}`,e.ohlc.last_price
+  )
+
+  this.$set(this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0],
+  `OI-${this.minuteCounter}`,e.oi
+
+
+
+  )
+
+
+  let {m0,m1,m2,m3,OI1,OI2,OI3,OI4}=this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0];
+
+
+  let zeroCheck=(m0 !== 0 && m1 !== 0 && m2 !== 0 && m3 !== 0);
+
+  let priceChk=m3 > m2 && m2 > m1 && m1 > m0;
+
+  // let oiCheck=OI-0<OI-1<OI-2<OI-3<OI4;
+
+  // && oiCheck
+
+  if(zeroCheck &&   priceChk ){
+
+
+    this.shortCovering.push(ci);
+
+    console.log(cis.tradingsymbol,'is short covering')
+  }
+
+
+}
 
 
   let {d2}=cis.pricePoints;
@@ -177,7 +245,7 @@ s.forEach(e=>{
 
 
   // e.ohlc.open>e.ohlc.close*1.5
-  e.ohlc.open>e.ohlc.close*1.5
+  e.last_price>e.ohlc.close*2
 
 //  &&  e.ohlc.low< e.ohlc.open*.8
 
@@ -201,7 +269,7 @@ s.forEach(e=>{
 
     let present;
 
-    if(! this.instrumentsAll.any(i=>i.tradingsymbol==cis.name)){
+    if(! this.instrumentsAll.some(i=>i.tradingsymbol==cis.name)){
 
       return false;
     }
@@ -557,6 +625,9 @@ this.scriptsWithConditionGain=this.scriptsWithCondition.reduce( (pvs,cur)=>pvs+c
      data(){
 
         return{
+
+          shortCovering:[],
+          minuteCounter:0,
 linkColor:'grey',
           instrumentsAll:[],
           winners:[],
@@ -619,10 +690,54 @@ columns: [
           sortable: true
         }
       ]
-            
+        , hours:0,
+        seconds:0,
+        minutes:0,
+        minuteEnd:false, 
+        
+        counter:0,
         }
+       
      },
         mounted(){
+
+
+
+
+          setInterval((i)=>{
+
+            var d = new Date();
+         this.hours = d.getHours();
+         this.minutes = d.getMinutes();
+         this.seconds = d.getSeconds();
+
+
+         this.counter++
+
+         if(this.counter==58){
+
+this.counter=0;
+this.minuteEnd=true;
+
+
+
+         }else{
+          this.minuteEnd=true;
+
+
+         }
+
+         
+
+          },1000)
+
+
+          setInterval((i)=>{
+
+
+
+
+},60*1000)
 
           this.fetchInstruments(); 
           // this.generateSignals([])

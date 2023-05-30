@@ -131,7 +131,7 @@ export const placeTargetsForLiveScripts = {
                 let quote=quotes[e.instrument_token];
       
                
-      
+                let cis=this.instruments.find(i=>i.instrument_token==e.instrument_token);
       
       
       
@@ -145,6 +145,8 @@ export const placeTargetsForLiveScripts = {
                 }
       
                 let instrument_token = e.instrument_token;
+
+               
       
                 if(liveOrderInstruments.includes(instrument_token)){
       
@@ -160,9 +162,9 @@ export const placeTargetsForLiveScripts = {
       
          
       
-                let cis = this.instruments.find(
-                  (i) => i.instrument_token == e.instrument_token
-                );
+                // let cis = this.instruments.find(
+                //   (i) => i.instrument_token == e.instrument_token
+                // );
       
                 if (typeof cis == "undefined") {
                   this.placingReverseOrderInProgress == false;
@@ -261,6 +263,54 @@ export const placeTargetsForLiveScripts = {
                   
                   
                 }
+
+                if(quantity<0){
+
+                  transaction_type = "BUY";
+      
+                  quantity = Math.abs(e.quantity);
+
+
+                 
+             
+      
+                  hasLiveTarget  = this.liveOrders.some(
+                    (i) =>
+                      i.instrument_token == instrument_token &&
+                      i.transaction_type == "BUY"
+                  );
+      
+           
+                  if(quote && quote.ohlc && quote.ohlc.open){
+
+                    targetPoint=quote.ohlc.open
+                 this.cl('QUOTE PRESENT SO USING THAT FOR SHORT COVERING for ',cis.tradingsymbol,' at ',targetPoint);
+                    
+
+                  }else if(!typeof cis=='undefined'){
+
+                  
+
+                    targetPoint=cis.pricePoints.d1.low;
+                 this.cl('QUOTE ABSENT  SO USING CIS FOR SHORT COVERING',targetPoint,cis.tradingsymbol)
+
+
+
+
+
+                  }
+      
+
+                  // targetPoint=
+      
+      
+      
+        
+      
+    
+
+
+                }
       
                
       
@@ -279,13 +329,7 @@ export const placeTargetsForLiveScripts = {
       
                   this.placingReverseOrderInProgress == false;
       
-                  // this.cl('has reverse order for %s',cis.tradingsymbol)
-      
-      
-      
-      
-      
-      // this.cl('reverse order bening placed',{ReverseOrderPending},{PlacedReverseOrder },{hasLiveTarget })
+              
       
       
       
@@ -300,13 +344,13 @@ export const placeTargetsForLiveScripts = {
       
       if(hasLivetgt){
       
-        // this.cl({hasLivetgt});
+ 
         return false
       }
       
       if(!hasLivePos){
       
-      // this.cl({hasLivePos});
+
       return false
       }
       

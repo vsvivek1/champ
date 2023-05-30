@@ -625,6 +625,12 @@ export default {
   
 mounted(){
 
+
+  const currentDate = new Date().toISOString().split('T')[0];
+    const existingData = JSON.parse(localStorage.getItem(currentDate))
+
+    // console.log(existingData,'existingData')
+    // this.globalConsoleLogs=existingData;
   const originalLog = console.log;
 
     // Define a new console.log function that writes to the logs array
@@ -1330,6 +1336,8 @@ return {entry,target,stopLoss};
       }
     },
 
+
+  
 
 setD0WithCurrentDayOhlc(element){
 
@@ -3977,6 +3985,27 @@ var isBefore15Minutes = timeDiffInMinutes > 15;
 
 
 
+let {d2,d1}=cis.pricePoints;
+
+let d2Range=d2.high-d2.low;
+let d1Range=d1.high-d1.low;
+
+let d1UpperShadow=d1.high-Math.max(d1.close,d1.open);
+let d1LowerShadow=Math.min(d1.close,d1.open)-d1.low;
+
+let d1Body=Math.abs(d1.open-d1.close);
+
+
+
+
+let largeYesterdayCandle=d1Range>=d2Range*2
+
+
+if(largeYesterdayCandle){
+
+  // this.cl('YESTEFDAY HUGE CANDLE NO TRADING ',cis.tradingsymbol);
+  return;
+}
 
 
 if(!(element && element.depth && element.depth.buy)){
@@ -4261,28 +4290,14 @@ element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.hig
 
 // this.cl('before yesterDayCloseStrategy')
 
-let {d2,d1}=cis.pricePoints;
-
-let d2Range=d2.high-d2.low;
-let d1Range=d1.high-d1.low;
-
-let d1UpperShadow=d1.high-Math.max(d1.close,d1.open);
-let d1LowerShadow=Math.min(d1.close,d1.open)-d1.low;
-
-let d1Body=Math.abs(d1.open-d1.close);
-
-
-
-
-let largeYesterdayCandle=d1Range>=d2Range*2
 
 
 
 
 let shortGapUpOpen=(
-  this.hours==9 && this.minutes<17 && this.minutes>15 // trigger only at 9:16
+  this.hours==9 //&& this.minutes<17 && this.minutes>15 // trigger only at 9:16
     
-    && element.ohlc.open>element.ohlc.close*1.5  //open 1.5 times greater than yesterdays close price
+    && element.ohlc.open>element.ohlc.close*2  //open 1.5 times greater than yesterdays close price
   
     && element.ohlc.open!=0 
     
@@ -4420,7 +4435,7 @@ switch(true){
 
   case shortGapUpOpen:
 
-  let entryPriceForShort=(element.ohlc.close*2).toFixed(1);
+  let entryPriceForShort=Math.max((element.ohlc.close*2.5).toFixed(1),element.last_price);
 
 
 
@@ -7681,7 +7696,8 @@ upperRangeCheck=ohlc.high<lp*1.05;
 
 
 
-let hrsCheck=(this.hours>9 || (this.hours==9 && this.minutes>20) )
+// let hrsCheck=(this.hours>9 || (this.hours==9 && this.minutes>20) )
+let hrsCheck=(this.hours>10  )
 
 // this.hours>=10;
 
