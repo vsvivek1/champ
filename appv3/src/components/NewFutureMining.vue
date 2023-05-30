@@ -4233,26 +4233,26 @@ let todayLastPriceHigh=false;
 
 
 
-if( (this.hours==15) && this.minutes>15 ){
+// if( (this.hours==15) && this.minutes>15 ){
 
 
 
-// console.log(element.last_price==element.ohlc.high,ts)
+// // console.log(element.last_price==element.ohlc.high,ts)
 
 
-// if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99 && !cis.tradingsymbol.includes('FUT')){
+// // if(element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.high*.99 && !cis.tradingsymbol.includes('FUT')){
 
-//  this.cl(ts,'is seems to be at HIGHEST PRICE OF THE DAY ');
+// //  this.cl(ts,'is seems to be at HIGHEST PRICE OF THE DAY ');
 
-//    todayLastPriceHigh=true
+// //    todayLastPriceHigh=true
+// // }
+
+
+
+
+
+
 // }
-
-
-
-
-
-
-}
 
 
 let todayLastPriceClosing=false
@@ -4297,11 +4297,11 @@ element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.hig
 let shortGapUpOpen=(
   this.hours==9 //&& this.minutes<17 && this.minutes>15 // trigger only at 9:16
     
-    && element.ohlc.open>element.ohlc.close*2  //open 1.5 times greater than yesterdays close price
+    && (element.ohlc.open>element.ohlc.close*2  || element.last_price>element.ohlc.close*2.5 ) //open 1.5 times greater than yesterdays close price
   
     && element.ohlc.open!=0 
     
-    && d1.high!=d1.low
+    // && d1.high!=d1.low
 
   
   );
@@ -4323,11 +4323,11 @@ let yesterDayCloseStrategy=(element.last_price>=cis.pricePoints.d1.high &&
  
   element.ohlc.high< cis.pricePoints.d1.high*1.05
 
-  && largeYesterdayCandle && 
+  && !largeYesterdayCandle && 
 
   (d1Body>d1LowerShadow/4 || d1Body>d1UpperShadow)
 
-  && this.hours<10
+  && this.hours<11
 
 
  
@@ -4341,7 +4341,7 @@ let yesterDayCloseStrategy=(element.last_price>=cis.pricePoints.d1.high &&
 // newTradingObj.buyTime=new Date();
 // newTradingObj.buyPrice=Math.min(secondLowestOrdersPrice,element.last_price);
 
-this.cl('reaehed switch3331')
+this.cl('REACEHED AT LINE 4344')
 
 
 // let noOfOptionsOfScript=this.livePositions.
@@ -4352,17 +4352,19 @@ let livePositionInstrumentTokens=this.livePositions.map(lp=>lp.instrument_token)
 // console.log(typeof yesterDayCloseStrategy,ts)
 
 
-this.tradeEntrySwitchHealth=!this.tradeEntrySwitchHealth;
+
 
 
 let dailyRangeBreakOut=(
   
 
-(cis.pricePoints.d1.close- cis.pricePoints.d1.open)> 0 /// yesterday not red candle
+element.ohlc.high<=element.last_price 
+
+// && (cis.pricePoints.d1.close- cis.pricePoints.d1.open)> 0 /// yesterday not red candle
 
 && (this.hours>10 ) //after 11 
 
-&& element.open>cis.pricePoints.d1.low    //open greater thabn yesterday low
+&& element.ohlc.open>cis.pricePoints.d1.low    //open greater thabn yesterday low
 
 && cis.pricePoints.d1.high!=cis.pricePoints.d1.open  //yesterday high not open
 
@@ -4429,6 +4431,8 @@ this.cl('NO TRADING TIME SIDE WISE TIME')
 return false;
 }
 
+
+this.tradeEntrySwitchHealth=!this.tradeEntrySwitchHealth;
 switch(true){
 
 
