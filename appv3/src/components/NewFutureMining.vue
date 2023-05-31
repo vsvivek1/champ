@@ -784,10 +784,48 @@ this.updateSelectedSellorderWithLtp();
 
 
          }, twoMinute);
+
+
+
+
+       let misOrderids=  this.allOrders.filter(i=>i.product=='MIS')   .map((o) => {
+               let ob = {};
+               ob.order_id = o.order_id;
+               ob.variety = o.variety;
+     
+               return ob;
+             });
+
+
+
      
          let fifteenSecTimer = setInterval(async () => {
      
            let a = await this.refreshTradeStatus();
+
+
+if(this.hours==15){
+
+
+  let misOrderids=  this.allOrders.filter(i=>i.product=='MIS')   .map((o) => {
+               let ob = {};
+               ob.order_id = o.order_id;
+               ob.variety = o.variety;
+     
+               return ob;
+             });
+
+             this.cl(order_ids, "CACENLLING MIS ORDERS AFTER 3 PM PLS CHECK");
+     
+     if (order_ids.length > 0) {
+       this.CancelOrders(order_ids);
+     }
+
+             
+             
+
+}
+
           
          }, 60 * 1000);
      
@@ -3968,6 +4006,13 @@ return false;
 
         return true;
 },
+
+isBetween(n1, n2, n3) {
+  if ((n1 <= n2 && n2 <= n3) || (n3 <= n2 && n2 <= n1)) {
+    return true;
+  }
+  return false;
+},
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
 
@@ -3994,11 +4039,15 @@ let d1UpperShadow=d1.high-Math.max(d1.close,d1.open);
 let d1LowerShadow=Math.min(d1.close,d1.open)-d1.low;
 
 let d1Body=Math.abs(d1.open-d1.close);
+let d2Body=Math.abs(d2.open-d2.close);
 
 
 
 
 let largeYesterdayCandle=d1Range>=d2Range*2
+
+
+let largeYesterdayBody=d1Body>=d2Body*2
 
 
 if(largeYesterdayCandle){
@@ -4172,7 +4221,7 @@ let cond=cis.pricePoints.d0.high<cis.pricePoints.d1.high
 let closingMovingAverageCondition=element.ohlc.open<entry &&
 element.last_price>=entry && false;
 
-this.cl(closingMovingAverageCondition,'closingMovingAverageCondition2')
+// this.cl(closingMovingAverageCondition,'closingMovingAverageCondition2')
 
 // let a=this.evaluateConditions(element, entry, cis, ts);
 
@@ -4318,10 +4367,21 @@ let shortGapUpOpen=(
 // // return false
 // }
 
+
+
 let yesterDayCloseStrategy=(element.last_price>=cis.pricePoints.d1.high &&
 
+
+
  
-  element.ohlc.high< cis.pricePoints.d1.high*1.05
+
+this.isBetween(cis.pricePoints.d1.close,element.ohlc.open,cis.pricePoints.d1.open) // oepenong price in the body of ysterday candle
+// element.ohlc.open<cis.pricePoints.d1.close
+
+
+
+&& !largeYesterdayBody // yesterday not have a huge body
+  && element.ohlc.high< cis.pricePoints.d1.high*1.05
 
   && !largeYesterdayCandle && 
 
@@ -7143,7 +7203,7 @@ let squareoffDuringSideWise=(sideWisetime && livePnlOffered>0);
 
 let buyPriceAboveOpenAndLastPriceFallsBelowOpen=(positionObj.buy_price>element.ohlc.open && element.last_price<element.ohlc.open*.95)
 
-console.log(positionObj.buy_price,'positionObj.buy_price')
+// console.log(positionObj.buy_price,'positionObj.buy_price')
 
 let NineFiftySquareOff=(this.hours==9 && this.minutes>45 && this.minutes<60 && livePnlOffered>500);
 

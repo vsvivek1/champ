@@ -387,6 +387,10 @@ export const placeTargetsForLiveScripts = {
       try {
           let lo=this.livePositions.find(i=>i.instrument_token==instrument_token)
           let avg=lo.buy_price;
+
+
+
+
       
         let tgt1
         if((this.hours==15 && this.minutes>30)|| this.hours>15 || this.hours<9 || (this.hours==9 && this.minutes<15)
@@ -400,11 +404,24 @@ export const placeTargetsForLiveScripts = {
            tgt1=avg*2;
       
         }
+
+
+if(avg<=cis.pricePoints.d1.low){
+
+  tgt=cis.pricePoints.d1.high*99;
+
+
+}
+
+
        
         let tgt=tgt1.toFixed(1)
        
       
         // this.cl(uck,'uck');
+
+
+
         targetPoint=Math.min(tgt,uck);
       
       } catch (error) {
@@ -417,6 +434,56 @@ export const placeTargetsForLiveScripts = {
       }
       
       
+
+/// setting targets for sell quantity
+if(quantity<0){
+
+  try {
+    let lo=this.livePositions.find(i=>i.instrument_token==instrument_token)
+    let avg=lo.sell_price;
+  
+  let tgt1
+  if((this.hours==15 && this.minutes>30)|| this.hours>15 || this.hours<9 || (this.hours==9 && this.minutes<15)
+  
+  ){
+  
+    tgt1=avg/2
+  
+  }else{
+  
+     tgt1=avg/2
+  
+  }
+  
+  let tgt=tgt1.toFixed(1)
+  
+  
+  // this.cl(uck,'uck');
+  
+  
+  
+  targetPoint=tgt
+  
+  } catch (error) {
+  
+  
+  console.log('target error',error)
+    
+  
+  
+  }
+
+
+}
+
+
+
+
+
+/// setting targets for sell quantity
+
+
+
       
       // let storedTarget=this.retrieveTradeDetailsInLocalStorage(cis.tradingsymbol);
       
