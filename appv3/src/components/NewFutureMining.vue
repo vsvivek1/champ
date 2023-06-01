@@ -4539,7 +4539,7 @@ element.ohlc.high<=element.last_price
 
 // && (cis.pricePoints.d1.close- cis.pricePoints.d1.open)> 0 /// yesterday not red candle
 
-&& (this.hours>10 ) //after 11 
+&& (this.hours>=9 && this.minutes>=25 ) //after 11 
 
 && element.ohlc.open>cis.pricePoints.d1.low    //open greater thabn yesterday low
 
