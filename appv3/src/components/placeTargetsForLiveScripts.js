@@ -29,6 +29,8 @@ export const placeTargetsForLiveScripts = {
     
       
 await this.getPositions();
+
+
       
       
 
@@ -113,6 +115,20 @@ await this.getPositions();
                 let e = symbols.pop();
       
       
+
+                let pos=this.livePositions.find(i=>i.instrument_token==e.instrument_token);
+
+                let entryPrice;
+
+
+                if(pos.quantity<0){
+entryPrice=pos.sell_price
+
+
+                }else if(pos.quantity>0){
+
+                  entryPrice=pos.buy_price
+                }
              
       
                 let quote=quotes[e.instrument_token];
@@ -197,7 +213,7 @@ await this.getPositions();
                 ;
       
    
-                this.cl(e.quotes,'e.quotes',uck,'uck');
+                // this.cl(e.quotes,'e.quotes',uck,'uck');
       
                 // return;
                 let hasLiveTarget;
@@ -486,14 +502,79 @@ if(quantity<0){
       // targetPoint=storedTarget.target;
       
       // }
+
+     
+     
+     
+
+      /// target point comparison with upper and lower  circult point
+      let  targetPointFinal;
+
+   
+
+      let {d0,d1}=cis.pricePoints;
+
+      if(quantity>0){
+
+
+
+        switch(true){
+
+           case (entryPrice<d1.low):
+
+
+          //  this.cl(' ENTRY BELOW D1 LOW FOR ',)
+
+           targetPoint=d1.low
+
+          break;
+
+          case (entryPrice<Math.min(d1.open,d1.close)):
+
+          targetPoint=Math.min(d1.open,d1.close)
+
+         break;
+
+         case (entryPrice<Math.max(d1.open,d1.close)):
+
+         targetPoint=Math.max(d1.open,d1.close)
+
+        break;
+
+        case (entryPrice<d1.high):
+
+        targetPoint=d1.high;
+
+       break;
+
+       case (entryPrice>d1.high):
+
+       targetPoint=(d1.high*2).toFixed(1);
+
+      break;
+
+
+
+        }
+
+
+        targetPointFinal=Math.min(targetPoint,uck-.1)
+
+      }else if(quantity<0){
+
+        targetPointFinal=Math.max(targetPoint,lck+.1)
+
+      }
       
+
+      console.log('ENTRY PRICE target point of script', cis.tradingsymbol,targetPointFinal,uck,targetPoint,'entry price',entryPrice)
                 this.placetargetAndStopLoss(
                   cis,
                   instrument_token,
                   element,
                   product,
                   quantity,
-                  targetPoint,
+                  targetPointFinal,
                   livePnl,
                   true,
                   transaction_type

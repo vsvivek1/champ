@@ -1,5 +1,5 @@
 "use strict";
-const TIMER=200;
+const TIMER=501;
 require('dotenv').config({path:'../../findiserver/.env'});
 const Path = require('path');
 const Fs = require('fs')
@@ -19,7 +19,7 @@ class Gtt {
         this.instruments=require('../appv3/public/instruments/instrumentsAll.json');
 
      let tmp =this.getGttStocks();
-        this.stocks=tmp//ß.slice(1,10)
+        this.stocks=tmp//.slice(1,100)
 
         this.accessToken;
 
@@ -56,95 +56,105 @@ let result=[]
   
         return new Promise(async (res,rej)=>{
 
-            const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-            let mongo=await mongoose.connect(uri,{ useNewUrlParser: true, useUnifiedTopology: true });
+try {
+                const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+                let mongo=await mongoose.connect(uri,{ useNewUrlParser: true, useUnifiedTopology: true });
+                
+                
+                let today= moment().format('Y-MM-DD');
+                let at1  = await AccesTocken.
+                findOne({ 'date': today },'access_token').then(e=>e.access_token);
+        
+        
+          
             
+                this.accessToken=at1;      
+        
+        console.log(at1,'ACCEESS TOKEN',today)
+        
+    
             
-            let today= moment().format('Y-MM-DD');
-            let at1  = await AccesTocken.
-            findOne({ 'date': today },'access_token').then(e=>e.access_token);
+            let pricePoint=require('./../pricePoints');
+            let nse1=require('./../nifty.json');
+            let nifty=nse1.data.map(n=>n.symbol)
+    
+            
     
     
-      
-        
-            this.accessToken=at1;      
     
-    console.log(at1,'ACCEESS TOKEN',today)
+        let ln=this.stocks.length;
     
-
-        
-        let pricePoint=require('./../pricePoints');
-        let nse1=require('./../nifty.json');
-        let nifty=nse1.data.map(n=>n.symbol)
-
-        
-
-
-
-    let ln=this.stocks.length;
-
-
-   
-let count=1;
-
-
-
-if(true){
-    let t=setInterval(async ()=>{
-
-
-
-        
-        var stock=this.stocks.pop();
-
-        if(typeof stock=='undefined' ){
-
-            res(result);
-            clearInterval(t);
-            writeFinalScriptsTofile(result);
-            return ;
-        }
-
-        console.log(count ,' of ',ln)
-        count++;
-
-        let instrument=this.instruments.
-        filter(i=>i.instrument_token
-            ==stock)[0];
-
-
-            let tradingsymbol=instrument.tradingsymbol;
-
-            // console.log(stock,'stock',this.accessToken);
-
-        let pp=new pricePoint(stock, this.accessToken);
-
-        // pp.initiateKiteConnect();
-        pp.initiateKiteConnect();
-        
-
-        let pp2=await pp.getPricePoints()
-        instrument.pricePoints=pp2
-
-        if(nifty.includes(tradingsymbol)){
-            instrument.group='NIFTY'
-
-        }
-
-
-        result.push(instrument);
-
-// console.log(pp2)
-
-    },TIMER)
+    
+       
+    let count=1;
+    
+    
+    
+    if(true){
+        let t=setInterval(async ()=>{
+    
+    
+    
+            
+            var stock=this.stocks.pop();
+    
+            if(typeof stock=='undefined' ){
+    
+                res(result);
+                clearInterval(t);
+                writeFinalScriptsTofile(result);
+                return ;
+            }
+    
+            console.log(count ,' of ',ln)
+            count++;
+    
+            let instrument=this.instruments.
+            filter(i=>i.instrument_token
+                ==stock)[0];
+    
+    
+                let tradingsymbol=instrument.tradingsymbol;
+    
+                // console.log(stock,'stock',this.accessToken);
+    
+            let pp=new pricePoint(stock, this.accessToken);
+    
+            // pp.initiateKiteConnect();
+            pp.initiateKiteConnect();
+            
+    
+            let pp2=await pp.getPricePoints()
+            instrument.pricePoints=pp2
+    
+            if(nifty.includes(tradingsymbol)){
+                instrument.group='NIFTY'
+    
+            }
+    
+    
+            result.push(instrument);
+    
+    // console.log(pp2)
+    
+        },TIMER)
+    
+    
+    }
+} catch (error) {
 
 
+    console.log('promise rejection error',error)
+    rej(error)
+    
 }
    
 
 
 
-    })
+    }
+
+    )
 
 
 

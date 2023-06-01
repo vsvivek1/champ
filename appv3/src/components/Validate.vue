@@ -17,6 +17,8 @@ import store from '@/store';
 
 
 setCookies(){
+
+ 
     const midnight = new Date()
 midnight.setHours(24,0,0,0)
 
@@ -85,14 +87,17 @@ requestTockenSettingErrorMsg:'',
 
         mounted(){
 
-           console.log('mounted validate outside',this.$route.query.action) 
+    //         this.$cookie.delete(session)
+    // this.$cookie.delete(accessToken)
+
+        //    console.log('mounted validate outside',this.$route.query.action) 
 
         //    this.$route.query.action=="login" && 
 
         if(this.$route.query.status=="success"){
 
 
-console.log('mounted validate',this.$route.query)
+// console.log('mounted validate',this.$route.query)
             store.commit('setRequest_tocken',this.$route.query.request_token)
 
             var toc={}; 
@@ -104,7 +109,7 @@ this.requestTockenSettingErrorMsg='';// resetting errors
           const url = '/api/setRequestTocken'
            axios.post(url,toc).then(res=>{
 
-               console.log('this is session',this.session,res)
+            //    console.log('this is session',this.session,res)
 
                this.session=res.data;
 

@@ -677,7 +677,8 @@ app.post('/api/PlaceGTT', async (req,res) => {
 try {
   var kc = new KiteConnect({
     api_key: api_key,
-    access_token: accessToken
+    access_token: accessToken,
+    debug:True
   });
   params.trigger_type=kc.GTT_TYPE_SINGLE;
 
