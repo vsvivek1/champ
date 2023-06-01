@@ -4,20 +4,15 @@ export const placeTargetsForLiveScripts = {
         async placeTargetsForLiveScripts() {
 
 
-            // return;
-            //TARGETSFORLIVESCRIPTS
-      
-            //TARGETS
-      //  return ;
-      
+        
       
       if(this.placingReverseOrderInProgress==true){
       
-      // this.cl('reverse order is being placed please wait...');
+ 
       
-        let code='reverseOrderBeingPlaced';
-        let msg='reverse order is being placed please wait...'
-        // this.triggerAlert(code,msg)
+        // let code='reverseOrderBeingPlaced';
+        // let msg='reverse order is being placed please wait...'
+        // // this.triggerAlert(code,msg)
         
         return false;
       }
@@ -28,23 +23,15 @@ export const placeTargetsForLiveScripts = {
       let o=await this.getOrders();
       
       
-      
-      
-      // console.log(o,'o')
+
       let liveOrderInstruments=this.liveOrders.filter(o2=>o2.transaction_type=="SELL").map(o1=>o1.instrument_token);
       
-      // console.log(this.liveOrders,'live orders');
+    
       
-      // return;
-      // console.log(liveOrderInstruments,'liveOrderInstruments');
-      
-      
-      // return;
-      
-      let lp=await this.getPositions();
+await this.getPositions();
       
       
-      // console.log(lp,'lp');
+
       
             let liveInstrumentSymbols = this.livePositions.map(
                     (a) => parseInt(a.instrument_token)
@@ -62,7 +49,7 @@ export const placeTargetsForLiveScripts = {
       
       
       
-      // await this.getPositions();  
+
       
       
       
@@ -98,7 +85,7 @@ export const placeTargetsForLiveScripts = {
       
             
       
-            let symbols = [...this.livePositions.filter(lp=>lp.quantity>0)];
+            let symbols = [...this.livePositions]//.filter(lp=>lp.quantity>0)];
       
             let ln = symbols.length;
       
@@ -129,6 +116,9 @@ export const placeTargetsForLiveScripts = {
              
       
                 let quote=quotes[e.instrument_token];
+                let uck=quote.upper_circuit_limit;
+                let lck=quote.lower_circuit_limit;
+                
       
                
                 let cis=this.instruments.find(i=>i.instrument_token==e.instrument_token);
@@ -162,20 +152,18 @@ export const placeTargetsForLiveScripts = {
       
          
       
-                // let cis = this.instruments.find(
-                //   (i) => i.instrument_token == e.instrument_token
-                // );
+             
       
                 if (typeof cis == "undefined") {
                   this.placingReverseOrderInProgress == false;
                   return false;
                 }
       
-                // if (typeof cis.otherCriteria == "undefined") {
-                //   // return false;
-                // }
+               
       
                 let quantity = e.quantity;
+
+               
       
                 if (quantity == 0) {
                   this.placingReverseOrderInProgress == false;
@@ -208,9 +196,8 @@ export const placeTargetsForLiveScripts = {
                 // let upper_circuit_limit = e.quotes.upper_circuit_limit
                 ;
       
-      let uck=quote.upper_circuit_limit;
-      
-                // this.cl(e.quotes,'e.quotes');
+   
+                this.cl(e.quotes,'e.quotes',uck,'uck');
       
                 // return;
                 let hasLiveTarget;
@@ -231,11 +218,7 @@ export const placeTargetsForLiveScripts = {
                       i.transaction_type == "SELL"
                   );
       
-                  // rangeBreakOut = lowerBreakOutTarget ;
-                  // // (cis.pricePoints.d1.rangeBreakOutTarget) - 0.15;
-                  // high = rangeBreakOut;
-      
-                  // this.cl({upperBreakOutTarget},'upperBreakOutTarget',{uck})
+           
       
       
       
@@ -258,13 +241,15 @@ export const placeTargetsForLiveScripts = {
       
       
          
-      // this.cl(upperBreakOutTarget,cis.pricePoints.d0.high,'here dk uck todays high',uck,lck,cis.tradingsymbol)
+       this.cl(upperBreakOutTarget,cis.pricePoints.d0.high,'here dk uck todays high',uck,lck,cis.tradingsymbol)
       
                   
                   
                 }
 
                 if(quantity<0){
+
+                  this.cl('qty<0')
 
                   transaction_type = "BUY";
       
@@ -381,62 +366,69 @@ export const placeTargetsForLiveScripts = {
       
       let {target}=this.getAverageClosingValue(cis);
       
+
+
+
       targetPoint=target;
       
       
-      try {
-          let lo=this.livePositions.find(i=>i.instrument_token==instrument_token)
-          let avg=lo.buy_price;
-
-
-
-
-      
-        let tgt1
-        if((this.hours==15 && this.minutes>30)|| this.hours>15 || this.hours<9 || (this.hours==9 && this.minutes<15)
+     if (quantity>0) {
+       try {
+           let lo=this.livePositions.find(i=>i.instrument_token==instrument_token)
+           let avg=lo.buy_price;
+ 
+ 
+ 
+ 
+       
+         let tgt1
+         if((this.hours==15 && this.minutes>30)|| this.hours>15 || this.hours<9 || (this.hours==9 && this.minutes<15)
+         
+         ){
+       
+           tgt1=avg*2.5;
+       
+         }else{
+       
+            tgt1=avg*2;
+       
+         }
+ 
+ 
+ if(avg<=cis.pricePoints.d1.low){
+ 
+   tgt1=cis.pricePoints.d1.high*99;
+ 
+ 
+ }
+ 
+ 
         
-        ){
-      
-          tgt1=avg*2.5;
-      
-        }else{
-      
-           tgt1=avg*2;
-      
-        }
-
-
-if(avg<=cis.pricePoints.d1.low){
-
-  tgt=cis.pricePoints.d1.high*99;
-
-
-}
-
-
+         let tgt=tgt1.toFixed(1)
+        
        
-        let tgt=tgt1.toFixed(1)
+         // this.cl(uck,'uck');
+ 
+ 
+ 
+         targetPoint=Math.min(tgt,uck);
        
-      
-        // this.cl(uck,'uck');
-
-
-
-        targetPoint=Math.min(tgt,uck);
-      
-      } catch (error) {
-      
-      
-        console.log('target error',error)
-          
-      
-      
-      }
+       } catch (error) {
+       
+       
+         console.log('target error',error)
+           
+       
+       
+       }
+     }
       
       
 
 /// setting targets for sell quantity
 if(quantity<0){
+
+  transaction_type='BUY';
 
   try {
     let lo=this.livePositions.find(i=>i.instrument_token==instrument_token)

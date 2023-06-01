@@ -1,5 +1,5 @@
 "use strict";
-const TIMER=501;
+const TIMER=200;
 require('dotenv').config({path:'../../findiserver/.env'});
 const Path = require('path');
 const Fs = require('fs')
@@ -19,7 +19,7 @@ class Gtt {
         this.instruments=require('../appv3/public/instruments/instrumentsAll.json');
 
      let tmp =this.getGttStocks();
-        this.stocks=tmp//.slice(1,10)
+        this.stocks=tmp//ß.slice(1,10)
 
         this.accessToken;
 

@@ -815,7 +815,9 @@ if(this.hours==15){
                return ob;
              });
 
-             this.cl(order_ids, "CACENLLING MIS ORDERS AFTER 3 PM PLS CHECK");
+
+             //LOST 20 K DUE TO THIS STUPIDITY IE NOT CACELLING MIS ORDERS AFTER 3 PM
+             this.cl(order_ids, "CANCENLLING MIS ORDERS AFTER 3 PM PLS CHECK");
      
      if (order_ids.length > 0) {
        this.CancelOrders(order_ids);
@@ -1365,6 +1367,11 @@ return {entry,target,stopLoss};
         const currentDate = new Date().toISOString().split('T')[0]; // Get the current date in "yyyy-mm-dd" format
       const timestamp = new Date().getTime(); // Get the current timestamp
       const existingData = JSON.parse(localStorage.getItem(currentDate)) || {};
+
+      if(result.includes('cis')){
+
+        return false;
+      }
 
       existingData[timestamp] = result;
 
@@ -2428,10 +2435,10 @@ let d0High=d0.high;
 
 let febprice=d0High-(Math.abs(d0.open-d0.high)*(1-.25));
 
-console.log(cis.last_price,'cis.last_price @ 2378')
+// console.log(cis.last_price,'cis.last_price @ 2378')
 
 
-console.log(lp.last_price,cis.tradingsymbol,'lp_last_price @2381')
+// console.log(lp.last_price,cis.tradingsymbol,'lp_last_price @2381')
 
 let refPrice;
 if(cis.last_price!=0)
@@ -3798,7 +3805,7 @@ let pp= this.indices.find(i=>i.tradingsymbol==index)
 // this.cl(pp.last_price);
 
 let res={};
-if(pp.last_price!=0){
+if (type of pp!='undefined' && typeof pp.last_prcie!='undefined' && pp.last_price!=0){
 
   
         
@@ -5821,7 +5828,7 @@ if(reverseOrder==true){
         }
       }
 
-      //  order.variety = "regular";
+       order.variety = "regular";
 
 this.cl(this.hours,'hours');
 
@@ -5831,12 +5838,19 @@ this.cl(this.hours,'hours');
 
         this.cl('amo')
 
+
+        if(transaction_type=='BUY' && !reverseOrder){
+
+order.variety = "regular";// prevent buy amos 
+}else{
+
+order.variety = "AMO";// prevent buy am
+
+}
+
       }
 
-      if(transaction_type=='BUY'){
-
-        order.variety = "regular";// prevent buy amos 
-      }
+     
 
       order.params = {};
       order.params.exchange = this.itype;
@@ -7210,11 +7224,71 @@ let NineFiftySquareOff=(this.hours==9 && this.minutes>45 && this.minutes<60 && l
 
  this.cl(' XXX last prcie below open',element.last_price<element.ohlc.open,'element.last_price<element.ohlc.open',cis.tradingsymbol)
 
+ 
+
+ let {d1}=cis.pricePoints;
+
+let hitHighStopLoss=element.ohlc.open<Math.min(d1.open,d1.close) && element.ohlc.high>Math.max(d1.open,d1.close) 
+
+&& element.last_price<=Math.max(d1.open,d1.close) ;
+
+
+
+
+
+// Math.min(d1.open,d1.low)
+
+let openLowTouchedYdayHigh=element.ohlc.open<d1.low && element.ohlc.high>=d1.high && element.last_price<=element.ohlc.high>=d1.high;
+
+
+
+  let openBelowYesterdayHigh=element.ohlc.open<d1.high && element.ohlc.high>=d1.high && element.last_price<=d1.high;
 
  this.stopLossSwitchHealth=!this.stopLossSwitchHealth;
       switch (true) {
 
 
+
+        case openBelowYesterdayHigh:
+        
+        msg=`open below yesterdays high , touched y day high and thebn  retturning to yesterdays high , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime} SQUARING OFF`
+         this.cl(msg)
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+        
+        break;
+        
+        
+        case openLowTouchedYdayHigh:
+        
+        msg=`open below yesterdays low, touched y day high and thebn  retturning to yesterdays high , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime} SQUARING OFF`
+         this.cl(msg)
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+        
+        break;
+
+
+        case hitHighStopLoss:
+        
+        msg=`open below yesterdays candle body crossed yesterdays body, retturning to yesterdays body stop loss , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime} SQUARING OFF`
+         this.cl(msg)
+        this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           last_price
+         );
+        
+        break;
 
         case(element.last_price<element.ohlc.open*.98):
 

@@ -241,7 +241,7 @@ this.$set(this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0],
 
  
   let {d1,d3}=cis.pricePoints;
-  console.log(d1,'d1.volume')
+  // console.log(d1,'d1.volume')
   if(
     
 
@@ -252,7 +252,7 @@ this.$set(this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0],
 
 
   // e.ohlc.open>e.ohlc.close*1.5
-  e.last_price>e.ohlc.close*2.5
+  e.ohlc.open>e.ohlc.close*2
 
 //  &&  e.ohlc.low< e.ohlc.open*.8
 

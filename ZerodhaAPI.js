@@ -335,7 +335,18 @@ return ;
 
 // let testObj=Object.keys(a).length === 0 && a.constructor === Object
 
+
+// console.log(a,'a')
 let a1={};
+
+
+if(typeof a.variety=='undefined'){
+
+  return false;
+}
+
+
+
 if(JSON.stringify(a)!=JSON.stringify(a1))//ch3cnking of null value of aa  was a workaround
 {
    
