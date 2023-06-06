@@ -45,13 +45,32 @@
                :href="win.stockChart" target="_blank">{{win.name  }}</a>
               
             </td>
+
+            <td>
+              {{ win.closeTimes }} close times
+            </td>
+
             <td>
 
-              {{ win.ohlc.open }}
+              {{ win.highestpc }} hi pc 
+            </td>
+            <td>
+
+              {{ win.ohlc.close }} close
+
+            </td>  
+            
+            <td>
+
+              {{ win.ohlc.open }} open
+
+            </td><td>
+
+              {{ win.ohlc.high }} high
 
             </td>
             <td>
-              {{ win.last_price }}
+              {{ win.last_price }} lp
 
 
             </td>
@@ -129,7 +148,7 @@ await  fetch("../../../instruments/instrumentsForMining.json")
 
           winners1(){
 
-            return this.winners.sort((a,b)=>a.gain-b.gain)
+            return this.winners.sort((a,b)=>b.highestpc-a.highestpc)
 
 
           },
@@ -248,11 +267,13 @@ this.$set(this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0],
   // d1.open!=d1.close &&
 
   // d1.volume!=0 &&
-  //  e.last_price<e.ohlc.open  &&
+  //  e.last_price>e.ohlc.close*2
+   e.last_price>e.ohlc.close*2
+  //  && e.last_price>=e.ohlc.high
 
 
   // e.ohlc.open>e.ohlc.close*1.5
-  e.ohlc.open>e.ohlc.close*2
+  // e.ohlc.open>e.ohlc.close*1.5
 
 //  &&  e.ohlc.low< e.ohlc.open*.8
 
@@ -280,12 +301,17 @@ this.$set(this.instruments.filter(i=>i.instrument_token==e.instrument_token)[0],
 
       return false;
     }
+
+
 try{
     cis.ohlc=e.ohlc;
     cis.last_price=e.last_price
+
+    cis.highestpc=(e.ohlc.high-e.ohlc.close)*100/e.ohlc.close
     cis.gain=(e.last_price-e.ohlc.open) *cis.lot_size
 
     let name=cis.name
+    cis.closeTimes=e.ohlc.high/e.ohlc.close
 
     
     let nameinstrumentToken=this.instrumentsAll.find(i=>i.tradingsymbol==cis.name).instrument_token;

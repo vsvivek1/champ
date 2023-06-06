@@ -781,7 +781,7 @@ this.updateSelectedSellorderWithLtp();
            this.cl(order_ids, "live orderss to be canceled");
      
            if (order_ids.length > 0) {
-             this.CancelOrders(order_ids);
+            //  this.CancelOrders(order_ids);
            }
 
 
@@ -1202,12 +1202,14 @@ this.orders.map(
  // params.price=i.last_price;
 
 
-
+let cis=this.instruments.find(i=>i.instrument_token==o.instrument_token);
 
 if(o.trasaction_type=="SELL"){
 
 let bestBuyOffer=quotes[o.instrument_token].depth.buy[0];
-params.price =bestBuyOffer
+params.price =bestBuyOffer;
+
+console.log(bestBuyOffer,'bestBuyOffer',cis.tradingsymbol)
 // params.trigger_price =bestBuyOffer
 }else if(o.trasaction_type=="BUY"){
 
@@ -1227,13 +1229,13 @@ params.price =bestSellOffer
  ob.params = params;
 
  // this.cl('o',o)
- return ob;
+//  return ob;
 
  } );
     
         
 
-  this.updateOrder();
+  // this.updateOrder();
 
 
 
@@ -4095,13 +4097,31 @@ checkCandlePattern(d0, d1) {
 
 specialChecks(element,cis,txt=''){
 
-  if(element.ohlc.high>=element.last_price*1.2 ||
+  if(element.ohlc.high>=element.last_price*1.5 ||
         
-        element.ohlc.low<=element.last_price*1.2
+        element.ohlc.low<=element.last_price*.5
         
         ){
 
-this.cl(`SO MUCH  MOVE OF 20% IN EITHER DIRECTION ALREADY HAPPEENED  SO IGNORING  ${cis.tradingsymbol} NO TRADE yday high :${cis.pricePoints.d1.high}  low ${cis.pricePoints.d1.low} ${txt}`)
+
+          let highPc;
+          let lowPc;
+
+          highPc=(element.ohlc.high-element.last_price)*100/element.last_price
+          lowPc=(element.last_price-element.ohlc.low)*100/element.last_price
+
+this.cl(`SO MUCH  MOVE OF 20% IN EITHER DIRECTION ALREADY HAPPEENED  SO IGNORING  ${cis.tradingsymbol} NO 
+
+TRADE yday high :${cis.pricePoints.d1.high}  low ${cis.pricePoints.d1.low} ${txt}
+
+
+high % is ${highPc}  and low% is ${lowPc}
+
+`
+
+
+
+)
 return false;
 }
 
@@ -4132,6 +4152,8 @@ isBetween(n1, n2, n3) {
       try {
 
 
+        var buying=false;
+        var selling=true;
         const lastTradedDate = new Date(element.last_traded_time);
 
 // Get the current time
@@ -4537,16 +4559,19 @@ let dailyRangeBreakOut=(
 
 element.ohlc.high<=element.last_price 
 
+ && element.ohlc.high>element.ohlc.open
+
 // && (cis.pricePoints.d1.close- cis.pricePoints.d1.open)> 0 /// yesterday not red candle
 
-&& (this.hours>=9 && this.minutes>=25 ) //after 11 
+&& (this.hours>=9 && this.minutes>=25 ) //after 9:25
 
 && element.ohlc.open>cis.pricePoints.d1.low    //open greater thabn yesterday low
 
 && cis.pricePoints.d1.high!=cis.pricePoints.d1.open  //yesterday high not open
 
 
-&& element.last_price>=cis.pricePoints.d0.high  //entry criteria
+// && element.last_price>=cis.pricePoints.d0.high  //entry criteria
+&& element.last_price>=element.ohlc.high  //entry criteria
 
 
 // && element.last_price<= cis.pricePoints.d0.high*1.05  /// limiting criteria
@@ -4625,7 +4650,28 @@ switch(true){
 
 
 
-  case shortGapUpOpen:
+
+  case element.last_price>element.ohlc.close*2.5 && selling:
+
+let entry250HiPriceForShort=Math.max((element.ohlc.close*2.5).toFixed(1),element.last_price);
+
+
+
+this.cl('SHORTING FOR last price higher than 2.5 times y day  close ',ts ,'AT ',entry250HiPriceForShort)
+this.proceedForEntry(
+         instrument_token,
+         cis,
+         element,
+         entry250HiPriceForShort,
+         "short"
+       );
+
+
+break;
+
+
+
+  case (shortGapUpOpen && selling):
 
   let entryPriceForShort=Math.max((element.ohlc.close*2.5).toFixed(1),element.last_price);
 
@@ -4643,7 +4689,7 @@ switch(true){
 
   break;
 
-  case dailyRangeBreakOut: 
+  case (dailyRangeBreakOut && buying): 
 
 
    specialCheck=this.specialChecks(element,cis,'FROM DAILY RANGE BRAK OUT');
@@ -4654,7 +4700,7 @@ switch(true){
   }
   
 
-  if(openHigh){
+  if(openHigh && buying){
 this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
   return false
 }
@@ -4671,13 +4717,13 @@ this.proceedForEntry(
            instrument_token,
            cis,
            element,
-           bestOffer,
+           bestSellOffer,
            "long"
          );
 
 
 
-          msg=`TRADE EXECUTION SEND BY  DAILY RANGE BREAKOUT STRATEGY FOR ${ts}  for ${bestOffer} at ${formattedTime}`
+          msg=`TRADE EXECUTION SEND BY  DAILY RANGE BREAKOUT STRATEGY FOR ${ts}  for ${bestSellOffer} at ${formattedTime}`
          this.cl(msg)
 
 this.sendTradeStrategy(cis.tradingsymbol,e4,cis.lot_size,'daily range break out')
@@ -4688,7 +4734,7 @@ this.sendTradeStrategy(cis.tradingsymbol,e4,cis.lot_size,'daily range break out'
   break;
 
 
-  case yesterDayCloseStrategy :
+  case (yesterDayCloseStrategy && buying) :
 
   specialCheck=this.specialChecks(element,cis,'FROM YDAY HIGH STRATEGY');
 
@@ -4737,7 +4783,7 @@ this.sendTradeStrategy(cis.tradingsymbol,e3,cis.lot_size,'yesterDayCloseStrategy
 
 
 
-  case todayLastPriceHigh:
+  case (todayLastPriceHigh && buying):
 
 
   
@@ -4778,7 +4824,7 @@ this.proceedForEntry(
   
 
 
-  case todayLastPriceClosing:
+  case (todayLastPriceClosing && buying):
 
   (Math.abs(element.ohlc.low-element.last_price)> (cis.pricePoints.d1.high-cis.pricePoints.d1.low)*2)
   {
@@ -4817,7 +4863,7 @@ this.proceedForEntry(
 
 
 
-case isOpenLow:
+case (isOpenLow && buying):
 
 
 specialCheck=this.specialChecks(element,cis);
@@ -4855,7 +4901,7 @@ break;
 
 
 
-case  (closingMovingAverageCondition && false):
+case  (closingMovingAverageCondition && false && buying):
 
 this.cl('closingMovingAverageCondition')
 
@@ -5942,6 +5988,8 @@ if(reverseOrder==true){
         else {
           order.variety = "regular";
         }
+
+
       } else if (exchange == this.itype) {
         if (
           (this.hours == 23 && this.minutes >= 30) ||
@@ -5955,7 +6003,7 @@ if(reverseOrder==true){
         }
       }
 
-       order.variety = "regular";
+      //  order.variety = "regular";
 
 this.cl(this.hours,'hours');
 
@@ -5977,6 +6025,12 @@ order.variety = "AMO";// prevent buy am
 
       }
 
+
+      if(this.hours>9 || (this.hours==9 && this.minutes>15)){
+
+        order.variety = "regular";
+
+      }
      
 
       order.params = {};
@@ -7139,7 +7193,7 @@ let ts=cis.tradingsymbol;
       const { hours, minutes } = this;
       
       // Opening Period: 9:15 AM to 10:00 AM IST
-      if (hours === 9 && minutes >= 15 && minutes < 60) {
+      if (hours === 9 && minutes >= 15 ) {
         return false;
       }
 
@@ -7195,6 +7249,11 @@ return false;
 }
 
     let sideWisetime=this.checkSidewaysMovementTime();
+
+    if( sideWisetime){
+this.cl('no sl in side wiseß ')
+      return false;
+    }
 
       /// gapped up yesteddays high then going below 5% of yesterddays high stop loss
 
@@ -7389,7 +7448,7 @@ let bestBuyOffer=sells[0].price;
 
         
 
-        case exitNow:
+        case this.exitNow:
 
         // if(lp.quantity>0)
 
@@ -7494,7 +7553,7 @@ break;
 
 
 
-        case  squareoffDuringSideWise:
+        case  squareoffDuringSideWise && false:
 
 
        

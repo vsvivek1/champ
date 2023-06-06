@@ -118,6 +118,13 @@ await this.getPositions();
 
                 let pos=this.livePositions.find(i=>i.instrument_token==e.instrument_token);
 
+                if(typeof pos=='undefined'){
+
+                  return false;
+                }
+
+                // console.log({pos},'pos')
+
                 let entryPrice;
 
 
@@ -387,10 +394,12 @@ entryPrice=pos.sell_price
 
       targetPoint=target;
       
-      
+      let lo=this.livePositions.find(i=>i.instrument_token==instrument_token)
+
+      console.log(lo,'lo lo  lo')
      if (quantity>0) {
        try {
-           let lo=this.livePositions.find(i=>i.instrument_token==instrument_token)
+       
            let avg=lo.buy_price;
  
  
@@ -402,11 +411,16 @@ entryPrice=pos.sell_price
          
          ){
        
-           tgt1=avg*2.5;
+           tgt1=avg*2.5
+
+           targetPoint=Math.min(tgt1,uck-.1)
+           
        
          }else{
        
-            tgt1=avg*2;
+            tgt1=avg*1.3
+            targetPoint=Math.min(tgt1,uck-.1)
+           
        
          }
  
@@ -414,6 +428,7 @@ entryPrice=pos.sell_price
  if(avg<=cis.pricePoints.d1.low){
  
    tgt1=cis.pricePoints.d1.high*99;
+   targetPoint=Math.min(tgt1,uck-.1).toFixed(1)
  
  
  }
@@ -427,7 +442,7 @@ entryPrice=pos.sell_price
  
  
  
-         targetPoint=Math.min(tgt,uck);
+         targetPoint=Math.min(tgt,uck).toFixed(1);
        
        } catch (error) {
        
@@ -442,13 +457,17 @@ entryPrice=pos.sell_price
       
 
 /// setting targets for sell quantity
+
+let avg=entryPrice;
 if(quantity<0){
 
   transaction_type='BUY';
 
   try {
-    let lo=this.livePositions.find(i=>i.instrument_token==instrument_token)
-    let avg=lo.sell_price;
+
+
+  
+     avg=lo.sell_price;
   
   let tgt1
   if((this.hours==15 && this.minutes>30)|| this.hours>15 || this.hours<9 || (this.hours==9 && this.minutes<15)
@@ -456,21 +475,25 @@ if(quantity<0){
   ){
   
     tgt1=avg/2
+
+    targetPoint=Math.max(tgt1,lck+.1).toFixed(1)
+    
   
   }else{
   
      tgt1=avg/2
+     targetPoint=Math.max(tgt1,lck+.1).toFixed(1)
   
   }
   
-  let tgt=tgt1.toFixed(1)
+  // let tgt=tgt1.toFixed(1)
   
   
   // this.cl(uck,'uck');
   
   
   
-  targetPoint=tgt
+  // targetPoint=tgt
   
   } catch (error) {
   
@@ -514,7 +537,13 @@ if(quantity<0){
 
       let {d0,d1}=cis.pricePoints;
 
-      if(quantity>0){
+      let overnight_quantity=lo.overnight_quantity;
+
+  
+
+
+
+      if(quantity>0  && overnight_quantity==0  ){
 
 
 
@@ -560,9 +589,24 @@ if(quantity<0){
 
         targetPointFinal=Math.min(targetPoint,uck-.1)
 
-      }else if(quantity<0){
+      } 
+      
+      if(quantity>0  && overnight_quantity!=0  ){
 
-        targetPointFinal=Math.max(targetPoint,lck+.1)
+        console.log(overnight_quantity,'overnight_quantity',quantity)
+        targetPoint=(avg*2.5).toFixed(1);
+
+
+
+        targetPointFinal=Math.min(targetPoint,uck-.1).toFixed(1)
+
+      }
+      
+      
+      
+      else if(quantity<0){
+
+        targetPointFinal=Math.max(targetPoint,lck+.1).toFixed(1)
 
       }
       
