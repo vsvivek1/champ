@@ -55,6 +55,7 @@ if(typeof yesterdayData!='object'){
       yesterDay.high = yesterdayData.high;
       yesterDay.close = yesterdayData.close;
       yesterDay.open = yesterdayData.open;
+      yesterDay.volume = yesterdayData.volume;
 
       yesterDay.range = Math.abs(yesterdayData.high - yesterdayData.low);
 
@@ -992,6 +993,8 @@ return new Promise.resolve({});
 	    });
 	
 	
+      // console.log(b);
+      // return;
 	
 	    let sorted = b.sort((a, b) => {
 	

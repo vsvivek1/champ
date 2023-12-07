@@ -15,11 +15,11 @@ const scriptDirectory = Path.dirname(process.argv[1]);
 const FILE_LOCATION = Path.join(scriptDirectory, 'appv3', 'public', 'instruments');
 
 
-let ce_upper_percentage=1.04;
-let ce_lower_percentage=1.01;
+let ce_upper_percentage=1.02;
+let ce_lower_percentage=1;
 
-let pe_upper_percentage=.99;
-let pe_lower_percentage=.96;
+let pe_upper_percentage=1;
+let pe_lower_percentage=.98;
 const TIMER =200 ;
 let today = new Date().toISOString().slice(0,10)
 
@@ -108,13 +108,15 @@ const pricePoint = require('./pricePoints');
 
 const ZerodhaAPI = require('./ZerodhaAPI');
 
-const ohlc = require('./scraping/ohlc')
+const ohlc = require('./scraping/ohlc');
+const { getNextThursday } = require('./getNextThursday.js');
 // let today = new Date().toISOString()//.slice(0, 10);
 // const fetchInstrumentsForNewMint=require('./FetchInstrumentsForNewMint.js')
 
 const instruAll = FILE_LOCATION+'/instrumentsAll.json';
 
 const EXPIRY = getCurrentExpiryDate();
+console.log(EXPIRY,'EXPIRY')
 
 
 
@@ -183,7 +185,9 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	  csvresult.filter(j => (
 	    (
 	      
-	      j.exchange == 'NFO' && j.expiry == EXPIRY
+	      j.exchange == 'NFO' && (j.expiry == EXPIRY 
+			// || j.expiry == getBankNiftyExpiry()
+		  ) 
 	      
 	   
 	      )
@@ -296,8 +300,13 @@ async function fetchInstrumentsForMining(accessToken) {try {
 
 
 	    let instruments1 = require(FILE_LOCATION+'/instruments.json');
-	    let instruments = instruments1//.slice(0,10)
-	    let strikes1 = await getNearestStrikes_unoptimized(ohlcs, instruments)//.slice(1,50);
+	    let instruments = instruments1.filter(i=>(i.tradingsymbol.includes('NIFTY'))
+		|| i.tradingsymbol.includes('BANKNIFTY')
+		
+		)//.slice(0,10)
+	    
+		
+		let strikes1 = await getNearestStrikes_unoptimized(ohlcs, instruments)//.slice(1,50);
 	
 
 		let strikes=strikes1//.slice(1,100);
@@ -509,7 +518,7 @@ async function fetchInstrumentsForMining(accessToken) {try {
 	    jsonObjWithOutCriteria.push(niftyfut);
 	
 	
-	    let bankniftyfut = instruForFuture.filter(i => i.name == 'BANKNIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT")[0];
+	    let bankniftyfut = instruForFuture.filter(i => i.name == 'BANKNIFTY' && i.expiry == getBankNiftyExpiry() && i.instrument_type == "FUT")[0];
 	
 	
 	
@@ -1359,15 +1368,27 @@ async function attachMIsPricePoints(jsonObj2, accessToken) {
   })
 }
 
+
+function getBankNiftyExpiry(){
+
+	let {bankNifty}=getNextThursday();
+
+	return bankNifty;
+}
 function getCurrentExpiryDate() {
 
 
 	// const moment = require('moment');
 
 	
+
+
+	return '2023-12-06'
+let {nifty} =getNextThursday();
+return nifty;
 // let m=moment();
 
-return "2023-06-29";
+return "2023-11-02";
 	
 	const lastThursday = getLastThursdayOfMonth(m);
 	console.log(`Last Thursday of the month: ${lastThursday}`);

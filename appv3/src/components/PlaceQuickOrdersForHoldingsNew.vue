@@ -311,7 +311,7 @@
               }}</v-chip>
             </td>
 
-            <td v-if="holding.targets.level">
+            <td v-if="holding.targets.level.ressistance">
               Resistance
               {{ holding.targets.level.ressistance.high }}
             </td>
@@ -914,7 +914,7 @@ if(typeof orderUpdates=='undefined'){
 
       axios.post(url, data).then((res) => {
         // console.log('result')
-        this.$router.push("/orders");
+        // this.$router.push("/orders");
       });
     },
     PlaceTargetR2() {
@@ -973,7 +973,7 @@ if(typeof orderUpdates=='undefined'){
 
       axios.post(url, data).then((res) => {
         // console.log('result')
-        this.$router.push("/orders");
+        // this.$router.push("/orders");
       });
     },
 
@@ -1096,7 +1096,7 @@ if(typeof orderUpdates=='undefined'){
       // console.log('mapy',data); //return false;
 
       axios.post(url, data).then((res) => {
-        this.$router.push("/orders");
+        // this.$router.push("/orders");
 
         // console.log('result')
       });
@@ -1429,7 +1429,7 @@ if(typeof orderUpdates=='undefined'){
             o
           );
         });
-        this.$router.push("/orders");
+        // this.$router.push("/orders");
 
         // console.log('result')
       });

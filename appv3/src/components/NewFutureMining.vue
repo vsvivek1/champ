@@ -1,7 +1,8 @@
 <template>
   <div>
 
-
+    <!-- <v-btn color="red" prominent @click="exitAll()"> Exit all</v-btn> -->
+    <v-btn color="red" prominent @click="exitPositions()"> Exit all</v-btn>
 
     <p v-if="liveMargin && liveMargin.equity && liveMargin.equity.utilised && liveMargin.equity.utilised.debits">
 
@@ -19,7 +20,7 @@ ACTION TIME
       </v-alert>
 
 
-      <v-btn color="red" prominent @click="exitAll()"> Exit all</v-btn>
+    
  
       Margin: {{ liveMargin.equity.utilised.margin }}
      TOTAL OPTION PRICE: {{ totalOptionPrice }}
@@ -145,7 +146,7 @@ ACTION TIME
     </v-chip>
 
 
-    <v-btn @click="updateSelectedSellorderWithLtp()">Update Sell orders with LTP </v-btn>
+    <v-btn @click="trailingStopLossWithLtp()">TRAILING STOP LOSS </v-btn>
 
     <v-row class="mt-1">
       <v-col>
@@ -536,17 +537,20 @@ ACTION TIME
 
 <script>
 
-
 import { tradingMixin } from './tadingMixin';
-import {placeTargetsForLiveScripts} from './placeTargetsForLiveScripts';
+import { placeTargetsForLiveScripts } from './placeTargetsForLiveScripts';
+import moment from 'moment';
+import axios from 'redaxios';
+import sessionMixin from "@/views/sessionMixin";
+// import {placeTargetsForLiveScripts} from './placeTargetsForLiveScripts';
 import VueGoodTable from "vue-good-table";
 import "vue-good-table/dist/vue-good-table.css";
+import newFutureMiningMixin from './newFutureMiningMixin';
 
 
 import store from '@/store';
  import LogWindow from './LogWindow.vue';
 // let moment = require("moment");
-import moment from 'moment';
  import { io } from "socket.io-client";
 //import io  from "vue-socket.io"
 
@@ -554,12 +558,10 @@ import Margin from '@/components/Margin.vue'
 import Messages from '@/components/Messages.vue'
 import IronCondor from '@/components/IronCondor.vue'
 // import axios from "axios";
-import axios from 'redaxios';
-import sessionMixin from "@/views/sessionMixin";
 //import ThemeSwitcherVue from "../../../../theme/materio-free-v1.0.2/materio-vuetify-vuejs-admin-template-free/materio-vuetify-vuejs-admin-template-free-main/src/layouts/components/ThemeSwitcher.vue";
 //import TypographyTextsVue from "../../../../theme/materio-free-v1.0.2/materio-vuetify-vuejs-admin-template-free/materio-vuetify-vuejs-admin-template-free-main/src/views/typography/TypographyTexts.vue";
 
-const socket = io("http://127.0.0.1:4000"
+export const socket = io("http://127.0.0.1:4000"
 
 ,
 {
@@ -582,8 +584,8 @@ socket.on("connect_error", (err) => {
 
 // this.cl(socket,'start')
 
-var comF = "instrumentsForCommodity.json";
-var shareF = "instrumentsForMining.json";
+export var comF = "instrumentsForCommodity.json";
+export var shareF = "instrumentsForMining.json";
 // var shareF = "instrumentsAll.json";
 var NFOX = "NFO";
 var MCXX = "MCX";
@@ -611,9 +613,9 @@ import IndicesTable from "./IndicesTable.vue";
 
 
 
-var hourlyPricePointsofLiveDay1 ;
+export var hourlyPricePointsofLiveDay1 ;
 
-var instruments;
+export var instruments;
 
 
 // var hourlyPricePointsofLiveDay1 =
@@ -621,7 +623,6 @@ var instruments;
 
 var cl;
 
-import newFutureMiningMixin from './newFutureMiningMixin';
 // import { timingSafeEqual } from 'crypto';
 
 export default {
@@ -637,6 +638,7 @@ mounted(){
   const originalLog = console.log;
 
     // Define a new console.log function that writes to the logs array
+
     console.log = (...args) => {
       const message = args.join(' ');
       this.logs.push(message);
@@ -647,7 +649,7 @@ mounted(){
 
   setInterval(()=>{
 
-this.updateSelectedSellorderWithLtp();
+this.trailingStopLossWithLtp();
 
   },60*1000)
 
@@ -823,7 +825,7 @@ if(this.hours==15){
              this.cl(misOrderids, "CANCENLLING MIS ORDERS AFTER 3 PM PLS CHECK");
      
      if (misOrderids.length > 0) {
-       this.CancelOrders(misOrder_ids);
+       this.CancelOrders(misOrderids);
      }
 
              
@@ -833,6 +835,24 @@ if(this.hours==15){
 
           
          }, 60 * 1000);
+
+
+
+         let oneSecTimer=setInterval(()=>{
+
+          var d = new Date();
+           this.hours = d.getHours();
+           this.minutes = d.getMinutes();
+           this.seconds = d.getSeconds();
+
+         if(this.seconds==55){
+
+          this. getOneMinuteData()
+
+          console.log('ohlc data at 53 sec',this.ohlcData)
+         } 
+
+         },1000)
      
          let placingTimer = window.setInterval(async () => {
      
@@ -854,10 +874,10 @@ if(this.hours==15){
              this.webSocketNotActive = false;
            }
            this.laggingCheckDigit = this.CurrentCheckDigit;
-           var d = new Date();
-           this.hours = d.getHours();
-           this.minutes = d.getMinutes();
-           this.seconds = d.getSeconds();
+          //  var d = new Date();
+          //  this.hours = d.getHours();
+          //  this.minutes = d.getMinutes();
+          //  this.seconds = d.getSeconds();
      
            let times=[17,47,37,2]
                 
@@ -992,7 +1012,11 @@ if(this.hours==15){
     let orderTotal = -1;
 
     if (this.livePositions && this.livePositions.length > 0) {
-      positionTotal = this.livePositions.filter(lp=>lp.instrument.segment=='NFO-OPT').
+      positionTotal = this.livePositions
+      
+      // .filter(lp=>lp.instrument.segment=='NFO-OPT')
+      
+      .
       
       reduce((total, position) => {
         const { buy_price, price, quantity } = position;
@@ -1155,6 +1179,62 @@ if(typeof this.livePositions =='undefined' ){
 
   methods: {
 
+    getOneMinuteData(){
+let intervel='minute';
+      this.getHistoricalData(intervel)
+    },
+
+
+    async getHistoricalData(intervel){
+
+      let start =this.getRequiredTime(9,15);
+       let end =this.getRequiredTime(15,31);
+      //  let intervel='minute';
+      let url="/api/getHistoricalData/symbol/"+ this.symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
+
+// console.log(url)
+let resultPromise= await  axios.get(url);
+
+this.ohlcData=resultPromise.data;
+
+    },
+   
+
+    exitPositions(){
+
+this.exitNow=true;
+      setTimeout(()=>{
+
+        this.exitNow=false;
+
+      },1000* 25)
+      this.exitNow=true;
+
+
+    },
+
+
+    async  saveTrigger(date, tradingSymbol, entryPrice, exitPrice, entryType, sellTime, triggerName) {
+  try {
+    const response = await axios.post('/api/triggers', {
+      date,
+      tradingsymbol: tradingSymbol,
+      entryPrice,
+      exitPrice,
+      entryType,
+      sellTime,
+      triggerName
+    });
+    
+    console.log(response.data.message); // Display success message
+    
+    // Perform any additional actions after successful save
+    
+  } catch (error) {
+    console.error('Failed to save trigger:', error);
+    // Handle error case
+  }
+},
    async  exitAll(){
 
     // await this.getPositions();
@@ -1171,8 +1251,9 @@ if(!y){
 let livePositionsInstrumentTokens=this.orders.map(i=>i.instrument_token)
 
 
-let quotes=this.getQuoteFromZerodha(livePositionsInstrumentTokens);
+let quotes=await this.getQuoteFromZerodha(livePositionsInstrumentTokens);
 
+this.cl('quoyes from exit all',quotes)
 
 this.newOrder=
 this.orders.map(
@@ -1204,14 +1285,18 @@ this.orders.map(
 
 let cis=this.instruments.find(i=>i.instrument_token==o.instrument_token);
 
-if(o.trasaction_type=="SELL"){
+if(o.transaction_type=="SELL"){
+
+
 
 let bestBuyOffer=quotes[o.instrument_token].depth.buy[0];
+
+this.cl('trouble shooting depth', bestBuyOffer)
 params.price =bestBuyOffer;
 
 console.log(bestBuyOffer,'bestBuyOffer',cis.tradingsymbol)
 // params.trigger_price =bestBuyOffer
-}else if(o.trasaction_type=="BUY"){
+}else if(o.transaction_type=="BUY"){
 
 
 
@@ -1229,7 +1314,7 @@ params.price =bestSellOffer
  ob.params = params;
 
  // this.cl('o',o)
-//  return ob;
+return ob;
 
  } );
     
@@ -1237,6 +1322,8 @@ params.price =bestSellOffer
 
   // this.updateOrder();
 
+
+  this.cl('new order this.newOrder from exit all ', this.newOrder)
 
 
 
@@ -2486,11 +2573,11 @@ price=element.last_price;
   }
 },
 
-  async   updateSelectedSellorderWithLtp(){
+  async   trailingStopLossWithLtp(){
 
       
 
-    this.cl('FROM UPDATE SELECTED SELL ORDERS WITH LTP')
+    this.cl('TSL FROM TRAILING STOP LOSS')
       await this.getOrders();
       await this.getPositions();
 
@@ -2504,9 +2591,9 @@ lo.status=='CANCELLED' ||
 lo.status=='CANCEL PENDING' 
 )
 
+st=lo.status=='OPEN';
 
-
-return !st;
+return st;
 
 }
 
@@ -2516,172 +2603,126 @@ return !st;
 )
 
 
+this.cl('TSL FROM TRAILING STOP LOSS validOrders',validOrders.length)
 
-const count = this.livePositions.filter(pos => pos.pnl > 2000).length;
-console.log(`Number of positions with PnL greater than 2000: ${count}`);
+
+const count = this.livePositions.filter(pos => pos.pnl > 1000).length;
+console.log(`TSL Number of positions with PnL greater than 2000: ${count}`);
+
 this.newOrder =
-// this.liveOrders.filter(o=> o.transaction_type=="SELL").map(i=>{
+
+  
+  
   validOrders.filter(o=> o.transaction_type=="SELL").map(i=>{
 
 
+
+
+
 let lp =this.livePositions.find(j=>j.instrument_token==i.instrument_token)
-let cis=this.instruments.find(k=>i.instrument_token==i.instrument_token);
-if(typeof lp== 'undefined'){
+let cis=this.instruments.find(k=>k.instrument_token==i.instrument_token);
 
-  this.cl('INSTRUMENT NOT FOUND IN VALID POSTIONS WTF ',cis.tradingsymbol);
+this.cl('TSL 1')
+if(typeof lp== 'undefined' || typeof cis=='undefined'){
 
-  return ;
-}
-
-
-
-
-
-let {d0}=cis.pricePoints;
-
-let d0High=d0.high;
-
-let febprice=d0High-(Math.abs(d0.open-d0.high)*(1-.25));
-
-// console.log(cis.last_price,'cis.last_price @ 2378')
-
-
-// console.log(lp.last_price,cis.tradingsymbol,'lp_last_price @2381')
-
-let refPrice;
-if(cis.last_price!=0)
-{
-   refPrice=Math.min(febprice,cis.last_price*.95);
-
-}
-
-
-
-
-if(typeof refPrice=='undefined'){
+  // this.cl('TSL INSTRUMENT NOT FOUND IN VALID POSTIONS WTF ',cis.tradingsymbol);
 
   return ;
 }
 
-const reducedPrice = (refPrice ).toFixed(1);
+this.cl('TSL 2')
 
 
-//changing trailing  stop loss price to below fibanoci retracement price of 23.6 %
-let currentStopLossPrice=i.price;
-    let proposedSopLossPrice=reducedPrice;
-
-  let inRange=false;
-  if(i.status=='TRIGGER PENDING'){
-
-    let inRange=true;
-  
-
-    if(
-      // proposedSopLossPrice>=currentStopLossPrice*.95 &&
-      proposedSopLossPrice<currentStopLossPrice
-      
-      ){
-/// measns new sl price based on ltp is less than curent stop loss /// means do not modify
+if(lp.pnl<500 || cis.last_price==0){
 
 
-        inRange=true
-
-        return false;
-
-      }else{
-
-        inRange=false
-      }
+  this.cl('either pnl less than 1000 or last pri e 0',lp.pnl,cis.last_price)
+  return ;
+}
 
 
-    console.log(i.tradingsymbol,'order in range is is',inRange,
-    
-    'that is ',proposedSopLossPrice,'is less than higher range of ',currentStopLossPrice*1.04,' and current stop loss is',
-    currentStopLossPrice
+let proposedStopLoss;
 
-    )
-  
+let currentSellOrderPrice=i.price;
+
+if(i.status=='TRIGGER PENDING'){
 
 
-  }
+  console.log('has current triger')
 
+// already have stop loss
 
+/// modify if new proposed stop loss is greater than current one
+proposedStopLoss=cis.last_price*.9;
 
-if(lp.pnl>1500){
+if(i.price< proposedStopLoss*.95){
 
-
-  if(i.status=='TRIGGER PENDING'){
-
-    /// code for updating
-
-    if(proposedSopLossPrice>=(currentStopLossPrice*1.1)){
-      let o={};
-   
-   o.variety='regular';
-   o.order_id=i.order_id;
-   let params={};
-     params.price=proposedSopLossPrice
-
-params.trigger_price=proposedSopLossPrice
-params.order_type="SL"
-   o.params=params;
-
-
-  //  console.log(lp.tradingsymbol,lp.pnl,o)
- 
-   return o;
-
-
-    }
-
-
-    // return false;
-
-  }
-
-/// rest code for fresh sl 
-
-let {buy_price,buy_quantity,pnl}=lp;
-
- 
-
-let o={};
-   
+  // console.log('proposed sgoploss is TSL',proposedSopLossPrice)
+  let o;
     o.variety='regular';
     o.order_id=i.order_id;
     let params={};
-      params.price=proposedSopLossPrice
+      params.price=proposedSopLossPrice.toFixed(1)
 
-params.trigger_price=proposedSopLossPrice
+params.trigger_price=proposedSopLossPrice.toFixed(1)
 params.order_type="SL"
     o.params=params;
 
 
-    this.cl('PLACING STOP LOSS FOR GAIN ',)
+    this.cl('PLACING STOP LOSS FOR GAIN  ',)
 
     // console.log(lp.tradingsymbol,lp.pnl,o)
   
     return o;
 
- 
+}
+
+ return;
+}else{
+
+
+
+  console.log('NO current triger')
+
+/// no trigger
+let o;
+
+proposedSopLossPrice=cis.last_price*.9
+o.variety='regular';
+    o.order_id=i.order_id;
+    let params={};
+      params.price=proposedSopLossPrice.toFixed(1)
+
+params.trigger_price=proposedSopLossPrice.toFixed(1)
+params.order_type="SL"
+    o.params=params;
+
+
+    this.cl('PLACING STOP LOSS FOR GAIN  ',)
+
+    // console.log(lp.tradingsymbol,lp.pnl,o)
+  
+    return o;
+
+
+
 }
 
 
-}).filter(k=>k!=null);
 
 
 
- console.log(this.newOrder.length,'new order length')
 
 
- let t = await this.getOrders();
+          }).filter(i=>i!=null);
+
+          let t = await this.getOrders();
+
+this. cl('Bumber of new orders :',this.newOrder.length,this.newOrder)
 
 
-  this.updateOrder();
-
-
-
-          },
+this.updateOrder();
+        },
 
 
 
@@ -4148,11 +4189,72 @@ isBetween(n1, n2, n3) {
   }
   return false;
 },
+
+triggers(element,cis){
+  let currentDate = moment().format('YYYY-MM-DD');
+
+
+let {tradingSymbol,pricePoints}=cis;
+let {d1,d0}=pricePoints;
+
+
+let {volume:d1Volume}=d0;
+
+// let {d1,d0}=d1;
+
+let {ohlc,last_price,volume_traded:d0Volume_traded}=element;
+
+let {open:d0Open,high:d0High,low:d0Low,close:d0Close}=ohlc;
+
+if(typeof element.depth=='undefined'){
+
+  return;
+}
+
+let buyersHighestPrice=element.depth.buy[0].price;
+let sellersLowestPrice=element.depth.sell[0].price;
+
+let entryPrice=sellersLowestPrice;
+  let exitPrice =-1;
+  let triggerName,entryType,sellTime;
+switch(true){
+
+ 
+
+  case last_price>d1.high && d0High<d1.high*1.1 && d0Volume_traded>d1Volume:
+
+  triggerName='ydayHighWithVolume';
+  entryType='long';
+  entryPrice=sellersLowestPrice;
+  sellTime=0;
+
+
+  // this.saveTrigger(currentDate, tradingSymbol, entryPrice, exitPrice, entryType, sellTime, triggerName)
+
+  break;
+
+
+}
+
+
+ 
+
+},
+
     tradeEntry(instrument_token,inst=cis,cis,element){
       try {
 
 
-        var buying=false;
+
+        this.triggers(element,cis);
+        
+
+
+
+
+        // 
+
+        var buying=true;
         var selling=true;
         const lastTradedDate = new Date(element.last_traded_time);
 
@@ -4226,15 +4328,15 @@ for (let i = 0; i < depthBuy.length; i++) {
 
 
 
-if(isBefore15Minutes){
+// if(isBefore15Minutes){
 
 
-  this.cl('LAST TRADED TIME IS BEFORE 15 MINUTES IGNORING TRADE ENTRY DUR TO LIQUIDITY ISSUE FOR',cis.tradingsymbol,'traded before ',timeDiffInMinutes,' minutes');
+//   this.cl('LAST TRADED TIME IS BEFORE 15 MINUTES IGNORING TRADE ENTRY DUR TO LIQUIDITY ISSUE FOR',cis.tradingsymbol,'traded before ',timeDiffInMinutes,' minutes');
 
-  return false;
+//   return false;
 
 
-}
+// }
 
 if( this.totalOptionPrice &&
 
@@ -4243,9 +4345,9 @@ if( this.totalOptionPrice &&
 this.totalOptionPrice!=-2 
 
 &&
-this.totalOptionPrice>200000){
+this.totalOptionPrice>300000){
 
-  this.cl('DEBITS MORE THAN 200000 NO TRADING FURTER');
+  this.cl('DEBITS MORE THAN 100000 NO TRADING FURTER');
 
   return false;
 }
@@ -4481,11 +4583,12 @@ element.last_price<element.ohlc.high*1.01 && element.last_price>element.ohlc.hig
 
 
 let shortGapUpOpen=(
-  this.hours==9 //&& this.minutes<17 && this.minutes>15 // trigger only at 9:16
+  // this.hours==9 //&& this.minutes<17 && this.minutes>15 // trigger only at 9:16
     
-    && (element.ohlc.open>element.ohlc.close*2  || element.last_price>element.ohlc.close*2.5 ) //open 1.5 times greater than yesterdays close price
+    // && 
+    (element.ohlc.open>element.ohlc.close*2  || element.last_price>element.ohlc.close*2.5 ) //open 1.5 times greater than yesterdays close price
   
-    && element.ohlc.open!=0 
+    && element.ohlc.open!=0  && false
     
     // && d1.high!=d1.low
 
@@ -4538,7 +4641,7 @@ this.isBetween(cis.pricePoints.d1.close,element.ohlc.open,cis.pricePoints.d1.ope
 // newTradingObj.buyTime=new Date();
 // newTradingObj.buyPrice=Math.min(secondLowestOrdersPrice,element.last_price);
 
-this.cl('REACEHED AT LINE 4344')
+
 
 
 // let noOfOptionsOfScript=this.livePositions.
@@ -4586,12 +4689,12 @@ element.ohlc.high<=element.last_price
 if(dailyRangeBreakOut)
 {
 
-  this.cl('DAILY RANGE BREAK OUT AFTER 11 OF ',ts,'AT ',element.last_price,'TIME',this.hours,':',this.minutes)
+  // this.cl('DAILY RANGE BREAK OUT AFTER 11 OF ',ts,'AT ',element.last_price,'TIME',this.hours,':',this.minutes)
 }
 
 if(element.last_price<1){
 
-  this.cl(' NO TRADING IN SCRIPT PRICE LESS THAN 1 RS',ts)
+  // this.cl(' NO TRADING IN SCRIPT PRICE LESS THAN 1 RS',ts)
 
 return ;
 }
@@ -4630,7 +4733,7 @@ if(this.checkSidewaysMovementTime() ){
 
 this.cl('NO TRADING TIME SIDE WISE TIME')
 
-return false;
+// return false;
 }
 
 
@@ -4642,22 +4745,237 @@ let sells=element.depth.sell;
 // this.cl(sells[0].price,sells[sells.length-1].price,'sells',cis.tradingsymbol,'last price',element.last_price);
 
 
-let bestSellOffer=sells[0].price;
+let bestSellOffer=sells[0].price
 let bestBuyOffer=buys[0].price;
 
+
+if(bestBuyOffer>element.last_price){
+
+
+  // this.cl('BUY OFFER GREATER THAN LAST PRICE DEMAND FOR',cis.tradingsymbol);
+}
+
+
+this.cl('REACEHED  BEFORE TRADE ENTRY SWITCH 4687',element.last_price>element.ohlc.close*2)
+
+
+let buyersHighestPrice=element.depth.buy[0].price;
+let sellersLowestPrice=element.depth.sell[0].price;
+ 
+
+
+//  {d1}=cis.pricePoints;
+
+ d2Body=Math.abs(d2.close-d2.open);
+
+ let body=Math.abs(d1.close-d1.open)
+ let upper=Math.abs(Math.max(d1.close,d1.open)-d1.high);
+ let lower=Math.abs(Math.min(d1.close,d1.open)-d1.low);
+
+
+//thudakkam
+
+// return false;
+
+selling=true;
+
+let e=element;
+// if(element.last_price>cis.pricePoints.d0.high &&  element.volume_traded>cis.pricePoints.d1.volume*6/7){
+
+//   this.cl(element.last_price>cis.pricePoints.d0.high &&  element.volume_traded>cis.pricePoints.d1.volume
+  
+//   ,'element.last_price>cis.pricePoints.d0.high  @ ',cis.tradingsymbol,'ltp',element.last_price,element.volume_traded,cis.pricePoints.d1.volume)
+// }
+
+
+// console.log(cis.pricePoints.d1.volume ,'cis.pricePoints.d1.volume');
+
+// this.cl('element.volume_traded>cis.pricePoints.d1.volume',element.volume_traded,cis.pricePoints.d1.volume);
+
+// return;
+
+// let d2Body=Math.abs(d2.close-d2.open);
+
+// let body=Math.abs(d1.close-d1.open)
+// let upper=Math.abs(Math.max(d1.close,d1.open)-d1.high);
+// let lower=Math.abs(Math.min(d1.close,d1.open)-d1.low);
+
+
+if(this.exitNow){
+
+
+  this.cl('NO ENTRY DURING EXIT SWITH IS ON ')
+  return false
+}
+
+
+
+let NoTradeForLtpBelowOpenPrice=element.last_price<e.ohlc.open;
+
+this.cl('reached thudakkam switch');
+
+if(this.liveMargin.equity.utilised.option_premium>30000){
+
+  return false;
+}
+
+
+// this.cl(
+//  ` element.last_price>=cis.pricePoints.d0.high   /// break todays high at reference time
+  
+//   && element.ohlc.high<cis.pricePoints.d0.high*1.1
+  
+
+// //  &&  element.last_price>element.ohlc.open  /// buying only stocks above open
+  
+//   &&  ((element.last_price-element.ohlc.open)*cis.lot_size)<2500   // even if it broke just check  whether it have moved too much  this is the stopo loss  open is the stop loss
+  
+
+//   && element.volume_traded>cis.pricePoints.d1.volume && cis.pricePoints.d1.volume!=0   //  have a volume greater than yesterday
+
+
+
+//   && element.ohlc.open<element.last_price   /// must be above todays open price 
+
+
+//   // && cis.pricePoints.d0.high>element.ohlc.high  what is this 
+
+//   && body>upper*1.5   ///yesterdays bodys must be greater than atleast 1.5 times  upper shadow
+
+//   && d2Body>body   /// yesterdays body less than   day befores yesterdays body
+//   && d2.high<d1.high "`,
+
+
+//   element.last_price,cis.pricePoints.d0.high  ,(element.last_price-element.ohlc.open)*cis.lot_size,body,upper,d2Body
+
+// ,cis.tradingsymbol
+// );
 
 switch(true){
 
 
 
 
-  case element.last_price>element.ohlc.close*2.5 && selling:
+  case 
+  
+  
+  (
 
-let entry250HiPriceForShort=Math.max((element.ohlc.close*2.5).toFixed(1),element.last_price);
+  element.ohlc.high<cis.pricePoints.d1.high && /// has not crossed yesterday high previosly
+    
+  element.last_price>=cis.pricePoints.d1.high   /// break todays high at reference time
+  
+  // && element.ohlc.high<cis.pricePoints.d0.high*1.1
+  
+
+//  &&  element.last_price>element.ohlc.open  /// buying only stocks above open
+  
+  // &&  ((element.last_price-element.ohlc.open)*cis.lot_size)<2500   // even if it broke just check  whether it have moved too much  this is the stopo loss  open is the stop loss
+  
+
+  // && element.volume_traded>cis.pricePoints.d1.volume && cis.pricePoints.d1.volume!=0   //  have a volume greater than yesterday
 
 
 
-this.cl('SHORTING FOR last price higher than 2.5 times y day  close ',ts ,'AT ',entry250HiPriceForShort)
+  && element.ohlc.open<cis.pricePoints.d1.high   /// must be above todays open price 
+
+
+  // && cis.pricePoints.d0.high>element.ohlc.high  what is this 
+
+  && body>upper*1.5   ///yesterdays bodys must be greater than atleast 1.5 times  upper shadow
+
+  && d2Body>body   /// yesterdays body less than   day befores yesterdays body
+  && d2.high<d1.high /// d2 high less than d1 high 
+
+  // && NoTradeForLtpBelowOpenPrice // no entry below entry
+  
+  ):
+
+
+
+  this.proceedForEntry(
+         instrument_token,
+         cis,
+         element,
+         sellersLowestPrice,
+         "long"
+       );
+this.cl('DO break out with volume greater than yeterday high  ',cis.tradingsymbol)
+
+
+
+  break;
+
+
+
+
+case ( 
+    
+    // e.ohlc.low<d1.low && 
+    // e.ohlc.high> d1.high &&
+
+false &&
+
+    (body<d2Body*2) &&
+
+    element.ohlc.high<d1.high*1.3 && 
+
+    element.last_price>=d1.high && 
+
+    element.ohlc.high!=element.ohlc.open &&
+
+  body>upper && body>lower &&
+    d1.open<d1.close &&
+    e.ohlc.open<d1.close 
+
+   &&
+    e.ohlc.open!=0  
+
+    && sellersLowestPrice<element.last_price*1.2 // to cehck malleciaou trade
+
+    && 
+
+(Math.max(buyersHighestPrice,sellersLowestPrice)- Math.min(buyersHighestPrice,sellersLowestPrice)*100)/Math.min(buyersHighestPrice,sellersLowestPrice) <20
+
+
+///percetage difff between buy price and sell price to prevent mallicious tradees
+    
+
+  
+ 
+    ):
+
+
+    this.cl(`LONG Entry for new tested ALGO  ${ts} Buying for ${sellersLowestPrice}  `)
+this.proceedForEntry(
+         instrument_token,
+         cis,
+         element,
+         sellersLowestPrice,
+         "long"
+       );
+
+
+    break;
+
+
+  case (element.last_price>element.ohlc.close*2 && false):
+  
+  // && selling  //&& element.ohlc.high>element.last_price*1.03
+  
+  // && this.hours>9 || (this.hours==9 && this.minutes>30)
+  
+  // )
+  // :
+
+let entry250HiPriceForShort=Math.max(
+  
+  (element.ohlc.close*2.5).toFixed(1),(element.last_price*1.3).toFixed(1)
+  );
+
+
+
+this.cl(`SHORTING ${ts} FOR last price ${element.last_price} higher than 2.1 times y day  close of ${element.ohlc.close} `,ts ,'AT ',entry250HiPriceForShort)
 this.proceedForEntry(
          instrument_token,
          cis,
@@ -4671,9 +4989,50 @@ break;
 
 
 
+  // case (buyersHighestPrice>element.last_price):
+
+  // this.proceedForEntry(
+  //        instrument_token,
+  //        cis,
+  //        element,
+  //        Math.min(element.last_price),
+  //        "long"
+  //      );
+  // this.cl(' has to buy this :buyersHighestPrice is greater than last price for',cis.tradingsymbol, 'buyersHighestPrice', buyersHighestPrice,' last price', element.last_price)
+  // break;
+
+
+  // case (sellersLowestPrice<element.last_price):
+
+
+  // this.cl(' has to sell this :sellersLowestPrice is less  than last price for',cis.tradingsymbol, 'sellersLowestPrice', sellersLowestPrice,' last price', element.last_price)
+  // break;
+
+
+  case (element.last_price==element.ohlc.high && element.ohlc.high!=element.ohlc.open &&  
+  element.upper_circuit_limit!=element.ohlc.high && false ):
+
+  this.cl('LAST PRICE HIGH BREAK OUT FOR',cis.tradingsymbol)
+
+  this.proceedForEntry(
+         instrument_token,
+         cis,
+         element,
+         Math.min(element.last_price,bestSellOffer),
+         "long"
+       );
+
+  break;
+
+  // &&  element.ohlc.high<element.last_price*1.2
+
+
+
+
+
   case (shortGapUpOpen && selling):
 
-  let entryPriceForShort=Math.max((element.ohlc.close*2.5).toFixed(1),element.last_price);
+  let entryPriceForShort=Math.max((element.ohlc.close*2.5).toFixed(1),(element.last_price*1.2).toFixed(1));
 
 
 
@@ -4689,7 +5048,7 @@ break;
 
   break;
 
-  case (dailyRangeBreakOut && buying): 
+  case (dailyRangeBreakOut && buying && false): 
 
 
    specialCheck=this.specialChecks(element,cis,'FROM DAILY RANGE BRAK OUT');
@@ -4700,7 +5059,7 @@ break;
   }
   
 
-  if(openHigh && buying){
+  if(openHigh && buying &&  false){
 this.cl('OPEN IS HIGH NO TRADE  FOR',cis.tradingsymbol)
   return false
 }
@@ -4734,7 +5093,7 @@ this.sendTradeStrategy(cis.tradingsymbol,e4,cis.lot_size,'daily range break out'
   break;
 
 
-  case (yesterDayCloseStrategy && buying) :
+  case (yesterDayCloseStrategy && buying && false) :
 
   specialCheck=this.specialChecks(element,cis,'FROM YDAY HIGH STRATEGY');
 
@@ -4783,7 +5142,7 @@ this.sendTradeStrategy(cis.tradingsymbol,e3,cis.lot_size,'yesterDayCloseStrategy
 
 
 
-  case (todayLastPriceHigh && buying):
+  case (todayLastPriceHigh && buying && false):
 
 
   
@@ -4824,7 +5183,7 @@ this.proceedForEntry(
   
 
 
-  case (todayLastPriceClosing && buying):
+  case (todayLastPriceClosing && buying && false):
 
   (Math.abs(element.ohlc.low-element.last_price)> (cis.pricePoints.d1.high-cis.pricePoints.d1.low)*2)
   {
@@ -4863,7 +5222,7 @@ this.proceedForEntry(
 
 
 
-case (isOpenLow && buying):
+case (isOpenLow && buying && false):
 
 
 specialCheck=this.specialChecks(element,cis);
@@ -5075,9 +5434,12 @@ try {
 	          )[0].last_price
 	        );
 	        
-	        this.instruments.filter(
+
+          this.instruments.filter(
 	          (i) => i.instrument_token == instrument_token
-	        )[0].last_price = last_price;
+	        )[0].last_price=last_price;
+	      
+  
 	
 	     
 	
@@ -6100,6 +6462,8 @@ order.variety = "AMO";// prevent buy am
     },
 
     async placeOrder(orderArray) {
+
+      return
       const url = "/api/PlaceTarget"; //temporary change
 
       // orderArray.forEach(e=>{
@@ -6683,12 +7047,12 @@ break;
         // );
 
         // this.liveTradablebalance > 0 &&
-        // if (cis.instrument_type == "FUT") {
+        // if (cis.instrument_type == "FUT") {©
         if (true) {
 
 
           var audio = new Audio("/sounds/mixkit-sci-fi-confirmation-914.wav");
-          audio.play();
+          //audio.play();
           let transaction_type;
 
           if (direction == "long") {
@@ -7239,6 +7603,8 @@ let ts=cis.tradingsymbol;
     ////STOPLOSSSWITCH stopLossSwitch //stoplossswitch
     stopLossTargetSwitch(quantity,last_price,high,low,bidPrice,offerPrice,cis,element,livePnlOffered,positionObj){
 
+   var   waitForShortCovering=true;
+  //  var   waitForShortCovering=false;
       // console.log(element)
        
       if(this.hours>15 || (this.hours==15 && this.minutes>29)){
@@ -7251,8 +7617,8 @@ return false;
     let sideWisetime=this.checkSidewaysMovementTime();
 
     if( sideWisetime){
-this.cl('no sl in side wiseß ')
-      return false;
+// this.cl('no sl in side wiseß ')
+      // return false;
     }
 
       /// gapped up yesteddays high then going below 5% of yesterddays high stop loss
@@ -7348,7 +7714,7 @@ Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) &&
 
 
 /// login last price less than yesterdays lows and todays opening price greater than yesterdays low this is to ensure that opening trade issues
-let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low  )
+
 
 // && element.ohlc.open>cis.pricePoints.d1.low)
 
@@ -7438,14 +7804,259 @@ let openLowTouchedYdayHigh=element.ohlc.open<d1.low && element.ohlc.high>=d1.hig
 
 
 let bestSellOffer=sells[0].price;
-let bestBuyOffer=sells[0].price;
+let bestBuyOffer=buy[0].price;
+
+
+
+let buyersHighestPrice=element.depth.buy[0].price;
+let sellersLowestPrice=element.depth.sell[0].price;
+
+// if(buyersHighestPrice>element.last_price){
+
+
+//   // console.log(cis.tradingsymbol,'BUY >LP ','buyersHighestPrice=',buyersHighestPrice,'sellersLowestPrice=',sellersLowestPrice)
+// }
 
  this.stopLossSwitchHealth=!this.stopLossSwitchHealth;
 
- console.log('lp trasaction tupe',lp.transaction_type)
+//  console.log('lp trasaction tupe',lp)
+//  console.log('NEAR STOP LOSS SWITCH 7491',);
+
+//  console.log('NEAR STOP LOSS SWITCH 7491');
+ waitForShortCovering=true;
+
+ //ending 
+ let yesterDayLowStopLoss=(element.last_price<cis.pricePoints.d1.low  )
+ let normalShorCovering=false;
+ if(element.ohlc.open< cis.pricePoints.d1.low ){
+
+
+  if(this.hours>9){
+
+
+    if(element.ohlc.open=element.ohlc.high){
+
+
+      normalShorCovering=lp.quantity>0 && (yesterDayLowStopLoss) && positionObj.buy_price>cis.pricePoints.d1.low;
+    }
+
+
+   
+  } else if(this.hours>14){
+
+    normalShorCovering=lp.quantity>0 && (yesterDayLowStopLoss) && positionObj.buy_price>cis.pricePoints.d1.low;
+
+
+  }
+
+ }else{
+
+  normalShorCovering=lp.quantity>0 && (yesterDayLowStopLoss) && positionObj.buy_price>cis.pricePoints.d1.low;
+
+ }
+ 
+
+
+ let isGapDown=element.ohlc.open<element.ohlc.close;
+ let isOverNightScript=lp.quantity<0;
+ let buyPriceGreaterThanTodaysOpen=lp.buy_price>element.ohlc.open
+
+ /// exitswitch
       switch (true) {
 
 
+        case (isGapDown && isOverNightScript && buyPriceGreaterThanTodaysOpen ) :
+
+
+
+        let exitingPrice;
+        if( element.last_price<element.ohlc.open){
+
+          exitingPrice=element.last_price;
+        }else if(element.last_price>element.ohlc.open ){
+
+
+          let exitingPrice=element.last_price>=(Math.min(cis.pricePoints.d1.close,cis.pricePoints.d1.open))
+        }
+
+
+
+        msg=`EXITING POSITIONS FOR  ${cis.tradingsymbol}  for ${element.last_price} at ${formattedTime} in GapDownOpeneing strategy for overnight scripts`
+         this.cl(msg)
+
+         this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           exitingPrice
+         );
+
+        break;
+
+
+        case (this.exitNow):
+
+        msg=`EXITING POSITIONS FOR  ${cis.tradingsymbol}  for ${buyersHighestPrice} at ${formattedTime}`
+         this.cl(msg)
+
+         this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           buyersHighestPrice
+         );
+
+
+        break;
+
+
+        case (element.last_price<cis.pricePoints.d0.low):
+        msg=`STOP LOSS  EXECUTION SEND BY  DAILY  LOW STRATEGY FOR ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
+
+         this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           element.last_price
+         );
+
+        break;
+
+
+
+        case (element.last_price<element.ohlc.open) :
+        msg=`STOP LOSS  EXECUTION SEND BY  DAILY price less than open price  ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
+
+         this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           element.last_price
+         );
+
+        break;
+
+        case (
+        
+        
+       normalShorCovering
+        
+        ):
+
+// console.log('yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol)
+
+
+msg=`STOP LOSS  EXECUTION SEND BY  DAILY yesterDayLowStopLoss STRATEGY FOR ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
+         this.cl(msg)
+
+         this.updateSquareOfforderWithDesiredPrice(
+           cis,
+           element,
+           false,
+           element.last_price
+         );
+      
+
+
+break;  
+
+
+
+
+
+        case (sellersLowestPrice<element.last_price && false):
+
+
+this.cl(' line-7559 has to sell this :sellersLowestPrice is less  than last price for',cis.tradingsymbol, 'sellersLowestPrice', sellersLowestPrice,' last price', element.last_price)
+this.updateSquareOfforderWithDesiredPrice(
+    cis,
+    element,
+    false,
+    buyersHighestPrice
+  );
+
+break;
+
+  //       case (lp.quantity>0 && bestBuyOffer>element.last_price):
+
+
+  //       this.cl(
+  //  "Firing stop loss order for bestSellOffer  less than last price ",
+  //  cis.tradingsymbol,
+  //  offerPrice,
+  //   high,last_price
+  // );
+  //       this.updateSquareOfforderWithDesiredPrice(
+  //   cis,
+  //   element,
+  //   false,
+  //   element.last_price
+  // );
+
+
+  //       break;
+
+
+//         case (lp.quantity<0 && bestSellOffer<element.last_price):
+
+
+// this.cl(
+// "Firing stop loss order for buy offer less than last price ",
+// cis.tradingsymbol,
+// offerPrice,
+// high,last_price
+// );
+// this.updateSquareOfforderWithDesiredPrice(
+// cis,
+// element,
+// false,
+// element.last_price
+// );
+
+
+// break;
+
+
+
+        case (lp.quantity>0 &&  element.last_price<element.ohlc.high*97  && false):
+
+        this.cl(
+   "Firing stop loss order for 3% less than high ",
+   cis.tradingsymbol,
+   offerPrice,
+    high,last_price
+  );
+  
+  this.updateSquareOfforderWithDesiredPrice(
+    cis,
+    element,
+    false,
+    element.last_price
+  );
+        break
+ 
+
+        case (lp.quantity < 0 && element.last_price >= lp.sell_price*1.05 && waitForShortCovering   && false ):
+
+              
+
+this.cl(
+   "Firing shortcover stop loss order for %s bidprice is %s and high is %s  and last price is %s",
+   cis.tradingsymbol,
+   offerPrice,
+    high,last_price
+  );
+  
+  this.updateSquareOfforderWithDesiredPrice(
+    cis,
+    element,
+    false,
+    element.last_price
+  );
+
+  break;
         
 
         case this.exitNow:
@@ -7466,7 +8077,7 @@ let bestBuyOffer=sells[0].price;
 
 
 
-        case openBelowYesterdayHigh:
+        case (lp.quantity>0 && openBelowYesterdayHigh && false):
         
         msg=`open below yesterdays high , touched y day high and thebn  retturning to yesterdays high , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime} SQUARING OFF`
          this.cl(msg)
@@ -7480,7 +8091,7 @@ let bestBuyOffer=sells[0].price;
         break;
         
         
-        case openLowTouchedYdayHigh:
+        case (lp.quantity>0 && openLowTouchedYdayHigh && false):
         
         msg=`open below yesterdays low, touched y day high and thebn  retturning to yesterdays high , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime} SQUARING OFF`
          this.cl(msg)
@@ -7494,7 +8105,7 @@ let bestBuyOffer=sells[0].price;
         break;
 
 
-        case hitHighStopLoss:
+        case (lp.quantity>0 && hitHighStopLoss && false):
         
         msg=`open below yesterdays candle body crossed yesterdays body, retturning to yesterdays body stop loss , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime} SQUARING OFF`
          this.cl(msg)
@@ -7507,7 +8118,7 @@ let bestBuyOffer=sells[0].price;
         
         break;
 
-        case(element.last_price<element.ohlc.open*.98):
+        case (lp.quantity>0 && element.last_price<element.ohlc.open*.98 && false):
 
 
         msg=`GONE BELOW OPEN PRICE FOR , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime} SQUARING OFF`
@@ -7522,7 +8133,7 @@ let bestBuyOffer=sells[0].price;
         break;
 
 
-        case (NineFiftySquareOff):
+        case (lp.quantity>0 && NineFiftySquareOff && false):
 
 
         msg=`SQUARING OFF ALL GREENS AT 9 :58 , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
@@ -7536,7 +8147,7 @@ let bestBuyOffer=sells[0].price;
 
         break;
 
-case (buyPriceAboveOpenAndLastPriceFallsBelowOpen):
+case (lp.quantity>0 && buyPriceAboveOpenAndLastPriceFallsBelowOpen && false):
 
 msg=`SQUARING OFF IF BUY PRICE ABOVE OPEN AND LAST PRICE FELL BELOW 5% OPEN , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
@@ -7553,7 +8164,7 @@ break;
 
 
 
-        case  squareoffDuringSideWise && false:
+        case  (lp.quantity>0 && squareoffDuringSideWise && false):
 
 
        
@@ -7572,7 +8183,7 @@ break;
 
 
 
-case ((element.last_price<element.ohlc.open && (this.hours==15 && this.minutes>15) && positionObj.buy_price>=element.ohlc.open) ):
+case (( ( lp.quantity>0 && element.last_price<element.ohlc.open && false && (this.hours==15 && this.minutes>15) && positionObj.buy_price>=element.ohlc.open) )):
 
 
 msg=`STOP LOSS  EXECUTION  PRICE AFTER 3 :15 PM WAS BELOW TODAYS OPEN EXIT FOR , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
@@ -7587,7 +8198,7 @@ msg=`STOP LOSS  EXECUTION  PRICE AFTER 3 :15 PM WAS BELOW TODAYS OPEN EXIT FOR ,
 break;
 
 
-        case(element.ohlc.low<=cis.pricePoints.d1.low && (this.hours==15 && this.minutes>15) && positionObj.buy_price>=element.ohlc.low):
+        case( (  lp.quantity>0 && element.ohlc.low<=cis.pricePoints.d1.low && false && (this.hours==15 && this.minutes>15) && positionObj.buy_price>=element.ohlc.low)):
         msg=`STOP LOSS  EXECUTION TODAYS LOW CROESSED AT SOME TIME YESTERDAYS LOW DANGER EXIT , ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
         this.updateSquareOfforderWithDesiredPrice(
@@ -7604,7 +8215,7 @@ break;
 
 
 
-        case(todayOpenYesterDayhigh):
+        case( lp.quantity>0 && todayOpenYesterDayhigh && false):
         msg=`STOP LOSS  EXECUTION  BY  GAP UP YESTERDAY HIGH , THEN FALLED BELOW 5% OF YESTERDAY HIGH ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
         this.updateSquareOfforderWithDesiredPrice(
@@ -7617,7 +8228,7 @@ break;
         break;
 
 
-        case(todayOpenYesterDayClose):
+        case (lp.quantity>0 &&todayOpenYesterDayClose && false):
         msg=`STOP LOSS  EXECUTION  BY  GAP UP YESTERDAY close , THEN FALLED BELOW 5% OF YESTERDAY close ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
          this.cl(msg)
         this.updateSquareOfforderWithDesiredPrice(
@@ -7630,7 +8241,7 @@ break;
         break;
 
 
-        case(momentFire && false):
+        case (lp.quantity>0 &&momentFire && false):
 
 
 
@@ -7645,24 +8256,7 @@ break;
         break;
 
 
-        case (yesterDayLowStopLoss && positionObj.buy_price>cis.pricePoints.d1.low):
 
-// console.log('yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol)
-
-
-msg=`STOP LOSS  EXECUTION SEND BY  DAILY yesterDayLowStopLoss STRATEGY FOR ${cis.tradingsymbol}  for ${last_price} at ${formattedTime}`
-         this.cl(msg)
-
-         this.updateSquareOfforderWithDesiredPrice(
-           cis,
-           element,
-           false,
-           element.last_price
-         );
-      
-
-
-break;  
 
 
 
@@ -7755,7 +8349,7 @@ break;
 
 
 
-case (maxOfYdayTodayLow && positionObj.buy_price>=Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) ):
+case (lp.quantity>0 && maxOfYdayTodayLow && false && positionObj.buy_price>=Math.max(cis.pricePoints.d0.low,cis.pricePoints.d1.low) ):
 
 
 this.cl('sltrigger  trigger minimum of y day low todays low for  %s at squareoffPrice of %s',
@@ -7817,34 +8411,16 @@ this.updateSquareOfforderWithDesiredPrice(
         //            last_price
         //          );
               
-
+waitForShortCovering
         // break;
                
 
 
 
 
-               case (quantity < 0 && last_price > high):
+            
 
-              
-
-               this.cl(
-                  "Firing shortcover stop loss order for %s bidprice is %s and high is %s  and last price is %s",
-                  cis.tradingsymbol,
-                  offerPrice,
-                   high,last_price
-                 );
-                 
-                 this.updateSquareOfforderWithDesiredPrice(
-                   cis,
-                   element,
-                   false,
-                   squareoffPrice
-                 );
-
-                 break;
-
-               case (quantity > 0 && last_price < low  && positionObj.buy_price>low):
+               case (lp.quantity > 0 && last_price < low  && positionObj.buy_price>low):
 
                  this.cl(
                   "Firing long cover stop loss order for %s bidprice is %s and low  is %s  and last price is %s",
@@ -8060,7 +8636,7 @@ let hrsCheck=(this.hours>10  )
 if(openLow && lossCheck && hrsCheck && upperRangeCheck){
 
 
-  this.cl('for open low with 2500',cis.tradingsymbol)
+  // this.cl('for open low with 2500',cis.tradingsymbol)
 
   return true;
 
@@ -8210,11 +8786,10 @@ this.cl('buys undefined so -1');
 
         
 
-let minutes=[16,31,46,1]
-if(minutes.includes(this.minues)){
-
-  this.setD0WithCurrentDayOhlc(element);
-}
+// let minutes=[16,31,46,1]
+// if(minutes.includes(this.minues)){
+// this.setD0WithCurrentDayOhlc(element);
+// }
       
 
         if(!element){
@@ -8226,13 +8801,65 @@ if(minutes.includes(this.minues)){
 
       
 
+     
         
 
 let instrument_token = element.instrument_token;
 
 
 let cis = this.instruments.filter(i => i.instrument_token == instrument_token)[0];
+
+// console.log(cis.pricePoints.d1)
 // this.cl(cis,'cis')
+
+
+
+
+// console.log(this.seconds)
+let secs=[0,15,30,45]
+
+if(secs.includes(this.seconds) && false){
+
+  if(this.seconds==0){
+let v0=element.volume_traded;
+this.$set(cis,'v0',element.volume_traded);
+
+// this.cl(v0,'volume')
+}
+
+  if(this.seconds==15){
+
+    let v1=element.volume_traded-cis.v0;
+
+    this.$set(cis,'v1',v1);
+    // this.cl(v1,' v1 nvolume')
+  }
+  if(this.seconds==30){
+
+    let v2=element.volume_traded-cis.v1;
+
+this.$set(cis,'v2',v2);
+}
+
+if(this.seconds==30){
+
+  let v3=element.volume_traded-cis.v3;
+
+this.$set(cis,'v3',v3);
+
+// this.cl('voulume up 30',cis.tradingsymbol)
+
+if(cis.v1>cis.v2>cis.v3){
+
+ this.cl('voulume up 30',cis.tradingsymbol, v1,v2,v3)
+}
+}
+
+  
+
+
+}
+
 
 
 
@@ -8265,7 +8892,7 @@ this.cl("MARUBOZU CANDLE FOR",cis.tradingsymbol)
 
 
 
-this.cl('check point 4a')
+// this.cl('check point 4a')
 this.currentTradingsymbol=cis.tradingsymbol
 
 
@@ -8300,7 +8927,7 @@ if (!cis) {
 }
              
     
-this.cl('check[ point 3]')
+// this.cl('check[ point 3]')
 
         last_price=element.last_price;
 
@@ -8366,7 +8993,7 @@ this.$set(
 //       );
 
 
-this.cl('checkpoint 4c');
+// this.cl('checkpoint 4c');
           
         let hasLivetargetFromcis=cis.hasLiveTarget;
    let hasLivePositionFromcis=cis.hasLivePosition;
@@ -8392,9 +9019,17 @@ let ln1=this.livePositions.some(
           )
           let average_price=-1
 
-          if(lpCurrent){
+          if(typeof lpCurrent!='undefined'){
 
-            average_price=lpCurrent.average_price;
+
+            if(lpCurrent.quantity<0){
+              average_price=lpCurrent.sell_price
+
+            }else if(lpCurrent.quantity>0){
+
+              average_price=lpCurrent.buy_price
+            }
+            
 
           }else{
 
@@ -8578,7 +9213,7 @@ const pricePoints = cis.pricePoints;
 
 
 
-this.cl('d0',cis.pricePoints.d0.normalDate)
+// this.cl('d0',cis.pricePoints.d0.normalDate)
 this.cl('d1',cis.pricePoints.d1.normalDate)
 this.cl('d2',cis.pricePoints.d2.normalDate)
 let {d0,d1,d2,d3,d4,d5,d6,d7}=pricePoints;
@@ -8697,6 +9332,7 @@ return false;
 
   data() {
     return {
+      ohlcData:[],
       allPositions:[],
       exitNow:false,
       viewLogs:false,

@@ -264,7 +264,7 @@ entryPrice=pos.sell_price
       
       
          
-       this.cl(upperBreakOutTarget,cis.pricePoints.d0.high,'here dk uck todays high',uck,lck,cis.tradingsymbol)
+      //  this.cl(upperBreakOutTarget,cis.pricePoints.d0.high,'here dk uck todays high',uck,lck,cis.tradingsymbol)
       
                   
                   
@@ -292,7 +292,7 @@ entryPrice=pos.sell_price
                   if(quote && quote.ohlc && quote.ohlc.open){
 
                     targetPoint=quote.ohlc.open
-                 this.cl('QUOTE PRESENT SO USING THAT FOR SHORT COVERING for ',cis.tradingsymbol,' at ',targetPoint);
+                //  this.cl('QUOTE PRESENT SO USING THAT FOR SHORT COVERING for ',cis.tradingsymbol,' at ',targetPoint);
                     
 
                   }else if(!typeof cis=='undefined'){
@@ -396,7 +396,7 @@ entryPrice=pos.sell_price
       
       let lo=this.livePositions.find(i=>i.instrument_token==instrument_token)
 
-      console.log(lo,'lo lo  lo')
+      // console.log(lo,'lo lo  lo')
      if (quantity>0) {
        try {
        
@@ -460,6 +460,10 @@ entryPrice=pos.sell_price
 
 let avg=entryPrice;
 if(quantity<0){
+
+  this.cl('quantity less than 0 for',cis.tradingsymbol)
+
+  return;
 
   transaction_type='BUY';
 
@@ -549,6 +553,12 @@ if(quantity<0){
 
         switch(true){
 
+
+          // case true:
+          //   targetPoint=(d1.high*1.4).toFixed(1)
+
+          // break;
+
            case (entryPrice<d1.low):
 
 
@@ -578,7 +588,7 @@ if(quantity<0){
 
        case (entryPrice>d1.high):
 
-       targetPoint=(d1.high*2).toFixed(1);
+       targetPoint=(d1.high*1.5).toFixed(1);
 
       break;
 
@@ -593,6 +603,9 @@ if(quantity<0){
       
       if(quantity>0  && overnight_quantity!=0  ){
 
+
+
+
         console.log(overnight_quantity,'overnight_quantity',quantity)
         targetPoint=(avg*2.5).toFixed(1);
 
@@ -604,14 +617,29 @@ if(quantity<0){
       
       
       
-      else if(quantity<0){
+      
+
+
+      if(pos.quantity<0){
+
+        
+
+        targetPoint=(lo.sell_price*.5).toFixed(1)
 
         targetPointFinal=Math.max(targetPoint,lck+.1).toFixed(1)
+
+        this.cl('PLACING A BUY ORDER TARGET  FOR ', cis.tradingsymbol, ' AT', targetPointFinal)
 
       }
       
 
-      console.log('ENTRY PRICE target point of script', cis.tradingsymbol,targetPointFinal,uck,targetPoint,'entry price',entryPrice)
+
+      if(lo.quantity>0){
+
+        targetPointFinal=Math.max((cis.pricePoints.d0.high*1.3).toFixed(1),uck-.1).toFixed(1)
+
+      }
+      console.log('ENTRY PRICE target point of script', cis.tradingsymbol,'is ',entryPrice,' and target point is for ',transaction_type,'is ', targetPointFinal,'Upper circuit is',uck)
                 this.placetargetAndStopLoss(
                   cis,
                   instrument_token,

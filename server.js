@@ -293,6 +293,27 @@ app.post('/api/writeTradeStrategy', async (req, res) => {
 
 
 
+app.post('/api/triggers',(req,res)=>{
+  const Trigger = require('./models/Triggers.js')
+;
+
+const triggerData = req.body;
+
+  // Create a new trigger instance
+  const trigger = new Trigger(triggerData);
+
+  // Save the trigger to the database
+  trigger.save()
+    .then(() => {
+      res.json({ message: 'Trigger saved successfully' });
+    })
+    .catch(error => {
+      res.status(500).json({ error: 'Failed to save trigger' });
+    });
+
+} );
+
+
 app.post('/api/getOrdersPost',(req,res)=>{
 
 let accessToken=req.body.accessToken;
@@ -1141,8 +1162,9 @@ let accessToken=req.params.accessToken;
 let symbol=req.params.symbol;
 let start=req.params.start.replace(/T|Z|\.\d{3}/g, ' ').trim();
 let end=req.params.end.replace(/T|Z|\.\d{3}/g, ' ').trim();
+let intervel=req.params.intervel;
 
-console.log('start',start,'end',end)
+console.log('start',start,'end',end,intervel)
 
 
 
@@ -1158,8 +1180,8 @@ console.log('start',start,'end',end)
 
   try {
 
-    console.log(symbol,'day',start,end)
-    let result= await kc.getHistoricalData(symbol,'day',start,end);
+    console.log(symbol,intervel,start,end)
+    let result= await kc.getHistoricalData(symbol,intervel,start,end);
 
     console.log('result',result)
 

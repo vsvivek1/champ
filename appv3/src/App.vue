@@ -18,6 +18,9 @@
         <router-link  v-if="session!=null" to="/LongBuildUps">Long Build Ups</router-link> |
         <router-link  v-if="session!=null" to="/Strategies">Strategies</router-link> |
         <router-link  v-if="session!=null" to="/FutureTrading">Future Trading</router-link> |
+
+        <!-- <router-link  v-if="session!=null" to="/timePriceHigh">Time Price High</router-link> | -->
+        <router-link  v-if="session!=null" to="/WraperForInstruments">WraperForInstruments</router-link> |
        
   
        

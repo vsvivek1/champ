@@ -15,7 +15,29 @@ fs.readFile('work.json', 'utf8', (err, data) => {
 
     
 
-    console.log(jsonData['result_data']['data']);
+    // console.log(jsonData['result_data']['data']['wrk_schedule_group_structures']);
+
+
+
+    var res=jsonData['result_data']['unit_master']['labours'][0]['quantity']//['data']['wrk_schedule_group_structures'];
+
+    let keys=Object.keys(res);
+
+
+    console.log(res)
+    console.log(keys);
+// var uniqueTasks = wrk_schedule_group_structures.map(i => i.mst_task);
+
+// .filter((obj, index, self) =>
+//   index === self.findIndex(item => item.mst_task === obj.mst_task.id))
+
+
+
+
+    // console.log(uniqueTasks,'uq');
+    // console.log(taskList);
+
+
   } catch (error) {
     console.error('Error parsing JSON:', error);
   }

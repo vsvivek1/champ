@@ -5,6 +5,8 @@ import Validate from '@/components/Validate.vue'
 import LogOut from '@/components/LogOut.vue'
 import Login from '@/components/Login.vue'
 import NewFutureMining from '@/components/NewFutureMining.vue'
+import TimePriceHigh from '@/components/Tester/TimePriceHigh.vue'
+import WraperForInstruments from '@/components/Tester/WraperForInstruments.vue'
 
 import ListHoldings from '@/components/ListHoldings.vue'
 import testWebSocket from '@/components/testWebSocket.vue'
@@ -23,7 +25,7 @@ import Strategies from '@/components/Strategies.vue'
 // import Mining from '@/components/Mining.vue'
 // import MiningMis from '@/components/MiningMis.vue'
 import GTT from '@/components/GTT.vue'
-import Tester from '@/components/Tester.vue'
+import Tester from '@/components/Tester/Tester.vue'
 import FutureTrading from '@/components/FutureTrading.vue'
 // import BTST from '@/components/Btst.vue'
 // import dailyGainers from '@/components/dailyGainers.vue'
@@ -41,6 +43,18 @@ import FutureTrading from '@/components/FutureTrading.vue'
 Vue.use(VueRouter)
 
 const routes = [
+
+  {
+    path: '/WraperForInstruments',
+    name: 'WraperForInstruments',
+    component: WraperForInstruments
+  }, 
+  
+  {
+    path: '/timePriceHigh',
+    name: 'TimePriceHigh',
+    component: TimePriceHigh
+  },
 
   {
     path: '/FutureTrading',

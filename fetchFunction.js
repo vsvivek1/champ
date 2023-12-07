@@ -1,3 +1,5 @@
+const { getNextThursday } = require("./getNextThursday");
+
 module.exports =function fetchFunction(app){
 
     console.log('from function');
@@ -26,3 +28,7 @@ module.exports =function fetchFunction(app){
       });
 
 }
+
+
+const result = getNextThursday();
+console.log(result);

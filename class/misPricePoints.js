@@ -81,7 +81,7 @@ module.exports = class misPricePoints {
     try {
  
 
-     let b = await kc2.getHistoricalData(this.stock_tocken, '30minute', 
+     let b = await kc2.getHistoricalData(this.stock_tocken, '5minute', 
    this.dateBforeXDays(7) , this.today(), false).then(
     res => {
         let sorted = res.sort((a, b) => {
