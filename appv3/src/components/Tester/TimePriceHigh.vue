@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <table>
+        <table class="table table-bordered">
   <tr>
     <td>Description</td>
     <td>Value</td>
@@ -20,12 +20,13 @@
 
 <!-- {{ ohlcData }} -->
 
-<table>
+<table class="table table-bordered" border="1">
 
-  <tr v-for="(ohlc,index) in ohlcData" key="index">
-    <td>{{ index+1 }}</td>
+  <tr v-for="(ohlc,index1) in ohlcData" key="index1">
+    <td>{{ index1+1 }}</td>
     <td>{{ ohlc.open }}</td>
     <td>{{ ohlc.entryPrice }}</td>
+    <td>{{ hasWick(ohlc) }}</td>
   </tr>
 
 
@@ -81,6 +82,14 @@ table {
       }
     },
     methods: {
+
+      hasWick(ohlc){
+
+
+        
+      return  (Math.min(ohlc.open-ohlc.close))-  ohlc.low>(Math.abs(ohlc.open-ohlc.close)*2) 
+
+      },
         getRequiredTime(h,m) {
   const today = new Date(); // Current date
 

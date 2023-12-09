@@ -1383,7 +1383,7 @@ function getCurrentExpiryDate() {
 	
 
 
-	return '2023-12-06'
+	return '2023-12-14'
 let {nifty} =getNextThursday();
 return nifty;
 // let m=moment();
