@@ -10,7 +10,7 @@ console.log(entryPrice,last_price,entry,
 setOrderPlacedByMint(instrument_token,true)
 
 
-let p=instruments.filter(p1=>p1.instrument_token==instrument_token)[0];
+let p=instruments.filter(p1=>p1.instrument_token == instrument_token)[0];
 //build orderarray
 
 console.log('p',p)

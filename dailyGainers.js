@@ -39,9 +39,6 @@ module.exports=async function dailygainers(){
 
 
     let today=today1();;
-
-
- 
 // const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 // let mongo=await mongoose.connect(uri,{ useNewUrlParser: true, useUnifiedTopology: true });
 
@@ -72,7 +69,7 @@ let start=1;
   console.log(instrument_tokens.length,'instru token len',start)
   let ln=instrument_tokens.length
 
-  // if(ln==0){
+  // if(ln == 0){
 
   //   clearInterval(t1)
   // }
@@ -127,7 +124,7 @@ let start=1;
           
         
     
-        let ins=instru.filter(i=>i.instrument_token==
+        let ins=instru.filter(i=>i.instrument_token == 
           e)[0];
           ins.ohlc=ohlc1[e]
     
@@ -230,7 +227,7 @@ result.push(ins)
           
         
     
-        let ins=instru.filter(i=>i.instrument_token==
+        let ins=instru.filter(i=>i.instrument_token == 
           e)[0];
           ins.ohlc=ohlc1[e]
     
@@ -312,9 +309,9 @@ result.push(ins)
     var m = Math.floor(d % 3600 / 60);
     var s = Math.floor(d % 3600 % 60);
   
-    var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-    var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-    var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+    var hDisplay = h > 0 ? h + (h  ==  1 ? " hour, " : " hours, ") : "";
+    var mDisplay = m > 0 ? m + (m  ==  1 ? " minute, " : " minutes, ") : "";
+    var sDisplay = s > 0 ? s + (s  ==  1 ? " second" : " seconds") : "";
     return hDisplay + mDisplay + sDisplay; 
   }
   

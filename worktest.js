@@ -29,7 +29,7 @@ fs.readFile('work.json', 'utf8', (err, data) => {
 // var uniqueTasks = wrk_schedule_group_structures.map(i => i.mst_task);
 
 // .filter((obj, index, self) =>
-//   index === self.findIndex(item => item.mst_task === obj.mst_task.id))
+//   index  === self.findIndex(item => item.mst_task  === obj.mst_task.id))
 
 
 

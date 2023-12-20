@@ -27,7 +27,7 @@ module.exports = class misPricePoints {
   
     let pp2=await this.getXDaysPricePoints()
   
-  if(typeof pp2=='undefined' ) return [];
+  if(typeof pp2 == 'undefined' ) return [];
   
   
   
@@ -137,9 +137,6 @@ module.exports = class misPricePoints {
   
   // console.log(pp3,'hi')
 
-
-
- 
 
 
 

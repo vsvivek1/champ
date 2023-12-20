@@ -1,4 +1,4 @@
-const instruments=require('./instruments.json');
+const instruments = require( './instruments.json' );
 
-let len=instruments.lenght;
-console.log('len',len);
+let len = instruments.lenght;
+console.log( 'len',len );

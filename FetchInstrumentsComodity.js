@@ -35,9 +35,6 @@ async function fetchInstrumentsForMining(accessToken) {
 
   let fileInputName = Path.resolve(__dirname, 'instruments', 'instruments.csv')
 
- 
-
-
   
   
   let jsonObjCommodityFile= Path.resolve(__dirname, 'instruments', 'instrumentsForCommodity.json')
@@ -48,25 +45,22 @@ async function fetchInstrumentsForMining(accessToken) {
   Fs.unlink(fileInputName ,function(err){
     if(err) return console.log(err);
     console.log('file deleted successfully');
-})
+ } )
 
 
 
-
-
- 
 
   let jsonObjMultiple = 
-  csvresult.filter(j => ((j.exchange == 'MCX' && j.expiry.includes("2023-01-31"))))
+  csvresult.filter(j => ((j.exchange  ==  'MCX' && j.expiry.includes("2023-01-31"))))
 
-  let jsonObj1=jsonObjMultiple.filter((curr,index,arr)=>arr.indexOf(curr)==index)
+  let jsonObj1=jsonObjMultiple.filter((curr,index,arr)=>arr.indexOf(curr) == index)
 
 
     ;
 
 
 
-  let jsonObjAll = csvresult.filter(j => ((j.exchange == 'MCX') ));
+  let jsonObjAll = csvresult.filter(j => ((j.exchange  ==  'MCX')));
   
 
   let fileOutputName = Path.resolve(__dirname, 'instruments', 'instrumentsForCommodity.json')
@@ -79,14 +73,14 @@ async function fetchInstrumentsForMining(accessToken) {
         if (err) {
           console.log("An error occured while writing JSON Object to File.");
           return console.log(err);
-        }
+         } 
         console.log(fileOutputName + " JSON file has been saved.");
         res('ok')
-          });
+           } );
 
 
           
-      })
+       } )
 
 
 
@@ -106,7 +100,7 @@ async function fetchInstrumentsForMining(accessToken) {
 
     let instruments1 = require('./appv3/public/instruments/instrumentsForCommodity.json');
 
-    let strikes = instruments1.filter(r=>r.instrument_type=='FUT')
+    let strikes = instruments1.filter(r=>r.instrument_type == 'FUT')
     
     
     //.map(m=>m.instrument_token)
@@ -128,7 +122,7 @@ async function fetchInstrumentsForMining(accessToken) {
       console.log(e)
 
 
-      if (typeof e == 'undefined'  || strikes.length==0) {
+      if (typeof e  ==  'undefined'  || strikes.length == 0) {
         clearInterval(intr);
 
 
@@ -144,7 +138,7 @@ async function fetchInstrumentsForMining(accessToken) {
      
 
         return false
-      }
+       } 
       len--;
 
       //////////////////////////////////////////////
@@ -165,26 +159,26 @@ async function fetchInstrumentsForMining(accessToken) {
         e.pricePoints = c;
         e.SevenDayMaxMin = c.SevenDayMaxMin;
 
-        e.chart = `https://kite.zerodha.com/chart/ext/ciq/MCX-OPT/${e.tradingsymbol}/${e.instrument_token}`;
+        e.chart = `https://kite.zerodha.com/chart/ext/ciq/MCX-OPT/${e.tradingsymbol } /${e.instrument_token } `;
         e.seletedBuyingMethod = 'MAX'
         e.enterNowToTrade = false;
         e.PlacedReverseOrder = false;
 
 
-        if (typeof e.pricePoints == 'undefined') {
+        if (typeof e.pricePoints  ==  'undefined') {
           console.log('pricePoints undefined ', e.tradingsymbol)
 
           return;
-        }
-        if (e.pricePoints.length == 0) {
+         } 
+        if (e.pricePoints.length  ==  0) {
 
           console.log('pricePoints not set for ', e.tradingsymbol);
 
           return;
-        } else {
+         }  else {
 
        
-          let { otherCriteriaCheck, otherCriteriaObj } = otherCriteria(e);
+          let { otherCriteriaCheck, otherCriteriaObj  }  = otherCriteria(e);
 
           e.otherCriteria = otherCriteriaObj;
           e.otherCriteriaCheck = otherCriteriaCheck;
@@ -194,36 +188,36 @@ async function fetchInstrumentsForMining(accessToken) {
 
 
             jsonObj2.push(e)
-          } else {
+           }  else {
            jsonObjWithOutCriteria.push(e)
     
-          }
+           } 
 
-        }
+         } 
 
-      }
+       } 
 
-    }, TIMER)
-
-
+     } , TIMER)
 
 
 
 
-  }
+
+
+   } 
 
   catch (error) {
 
     console.log('some error', error)
 
-  }
+   } 
 
 
 
   return true;
 
 
-}
+ } 
 
 
 
@@ -241,17 +235,17 @@ function otherCriteria(e) {
     let candleColor = (e.pricePoints.yesterday.close - e.pricePoints.yesterday.open > 0) ? 'green' : 'red';
     let upperShadow;
     let lowerShadow;
-    if (candleColor == 'green') {
+    if (candleColor  ==  'green') {
       upperShadow = e.pricePoints.yesterday.high - e.pricePoints.yesterday.close;
       lowerShadow = e.pricePoints.yesterday.open - e.pricePoints.yesterday.low;
 
-    } else {
+     }  else {
       upperShadow = e.pricePoints.yesterday.high - e.pricePoints.yesterday.open;
       lowerShadow = e.pricePoints.yesterday.close - e.pricePoints.yesterday.low;
 
-    }
+     } 
 
-    let ob = { body, upperShadow, candleColor, lowerShadow }
+    let ob = { body, upperShadow, candleColor, lowerShadow  } 
 
     // console.log(ob)
     // && body<=lowerShadow
@@ -259,8 +253,8 @@ function otherCriteria(e) {
     
     if (e.pricePoints.d1.range < e.pricePoints.d2.range
 
-      && (candleColor == 'red' && body > upperShadow * 2)
-      || (candleColor == 'green' && body > upperShadow * 2)
+      && (candleColor  ==  'red' && body > upperShadow * 2)
+      || (candleColor  ==  'green' && body > upperShadow * 2)
 
     ) {
 
@@ -270,28 +264,28 @@ function otherCriteria(e) {
       // console.log(ob)
 
 
-      retObj = { 'otherCriteriaCheck': true, 'otherCriteriaObj': ob }
+      retObj = { 'otherCriteriaCheck': true, 'otherCriteriaObj': ob  } 
       return retObj
       tradables.push(e.instrument_token)
 
-    } 
+     }  
     
     
     
     else {
 
-      retObj = { 'otherCriteriaCheck': true, 'otherCriteriaObj': ob }
+      retObj = { 'otherCriteriaCheck': true, 'otherCriteriaObj': ob  } 
       return retObj
-    }
+     } 
 
-  } catch (e) {
+   }  catch (e) {
 
 
     console.log('error', e)
     return false;
 
-  }
-}
+   } 
+ } 
 
 
 
@@ -322,11 +316,11 @@ function secondsToHms(d) {
   var m = Math.floor(d % 3600 / 60);
   var s = Math.floor(d % 3600 % 60);
 
-  var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-  var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-  var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+  var hDisplay = h > 0 ? h + (h  ==  1 ? " hour, " : " hours, ") : "";
+  var mDisplay = m > 0 ? m + (m  ==  1 ? " minute, " : " minutes, ") : "";
+  var sDisplay = s > 0 ? s + (s  ==  1 ? " second" : " seconds") : "";
   return hDisplay + mDisplay + sDisplay;
-}
+ } 
 
 
 
@@ -339,7 +333,7 @@ async function getHoldingInstruments(access_token) {
     var kc = new KiteConnect({
       api_key: api_key,
       access_token: access_token
-    });
+     } );
 
     let pos = await kc.getPositions();
     // console.log(pos)
@@ -354,42 +348,42 @@ async function getHoldingInstruments(access_token) {
     //         type: 'input',
     //         name: 'name',
     //         message: "What's your name?"
-    //       }
+    //        } 
     //     ]
 
     //     inquirer.prompt(questions).then(answers => {
-    //       console.log(`Hi ${answers['name']}!`)
-    //     })
+    //       console.log(`Hi ${answers['name'] } !`)
+    //      } )
 
     return pos.net.map(p => p.tradingsymbol)
     // console.log((pos))
 
-  } catch (error) {
+   }  catch (error) {
     console.log('error', error)
-  }
+   } 
 
 
 
 
-}
+ } 
 
 
 
 const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(r => {
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true  } ).then(r => {
 
-  return AccesTocken.findOne({ 'date': today }, 'access_token').then(async e => {
+  return AccesTocken.findOne({ 'date': today  } , 'access_token').then(async e => {
     access_token = e.access_token;
     let t = await fetchInstrumentsForMining(access_token);
 
-  });
+   } );
 
   ;
 
 
   return;
 
-});
+ } );
 
 
 async function writeFinalScriptsTofile(jsonObj2, jsonObjWithOutCriteria) {
@@ -418,9 +412,9 @@ async function writeFinalScriptsTofile(jsonObj2, jsonObjWithOutCriteria) {
 
 
 
-  })
+   } )
 
-}
+ } 
 
 
 
@@ -437,7 +431,7 @@ function createAndMoveFileFromJson(fileOutputName, jsonObj2, targetDir) {
         if (err) {
           console.log("An error occured while writing JSON Object to File.");
           return console.log(err);
-        }
+         } 
         console.log(fileOutputName + "JSON file has been saved.");
 
 
@@ -445,19 +439,19 @@ function createAndMoveFileFromJson(fileOutputName, jsonObj2, targetDir) {
           (err) => {
             if (err) throw err;
             console.log('source.txt was copied to destination.txt');
-          });
+           } );
 
 
 
 
         res(true);
 
-      });
+       } );
 
 
-  })
+   } )
 
-}
+ } 
 
 function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
 
@@ -485,7 +479,7 @@ function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
 
 
 
-      if (typeof e == 'undefined') {
+      if (typeof e  ==  'undefined') {
         console.warn('clearing postion timer')
         clearInterval(PostionsTimer)
 
@@ -493,33 +487,33 @@ function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
 
         console.log('where am i', jsonObj2.length)
         return false;
-      }
+       } 
       try {
 
         console.log(' overnight left', posln, 'e', e);
         let instruAll = require('./appv3/public/instruments/instrumentsAll.json');
 
-        let ln = jsonObj2.filter(ci => ci.tradingsymbol == e).length;
+        let ln = jsonObj2.filter(ci => ci.tradingsymbol  ==  e).length;
 
         console.log(ln, 'is presnett', e);
-        if (ln == 0) {
+        if (ln  ==  0) {
 
           // console.log(e,'Holding instrument Not Found');
-          let i = instruAll.filter(i => i.tradingsymbol == e)[0];
+          let i = instruAll.filter(i => i.tradingsymbol  ==  e)[0];
           let a = new pricePoint(i.instrument_token, access_token);
           let c = await a.getPricePoints(7, 'day');
 
-          if (typeof c == 'undefined') {
+          if (typeof c  ==  'undefined') {
 
             console.log('big problem with price points')
 
             return false
-          }
+           } 
           // console.log(c,'c')
           i.pricePoints = c;
           i.SevenDayMaxMin = c.SevenDayMaxMin;
 
-          i.chart = `https://kite.zerodha.com/chart/ext/ciq/MCX-OPT/${i.tradingsymbol}/${i.instrument_token}`;
+          i.chart = `https://kite.zerodha.com/chart/ext/ciq/MCX-OPT/${i.tradingsymbol } /${i.instrument_token } `;
           i.seletedBuyingMethod = 'MAX'
           i.enterNowToTrade = false;
 
@@ -527,18 +521,18 @@ function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
           jsonObj2.push(i);
 
 
-        } else {
+         }  else {
 
           console.log('Instrument ', e, 'Found no issues')
-        }
+         } 
 
-      }
+       } 
 
       catch (error) {
 
 
         console.log(error, 'error of position check')
-      }
+       } 
 
 
 
@@ -547,14 +541,14 @@ function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
 
 
 
-    }, 600) //pos for each
+     } , 600) //pos for each
 
 
 
 
 
-  })
-}
+   } )
+ } 
 
 
 
@@ -565,7 +559,7 @@ function getCurrentExpiryDate() {
   d.setDate(d.getDate())
   d.setMonth(d.getMonth() + 1);
 
-  let index = { 1: -4, 2: -5, 3: -6, 4: 0, 5: -1, 6: -2 }
+  let index = { 1: -4, 2: -5, 3: -6, 4: 0, 5: -1, 6: -2  } 
   d.setDate(0);
   let lastDaysWeekDay = d.getDay()
   let out = index[lastDaysWeekDay]
@@ -579,14 +573,14 @@ function getCurrentExpiryDate() {
     ///next month expiry
     d.setMonth(d.getMonth() + 2);
 
-    let index = { 1: -4, 2: -5, 3: -6, 4: 0, 5: -1, 6: -2 }
+    let index = { 1: -4, 2: -5, 3: -6, 4: 0, 5: -1, 6: -2  } 
     d.setDate(0);
     let lastDaysWeekDay = d.getDay()
     let out = index[lastDaysWeekDay]
 
     d.setDate(d.getDate() + out);
 
-  }
+   } 
 
 
 
@@ -595,6 +589,6 @@ function getCurrentExpiryDate() {
 
 
   return d1
-}
+ } 
 
 

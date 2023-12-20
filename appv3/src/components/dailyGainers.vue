@@ -1,20 +1,20 @@
 <template>
     <div>
 
-        profit {{profit}}
+        profit {{ profit }} 
 
-<v-btn @click="getDailyGainers()">get</v-btn>
-<v-btn @click="getDailyLosers()">get</v-btn>
+<v-btn @click = "getDailyGainers(  )">get</v-btn>
+<v-btn @click = "getDailyLosers(  )">get</v-btn>
       
 
-       count <v-chip color="green">{{gainerList.length}}</v-chip>
-       reds <v-chip color="red">{{reds}}</v-chip>
-      green <v-chip color="green">{{greens}}</v-chip>
+       count <v-chip color = "green">{{ gainerList.length }} </v-chip>
+       reds <v-chip color = "red">{{ reds }} </v-chip>
+      green <v-chip color = "green">{{ greens }} </v-chip>
      
      
-    upperShadowGreaterThanBody<v-chip color="green">{{upperShadowGreaterThanBody}}</v-chip>
-     lowerShadowGreaterThanBody<v-chip color="green">{{lowerShadowGreaterThanBody}}</v-chip>
-<table class="table table-bordered table-hover table-stripped">
+    upperShadowGreaterThanBody<v-chip color = "green">{{ upperShadowGreaterThanBody }} </v-chip>
+     lowerShadowGreaterThanBody<v-chip color = "green">{{ lowerShadowGreaterThanBody }} </v-chip>
+<table class = "table table-bordered table-hover table-stripped">
     <thead>
         <th>#</th>
         <th>Script</th>
@@ -23,23 +23,23 @@
         <th></th>
     </thead>
     <tbody>
-        <tr v-for="(gainer,index) in gainerList" :key="index">
-            <td>{{index+1}}</td>
+        <tr v-for = "( gainer,index ) in gainerList" :key = "index">
+            <td>{{ index+1 }} </td>
             <td>
             
-            <a target="_blank" :href="gainer.chart">
+            <a target = "_blank" :href = "gainer.chart">
             
-            {{gainer.tradingsymbol}}</a>
+            {{ gainer.tradingsymbol }} </a>
             
             </td>
-            <td>{{gainer.profitPc}}
+            <td>{{ gainer.profitPc }} 
             
-            <small>{{gainer.profitTot}}</small>
+            <small>{{ gainer.profitTot }} </small>
             </td>
-            <td>{{gainer.otherCriteria}}</td>
+            <td>{{ gainer.otherCriteria }} </td>
             <td
             >
-            {{gainer.ohlc.ohlc}}
+            {{ gainer.ohlc.ohlc }} 
             
             </td>
         </tr>
@@ -55,197 +55,197 @@
 import axios from 'axios';
 import sessionMixin from "@/views/sessionMixin";
 
-    export default {
+    export default { 
 
-        computed:{
+        computed:{ 
 
       
 
-lowerShadowGreaterThanBody(){
-return this.gainerList.filter(r=>{
+lowerShadowGreaterThanBody(  ){ 
+return this.gainerList.filter( r =>{ 
     
- try{
+ try{ 
 
-if(r.otherCriteria.lowerShadow>r.otherCriteria.body)
-{
+if( r.otherCriteria.lowerShadow>r.otherCriteria.body )
+{ 
 
     return true
-}else{
+ } else{ 
 
     return false
-}
+ } 
 
- } catch(error){
+  }  catch( error ){ 
 
     return false;
- }
+  } 
     
     
     
-    }
+     } 
     
     
     
-    ).length
+     ).length
 
-},
+ } ,
 
-upperShadowGreaterThanBody(){
-return this.gainerList.filter(r=>{
+upperShadowGreaterThanBody(  ){ 
+return this.gainerList.filter( r =>{ 
     
- try{
+ try{ 
 
-if(r.otherCriteria.upperShadow>r.otherCriteria.body)
-{
+if( r.otherCriteria.upperShadow>r.otherCriteria.body )
+{ 
 
     return true
-}else{
+ } else{ 
 
     return false
-}
+ } 
 
- } catch(error){
+  }  catch( error ){ 
 
     return false;
- }
+  } 
     
     
     
-    }
+     } 
     
     
     
-    ).length
+     ).length
 
-},
+ } ,
 
 
 
-reds(){
+reds(  ){ 
     // return 1
-return this.gainerList.filter(r=>{
+return this.gainerList.filter( r =>{ 
     
- try{
+ try{ 
 
-if(r.otherCriteria.candleColor=='red')
-{
+if( r.otherCriteria.candleColor == 'red' )
+{ 
 
     return true
-}else{
+ } else{ 
 
     return false
-}
+ } 
 
- } catch(error){
+  }  catch( error ){ 
 
     return false;
- }
+  } 
     
     
     
-    }
+     } 
     
     
     
-    ).length
+     ).length
 
-},greens(){
+ } ,greens(  ){ 
 
     // return 1
 
 
 
-return  this.gainerList.filter(r=>{
+return  this.gainerList.filter( r =>{ 
     
-     try{
+     try{ 
 
-if(r.otherCriteria.candleColor=='green' || r.otherCriteria.candleColor=='red')
-{
+if( r.otherCriteria.candleColor == 'green' || r.otherCriteria.candleColor == 'red' )
+{ 
 
     return true
-}else{
+ } else{ 
 
     return false
-}
+ } 
 
- } catch(error){
+  }  catch( error ){ 
 
     return false;
- }
+  } 
 
-}
+ } 
     
-    ).length
+     ).length
 
-}
+ } 
 
-        },
+         } ,
 
          mixins: [sessionMixin],
-data(){
+data(  ){ 
 
-    return {
+    return { 
 gainerList:[],
 loserList:[],
 profit:0,
 
-    }
-},
-        mounted(){
-// this.getDailyGainers()
+     } 
+ } ,
+        mounted(  ){ 
+// this.getDailyGainers(  )
 
-        },
-        methods:{
+         } ,
+        methods:{ 
 
-                  getProfit(){
+                  getProfit(  ){ 
 
-let out=0;
+let out = 0;
 
-this.gainerList.forEach(e=>out=out+e.profitTot)
-    this.profit=out;               
-let a= this.gainerList.reduce(
+this.gainerList.forEach( e =>out = out+e.profitTot )
+    this.profit = out;               
+let a =  this.gainerList.reduce( 
     
-    (pvs,cur)=>pvs+cur.profitTot,0)
+    ( pvs,cur ) =>pvs+cur.profitTot,0 )
 
-            },
+             } ,
 
-            getDailyLosers(){
-let url="/api/dailyLosers/"+this.accessToken;
+            getDailyLosers(  ){ 
+let url = "/api/dailyLosers/"+this.accessToken;
 
-axios.get(url).then( (r) => {
-    this.gainerList=r.data
+axios.get( url ).then(  ( r )  => { 
+    this.gainerList = r.data
     
 
   
-    // . sort((a,b)=>a.profitPc-b.profitPc)
+    // . sort(( a,b ) =>a.profitPc-b.profitPc )
     
    
-}
-    )
+ } 
+     )
 
-            },
+             } ,
 
-            getDailyGainers(){
-let url="/api/dailyGainers/"+this.accessToken;
+            getDailyGainers(  ){ 
+let url = "/api/dailyGainers/"+this.accessToken;
 
-axios.get(url).then( (r) => {
-    this.gainerList=r.data
+axios.get( url ).then(  ( r )  => { 
+    this.gainerList = r.data
 
-      this.getProfit()
+      this.getProfit(  )
     
-    // .    sort((a,b)=>a.profitPc-a.profitPc)
+    // .    sort(( a,b ) =>a.profitPc-a.profitPc )
     
    
-}
-    )
-            },
+ } 
+     )
+             } ,
         
         
-    },
+     } ,
     name:'dailyGainers'
-    }
+     } 
 </script>
 
-<style lang="scss" scoped>
+<style lang = "scss" scoped>
 
 </style>

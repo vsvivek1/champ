@@ -13,46 +13,46 @@ import Vddl from 'vddl';
 
 // import ripple from 'vuetify/lib/directives/ripple';
 
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+import {  BootstrapVue, IconsPlugin  }  from 'bootstrap-vue'
 
-// Import Bootstrap an BootstrapVue CSS files (order is important)
+// Import Bootstrap an BootstrapVue CSS files ( order is important)
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 
-import { VuePlugin } from 'vuera'
+import {  VuePlugin  }  from 'vuera'
 
-Vue.use(VuePlugin)
+Vue.use( VuePlugin)
 
 // Make BootstrapVue available throughout your project
-Vue.use(BootstrapVue)
+Vue.use( BootstrapVue)
 // Optionally install the BootstrapVue icon components plugin
-Vue.use(IconsPlugin)
+Vue.use( IconsPlugin)
 
 
 import 'vuetify/styles'
-import { createVuetify } from 'vuetify'
+import {  createVuetify  }  from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 
-const vuetify = createVuetify({
+const vuetify = createVuetify( { 
   components,
   directives,
-})
+ } )
 
 
-Vue.use(vuetify, {
-  directives: {
+Vue.use( vuetify, { 
+  directives: { 
    
-  },
-});
+   } ,
+ } );
 
 // import Ripple from 'vuetify/lib/directives/ripple';
-// Vue.use(vuetify, {
-//   directives: {
+// Vue.use(vuetify, { 
+//   directives: { 
 //     Ripple,
-//   },
-// });
+//    } ,
+//  } );
  
 Vue.use(Vddl);
 
@@ -64,10 +64,10 @@ Vue.use(VueCookie);
 Vue.config.productionTip = false
 
 
-new Vue({
+new Vue({ 
   router,
   store,
   vuetify,
   render: h => h(App)
-}).$mount('#app')
+ } ).$mount('#app')
 

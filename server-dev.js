@@ -65,7 +65,7 @@ process.on('uncaughtException', function(err) {
 app.use(history());
 
 let port = process.env.PORT;
-if (port == null || port == "") {
+if (port  ==  null || port  ==  "") {
   const port =9090;
 }
 
@@ -122,10 +122,7 @@ app.post('/api/setRequestTocken/',(req,res)=>{
 let at=  ZerodhaAPI.generateSession(request_tocken).then(r=>{
   // console.log('at',r)
 
-  let today = new Date().toISOString().slice(0, 10);
-
- 
-let at={};
+  let today = new Date().toISOString().slice(0, 10);let at={};
 at._id=new mongoose.Types.ObjectId();
 at.date=today
 at.user_id=r.user_id;
@@ -188,7 +185,7 @@ function getHistoricalData(access_token,symbol='INE002A01018',start='2021-03-10'
   console.log('access tocken from historical data',access_token);
   console.log('\n \n access tocken from historical data api_key',api_key);
 
-  if(access_token==null){
+  if(access_token == null){
 
     console.log('No acceess tocken insdie get historical data');
   }
@@ -262,10 +259,7 @@ app.get('/Validate', (req,res) => {
 
 
 
-app.get('/api/getOrders/:accessToken',(req,res)=>{
-
- 
-  let accessToken=req.params.accessToken;
+app.get('/api/getOrders/:accessToken',(req,res)=>{  let accessToken=req.params.accessToken;
 
   let holding=[]
 
@@ -296,7 +290,7 @@ re=>{
       // console.log('h.instrument_tocken',h.instrument_token)
       // console.log('r1.instrument_tocken',r1.instrument_token)
       
-     return  h.instrument_token==r1.instrument_token
+     return  h.instrument_token == r1.instrument_token
      
 
     })[0];
@@ -362,10 +356,7 @@ async function execute (res){
 }
 
 
-app.get('/api/longBuildUp', (req,res) => {
-
- 
-  
+app.get('/api/longBuildUp', (req,res) => {  
   let s2=execute().then(
   s=>{
 
@@ -444,10 +435,7 @@ app.get('/api/getOHLC/symbols/:arr/accessToken/:accessToken', async (req,res) =>
  let arr=JSON.parse(req.params.arr)
  let accessToken=req.params.accessToken;
 
-
- 
-
-//  if(typeof(arr)=='string'){
+//  if(typeof(arr) == 'string'){
 
 //   console.log('newe parse',JSON.parse(arr),typeof(JSON.parse(arr)))
 //  }
@@ -467,10 +455,7 @@ app.post('/api/postOHLC', async (req,res) => {
  let arr=JSON.parse(req.body.symbols)
  let accessToken=req.body.accessToken;
 
-
- 
-
-//  if(typeof(arr)=='string'){
+//  if(typeof(arr) == 'string'){
 
 //   console.log('newe parse',JSON.parse(arr),typeof(JSON.parse(arr)))
 //  }
@@ -630,9 +615,6 @@ app.post('/api/fetchSymbolsForTheCategory',async (req,res)=>{
    console.log('ERROR FOR FETCH SYMBOLS FOR CATEGORY',error)
  }
  
-
- 
-
  
 
 });
@@ -651,9 +633,6 @@ app.post('/api/PlaceTarget',(req,res)=>{
     console.log('zerodhaparamas',ZerodhaParams)
     res.send(r)
   }).catch(e=>console.log('it happens inside',e));
-
- 
-
 });
 
 app.post('/api/getQuoteFromZerodha',(req,res)=>{
@@ -669,9 +648,6 @@ app.post('/api/getQuoteFromZerodha',(req,res)=>{
   //   console.log('zerodhaparamas',ZerodhaParams)
   //   res.send(r)
   // })
-
- 
-
 });
 
 
@@ -682,7 +658,7 @@ app.get('/api/getInstruments/:accessToken',(req,res)=>{
 
     let eq=r.filter(r1=> {
       
-     return  r1.segment=='NSE' && r1.exchange=='NSE' && r1.instrument_type=='EQ' && r1.name!=''
+     return  r1.segment == 'NSE' && r1.exchange == 'NSE' && r1.instrument_type == 'EQ' && r1.name!=''
 
 
     })
@@ -716,7 +692,7 @@ function getMinRange(res,e){
 
   let minValue=Math.min.apply(Math, res.map(function(o) { return o.range; }))
 
-  let min=res.filter(a=>a.range==minValue)[0];
+  let min=res.filter(a=>a.range == minValue)[0];
 
 
   let d3=new Date();
@@ -765,7 +741,7 @@ dateIST.setMinutes(dateIST.getMinutes() + 30);
 
 // console.log('dateIST::',dateIST,'mindate',mindate,'yday',d3.toISOString())
 
-    if(ydate==mindate1){
+    if(ydate == mindate1){
 
       // console.log()
     // if(true){
@@ -819,7 +795,7 @@ async function GetStocks(req){
 
 let eq=instru.then(
     r=>{
-      let eq=r.filter(r1=>r1.segment=='NSE' && r1.exchange=='NSE' && r1.instrument_type=='EQ' && r1.name!='');
+      let eq=r.filter(r1=>r1.segment == 'NSE' && r1.exchange == 'NSE' && r1.instrument_type == 'EQ' && r1.name!='');
     
       // eq1=eq
 
@@ -1009,9 +985,6 @@ Promise.all(r).then(values=>{
 })
 
 
-
- 
-
     
   })
 
@@ -1083,10 +1056,7 @@ res.send(result);
   }
    
 
-   
-
- 
-   
+      
     
   });
   
@@ -1099,7 +1069,7 @@ res.send(result);
 
 
     
-    if(typeof(r)=='undefined'){
+    if(typeof(r) == 'undefined'){
 
 console.log('ndefined fired')
   res.status(200).send('err');
@@ -1287,9 +1257,6 @@ console.log(r,'force disconenct')
 ;
 
    
-
- 
-
  
 
 })
@@ -1378,10 +1345,7 @@ socket.on('subscribe-scripts-for-mint',r=>{
 
 function sktForMKVStrategy(socket,access_token){
 
-  
-
- 
-/////////////////////io part
+  /////////////////////io part
 
 
 // socket.on('order-book',e=>{
@@ -1456,9 +1420,6 @@ ticker.on("ticks", (ticks)=>{
 
 function startWebSocketsOnTrade(socket,access_token){
 
-
- 
-
 socket.on('forceDisconnect', r=>{
 // socket.disconnect();
 
@@ -1493,9 +1454,6 @@ ticker.on("order_update", (orderUpdates)=>{
     io.emit('order_update',orderUpdates)
 
     console.log('orderupdates',orderUpdates)
-
-
- 
 
 });
 

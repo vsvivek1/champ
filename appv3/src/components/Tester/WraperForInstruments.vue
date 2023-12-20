@@ -2,11 +2,10 @@
     <div>
 
         <div :key="index" v-for="(instrument,index) in instruments">
-
+<a target="_blank"  :href=" instrument.chart">{{ instrument.tradingsymbol }}</a>
             
 
-<div v-if="instrument.tradingsymbol.includes('CE')">
-    <a target="_blank"  :href=" instrument.chart">{{ instrument.tradingsymbol }}</a>
+<div v-if="instrument.tradingsymbol=='DELTACORP'">
     <TimePriceHigh  :symbol="instrument.instrument_token"></TimePriceHigh>
 </div>
             

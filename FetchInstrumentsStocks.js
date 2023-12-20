@@ -56,7 +56,7 @@ async function fetchInstrumentsForMining(accessToken) {
   let csvresult = await csvToJson().fromFile(fileInputName)
 
 
-  //  || j.exchange == 'NSE'
+  //  || j.exchange  ==  'NSE'
 
   const  nifty = require("./nifty.json");
 
@@ -68,9 +68,9 @@ async function fetchInstrumentsForMining(accessToken) {
   csvresult.filter(j => (
     (
       
-      j.exchange == 'NSE' 
+      j.exchange  ==  'NSE' 
       
-      && j.instrument_type == "EQ"   && b.includes(j.tradingsymbol)
+      && j.instrument_type  ==  "EQ"   && b.includes(j.tradingsymbol)
       )
     
     
@@ -80,7 +80,7 @@ async function fetchInstrumentsForMining(accessToken) {
 
   
 
-  let jsonObjAll = csvresult.filter(j => ((j.exchange == 'NSE')));
+  let jsonObjAll = csvresult.filter(j => ((j.exchange  ==  'NSE')));
   
   
 
@@ -152,7 +152,7 @@ async function fetchInstrumentsForMining(accessToken) {
       //////////////////////////////////////////////
 
 
-      if (typeof e == 'undefined') {
+      if (typeof e  ==  'undefined') {
         clearInterval(intr);
 
 
@@ -183,7 +183,7 @@ async function fetchInstrumentsForMining(accessToken) {
       console.log(len, 'left out of ', len1, ' ', t, ' time left', e.tradingsymbol);
 
 
-      // if (len == (len1 - 1)) 
+      // if (len  ==  (len1 - 1)) 
     
 
 
@@ -203,12 +203,12 @@ async function fetchInstrumentsForMining(accessToken) {
         e.PlacedReverseOrder = false;
 
 
-        if (typeof e.pricePoints == 'undefined') {
+        if (typeof e.pricePoints  ==  'undefined') {
           console.log('pricePoints undefined ', e.tradingsymbol)
 
           return;
         }
-        if (e.pricePoints.length == 0) {
+        if (e.pricePoints.length  ==  0) {
 
           console.log('pricePoints not set for ', e.tradingsymbol);
 
@@ -225,7 +225,7 @@ async function fetchInstrumentsForMining(accessToken) {
           e.otherCriteriaCheck = otherCriteriaCheck;
 
           // let otherCriteriaCheck =true; //logic moved lastly
-          // if(e.pricePoints.nr4==true)
+          // if(e.pricePoints.nr4 == true)
           // console.log(otherCriteriaCheck, 'otherCriteriaCheck1', 'otherCriteriaObj', otherCriteriaObj)
 
           if (otherCriteriaCheck) {
@@ -290,7 +290,7 @@ function otherCriteria(e) {
     let candleColor = (e.pricePoints.yesterday.close - e.pricePoints.yesterday.open > 0) ? 'green' : 'red';
     let upperShadow;
     let lowerShadow;
-    if (candleColor == 'green') {
+    if (candleColor  ==  'green') {
       upperShadow = e.pricePoints.yesterday.high - e.pricePoints.yesterday.close;
       lowerShadow = e.pricePoints.yesterday.open - e.pricePoints.yesterday.low;
 
@@ -308,8 +308,8 @@ function otherCriteria(e) {
     
     if (e.pricePoints.d1.range < e.pricePoints.d2.range
 
-      && (candleColor == 'red' && body > upperShadow * 2)
-      || (candleColor == 'green' && body > upperShadow * 2)
+      && (candleColor  ==  'red' && body > upperShadow * 2)
+      || (candleColor  ==  'green' && body > upperShadow * 2)
 
     ) {
 
@@ -372,9 +372,9 @@ function secondsToHms(d) {
   var m = Math.floor(d % 3600 / 60);
   var s = Math.floor(d % 3600 % 60);
 
-  var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-  var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-  var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+  var hDisplay = h > 0 ? h + (h  ==  1 ? " hour, " : " hours, ") : "";
+  var mDisplay = m > 0 ? m + (m  ==  1 ? " minute, " : " minutes, ") : "";
+  var sDisplay = s > 0 ? s + (s  ==  1 ? " second" : " seconds") : "";
   return hDisplay + mDisplay + sDisplay;
 }
 
@@ -462,11 +462,11 @@ function getNearestStrikes(ohlc, instruments) {
       let last_price = ohlc[item].last_price;
 
 
-      if (symbol == 'NIFTY 50') {
+      if (symbol  ==  'NIFTY 50') {
 
         console.log('NIFTY 50', last_price)
       }
-      if (symbol == 'NIFTY BANK') {
+      if (symbol  ==  'NIFTY BANK') {
 
         console.log('NIFTY BANK', last_price)
       }
@@ -476,38 +476,38 @@ function getNearestStrikes(ohlc, instruments) {
 
         i => {
 
-          if (symbol == 'NIFTY 50') {
+          if (symbol  ==  'NIFTY 50') {
 
             symbol = 'NIFTY'
           }
 
 
-          if (symbol == 'NIFTY BANK') {
+          if (symbol  ==  'NIFTY BANK') {
 
             symbol = 'BANKNIFTY'
           }
 
-          return i.name == symbol
+          return i.name  ==  symbol
         }
 
       ).filter(i => {
 
         // console.log('i.name',i.name)
 
-        if (i.name == 'NIFTY') {
+        if (i.name  ==  'NIFTY') {
 
           console.log('NIFTY', i.tradingsymbol, last_price)
         }
-        if (i.name == 'BANKNIFTY') {
+        if (i.name  ==  'BANKNIFTY') {
 
           console.log('NIFTY BANK', i.tradingsymbol, last_price)
         }
 
 
 
-        if (i.instrument_type == 'EQ') {
+        if (i.instrument_type  ==  'EQ') {
 
-          if (i.name == 'NIFTY' || i.name == 'BANKNIFTY') {
+          if (i.name  ==  'NIFTY' || i.name  ==  'BANKNIFTY') {
 
             console.log('its EQure', i.tradingsymbol)
             return true
@@ -516,7 +516,7 @@ function getNearestStrikes(ohlc, instruments) {
         }
 
         // console.log('i.instrument_type',i.instrument_type)
-        if (i.instrument_type == 'CE') {
+        if (i.instrument_type  ==  'CE') {
 
 
           /// if ce strike between 1.05 pc and 1.1 pc
@@ -533,11 +533,11 @@ function getNearestStrikes(ohlc, instruments) {
           {
 
 
-            if (i.name == 'NIFTY') {
+            if (i.name  ==  'NIFTY') {
 
               console.log('NIFTY 50', i.tradingsymbol)
             }
-            if (i.name == 'BANKNIFTY') {
+            if (i.name  ==  'BANKNIFTY') {
 
               console.log('NIFTY BANK', i.tradingsymbol)
             }
@@ -546,7 +546,7 @@ function getNearestStrikes(ohlc, instruments) {
           }
         }
 
-        else if (i.instrument_type == 'PE') {
+        else if (i.instrument_type  ==  'PE') {
 
           // console.log('pee yeee')
 
@@ -554,11 +554,11 @@ function getNearestStrikes(ohlc, instruments) {
           if (i.strike < last_price * .98 && i.strike > last_price * .93) {
 
 
-            if (i.name == 'NIFTY') {
+            if (i.name  ==  'NIFTY') {
 
               console.log('NIFTY 50', i.tradingsymbol)
             }
-            if (i.name == 'BANKNIFTY') {
+            if (i.name  ==  'BANKNIFTY') {
 
               console.log('NIFTY BANK', i.tradingsymbol)
             }
@@ -593,7 +593,7 @@ function getNearestStrikes(ohlc, instruments) {
 
 
       len = len - 1;
-      if (len == 0) {
+      if (len  ==  0) {
         /// currrent positions
 
         currentInstruments1 = currentInstruments.map(c => {
@@ -651,18 +651,18 @@ async function getSymbols() {
 
   let instruments = require('./appv3/public/instruments/instrumentsForMining.json');
 
-  let st = instruments.filter(i => i.exchange == 'NSE')
+  let st = instruments.filter(i => i.exchange  ==  'NSE')
     .map((i) => i.name)
-    .filter((x, i, a) => a.indexOf(x) === i);
+    .filter((x, i, a) => a.indexOf(x)  === i);
 
   let st2 = instruments
     .map((i) => i.instrument_token)
-    .filter((x, i, a) => a.indexOf(x) === i);
+    .filter((x, i, a) => a.indexOf(x)  === i);
 
   let instTockens = st.map((s) => {
     // console.log(s,'s')
     let ar = instruments.filter(
-      (i) => i.tradingsymbol == s && i.exchange == "NSE"
+      (i) => i.tradingsymbol  ==  s && i.exchange  ==  "NSE"
     );
 
     if (typeof ar[0] != "undefined") {
@@ -684,17 +684,17 @@ async function getSymbols() {
 
     console.log('from get symbls', s)
 
-    if (s == 'NIFTY') {
+    if (s  ==  'NIFTY') {
       s = "NIFTY 50"
 
     }
 
-    if (s == 'BANKNIFTY') {
+    if (s  ==  'BANKNIFTY') {
       s = "NIFTY BANK"
 
     }
     return "NSE:" + s;
-  }).filter((x, i, a) => a.indexOf(x) === i);;
+  }).filter((x, i, a) => a.indexOf(x)  === i);;
 
 
 
@@ -726,10 +726,7 @@ async function getSymbols() {
 const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true }).then(r => {
   // console.log(r)
-  return AccesTocken.findOne({ 'date': today }, 'access_token').then(async e => {
-
- 
-    access_token = e.access_token;
+  return AccesTocken.findOne({ 'date': today }, 'access_token').then(async e => {    access_token = e.access_token;
    
 
     let t = await fetchInstrumentsForMining(access_token);

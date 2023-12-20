@@ -41,7 +41,7 @@ this.totalTime=0;
  getZeroVolumeCandleScripts(jsonObj2){
 	const  instruments = require("./appv3/public/instruments/instrumentsAll.json");
 
-	let indices=instruments.filter(i=>i.segment=="INDICES").map(i=>i.instrument_token);
+	let indices=instruments.filter(i=>i.segment == "INDICES").map(i=>i.instrument_token);
 	
 
 
@@ -56,7 +56,7 @@ this.totalTime=0;
 return true
 
 		}else{
-			return  item.prices.map(k=>k.volume).filter(j=>j==0)
+			return  item.prices.map(k=>k.volume).filter(j=>j == 0)
 			  
 			.length<2;  //changed from less than 2 to less than 0 meaasnn always true
 		}
@@ -164,7 +164,7 @@ async  getHoldingInstruments(access_token) {
 	          
 	          
 	          
-	                if (typeof e == 'undefined') {
+	                if (typeof e  ==  'undefined') {
 	                  console.warn('clearing postion timer')
 	                  clearInterval(PostionsTimer)
 	          
@@ -178,17 +178,17 @@ async  getHoldingInstruments(access_token) {
 	                  console.log(' overnight left', posln, 'e', e);
 	                  let instruAll = require('./appv3/public/instruments/instrumentsAll.json');
 	          
-	                  let ln = jsonObj2.filter(ci => ci.tradingsymbol == e).length;
+	                  let ln = jsonObj2.filter(ci => ci.tradingsymbol  ==  e).length;
 	          
 	                  console.log(ln, 'is presnett', e);
-	                  if (ln == 0) {
+	                  if (ln  ==  0) {
 	          
 	                    // console.log(e,'Holding instrument Not Found');
-	                    let i = instruAll.filter(i => i.tradingsymbol == e)[0];
+	                    let i = instruAll.filter(i => i.tradingsymbol  ==  e)[0];
 	                    let a = new pricePoint(i.instrument_token, access_token);
 	                    let c = await a.getPricePoints(7, 'day');
 	          
-	                    if (typeof c == 'undefined') {
+	                    if (typeof c  ==  'undefined') {
 	          
 	                      console.log('big problem with price points')
 	          
@@ -256,7 +256,7 @@ async  getHoldingInstruments(access_token) {
 	    
 	        
 	        map(r => r.instrument_token ).filter((val,index,arr)=>{
-	            return arr.indexOf(val)==index
+	            return arr.indexOf(val) == index
 	        })
 	       
 	        
@@ -307,7 +307,7 @@ async  getHoldingInstruments(access_token) {
 	   
 } catch (error) {
 	console.log('error in fetching hourly data',error)
-} }
+}}
 
 
 

@@ -36,7 +36,7 @@ function a(){
   }
   
   function writeOutputToFile(filePath) {
-      let filteredInstruments = instruments.filter(i => i.segment == "NFO-OPT")[0].pricePoints;
+      let filteredInstruments = instruments.filter(i => i.segment  ==  "NFO-OPT")[0].pricePoints;
   
       // console.log(filteredInstruments);
   
@@ -67,7 +67,7 @@ function filterInstruments() {
   const instruments = JSON.parse(fs.readFileSync('./appv3/public/instruments/instrumentsAll.json'));
 
   const filteredInstruments = instruments.filter(i=> {
-    return  i.segment=="NFO-OPT" && i.exchange=="NFO"
+    return  i.segment == "NFO-OPT" && i.exchange == "NFO"
   });
 
   console.log(filteredInstruments);
@@ -96,11 +96,11 @@ if(month<10){
 }
 // console.log(month);
 
-return arr.indexOf(i)===index && i.includes("-"+month+"-")
+return arr.indexOf(i) ===index && i.includes("-"+month+"-")
 
   })
   
-  // filter(i=>i.exchange=='MCX')[0]
+  // filter(i=>i.exchange == 'MCX')[0]
 
 
   console.log(a1);

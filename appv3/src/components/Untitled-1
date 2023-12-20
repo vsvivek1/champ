@@ -1,6 +1,6 @@
-curl "https://api.kite.trade/instruments/historical/12517890/minute?from=2019-12-04%2009:15:00&to=2019-12-04%2009:20:00&oi=1" \
+curl "https://api.kite.trade/instruments/historical/12517890/minute?from = 2019-12-04%2009:15:00&to = 2019-12-04%2009:20:00&oi = 1" \
      -H 'X-Kite-Version: 3' \
      -H 'Authorization: token wkcurst2vu5obug7:UmzrGCADVL4SdCE2giXBdJW2gnry6lrs'
 
 
-     curl "https://api.kite.trade/instruments/historical/5633/minute?from=2015-12-28+09:30:00&to=2016-01-01+10:30:00"  -H "X-Kite-Version: 3"   -H 'Authorization: token wkcurst2vu5obug7:frOLTrKDWqncw5JtYzEfOaWIAEmRXMYX' 
+     curl "https://api.kite.trade/instruments/historical/5633/minute?from = 2015-12-28+09:30:00&to = 2016-01-01+10:30:00"  -H "X-Kite-Version: 3"   -H 'Authorization: token wkcurst2vu5obug7:frOLTrKDWqncw5JtYzEfOaWIAEmRXMYX' 

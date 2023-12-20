@@ -1,6 +1,6 @@
 <template>
     <div>
-<!-- {{headers}} -->
+<!-- {{ headers }}  -->
          <v-card>
     <v-card-title>
       <v-text-field
@@ -33,13 +33,13 @@
   </v-card>>
 
 <!-- <ul>
-    <li v-for="(instrument,index) in Instruments" :key="instrument.instrument_token">
-{{index}} of {{numberOfInstruments}}.{{instrument.tradingsymbol}} {{instrument}}
+    <li v-for="( instrument,index ) in Instruments" :key="instrument.instrument_token">
+{{ index }}  of {{ numberOfInstruments }} .{{ instrument.tradingsymbol }}  {{ instrument }} 
 
     </li>
 </ul> -->
 
-<!-- {{accessToken}}accessToken -->
+<!-- {{ accessToken }} accessToken -->
     </div>
 </template>
 
@@ -47,91 +47,91 @@
 import axios from 'axios'
   import sessionMixin from '@/views/sessionMixin';
 import store from '@/store';
-    export default {
+    export default { 
 
-        data(){
-return{
+        data(  ){ 
+return{ 
 
     search:''
-}
+ } 
 
-        },
+         } ,
         mixins:[sessionMixin],
         name:'GetInstruments',
-        mounted(){
+        mounted(  ){ 
 
-this.getInstruments();
-        },
+this.getInstruments(  );
+         } ,
 
-        computed:{
+        computed:{ 
 
-            headers(){
+            headers(  ){ 
 let out=[];
-var ob={};
+var ob={  } ;
 ob.text='tradingsymbol';
 ob.value='tradingsymbol';
-out.push(ob);
-var ob={};
+out.push( ob );
+var ob={  } ;
 ob.text='name';
 ob.value='name';
-out.push(ob);
-var ob={};
+out.push( ob );
+var ob={  } ;
 ob.text='last_price';
 ob.value='last_price';
-out.push(ob);
+out.push( ob );
 
 
 return out;
               
 
-// return Object.keys(JSON.parse(this.Instruments[0]))
+// return Object.keys( JSON.parse( this.Instruments[0] ))
 
-            },
-numberOfInstruments(){
+             } ,
+numberOfInstruments(  ){ 
 
 return this.Instruments.length;
-},
+ } ,
 
-        Instruments:{
-get(){
+        Instruments:{ 
+get(  ){ 
 
     return store.state.Instruments;
-},
-set(val){
+ } ,
+set( val ){ 
 
-    store.commit('setInstruments',val)
-}
+    store.commit( 'setInstruments',val )
+ } 
 
-            },
+             } ,
 
-        },
-        methods:{
+         } ,
+        methods:{ 
 
-                 getInstruments() {
+                 getInstruments(  ) { 
                      
         const url = '/api/getInstruments/' + this.accessToken
-        axios.get(url).then(res => {
+        axios.get( url ).then( res => { 
           this.Instruments = res.data
           
-        //   .sort((a, b) => {
+        //   .sort(( a, b ) => { 
         //     return a.name - b.name
-        //   })
+        //    }  )
 
-        //   this.holdings.forEach(h => {
+        //   this.holdings.forEach( h => { 
 
 
         //     h.investments = h.average_price * h.quantity;
-        //     this.$set(h, 'PcSl', false);
+        //     this.$set( h, 'PcSl', false );
         //     h.targetPc = false;
 
-        //   })
+        //    }  )
 
 
-        })
+         }  )
 
-      }
-        }
-    }
+       } 
+         } 
+     } 
 </script>
 
 <style scoped>

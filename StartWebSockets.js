@@ -12,7 +12,7 @@ module.exports=function StartWebSockets(socket,io,access_token){
 
 
 
-    if(startedWebSockets==true){
+    if(startedWebSockets == true){
         console.log('websockets alrady started');
 
 //         console.log(socket);
@@ -266,7 +266,7 @@ module.exports=function StartWebSockets(socket,io,access_token){
   function proxyTradeProcedure(count) {
     if (ProxyTrade) {
 
-      if (count == 0) {
+      if (count  ==  0) {
 
         const getTickgenerator = require('./backtest/tickGenerator');
 

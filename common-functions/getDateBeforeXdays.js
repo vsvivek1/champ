@@ -49,7 +49,7 @@ while (counter < 210) {
   // Check if the day is not a weekend or holiday
 
 
-  if (today.day() !== 0 && today.day() !== 6 && 
+  if (today.day() !==  0 && today.day() !==  6 && 
   
   !holidays.includes(today.format('YYYY-MM-DD')
   

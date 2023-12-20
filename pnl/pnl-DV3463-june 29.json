@@ -1,5 +1,5 @@
 [
- {
+ { 
   "Symbol": "AARTIIND22JUN680PE",
   "ISIN": null,
   "Quantity": 850,
@@ -13,8 +13,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ABB22JUN2400CE",
   "ISIN": null,
   "Quantity": 500,
@@ -28,8 +28,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ABB22JUN2500CE",
   "ISIN": null,
   "Quantity": 250,
@@ -43,8 +43,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ABB22MAY2200PE",
   "ISIN": null,
   "Quantity": 250,
@@ -58,8 +58,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ABBOTINDIA22JUN17000PE",
   "ISIN": null,
   "Quantity": 50,
@@ -73,8 +73,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ABBOTINDIA22JUN17500PE",
   "ISIN": null,
   "Quantity": 25,
@@ -88,8 +88,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ABFRL22APR310CE",
   "ISIN": null,
   "Quantity": 2600,
@@ -103,8 +103,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ABFRL22APR315CE",
   "ISIN": null,
   "Quantity": 2600,
@@ -118,8 +118,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ABFRL22APR320CE",
   "ISIN": null,
   "Quantity": 2600,
@@ -133,8 +133,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ADANIPORTS22JUN760CE",
   "ISIN": null,
   "Quantity": 1250,
@@ -148,8 +148,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "AMARAJABAT22JUN450PE",
   "ISIN": null,
   "Quantity": 1000,
@@ -163,8 +163,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "AMARAJABAT22MAY600CE",
   "ISIN": null,
   "Quantity": 1000,
@@ -178,8 +178,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "AMBUJACEM22JUN370CE",
   "ISIN": null,
   "Quantity": 3000,
@@ -193,8 +193,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "AMBUJACEM22JUN390CE",
   "ISIN": null,
   "Quantity": 1500,
@@ -208,8 +208,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "AMBUJACEM22MAY365PE",
   "ISIN": null,
   "Quantity": 1500,
@@ -223,8 +223,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "APOLLOHOSP22APR4500PE",
   "ISIN": null,
   "Quantity": 125,
@@ -238,8 +238,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "APOLLOHOSP22JUN3800CE",
   "ISIN": null,
   "Quantity": 125,
@@ -253,8 +253,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "APOLLOTYRE22JUN170PE",
   "ISIN": null,
   "Quantity": 2500,
@@ -268,8 +268,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "APOLLOTYRE22JUN175PE",
   "ISIN": null,
   "Quantity": 2500,
@@ -283,8 +283,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "APOLLOTYRE22JUN182.5PE",
   "ISIN": null,
   "Quantity": 2500,
@@ -298,8 +298,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "APOLLOTYRE22JUN195CE",
   "ISIN": null,
   "Quantity": 5000,
@@ -313,8 +313,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "APOLLOTYRE22JUN212.5PE",
   "ISIN": null,
   "Quantity": 2500,
@@ -328,8 +328,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ASHOKLEY22JUN135CE",
   "ISIN": null,
   "Quantity": 4500,
@@ -343,8 +343,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ASIANPAINT22APR3040CE",
   "ISIN": null,
   "Quantity": 150,
@@ -358,8 +358,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ASIANPAINT22APR3100CE",
   "ISIN": null,
   "Quantity": 150,
@@ -373,8 +373,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ASIANPAINT22JUN2750CE",
   "ISIN": null,
   "Quantity": 150,
@@ -388,8 +388,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ASIANPAINT22MAY2980CE",
   "ISIN": null,
   "Quantity": 150,
@@ -403,8 +403,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "AUROPHARMA22JUN540CE",
   "ISIN": null,
   "Quantity": 750,
@@ -418,8 +418,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "AUROPHARMA22MAY550CE",
   "ISIN": null,
   "Quantity": 750,
@@ -433,8 +433,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "AXISBANK22APR820CE",
   "ISIN": null,
   "Quantity": 1200,
@@ -448,8 +448,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "AXISBANK22MAY690CE",
   "ISIN": null,
   "Quantity": 1200,
@@ -463,8 +463,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BAJAJ-AUTO22JUN4000CE",
   "ISIN": null,
   "Quantity": 250,
@@ -478,8 +478,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BAJAJ-AUTO22MAY3800CE",
   "ISIN": null,
   "Quantity": 250,
@@ -493,8 +493,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BAJFINANCE22JUN5900CE",
   "ISIN": null,
   "Quantity": 125,
@@ -508,8 +508,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BAJFINANCE22JUN6000CE",
   "ISIN": null,
   "Quantity": 125,
@@ -523,8 +523,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BALKRISIND22JUN2200PE",
   "ISIN": null,
   "Quantity": 200,
@@ -538,8 +538,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BALKRISIND22MAY2200CE",
   "ISIN": null,
   "Quantity": 200,
@@ -553,8 +553,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BALRAMCHIN22APR490CE",
   "ISIN": null,
   "Quantity": 1600,
@@ -568,8 +568,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BALRAMCHIN22JUN370PE",
   "ISIN": null,
   "Quantity": 1600,
@@ -583,8 +583,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BANKBARODA22JUN95PE",
   "ISIN": null,
   "Quantity": 5850,
@@ -598,8 +598,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BANKNIFTY22APR36700PE",
   "ISIN": null,
   "Quantity": 50,
@@ -613,8 +613,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BANKNIFTY22JUN36500CE",
   "ISIN": null,
   "Quantity": 50,
@@ -628,8 +628,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BANKNIFTY22JUNFUT",
   "ISIN": null,
   "Quantity": 50,
@@ -643,8 +643,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BANKNIFTY22MAY35200CE",
   "ISIN": null,
   "Quantity": 50,
@@ -658,8 +658,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BANKNIFTY22MAY35400CE",
   "ISIN": null,
   "Quantity": 25,
@@ -673,8 +673,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BANKNIFTY22MAY35500CE",
   "ISIN": null,
   "Quantity": 25,
@@ -688,8 +688,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BANKNIFTY22MAY35900CE",
   "ISIN": null,
   "Quantity": 25,
@@ -703,8 +703,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BANKNIFTY22MAYFUT",
   "ISIN": null,
   "Quantity": 125,
@@ -718,8 +718,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BATAINDIA22JUN1820CE",
   "ISIN": null,
   "Quantity": 275,
@@ -733,8 +733,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BEL22APR237.5CE",
   "ISIN": null,
   "Quantity": 3800,
@@ -748,8 +748,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BEL22APR245CE",
   "ISIN": null,
   "Quantity": 3800,
@@ -763,8 +763,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BEL22JUL240CE",
   "ISIN": null,
   "Quantity": 3800,
@@ -778,8 +778,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BERGEPAINT22APR700PE",
   "ISIN": null,
   "Quantity": 1100,
@@ -793,8 +793,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BERGEPAINT22JUN580CE",
   "ISIN": null,
   "Quantity": 1100,
@@ -808,8 +808,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BHARATFORG22APR780CE",
   "ISIN": null,
   "Quantity": 750,
@@ -823,8 +823,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BHARATFORG22JUN680PE",
   "ISIN": null,
   "Quantity": 750,
@@ -838,8 +838,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BHARTIARTL22JUN670PE",
   "ISIN": null,
   "Quantity": 950,
@@ -853,8 +853,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BHARTIARTL22JUN720CE",
   "ISIN": null,
   "Quantity": 950,
@@ -868,8 +868,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BIOCON22JUN320PE",
   "ISIN": null,
   "Quantity": 2300,
@@ -883,8 +883,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BIOCON22JUN350CE",
   "ISIN": null,
   "Quantity": 2300,
@@ -898,8 +898,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BOSCHLTD22JUN13500PE",
   "ISIN": null,
   "Quantity": 50,
@@ -913,8 +913,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BOSCHLTD22MAY13500CE",
   "ISIN": null,
   "Quantity": 50,
@@ -928,8 +928,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BPCL22JUN305PE",
   "ISIN": null,
   "Quantity": 1800,
@@ -943,8 +943,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BPCL22JUN310PE",
   "ISIN": null,
   "Quantity": 9000,
@@ -958,8 +958,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BPCL22JUN315CE",
   "ISIN": null,
   "Quantity": 3600,
@@ -973,8 +973,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BPCL22MAY330PE",
   "ISIN": null,
   "Quantity": 1800,
@@ -988,8 +988,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BRITANNIA22APR3360CE",
   "ISIN": null,
   "Quantity": 200,
@@ -1003,8 +1003,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BRITANNIA22APR3400CE",
   "ISIN": null,
   "Quantity": 200,
@@ -1018,8 +1018,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "BRITANNIA22JUN3380PE",
   "ISIN": null,
   "Quantity": 200,
@@ -1033,8 +1033,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "CANBK22JUN185PE",
   "ISIN": null,
   "Quantity": 2700,
@@ -1048,8 +1048,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "CANBK22JUN215CE",
   "ISIN": null,
   "Quantity": 2700,
@@ -1063,8 +1063,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "CANBK22MAY195CE",
   "ISIN": null,
   "Quantity": 2700,
@@ -1078,8 +1078,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "CHOLAFIN22MAY690CE",
   "ISIN": null,
   "Quantity": 1250,
@@ -1093,8 +1093,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "CIPLA22JUN950PE",
   "ISIN": null,
   "Quantity": 650,
@@ -1108,8 +1108,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "COALINDIA22JUN175PE",
   "ISIN": null,
   "Quantity": 4200,
@@ -1123,8 +1123,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "COALINDIA22JUN180CE",
   "ISIN": null,
   "Quantity": 25200,
@@ -1138,8 +1138,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "COALINDIA22JUN205CE",
   "ISIN": null,
   "Quantity": 8400,
@@ -1153,8 +1153,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "COALINDIA22MAY177.5PE",
   "ISIN": null,
   "Quantity": 4200,
@@ -1168,8 +1168,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "COLPAL22JUN1550CE",
   "ISIN": null,
   "Quantity": 700,
@@ -1183,8 +1183,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "COLPAL22JUN1550PE",
   "ISIN": null,
   "Quantity": 350,
@@ -1198,8 +1198,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "COLPAL22MAY1550PE",
   "ISIN": null,
   "Quantity": 350,
@@ -1213,8 +1213,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "CONCOR22JUN610PE",
   "ISIN": null,
   "Quantity": 800,
@@ -1228,8 +1228,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "COROMANDEL22JUN950CE",
   "ISIN": null,
   "Quantity": 625,
@@ -1243,8 +1243,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "COROMANDEL22JUN970CE",
   "ISIN": null,
   "Quantity": 1250,
@@ -1258,8 +1258,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "CROMPTON22APR380CE",
   "ISIN": null,
   "Quantity": 1100,
@@ -1273,8 +1273,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "CROMPTON22JUN350PE",
   "ISIN": null,
   "Quantity": 1100,
@@ -1288,8 +1288,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "CUB22APR125CE",
   "ISIN": null,
   "Quantity": 3400,
@@ -1303,8 +1303,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DABUR22JUN530CE",
   "ISIN": null,
   "Quantity": 1250,
@@ -1318,8 +1318,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DALBHARAT22JUN1320CE",
   "ISIN": null,
   "Quantity": 250,
@@ -1333,8 +1333,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DEEPAKNTR22APR2360CE",
   "ISIN": null,
   "Quantity": 250,
@@ -1348,8 +1348,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DEEPAKNTR22APR2380CE",
   "ISIN": null,
   "Quantity": 250,
@@ -1363,8 +1363,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DEEPAKNTR22APR2400CE",
   "ISIN": null,
   "Quantity": 500,
@@ -1378,8 +1378,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DEEPAKNTR22APR2460CE",
   "ISIN": null,
   "Quantity": 250,
@@ -1393,8 +1393,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DEEPAKNTR22MAY1980CE",
   "ISIN": null,
   "Quantity": 250,
@@ -1408,8 +1408,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DIXON22JUN3400PE",
   "ISIN": null,
   "Quantity": 125,
@@ -1423,8 +1423,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DIXON22MAY3500CE",
   "ISIN": null,
   "Quantity": 125,
@@ -1438,8 +1438,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DLF22JUL290PE",
   "ISIN": null,
   "Quantity": 1650,
@@ -1453,8 +1453,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DRREDDY22APR3900PE",
   "ISIN": null,
   "Quantity": 125,
@@ -1468,8 +1468,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DRREDDY22APR4600CE",
   "ISIN": null,
   "Quantity": 125,
@@ -1483,8 +1483,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DRREDDY22JUN4200PE",
   "ISIN": null,
   "Quantity": 125,
@@ -1498,8 +1498,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DRREDDY22JUN4500CE",
   "ISIN": null,
   "Quantity": 125,
@@ -1513,8 +1513,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "DRREDDY22MAY4050CE",
   "ISIN": null,
   "Quantity": 125,
@@ -1528,8 +1528,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "EICHERMOT22JUL2860PE",
   "ISIN": null,
   "Quantity": 350,
@@ -1543,8 +1543,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "EICHERMOT22JUN2800CE",
   "ISIN": null,
   "Quantity": 350,
@@ -1558,8 +1558,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "EICHERMOT22MAY2640PE",
   "ISIN": null,
   "Quantity": 350,
@@ -1573,8 +1573,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ESCORTS22MAY1700CE",
   "ISIN": null,
   "Quantity": 550,
@@ -1588,8 +1588,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "EXIDEIND22APR165CE",
   "ISIN": null,
   "Quantity": 3600,
@@ -1603,8 +1603,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "EXIDEIND22JUN142.5CE",
   "ISIN": null,
   "Quantity": 3600,
@@ -1618,8 +1618,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "GLENMARK22APR480CE",
   "ISIN": null,
   "Quantity": 1150,
@@ -1633,8 +1633,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "GMRINFRA22APR38CE",
   "ISIN": null,
   "Quantity": 22500,
@@ -1648,8 +1648,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "GMRINFRA22JUL34CE",
   "ISIN": null,
   "Quantity": 22500,
@@ -1663,8 +1663,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "GMRINFRA22MAY38CE",
   "ISIN": null,
   "Quantity": 22500,
@@ -1678,8 +1678,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "GODREJCP22MAY850CE",
   "ISIN": null,
   "Quantity": 500,
@@ -1693,8 +1693,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "GODREJPROP22JUN1280PE",
   "ISIN": null,
   "Quantity": 325,
@@ -1708,8 +1708,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "GODREJPROP22MAY1350PE",
   "ISIN": null,
   "Quantity": 325,
@@ -1723,8 +1723,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "GODREJPROP22MAY1380CE",
   "ISIN": null,
   "Quantity": 325,
@@ -1738,8 +1738,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "GRANULES22MAY260PE",
   "ISIN": null,
   "Quantity": 1550,
@@ -1753,8 +1753,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "GUJGASLTD22JUN570CE",
   "ISIN": null,
   "Quantity": 1250,
@@ -1768,8 +1768,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HAL22JUN1840PE",
   "ISIN": null,
   "Quantity": 475,
@@ -1783,8 +1783,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HAL22JUN1980CE",
   "ISIN": null,
   "Quantity": 475,
@@ -1798,8 +1798,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HAVELLS22APR1300CE",
   "ISIN": null,
   "Quantity": 500,
@@ -1813,8 +1813,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HAVELLS22APR1320CE",
   "ISIN": null,
   "Quantity": 500,
@@ -1828,8 +1828,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HAVELLS22JUN1080PE",
   "ISIN": null,
   "Quantity": 500,
@@ -1843,8 +1843,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22APR1420PE",
   "ISIN": null,
   "Quantity": 550,
@@ -1858,8 +1858,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22APR1440PE",
   "ISIN": null,
   "Quantity": 550,
@@ -1873,8 +1873,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22APR1450PE",
   "ISIN": null,
   "Quantity": 550,
@@ -1888,8 +1888,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22APR1460PE",
   "ISIN": null,
   "Quantity": 550,
@@ -1903,8 +1903,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22APR1470PE",
   "ISIN": null,
   "Quantity": 550,
@@ -1918,8 +1918,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22APR1480PE",
   "ISIN": null,
   "Quantity": 550,
@@ -1933,8 +1933,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22APR1500PE",
   "ISIN": null,
   "Quantity": 550,
@@ -1948,8 +1948,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22APR1510PE",
   "ISIN": null,
   "Quantity": 550,
@@ -1963,8 +1963,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22JUN1280PE",
   "ISIN": null,
   "Quantity": 1100,
@@ -1978,8 +1978,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22JUN1460CE",
   "ISIN": null,
   "Quantity": 550,
@@ -1993,8 +1993,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCBANK22MAY1480CE",
   "ISIN": null,
   "Quantity": 1100,
@@ -2008,8 +2008,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCLIFE22APR595CE",
   "ISIN": null,
   "Quantity": 1100,
@@ -2023,8 +2023,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HDFCLIFE22JUN575PE",
   "ISIN": null,
   "Quantity": 1100,
@@ -2038,8 +2038,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HEROMOTOCO22JUN2700CE",
   "ISIN": null,
   "Quantity": 300,
@@ -2053,8 +2053,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HINDALCO22JUN350PE",
   "ISIN": null,
   "Quantity": 1075,
@@ -2068,8 +2068,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HINDALCO22JUN410CE",
   "ISIN": null,
   "Quantity": 1075,
@@ -2083,8 +2083,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HINDPETRO22JUN205PE",
   "ISIN": null,
   "Quantity": 2700,
@@ -2098,8 +2098,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HINDPETRO22MAY260PE",
   "ISIN": null,
   "Quantity": 2700,
@@ -2113,8 +2113,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HINDUNILVR22APR2120CE",
   "ISIN": null,
   "Quantity": 300,
@@ -2128,8 +2128,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HINDUNILVR22APR2240CE",
   "ISIN": null,
   "Quantity": 300,
@@ -2143,8 +2143,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HINDUNILVR22JUN2080PE",
   "ISIN": null,
   "Quantity": 300,
@@ -2158,8 +2158,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HINDUNILVR22JUN2200PE",
   "ISIN": null,
   "Quantity": 300,
@@ -2173,8 +2173,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "HONAUT22JUN34000CE",
   "ISIN": null,
   "Quantity": 15,
@@ -2188,8 +2188,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "IBULHSGFIN22JUN100PE",
   "ISIN": null,
   "Quantity": 3100,
@@ -2203,8 +2203,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ICICIBANK22JUL720PE",
   "ISIN": null,
   "Quantity": 1375,
@@ -2218,8 +2218,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ICICIBANK22JUN680PE",
   "ISIN": null,
   "Quantity": 1375,
@@ -2233,8 +2233,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ICICIGI22JUN1080PE",
   "ISIN": null,
   "Quantity": 425,
@@ -2248,8 +2248,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ICICIGI22JUN1120CE",
   "ISIN": null,
   "Quantity": 425,
@@ -2263,8 +2263,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ICICIGI22JUN1160CE",
   "ISIN": null,
   "Quantity": 425,
@@ -2278,8 +2278,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ICICIGI22MAY1360CE",
   "ISIN": null,
   "Quantity": 425,
@@ -2293,8 +2293,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ICICIPRULI22JUN550CE",
   "ISIN": null,
   "Quantity": 1500,
@@ -2308,8 +2308,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ICICIPRULI22JUN570CE",
   "ISIN": null,
   "Quantity": 750,
@@ -2323,8 +2323,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "IDEA22JUN9CE",
   "ISIN": null,
   "Quantity": 0,
@@ -2338,8 +2338,8 @@
   "Open_Value": 14000,
   "Unrealized P&L": -7000,
   "Unrealized P&L Pct.": -50
- },
- {
+  } ,
+ { 
   "Symbol": "IDFCFIRSTB22JUN31PE",
   "ISIN": null,
   "Quantity": 22200,
@@ -2353,8 +2353,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "IGL22MAY370CE",
   "ISIN": null,
   "Quantity": 1375,
@@ -2368,8 +2368,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INDHOTEL22JUN220CE",
   "ISIN": null,
   "Quantity": 4022,
@@ -2383,8 +2383,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INDHOTEL22JUN230CE",
   "ISIN": null,
   "Quantity": 4022,
@@ -2398,8 +2398,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INDIACEM22JUN160PE",
   "ISIN": null,
   "Quantity": 2900,
@@ -2413,8 +2413,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INDIAMART22MAY4100PE",
   "ISIN": null,
   "Quantity": 75,
@@ -2428,8 +2428,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INDIGO22APR2020CE",
   "ISIN": null,
   "Quantity": 250,
@@ -2443,8 +2443,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INDIGO22JUN1560PE",
   "ISIN": null,
   "Quantity": 250,
@@ -2458,8 +2458,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INDUSINDBK22APR1000CE",
   "ISIN": null,
   "Quantity": 900,
@@ -2473,8 +2473,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INDUSINDBK22JUN860PE",
   "ISIN": null,
   "Quantity": 900,
@@ -2488,8 +2488,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INDUSINDBK22JUN960CE",
   "ISIN": null,
   "Quantity": 900,
@@ -2503,8 +2503,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INDUSINDBK22MAY990CE",
   "ISIN": null,
   "Quantity": 900,
@@ -2518,8 +2518,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INFY22APR1900CE",
   "ISIN": null,
   "Quantity": 300,
@@ -2533,8 +2533,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INFY22APR1980CE",
   "ISIN": null,
   "Quantity": 300,
@@ -2548,8 +2548,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INFY22JUL1480PE",
   "ISIN": null,
   "Quantity": 300,
@@ -2563,8 +2563,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INFY22JUL1500PE",
   "ISIN": null,
   "Quantity": 600,
@@ -2578,8 +2578,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INFY22JUN1340PE",
   "ISIN": null,
   "Quantity": 900,
@@ -2593,8 +2593,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INFY22JUN1400PE",
   "ISIN": null,
   "Quantity": 300,
@@ -2608,8 +2608,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INFY22MAY1580CE",
   "ISIN": null,
   "Quantity": 600,
@@ -2623,8 +2623,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INFY22MAY1580PE",
   "ISIN": null,
   "Quantity": 300,
@@ -2638,8 +2638,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "INTELLECT22JUN680CE",
   "ISIN": null,
   "Quantity": 2250,
@@ -2653,8 +2653,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "IOC22MAY115PE",
   "ISIN": null,
   "Quantity": 6500,
@@ -2668,8 +2668,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "IPCALAB22JUN920CE",
   "ISIN": null,
   "Quantity": 450,
@@ -2683,8 +2683,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "IPCALAB22JUN940CE",
   "ISIN": null,
   "Quantity": 450,
@@ -2698,8 +2698,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ITC22JUN257.5PE",
   "ISIN": null,
   "Quantity": 3200,
@@ -2713,8 +2713,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ITC22JUN275CE",
   "ISIN": null,
   "Quantity": 3200,
@@ -2728,8 +2728,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ITC22MAY277.5CE",
   "ISIN": null,
   "Quantity": 3200,
@@ -2743,8 +2743,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "JKCEMENT22JUN2150CE",
   "ISIN": null,
   "Quantity": 525,
@@ -2758,8 +2758,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "JKCEMENT22JUN2200CE",
   "ISIN": null,
   "Quantity": 175,
@@ -2773,8 +2773,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "JUBLFOOD22APR2700PE",
   "ISIN": null,
   "Quantity": 125,
@@ -2788,8 +2788,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "JUBLFOOD22APR2800CE",
   "ISIN": null,
   "Quantity": 125,
@@ -2803,8 +2803,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "JUBLFOOD22JUN500CE",
   "ISIN": null,
   "Quantity": 625,
@@ -2818,8 +2818,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "JUBLFOOD22JUN530CE",
   "ISIN": null,
   "Quantity": 625,
@@ -2833,8 +2833,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "KOTAKBANK22APR1600PE",
   "ISIN": null,
   "Quantity": 400,
@@ -2848,8 +2848,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "KOTAKBANK22JUN2000CE",
   "ISIN": null,
   "Quantity": 400,
@@ -2863,8 +2863,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LALPATHLAB22JUN2000PE",
   "ISIN": null,
   "Quantity": 125,
@@ -2878,8 +2878,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LALPATHLAB22JUN2300CE",
   "ISIN": null,
   "Quantity": 125,
@@ -2893,8 +2893,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LAURUSLABS22JUL500CE",
   "ISIN": null,
   "Quantity": 900,
@@ -2908,8 +2908,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LAURUSLABS22MAY630CE",
   "ISIN": null,
   "Quantity": 900,
@@ -2923,8 +2923,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LICHSGFIN22JUL320CE",
   "ISIN": null,
   "Quantity": 2000,
@@ -2938,8 +2938,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LICHSGFIN22JUN315PE",
   "ISIN": null,
   "Quantity": 2000,
@@ -2953,8 +2953,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LICHSGFIN22JUN370PE",
   "ISIN": null,
   "Quantity": 2000,
@@ -2968,8 +2968,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LICHSGFIN22MAY375PE",
   "ISIN": null,
   "Quantity": 2000,
@@ -2983,8 +2983,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LT22APR1900CE",
   "ISIN": null,
   "Quantity": 575,
@@ -2998,8 +2998,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "L&TFH22JUN64PE",
   "ISIN": null,
   "Quantity": 17848,
@@ -3013,8 +3013,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LTI22JUN4400CE",
   "ISIN": null,
   "Quantity": 150,
@@ -3028,8 +3028,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "LTTS22MAY4100CE",
   "ISIN": null,
   "Quantity": 200,
@@ -3043,8 +3043,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MANAPPURAM22JUN85PE",
   "ISIN": null,
   "Quantity": 9000,
@@ -3058,8 +3058,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MARICO22JUN495CE",
   "ISIN": null,
   "Quantity": 1000,
@@ -3073,8 +3073,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MARICO22JUN500CE",
   "ISIN": null,
   "Quantity": 1000,
@@ -3088,8 +3088,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MARICO22MAY490PE",
   "ISIN": null,
   "Quantity": 1000,
@@ -3103,8 +3103,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MARUTI22APR7800CE",
   "ISIN": null,
   "Quantity": 100,
@@ -3118,8 +3118,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MARUTI22JUN7600PE",
   "ISIN": null,
   "Quantity": 100,
@@ -3133,8 +3133,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MCDOWELL-N22JUN690PE",
   "ISIN": null,
   "Quantity": 625,
@@ -3148,8 +3148,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MCX22MAY1300PE",
   "ISIN": null,
   "Quantity": 350,
@@ -3163,8 +3163,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MGL22JUN820CE",
   "ISIN": null,
   "Quantity": 600,
@@ -3178,8 +3178,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MINDTREE22JUN3000CE",
   "ISIN": null,
   "Quantity": 200,
@@ -3193,8 +3193,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "M&M22APR840CE",
   "ISIN": null,
   "Quantity": 700,
@@ -3208,8 +3208,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "M&M22APR920CE",
   "ISIN": null,
   "Quantity": 700,
@@ -3223,8 +3223,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "M&M22JUN1000CE",
   "ISIN": null,
   "Quantity": 700,
@@ -3238,8 +3238,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "M&M22JUN890PE",
   "ISIN": null,
   "Quantity": 700,
@@ -3253,8 +3253,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "M&MFIN22APR170CE",
   "ISIN": null,
   "Quantity": 4000,
@@ -3268,8 +3268,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MOTHERSUMI22APR145CE",
   "ISIN": null,
   "Quantity": 3500,
@@ -3283,8 +3283,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MOTHERSUMI22MAY130CE",
   "ISIN": null,
   "Quantity": 14000,
@@ -3298,8 +3298,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MPHASIS22JUN2250PE",
   "ISIN": null,
   "Quantity": 175,
@@ -3313,8 +3313,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MPHASIS22JUN2300PE",
   "ISIN": null,
   "Quantity": 175,
@@ -3328,8 +3328,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "MPHASIS22MAY2850CE",
   "ISIN": null,
   "Quantity": 175,
@@ -3343,8 +3343,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NATIONALUM22JUN67.5PE",
   "ISIN": null,
   "Quantity": 4250,
@@ -3358,8 +3358,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NATIONALUM22JUN90PE",
   "ISIN": null,
   "Quantity": 4250,
@@ -3373,8 +3373,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NATIONALUM22MAY100PE",
   "ISIN": null,
   "Quantity": 4250,
@@ -3388,8 +3388,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NAUKRI22APR4600CE",
   "ISIN": null,
   "Quantity": 125,
@@ -3403,8 +3403,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NAUKRI22APR4800CE",
   "ISIN": null,
   "Quantity": 125,
@@ -3418,8 +3418,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NAUKRI22APR4900CE",
   "ISIN": null,
   "Quantity": 125,
@@ -3433,8 +3433,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NAUKRI22JUN3800CE",
   "ISIN": null,
   "Quantity": 125,
@@ -3448,8 +3448,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NESTLEIND22JUN17300CE",
   "ISIN": null,
   "Quantity": 25,
@@ -3463,8 +3463,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY2251215850CE",
   "ISIN": null,
   "Quantity": 100,
@@ -3478,8 +3478,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22APR16650PE",
   "ISIN": null,
   "Quantity": 50,
@@ -3493,8 +3493,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22APR17000CE",
   "ISIN": null,
   "Quantity": 50,
@@ -3508,8 +3508,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22APR17300CE",
   "ISIN": null,
   "Quantity": 50,
@@ -3523,8 +3523,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22APR18250CE",
   "ISIN": null,
   "Quantity": 50,
@@ -3538,8 +3538,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22APRFUT",
   "ISIN": null,
   "Quantity": 150,
@@ -3553,8 +3553,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22JUL15750PE",
   "ISIN": null,
   "Quantity": 50,
@@ -3568,8 +3568,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22JUL15850PE",
   "ISIN": null,
   "Quantity": 50,
@@ -3583,8 +3583,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22JUN15250PE",
   "ISIN": null,
   "Quantity": 50,
@@ -3598,8 +3598,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22JUN15700PE",
   "ISIN": null,
   "Quantity": 50,
@@ -3613,8 +3613,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22JUNFUT",
   "ISIN": null,
   "Quantity": 100,
@@ -3628,8 +3628,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22MAY15850CE",
   "ISIN": null,
   "Quantity": 100,
@@ -3643,8 +3643,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22MAY16300CE",
   "ISIN": null,
   "Quantity": 50,
@@ -3658,8 +3658,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22MAY16600CE",
   "ISIN": null,
   "Quantity": 50,
@@ -3673,8 +3673,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22MAY16750CE",
   "ISIN": null,
   "Quantity": 100,
@@ -3688,8 +3688,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22MAY16800CE",
   "ISIN": null,
   "Quantity": 100,
@@ -3703,8 +3703,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22MAY16850CE",
   "ISIN": null,
   "Quantity": 50,
@@ -3718,8 +3718,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22MAY18400CE",
   "ISIN": null,
   "Quantity": 50,
@@ -3733,8 +3733,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NIFTY22MAYFUT",
   "ISIN": null,
   "Quantity": 50,
@@ -3748,8 +3748,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NMDC22MAY150PE",
   "ISIN": null,
   "Quantity": 3350,
@@ -3763,8 +3763,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NTPC22APR150PE",
   "ISIN": null,
   "Quantity": 5700,
@@ -3778,8 +3778,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NTPC22JUL140PE",
   "ISIN": null,
   "Quantity": 5700,
@@ -3793,8 +3793,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "NTPC22JUN135CE",
   "ISIN": null,
   "Quantity": 11400,
@@ -3808,8 +3808,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "OBEROIRLTY22JUN740PE",
   "ISIN": null,
   "Quantity": 700,
@@ -3823,8 +3823,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ONGC22JUN152.5PE",
   "ISIN": null,
   "Quantity": 3850,
@@ -3838,8 +3838,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PAGEIND22JUN40000PE",
   "ISIN": null,
   "Quantity": 120,
@@ -3853,8 +3853,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PAGEIND22JUN41000CE",
   "ISIN": null,
   "Quantity": 15,
@@ -3868,8 +3868,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PAGEIND22JUN43000CE",
   "ISIN": null,
   "Quantity": 15,
@@ -3883,8 +3883,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PERSISTENT22APR5000CE",
   "ISIN": null,
   "Quantity": 150,
@@ -3898,8 +3898,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PFC22JUN102PE",
   "ISIN": null,
   "Quantity": 6200,
@@ -3913,8 +3913,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PFC22JUN103CE",
   "ISIN": null,
   "Quantity": 6200,
@@ -3928,8 +3928,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PFC22JUN104CE",
   "ISIN": null,
   "Quantity": 6200,
@@ -3943,8 +3943,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PFC22MAY109CE",
   "ISIN": null,
   "Quantity": 6200,
@@ -3958,8 +3958,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PFC22MAY113CE",
   "ISIN": null,
   "Quantity": 6200,
@@ -3973,8 +3973,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PIIND22JUN2700CE",
   "ISIN": null,
   "Quantity": 500,
@@ -3988,8 +3988,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PIIND22MAY2750CE",
   "ISIN": null,
   "Quantity": 250,
@@ -4003,8 +4003,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PNB22APR38CE",
   "ISIN": null,
   "Quantity": 16000,
@@ -4018,8 +4018,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PNB22JUN30PE",
   "ISIN": null,
   "Quantity": 16000,
@@ -4033,8 +4033,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "POWERGRID22JUN207.5PE",
   "ISIN": null,
   "Quantity": 10666,
@@ -4048,8 +4048,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "PVR22JUN1820CE",
   "ISIN": null,
   "Quantity": 407,
@@ -4063,8 +4063,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "RBLBANK22JUN120CE",
   "ISIN": null,
   "Quantity": 2900,
@@ -4078,8 +4078,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "RECLTD22APR132.5CE",
   "ISIN": null,
   "Quantity": 6000,
@@ -4093,8 +4093,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "RECLTD22JUL120CE",
   "ISIN": null,
   "Quantity": 0,
@@ -4108,8 +4108,8 @@
   "Open_Value": 16800,
   "Unrealized P&L": -300,
   "Unrealized P&L Pct.": -1.7856999999999998
- },
- {
+  } ,
+ { 
   "Symbol": "RELIANCE22APR2420PE",
   "ISIN": null,
   "Quantity": 250,
@@ -4123,8 +4123,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "RELIANCE22JUL2440CE",
   "ISIN": null,
   "Quantity": 0,
@@ -4138,8 +4138,8 @@
   "Open_Value": 36437.5,
   "Unrealized P&L": 100,
   "Unrealized P&L Pct.": 0.2744
- },
- {
+  } ,
+ { 
   "Symbol": "RELIANCE22JUL2840CE",
   "ISIN": null,
   "Quantity": 250,
@@ -4153,8 +4153,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "RELIANCE22JUN2500PE",
   "ISIN": null,
   "Quantity": 250,
@@ -4168,8 +4168,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "RELIANCE22JUN2520PE",
   "ISIN": null,
   "Quantity": 250,
@@ -4183,8 +4183,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "RELIANCE22MAY2600CE",
   "ISIN": null,
   "Quantity": 250,
@@ -4198,8 +4198,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SBICARD22JUN730PE",
   "ISIN": null,
   "Quantity": 500,
@@ -4213,8 +4213,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SBICARD22MAY790PE",
   "ISIN": null,
   "Quantity": 500,
@@ -4228,8 +4228,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SBILIFE22JUN1180CE",
   "ISIN": null,
   "Quantity": 750,
@@ -4243,8 +4243,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SBIN22APR490PE",
   "ISIN": null,
   "Quantity": 1500,
@@ -4258,8 +4258,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SBIN22JUN480CE",
   "ISIN": null,
   "Quantity": 1500,
@@ -4273,8 +4273,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SHREECEM22JUN19500CE",
   "ISIN": null,
   "Quantity": 25,
@@ -4288,8 +4288,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SIEMENS22MAY2260PE",
   "ISIN": null,
   "Quantity": 275,
@@ -4303,8 +4303,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SRF22APR2800CE",
   "ISIN": null,
   "Quantity": 375,
@@ -4318,8 +4318,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SRF22APR2840CE",
   "ISIN": null,
   "Quantity": 375,
@@ -4333,8 +4333,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SRF22APR2900CE",
   "ISIN": null,
   "Quantity": 375,
@@ -4348,8 +4348,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SRF22JUN2300PE",
   "ISIN": null,
   "Quantity": 375,
@@ -4363,8 +4363,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SRF22JUN2400CE",
   "ISIN": null,
   "Quantity": 375,
@@ -4378,8 +4378,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SRF22MAY2400PE",
   "ISIN": null,
   "Quantity": 375,
@@ -4393,8 +4393,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SUNPHARMA22MAY870PE",
   "ISIN": null,
   "Quantity": 700,
@@ -4408,8 +4408,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SUNTV22APR520CE",
   "ISIN": null,
   "Quantity": 1500,
@@ -4423,8 +4423,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SUNTV22JUN390PE",
   "ISIN": null,
   "Quantity": 1500,
@@ -4438,8 +4438,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SYNGENE22APR600CE",
   "ISIN": null,
   "Quantity": 850,
@@ -4453,8 +4453,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "SYNGENE22MAY660CE",
   "ISIN": null,
   "Quantity": 850,
@@ -4468,8 +4468,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATACHEM22JUN780PE",
   "ISIN": null,
   "Quantity": 1000,
@@ -4483,8 +4483,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATACHEM22JUN840PE",
   "ISIN": null,
   "Quantity": 1000,
@@ -4498,8 +4498,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATACHEM22JUN860PE",
   "ISIN": null,
   "Quantity": 1000,
@@ -4513,8 +4513,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATACHEM22JUN920PE",
   "ISIN": null,
   "Quantity": 1000,
@@ -4528,8 +4528,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATACHEM22MAY1010CE",
   "ISIN": null,
   "Quantity": 1000,
@@ -4543,8 +4543,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATACHEM22MAY980CE",
   "ISIN": null,
   "Quantity": 1000,
@@ -4558,8 +4558,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATACONSUM22JUL750CE",
   "ISIN": null,
   "Quantity": 900,
@@ -4573,8 +4573,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATACONSUM22MAY800PE",
   "ISIN": null,
   "Quantity": 675,
@@ -4588,8 +4588,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATAMOTORS22JUN410CE",
   "ISIN": null,
   "Quantity": 1425,
@@ -4603,8 +4603,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATAPOWER22JUN210PE",
   "ISIN": null,
   "Quantity": 3375,
@@ -4618,8 +4618,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TATASTEEL22APR1440CE",
   "ISIN": null,
   "Quantity": 425,
@@ -4633,8 +4633,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TCS22APR3520PE",
   "ISIN": null,
   "Quantity": 150,
@@ -4648,8 +4648,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TCS22APR3900CE",
   "ISIN": null,
   "Quantity": 150,
@@ -4663,8 +4663,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TCS22JUL3300PE",
   "ISIN": null,
   "Quantity": 0,
@@ -4678,8 +4678,8 @@
   "Open_Value": 14595,
   "Unrealized P&L": -502.5,
   "Unrealized P&L Pct.": -3.443
- },
- {
+  } ,
+ { 
   "Symbol": "TCS22JUN3300CE",
   "ISIN": null,
   "Quantity": 150,
@@ -4693,8 +4693,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TCS22MAY3600CE",
   "ISIN": null,
   "Quantity": 150,
@@ -4708,8 +4708,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TCS22MAY3640CE",
   "ISIN": null,
   "Quantity": 150,
@@ -4723,8 +4723,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TECHM22JUN1000CE",
   "ISIN": null,
   "Quantity": 1200,
@@ -4738,8 +4738,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TECHM22JUN1060CE",
   "ISIN": null,
   "Quantity": 600,
@@ -4753,8 +4753,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TECHM22JUN1120PE",
   "ISIN": null,
   "Quantity": 600,
@@ -4768,8 +4768,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TECHM22JUN980CE",
   "ISIN": null,
   "Quantity": 600,
@@ -4783,8 +4783,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TITAN22MAY2280CE",
   "ISIN": null,
   "Quantity": 375,
@@ -4798,8 +4798,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TORNTPOWER22JUN460CE",
   "ISIN": null,
   "Quantity": 1500,
@@ -4813,8 +4813,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TVSMOTOR22JUL780CE",
   "ISIN": null,
   "Quantity": 2800,
@@ -4828,8 +4828,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "TVSMOTOR22JUN780CE",
   "ISIN": null,
   "Quantity": 1400,
@@ -4843,8 +4843,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "UBL22APR1500CE",
   "ISIN": null,
   "Quantity": 350,
@@ -4858,8 +4858,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "UBL22JUN1600CE",
   "ISIN": null,
   "Quantity": 350,
@@ -4873,8 +4873,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ULTRACEMCO22APR6700CE",
   "ISIN": null,
   "Quantity": 100,
@@ -4888,8 +4888,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ULTRACEMCO22APR6800CE",
   "ISIN": null,
   "Quantity": 200,
@@ -4903,8 +4903,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ULTRACEMCO22APR6900CE",
   "ISIN": null,
   "Quantity": 100,
@@ -4918,8 +4918,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ULTRACEMCO22APR7000CE",
   "ISIN": null,
   "Quantity": 200,
@@ -4933,8 +4933,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ULTRACEMCO22APR7100CE",
   "ISIN": null,
   "Quantity": 100,
@@ -4948,8 +4948,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ULTRACEMCO22APR7200CE",
   "ISIN": null,
   "Quantity": 100,
@@ -4963,8 +4963,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ULTRACEMCO22JUN5700CE",
   "ISIN": null,
   "Quantity": 100,
@@ -4978,8 +4978,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ULTRACEMCO22MAY6000PE",
   "ISIN": null,
   "Quantity": 100,
@@ -4993,8 +4993,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "UPL22JUN660PE",
   "ISIN": null,
   "Quantity": 1300,
@@ -5008,8 +5008,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "UPL22MAY880CE",
   "ISIN": null,
   "Quantity": 1300,
@@ -5023,8 +5023,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "VEDL22JUN228.5CE",
   "ISIN": null,
   "Quantity": 3100,
@@ -5038,8 +5038,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "VEDL22JUN260PE",
   "ISIN": null,
   "Quantity": 1550,
@@ -5053,8 +5053,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "VEDL22MAY348.5PE",
   "ISIN": null,
   "Quantity": 1550,
@@ -5068,8 +5068,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "VEDL22MAY380PE",
   "ISIN": null,
   "Quantity": 1550,
@@ -5083,8 +5083,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "WIPRO22APR605CE",
   "ISIN": null,
   "Quantity": 800,
@@ -5098,8 +5098,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "WIPRO22APR610CE",
   "ISIN": null,
   "Quantity": 800,
@@ -5113,8 +5113,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "WIPRO22APR625CE",
   "ISIN": null,
   "Quantity": 800,
@@ -5128,8 +5128,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "WIPRO22APR630CE",
   "ISIN": null,
   "Quantity": 800,
@@ -5143,8 +5143,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "WIPRO22MAY510PE",
   "ISIN": null,
   "Quantity": 800,
@@ -5158,8 +5158,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ZEEL22JUN200PE",
   "ISIN": null,
   "Quantity": 3000,
@@ -5173,8 +5173,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ZYDUSLIFE22JUN360CE",
   "ISIN": null,
   "Quantity": 1100,
@@ -5188,8 +5188,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ZYDUSLIFE22JUN375CE",
   "ISIN": null,
   "Quantity": 1100,
@@ -5203,8 +5203,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ZYDUSLIFE22JUN390CE",
   "ISIN": null,
   "Quantity": 1100,
@@ -5218,8 +5218,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ZYDUSLIFE22MAY360CE",
   "ISIN": null,
   "Quantity": 1100,
@@ -5233,8 +5233,8 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- },
- {
+  } ,
+ { 
   "Symbol": "ZYDUSLIFE22MAY370CE",
   "ISIN": null,
   "Quantity": 1100,
@@ -5248,5 +5248,5 @@
   "Open_Value": 0,
   "Unrealized P&L": 0,
   "Unrealized P&L Pct.": 0
- }
+  } 
 ]

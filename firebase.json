@@ -9,7 +9,7 @@
         "firebase-debug.log",
         "firebase-debug.*.log"
       ]
-    }
+     } 
   ],
   "hosting": {
     "public": "public",
@@ -22,7 +22,7 @@
       {
         "source": "**",
         "destination": "/index.html"
-      }
+       } 
     ]
-  }
-}
+   } 
+ } 

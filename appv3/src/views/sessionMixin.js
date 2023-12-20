@@ -1,56 +1,56 @@
 import store from '@/store';
-export default{
+export default{ 
 
-    methods:{
+    methods:{ 
 
-        getSessionDetailsFromCookies(){
+        getSessionDetailsFromCookies(  ){ 
         
-          //console.log('session from cookies',this.$cookie.get('session'))
+          //console.log( 'session from cookies',this.$cookie.get( 'session' ))
         
-        this.session=JSON.parse(this.$cookie.get('session'));
-        this.accessToken=this.$cookie.get('accessToken');
+        this.session=JSON.parse( this.$cookie.get( 'session' ));
+        this.accessToken=this.$cookie.get( 'accessToken' );
         
-        },
+         } ,
         
-          },
-          mounted(){
+           } ,
+          mounted(  ){ 
 
-            // console.log('session',this.session)
+            // console.log( 'session',this.session )
         
-        this.getSessionDetailsFromCookies();
+        this.getSessionDetailsFromCookies(  );
 
-        // console.log('this.session',this.session)
+        // console.log( 'this.session',this.session )
 
-        if(this.session==null){
+        if( this.session == null ){ 
 
-          this.$router.push('/');
-        }
+          this.$router.push( '/' );
+         } 
         
-          },
-          computed:{
+           } ,
+          computed:{ 
 
-            session:{
-get(){
+            session:{ 
+get(  ){ 
 
   return store.state.session;
-},
-set(val){
+ } ,
+set( val ){ 
 
-  store.commit('setSession',val)
-}
+  store.commit( 'setSession',val )
+ } 
 
-          },
-          accessToken:{
-get(){
+           } ,
+          accessToken:{ 
+get(  ){ 
 
   return store.state.accessToken;
-},
-set(val){
+ } ,
+set( val ){ 
 
-  store.commit('setAccessToken',val)
-}
+  store.commit( 'setAccessToken',val )
+ } 
 
-          },
-        }
+           } ,
+         } 
 
-}
+ } 

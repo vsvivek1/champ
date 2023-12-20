@@ -24,160 +24,160 @@ import BTST from '@/components/Btst.vue'
 import MiningFuture from '@/components/MiningFuture.vue'
 import FutureMining from '@/components/FutureMining.vue'
 // /home/kseb/findependence/findiapp/src/components/PlaceQuickOrdersForHoldings.vue
-Vue.use(VueRouter)
+Vue.use( VueRouter )
 
-const routes = [
+const routes  =  [
 
-  {
+  { 
     path: '/FutureMining',
     name: 'FutureMining',
     component: FutureMining
-  },  
-    {
+   } ,  
+    { 
     path: '/BTST',
     name: 'BTST',
     component: BTST
-  },  
+   } ,  
   
-  {
+  { 
     path: '/GTT',
     name: 'GTT',
     component: GTT
-  }, 
+   } , 
   
-  {
+  { 
     path: '/Mining',
     name: 'Mining',
     component: Mining
-  }, 
+   } , 
   
   
   
-  {
+  { 
     path: '/MiningMis',
     name: 'MiningMis',
     component: MiningMis
-  }, 
+   } , 
   
   
-  // <!-- {
+  // <!-- { 
   //   path: '/mint',
   //   name: 'mint',
   //   component: Mint
-  // },  
+  //  } ,  
   
-  // { -->
+  // {  -->
 
-    {
+    { 
     path: '/StopLoss',
     name: 'StopLoss',
     component: StopLoss
-  }, 
-    {
+   } , 
+    { 
     path: '/ManiKandanStrategy',
     name: 'ManiKandanStrategy',
     component: ManiKandanStrategy
-  }, 
+   } , 
   
-  {
+  { 
     path: '/OptionChain',
     name: 'OptionChain',
     component: OptionChain 
-  },
-  {
+   } ,
+  { 
     path: '/WebSockets',
     name: 'WebSockets',
     component: WebSockets 
-  },
-  {
+   } ,
+  { 
     path: '/LongBuildUps',
     name: 'LongBuildUp',
     component: LongBuildUp 
-  },
-  {
+   } ,
+  { 
     path: '/Strategies',
     name: 'Strategies',
     component: Strategies 
-  },
-  {
+   } ,
+  { 
     path: '/NarrowRange',
     name: 'NarrowRange',
     component: NarrowRange 
-  },
-  {
+   } ,
+  { 
     path: '/login',
     name: 'login',
     component: Login 
-  },
-  {
+   } ,
+  { 
     path: '/orders',
     name: 'orders',
     component: OrderBook
-  },
-  {
+   } ,
+  { 
     path: '/instruments',
     name: 'GetInstruments',
     component: GetInstruments 
-  },
-  {
+   } ,
+  { 
     path: '/logout',
     name: 'LogOut',
     component: LogOut
-  },
-  {
+   } ,
+  { 
     path: '/holdings',
     name: 'holdings',
     component: ListHoldings
-  },
-  {
+   } ,
+  { 
     path: '/Validate',
     name: 'Validate',
     component: Validate 
-  },
-  {
+   } ,
+  { 
     path: '/',
     name: 'Home',
     component: Home,
     children:[
-      {
+      { 
         path: '',
         name: 'MiningFuture',
         component: MiningFuture
-      }
+       } 
 
 
     ]
-  },
-  {
+   } ,
+  { 
     path: '/quickTargets',
     name: 'PlaceQuickOrderForHoldings',
     component: PlaceQuickOrderForHoldings
-  },
+   } ,
 
-  {
+  { 
     path: '/about',
     name: 'About',
     // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
+    // this generates a separate chunk ( about.[hash].js ) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
+    component: (  )  => import( /* webpackChunkName: "about" */ '../views/About.vue' )
+   } 
 ]
 
-const router = new VueRouter({
+const router  =  new VueRouter( { 
   routes,
   mode: 'history',
    
-})
+ }  )
 
-// router.beforeEach((to, from, next) => {
-//   if (to.fullPath.substr(0,2) === "/#") {
-//     const path = to.fullPath.substr(2);
-//     next(path);
+// router.beforeEach(( to, from, next )  => { 
+//   if ( to.fullPath.substr( 0,2 )== "/#" ) { 
+//     const path  =  to.fullPath.substr( 2 );
+//     next( path );
 //     return;
-//   }
-//   next();
-// });
+//    } 
+//   next(  );
+//  }  );
 // mode: 'history',
 
 export default router

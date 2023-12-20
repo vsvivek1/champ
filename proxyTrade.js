@@ -11,7 +11,7 @@ module.exports=function proxyTrade(io){
       let p=ticks.pop();
   
   
-      if(typeof p=='undefined'){
+      if(typeof p == 'undefined'){
   
           clearInterval(outer)
       return ;
@@ -29,7 +29,7 @@ module.exports=function proxyTrade(io){
      
   let tick1=ar.pop();
   
-  if(typeof tick1=='undefined'){
+  if(typeof tick1 == 'undefined'){
   
       clearInterval(inner)
   return ;

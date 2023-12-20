@@ -1,91 +1,91 @@
 <template>
   <div>
-    <!-- <v-btn @click="FetchInstruments" color="teal">
+    <!-- <v-btn @click = "FetchInstruments" color = "teal">
       Fetch Insruments
       <v-icon>mdi-round-arow</v-icon>
     </v-btn>
 
-{{}}
+{{  }} 
 
      -->
 
-     <!-- {{livePositions}} livePositionsSelected -->
+     <!-- {{ livePositions }}  livePositionsSelected -->
 
-    <!-- {{instrumentTokens}} -->
+    <!-- {{ instrumentTokens }}  -->
 
-    <!-- {{maxTradableAmount}}
-        {{liveBuyOrderAmount }}
-      {{livePositionTotalCost}}
-        {{totalBuyOrderLivePlacedBySoftware}}  -->
+    <!-- {{ maxTradableAmount }} 
+        {{ liveBuyOrderAmount  }} 
+      {{ livePositionTotalCost }} 
+        {{ totalBuyOrderLivePlacedBySoftware }}   -->
 
   <!-- //  -->
 
 
-  {{
+  {{ 
  
   
-  }} it
+   }}  it
 
 
 
 
-    <v-btn @click="showModalForSquareOff()">
+    <v-btn @click = "showModalForSquareOff(  )">
       square off selected
       <v-icon></v-icon>
     </v-btn>
 
-    <button @click="review()">review</button>
+    <button @click = "review(  )">review</button>
 
-    <v-btn @click="getOrders()">Refresh orders</v-btn>
-    <v-btn @click="refreshTradeStatus()">Refresh trade status</v-btn>
+    <v-btn @click = "getOrders(  )">Refresh orders</v-btn>
+    <v-btn @click = "refreshTradeStatus(  )">Refresh trade status</v-btn>
 
-    <v-row class="mt-1">
+    <v-row class = "mt-1">
       <v-col>
         <v-row>
           <v-col>
             <v-chip>
-              Live Position cost {{ livePositionTotalCost }} Live Buy order
-              Amount {{ liveBuyOrderAmount }} &nbsp; Live Tradable Balance
-              {{ liveTradablebalance }}</v-chip
+              Live Position cost {{  livePositionTotalCost  }}  Live Buy order
+              Amount {{  liveBuyOrderAmount  }}  &nbsp; Live Tradable Balance
+              {{  liveTradablebalance  }} </v-chip
             >
           </v-col>
         </v-row>
       </v-col>
       <v-col>
         <v-icon
-          color="red"
-          v-if="heartBeat"
-          title="if This symbol changes color switches between red and blue system is conencted to market"
+          color = "red"
+          v-if = "heartBeat"
+          title = "if This symbol changes color switches between red and blue system is conencted to market"
         >
           mdi-heart
         </v-icon>
 
         <v-icon
-          color="green"
-          v-if="!heartBeat"
-          title="if This symbol changes color switches between red and blue system is conencted to market"
+          color = "green"
+          v-if = "!heartBeat"
+          title = "if This symbol changes color switches between red and blue system is conencted to market"
         >
           mdi-heart
         </v-icon>
       </v-col>
       <v-col>
         <img
-          v-if="chat_id < -1"
-          src="https://img.icons8.com/color/48/000000/twitter--v2.png"
+          v-if = "chat_id < -1"
+          src = "https://img.icons8.com/color/48/000000/twitter--v2.png"
         />
       </v-col>
 
       <v-col>
-        <v-icon color="blue">mdi-clock</v-icon> {{ hours }}: {{ minutes }} :
-        {{ seconds }}
+        <v-icon color = "blue">mdi-clock</v-icon> {{  hours  }} : {{  minutes  }}  :
+        {{  seconds  }} 
       </v-col>
 
       <v-col>
         <v-btn
-          @clck="resetUserMessages()"
+          @clck = "resetUserMessages(  )"
           small
-          color="red"
-          title="reset user messages"
+          color = "red"
+          title = "reset user messages"
         >
           <v-icon>mdi-power-cycle</v-icon>
         </v-btn></v-col
@@ -93,36 +93,36 @@
 
       <v-col>
         <input
-          title="Maximum Tradable Amount"
-          type="text"
-          class="form-control"
-          v-model="maxTradableAmount"
-          placeholder="Maximum Tradable Amount"
+          title = "Maximum Tradable Amount"
+          type = "text"
+          class = "form-control"
+          v-model = "maxTradableAmount"
+          placeholder = "Maximum Tradable Amount"
         />
       </v-col>
 
       <v-col>
         <v-btn
-          v-if="!AutoMode"
-          @click="AutoMode = true"
-          title="Switch to Auto"
+          v-if = "!AutoMode"
+          @click = "AutoMode  =  true"
+          title = "Switch to Auto"
           icon
-          color="green"
+          color = "green"
         >
           <v-icon>mdi-send-clock-outline</v-icon> </v-btn
         ><v-btn
-          v-if="AutoMode"
-          @click="AutoMode = false"
-          title=" Switch to Manual"
+          v-if = "AutoMode"
+          @click = "AutoMode  =  false"
+          title = " Switch to Manual"
           icon
-          color="red"
+          color = "red"
         >
           <v-icon>mdi-send-lock</v-icon>
         </v-btn>
       </v-col>
     </v-row>
 
-    <!-- <div class="user-messages" v-if="userMessages.length">
+    <!-- <div class = "user-messages" v-if = "userMessages.length">
 
    
 
@@ -130,28 +130,28 @@
       
      
       <ul>
-        <li v-for='(msg,index) in userMessages' :key="index">
+        <li v-for = '( msg,index ) in userMessages' :key = "index">
 
-          {{msg}}
+          {{ msg }} 
         </li>
       </ul>
 
 
     </div> -->
 
-    {{ instrumentsFiltered.length }} out of {{ instrumentTokens.length }}
+    {{  instrumentsFiltered.length  }}  out of {{  instrumentTokens.length  }} 
 
     <input
-      type="text"
-      class="form-control"
-      v-model="targetPc"
-      placeholder="Enter the Target %"
+      type = "text"
+      class = "form-control"
+      v-model = "targetPc"
+      placeholder = "Enter the Target %"
     />
 
-    <div class="row">
-      <div class="col offset-1">
+    <div class = "row">
+      <div class = "col offset-1">
         Positions
-        <table class="table">
+        <table class = "table">
           <thead>
             <th>Sl#</th>
             <th>Symbol</th>
@@ -164,57 +164,57 @@
             <th>ACTION</th>
           </thead>
           <tbody>
-            <tr v-for="(pos, index) in livePositions" :key="index">
-              <td>{{ index + 1 }}</td>
-              <td>{{ pos.tradingsymbol }}</td>
-              <td>{{ pos.pnl }}</td>
-              <td>{{ pos.average_price }}</td>
-              <td>{{ pos.last_price }}</td>
+            <tr v-for = "( pos, index ) in livePositions" :key = "index">
+              <td>{{  index + 1  }} </td>
+              <td>{{  pos.tradingsymbol  }} </td>
+              <td>{{  pos.pnl  }} </td>
+              <td>{{  pos.average_price  }} </td>
+              <td>{{  pos.last_price  }} </td>
 
 
               <td>
                 <input
-                  type="text"
-                  size="5"
-                  name=""
-                  id=""
-                  v-model="pos.targetPc"
+                  type = "text"
+                  size = "5"
+                  name = ""
+                  id = ""
+                  v-model = "pos.targetPc"
                 />
                 <input
-                  style="width: fit-content"
-                  type="text"
-                  name=""
-                  id=""
-                  v-model="pos.rangeBreakOutTarget"
+                  style = "width: fit-content"
+                  type = "text"
+                  name = ""
+                  id = ""
+                  v-model = "pos.rangeBreakOutTarget"
                 />
               </td>
 
 
 <td>
 
-  {{ getMisPricePointofScript(pos.instrument_token)}}
+  {{  getMisPricePointofScript( pos.instrument_token ) }} 
 </td>
               <td>
                 <v-icon
-                  color="blue"
-                  v-if="pos.hasLiveTarget"
-                  title="Live Target Exist"
+                  color = "blue"
+                  v-if = "pos.hasLiveTarget"
+                  title = "Live Target Exist"
                   >mdi-star</v-icon
                 >
 
-                <v-btn @click="enableForEditng()" v-if="pos.hasLiveTarget">
+                <v-btn @click = "enableForEditng(  )" v-if = "pos.hasLiveTarget">
                   <v-icon>mdi-pencil</v-icon>
                 </v-btn>
 
-                <v-btn @click="CancelOrder()" v-if="pos.hasLiveTarget">
+                <v-btn @click = "CancelOrder(  )" v-if = "pos.hasLiveTarget">
                   <v-icon>mdi-cancel</v-icon>
                 </v-btn>
 
                 <v-btn
-                  color="green"
-                  title="Set Target"
-                  @click="setTarget(pos)"
-                  v-if="!pos.hasLiveTarget"
+                  color = "green"
+                  title = "Set Target"
+                  @click = "setTarget( pos )"
+                  v-if = "!pos.hasLiveTarget"
                 >
                   <v-icon>mdi-cube-send</v-icon>
                 </v-btn>
@@ -224,14 +224,14 @@
         </table>
         <hr />
 
-        <!-- {{livePositions}} -->
+        <!-- {{ livePositions }}  -->
       </div>
-      <div class="col-6"></div>
+      <div class = "col-6"></div>
     </div>
 
-    <div class="row fixTableHead">
-      <div class="col">
-        <table class="table table bordered table-stripped">
+    <div class = "row fixTableHead">
+      <div class = "col">
+        <table class = "table table bordered table-stripped">
           <thead>
             <th>Slno</th>
             <th>Stock</th>
@@ -247,64 +247,64 @@
           </thead>
           <tbody>
             <tr
-              v-for="(i, index) in instrumentsFiltered"
-              :key="i.instrument_tocken"
+              v-for = "( i, index ) in instrumentsFiltered"
+              :key = "i.instrument_tocken"
             >
-              <template v-if="true">
+              <template v-if = "true">
                 <td>
-                  {{ index + 1 }}
+                  {{  index + 1  }} 
                 </td>
                 <td>
-                  {{ i.name }}
+                  {{  i.name  }} 
 
-                  <div class="row mt-2">
-                    <div class="col-xs mr-2">
-                      <small>SPOT {{ i.spot_price }}</small>
+                  <div class = "row mt-2">
+                    <div class = "col-xs mr-2">
+                      <small>SPOT {{  i.spot_price  }} </small>
                     </div>
-                    <div class="col-xs mr-2">
-                      <small>LOT {{ i.lot_size }}</small>
+                    <div class = "col-xs mr-2">
+                      <small>LOT {{  i.lot_size  }} </small>
                     </div>
-                    <div class="col-xs mr-2"></div>
+                    <div class = "col-xs mr-2"></div>
                   </div>
                 </td>
 
-                <td>{{ i.strike }}</td>
+                <td>{{  i.strike  }} </td>
 
                 <td>
-                  <a target="_blank" :href="i.chart">{{ i.tradingsymbol }} </a>
+                  <a target = "_blank" :href = "i.chart">{{  i.tradingsymbol  }}  </a>
                 </td>
-                <td :class="i.candle">
-                  {{ i.last_price }}
-                  <small> Amt {{ i.lot_size * i.last_price }} </small>
-                  <!-- Live Profit if executed  <b>{{i.lot_size *(i.last_price-i.SevenDayMaxMin.Max)}}</b> -->
+                <td :class = "i.candle">
+                  {{  i.last_price  }} 
+                  <small> Amt {{  i.lot_size * i.last_price  }}  </small>
+                  <!-- Live Profit if executed  <b>{{ i.lot_size *( i.last_price-i.SevenDayMaxMin.Max ) }} </b> -->
                 </td>
-                <td>{{ i.instrument_type }}</td>
-                <td>{{ i.pricePoints.yesterday.high }}</td>
+                <td>{{  i.instrument_type  }} </td>
+                <td>{{  i.pricePoints.yesterday.high  }} </td>
 
                 <td>
                   <select
-                    name=""
-                    id=""
-                    v-model="i.seletedBuyingMethod"
-                    @change="changeBuyingMethod(i)"
+                    name = ""
+                    id = ""
+                    v-model = "i.seletedBuyingMethod"
+                    @change = "changeBuyingMethod( i )"
                   >
-                    <option v-for="bp in buyingPoint" :value="bp" :key="bp">
-                      {{ bp }}
+                    <option v-for = "bp in buyingPoint" :value = "bp" :key = "bp">
+                      {{  bp  }} 
                     </option>
                   </select>
 
-                  <!-- {{i.seletedBuyingMethod}} -->
-                  <small v-if="i.SevenDayMaxMin"></small> &nbsp;
+                  <!-- {{ i.seletedBuyingMethod }}  -->
+                  <small v-if = "i.SevenDayMaxMin"></small> &nbsp;
 
-                  {{i}}
+                  {{ i }} 
                   <v-btn
                     fab
                     small
-                    :title="`Buy Now for  Amt ${
+                    :title = "`Buy Now for  Amt ${ 
                       i.SevenDayMaxMin.Max * i.lot_size
-                    }`"
-                    @click="BuyNow(i)"
-                    ><v-icon color="green">mdi-cart</v-icon>
+                     } `"
+                    @click = "BuyNow( i )"
+                    ><v-icon color = "green">mdi-cart</v-icon>
                   </v-btn>
                 </td>
               </template>
@@ -314,397 +314,397 @@
       </div>
     </div>
 
-    <!-- :class="{ 'red': pos.candle_color=='red', 'green': pos.candle_color=='green' }" -->
+    <!-- :class = "{  'red': pos.candle_color == 'red', 'green': pos.candle_color == 'green'  } " -->
     <!-- <ul>
-      <li v-for="i in instruments" :key="i.instrument_tocken">
-        {{ i }} 
+      <li v-for = "i in instruments" :key = "i.instrument_tocken">
+        {{  i  }}  
       </li>
     </ul> -->
 
-    <b-modal v-model="modalShow">
-      <slot name="header"> geader </slot>
-      <slot name="body">
+    <b-modal v-model = "modalShow">
+      <slot name = "header"> geader </slot>
+      <slot name = "body">
         <table>
-          <tr v-for="(symbol, index) in livePositionsSelected" :key="index">
-            <td>{{ index + 1 }}</td>
-            <td>{{ symbol.tradingsymbol }}</td>
-            <td>{{ symbol.pnl }}</td>
+          <tr v-for = "( symbol, index ) in livePositionsSelected" :key = "index">
+            <td>{{  index + 1  }} </td>
+            <td>{{  symbol.tradingsymbol  }} </td>
+            <td>{{  symbol.pnl  }} </td>
             <td>
               <input
-                type="checkbox"
-                name=""
-                id=""
-                class="form-control"
-                v-model="symbol.selected"
+                type = "checkbox"
+                name = ""
+                id = ""
+                class = "form-control"
+                v-model = "symbol.selected"
               />
 
-              {{ symbol.selected }}
+              {{  symbol.selected  }} 
             </td>
           </tr>
         </table>
       </slot>
 
-      <slot name="footer">
-        <v-btn @click="squareoffAll()">Proceed </v-btn>
+      <slot name = "footer">
+        <v-btn @click = "squareoffAll(  )">Proceed </v-btn>
       </slot>
     </b-modal>
   </div>
 </template>
 
 <script>
-import { io } from "socket.io-client";
+import {  io  }  from "socket.io-client";
 import axios from "axios";
 import sessionMixin from "@/views/sessionMixin";
 // import ThemeSwitcherVue from "../../../../theme/materio-free-v1.0.2/materio-vuetify-vuejs-admin-template-free/materio-vuetify-vuejs-admin-template-free-main/src/layouts/components/ThemeSwitcher.vue";
 // import TypographyTextsVue from "../../../../theme/materio-free-v1.0.2/materio-vuetify-vuejs-admin-template-free/materio-vuetify-vuejs-admin-template-free-main/src/views/typography/TypographyTexts.vue";
 
-const socket = io("http://localhost:4000");
+const socket  =  io( "http://localhost:4000" );
 
-// let instru = require("");
+// let instru  =  require( "" );
 
 
 
-// let instrumentsForMining = require("../instrumentsMIS.json");
+// let instrumentsForMining  =  require( "../instrumentsMIS.json" );
 
 // findiserver/app/instrumentsMIS.json
 
-//  let a=require('@./app/')
-let instrumentsForMining = require("./../../../app/instrumentsMIS.json");
-export default {
+//  let a = require( '@./app/' )
+let instrumentsForMining  =  require( "./../../../app/instrumentsMIS.json" );
+export default { 
   mixins: [sessionMixin],
 
-  beforeMount() {},
-  watch: {
-    orderArray(n, o) {
-      // console.log(n,o)
+  beforeMount(  ) {  } ,
+  watch: { 
+    orderArray( n, o ) { 
+      // console.log( n,o )
 
-      let orderArrays = [...this.orderArray];
+      let orderArrays  =  [...this.orderArray];
 
-      if (orderArrays.length > 0) {
-        orderArrays.forEach(async (orderArray) => {
-          let a = await this.placeOrder(orderArray);
-          console.log("place order result", a);
-          console.log("Actual Firing", JSON.stringify(orderArray));
-        });
+      if ( orderArrays.length > 0 ) { 
+        orderArrays.forEach( async ( orderArray )  => { 
+          let a  =  await this.placeOrder( orderArray );
+          console.log( "place order result", a );
+          console.log( "Actual Firing", JSON.stringify( orderArray ));
+         }  );
 
-        this.orderArray = [];
-      }
-    },
-  },
+        this.orderArray  =  [];
+       } 
+     } ,
+   } ,
 
-  mounted() {
-    let placingTimer = window.setInterval(() => {
-      let ln = this.orderArray.length;
+  mounted(  ) { 
+    let placingTimer  =  window.setInterval((  )  => { 
+      let ln  =  this.orderArray.length;
 
-      // console.log('order array length1',ln,JSON.stringify(this.orderArray))
+      // console.log( 'order array length1',ln,JSON.stringify( this.orderArray ))
 
-      // console.log('this.orderArray.',this.orderArray)
+      // console.log( 'this.orderArray.',this.orderArray )
 
       // clock
-      var d = new Date();
-      this.hours = d.getHours();
-      this.minutes = d.getMinutes();
-      this.seconds = d.getSeconds();
+      var d  =  new Date(  );
+      this.hours  =  d.getHours(  );
+      this.minutes  =  d.getMinutes(  );
+      this.seconds  =  d.getSeconds(  );
       // order status
 
-      this.getOrders();
-      this.refreshTradeStatus();
-    }, 30000);
+      this.getOrders(  );
+      this.refreshTradeStatus(  );
+     } , 30000 );
 
-    // *Math.max(this.orderArray.length,1)
+    // *Math.max( this.orderArray.length,1 )
 
-    if (this.chat_id == -1) {
-      this.getChatId().then((chat_id) => {
-        var d = new Date();
+    if ( this.chat_id  ==  -1 ) { 
+      this.getChatId(  ).then(( chat_id )  => { 
+        var d  =  new Date(  );
 
-        let today = d.toLocaleString().slice(0, 10);
+        let today  =  d.toLocaleString(  ).slice( 0, 10 );
 
-        var txt = "Welcome to Trading on " + today;
-        this.sendToTelegramGroup(txt);
-      });
-    }
-    // this.triggerWebsocktsInServer();
+        var txt  =  "Welcome to Trading on " + today;
+        this.sendToTelegramGroup( txt );
+       }  );
+     } 
+    // this.triggerWebsocktsInServer(  );
 
-    socket.on("order_update", (orderUpdates) => {
-      this.getOrders();
-      this.refreshTradeStatus();
-    });
+    socket.on( "order_update", ( orderUpdates )  => { 
+      this.getOrders(  );
+      this.refreshTradeStatus(  );
+     }  );
 
-    //  window.setInterval(() => {
-    //   console.clear();
+    //  window.setInterval((  )  => { 
+    //   console.clear(  );
 
-    //    },250000)
+    //     } ,250000 )
 
-    // window. setInterval(() => {
-    //     var d = new Date();
-    //     this.hours = d.getHours();
-    //     this.minutes = d.getMinutes();
-    //     this.seconds = d.getSeconds();
+    // window. setInterval((  )  => { 
+    //     var d  =  new Date(  );
+    //     this.hours  =  d.getHours(  );
+    //     this.minutes  =  d.getMinutes(  );
+    //     this.seconds  =  d.getSeconds(  );
 
-    //  },1000)
+    //   } ,1000 )
 
-    this.getOrders();
-    this.refreshTradeStatus();
-    this.instruments = instrumentsForMining;
+    this.getOrders(  );
+    this.refreshTradeStatus(  );
+    this.instruments  =  instrumentsForMining;
 
-    //  let k=await
-    this.setInstrumentTokens();
+    //  let k = await
+    this.setInstrumentTokens(  );
 
-    socket.emit("subscribe-orders", JSON.stringify(this.instrumentTokens));
+    socket.emit( "subscribe-orders", JSON.stringify( this.instrumentTokens ));
 
-    socket.on("send-realtime-subscription", (s) => {
-      this.mutateWithLtp(s);
+    socket.on( "send-realtime-subscription", ( s )  => { 
+      this.mutateWithLtp( s );
 
-      this.CurrentTick = s;
-    });
+      this.CurrentTick  =  s;
+     }  );
 
-    //   setInterval(async () => {
+    //   setInterval( async (  )  => { 
     //  this.getOrders;
     //    this.refreshTradeStatus;
 
-    //   }, 30000);
-  },
+    //    } , 30000 );
+   } ,
 
-  computed: {
-    liveTradablebalance() {
-      return (
+  computed: { 
+    liveTradablebalance(  ) { 
+      return ( 
         this.maxTradableAmount -
         this.liveBuyOrderAmount -
         this.livePositionTotalCost -
         this.totalBuyOrderLivePlacedBySoftware -
         this.proposedBuyAmount
-      );
-    },
-    //  &&  typeof i.SevenDayMaxMin!='undefined'
+       );
+     } ,
+    //  &&  typeof i.SevenDayMaxMin!= 'undefined'
 
-    // &&  typeof i.SevenDayMaxMin!='undefined'
-    totalLiveprofitIfExecuted() {
+    // &&  typeof i.SevenDayMaxMin!= 'undefined'
+    totalLiveprofitIfExecuted(  ) { 
       return 0;
 
-      let total = 0;
+      let total  =  0;
 
       this.instruments
-        .map((i) => i.liveprofitIfExecuted)
-        .forEach((e) => {
-          // console.log('e',e)
+        .map(( i )  => i.liveprofitIfExecuted )
+        .forEach(( e )  => { 
+          // console.log( 'e',e )
 
-          if (isNaN(e)) {
-            e = 0;
-          }
+          if ( isNaN( e )) { 
+            e  =  0;
+           } 
 
-          total = total + e;
-        });
+          total  =  total + e;
+         }  );
 
       return total;
 
       return this.instruments
-        .map((i) => i.liveprofitIfExecuted)
-        .reduce((c, p) => {
-          if (isNaN(p)) {
-            p = 0;
-          }
-          c = c + p;
-        }, 0);
-    },
+        .map(( i )  => i.liveprofitIfExecuted )
+        .reduce(( c, p )  => { 
+          if ( isNaN( p )) { 
+            p  =  0;
+           } 
+          c  =  c + p;
+         } , 0 );
+     } ,
 
-    instrumentsFiltered() {
-      return this.instruments.filter((i) => i.buyNow == true);
+    instrumentsFiltered(  ) { 
+      return this.instruments.filter(( i )  => i.buyNow  ==  true );
 
-      // .sort((a, b) => {
+      // .sort(( a, b )  => { 
       //   return a.activatedTime - b.activatedTime;
-      // });
-    },
-  },
+      //  }  );
+     } ,
+   } ,
 
-  methods: {
+  methods: { 
 
-getMisPricePointofScript(instrument_tocken){
-
-
-let yesterdayHigh=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pricePoints.yesterday.high;
-
-let type=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].instrument_type;
-let name=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].name;
-
-//.hourlyPricePoints(h=>h.h.high>1.1*yesterdayHigh
-
-if(name=='BANKNIFTY' && type=='FUT'){
-
-  let offset=90;
- let reference= yesterdayHigh+offset
+getMisPricePointofScript( instrument_tocken ){ 
 
 
-return this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pricePoints.hourlyPricePoints.filter(l=>l.high>reference)[0].high
+let yesterdayHigh = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].pricePoints.yesterday.high;
+
+let type = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].instrument_type;
+let name = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].name;
+
+//.hourlyPricePoints( h =>h.h.high>1.1*yesterdayHigh
+
+if( name == 'BANKNIFTY' && type == 'FUT' ){ 
+
+  let offset = 90;
+ let reference =  yesterdayHigh+offset
+
+
+return this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].pricePoints.hourlyPricePoints.filter( l =>l.high>reference )[0].high
 
 
 
-}
-
-
+ } 
 
 
 
 
 
-},
 
 
-    async review() {
-      let livePositionsTmp = await this.getPositions();
-
-      // console.log()
-
-      // let pnl=0
-
-      let itrator = livePositionsTmp.net.slice(1, 200);
-
-      let livePositionsInstrumentTokens = instrumentsForMining
+ } ,
 
 
-        .map((m) => "NFO:" + m.tradingsymbol)
-        .slice(1, 200);
+    async review(  ) { 
+      let livePositionsTmp  =  await this.getPositions(  );
 
-      let url = "/api/getQuoteFromZerodha";
+      // console.log(  )
 
-      // console.log(livePositionsInstrumentTokens)
+      // let pnl = 0
 
-      let obj = {};
-      obj.accessToken = this.accessToken;
+      let itrator  =  livePositionsTmp.net.slice( 1, 200 );
 
-      let quoteData = [];
-      obj.arryOfInstruments = livePositionsInstrumentTokens;
+      let livePositionsInstrumentTokens  =  instrumentsForMining
 
-      let a = await axios.post(url, obj).then((r) => {
-        quoteData = r.data;
+
+        .map(( m )  => "NFO:" + m.tradingsymbol )
+        .slice( 1, 200 );
+
+      let url  =  "/api/getQuoteFromZerodha";
+
+      // console.log( livePositionsInstrumentTokens )
+
+      let obj  =  {  } ;
+      obj.accessToken  =  this.accessToken;
+
+      let quoteData  =  [];
+      obj.arryOfInstruments  =  livePositionsInstrumentTokens;
+
+      let a  =  await axios.post( url, obj ).then(( r )  => { 
+        quoteData  =  r.data;
 
         return 1;
-      });
+       }  );
 
-      // console.log(quoteData,'quoteData',a)
-      let counter = 0;
+      // console.log( quoteData,'quoteData',a )
+      let counter  =  0;
 
-      Object.keys(quoteData).forEach((lp1) => {
-        let lp = quoteData[lp1];
-        console.log(lp, "lp");
+      Object.keys( quoteData ).forEach(( lp1 )  => { 
+        let lp  =  quoteData[lp1];
+        console.log( lp, "lp" );
 
-        counter = counter + 1;
-        let obj = instrumentsForMining.filter(
-          (i) => i.instrument_token == lp.instrument_token
-        )[0];
-        lp.buy_quantity = obj.lot_size;
+        counter  =  counter + 1;
+        let obj  =  instrumentsForMining.filter( 
+          ( i )  => i.instrument_token  ==  lp.instrument_token
+         )[0];
+        lp.buy_quantity  =  obj.lot_size;
 
-        // let tgt=obj.pricePoints.yesterday.rangeBreakOutTarget;
-        let tgt = obj.pricePoints.yesterday.high * 1.05;
+        // let tgt = obj.pricePoints.yesterday.rangeBreakOutTarget;
+        let tgt  =  obj.pricePoints.yesterday.high * 1.05;
 
-        let entry = obj.pricePoints.yesterday.high;
-        // let sl=obj.pricePoints.yesterday.low;
-        let sl = obj.pricePoints.yesterday.high * 0.95;
+        let entry  =  obj.pricePoints.yesterday.high;
+        // let sl = obj.pricePoints.yesterday.low;
+        let sl  =  obj.pricePoints.yesterday.high * 0.95;
 
-        if (lp.last_price > tgt) {
-          console.log("profit");
-          let tmp = 0;
-          tmp = (lp.last_price - tgt) * lp.buy_quantity;
+        if ( lp.last_price > tgt ) { 
+          console.log( "profit" );
+          let tmp  =  0;
+          tmp  =  ( lp.last_price - tgt ) * lp.buy_quantity;
 
-          console.log("tmp", tmp, obj.tradingsymbol);
+          console.log( "tmp", tmp, obj.tradingsymbol );
 
-          this.pnl = this.pnl + tmp;
-        } else if (lp.last_price < sl) {
-          console.log("stop loss");
-          let tmp = 0;
-          tmp = (lp.last_price - sl) * lp.buy_quantity;
+          this.pnl  =  this.pnl + tmp;
+         }  else if ( lp.last_price < sl ) { 
+          console.log( "stop loss" );
+          let tmp  =  0;
+          tmp  =  ( lp.last_price - sl ) * lp.buy_quantity;
 
-          console.log("tmp", tmp, lp.tradingsymbol);
+          console.log( "tmp", tmp, lp.tradingsymbol );
 
-          this.pnl = this.pnl + tmp;
-        } else {
-          console.log("neither");
+          this.pnl  =  this.pnl + tmp;
+         }  else { 
+          console.log( "neither" );
 
-          let tmp = 0;
-          tmp = (lp.last_price - entry) * lp.buy_quantity;
+          let tmp  =  0;
+          tmp  =  ( lp.last_price - entry ) * lp.buy_quantity;
 
-          console.log("tmp", tmp, lp.tradingsymbol);
+          console.log( "tmp", tmp, lp.tradingsymbol );
 
-          this.pnl = this.pnl + tmp;
-        }
+          this.pnl  =  this.pnl + tmp;
+         } 
 
-        // console.log(lp)
-      });
+        // console.log( lp )
+       }  );
 
-      console.log("total this.pnl", this.pnl, counter);
-    },
+      console.log( "total this.pnl", this.pnl, counter );
+     } ,
 
-    async showModalForSquareOff() {
-      let livePositionsTmp = await this.getPositions();
+    async showModalForSquareOff(  ) { 
+      let livePositionsTmp  =  await this.getPositions(  );
 
-      this.livePositionsSelected = livePositionsTmp.net.filter(
-        (p) => p.exchange == "NFO" && p.quantity > 0 && p.product=='MIS'
-      );
+      this.livePositionsSelected  =  livePositionsTmp.net.filter( 
+        ( p )  => p.exchange  ==  "NFO" && p.quantity > 0 && p.product == 'MIS'
+       );
 
-      this.livePositionsSelected.forEach((lp) =>
-        this.$set(lp, "selected", false)
-      );
+      this.livePositionsSelected.forEach(( lp )  =>
+        this.$set( lp, "selected", false )
+       );
 
-      this.modalShow = true;
-    },
+      this.modalShow  =  true;
+     } ,
 
-    async squareoffAll() {
-      // var y=confirm('do uwant to continue');
+    async squareoffAll(  ) { 
+      // var y = confirm( 'do uwant to continue' );
 
       //get positions
 
-      let livePositionsInstrumentTokens = this.livePositionsSelected
-        .filter((lp) => lp.selected == true)
-        .map((m) => {
-          let pp1 = this.instruments.filter(
-            (i) => i.instrument_token == m.instrument_token
-          )[0].pricePoints;
+      let livePositionsInstrumentTokens  =  this.livePositionsSelected
+        .filter(( lp )  => lp.selected  ==  true )
+        .map(( m )  => { 
+          let pp1  =  this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  m.instrument_token
+           )[0].pricePoints;
 
-          console.log(pp1, "pricePoints");
+          console.log( pp1, "pricePoints" );
 
           return "NFO:" + m.tradingsymbol;
-        });
+         }  );
 
-      let urlGetQuoteFromZerodha = "/api/getQuoteFromZerodha";
+      let urlGetQuoteFromZerodha  =  "/api/getQuoteFromZerodha";
 
-      let obj = {};
-      obj.accessToken = this.accessToken;
-      obj.arryOfInstruments = livePositionsInstrumentTokens;
+      let obj  =  {  } ;
+      obj.accessToken  =  this.accessToken;
+      obj.arryOfInstruments  =  livePositionsInstrumentTokens;
 
-      let marketQuotes = await axios
-        .post(urlGetQuoteFromZerodha, obj)
-        .then((res) => res.data);
+      let marketQuotes  =  await axios
+        .post( urlGetQuoteFromZerodha, obj )
+        .then(( res )  => res.data );
 
-      let keys = Object.keys(marketQuotes);
+      let keys  =  Object.keys( marketQuotes );
 
-      let orderArray = keys
-        .map((k1) => {
-          let i = marketQuotes[k1];
-          let tradingsymbol = k1.split(":")[1];
-          let transaction_type = "SELL";
+      let orderArray  =  keys
+        .map(( k1 )  => { 
+          let i  =  marketQuotes[k1];
+          let tradingsymbol  =  k1.split( ":" )[1];
+          let transaction_type  =  "SELL";
 
-          let instrument_token = marketQuotes[k1].instrument_token;
+          let instrument_token  =  marketQuotes[k1].instrument_token;
 
-          let PlacedReverseOrder = this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0].PlacedReverseOrder;
+          let PlacedReverseOrder  =  this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0].PlacedReverseOrder;
 
-          let hasLivetarget = this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0].hasLivetarget;
+          let hasLivetarget  =  this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0].hasLivetarget;
 
-          if (PlacedReverseOrder == true || hasLivetarget == true) {
-            console.log("placed reverse order");
+          if ( PlacedReverseOrder  ==  true || hasLivetarget  ==  true ) { 
+            console.log( "placed reverse order" );
             return false;
-          } else {
-            let lot_size = this.instruments.filter(
-              (i) => i.instrument_token == instrument_token
-            )[0].lot_size;
-            let order_type = "LIMIT";
-            let Price = i.depth.buy.sort((a, b) => b.price - a.price)[0].price;
+           }  else { 
+            let lot_size  =  this.instruments.filter( 
+              ( i )  => i.instrument_token  ==  instrument_token
+             )[0].lot_size;
+            let order_type  =  "LIMIT";
+            let Price  =  i.depth.buy.sort(( a, b )  => b.price - a.price )[0].price;
 
-            let product='MIS';
+            let product = 'MIS';
 
-            let arr = this.buildOrderArray(
+            let arr  =  this.buildOrderArray( 
               tradingsymbol,
               transaction_type,
 
@@ -712,103 +712,103 @@ return this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pric
               order_type,
               Price,
               product
-            );
+             );
 
-            this.$set(
-              this.instruments.filter(
-                (i) => i.instrument_token == instrument_token
-              )[0],
+            this.$set( 
+              this.instruments.filter( 
+                ( i )  => i.instrument_token  ==  instrument_token
+               )[0],
               "PlacedReverseOrder",
               true
-            );
+             );
 
-            this.$set(
-              this.instruments.filter(
-                (i) => i.instrument_token == instrument_token
-              )[0],
+            this.$set( 
+              this.instruments.filter( 
+                ( i )  => i.instrument_token  ==  instrument_token
+               )[0],
               "PlacedReverseOrderType",
               "Day Exit"
-            );
+             );
 
-            let a = [];
+            let a  =  [];
 
-            a.push(arr);
+            a.push( arr );
 
             return a;
-          }
-        })
-        .filter((n) => !(n == null || n == false));
+           } 
+         }  )
+        .filter(( n )  => !( n  ==  null || n  ==  false ));
 
-      this.modalShow = true;
+      this.modalShow  =  true;
 
-      this.orderArray=orderArray;
+      this.orderArray = orderArray;
 
-      console.log("orderArray", JSON.stringify(orderArray));
+      console.log( "orderArray", JSON.stringify( orderArray ));
 
       //return false;
 
       //check if reverse order exit
 
       ///till here
-    },
+     } ,
 
-    getChatId() {
-      this.chat_id = -1;
-      if (this.chat_id != 1) {
-        let url = `https://api.telegram.org/bot${this.token}/getUpdates`;
+    getChatId(  ) { 
+      this.chat_id  =  -1;
+      if ( this.chat_id !=  1 ) { 
+        let url  =  `https://api.telegram.org/bot${ this.token } /getUpdates`;
 
         return axios
-          .get(url)
-          .then((r) => {
-            this.chat_id = r.data.result[0].channel_post.chat.id;
+          .get( url )
+          .then(( r )  => { 
+            this.chat_id  =  r.data.result[0].channel_post.chat.id;
 
             return this.chat_id;
-          })
-          .catch((e) => e);
+           }  )
+          .catch(( e )  => e );
 
-        var txt = "First time";
-      }
-    },
+        var txt  =  "First time";
+       } 
+     } ,
 
-    sendToTelegramGroup(text) {
-      if (true) {
-        let obj = {};
-        obj.chat_id = this.chat_id;
-        obj.text = text;
+    sendToTelegramGroup( text ) { 
+      if ( true ) { 
+        let obj  =  {  } ;
+        obj.chat_id  =  this.chat_id;
+        obj.text  =  text;
 
-        let urlToSendMessage = `https://api.telegram.org/bot${this.token}/sendMessage`;
+        let urlToSendMessage  =  `https://api.telegram.org/bot${ this.token } /sendMessage`;
 
         axios
-          .post(urlToSendMessage, obj)
-          .then((r) => {
-            // console.log('from bot ',r.data.result[0])
-          })
-          .catch((e) => e);
-        // console.log('from bot ',r.data.result[0].channel_post.chat.id)
-      }
-    },
+          .post( urlToSendMessage, obj )
+          .then(( r )  => { 
+            // console.log( 'from bot ',r.data.result[0] )
+           }  )
+          .catch(( e )  => e );
+        // console.log( 'from bot ',r.data.result[0].channel_post.chat.id )
+       } 
+     } ,
 
-    resetUserMessages() {
-      this.userMessages = ["no msg"];
-    },
-    triggerWebsocktsInServer() {
-      let url = "/api/triggerWebsocktsInServer/accessToken/" + this.accessToken;
+    resetUserMessages(  ) { 
+      this.userMessages  =  ["no msg"];
+     } ,
+    triggerWebsocktsInServer(  ) { 
+      let url  =  "/api/triggerWebsocktsInServer/accessToken/" + this.accessToken;
 
-      axios.get(url).then((r) => {
-        console.log("triggered");
-      });
-    },
-    CancelOrder() {},
-    enableForEditng() {},
-    async setTarget(i) {
-      let tradingsymbol = i.tradingsymbol;
-      let lot_size = i.quantity;
-      let order_type = "LIMIT";
-      let Price = i.target;
-      let transaction_type = "SELL";
+      axios.get( url ).then(( r )  => { 
+        console.log( "triggered" );
+       }  );
+     } ,
+    CancelOrder(  ) {  } ,
+    enableForEditng(  ) {  } ,
+    async setTarget( i ) { 
+      let tradingsymbol  =  i.tradingsymbol;
+      let lot_size  =  i.quantity;
+      let order_type  =  "LIMIT";
+      let Price  =  i.target;
+      let transaction_type  =  "SELL";
 
-      let product='MIS'
-      let arr = this.buildOrderArray(
+      let product = 'MIS'
+      let arr  =  this.buildOrderArray( 
         tradingsymbol,
         transaction_type,
 
@@ -816,534 +816,534 @@ return this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pric
         order_type,
         Price,
         product
-      );
-      console.log(arr);
+       );
+      console.log( arr );
 
-      let orderArray = [arr];
+      let orderArray  =  [arr];
 
-      let a = await this.placeOrder(orderArray);
-      console.log("place order result", a);
-      this.refreshTradeStatus();
-    },
+      let a  =  await this.placeOrder( orderArray );
+      console.log( "place order result", a );
+      this.refreshTradeStatus(  );
+     } ,
 
-    async getOrders() {
-      let obj = {};
-      obj.accessToken = this.accessToken;
-      let url = "/api/getOrdersPost";
+    async getOrders(  ) { 
+      let obj  =  {  } ;
+      obj.accessToken  =  this.accessToken;
+      let url  =  "/api/getOrdersPost";
 
-      return axios.post(url, obj).then((res) => {
-        // console.log(res.data,'11')
-        let t = res.data.filter(
-          (o) =>
-            (o.exchange =
+      return axios.post( url, obj ).then(( res )  => { 
+        // console.log( res.data,'11' )
+        let t  =  res.data.filter( 
+          ( o )  =>
+            ( o.exchange  = 
               "NFO" &&
-              !(
-                o.status == "COMPLETE" ||
-                o.status == "CANCELLED" ||
-                o.status == "REJECTED"
-              ))
-        );
+              !( 
+                o.status  ==  "COMPLETE" ||
+                o.status  ==  "CANCELLED" ||
+                o.status  ==  "REJECTED"
+               ))
+         );
 
-        this.orders = t;
+        this.orders  =  t;
 
-        this.liveBuyOrderAmount = t
-          .filter(
-            (t1) =>
-              t1.status == "OPEN" &&
-              t1.transaction_type == "BUY" &&
-              t1.exchange == "NFO"
-          )
-          .map((s) => s.quantity * s.price)
-          .reduce((pv, cv) => (pv = pv + cv), 0);
-        //console.log('orders',t)
-      });
-    },
+        this.liveBuyOrderAmount  =  t
+          .filter( 
+            ( t1 )  =>
+              t1.status  ==  "OPEN" &&
+              t1.transaction_type  ==  "BUY" &&
+              t1.exchange  ==  "NFO"
+           )
+          .map(( s )  => s.quantity * s.price )
+          .reduce(( pv, cv )  => ( pv  =  pv + cv ), 0 );
+        //console.log( 'orders',t )
+       }  );
+     } ,
 
-    changeBuyingMethod(i) {},
+    changeBuyingMethod( i ) {  } ,
 
-    async getPositions() {
-      let url = "/api/getPositions";
+    async getPositions(  ) { 
+      let url  =  "/api/getPositions";
 
-      let obj = {};
-      obj.accessToken = this.accessToken;
-      return axios.post(url, obj).then((res) => {
+      let obj  =  {  } ;
+      obj.accessToken  =  this.accessToken;
+      return axios.post( url, obj ).then(( res )  => { 
         return res.data;
-      });
-    },
+       }  );
+     } ,
 
-    async refreshTradeStatus() {
-      let livePositionsTmp = await this.getPositions();
+    async refreshTradeStatus(  ) { 
+      let livePositionsTmp  =  await this.getPositions(  );
 
-      let a = await this.getOrders();
+      let a  =  await this.getOrders(  );
 
-      this.livePositions = livePositionsTmp.net.filter(
-        (p) => p.exchange == "NFO" && p.quantity != 0 && p.product=='MIS'
-      );
+      this.livePositions  =  livePositionsTmp.net.filter( 
+        ( p )  => p.exchange  ==  "NFO" && p.quantity !=  0 && p.product == 'MIS'
+       );
 
-      this.livePositionTotalCost = 0;
+      this.livePositionTotalCost  =  0;
 
-      this.totalBuyOrderLivePlacedBySoftware = 0;
+      this.totalBuyOrderLivePlacedBySoftware  =  0;
       this.livePositions
-        .filter((f) => f.exchange == "NFO")
-        .forEach(async (l) => {
-          this.livePositionTotalCost =
+        .filter(( f )  => f.exchange  ==  "NFO" )
+        .forEach( async ( l )  => { 
+          this.livePositionTotalCost  = 
             this.livePositionTotalCost + l.average_price * l.quantity;
 
-          if (
-            typeof this.instruments.filter(
-              (i) => i.instrument_token == l.instrument_token
-            )[0] !== "undefined"
-          ) {
-            this.$set(
-              this.instruments.filter(
-                (i) => i.instrument_token == l.instrument_token
-              )[0],
+          if ( 
+            typeof this.instruments.filter( 
+              ( i )  => i.instrument_token  ==  l.instrument_token
+             )[0] !==  "undefined"
+           ) { 
+            this.$set( 
+              this.instruments.filter( 
+                ( i )  => i.instrument_token  ==  l.instrument_token
+               )[0],
               "average_price",
               l.average_price
-            );
-          }
+             );
+           } 
 
-          this.$set(l, "targetPc", 1.2);
+          this.$set( l, "targetPc", 1.2 );
 
 
-let rangeBreakOutTarget=this.instruments.filter(
-                (i) => i.instrument_token == l.instrument_token
-              )[0].pricePoints.d1.rangeBreakOutTarget;
+let rangeBreakOutTarget = this.instruments.filter( 
+                ( i )  => i.instrument_token  ==  l.instrument_token
+               )[0].pricePoints.d1.rangeBreakOutTarget;
 
          
 
-          this.$set(l, "rangeBreakOutTarget", rangeBreakOutTarget);
-          this.$set(l, "target", Math.ceil(l.average_price * l.targetPc), 1);
+          this.$set( l, "rangeBreakOutTarget", rangeBreakOutTarget );
+          this.$set( l, "target", Math.ceil( l.average_price * l.targetPc ), 1 );
 
-          let ln = this.orders
-            .filter((o) => o.tradingsymbol == l.tradingsymbol)
-            .filter((t1) => t1.transaction_type == "SELL").length;
+          let ln  =  this.orders
+            .filter(( o )  => o.tradingsymbol  ==  l.tradingsymbol )
+            .filter(( t1 )  => t1.transaction_type  ==  "SELL" ).length;
 
-          if (ln == 0) {
-            this.$set(
-              this.instruments.filter(
-                (i) => i.instrument_token == l.instrument_token
-              )[0],
+          if ( ln  ==  0 ) { 
+            this.$set( 
+              this.instruments.filter( 
+                ( i )  => i.instrument_token  ==  l.instrument_token
+               )[0],
               "hasLiveTarget",
               false
-            );
-          } else if (ln > 0) {
-            this.$set(l, "hasLiveTarget", true);
+             );
+           }  else if ( ln > 0 ) { 
+            this.$set( l, "hasLiveTarget", true );
 
-            this.$set(
-              this.instruments.filter(
-                (i) => i.instrument_token == l.instrument_token
-              )[0],
+            this.$set( 
+              this.instruments.filter( 
+                ( i )  => i.instrument_token  ==  l.instrument_token
+               )[0],
               "hasLiveTarget",
               true
-            );
+             );
 
-            this.$set(
-              this.instruments.filter(
-                (i) => i.instrument_token == l.instrument_token
-              )[0],
+            this.$set( 
+              this.instruments.filter( 
+                ( i )  => i.instrument_token  ==  l.instrument_token
+               )[0],
               "buyNow",
               true
-            );
-          }
+             );
+           } 
 
           // no live target so set a live target
 
-          if (
-            typeof this.instruments.filter(
-              (i) => i.instrument_token == l.instrument_token
-            )[0] == "undefined"
-          ) {
-            console.log("l.instrument_token absent", l.tradingsymbol);
+          if ( 
+            typeof this.instruments.filter( 
+              ( i )  => i.instrument_token  ==  l.instrument_token
+             )[0]  ==  "undefined"
+           ) { 
+            console.log( "l.instrument_token absent", l.tradingsymbol );
 
             return false;
-          }
-        });
-    },
+           } 
+         }  );
+     } ,
 
-    writeTrades(trade) {
-      console.log("writing trade from write trade", trade);
-      let obj = {};
-      obj.trade = trade;
-      const url = "/api/WriteTrades";
+    writeTrades( trade ) { 
+      console.log( "writing trade from write trade", trade );
+      let obj  =  {  } ;
+      obj.trade  =  trade;
+      const url  =  "/api/WriteTrades";
 
-      axios.post(url, obj);
-    },
+      axios.post( url, obj );
+     } ,
 
-    FetchInstruments() {
-      const url = "/api/FetchInstruments";
+    FetchInstruments(  ) { 
+      const url  =  "/api/FetchInstruments";
 
-      let obj = {};
-      obj.accessToken = this.accessToken;
+      let obj  =  {  } ;
+      obj.accessToken  =  this.accessToken;
 
-      axios.post(url, obj);
-    },
-    async BuyNow(i) {
-      let tradingsymbol = i.tradingsymbol;
-      let lot_size = i.lot_size;
+      axios.post( url, obj );
+     } ,
+    async BuyNow( i ) { 
+      let tradingsymbol  =  i.tradingsymbol;
+      let lot_size  =  i.lot_size;
       let order_type;
       let Price;
 
-      switch (i.seletedBuyingMethod) {
+      switch ( i.seletedBuyingMethod ) { 
         case "MARKET":
-          order_type = "MARKET";
-          Price = i.last_price;
+          order_type  =  "MARKET";
+          Price  =  i.last_price;
 
           break;
 
         case "LTP":
-          Price = i.last_price;
-          order_type = "LIMIT";
+          Price  =  i.last_price;
+          order_type  =  "LIMIT";
           break;
 
         case "MAX":
-          Price = i.SevenDayMaxMin.Max;
-          order_type = "LIMIT";
+          Price  =  i.SevenDayMaxMin.Max;
+          order_type  =  "LIMIT";
 
           break;
-      }
+       } 
 
-      let transaction_type = "BUY";
-let product='MIS'
-      let arr = this.buildOrderArray(
+      let transaction_type  =  "BUY";
+let product = 'MIS'
+      let arr  =  this.buildOrderArray( 
         tradingsymbol,
         transaction_type,
 
         lot_size,
         order_type,
         Price,product
-      );
+       );
 
-      console.log(arr, "orderarray");
+      console.log( arr, "orderarray" );
 
-      let orderArray = [arr];
+      let orderArray  =  [arr];
 
-      let a = [];
-      a.push(arr);
+      let a  =  [];
+      a.push( arr );
 
-      this.orderArray.push(a);
+      this.orderArray.push( a );
 
-      // let a = await this.placeOrder(orderArray);
-      console.log("place order result", arr);
-    },
+      // let a  =  await this.placeOrder( orderArray );
+      console.log( "place order result", arr );
+     } ,
 
-    buildOrderArray(tradingsymbol, transaction_type, qty, order_type, Price,product='MIS') {
-      let order = {};
+    buildOrderArray( tradingsymbol, transaction_type, qty, order_type, Price,product = 'MIS' ) { 
+      let order  =  {  } ;
 
-      //   order.variety = this.selectedVariety;
+      //   order.variety  =  this.selectedVariety;
 
-      order.variety = "regular";
-      //  order.variety = "amo";
+      order.variety  =  "regular";
+      //  order.variety  =  "amo";
 
-      order.params = {};
-      order.params.exchange = "NFO";
-      order.params.tradingsymbol = tradingsymbol;
-      order.params.transaction_type = transaction_type;
+      order.params  =  {  } ;
+      order.params.exchange  =  "NFO";
+      order.params.tradingsymbol  =  tradingsymbol;
+      order.params.transaction_type  =  transaction_type;
 
-      order.params.quantity = qty;
+      order.params.quantity  =  qty;
 
-      order.params.product = product
-      order.params.order_type = order_type;
-      order.params.validity = "DAY";
+      order.params.product  =  product
+      order.params.order_type  =  order_type;
+      order.params.validity  =  "DAY";
 
-      order.params.price = Price;
+      order.params.price  =  Price;
 
       return order;
-    },
+     } ,
 
-    setScriptTradedStatus(symbol, property, value) {
-      let today = this.today();
+    setScriptTradedStatus( symbol, property, value ) { 
+      let today  =  this.today(  );
 
       let trades;
 
-      if (localStorage.getItem(today) == null) {
-        trades = [];
-      } else {
-        if (typeof (localStorage.getItem(today) == "string")) {
-          trades = JSON.parse(localStorage.getItem(today));
-        } else {
-          trades = localStorage.getItem(today);
-        }
-      }
+      if ( localStorage.getItem( today )  ==  null ) { 
+        trades  =  [];
+       }  else { 
+        if ( typeof ( localStorage.getItem( today )  ==  "string" )) { 
+          trades  =  JSON.parse( localStorage.getItem( today ));
+         }  else { 
+          trades  =  localStorage.getItem( today );
+         } 
+       } 
 
-      if (typeof trades.filter((t) => t.symbol == symbol)[0] == "undefined") {
+      if ( typeof trades.filter(( t )  => t.symbol  ==  symbol )[0]  ==  "undefined" ) { 
         return false;
-      }
+       } 
 
-      trades.filter((t) => t.symbol == symbol)[0][property] = value;
+      trades.filter(( t )  => t.symbol  ==  symbol )[0][property]  =  value;
 
-      console.log("status updated", property, value, symbol);
+      console.log( "status updated", property, value, symbol );
 
-      let ar2 = trades.filter((t) => t.status == "COMPLETE");
+      let ar2  =  trades.filter(( t )  => t.status  ==  "COMPLETE" );
 
-      let strigified = JSON.stringify(trades);
-      localStorage.removeItem(today);
-      localStorage.setItem(today, strigified);
+      let strigified  =  JSON.stringify( trades );
+      localStorage.removeItem( today );
+      localStorage.setItem( today, strigified );
 
-      // this.localStorage = this.setChart(
-      //   JSON.parse(localStorage.getItem(today))
-      // );
-    },
+      // this.localStorage  =  this.setChart( 
+      //   JSON.parse( localStorage.getItem( today ))
+      //  );
+     } ,
 
-    placeOrder(orderArray) {
-      const url = "/api/PlaceTarget"; //temporary change
+    placeOrder( orderArray ) { 
+      const url  =  "/api/PlaceTarget"; //temporary change
 
-      let data1 = JSON.stringify(orderArray);
+      let data1  =  JSON.stringify( orderArray );
 
-      let data = {};
+      let data  =  {  } ;
 
-      data.accessToken = this.accessToken;
-      data.ZerodhaParams = data1;
+      data.accessToken  =  this.accessToken;
+      data.ZerodhaParams  =  data1;
 
-      return axios.post(url, data).then((res) => res.data);
-    },
+      return axios.post( url, data ).then(( res )  => res.data );
+     } ,
 
-    async proceedForBuy(instrument_token, CurrentInstrument, element) {
-      this.proposedBuyAmount = 0;
-      this.$set(
-        this.instruments.filter(
-          (i) => i.instrument_token == instrument_token
-        )[0],
+    async proceedForBuy( instrument_token, CurrentInstrument, element ) { 
+      this.proposedBuyAmount  =  0;
+      this.$set( 
+        this.instruments.filter( 
+          ( i )  => i.instrument_token  ==  instrument_token
+         )[0],
         "buyNow",
         true
-      );
+       );
 
-      this.$set(
-        this.instruments.filter(
-          (i) => i.instrument_token == instrument_token
-        )[0],
+      this.$set( 
+        this.instruments.filter( 
+          ( i )  => i.instrument_token  ==  instrument_token
+         )[0],
         "PlacedReverseOrder",
         false
-      );
+       );
 
-      this.$set(
-        this.instruments.filter(
-          (i) => i.instrument_token == instrument_token
-        )[0],
+      this.$set( 
+        this.instruments.filter( 
+          ( i )  => i.instrument_token  ==  instrument_token
+         )[0],
         "seletedBuyingMethod",
         "MAX"
-      );
+       );
 
-      let date = new Date();
-      this.$set(
-        this.instruments.filter(
-          (i) => i.instrument_token == instrument_token
-        )[0],
+      let date  =  new Date(  );
+      this.$set( 
+        this.instruments.filter( 
+          ( i )  => i.instrument_token  ==  instrument_token
+         )[0],
         "activatedTime",
         date
-      );
+       );
 
       /// trigger buy
 
-      // let trade = `Buy instrument ${CurrentInstrument.tradingsymbol} at ${CurrentInstrument.SevenDayMaxMin.Max}`;
-      let trade = `Buy instrument ${CurrentInstrument.tradingsymbol} at ${CurrentInstrument.pricePoints.yesterday.high} . 
-      Target ${CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget} 
-      Strict stop loss at ${
+      // let trade  =  `Buy instrument ${ CurrentInstrument.tradingsymbol }  at ${ CurrentInstrument.SevenDayMaxMin.Max } `;
+      let trade  =  `Buy instrument ${ CurrentInstrument.tradingsymbol }  at ${ CurrentInstrument.pricePoints.yesterday.high }  . 
+      Target ${ CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget }  
+      Strict stop loss at ${ 
         
 
-        Math.min( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),CurrentInstrument.pricePoints.d1.low)
+        Math.min(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),CurrentInstrument.pricePoints.d1.low )
        
         
         
-        } ,
-      TargetProfit ${(CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget-CurrentInstrument.pricePoints.yesterday.high)*CurrentInstrument.lot_size}
-      Possible Loss ${(CurrentInstrument.pricePoints.yesterday.high-CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1))
+         }  ,
+      TargetProfit ${ ( CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget-CurrentInstrument.pricePoints.yesterday.high )*CurrentInstrument.lot_size } 
+      Possible Loss ${ ( CurrentInstrument.pricePoints.yesterday.high-CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ))
       
-      *CurrentInstrument.lot_size}
+      *CurrentInstrument.lot_size } 
       `;
 
       
-      let trade1={
+      let trade1 = { 
 
         'type':'Entry',
         
         'tradingsymbol':CurrentInstrument.tradingsymbol,
         'entry_price':CurrentInstrument.pricePoints.yesterday.high,
         'target':CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget,
-        'stoploss': Math.min( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),CurrentInstrument.pricePoints.d1.low)
+        'stoploss': Math.min(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),CurrentInstrument.pricePoints.d1.low )
       
-      }
+       } 
 
-      let trade2=JSON.stringify(trade1)
+      let trade2 = JSON.stringify( trade1 )
 
-      this.sendToTelegramGroup(trade);
-      this.writeTrades(trade2+',');
+      this.sendToTelegramGroup( trade );
+      this.writeTrades( trade2+',' );
 
       //checking the trade exeeds the maximum tradable amount   add live palced buy order in nfo
 
-      // if(this.livePositionTotalCost<this.maxTradableAmount){
+      // if( this.livePositionTotalCost<this.maxTradableAmount ){ 
 
-      if (CurrentInstrument.instrument_type == "FUT") {
-        console.log("its a future");
-        var audio1 = new Audio("/sounds/mixkit-sci-fi-confirmation-914.wav");
-        audio1.play();
+      if ( CurrentInstrument.instrument_type  ==  "FUT" ) { 
+        console.log( "its a future" );
+        var audio1  =  new Audio( "/sounds/mixkit-sci-fi-confirmation-914.wav" );
+        audio1.play(  );
 
-        let transaction_type = "BUY";
-        let tradingsymbol = CurrentInstrument.tradingsymbol;
+        let transaction_type  =  "BUY";
+        let tradingsymbol  =  CurrentInstrument.tradingsymbol;
 
-        let lot_size = CurrentInstrument.lot_size;
+        let lot_size  =  CurrentInstrument.lot_size;
 
-        let order_type = "LIMIT";
+        let order_type  =  "LIMIT";
 
-        let Price = CurrentInstrument.pricePoints.yesterday.high;
-        let priceSell1 = element.depth.sell.sort((a, b) => a.price - b.price)[0]
+        let Price  =  CurrentInstrument.pricePoints.yesterday.high;
+        let priceSell1  =  element.depth.sell.sort(( a, b )  => a.price - b.price )[0]
           .price;
-let product='MIS'
-        let arr = this.buildOrderArray(
+let product = 'MIS'
+        let arr  =  this.buildOrderArray( 
           tradingsymbol,
           transaction_type,
 
           lot_size,
           order_type,
           Price,product
-        );
+         );
 
-        console.log(arr, "FUTURE");
+        console.log( arr, "FUTURE" );
 
-        let orderArray = [arr];
+        let orderArray  =  [arr];
 
-        let a = await this.placeOrder(orderArray);
-        console.log("place order result", a);
+        let a  =  await this.placeOrder( orderArray );
+        console.log( "place order result", a );
 
-        this.counter = this.counter + 1;
-        console.log(
+        this.counter  =  this.counter + 1;
+        console.log( 
           "Placing Buy Order for :",
           tradingsymbol,
           this.counter,
           CurrentInstrument.buyNow,
           CurrentInstrument
-        );
-      } else if (
-        CurrentInstrument.instrument_type == "CE" ||
-        CurrentInstrument.instrument_type == "PE"
-      ) {
-        this.proposedBuyAmount =
+         );
+       }  else if ( 
+        CurrentInstrument.instrument_type  ==  "CE" ||
+        CurrentInstrument.instrument_type  ==  "PE"
+       ) { 
+        this.proposedBuyAmount  = 
           CurrentInstrument.pricePoints.yesterday.high *
           CurrentInstrument.lot_size;
 
-        console.log(
+        console.log( 
           "Proposed amount ",
           this.proposedBuyAmount,
           "for",
           CurrentInstrument.tradingsymbol
-        );
-        if (this.liveTradablebalance > 0) {
-          var audio = new Audio("/sounds/mixkit-sci-fi-confirmation-914.wav");
-          audio.play();
+         );
+        if ( this.liveTradablebalance > 0 ) { 
+          var audio  =  new Audio( "/sounds/mixkit-sci-fi-confirmation-914.wav" );
+          audio.play(  );
 
-          let transaction_type = "BUY";
+          let transaction_type  =  "BUY";
 
-          let tradingsymbol = CurrentInstrument.tradingsymbol;
+          let tradingsymbol  =  CurrentInstrument.tradingsymbol;
 
-          let lot_size = CurrentInstrument.lot_size;
-          //let lot_size=0;
-          let order_type = "LIMIT";
+          let lot_size  =  CurrentInstrument.lot_size;
+          //let lot_size = 0;
+          let order_type  =  "LIMIT";
 
-          //  let price1=  element.depth.sell.sort((a,b)=>a.price-b.price)[0]
-          //  let price2=  element.depth.sell.sort((a,b)=>b.price-a.price)[0]
+          //  let price1 =   element.depth.sell.sort(( a,b ) =>a.price-b.price )[0]
+          //  let price2 =   element.depth.sell.sort(( a,b ) =>b.price-a.price )[0]
 
-          //  console.log('sell price 1',price1,'sell price 2',price2)
+          //  console.log( 'sell price 1',price1,'sell price 2',price2 )
 
-          let priceBuy2 = element.depth.buy.sort((a, b) => b.price - a.price)[0]
+          let priceBuy2  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0]
             .price;
 
-          let priceSell1 = element.depth.sell.sort(
-            (a, b) => a.price - b.price
-          )[0].price;
+          let priceSell1  =  element.depth.sell.sort( 
+            ( a, b )  => a.price - b.price
+           )[0].price;
 
-          //  console.log(priceSell1,'priceSell1',priceSell2,'priceSell2');
+          //  console.log( priceSell1,'priceSell1',priceSell2,'priceSell2' );
 
-          //  console.log()
+          //  console.log(  )
 
-          //  let Price=priceSell1;
-          let Price = CurrentInstrument.pricePoints.yesterday.high;
+          //  let Price = priceSell1;
+          let Price  =  CurrentInstrument.pricePoints.yesterday.high;
 
-          let currentPrice = lot_size * Price;
-          this.totalBuyOrderLivePlacedBySoftware =
+          let currentPrice  =  lot_size * Price;
+          this.totalBuyOrderLivePlacedBySoftware  = 
             this.totalBuyOrderLivePlacedBySoftware + currentPrice;
 
-          this.proposedBuyAmount = 0;
-          //  let Price=priceSell1;
-let product='MIS'
-          let arr = this.buildOrderArray(
+          this.proposedBuyAmount  =  0;
+          //  let Price = priceSell1;
+let product = 'MIS'
+          let arr  =  this.buildOrderArray( 
             tradingsymbol,
             transaction_type,
 
             lot_size,
             order_type,
             Price,product
-          );
+           );
 
-          // console.log(arr);
+          // console.log( arr );
 
-          let orderArray = [arr];
+          let orderArray  =  [arr];
 
-          let a = await this.placeOrder(orderArray);
-          console.log("place order result", a);
+          let a  =  await this.placeOrder( orderArray );
+          console.log( "place order result", a );
 
-          this.counter = this.counter + 1;
-          console.log(
+          this.counter  =  this.counter + 1;
+          console.log( 
             "Placing Buy Order for :",
             tradingsymbol,
             this.counter,
             CurrentInstrument.buyNow,
             CurrentInstrument
-          );
+           );
 
-          this.userMessages.push(
+          this.userMessages.push( 
             "firing of auto mode+ buy now false",
             this.counter,
             CurrentInstrument.buyNow,
             CurrentInstrument
-          );
-        } else {
-          this.userMessages.push("Maximum tradable amout Exceeded");
-          console.log("Maximum tradable amout Exceeded");
-        }
-      }
-    },
+           );
+         }  else { 
+          this.userMessages.push( "Maximum tradable amout Exceeded" );
+          console.log( "Maximum tradable amout Exceeded" );
+         } 
+       } 
+     } ,
 
-    setcandleColour(inst, instrument_token) {
-      if (inst.previousPrice < inst.last_price) {
-        this.$set(
-          this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0],
+    setcandleColour( inst, instrument_token ) { 
+      if ( inst.previousPrice < inst.last_price ) { 
+        this.$set( 
+          this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0],
           "candle",
           "green"
-        );
+         );
 
-        // console.log(`Pvs price of green ${inst.tradingsymbol} is ${inst.previousPrice} and last price is ${inst.last_price}`)
-      } else {
-        this.$set(
-          this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0],
+        // console.log( `Pvs price of green ${ inst.tradingsymbol }  is ${ inst.previousPrice }  and last price is ${ inst.last_price } ` )
+       }  else { 
+        this.$set( 
+          this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0],
           "candle",
           "red"
-        );
+         );
 
-        // console.log(`Pvs price of red ${inst.tradingsymbol} is ${inst.previousPrice} and last price is ${inst.last_price}`)
-      }
-    },
+        // console.log( `Pvs price of red ${ inst.tradingsymbol }  is ${ inst.previousPrice }  and last price is ${ inst.last_price } ` )
+       } 
+     } ,
 
-    ProcedureForFuturesTargetAndStopLoss(
+    ProcedureForFuturesTargetAndStopLoss( 
       CurrentInstrument,
       instrument_token,
       element
-    ) {
-      console.log(
-        `Target for ${CurrentInstrument.tradingsymbol} is ${
+     ) { 
+      console.log( 
+        `Target for ${ CurrentInstrument.tradingsymbol }  is ${ 
           CurrentInstrument.average_price + 90
-        } and Stop loss is ${CurrentInstrument.average_price - 45} and cmp is ${
+         }  and Stop loss is ${ CurrentInstrument.average_price - 45 }  and cmp is ${ 
           CurrentInstrument.last_price
-        }`
-      );
-      if (CurrentInstrument.last_price > CurrentInstrument.average_price + 90) {
-        let trade = `Target hit at  ${CurrentInstrument.tradingsymbol} at ${
+         } `
+       );
+      if ( CurrentInstrument.last_price > CurrentInstrument.average_price + 90 ) { 
+        let trade  =  `Target hit at  ${ CurrentInstrument.tradingsymbol }  at ${ 
           CurrentInstrument.average_price * 90
-        }`;
-        //  this.writeTrades(trade);
+         } `;
+        //  this.writeTrades( trade );
 
 
 
@@ -1354,467 +1354,467 @@ let product='MIS'
 
 
 
-        let transaction_type = "SELL";
+        let transaction_type  =  "SELL";
 
-        let tradingsymbol = CurrentInstrument.tradingsymbol;
+        let tradingsymbol  =  CurrentInstrument.tradingsymbol;
 
-        let lot_size = CurrentInstrument.lot_size;
-        let order_type = "LIMIT";
+        let lot_size  =  CurrentInstrument.lot_size;
+        let order_type  =  "LIMIT";
 
-        let priceBuy2 = element.depth.buy.sort((a, b) => b.price - a.price)[0]
+        let priceBuy2  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0]
           .price;
-        let Price = priceBuy2;
-        let product='MIS'
+        let Price  =  priceBuy2;
+        let product = 'MIS'
 
-        let arr = this.buildOrderArray(
+        let arr  =  this.buildOrderArray( 
           tradingsymbol,
           transaction_type,
 
           lot_size,
           order_type,
           Price,product
-        );
+         );
 
-        // console.log(arr);
+        // console.log( arr );
 
-        let orderArray = [arr];
+        let orderArray  =  [arr];
 
-        this.orderArray.push(orderArray);
-        this.$set(
-          this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0],
+        this.orderArray.push( orderArray );
+        this.$set( 
+          this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0],
           "PlacedReverseOrder",
           true
-        );
+         );
 
-        this.$set(
-          this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0],
+        this.$set( 
+          this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0],
           "PlacedReverseOrderType",
           "Target"
-        );
+         );
 
         //target
-      }
+       } 
 
-      if (CurrentInstrument.last_price < CurrentInstrument.average_price - 45) {
+      if ( CurrentInstrument.last_price < CurrentInstrument.average_price - 45 ) { 
         //stop loss
-        this.writeTrades(trade);
+        this.writeTrades( trade );
 
         /////////////////////////sl
 
-        let trade = `Sl hit  ${CurrentInstrument.tradingsymbol} at ${
+        let trade  =  `Sl hit  ${ CurrentInstrument.tradingsymbol }  at ${ 
           CurrentInstrument.average_price - 45
-        }`;
+         } `;
 
-        // this.sendToTelegramGroup(trade);
+        // this.sendToTelegramGroup( trade );
 
         //target sells
 
-        //    var audio = new Audio('/sounds/mixkit-sci-fi-confirmation-914.wav');
-        // audio.play();
+        //    var audio  =  new Audio( '/sounds/mixkit-sci-fi-confirmation-914.wav' );
+        // audio.play(  );
 
-        let transaction_type = "SELL";
+        let transaction_type  =  "SELL";
 
-        let tradingsymbol = CurrentInstrument.tradingsymbol;
+        let tradingsymbol  =  CurrentInstrument.tradingsymbol;
 
-        let lot_size = CurrentInstrument.lot_size;
-        let order_type = "LIMIT";
+        let lot_size  =  CurrentInstrument.lot_size;
+        let order_type  =  "LIMIT";
 
-        let priceBuy2 = element.depth.buy.sort((a, b) => b.price - a.price)[0]
+        let priceBuy2  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0]
           .price;
 
-        let Price = priceBuy2;
+        let Price  =  priceBuy2;
 
-        let product='MIS'
+        let product = 'MIS'
 
-        let arr = this.buildOrderArray(
+        let arr  =  this.buildOrderArray( 
           tradingsymbol,
           transaction_type,
 
           lot_size,
           order_type,
           Price,product
-        );
+         );
 
-        console.log("stop loss array below");
-        console.log(JSON.stringify(arr));
+        console.log( "stop loss array below" );
+        console.log( JSON.stringify( arr ));
 
-        let orderArray = [arr];
+        let orderArray  =  [arr];
 
-        this.orderArray.push(orderArray);
+        this.orderArray.push( orderArray );
 
-        //  console.log('order array inside tgtsl fn',JSON.stringify(this.orderArray))
+        //  console.log( 'order array inside tgtsl fn',JSON.stringify( this.orderArray ))
 
-        console.log(trade, "firing stop loss", "@", Price);
+        console.log( trade, "firing stop loss", "@", Price );
 
-        this.writeTrades(trade);
+        this.writeTrades( trade );
 
-        console.log(trade, "firing stop loss");
+        console.log( trade, "firing stop loss" );
 
-        this.$set(
-          this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0],
+        this.$set( 
+          this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0],
           "PlacedReverseOrder",
           true
-        );
+         );
 
-        this.$set(
-          this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0],
+        this.$set( 
+          this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0],
           "PlacedReverseOrderType",
           "Stop Loss"
-        );
+         );
 
         /////////////////////////sl
-      }
-    },
+       } 
+     } ,
 
-    placetargetAndStopLoss(CurrentInstrument, instrument_token, element,product) {
-      if (CurrentInstrument.instrument_type == "FUT") {
-        this.ProcedureForFuturesTargetAndStopLoss(
+    placetargetAndStopLoss( CurrentInstrument, instrument_token, element,product ) { 
+      if ( CurrentInstrument.instrument_type  ==  "FUT" ) { 
+        this.ProcedureForFuturesTargetAndStopLoss( 
           CurrentInstrument,
           instrument_token,
           element
-        );
+         );
 
         return true;
-      } //// procedure for futures  end here
+       }  //// procedure for futures  end here
 
-      if (
+      if ( 
         CurrentInstrument.last_price >
         CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget 
-      ) {
-        // if (
+       ) { 
+        // if ( 
         //   CurrentInstrument.last_price >
         //   CurrentInstrument.average_price*1.12
-        // )
+        //  )
 
-        //  if (
+        //  if ( 
         //              true
-        //             )
-        // if (
+        //              )
+        // if ( 
         //               CurrentInstrument.last_price >
         //               CurrentInstrument.pricePoints.yesterday.high*1.02
-        //             )
+        //              )
 
-        let trade = `Target hit at  ${CurrentInstrument.tradingsymbol} at ${CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget}`;
+        let trade  =  `Target hit at  ${ CurrentInstrument.tradingsymbol }  at ${ CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget } `;
 
 
- let trade1={
+ let trade1 = { 
 
         'type':'Target',
         
         'tradingsymbol':CurrentInstrument.tradingsymbol,
         'entry_price':CurrentInstrument.pricePoints.yesterday.high,
         'target':CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget,
-        'stoploss': Math.min( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),CurrentInstrument.pricePoints.d1.low)
+        'stoploss': Math.min(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),CurrentInstrument.pricePoints.d1.low )
       
-      }
+       } 
 
-      let trade2=JSON.stringify(trade1)
+      let trade2 = JSON.stringify( trade1 )
 
 
 
-         this.writeTrades(trade2+',');
-        this.sendToTelegramGroup(trade);
-        this.userMessages.push(trade);
+         this.writeTrades( trade2+',' );
+        this.sendToTelegramGroup( trade );
+        this.userMessages.push( trade );
         ////target buys
 
-        //                                 var audio = new Audio('/sounds/mixkit-sci-fi-confirmation-914.wav');
-        // audio.play();
+        //                                 var audio  =  new Audio( '/sounds/mixkit-sci-fi-confirmation-914.wav' );
+        // audio.play(  );
 
-        let transaction_type = "SELL";
+        let transaction_type  =  "SELL";
 
-        let tradingsymbol = CurrentInstrument.tradingsymbol;
+        let tradingsymbol  =  CurrentInstrument.tradingsymbol;
 
-        let lot_size = CurrentInstrument.lot_size;
-        let order_type = "LIMIT";
+        let lot_size  =  CurrentInstrument.lot_size;
+        let order_type  =  "LIMIT";
 
-        let priceBuy2 = element.depth.buy.sort((a, b) => b.price - a.price)[0]
+        let priceBuy2  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0]
           .price;
 
-        console.log(priceBuy2, "priceBuy2");
+        console.log( priceBuy2, "priceBuy2" );
 
-        if (priceBuy2 > CurrentInstrument.average_price * 1.1) {
-          //  console.log('priceBuy1','priceBuy2',priceBuy2)
-          //  let Price=Math.round(CurrentInstrument.SevenDayMaxMin.Max*1.1,1);
-          let Price = priceBuy2;
+        if ( priceBuy2 > CurrentInstrument.average_price * 1.1 ) { 
+          //  console.log( 'priceBuy1','priceBuy2',priceBuy2 )
+          //  let Price = Math.round( CurrentInstrument.SevenDayMaxMin.Max*1.1,1 );
+          let Price  =  priceBuy2;
 
-          // let product='MIS'
+          // let product = 'MIS'
 
-          let arr = this.buildOrderArray(
+          let arr  =  this.buildOrderArray( 
             tradingsymbol,
             transaction_type,
 
             lot_size,
             order_type,
             Price,product
-          );
+           );
 
-          // console.log(arr);
+          // console.log( arr );
 
-          let orderArray = [arr];
+          let orderArray  =  [arr];
 
-          this.orderArray.push(orderArray);
+          this.orderArray.push( orderArray );
 
-          console.log(
+          console.log( 
             "order array inside tgtsl fn",
-            JSON.stringify(this.orderArray)
-          );
+            JSON.stringify( this.orderArray )
+           );
 
-          console.log(trade, "firing target", "@", Price);
+          console.log( trade, "firing target", "@", Price );
 
-          console.log(JSON.stringify(arr), "target  array");
+          console.log( JSON.stringify( arr ), "target  array" );
 
-          this.userMessages.push(trade);
-          this.$set(
-            this.instruments.filter(
-              (i) => i.instrument_token == instrument_token
-            )[0],
+          this.userMessages.push( trade );
+          this.$set( 
+            this.instruments.filter( 
+              ( i )  => i.instrument_token  ==  instrument_token
+             )[0],
             "PlacedReverseOrder",
             true
-          );
+           );
 
-          this.$set(
-            this.instruments.filter(
-              (i) => i.instrument_token == instrument_token
-            )[0],
+          this.$set( 
+            this.instruments.filter( 
+              ( i )  => i.instrument_token  ==  instrument_token
+             )[0],
             "PlacedReverseOrderType",
             "Target"
-          );
-        }
-      } else if (
-        CurrentInstrument.last_price <  Math.min( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),CurrentInstrument.pricePoints.d1.low)
+           );
+         } 
+       }  else if ( 
+        CurrentInstrument.last_price <  Math.min(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),CurrentInstrument.pricePoints.d1.low )
         // CurrentInstrument.pricePoints.yesterday.low
-      ) {
-        let trade = `Sl hit  ${CurrentInstrument.tradingsymbol} at 
+       ) { 
+        let trade  =  `Sl hit  ${ CurrentInstrument.tradingsymbol }  at 
       
       
-      ${ Math.min( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),CurrentInstrument.pricePoints.d1.low)}`;
+      ${  Math.min(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),CurrentInstrument.pricePoints.d1.low ) } `;
 
-        // this.sendToTelegramGroup(trade);
+        // this.sendToTelegramGroup( trade );
 
         //target sells
 
-        //    var audio = new Audio('/sounds/mixkit-sci-fi-confirmation-914.wav');
-        // audio.play();
+        //    var audio  =  new Audio( '/sounds/mixkit-sci-fi-confirmation-914.wav' );
+        // audio.play(  );
 
-        let transaction_type = "SELL";
+        let transaction_type  =  "SELL";
 
-        let tradingsymbol = CurrentInstrument.tradingsymbol;
+        let tradingsymbol  =  CurrentInstrument.tradingsymbol;
 
-        let lot_size = CurrentInstrument.lot_size;
-        // lot_size=0;
-        let order_type = "LIMIT";
+        let lot_size  =  CurrentInstrument.lot_size;
+        // lot_size = 0;
+        let order_type  =  "LIMIT";
 
-        let priceBuy2 = element.depth.buy.sort((a, b) => b.price - a.price)[0]
+        let priceBuy2  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0]
           .price;
 
-        //  let Price=Math.round(CurrentInstrument.SevenDayMaxMin.Max*.9,1);
-        let Price = priceBuy2;
+        //  let Price = Math.round( CurrentInstrument.SevenDayMaxMin.Max*.9,1 );
+        let Price  =  priceBuy2;
 
-        // let product='MIS'
+        // let product = 'MIS'
 
-        let arr = this.buildOrderArray(
+        let arr  =  this.buildOrderArray( 
           tradingsymbol,
           transaction_type,
 
           lot_size,
           order_type,
           Price
-        );
+         );
 
-        console.log("stop loss array below");
-        console.log(JSON.stringify(arr));
+        console.log( "stop loss array below" );
+        console.log( JSON.stringify( arr ));
 
-        let orderArray = [arr];
+        let orderArray  =  [arr];
 
-        this.orderArray.push(orderArray);
+        this.orderArray.push( orderArray );
 
-        console.log(
+        console.log( 
           "order array inside tgtsl fn",
-          JSON.stringify(this.orderArray)
-        );
+          JSON.stringify( this.orderArray )
+         );
 
-        console.log(trade, "firing stop loss", "@", Price);
+        console.log( trade, "firing stop loss", "@", Price );
 
 
-         let trade1={
+         let trade1 = { 
 
         'type':'stoploss',
         
         'tradingsymbol':CurrentInstrument.tradingsymbol,
         'entry_price':CurrentInstrument.pricePoints.yesterday.high,
         'target':CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget,
-        'stoploss': Math.min( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),CurrentInstrument.pricePoints.d1.low)
+        'stoploss': Math.min(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),CurrentInstrument.pricePoints.d1.low )
       
-      }
+       } 
 
-      let trade2=JSON.stringify(trade1)
+      let trade2 = JSON.stringify( trade1 )
 
-        this.writeTrades(trade2+',');
+        this.writeTrades( trade2+',' );
 
-        console.log(trade, "firing stop loss");
+        console.log( trade, "firing stop loss" );
 
-        this.$set(
-          this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0],
+        this.$set( 
+          this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0],
           "PlacedReverseOrder",
           true
-        );
+         );
 
-        this.$set(
-          this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0],
+        this.$set( 
+          this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0],
           "PlacedReverseOrderType",
           "Stop Loss"
-        );
-      } else {
-        console.log(
+         );
+       }  else { 
+        console.log( 
           "No target or stop for",
           CurrentInstrument.tradingsymbol,
           "stop loss",
-           Math.min( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),CurrentInstrument.pricePoints.d1.low),
+           Math.min(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),CurrentInstrument.pricePoints.d1.low ),
           "Target",
           CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget,
           "Last price",
           CurrentInstrument.last_price
-        );
+         );
 
-        // this.userMessages.push('No target or stop for ',CurrentInstrument.tradingsymbol,'stop loss',CurrentInstrument.pricePoints.yesterday.high*.9 )
-      }
-    },
+        // this.userMessages.push( 'No target or stop for ',CurrentInstrument.tradingsymbol,'stop loss',CurrentInstrument.pricePoints.yesterday.high*.9  )
+       } 
+     } ,
 
-    mutateWithLtp(s) {
+    mutateWithLtp( s ) { 
       //////////////////////////
-      // console.clear();
+      // console.clear(  );
 
       // return true
 
-      this.heartBeat = !this.heartBeat;
-      s.forEach((element) => {
-        let a = element.depth.buy.sort((a, b) => b.price - a.price)[0].price;
+      this.heartBeat  =  !this.heartBeat;
+      s.forEach(( element )  => { 
+        let a  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0].price;
 
-        let b = element.depth.sell.sort((a, b) => a.price - b.price)[0].price;
+        let b  =  element.depth.sell.sort(( a, b )  => a.price - b.price )[0].price;
 
-        let b1 = element.depth.sell.sort((a, b) => a.price - b.price)[1].price;
+        let b1  =  element.depth.sell.sort(( a, b )  => a.price - b.price )[1].price;
 
-        let b1b = b1 - b;
+        let b1b  =  b1 - b;
 
-        let b1bpc = (b1b / b) * 100;
+        let b1bpc  =  ( b1b / b ) * 100;
 
-        // if (isNaN(b1bpc)) {
+        // if ( isNaN( b1bpc )) { 
         //   return false;
-        // }
+        //  } 
 
-        // if (b1bpc > 1) {
-
-        //   return false;
-        // }
-
-        // let c = b - a;
-
-        // let lpPc = (c / s[0].last_price) * 100;
-
-        // if (lpPc > 5 || lpPc < -5) {
+        // if ( b1bpc > 1 ) { 
 
         //   return false;
-        // } else {
+        //  } 
 
-        // }
+        // let c  =  b - a;
 
-        // if (lpPc < 0) {
-        //   console.log("negative");
+        // let lpPc  =  ( c / s[0].last_price ) * 100;
 
-        // }
+        // if ( lpPc > 5 || lpPc < -5 ) { 
 
-        if (element.volume < 100000) {
-        }
+        //   return false;
+        //  }  else { 
 
-        let instrument_token = element.instrument_token;
-        let last_price = element.last_price;
-        let average_price = element.average_price;
+        //  } 
 
-        // try {
-        let CurrentInstrument = this.instruments.filter(
-          (i) => i.instrument_token == instrument_token
-        )[0];
+        // if ( lpPc < 0 ) { 
+        //   console.log( "negative" );
 
-        if (typeof CurrentInstrument == "undefined") {
-          console.log("CurrentInstrument=='undefined");
+        //  } 
+
+        if ( element.volume < 100000 ) { 
+         } 
+
+        let instrument_token  =  element.instrument_token;
+        let last_price  =  element.last_price;
+        let average_price  =  element.average_price;
+
+        // try { 
+        let CurrentInstrument  =  this.instruments.filter( 
+          ( i )  => i.instrument_token  ==  instrument_token
+         )[0];
+
+        if ( typeof CurrentInstrument  ==  "undefined" ) { 
+          console.log( "CurrentInstrument == 'undefined" );
           return false;
-        }
+         } 
 
-        if (typeof CurrentInstrument.SevenDayMaxMin == "undefined") {
-          console.log(
+        if ( typeof CurrentInstrument.SevenDayMaxMin  ==  "undefined" ) { 
+          console.log( 
             typeof CurrentInstrument.SevenDayMaxMin,
             "typeof CurrentInstrument.SevenDayMaxMin1"
-          );
+           );
           return false;
-        }
+         } 
 
-        if (typeof CurrentInstrument.SevenDayMaxMin.Max == "undefined") {
+        if ( typeof CurrentInstrument.SevenDayMaxMin.Max  ==  "undefined" ) { 
           return false;
-        }
+         } 
 
-        this.$set(
-          this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0],
+        this.$set( 
+          this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0],
           "previousPrice",
-          this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0].last_price
-        );
+          this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0].last_price
+         );
 
-        this.instruments.filter(
-          (i) => i.instrument_token == instrument_token
-        )[0].last_price = last_price;
+        this.instruments.filter( 
+          ( i )  => i.instrument_token  ==  instrument_token
+         )[0].last_price  =  last_price;
 
         /*
 
-this.$set(
-                  this.instruments.filter(
-                    (i) => i.instrument_token == instrument_token
-                  )[0],
+this.$set( 
+                  this.instruments.filter( 
+                    ( i )  => i.instrument_token  ==  instrument_token
+                   )[0],
                   "liveprofitIfExecuted",
-                  ( this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0].last_price - this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0].SevenDayMaxMin.max) *this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0].lot_size
-                );
+                  (  this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0].last_price - this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0].SevenDayMaxMin.max ) *this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0].lot_size
+                 );
 
          
 */
 
-        // i.lot_size *(i.last_price-i.SevenDayMaxMin.Max)
+        // i.lot_size *( i.last_price-i.SevenDayMaxMin.Max )
 
-        let inst = this.instruments.filter(
-          (i) => i.instrument_token == instrument_token
-        )[0];
+        let inst  =  this.instruments.filter( 
+          ( i )  => i.instrument_token  ==  instrument_token
+         )[0];
 
-        if (inst.previousPrice == 0) {
+        if ( inst.previousPrice  ==  0 ) { 
           return false;
-        }
+         } 
 
-        if (inst.previousPrice != 0) {
-          // this.setcandleColour(inst,instrument_token)
-        }
+        if ( inst.previousPrice !=  0 ) { 
+          // this.setcandleColour( inst,instrument_token )
+         } 
 
-        if (CurrentInstrument.buyNow == true) {
-          //   let priceBuy1=  element.depth.buy.sort((a,b)=>a.price-b.price)[0].price
-          //  let priceBuy2=  element.depth.buy.sort((a,b)=>b.price-a.price)[0].price;
-        }
+        if ( CurrentInstrument.buyNow  ==  true ) { 
+          //   let priceBuy1 =   element.depth.buy.sort(( a,b ) =>a.price-b.price )[0].price
+          //  let priceBuy2 =   element.depth.buy.sort(( a,b ) =>b.price-a.price )[0].price;
+         } 
 
         /////////////////////////////////////////////
 
@@ -1824,177 +1824,177 @@ this.$set(
 
         ////////////////////auto mode true
 
-        // if (this.AutoMode)
+        // if ( this.AutoMode )
 
-        // console.log('CurrentInstrument.buyNow',CurrentInstrument.buyNow)
+        // console.log( 'CurrentInstrument.buyNow',CurrentInstrument.buyNow )
 
-        if (CurrentInstrument.buyNow == false) {
+        if ( CurrentInstrument.buyNow  ==  false ) { 
           //not triggred earlier
-          // if(inst.previousPrice<inst.last_price)
+          // if( inst.previousPrice<inst.last_price )
 
-          // if (
+          // if ( 
           //   CurrentInstrument.last_price >
-          //   CurrentInstrument.SevenDayMaxMin.Max && inst.previousPrice<=CurrentInstrument.SevenDayMaxMin.Max
+          //   CurrentInstrument.SevenDayMaxMin.Max && inst.previousPrice<= CurrentInstrument.SevenDayMaxMin.Max
 
-          // )
+          //  )
 
           //new range breakout yesterday
 
-          // console.log('for' ,CurrentInstrument.tradingsymbol,'Entry price is',CurrentInstrument.pricePoints.yesterday.high ,'and last price is ',CurrentInstrument.last_price,'CurrentInstrument.buyNow',CurrentInstrument.buyNow,inst.previousPrice)
+          // console.log( 'for' ,CurrentInstrument.tradingsymbol,'Entry price is',CurrentInstrument.pricePoints.yesterday.high ,'and last price is ',CurrentInstrument.last_price,'CurrentInstrument.buyNow',CurrentInstrument.buyNow,inst.previousPrice )
 
-          if (
+          if ( 
             CurrentInstrument.last_price >
               CurrentInstrument.pricePoints.yesterday.high &&
-            inst.previousPrice <= CurrentInstrument.pricePoints.yesterday.high
-          ) {
-            this.proceedForBuy(instrument_token, CurrentInstrument, element);
+            inst.previousPrice <=  CurrentInstrument.pricePoints.yesterday.high
+           ) { 
+            this.proceedForBuy( instrument_token, CurrentInstrument, element );
             return true;
-          }
-        } ///already palced order .... so check whte there is live position
+           } 
+         }  ///already palced order .... so check whte there is live position
 
         //// checking whter there is live postions
 
-        let ln = this.livePositions.filter(
-          (lp) => lp.instrument_token == CurrentInstrument.instrument_token
-        ).length;
+        let ln  =  this.livePositions.filter( 
+          ( lp )  => lp.instrument_token  ==  CurrentInstrument.instrument_token
+         ).length;
 
-        if (ln > 0) {
+        if ( ln > 0 ) { 
 
 
-          let product=this.livePositions.filter(
-          (lp) => lp.instrument_token == CurrentInstrument.instrument_token
-        )[0].product;
-          // this.userMessages.push('there is a live position',CurrentInstrument.tradingsymbol);
-          console.log(
+          let product = this.livePositions.filter( 
+          ( lp )  => lp.instrument_token  ==  CurrentInstrument.instrument_token
+         )[0].product;
+          // this.userMessages.push( 'there is a live position',CurrentInstrument.tradingsymbol );
+          console.log( 
             "there is a live position",
             CurrentInstrument.tradingsymbol
-          );
+           );
 
           //there is a live position
 
           //check whether already a reverse order placed
 
-          let PlacedReverseOrder = this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0].PlacedReverseOrder;
+          let PlacedReverseOrder  =  this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0].PlacedReverseOrder;
 
-          let hasLiveTarget = this.instruments.filter(
-            (i) => i.instrument_token == instrument_token
-          )[0].hasLiveTarget;
+          let hasLiveTarget  =  this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0].hasLiveTarget;
 
-          if (PlacedReverseOrder == true || hasLiveTarget == true) {
-            console.log(
+          if ( PlacedReverseOrder  ==  true || hasLiveTarget  ==  true ) { 
+            console.log( 
               "PlacedReverseOrder",
               PlacedReverseOrder,
               "has live target",
               hasLiveTarget
-            );
+             );
 
-            // this.userMessages.push('reverse order alredy placed',CurrentInstrument.tradingsymbol)
+            // this.userMessages.push( 'reverse order alredy placed',CurrentInstrument.tradingsymbol )
 
-            console.log(
+            console.log( 
               "PlacedReverseOrder",
               PlacedReverseOrder,
               "hasLiveTarget",
               hasLiveTarget
-            );
-            console.log(
+             );
+            console.log( 
               "reverse order alredy placed",
               CurrentInstrument.tradingsymbol
-            );
+             );
 
             return false;
-          } else {
-            // this.userMessages.push('going to place reverese order',CurrentInstrument.tradingsymbol);
-            console.log(
+           }  else { 
+            // this.userMessages.push( 'going to place reverese order',CurrentInstrument.tradingsymbol );
+            console.log( 
               "going to place reverese order",
               CurrentInstrument.tradingsymbol
-            );
-            this.placetargetAndStopLoss(
+             );
+            this.placetargetAndStopLoss( 
               CurrentInstrument,
               instrument_token,
               element,product
-            );
-          }
+             );
+           } 
 
           /// now checking whter stop loss or target
 
           ///
-        } else {
-          // console.log('there No live position',ln,'ln',CurrentInstrument.tradingsymbol,'CurrentInstrument.tradingsymbol')
-        }
+         }  else { 
+          // console.log( 'there No live position',ln,'ln',CurrentInstrument.tradingsymbol,'CurrentInstrument.tradingsymbol' )
+         } 
 
         //measns already bought
-        //   }
-        //  else {
-        //   this.$set(
-        //     this.instruments.filter(
-        //       (i) => i.instrument_token == instrument_token
-        //     )[0],
+        //    } 
+        //  else { 
+        //   this.$set( 
+        //     this.instruments.filter( 
+        //       ( i )  => i.instrument_token  ==  instrument_token
+        //      )[0],
         //     "buyNow",
         //     false
-        //   );
-        // }
+        //    );
+        //  } 
 
         return;
-        // } catch (error) {
+        //  }  catch ( error ) { 
 
-        //   console.log("some error has occured ", error);
-        // }
+        //   console.log( "some error has occured ", error );
+        //  } 
 
         //////////////////////////
-      });
-    },
+       }  );
+     } ,
 
-    setInstrumentTokens() {
-      return new Promise((res, rej) => {
-        this.instrumentTokens = this.instruments.map((i) =>
-          parseInt(i.instrument_token)
-        );
+    setInstrumentTokens(  ) { 
+      return new Promise(( res, rej )  => { 
+        this.instrumentTokens  =  this.instruments.map(( i )  =>
+          parseInt( i.instrument_token )
+         );
 
-        res(true);
-      });
-    },
+        res( true );
+       }  );
+     } ,
 
-    mutateOrdersWithLtp(s) {
-      s.forEach((element) => {
-        let instrument_token = element.instrument_token;
-        let last_price = element.last_price;
-        let average_price = element.average_price;
+    mutateOrdersWithLtp( s ) { 
+      s.forEach(( element )  => { 
+        let instrument_token  =  element.instrument_token;
+        let last_price  =  element.last_price;
+        let average_price  =  element.average_price;
 
-        //console.log(element.instrument_token)
+        //console.log( element.instrument_token )
 
-        console.log(
-          instru.filter((e) => e.instrument_token == element.instrument_token)
-        );
+        console.log( 
+          instru.filter(( e )  => e.instrument_token  ==  element.instrument_token )
+         );
         return;
-        this.instruments.filter(
-          (e) => e.instrument_token == instrument_token
-        )[0].last_price = last_price;
+        this.instruments.filter( 
+          ( e )  => e.instrument_token  ==  instrument_token
+         )[0].last_price  =  last_price;
 
         this.symbols
-          .filter((o) => o.instr == instrument_token)
-          .forEach((e) => {
-            this.$set(e, "previous_last", e.last_price);
-            this.$set(e, "last_price", last_price);
+          .filter(( o )  => o.instr  ==  instrument_token )
+          .forEach(( e )  => { 
+            this.$set( e, "previous_last", e.last_price );
+            this.$set( e, "last_price", last_price );
 
-            if (e.previous_last < e.last_price) {
-              this.$set(e, "candleColor", "green");
-            } else if (e.previous_last > e.last_price) {
-              this.$set(e, "candleColor", "red");
-            } else if (e.previous_last == e.last_price) {
-              this.$set(e, "candleColor", "grey");
-            }
+            if ( e.previous_last < e.last_price ) { 
+              this.$set( e, "candleColor", "green" );
+             }  else if ( e.previous_last > e.last_price ) { 
+              this.$set( e, "candleColor", "red" );
+             }  else if ( e.previous_last  ==  e.last_price ) { 
+              this.$set( e, "candleColor", "grey" );
+             } 
 
-            this.$set(e, "live_gain", last_price);
-            this.$set(e, "average_price", average_price);
-          });
-      });
-    },
-  },
+            this.$set( e, "live_gain", last_price );
+            this.$set( e, "average_price", average_price );
+           }  );
+       }  );
+     } ,
+   } ,
 
-  data() {
-    return {
+  data(  ) { 
+    return { 
       livePositionsSelected: [],
       modalShow: false,
       proposedBuyAmount: 0,
@@ -2027,46 +2027,46 @@ this.$set(
       displayingInstruments: [],
       instruments: [],
       ohlc: [],
-    };
-  },
+     } ;
+   } ,
 
   name: "MiningMis",
-};
+ } ;
 </script>
 
-<style lang="scss" scoped>
-input {
-  border: 1px solid rgb(147, 206, 221);
+<style lang = "scss" scoped>
+input { 
+  border: 1px solid rgb( 147, 206, 221 );
   box-shadow: #327094;
-}
-.fixTableHead {
+ } 
+.fixTableHead { 
   overflow-y: auto;
-}
-.fixTableHead thead th {
+ } 
+.fixTableHead thead th { 
   position: sticky;
   top: 0;
-}
-table {
+ } 
+table { 
   border-collapse: collapse;
   width: 100%;
-}
+ } 
 th,
-td {
+td { 
   padding: 8px 15px;
   border: 2px solid #327094;
-}
-th {
+ } 
+th { 
   background: #93cedd;
-}
-// .red {
+ } 
+// .red { 
 //   background: white;
-//   color: rgb(109, 86, 86);
+//   color: rgb( 109, 86, 86 );
 
-// }
+//  } 
 
-// .green {
+// .green { 
 //   background: white;
-//  color: rgb(94, 136, 94);
+//  color: rgb( 94, 136, 94 );
 
-// }
+//  } 
 </style>

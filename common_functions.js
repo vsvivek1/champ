@@ -18,7 +18,7 @@ function getHistoricalData(access_token,symbol='INE002A01018',start='2021-03-10'
     console.log('access tocken from historical data',access_token);
     console.log('\n \n access tocken from historical data api_key',api_key);
   
-    if(access_token==null){
+    if(access_token == null){
   
       console.log('No acceess tocken insdie get historical data');
     }
@@ -76,7 +76,7 @@ function getHistoricalData(access_token,symbol='INE002A01018',start='2021-03-10'
 
   let minValue=Math.min.apply(Math, res.map(function(o) { return o.range; }))
 
-  let min=res.filter(a=>a.range==minValue)[0];
+  let min=res.filter(a=>a.range == minValue)[0];
 
 
   let d3=new Date();
@@ -125,7 +125,7 @@ dateIST.setMinutes(dateIST.getMinutes() + 30);
 
 // console.log('dateIST::',dateIST,'mindate',mindate,'yday',d3.toISOString())
 
-    if(ydate==mindate1){
+    if(ydate == mindate1){
 
       // console.log()
     // if(true){
@@ -176,7 +176,7 @@ return a;
       
       let eq=instru.then(
           r=>{
-            let eq=r.filter(r1=>r1.segment=='NSE' && r1.exchange=='NSE' && r1.instrument_type=='EQ' && r1.name!='');
+            let eq=r.filter(r1=>r1.segment == 'NSE' && r1.exchange == 'NSE' && r1.instrument_type == 'EQ' && r1.name!='');
           
             // eq1=eq
       

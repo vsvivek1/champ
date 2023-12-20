@@ -7,18 +7,18 @@ var promises = [];
 array.forEach(function(element) {
     promises.push(
         developer.getResources(element)
-            .then((data) = > {
+            .then((data) => {
                 name = data.items[0];
                 return developer.getResourceContent(element, file);
             })
-            .then((response) = > {
+            .then((response) => {
                 fileContent = atob(response.content);
                 self.files.push({
                     fileName: fileName,
                     fileType: fileType,
                     content: fileContent
                 });
-            }).catch ((error) = > {
+            }).catch ((error) => {
                 console.log('Error: ', error);
             })
     );

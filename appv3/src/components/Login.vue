@@ -13,61 +13,61 @@
 <script>
 import axios from 'axios'
 import store from '@/store';
-    export default {
+    export default { 
         name:'Login',
-computed:{
-           session:{
-get(){
+computed:{ 
+           session:{ 
+get(  ){ 
 
     return store.state.session;
-},
-set(val){
+ } ,
+set( val ){ 
 
-    store.commit('setSession',val)
-}
+    store.commit( 'setSession',val )
+ } 
 
-            },
-            accessToken:{
-get(){
+             } ,
+            accessToken:{ 
+get(  ){ 
 
     return store.state.accessToken;
-},
-set(val){
+ } ,
+set( val ){ 
 
-    store.commit('setAccessToken',val)
-}
+    store.commit( 'setAccessToken',val )
+ } 
 
-            },
+             } ,
 
-},
-
-
-        data(){
-
-            return{
+ } ,
 
 
-            }
-        },
+        data(  ){ 
 
-        mounted(){
-
-
-        },
-        methods:{
-
-            getCookies(){
-this.$cookie.get('session');
+            return{ 
 
 
-            },
+             } 
+         } ,
 
-            login(){
+        mounted(  ){ 
+
+
+         } ,
+        methods:{ 
+
+            getCookies(  ){ 
+this.$cookie.get( 'session' );
+
+
+             } ,
+
+            login(  ){ 
 let url=""
                 
-            }
-        }
-    }
+             } 
+         } 
+     } 
 </script>
 
 <style scoped>

@@ -1,16 +1,16 @@
 <template>
     <div>
-<!-- {{margins}} margin -->
+<!-- {{ margins }}  margin -->
 
-<div v-if="marginLoaded">
+<div v-if = "marginLoaded">
 <v-alert>Margins</v-alert>
 <v-container>
     <v-row>
         <v-col>
-            Equity &nbsp;<v-chip>{{margins.equity.net}}</v-chip>
+            Equity &nbsp;<v-chip>{{ margins.equity.net }} </v-chip>
             </v-col>
         <v-col>
-Live balance&nbsp;<v-chip>{{margins.equity.available.live_balance}}</v-chip>
+Live balance&nbsp;<v-chip>{{ margins.equity.available.live_balance }} </v-chip>
 
         </v-col>
         <v-col></v-col>
@@ -24,54 +24,54 @@ Live balance&nbsp;<v-chip>{{margins.equity.available.live_balance}}</v-chip>
 <script> 
 import sessionMixin from '@/views/sessionMixin';
 import axios from 'axios';
-    export default {
+    export default { 
         name:"Margin",
-        mounted(){
+        mounted(  ){ 
 
-            setInterval(()=>{
+            setInterval((  ) =>{ 
 
-                this.getMargins()
+                this.getMargins(  )
                 
-            },2*60*1000)
+             } ,2*60*1000 )
 
 
 
 
-        },
+         } ,
          mixins:[sessionMixin],
-         data(){
-return{
+         data(  ){ 
+return{ 
 
 marginLoaded:false,
     margins:[],
-}
+ } 
 
-         },
+          } ,
 
-        methods:{
+        methods:{ 
 
-getMargins(){
-this.marginLoaded=false;
-let url="/api/getMargins/accessTocken/"+this.accessToken;
-
-
-axios.get(url).then(res=>{
+getMargins(  ){ 
+this.marginLoaded = false;
+let url = "/api/getMargins/accessTocken/"+this.accessToken;
 
 
-this. margins=res.data;
+axios.get( url ).then( res =>{ 
 
-this.marginLoaded=true;
 
-this.$emit('marginUpdated',this. margins)
+this. margins = res.data;
 
-})
+this.marginLoaded = true;
 
-},
+this.$emit( 'marginUpdated',this. margins )
 
-        }
-    }
+ }  )
+
+ } ,
+
+         } 
+     } 
 </script>
 
-<style lang="scss" scoped>
+<style lang = "scss" scoped>
 
 </style>

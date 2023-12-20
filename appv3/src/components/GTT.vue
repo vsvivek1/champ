@@ -1,22 +1,22 @@
 <template>
     <div>
-{{CurrentGttList[0]}}CurrentGttList
+{{ CurrentGttList[0] }} CurrentGttList
 
 
 
-<v-btn @click="deleteGTT(1)"></v-btn>
+<v-btn @click = "deleteGTT( 1 )"></v-btn>
 
-    <input type="text" v-model="gttAmountPerManualOrder" name="" id="" class="form-control">
+    <input type = "text" v-model = "gttAmountPerManualOrder" name = "" id = "" class = "form-control">
 
-    <v-chip>Total {{stocksPricePointsFiltered.length}}</v-chip>   
+    <v-chip>Total {{ stocksPricePointsFiltered.length }} </v-chip>   
 
      <v-btn 
-     :loading="getStockPricePointsLoader"
-     @click="getStockPricePoints()">get </v-btn>
+     :loading = "getStockPricePointsLoader"
+     @click = "getStockPricePoints(  )">get </v-btn>
      
     <table
-    v-if="stocksPricePointsFiltered.length"
-    class="table table-bordered table-hover table-stripped">
+    v-if = "stocksPricePointsFiltered.length"
+    class = "table table-bordered table-hover table-stripped">
     <thead>
         <th>#</th>
         <th>Script</th>
@@ -25,21 +25,21 @@
         <th></th>
     </thead>
     <tbody>
-        <tr v-for="(stockPpItem,index) in stocksPricePointsFiltered" :key="index">
-            <td>{{index+1}}</td>
+        <tr v-for = "( stockPpItem,index ) in stocksPricePointsFiltered" :key = "index">
+            <td>{{ index+1 }} </td>
             <td>
-            <span class="text-primary" v-if="typeof stockPpItem.group!='undefined' ">{{stockPpItem.group}}</span>
-            <a target="_blank" :href="stockPpItem.chart">
+            <span class = "text-primary" v-if = "typeof stockPpItem.group!= 'undefined' ">{{ stockPpItem.group }} </span>
+            <a target = "_blank" :href = "stockPpItem.chart">
             
-            {{stockPpItem.tradingsymbol}}</a>
+            {{ stockPpItem.tradingsymbol }} </a>
             
-<span v-if="typeof stockPpItem.gttData!=='undefined' ">
-            <b class="bg-success" 
+<span v-if = "typeof stockPpItem.gttData!== 'undefined' ">
+            <b class = "bg-success" 
             
-            v-if="stockPpItem.gttData!='NO_GTT_PRESENT'">
+            v-if = "stockPpItem.gttData!= 'NO_GTT_PRESENT'">
 
-            GTT @ {{stockPpItem.gttData.condition.trigger_values[0]}}
-            <v-btn @click="deleteGTT(stockPpItem.gttData.id)"> <v-icon color="red">mdi-cancel</v-icon></v-btn>
+            GTT @ {{ stockPpItem.gttData.condition.trigger_values[0] }} 
+            <v-btn @click = "deleteGTT( stockPpItem.gttData.id )"> <v-icon color = "red">mdi-cancel</v-icon></v-btn>
 
 
             </b>
@@ -50,8 +50,8 @@
             </span>
 
             </td>
-            <!-- <td>{{stockPpItem.profitPc}}</td> -->
-            <td class="text-left">
+            <!-- <td>{{ stockPpItem.profitPc }} </td> -->
+            <td class = "text-left">
                 
 
                 
@@ -59,40 +59,40 @@
                     
                     
                     
-                    style="display:inline" :key="index" :class="{'bg-success': 
-                    l.support,'text-default':!l.support,'text-left':true }"
+                    style = "display:inline" :key = "index" :class = "{ 'bg-success': 
+                    l.support,'text-default':!l.support,'text-left':true  } "
 
 
-                    v-for="(l,index) in stockPpItem.supportLevels">
+                    v-for = "( l,index ) in stockPpItem.supportLevels">
                    <v-btn 
-                   @click="PlaceGttOrderForThisPrice(stockPpItem,l.level)"
-                   >{{l.level}}
+                   @click = "PlaceGttOrderForThisPrice( stockPpItem,l.level )"
+                   >{{ l.level }} 
 
-                   <b v-if="typeof stockPpItem.pricePoints!=='undefined' ">
+                   <b v-if = "typeof stockPpItem.pricePoints!== 'undefined' ">
 
 
-                   ({{
+                   ( {{ 
 
-                    getPercentage(stockPpItem,l.level)
+                    getPercentage( stockPpItem,l.level )
                   
                     
                     
-                    }}) %
+                     }}  ) %
                    </b>
                    </v-btn>  ,
                     
                     </b>
                
-                {{
+                {{ 
                 
                 
-                }}
+                 }} 
                 
                 </td>
             <td>
 
 
-{{stockPpItem.last_price}}
+{{ stockPpItem.last_price }} 
 
             </td>
         </tr>
@@ -104,149 +104,149 @@
 </template>
 
 <script>
-import { io } from "socket.io-client";
+import {  io  }  from "socket.io-client";
 import axios from 'axios';
 
 
 
 import sessionMixin from "@/views/sessionMixin";
-const socket = io("http://localhost:4000");
+const socket  =  io( "http://localhost:4000" );
 
 
-    export default {
+    export default { 
 
-        mounted(){
+        mounted(  ){ 
            
 
 
-        },
+         } ,
 
-        computed:{
+        computed:{ 
 
-stocksPricePointsFiltered(){
-return this.stocksPricePoints.filter(r=>{
+stocksPricePointsFiltered(  ){ 
+return this.stocksPricePoints.filter( r =>{ 
     
- try{
+ try{ 
 
-if(r.pricePoints.pricePoints.length==0)
-{
+if( r.pricePoints.pricePoints.length == 0 )
+{ 
 
     return false
-}else{
+ } else{ 
 
     return true
-}
+ } 
 
- } catch(error){
+  }  catch( error ){ 
 
     return false;
- }
+  } 
     
     
     
-    }
+     } 
     
     
     
-    )
+     )
 
-},
+ } ,
 
-upperShadowGreaterThanBody(){
-return this.stocksPricePoints.filter(r=>{
+upperShadowGreaterThanBody(  ){ 
+return this.stocksPricePoints.filter( r =>{ 
     
- try{
+ try{ 
 
-if(r.otherCriteria.upperShadow>r.otherCriteria.body)
-{
+if( r.otherCriteria.upperShadow>r.otherCriteria.body )
+{ 
 
     return true
-}else{
+ } else{ 
 
     return false
-}
+ } 
 
- } catch(error){
+  }  catch( error ){ 
 
     return false;
- }
+  } 
     
     
     
-    }
+     } 
     
     
     
-    ).length
+     ).length
 
-},
+ } ,
 
 
 
-reds(){
+reds(  ){ 
     // return 1
-return this.stocksPricePoints.filter(r=>{
+return this.stocksPricePoints.filter( r =>{ 
     
- try{
+ try{ 
 
-if(r.otherCriteria.candleColor=='red')
-{
+if( r.otherCriteria.candleColor == 'red' )
+{ 
 
     return true
-}else{
+ } else{ 
 
     return false
-}
+ } 
 
- } catch(error){
+  }  catch( error ){ 
 
     return false;
- }
+  } 
     
     
     
-    }
+     } 
     
     
     
-    ).length
+     ).length
 
-},greens(){
+ } ,greens(  ){ 
 
     // return 1
 
 
 
-return  this.stocksPricePoints.filter(r=>{
+return  this.stocksPricePoints.filter( r =>{ 
     
-     try{
+     try{ 
 
-if(r.otherCriteria.candleColor=='green')
-{
+if( r.otherCriteria.candleColor == 'green' )
+{ 
 
     return true
-}else{
+ } else{ 
 
     return false
-}
+ } 
 
- } catch(error){
+  }  catch( error ){ 
 
     return false;
- }
+  } 
 
-}
+ } 
     
-    ).length
+     ).length
 
-}
+ } 
 
-        },
+         } ,
 
          mixins: [sessionMixin],
-data(){
+data(  ){ 
 
-    return {
+    return { 
         CurrentGttList:[],
         gttAmountPerManualOrder:100000,
         CurrentTick:[],
@@ -255,81 +255,81 @@ data(){
 stocksPricePoints:[],
 loserList:[]
 
-    }
-},
-        mounted(){
+     } 
+ } ,
+        mounted(  ){ 
 // this.
 
-        },
-        methods:{
+         } ,
+        methods:{ 
 
-            deleteGTT(trigger_id){
-                axios.defaults.headers.common = {'Authorization': `bearer ${this.accessToken}`}
-                let url="/api/deleteGTT/"+trigger_id;
+            deleteGTT( trigger_id ){ 
+                axios.defaults.headers.common  =  { 'Authorization': `bearer ${ this.accessToken } ` } 
+                let url = "/api/deleteGTT/"+trigger_id;
 
-                axios.delete(url).then(r=>{
+                axios.delete( url ).then( r =>{ 
 
 
-                    console.log(r,'gtt has been deleted')
-                })
+                    console.log( r,'gtt has been deleted' )
+                 }  )
 
-            },
+             } ,
 
-            getPercentage(stockPpItem,level){
-  try {                  
-                         return(
-                                                     (stockPpItem.pricePoints.yesterday.close-level)*
-                         -100/stockPpItem.pricePoints.yesterday.close).toFixed(0)
-                    }
-                    catch(e){
+            getPercentage( stockPpItem,level ){ 
+  try {                   
+                         return( 
+                                                     ( stockPpItem.pricePoints.yesterday.close-level )*
+                         -100/stockPpItem.pricePoints.yesterday.close ).toFixed( 0 )
+                     } 
+                    catch( e ){ 
 
                        return e;
-                    }
+                     } 
 
-            },
+             } ,
 
-            getGTTS(){
-                let ob={};
+            getGTTS(  ){ 
+                let ob = {  } ;
 
 
 
-ob.accessToken=this.accessToken;
-let url="/api/getGTTs";
-axios.post(url,ob).then(r=>{
+ob.accessToken = this.accessToken;
+let url = "/api/getGTTs";
+axios.post( url,ob ).then( r =>{ 
 
-// console.log(r.data,'gtts')
+// console.log( r.data,'gtts' )
     
-this.CurrentGttList=r.data;
+this.CurrentGttList = r.data;
 
-this.stocksPricePoints.forEach(e=>{
+this.stocksPricePoints.forEach( e =>{ 
 
 
-    // console.log('e.instrument_token',e.instrument_token)
-let ln= r.data.
-        filter(r=>r.condition.instrument_token==e.instrument_token)
+    // console.log( 'e.instrument_token',e.instrument_token )
+let ln =  r.data.
+        filter( r =>r.condition.instrument_token == e.instrument_token )
 
-        // console.log(ln,'gtt')
+        // console.log( ln,'gtt' )
    
-if(
+if( 
     this.CurrentGttList.
-        filter(r=>e.instrument_token==r.condition.instrument_token).length>0
+        filter( r =>e.instrument_token == r.condition.instrument_token ).length>0
 
-){
+ ){ 
 
-    console.log('if')
-    this.$set(
+    console.log( 'if' )
+    this.$set( 
 
        e,
 'gttData',
 
 this.CurrentGttList.
-        filter(r=>e.instrument_token==r.condition.instrument_token)[0]
-    )
+        filter( r =>e.instrument_token == r.condition.instrument_token )[0]
+     )
 
-}else{
+ } else{ 
 
-    // console.log('else')
-    this.$set(
+    // console.log( 'else' )
+    this.$set( 
        e
         
         
@@ -337,192 +337,189 @@ this.CurrentGttList.
 
         'NO_GTT_PRESENT'
 
-    )
+     )
 
-}
-
-
+ } 
 
 
-});
+
+
+ }  );
     
-});
+ }  );
 
 
-            },
+             } ,
 
-PlaceGttOrderForThisPrice(stockPpItem,level){
+PlaceGttOrderForThisPrice( stockPpItem,level ){ 
 
-console.log(stockPpItem,level);
+console.log( stockPpItem,level );
 
-let ob={};
+let ob = {  } ;
 
-ob.params={};
+ob.params = {  } ;
 
-ob.accessToken=this.accessToken;
+ob.accessToken = this.accessToken;
 
-ob.params.tradingsymbol=stockPpItem.tradingsymbol;
-ob.params.exchange=stockPpItem.exchange;
-ob.params.trigger_values=[level];
-ob.params.last_price=stockPpItem.last_price;
-
-
-
-console.log(JSON.stringify(ob.params),'ob params');
-let order={};
-order.transaction_type='BUY'
-order.quantity=(this.gttAmountPerManualOrder/level).toFixed(0)
-order.product='CNC'
-order.order_type='LIMIT'
-order.price=level;
-
-ob.params.orders=[order]
-
-let url="/api/PlaceGTT";
-axios.post(url,ob).then(r=>console.log(r,'response'))
+ob.params.tradingsymbol = stockPpItem.tradingsymbol;
+ob.params.exchange = stockPpItem.exchange;
+ob.params.trigger_values = [level];
+ob.params.last_price = stockPpItem.last_price;
 
 
-},
+
+console.log( JSON.stringify( ob.params ),'ob params' );
+let order = {  } ;
+order.transaction_type = 'BUY'
+order.quantity = ( this.gttAmountPerManualOrder/level ).toFixed( 0 )
+order.product = 'CNC'
+order.order_type = 'LIMIT'
+order.price = level;
+
+ob.params.orders = [order]
+
+let url = "/api/PlaceGTT";
+axios.post( url,ob ).then( r =>console.log( r,'response' ))
 
 
-            mutateWithLtp(s){
+ } ,
+
+
+            mutateWithLtp( s ){ 
 
                 
-s.forEach(s1=>{
+s.forEach( s1 =>{ 
 
 
-let instrument_token=s1.instrument_token;
+let instrument_token = s1.instrument_token;
 
-this.stocksPricePoints.filter(sp=>sp.instrument_token==instrument_token)[0].last_price=s1.last_price
+this.stocksPricePoints.filter( sp =>sp.instrument_token == instrument_token )[0].last_price = s1.last_price
 
-})
-// console.log(s)
-            },
+ }  )
+// console.log( s )
+             } ,
 
-startSockets(){
-socket.emit("subscribe-GTT", JSON.stringify(this.instrumentTokens));
-// console.log(this.instrumentTokens,'i');
-
-
-    socket.on("send-GTT", (s) => {
-      this.mutateWithLtp(s);
-
-      this.CurrentTick = s;
-    });
+startSockets(  ){ 
+socket.emit( "subscribe-GTT", JSON.stringify( this.instrumentTokens ));
+// console.log( this.instrumentTokens,'i' );
 
 
-},
+    socket.on( "send-GTT", ( s )  => { 
+      this.mutateWithLtp( s );
+
+      this.CurrentTick  =  s;
+     }  );
 
 
-            getLevels(stockPpItem){
-
-let ar=stockPpItem.pricePoints.pricePoints;
+ } ,
 
 
-// let instrument=this.instrument.
-// filter(r=>r.instrument_token==instrument_token )[0];
+            getLevels( stockPpItem ){ 
 
-if(typeof stockPpItem.pricePoints=='undefined') return false;
-if(typeof stockPpItem.pricePoints.d1=='undefined') return false
-if(typeof stockPpItem.pricePoints.d1.close=='undefined') return false;
+let ar = stockPpItem.pricePoints.pricePoints;
 
 
+// let instrument = this.instrument.
+// filter( r =>r.instrument_token == instrument_token  )[0];
+
+if( typeof stockPpItem.pricePoints == 'undefined' ) return false;
+if( typeof stockPpItem.pricePoints.d1 == 'undefined' ) return false
+if( typeof stockPpItem.pricePoints.d1.close == 'undefined' ) return false;
 
 
-let refPrice=stockPpItem.pricePoints.d1.close;
-
-return ar.map(r=>r.high || r.level
-).sort((a,b)=>a-b)
-
- 
- 
-  .map((r,index,ar)=>{
 
 
-// console.log(r,refPrice,ar[index+1])
+let refPrice = stockPpItem.pricePoints.d1.close;
+
+return ar.map( r =>r.high || r.level
+ ).sort(( a,b ) =>a-b ) 
+  .map(( r,index,ar ) =>{ 
+
+
+// console.log( r,refPrice,ar[index+1] )
 let upperlevelCheck;
 let lowerlevelCheck;
-if(typeof ar[index+1]=='undefined'){
+if( typeof ar[index+1] == 'undefined' ){ 
 
 
- let ob={}
- ob.level=r;
-ob.support=false;
+ let ob = {  } 
+ ob.level = r;
+ob.support = false;
 
 return ob
 
-}else{
-// upperlevelCheck=refPrice<=ar[index+1]
+ } else{ 
+// upperlevelCheck = refPrice<= ar[index+1]
 
-if(ar[index-1]<=refPrice && ar[index+1]>=refPrice && ar[index]<=refPrice){
+if( ar[index-1]<= refPrice && ar[index+1]>= refPrice && ar[index]<= refPrice ){ 
 
- let ob={}
- ob.level=r;
-ob.support=true;
-
-return ob;
-
-}else{
- let ob={}
- ob.level=r;
-ob.support=false;
+ let ob = {  } 
+ ob.level = r;
+ob.support = true;
 
 return ob;
-}
-}
-})
+
+ } else{ 
+ let ob = {  } 
+ ob.level = r;
+ob.support = false;
+
+return ob;
+ } 
+ } 
+ }  )
 
 
 
-            },
+             } ,
 
-            getStockPricePoints(){
-
-
-                this.getStockPricePointsLoader=true
-let url="/api/GTT"
-let ob={};
-ob.accessToken=this.accessToken;
-axios.post(url,ob).then( (r) => {
+            getStockPricePoints(  ){ 
 
 
-    r.data.forEach(r1=>{
-let a=this.getLevels(r1);
-r1.supportLevels=a;
+                this.getStockPricePointsLoader = true
+let url = "/api/GTT"
+let ob = {  } ;
+ob.accessToken = this.accessToken;
+axios.post( url,ob ).then(  ( r )  => { 
 
-    })
-    this.stocksPricePoints=r.data
 
-    this.instrumentTokens=this.stocksPricePoints.map(r=>parseInt(r.instrument_token))
+    r.data.forEach( r1 =>{ 
+let a = this.getLevels( r1 );
+r1.supportLevels = a;
+
+     }  )
+    this.stocksPricePoints = r.data
+
+    this.instrumentTokens = this.stocksPricePoints.map( r =>parseInt( r.instrument_token ))
     
-this.getStockPricePointsLoader=false;
+this.getStockPricePointsLoader = false;
 
-this.startSockets()
+this.startSockets(  )
 
-this.getGTTS()
-    // console.log(r.data,'r.data')
+this.getGTTS(  )
+    // console.log( r.data,'r.data' )
     // . 
-    // sort((a,b)=>b.profitPc-a.profitPc)
+    // sort(( a,b ) =>b.profitPc-a.profitPc )
     
-    // this.loserList=r.data.losers.
+    // this.loserList = r.data.losers.
     
-    // sort((a,b)=>b.loserPc-a.loserPc)
-}
-    )
-            },
+    // sort(( a,b ) =>b.loserPc-a.loserPc )
+ } 
+     )
+             } ,
         
         
-    },
+     } ,
     name:'GTT'
-    }
+     } 
 </script>
 
-<style lang="scss" scoped>
+<style lang = "scss" scoped>
 
-td{
+td{ 
 
     max-width:100%;
 white-space:nowrap;
-}
+ } 
 
 </style>

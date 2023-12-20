@@ -2,7 +2,7 @@
     <div>
 
 
-      <div class="loading" v-if="loadingContent">
+      <div class = "loading" v-if = "loadingContent">
 
 
 
@@ -10,25 +10,25 @@
    
     <v-progress-linear
       indeterminate
-      color="green"
+      color = "green"
     ></v-progress-linear>
     <br>
     
   </div>
 
-<!-- loading... {{holdingLength}} -->
+<!-- loading... {{ holdingLength }}  -->
 </div>
 
-        <!-- {{NrInstruments}} -->
+        <!-- {{ NrInstruments }}  -->
 
-      <ul class="lits-item-group">
-        <li class="list-item" v-for ="NrInstrument in NrInstruments"  :key="NrInstrument._id">
+      <ul class = "lits-item-group">
+        <li class = "list-item" v-for  = "NrInstrument in NrInstruments"  :key = "NrInstrument._id">
 <v-row>
-  <v-col>{{NrInstrument.tradingsymbol}}</v-col>
-  <v-col>{{NrInstrument.date}}</v-col>
-  <v-col>{{NrInstrument.low}}</v-col>
-  <v-col>{{NrInstrument.high}}</v-col>
-  <v-col>{{NrInstrument.range}}</v-col>
+  <v-col>{{ NrInstrument.tradingsymbol }} </v-col>
+  <v-col>{{ NrInstrument.date }} </v-col>
+  <v-col>{{ NrInstrument.low }} </v-col>
+  <v-col>{{ NrInstrument.high }} </v-col>
+  <v-col>{{ NrInstrument.range }} </v-col>
   <v-col></v-col>
 </v-row>
 
@@ -42,52 +42,52 @@
 import axios from 'axios'
   import sessionMixin from '@/views/sessionMixin';
 import store from '@/store';
-    export default {
+    export default { 
         name:'NarrowRange',
-        data(){
-return {
+        data(  ){ 
+return { 
 
   loadingContent:false,
-}
+ } 
 
-        },
+         } ,
          mixins:[sessionMixin],
         name:'GetInstruments',
-        mounted(){
+        mounted(  ){ 
 
-this.getNarrowRange();
-        },
-           methods:{
+this.getNarrowRange(  );
+         } ,
+           methods:{ 
 
-                 getNarrowRange() {
-                   this.loadingContent=true;
-                   let range=4
-        const url = '/api/NrInstruments/' + this.accessToken+'/range/'+range;
-        axios.get(url).then(res => {
-          this.NrInstruments = res.data
-          this.loadingContent=false
+                 getNarrowRange(  ) { 
+                   this.loadingContent = true;
+                   let range = 4
+        const url  =  '/api/NrInstruments/' + this.accessToken+'/range/'+range;
+        axios.get( url ).then( res  => { 
+          this.NrInstruments  =  res.data
+          this.loadingContent = false
           
        
 
-        })
+         }  )
 
-      }
-        },computed:{
-        NrInstruments:{
-get(){
+       } 
+         } ,computed:{ 
+        NrInstruments:{ 
+get(  ){ 
 
     return store.state.NrInstruments;
-},
-set(val){
+ } ,
+set( val ){ 
 
-    store.commit('setNrInstruments',val)
-}
+    store.commit( 'setNrInstruments',val )
+ } 
 
-        }
+         } 
 
         
-    }
-    }
+     } 
+     } 
 </script>
 
 <style scoped>

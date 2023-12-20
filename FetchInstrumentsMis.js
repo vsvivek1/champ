@@ -99,9 +99,6 @@ async function downloadInstruments() {
 
 
 async function fetchInstrumentsForMiningMIS(accessToken) {
-
- 
-
   let dl=await downloadInstruments();
 
 
@@ -116,10 +113,10 @@ async function fetchInstrumentsForMiningMIS(accessToken) {
 
 
 
- let jsonObj1 =csvresult.filter(j => ((j.exchange == 'NFO' && j.expiry == EXPIRY &&  (j.name == 'NIFTY' || j.name == 'BANKNIFTY') )));
+ let jsonObj1 =csvresult.filter(j => ((j.exchange  ==  'NFO' && j.expiry  ==  EXPIRY &&  (j.name  ==  'NIFTY' || j.name  ==  'BANKNIFTY'))));
  
  
- let jsonObjAll =csvresult.filter(j => ((j.exchange == 'NFO' )|| j.exchange == 'NSE'));
+ let jsonObjAll =csvresult.filter(j => ((j.exchange  ==  'NFO' )|| j.exchange  ==  'NSE'));
           
     
 
@@ -129,7 +126,7 @@ async function fetchInstrumentsForMiningMIS(accessToken) {
 
  let f=await 
  
- new Promise( (res,rej)=>{
+ new Promise((res,rej)=>{
  
  Fs.writeFile(fileOutputName, JSON.stringify(jsonObj1), 'utf8', function (err) {
   if (err) {
@@ -213,11 +210,11 @@ let a = await getSymbols();
           console.log(len, 'left out of ', len1,' ',t ,' time left',e.tradingsymbol);
 
 
-          if(len==(len1-1)){
+          if(len == (len1-1)){
 
             let instruForFuture=require('./appv3/public/instruments/instrumentsMIS.json');
         
-           let niftyfut= instruForFuture.filter(i=>i.name=='NIFTY' && i.expiry==EXPIRY && i.instrument_type=="FUT" )[0];
+           let niftyfut= instruForFuture.filter(i=>i.name == 'NIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT" )[0];
            let a = new pricePoint(niftyfut.instrument_token, accessToken);
            let c = await a.getPricePoints(7, 'day');
            
@@ -233,7 +230,7 @@ let a = await getSymbols();
            jsonObj2.push(niftyfut)
            
 
-           let bankniftyfut= instruForFuture.filter(i=>i.name=='BANKNIFTY' && i.expiry==EXPIRY && i.instrument_type=="FUT" )[0]
+           let bankniftyfut= instruForFuture.filter(i=>i.name == 'BANKNIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT" )[0]
           
 
 
@@ -270,13 +267,13 @@ let a = await getSymbols();
             e.seletedBuyingMethod = 'MAX'
             e.buyNow = false;
 
-            if(e.pricePoints.length==0){
+            if(e.pricePoints.length == 0){
 
               console.log('pricePoints not set for ',e.tradingsymbol)
             }else{
 
 
-// if(e.pricePoints.nr4==true)
+// if(e.pricePoints.nr4 == true)
 
 let otherCriteriaCheck=otherCriteria(e)
 if(otherCriteriaCheck)
@@ -300,7 +297,7 @@ if(otherCriteriaCheck)
       
           }
 
-          if (len == 0) {
+          if (len  ==  0) {
 
       
            console.log('Now starting new mint ');
@@ -422,9 +419,9 @@ Fs.writeFile(fileOutputName, JSON.stringify(jsonObj2), 'utf8', function (err) {
   var m = Math.floor(d % 3600 / 60);
   var s = Math.floor(d % 3600 % 60);
 
-  var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-  var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-  var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+  var hDisplay = h > 0 ? h + (h  ==  1 ? " hour, " : " hours, ") : "";
+  var mDisplay = m > 0 ? m + (m  ==  1 ? " minute, " : " minutes, ") : "";
+  var sDisplay = s > 0 ? s + (s  ==  1 ? " second" : " seconds") : "";
   return hDisplay + mDisplay + sDisplay; 
 }
 
@@ -468,9 +465,6 @@ async function getHoldingInstruments(access_token){
     console.log('error',error)
   }
  
-
- 
-
 }
 
 
@@ -512,11 +506,11 @@ function getNearestStrikes(ohlc, instruments) {
       let last_price = ohlc[item].last_price;
 
 
-      if (symbol == 'NIFTY 50') {
+      if (symbol  ==  'NIFTY 50') {
 
         console.log('NIFTY 50', last_price)
       }
-      if (symbol == 'NIFTY BANK') {
+      if (symbol  ==  'NIFTY BANK') {
 
         console.log('NIFTY BANK', last_price)
       }
@@ -526,38 +520,38 @@ function getNearestStrikes(ohlc, instruments) {
 
         i => {
 
-          if (symbol == 'NIFTY 50') {
+          if (symbol  ==  'NIFTY 50') {
 
             symbol = 'NIFTY'
           }
 
 
-          if (symbol == 'NIFTY BANK') {
+          if (symbol  ==  'NIFTY BANK') {
 
             symbol = 'BANKNIFTY'
           }
 
-          return i.name == symbol
+          return i.name  ==  symbol
         }
 
       ).filter(i => {
 
 // console.log('i.name',i.name)
 
-        if (i.name == 'NIFTY') {
+        if (i.name  ==  'NIFTY') {
 
           console.log('NIFTY', i.tradingsymbol, last_price)
         }
-        if (i.name == 'BANKNIFTY') {
+        if (i.name  ==  'BANKNIFTY') {
 
           console.log('NIFTY BANK', i.tradingsymbol, last_price)
         }
 
 
 
-        if(i.instrument_type=='FUT'){
+        if(i.instrument_type == 'FUT'){
 
-        if(i.name=='NIFTY' || i.name=='BANKNIFTY'){
+        if(i.name == 'NIFTY' || i.name == 'BANKNIFTY'){
 
           console.log('its future',i.tradingsymbol)
           return true
@@ -566,7 +560,7 @@ function getNearestStrikes(ohlc, instruments) {
         }
 
         // console.log('i.instrument_type',i.instrument_type)
-        if (i.instrument_type == 'CE') {
+        if (i.instrument_type  ==  'CE') {
 
 
           /// if ce strike between 1.05 pc and 1.1 pc
@@ -583,11 +577,11 @@ function getNearestStrikes(ohlc, instruments) {
           {
 
 
-            if (i.name == 'NIFTY') {
+            if (i.name  ==  'NIFTY') {
 
               console.log('NIFTY 50', i.tradingsymbol)
             }
-            if (i.name == 'BANKNIFTY') {
+            if (i.name  ==  'BANKNIFTY') {
 
               console.log('NIFTY BANK', i.tradingsymbol)
             }
@@ -596,7 +590,7 @@ function getNearestStrikes(ohlc, instruments) {
           }
         }
 
-        else if (i.instrument_type == 'PE') {
+        else if (i.instrument_type  ==  'PE') {
 
           // console.log('pee yeee')
 
@@ -604,11 +598,11 @@ function getNearestStrikes(ohlc, instruments) {
           if (i.strike < last_price*.99 && i.strike > last_price*.93) {
 
 
-            if (i.name == 'NIFTY') {
+            if (i.name  ==  'NIFTY') {
 
               console.log('NIFTY 50', i.tradingsymbol)
             }
-            if (i.name == 'BANKNIFTY') {
+            if (i.name  ==  'BANKNIFTY') {
 
               console.log('NIFTY BANK', i.tradingsymbol)
             }
@@ -633,7 +627,7 @@ function getNearestStrikes(ohlc, instruments) {
 
 
 len=len-1;
-      if(len==0){
+      if(len == 0){
             /// currrent positions
 
             currentInstruments1=currentInstruments.map(c=>
@@ -692,18 +686,18 @@ async function getSymbols() {
 
   let instruments = require('./appv3/public/instruments/instrumentsMIS.json');
 
-  let st = instruments.filter(i => i.exchange == 'NFO')
+  let st = instruments.filter(i => i.exchange  ==  'NFO')
     .map((i) => i.name)
-    .filter((x, i, a) => a.indexOf(x) === i);
+    .filter((x, i, a) => a.indexOf(x)  === i);
 
   let st2 = instruments
     .map((i) => i.instrument_token)
-    .filter((x, i, a) => a.indexOf(x) === i);
+    .filter((x, i, a) => a.indexOf(x)  === i);
 
   let instTockens = st.map((s) => {
     // console.log(s,'s')
     let ar = instruments.filter(
-      (i) => i.tradingsymbol == s && i.exchange == "NSE"
+      (i) => i.tradingsymbol  ==  s && i.exchange  ==  "NSE"
     );
 
     if (typeof ar[0] != "undefined") {
@@ -725,17 +719,17 @@ async function getSymbols() {
 
     console.log('from get symbls', s)
 
-    if (s == 'NIFTY') {
+    if (s  ==  'NIFTY') {
       s = "NIFTY 50"
 
     }
 
-    if (s == 'BANKNIFTY') {
+    if (s  ==  'BANKNIFTY') {
       s = "NIFTY BANK"
 
     }
     return "NSE:" + s;
-  }).filter((x, i, a) => a.indexOf(x) === i);;
+  }).filter((x, i, a) => a.indexOf(x)  === i);;
 
 
 
@@ -795,7 +789,7 @@ function otherCriteria(e){
   let candleColor=(e.pricePoints.yesterday.close-e.pricePoints.yesterday.open>0) ?'green':'red';
   let upperShadow;
   let lowerShadow;
-  if(candleColor=='green'){
+  if(candleColor == 'green'){
   upperShadow=e.pricePoints.yesterday.high-e.pricePoints.yesterday.close;
   lowerShadow=e.pricePoints.yesterday.open-e.pricePoints.yesterday.low;
   
@@ -806,7 +800,7 @@ function otherCriteria(e){
   }
   // && lowerShadow>body
   let ob={body,upperShadow,candleColor}
-  if( candleColor=='green' && body>upperShadow ){
+  if( candleColor == 'green' && body>upperShadow ){
   
 
     return true

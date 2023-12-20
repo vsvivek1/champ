@@ -9,15 +9,15 @@
 <script>
 
 
-    export default {
+    export default { 
 
         name:"react",
 
     
         
-    }
+     } 
 </script>
 
-<style lang="scss" scoped>
+<style lang = "scss" scoped>
 
 </style>

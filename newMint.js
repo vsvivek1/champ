@@ -20,7 +20,7 @@ let hours,minutes,seconds;
 
 let LivePositionTotalAmount=-1;
 
-if(LivePositionTotalAmount==-1) {
+if(LivePositionTotalAmount == -1) {
 
 
   const maxAmountPerStock=0;
@@ -76,7 +76,7 @@ if(false){
 
       cluster.on("exit", function(worker) {
 
-      //   if (code !== 0 && !worker.exitedAfterDisconnect) {
+      //   if (code !==  0 && !worker.exitedAfterDisconnect) {
       //     cluster.fork();
       // }
         console.log("Worker", worker.id, " has exited.")});
@@ -99,7 +99,7 @@ async function coverOrders(){
   let livePositionsTmp = await getPositions(access_token_global);
 
   let livePositionsSelected = livePositionsTmp.net.filter(
-    (p) => p.exchange == "NFO" && p.quantity > 0 && p.product=='MIS'
+    (p) => p.exchange  ==  "NFO" && p.quantity > 0 && p.product == 'MIS'
   );
 
 
@@ -116,7 +116,7 @@ async function newMint(){
     try {
 
 
-if(minutes%2==0){
+if(minutes%2 == 0){
 
   coverOrders()
 
@@ -164,10 +164,10 @@ if(minutes%2==0){
 
        
         console.log(liveOrders1)
-        liveOrders=liveOrders1.filter(o=>o.exchange=='NFO' && o.product=='MIS');
+        liveOrders=liveOrders1.filter(o=>o.exchange == 'NFO' && o.product == 'MIS');
      
-        livePositions=livePositions1.net.filter(o=>o.exchange=='NFO'
-         && o.product=='MIS');
+        livePositions=livePositions1.net.filter(o=>o.exchange == 'NFO'
+         && o.product == 'MIS');
 
 
     
@@ -187,7 +187,7 @@ if(minutes%2==0){
          
           
 let instrument_token=tick.instrument_token;
-if(pvsToken==instrument_token){
+if(pvsToken == instrument_token){
 
   return false;
 }
@@ -195,15 +195,15 @@ pvsToken=instrument_token;
 
 let last_price=tick.last_price;
 
-let previous_price=instruments.filter(i=>i.instrument_token==instrument_token)[0].last_price
+let previous_price=instruments.filter(i=>i.instrument_token == instrument_token)[0].last_price
 
-let d1=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+let d1=instruments.filter(i=>i.instrument_token == instrument_token)[0].
 pricePoints.d1;
 
-let tradingsymbol=instruments.filter(i=>i.instrument_token==instrument_token)[0].tradingsymbol
+let tradingsymbol=instruments.filter(i=>i.instrument_token == instrument_token)[0].tradingsymbol
 
 
-if(typeof d1 =='undefined'){
+if(typeof d1  == 'undefined'){
 
   // console.log('d1',d1)
 return false;
@@ -225,34 +225,34 @@ let shortEntryStopLoss;
 if(breakoutTrading){
 
   // console.log(ticks[0],'here')
- shortEntryPrice=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+ shortEntryPrice=instruments.filter(i=>i.instrument_token == instrument_token)[0].
 pricePoints.d1.low;
 
-// shortEntryPrice=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+// shortEntryPrice=instruments.filter(i=>i.instrument_token == instrument_token)[0].
 // pricePoints.pivotPointObject.bc.toFixed(1)
 
- LongEntryPrice=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+ LongEntryPrice=instruments.filter(i=>i.instrument_token == instrument_token)[0].
 pricePoints.d1.high;
 
-if(typeof LongEntryPrice=='undefined') return false;
-if(typeof shortEntryPrice=='undefined') return false;
+if(typeof LongEntryPrice == 'undefined') return false;
+if(typeof shortEntryPrice == 'undefined') return false;
 
 
- longEntryTarget=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+ longEntryTarget=instruments.filter(i=>i.instrument_token == instrument_token)[0].
 pricePoints.d1.rangeBreakOutTarget;
 
-//  longEntryStopLoss=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+//  longEntryStopLoss=instruments.filter(i=>i.instrument_token == instrument_token)[0].
 // pricePoints.d1.low;
 
 
- longEntryStopLoss=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+ longEntryStopLoss=instruments.filter(i=>i.instrument_token == instrument_token)[0].
  pricePoints.pivotPointObject.bc.toFixed(1)
 
 
- shortEntryTarget=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+ shortEntryTarget=instruments.filter(i=>i.instrument_token == instrument_token)[0].
 pricePoints.d1.rangeBreakDownTarget;
 
- shortEntryStopLoss=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+ shortEntryStopLoss=instruments.filter(i=>i.instrument_token == instrument_token)[0].
 pricePoints.d1.high;
 
 
@@ -265,28 +265,28 @@ if(!breakoutTrading){
   
 
   
-  shortEntryPrice=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+  shortEntryPrice=instruments.filter(i=>i.instrument_token == instrument_token)[0].
   pricePoints.d1.high;
   
- LongEntryPrice=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+ LongEntryPrice=instruments.filter(i=>i.instrument_token == instrument_token)[0].
   pricePoints.d1.low;
   
 
-  if(typeof LongEntryPrice=='undefined') return false;
-  if(typeof shortEntryPrice=='undefined') return false;
+  if(typeof LongEntryPrice == 'undefined') return false;
+  if(typeof shortEntryPrice == 'undefined') return false;
  
  
-  longEntryTarget=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+  longEntryTarget=instruments.filter(i=>i.instrument_token == instrument_token)[0].
   pricePoints.d1.high;
   
-  longEntryStopLoss=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+  longEntryStopLoss=instruments.filter(i=>i.instrument_token == instrument_token)[0].
   pricePoints.d1.rangeBreakDownTarget;
   
   
- shortEntryTarget=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+ shortEntryTarget=instruments.filter(i=>i.instrument_token == instrument_token)[0].
   pricePoints.d1.low;
   
- shortEntryStopLoss=instruments.filter(i=>i.instrument_token==instrument_token)[0].
+ shortEntryStopLoss=instruments.filter(i=>i.instrument_token == instrument_token)[0].
   pricePoints.d1.rangeBreakOutTarget;
 
 
@@ -306,7 +306,7 @@ if(!breakoutTrading){
 //has order placed by software 
 
 // console.log(previous_price)
-if(previous_price==0){
+if(previous_price == 0){
 
 
 
@@ -314,12 +314,12 @@ if(previous_price==0){
 }
 
 // console.log(tick)
-// '(!hasLiveOrder(instrument_token) && !hasLivePosition(instrument_token) && !hasOrderPlacedByMint(instrument_token) )
+// '(!hasLiveOrder(instrument_token) && !hasLivePosition(instrument_token) && !hasOrderPlacedByMint(instrument_token))
 // console.log(hasLiveOrder(instrument_token)  ,
 // hasLivePosition(instrument_token) ,hasOrderPlacedByMint(instrument_token),tradingsymbol )
 
 if((!hasLiveOrder(instrument_token) && 
-!hasLivePosition(instrument_token) && !hasOrderPlacedByMint(instrument_token) )){
+!hasLivePosition(instrument_token) && !hasOrderPlacedByMint(instrument_token))){
 
    /// means no live order or  position
 
@@ -370,8 +370,8 @@ if(breakoutTrading){
     if(!breakoutTrading){
 
       // console.log('hi')
-      // if(typeof LongEntryPrice=='undefined') return false;
-      // if(typeof LongEntryPrice=='undefined') return false;
+      // if(typeof LongEntryPrice == 'undefined') return false;
+      // if(typeof LongEntryPrice == 'undefined') return false;
 
 
       if(last_price<LongEntryPrice){
@@ -424,7 +424,7 @@ if(breakoutTrading){
 
 //check long or short
 
-let qty=livePositions.filter(lp=>lp.instrument_token==instrument_token).
+let qty=livePositions.filter(lp=>lp.instrument_token == instrument_token).
 
 reduce((total,cur)=>{
 
@@ -437,7 +437,7 @@ return total
 // pvs=0;
 
 
-let sym=instruments.filter(i=>i.instrument_token==instrument_token)[0].tradingsymbol;
+let sym=instruments.filter(i=>i.instrument_token == instrument_token)[0].tradingsymbol;
 // console.log(sym,'has live position qty',qty)
 
 
@@ -445,7 +445,7 @@ let StatusOfStopLossortarget=getStatusOfStopLossortarget(instrument_token);
 
 // console.log(StatusOfStopLossortarget,'StatusOfStopLossortarget')
 
-if(StatusOfStopLossortarget==true){
+if(StatusOfStopLossortarget == true){
 
 
   // console.log('Already placed a target/StopLoss  for ',sym)
@@ -498,9 +498,6 @@ let int2=setInterval(async ()  =>{
 
 },1000);
 
-
- 
-
      
     
 
@@ -536,15 +533,15 @@ return false;
 
           return false;
         }
-        liveOrders=liveOrders1.filter(o=>o.exchange=='NFO' && 
-        o.product=='MIS');
+        liveOrders=liveOrders1.filter(o=>o.exchange == 'NFO' && 
+        o.product == 'MIS');
 
 
 
         console.log(livePositions1,'livePositions1')
-        livePositions=livePositions1.net.filter(o=>o.exchange=='NFO'
+        livePositions=livePositions1.net.filter(o=>o.exchange == 'NFO'
          && 
-        o.product=='MIS' && o.quantity!=0);
+        o.product == 'MIS' && o.quantity!=0);
 
 // console.log(livePositions1.net.length,livePositions1.day.length)
         let total=0;
@@ -577,7 +574,7 @@ console.log(LivePositionTotalAmount,'LivePositionTotalAmount')
         // console.log('orderupdates',LivePositionTotalAmount,'LivePositionTotalAmount')
 
    let a=     instruments.
-   filter(i=>i.hasOrderPlacedByMint==true).map(m=>m.tradingsymbol);
+   filter(i=>i.hasOrderPlacedByMint == true).map(m=>m.tradingsymbol);
   //  console.log(a,'List of order placed by Mint')
         
       } catch (error) {
@@ -620,14 +617,14 @@ catch(err){
 
 function PlacedtargetOrStopLoss(instrument_token,status){
 
-  instruments.filter(i=>i.instrument_token==instrument_token)[0].PlacedtargetOrStopLoss=status
+  instruments.filter(i=>i.instrument_token == instrument_token)[0].PlacedtargetOrStopLoss=status
 }
 
 
 function getStatusOfStopLossortarget(instrument_token){
 
 
-  return   instruments.filter(i=>i.instrument_token==instrument_token)[0].
+  return   instruments.filter(i=>i.instrument_token == instrument_token)[0].
   PlacedtargetOrStopLoss
 
 
@@ -646,8 +643,8 @@ function ProcedureForShortCovering(instrument_token,qty,last_price)
 
   let gainStokcPrice=(maxAmountPerStock*10)
 
-  let tradingsymbol=instruments.filter(i=>i.instrument_token==instrument_token)[0].tradingsymbol
-  let instrument=instruments.filter(i=>i.instrument_token==instrument_token)[0]
+  let tradingsymbol=instruments.filter(i=>i.instrument_token == instrument_token)[0].tradingsymbol
+  let instrument=instruments.filter(i=>i.instrument_token == instrument_token)[0]
   let exchange=instrument.exchange;
   let target;
   let stopLoss;
@@ -673,7 +670,7 @@ if(!breakoutTrading){
 
 }
 
-if(breakoutTrading || exchange=='NFO'){
+if(breakoutTrading || exchange == 'NFO'){
   let rangeBreakDownTarget1=instrument.pricePoints.d1.rangeBreakDownTarget;
 
   let tgt3pc=Math.ceil(instrument.pricePoints.d1.low*.99)
@@ -750,8 +747,8 @@ return
 
   qty=qty; //revreser the quantity
 
-  let tradingsymbol=instruments.filter(i=>i.instrument_token==instrument_token)[0].tradingsymbol
-  let instrument=instruments.filter(i=>i.instrument_token==instrument_token)[0]
+  let tradingsymbol=instruments.filter(i=>i.instrument_token == instrument_token)[0].tradingsymbol
+  let instrument=instruments.filter(i=>i.instrument_token == instrument_token)[0]
 
   let target;
   let stopLoss;
@@ -770,7 +767,7 @@ return
   }
 
 
-  if(breakoutTrading || exchange=='NFO'){
+  if(breakoutTrading || exchange == 'NFO'){
  
     let rangeBreakDownTarget1=instrument.pricePoints.d1.rangeBreakOutTarget
   
@@ -861,8 +858,8 @@ function  buildOrderArray(tradingsymbol, transaction_type, qty, order_type, Pric
 
 function setLastPriceAndPreviousPriceToInstrument(instrument_token,last_price){
     
-    instruments.filter(i=>i.instrument_token==instrument_token)[0].previous_price=instruments.filter(i=>i.instrument_token==instrument_token)[0].last_price
-    instruments.filter(i=>i.instrument_token==instrument_token)[0].last_price=last_price;
+    instruments.filter(i=>i.instrument_token == instrument_token)[0].previous_price=instruments.filter(i=>i.instrument_token == instrument_token)[0].last_price
+    instruments.filter(i=>i.instrument_token == instrument_token)[0].last_price=last_price;
     
 }
 
@@ -884,7 +881,7 @@ async function getPositions(accessToken){
 function hasLivePosition(instrument_token){
 
   // console.log(livePositions,'livePositions')
-  let  ln= livePositions.filter(lp=>lp.instrument_token==instrument_token).length
+  let  ln= livePositions.filter(lp=>lp.instrument_token == instrument_token).length
 
   if(ln>0){
 
@@ -902,14 +899,14 @@ function setOrderPlacedByMint(instrument_token,status){
 
   // console.log('has placed by mint')
 
-    instruments.filter(lp=>lp.instrument_token==instrument_token )[0]
+    instruments.filter(lp=>lp.instrument_token == instrument_token )[0]
     .hasOrderPlacedByMint=status;
     
     
-    let ts=instruments.filter(i=>i.instrument_token==instrument_token)[0].tradingsymbol
+    let ts=instruments.filter(i=>i.instrument_token == instrument_token)[0].tradingsymbol
 
     let s=instruments.
-    filter(lp=>lp.instrument_token==instrument_token)[0].hasOrderPlacedByMint
+    filter(lp=>lp.instrument_token == instrument_token)[0].hasOrderPlacedByMint
 
 
 
@@ -924,18 +921,18 @@ function hasOrderPlacedByMint(instrument_token){
 
   // console.log(instrument_token);
     let  ln= instruments.
-    filter(lp=>lp.instrument_token==instrument_token )[0].hasOrderPlacedByMint
+    filter(lp=>lp.instrument_token == instrument_token )[0].hasOrderPlacedByMint
   return ln;
 
 
-    let ts=instruments.filter(i=>i.instrument_token==
+    let ts=instruments.filter(i=>i.instrument_token == 
       instrument_token)[0].tradingsymbol
 //  console.log(ln,'len mint',ts)
 
-    if(ln==true){
+    if(ln == true){
   
       return true
-    }else if (typeof ln=='undefined'){
+    }else if (typeof ln == 'undefined'){
   // console.log(typeof ln)
       return false;
     }
@@ -943,7 +940,7 @@ function hasOrderPlacedByMint(instrument_token){
 }
 
 function hasLiveOrder(instrument_token){
-    let  ln= liveOrders.filter(lp=>lp.instrument_token==instrument_token).length
+    let  ln= liveOrders.filter(lp=>lp.instrument_token == instrument_token).length
 
     if(ln>0){
   
@@ -1002,7 +999,7 @@ function buildOrderArrayNo(tradingsymbol, transaction_type, qty, order_type, Pri
 function buildOrderArrayAndPlaceOrder(instrument_token,transaction_type,qty,Price,exchange){
 
 
-  let p=instruments.filter(p1=>p1.instrument_token==instrument_token)[0];
+  let p=instruments.filter(p1=>p1.instrument_token == instrument_token)[0];
   
   // let Price = p.pricePoints.d1.low;
   let tradingsymbol = p.tradingsymbol;
@@ -1046,7 +1043,7 @@ function procedureForLongTradeForNewMint(instrument_token){
   let chk=hasOrderPlacedByMint(instrument_token);
 
   // console.log('chkinside',chk,'instrument_token',instrument_token)
-  if(chk==true){
+  if(chk == true){
 
     return false
   }
@@ -1056,7 +1053,7 @@ function procedureForLongTradeForNewMint(instrument_token){
   setOrderPlacedByMint(instrument_token,true)
     
     
-    let p=instruments.filter(p1=>p1.instrument_token==instrument_token)[0];
+    let p=instruments.filter(p1=>p1.instrument_token == instrument_token)[0];
   
     let Price;
     if(breakoutTrading){
@@ -1083,7 +1080,7 @@ function procedureForLongTradeForNewMint(instrument_token){
     
     let lot_size;
 
-    if(exchange=='NFO'){
+    if(exchange == 'NFO'){
       lot_size=p.lot_size
       Price = p.pricePoints.d1.high;
 
@@ -1137,7 +1134,7 @@ return false;
 
 
     // console.log('chkinside',chk)
-    if(chk==true){
+    if(chk == true){
 
       return false
     }
@@ -1145,7 +1142,7 @@ return false;
      setOrderPlacedByMint(instrument_token,true)
     
     
-    let p=instruments.filter(p1=>p1.instrument_token==instrument_token)[0];
+    let p=instruments.filter(p1=>p1.instrument_token == instrument_token)[0];
 
     let exchange=p.exchange;
     
@@ -1162,7 +1159,7 @@ return false;
 
    
 
-    if(exchange=='NFO'){
+    if(exchange == 'NFO'){
       lot_size=p.lot_size
 
       Price = p.pricePoints.d1.low;

@@ -9,76 +9,76 @@
   import axios from 'axios'
 
 
-    export default {
+    export default { 
         name:'OptionChain',
          mixins:[sessionMixin],
-         mounted(){
-this.getStrategy()
+         mounted(  ){ 
+this.getStrategy(  )
 
-         },
-         data(){
+          } ,
+         data(  ){ 
 
-             return{
+             return{ 
 OptionChainType:'NSE',
 OptionChains:[],
 loadingContent:false,
 
-             }
-         },
-         methods:{
+              } 
+          } ,
+         methods:{ 
 
-                    getStrategy(){
+                    getStrategy(  ){ 
                  this.loadingContent=true;
                  this.noData=false;
 
                 let accessToken=this.accessToken;
 const url = '/api/OptionChain/'+this.OptionChainType+'/accessToken/'+accessToken;
 
-// alert(accessToken);
-        axios.get(url).then(res => {
+// alert( accessToken );
+        axios.get( url ).then( res => { 
 
             
           this.OptionChains= res.data
 
-          if(this.OptionChains.length==0){
+          if( this.OptionChains.length == 0 ){ 
 
             return false
-          }
+           } 
 
 this.numberOfShares=this.OptionChains.length;
 
-          this. returnedSymbolsForOHLC=this.OptionChains.map(s=>{
+          this. returnedSymbolsForOHLC=this.OptionChains.map( s=>{ 
           
-          if(typeof(s.instrument_token)=='undefined'){
+          if( typeof( s.instrument_token ) == 'undefined' ){ 
 
             return 'NSE:'
-          }else{
+           } else{ 
 
 return  'NSE:'+s.instrument_token.tradingsymbol
-          }
-          // console.log(s.instrument_token.tradingsymbol)
+           } 
+          // console.log( s.instrument_token.tradingsymbol )
 
 
            
-            })
+             }  )
             
             
            this.loadingContent=false;
 
-           if(this.OptionChains.length==0){
+           if( this.OptionChains.length == 0 ){ 
              this.noData=true;
-           }
+            } 
           
        return this. returnedSymbolsForOHLC
 
-        }).then(r=>{
+         }  ).then( r=>{ 
 
-this.getOHLC(accessToken)
-        })
+this.getOHLC( accessToken )
+         }  )
 
-               }
-         }
-    }
+                } 
+          } 
+     } 
 </script>
 
 <style scoped>

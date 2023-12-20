@@ -1,10 +1,10 @@
 <template>
     <div id="app">
   
-  <!-- {{session}} -->
+  <!-- {{ session }}  -->
       <v-app>
       <div id="nav">
-        <router-link  v-if="session==null" to="/login">Login</router-link> |
+        <router-link  v-if="session == null" to="/login">Login</router-link> |
         <router-link v-if="session!=null" to="/">Home</router-link> |
         <router-link to="/about">About</router-link> |
         <!-- <router-link to="/Validate">validate</router-link> | -->
@@ -37,7 +37,7 @@
        <router-link  v-if="session!=null" to="/NewFutureMining/NFO" >New Future Mining</router-link> |
       
   
-   <!-- { name: 'NewFutureMining', params: { ITYPE: "NFO" } } -->
+   <!-- {  name: 'NewFutureMining', params: {  ITYPE: "NFO"  }   }  -->
   
    <router-link  v-if="session!=null" to="/NewFutureMining/MCX" >Commodity</router-link>|
    <router-link  v-if="session!=null" to="/NewFutureMining/NSE" >NSE intraday</router-link>|
@@ -77,7 +77,7 @@
       <div class="row">
         <div class="col">
 
-          <v-btn @click="fetchInstruments()">
+          <v-btn @click="fetchInstruments( )">
             Fetch Instruments
             <v-icon></v-icon>
           </v-btn>
@@ -101,79 +101,79 @@
     import axios from 'axios'
   
   
-  export default {
+  export default { 
 
-    methods:{
+    methods:{ 
 
-        fetchInstruments() {
-      axios.post('/api/fetch-instruments')
-        .then(response => {
-          console.log(response.data);
-        })
-        .catch(error => {
-          console.error(error);
-        });
-    }
+        fetchInstruments( ) { 
+      axios.post( '/api/fetch-instruments')
+        .then( response => { 
+          console.log( response.data);
+         } )
+        .catch( error => { 
+          console.error( error);
+         } );
+     } 
 
       
 
 
-    },
+     } ,
 
-    components: {
+    components: { 
     // LogWindow,
-  },
-      computed:{
+   } ,
+      computed:{ 
   
-                session:{
-  get(){
+                session:{ 
+  get( ){ 
   
       return store.state.session;
-  },
-  set(val){
+   } ,
+  set( val){ 
   
-      store.commit('setSession',val)
-  }
+      store.commit( 'setSession',val)
+   } 
   
-              },
-              accessToken:{
-  get(){
+               } ,
+              accessToken:{ 
+  get( ){ 
   
       return store.state.accessToken;
-  },
-  set(val){
+   } ,
+  set( val){ 
   
-      store.commit('setAccessToken',val)
-  }
+      store.commit( 'setAccessToken',val)
+   } 
   
-              },
-      }
+               } ,
+       } 
   
-  }
+   } 
   
   </script>
   
   <style lang="scss">
-  #app {
+  #app { 
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-  }
+   } 
   
-  #nav {
+  #nav { 
     padding: 30px;
   
-    a {
+    a { 
       font-weight: bold;
       color: #2c3e50;
   
-      &.router-link-exact-active {
+      &.router-link-exact-active { 
         color: #42b983;
-      }
-    }
-  }
+       } 
+     } 
+   } 
   
   // @import './assets/styles/app.17a510a7.css';
   // @import './assets/styles/css.css';

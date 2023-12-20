@@ -21,38 +21,38 @@ class="table table-bordered table-compact">
         <tr 
         
         
-        v-for="(closedTradesScript,index) in closedTradesScriptsDisplay" :key="index" >
-            <td>{{index+1}}</td>
+        v-for="( closedTradesScript,index ) in closedTradesScriptsDisplay" :key="index" >
+            <td>{{ index+1 }} </td>
     <td>
         <a :href="closedTradesScript.instrument.chart" target="_blank">
 
-            {{closedTradesScript.tradingsymbol}}
+            {{ closedTradesScript.tradingsymbol }} 
         </a>
         
         
     
     </td>
-    <td>{{closedTradesScript.buy_price}}</td>
-    <td>{{closedTradesScript.sell_price}}</td>
-    <td>{{closedTradesScript.sell_quantity}}</td>
-    <td :class="{
+    <td>{{ closedTradesScript.buy_price }} </td>
+    <td>{{ closedTradesScript.sell_price }} </td>
+    <td>{{ closedTradesScript.sell_quantity }} </td>
+    <td :class="{ 
         'text-success':closedTradesScript.postTradePrice<closedTradesScript.sell_price,
         'text-danger':closedTradesScript.postTradePrice>closedTradesScript.sell_price
         
         
-        }"
+         } "
     
     
-    >{{closedTradesScript.postTradePrice}}</td>
+    >{{ closedTradesScript.postTradePrice }} </td>
 
 
     <td>
         
-        {{(closedTradesScript.postTradePrice-closedTradesScript.sell_price)*closedTradesScript.sell_quantity}}
+        {{ ( closedTradesScript.postTradePrice-closedTradesScript.sell_price )*closedTradesScript.sell_quantity }} 
     
     
     </td>
-    <td>{{closedTradesScript.pnl}}</td>
+    <td>{{ closedTradesScript.pnl }} </td>
         </tr>
     </tbody>
 </table>
@@ -60,21 +60,21 @@ class="table table-bordered table-compact">
 </template>
 
 <script>
-    export default {
+    export default { 
         name:'ClosedTrades',
-        props:{closedTradesScripts:Array},
+        props:{ closedTradesScripts:Array } ,
 
-        computed:{
+        computed:{ 
 
-            closedTradesScriptsDisplay(){
+            closedTradesScriptsDisplay(  ){ 
 
 
               return   this.closedTradesScripts.
-                filter(i=>typeof i.instrument!='undefined')
+                filter( i=>typeof i.instrument!='undefined' )
 
-            }
-        }
-    }
+             } 
+         } 
+     } 
 </script>
 
 <style lang="scss" scoped>

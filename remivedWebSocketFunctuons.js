@@ -73,10 +73,7 @@ async function socketConectionsForFutureMining(socket,access_token){
   
   function sktForMKVStrategy(socket,access_token){
 
-  
-
- 
-    /////////////////////io part
+      /////////////////////io part
     
     
     // socket.on('order-book',e=>{
@@ -235,9 +232,6 @@ async function socketConectionsForFutureMining(socket,access_token){
 
 function startWebSocketsOnTrade(socket,access_token){
 
-
- 
-
     socket.on('forceDisconnect', r=>{
     // socket.disconnect();
     
@@ -297,7 +291,7 @@ function startWebSocketsOnTrade(socket,access_token){
     
       
     
-      // console.log('r.filter(r=>r==28807170)',r);
+      // console.log('r.filter(r=>r == 28807170)',r);
      
     
     
@@ -322,7 +316,7 @@ function startWebSocketsOnTrade(socket,access_token){
     
         console.log(items,'items from  send-realtime-subscription')
     
-        // console.log('items.filter(r=>r==28807170)',items.filter(r=>r==28807170));
+        // console.log('items.filter(r=>r == 28807170)',items.filter(r=>r == 28807170));
         // console.log('hre',ticker);
     
       console.log(ticker.connected(),'ticker.connected')

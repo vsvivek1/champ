@@ -18,21 +18,21 @@ import sessionMixin from "@/views/sessionMixin";
 
 // import ripple from 'vuetify/lib/directives/ripple';
 
-// import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+// import {  BootstrapVue, IconsPlugin  }  from 'bootstrap-vue'
 
-// Import Bootstrap an BootstrapVue CSS files (order is important)
+// Import Bootstrap an BootstrapVue CSS files ( order is important )
 // import 'bootstrap/dist/css/bootstrap.css'
 // import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 
-// import { VuePlugin } from 'vuera'
+// import {  VuePlugin  }  from 'vuera'
 
-// Vue.use(VuePlugin)
+// Vue.use( VuePlugin )
 
 // Make BootstrapVue available throughout your project
-// Vue.use(BootstrapVue)
+// Vue.use( BootstrapVue )
 // Optionally install the BootstrapVue icon components plugin
-// Vue.use(IconsPlugin)
+// Vue.use( IconsPlugin )
 
 
 
@@ -40,27 +40,27 @@ import sessionMixin from "@/views/sessionMixin";
 
 
 
-// Vue.use(vuetify, {
-//   directives: {
+// Vue.use( vuetify, { 
+//   directives: { 
 //     ripple,
-//   },
-// });
+//    } ,
+//  }  );
 
 // import Ripple from 'vuetify/lib/directives/ripple';
-// Vue.use(vuetify, {
-//   directives: {
+// Vue.use( vuetify, { 
+//   directives: { 
 //     Ripple,
-//   },
-// });
+//    } ,
+//  }  );
  
-Vue.use(Vddl);
+Vue.use( Vddl );
 
 import VueCookie from 'vue-cookie';
 // Tell Vue to use the plugin
-Vue.use(VueCookie);
+Vue.use( VueCookie );
 
-Vue.use(sessionMixin);
-// Vue.use(axios);
+Vue.use( sessionMixin );
+// Vue.use( axios );
 
 Vue.config.productionTip = false
 
@@ -68,92 +68,92 @@ Vue.config.productionTip = false
 
 
 
-// Vue.use(vuetify);
-Vue.prototype.$storeObjectInLocalStorage = function(key, value) {
-  localStorage.setItem(key, JSON.stringify(value));
-};
+// Vue.use( vuetify );
+Vue.prototype.$storeObjectInLocalStorage = function( key, value ) { 
+  localStorage.setItem( key, JSON.stringify( value ));
+ } ;
 
-Vue.prototype.$getObjectFromLocalStorage = function(key) {
-  const value = localStorage.getItem(key);
-  return JSON.parse(value);
-};
+Vue.prototype.$getObjectFromLocalStorage = function( key ) { 
+  const value = localStorage.getItem( key );
+  return JSON.parse( value );
+ } ;
 
 
-Vue.prototype.$getAllObjectsFromLocalStorage = function() {
+Vue.prototype.$getAllObjectsFromLocalStorage = function(  ) { 
   const objects = [];
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    const value = localStorage.getItem(key);
-    try {
-      const obj = JSON.parse(value);
-      objects.push(obj);
-    } catch (e) {
+  for ( let i = 0; i < localStorage.length; i++ ) { 
+    const key = localStorage.key( i );
+    const value = localStorage.getItem( key );
+    try { 
+      const obj = JSON.parse( value );
+      objects.push( obj );
+     }  catch ( e ) { 
       // Ignore non-JSON values
-    }
-  }
+     } 
+   } 
   return objects;
-};
-Vue.mixin({
-  methods: {
+ } ;
+Vue.mixin( { 
+  methods: { 
 
 
 
 
-  //  cl(...params){
+  //  cl( ...params ){ 
 
 
   //   let out='';
-  //   for (let i = 0; i < params.length; i++) {
+  //   for ( let i = 0; i < params.length; i++ ) { 
   //    out=out+' '+ params[i]
-  //   }
+  //    } 
 
 
-  //     console.log(out)
-  //   },
+  //     console.log( out )
+  //    } ,
 
 
-    requireJson(url){
-console.log(url)
-      return new Promise(async (res,rej)=>{
+    requireJson( url ){ 
+console.log( url )
+      return new Promise( async ( res,rej )=>{ 
       
       let a =  await fetch
-      (url).then(
+      ( url ).then( 
         
-        r=>{
+        r=>{ 
 
-if(r){
-  return   r.json()
-}
+if( r ){ 
+  return   r.json(  )
+ } 
 
        
-        }
+         } 
         
         
        
         
-        );
+         );
       
-      res(a);
-      })
+      res( a );
+       } )
       
       
       
-      }
+       } 
   
   
   
-    },
-})
+     } ,
+ } )
 
 
-// console.log(globalConsoleLogs,'globalConsoleLogs')
+// console.log( globalConsoleLogs,'globalConsoleLogs')
 
-// created() {
+// created( ) { 
 //   this.$root.globalConsoleLogs = [];
-// },
+//  } ,
 
 // vuetify,
-new Vue({
+new Vue( { 
 
 
 
@@ -162,6 +162,6 @@ new Vue({
   store,
   vuetify,
  
-  render: h => h(App)
-}).$mount('#app')
+  render: h => h( App)
+ } ).$mount( '#app')
 

@@ -1,5 +1,5 @@
-module.exports=fetchCommodityPricePoints(){
+module.exports = fetchCommodityPricePoints(  ){ 
 
 
 
-}
+ } 

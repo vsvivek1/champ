@@ -30,15 +30,15 @@ async function main(access_token){
     
    let  erroroutFile='./actutalTrade-'+'2022-04-22'+'.text';
     let a= await  kc.getPositions()
-    let a1=a.net //.filter(ax=>ax.product=='NRML');
+    let a1=a.net //.filter(ax=>ax.product == 'NRML');
 
     const csv = new ObjectsToCsv(a1)
 
     await csv.toDisk(erroroutFile)
 
-let a2=a1.filter(ax=>ax.product=='NRML')
+let a2=a1.filter(ax=>ax.product == 'NRML')
 .filter(ay=>ay.last_price>ay.sell_price)
-.filter(az=>az.quantity==0)
+.filter(az=>az.quantity == 0)
 
 ;
 
@@ -107,9 +107,6 @@ data2.forEach(e=>{
 //  return ;
 
 
-
- 
-
 //  return 
 
 // data1.forEach(e=>{
@@ -136,7 +133,7 @@ data2.forEach(e=>{
 // })
 
 
-let a11=data3.filter(a=>a.type=='Entry');
+let a11=data3.filter(a=>a.type == 'Entry');
 
 let a1=[...new Set(a11.map(a => JSON.stringify(a)))].map(a => JSON.parse(a))
 
@@ -144,12 +141,12 @@ let a1=[...new Set(a11.map(a => JSON.stringify(a)))].map(a => JSON.parse(a))
 
 
 a1.forEach(e=>{
-  let o=instruments.filter(i=>i.tradingsymbol==e.tradingsymbol)[0]
+  let o=instruments.filter(i=>i.tradingsymbol == e.tradingsymbol)[0]
 
 
   e.instrument=o;
 
-  if(typeof o=='undefined'){
+  if(typeof o == 'undefined'){
 
    e.instrument_token=0
   }else{
@@ -161,18 +158,15 @@ a1.forEach(e=>{
 
 let instr=a1.map(a11=>  {
 
-  let o=instruments.filter(i=>i.tradingsymbol==a11.tradingsymbol)[0]
+  let o=instruments.filter(i=>i.tradingsymbol == a11.tradingsymbol)[0]
 
-  if(typeof o=='undefined'){
+  if(typeof o == 'undefined'){
 
     return 0
   }else{
 
     return o.instrument_token
   }
-
- 
-
 } )
 
 
@@ -201,7 +195,7 @@ a1.forEach(element => {
   
 let lp=ltps[element.instrument_token]
 
-if(typeof lp=='undefined'){
+if(typeof lp == 'undefined'){
 
   return false
 }
@@ -221,9 +215,6 @@ list.push(trade)
 console.log(trade)
 
 profit=profit+element.profit_day_end;
-
-
- 
     //  fs.appendFile(erroroutFile, JSON.stringify(trade), 'utf8', function (err) {
     //    if (err) {
     //        console.log("An error occured while writing JSON Object to File.");

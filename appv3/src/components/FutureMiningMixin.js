@@ -1,7 +1,7 @@
-export default{
+export default{ 
 
-  data(){
-return {
+  data(  ){ 
+return { 
   totalForgoneForStopLoss:0,
   totalForgoneFortarget:0,
   totalForgone:0,
@@ -10,7 +10,7 @@ return {
         loadingHourlyTradingLows: false,
         closedTradesScripts: [],
         tradingAlerts: [],
-        liveScript: {},
+        liveScript: {  } ,
         liveOrders: [],
         webSocketNotActive: false,
         laggingCheckDigit: -1,
@@ -53,430 +53,430 @@ return {
         ohlc: [],
 
 
-}
+ } 
 
 
-  }
+   } 
 ,
-methods:{
+methods:{ 
 
-    getMisPricePointofScript(instrument_tocken)
-    {
-try{
+    getMisPricePointofScript( instrument_tocken )
+    { 
+try{ 
 // return ;
 // return instrument_tocken;
 
-// return this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pricePoints.yesterday.high;;
+// return this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].pricePoints.yesterday.high;;
 
-//console.log(instrument_tocken)
-//console.log(this.instruments.filter(i=>i.instrument_token==instrument_tocken),'this.instruments.filter(i=>i.instrument_token==instrument_tocken)')
-// console.log(this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0],
-// 'this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0]');
+//console.log( instrument_tocken )
+//console.log( this.instruments.filter( i =>i.instrument_token == instrument_tocken ),'this.instruments.filter( i =>i.instrument_token == instrument_tocken )' )
+// console.log( this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0],
+// 'this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0]' );
 
-if(this.instruments.filter(i=>i.instrument_token==instrument_tocken.length==0))
-{
+if( this.instruments.filter( i =>i.instrument_token == instrument_tocken.length == 0 ))
+{ 
 
 
-}
-let yesterdayHigh=
-this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].
+ } 
+let yesterdayHigh = 
+this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].
 pricePoints.yesterday.high;
 
 
 // return yesterdayHigh*1.2;
-let type=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].instrument_type;
-let name=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].name;
+let type = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].instrument_type;
+let name = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].name;
 
-//.hourlyPricePoints(h=>h.h.high>1.1*yesterdayHigh
+//.hourlyPricePoints( h =>h.h.high>1.1*yesterdayHigh
 
 // return name+type;
 
-if(name=='BANKNIFTY' && type=='FUT'){
+if( name == 'BANKNIFTY' && type == 'FUT' ){ 
 
-  let offset=90;
- let reference= yesterdayHigh+offset
-
-
-return this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].
-pricePoints.hourlyPricePoints.filter(l=>l.high>reference)[0].high
+  let offset = 90;
+ let reference =  yesterdayHigh+offset
 
 
-
-}
+return this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].
+pricePoints.hourlyPricePoints.filter( l =>l.high>reference )[0].high
 
 
 
-
-if(name=='NIFTY' && type=='FUT'){
-
-  let offset=45;
- let reference= yesterdayHigh+offset
-
-
-return this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pricePoints.hourlyPricePoints.filter(l=>l.high>reference)[0].high
+ } 
 
 
 
 
+if( name == 'NIFTY' && type == 'FUT' ){ 
+
+  let offset = 45;
+ let reference =  yesterdayHigh+offset
 
 
-} else if((type=='CE' ||type=='PE' )){
+return this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].pricePoints.hourlyPricePoints.filter( l =>l.high>reference )[0].high
 
-  let offset=1.5;
- let reference= yesterdayHigh*offset
+
+
+
+
+
+ }  else if(( type == 'CE' ||type == 'PE'  )){ 
+
+  let offset = 1.5;
+ let reference =  yesterdayHigh*offset
 // return offset;
 
 
 // return 1000;
-if(typeof this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0]!='undefined')
-if(typeof this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pricePoints!='undefined')
-if(typeof this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pricePoints.
-hourlyPricePoints!='undefined')
-if(typeof this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pricePoints.
-hourlyPricePoints.filter(l=>l.high>reference)[0]!='undefined')
+if( typeof this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0]!= 'undefined' )
+if( typeof this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].pricePoints!= 'undefined' )
+if( typeof this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].pricePoints.
+hourlyPricePoints!= 'undefined' )
+if( typeof this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].pricePoints.
+hourlyPricePoints.filter( l =>l.high>reference )[0]!= 'undefined' )
 
 // return 1000;
 
 
-{
-let lows=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].
+{ 
+let lows = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].
 pricePoints.
 hourlyPricePoints.
 
-filter(l=>l.low>reference).map(a=>a.low).
+filter( l =>l.low>reference ).map( a =>a.low ).
 
-sort(
-(a,b)=>a-b
+sort( 
+( a,b ) =>a-b
 
 
-)[0]
+ )[0]
 
 
 ///if hourly price poits is absent multiply with ref and set target
 
-let highs=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].
+let highs = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].
 pricePoints.
 hourlyPricePoints.
 
-filter(l=>l.high>reference).map(a=>a.high).
+filter( l =>l.high>reference ).map( a =>a.high ).
 
-sort(
-(a,b)=>a-b
+sort( 
+( a,b ) =>a-b
 
 
-)[0]
-// console.warn(lows,'lows')
+ )[0]
+// console.warn( lows,'lows' )
 
 // return highs +',' + lows;
-let target=Math.min(lows,highs)
+let target = Math.min( lows,highs )
 
 
 
 
 
-  if(isNaN(target)){
+  if( isNaN( target )){ 
 
    return  this.livePositions.
-  filter(lp=>lp.instrument_token==instrument_tocken)[0]
+  filter( lp =>lp.instrument_token == instrument_tocken )[0]
   .average_price*1.2
-  }
+   } 
 
  // return 'lows'
-return target.toFixed(1);
+return target.toFixed( 1 );
 
 
-return this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pricePoints.
+return this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].pricePoints.
 hourlyPricePoints.
 
-filter(l=>l.high>reference)[0].low
+filter( l =>l.high>reference )[0].low
 
 
-}else{
+ } else{ 
 
-if(typeof this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].
-yesterday=='undefined'  || this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].
-yesterday.rangeBreakOutTarget=='undefined'){
+if( typeof this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].
+yesterday == 'undefined'  || this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].
+yesterday.rangeBreakOutTarget == 'undefined' ){ 
 
 // return instrument_tocken+'it';
 
 
-let bo=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].
+let bo = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].
 pricePoints.yesterday.rangeBreakOutTarget;
 
-return bo.toFixed(2);
+return bo.toFixed( 2 );
   return this.livePositionsSelected.
-  filter(lp=>lp.instrument_token==instrument_tocken)
+  filter( lp =>lp.instrument_token == instrument_tocken )
 
 
 
-}else{
-let ret=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].
+ } else{ 
+let ret = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].
 yesterday.rangeBreakOutTarget;
-  if(isNaN(ret)){
+  if( isNaN( ret )){ 
 //return 'nan'
    return  this.livePositionsSelected.
-  filter(lp=>lp.instrument_token==instrument_tocken)[0].
+  filter( lp =>lp.instrument_token == instrument_tocken )[0].
   average_price*1.2
-  }
+   } 
   
 
   //return 'avg'
-  return ret.tofixed(1);
+  return ret.tofixed( 1 );
 
-}
+ } 
 
-}
-
-
+ } 
 
 
-}
 
 
-} catch(e){
+ } 
 
 
-let tradingsymbol=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].tradingsymbol
-console.log(e,'mis target error for ',tradingsymbol)
+ }  catch( e ){ 
+
+
+let tradingsymbol = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].tradingsymbol
+console.log( e,'mis target error for ',tradingsymbol )
   return 1000
-}
+ } 
 
 
 
 
-},
+ } ,
 
-    async  placetargetAndStopLoss(CurrentInstrument, instrument_token,
-        element,product,quantity) {
+    async  placetargetAndStopLoss( CurrentInstrument, instrument_token,
+        element,product,quantity ) { 
    
    
    
-   let misTarget=this.getMisPricePointofScript(instrument_token)
-   let trailingStopLoss=this.getTrailingStopLoss(instrument_token);
-   let sl=Math.max( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),
-           CurrentInstrument.pricePoints.d1.low,trailingStopLoss);
+   let misTarget = this.getMisPricePointofScript( instrument_token )
+   let trailingStopLoss = this.getTrailingStopLoss( instrument_token );
+   let sl = Math.max(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),
+           CurrentInstrument.pricePoints.d1.low,trailingStopLoss );
    
-       //   console.log('pl target',
+       //   console.log( 'pl target',
        //   CurrentInstrument.tradingsymbol,
        //  ' misTarget',misTarget,'trailingStopLoss',trailingStopLoss,
        //  'last price',element.last_price
-       //   )
+       //    )
    
-   if(
-       element.tradingsymbol=='INDHOTEL22JUN230CE' ||
-       element.tradingsymbol=='BAJFINANCE22JUN5900CE'
+   if( 
+       element.tradingsymbol == 'INDHOTEL22JUN230CE' ||
+       element.tradingsymbol == 'BAJFINANCE22JUN5900CE'
        
-       ){
+        ){ 
    
-         console.log(element.tradingsymbol,'lp2',element.ltp,
-         'CurrentInstrument.buyNow',CurrentInstrument.buyNow)
-       }
+         console.log( element.tradingsymbol,'lp2',element.ltp,
+         'CurrentInstrument.buyNow',CurrentInstrument.buyNow )
+        } 
    
    
-         if (CurrentInstrument.instrument_type == "FUT") {
+         if ( CurrentInstrument.instrument_type  ==  "FUT" ) { 
    
            return false;
-           this.ProcedureForFuturesTargetAndStopLoss(
+           this.ProcedureForFuturesTargetAndStopLoss( 
              CurrentInstrument,
              instrument_token,
              element
-           );
+            );
    
            return true;
-         } //// procedure for futures  end here
+          }  //// procedure for futures  end here
    
-         // if (
+         // if ( 
          //   CurrentInstrument.last_price >
          //   CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget 
-         // ) 
+         //  ) 
    
-   if(quantity<0){
+   if( quantity<0 ){ 
    
-     this.procedureForOptionsShortCovering(CurrentInstrument, 
+     this.procedureForOptionsShortCovering( CurrentInstrument, 
      instrument_token,
-        element,product,quantity);
+        element,product,quantity );
      return false
-   }
+    } 
    
    
          
-         if (
-           CurrentInstrument.last_price >=
+         if ( 
+           CurrentInstrument.last_price >= 
            misTarget 
-         ) 
+          ) 
          
          
-         {
-           // if (
+         { 
+           // if ( 
            //   CurrentInstrument.last_price >
            //   CurrentInstrument.average_price*1.12
-           // )
+           //  )
    
-           //  if (
+           //  if ( 
            //              true
-           //             )
-           // if (
+           //              )
+           // if ( 
            //               CurrentInstrument.last_price >
            //               CurrentInstrument.pricePoints.yesterday.high*1.02
-           //             )
+           //              )
    
-           let trade = `Target hit at  ${CurrentInstrument.tradingsymbol} at
-            ${misTarget}`;
+           let trade  =  `Target hit at  ${ CurrentInstrument.tradingsymbol }  at
+            ${ misTarget } `;
    
    
-    let trade1={
+    let trade1 = { 
    
            'type':'Target',
            
            'tradingsymbol':CurrentInstrument.tradingsymbol,
            'entry_price':CurrentInstrument.pricePoints.yesterday.high,
            'target':misTarget,
-           'stoploss': Math.max( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),CurrentInstrument.pricePoints.d1.low)
+           'stoploss': Math.max(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),CurrentInstrument.pricePoints.d1.low )
          
-         }
+          } 
    
-         let trade2=JSON.stringify(trade1)
+         let trade2 = JSON.stringify( trade1 )
    
    
    
-            this.writeTrades(trade2+',');
-           this.sendToTelegramGroup(trade);
-           this.userMessages.push(trade);
+            this.writeTrades( trade2+',' );
+           this.sendToTelegramGroup( trade );
+           this.userMessages.push( trade );
            ////target buys
    
-           //                                 var audio = new Audio('/sounds/mixkit-sci-fi-confirmation-914.wav');
-           // audio.play();
+           //                                 var audio  =  new Audio( '/sounds/mixkit-sci-fi-confirmation-914.wav' );
+           // audio.play(  );
    
-           let transaction_type = "SELL";
+           let transaction_type  =  "SELL";
    
-           let tradingsymbol = CurrentInstrument.tradingsymbol;
+           let tradingsymbol  =  CurrentInstrument.tradingsymbol;
    
-           let lot_size = CurrentInstrument.lot_size;
-           let order_type = "LIMIT";
+           let lot_size  =  CurrentInstrument.lot_size;
+           let order_type  =  "LIMIT";
    
-           let priceBuy2 = element.depth.buy.sort((a, b) => b.price - a.price)[0]
+           let priceBuy2  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0]
              .price;
    
          ;
-     console.log(priceBuy2, "priceBuy2* avg*1.1",CurrentInstrument.average_price)
+     console.log( priceBuy2, "priceBuy2* avg*1.1",CurrentInstrument.average_price )
    
-           if (priceBuy2 > CurrentInstrument.average_price * 1.1) {
-             //  console.log('priceBuy1','priceBuy2',priceBuy2)
-             //  let Price=Math.round(CurrentInstrument.SevenDayMaxMin.Max*1.1,1);
-             let Price = priceBuy2;
-             // let product='NRML'
+           if ( priceBuy2 > CurrentInstrument.average_price * 1.1 ) { 
+             //  console.log( 'priceBuy1','priceBuy2',priceBuy2 )
+             //  let Price = Math.round( CurrentInstrument.SevenDayMaxMin.Max*1.1,1 );
+             let Price  =  priceBuy2;
+             // let product = 'NRML'
    
-             let arr = this.buildOrderArray(
+             let arr  =  this.buildOrderArray( 
                tradingsymbol,
                transaction_type,
    
                lot_size,
                order_type,
                Price,product
-             );
+              );
    
-             // console.log(arr);
-   
-   
+             // console.log( arr );
    
    
-             let orderArray = [arr];
    
-             // this.orderArray.push(orderArray);
    
-             console.log(
+             let orderArray  =  [arr];
+   
+             // this.orderArray.push( orderArray );
+   
+             console.log( 
                "order array inside tgtsl fn",
-               JSON.stringify(this.orderArray)
-             );
+               JSON.stringify( this.orderArray )
+              );
    
-             console.log(trade, "firing target", "@", Price);
+             console.log( trade, "firing target", "@", Price );
    
-             let a = await this.placeOrder(orderArray);
+             let a  =  await this.placeOrder( orderArray );
    
           
    
-             this.userMessages.push(trade);
+             this.userMessages.push( trade );
             
             
-           //  this.$set(
-           //     this.instruments.filter(
-           //       (i) => i.instrument_token == instrument_token
-           //     )[0],
+           //  this.$set( 
+           //     this.instruments.filter( 
+           //       ( i )  => i.instrument_token  ==  instrument_token
+           //      )[0],
            //     "PlacedReverseOrder",
            //     true
-           //   );
+           //    );
    
-             this.$set(
-               this.instruments.filter(
-                 (i) => i.instrument_token == instrument_token
-               )[0],
+             this.$set( 
+               this.instruments.filter( 
+                 ( i )  => i.instrument_token  ==  instrument_token
+                )[0],
                "PlacedReverseOrderType",
                "Target"
-             );
-           }
-         } else if (
+              );
+            } 
+          }  else if ( 
            CurrentInstrument.last_price <  
-           Math.max( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),
-           CurrentInstrument.pricePoints.d1.low,trailingStopLoss)
-         ) {
+           Math.max(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),
+           CurrentInstrument.pricePoints.d1.low,trailingStopLoss )
+          ) { 
    
            
            
-           let trade = `Sl hit  ${CurrentInstrument.tradingsymbol} at 
+           let trade  =  `Sl hit  ${ CurrentInstrument.tradingsymbol }  at 
          
          
-         ${sl}`;
+         ${ sl } `;
    
-           // this.sendToTelegramGroup(trade);
+           // this.sendToTelegramGroup( trade );
    
            //target sells
    
-           //    var audio = new Audio('/sounds/mixkit-sci-fi-confirmation-914.wav');
-           // audio.play();
+           //    var audio  =  new Audio( '/sounds/mixkit-sci-fi-confirmation-914.wav' );
+           // audio.play(  );
    
-           let transaction_type = "SELL";
+           let transaction_type  =  "SELL";
    
-           let tradingsymbol = CurrentInstrument.tradingsymbol;
+           let tradingsymbol  =  CurrentInstrument.tradingsymbol;
    
-           let lot_size = CurrentInstrument.lot_size;
-           // lot_size=0;
-           let order_type = "LIMIT";
+           let lot_size  =  CurrentInstrument.lot_size;
+           // lot_size = 0;
+           let order_type  =  "LIMIT";
    
-           let priceBuy2 = element.depth.buy.sort((a, b) => b.price - a.price)[0]
+           let priceBuy2  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0]
              .price;
    
-           //  let Price=Math.round(CurrentInstrument.SevenDayMaxMin.Max*.9,1);
-           let Price = priceBuy2;
+           //  let Price = Math.round( CurrentInstrument.SevenDayMaxMin.Max*.9,1 );
+           let Price  =  priceBuy2;
    
-           // let product='NRML'
+           // let product = 'NRML'
    
-           let arr = this.buildOrderArray(
+           let arr  =  this.buildOrderArray( 
              tradingsymbol,
              transaction_type,
    
              lot_size,
              order_type,
              Price
-           );
+            );
    
-           console.log("stop loss array below");
-           console.log(JSON.stringify(arr));
+           console.log( "stop loss array below" );
+           console.log( JSON.stringify( arr ));
    
-           let orderArray = [arr];
+           let orderArray  =  [arr];
    
-            let a = await this.placeOrder(orderArray);
+            let a  =  await this.placeOrder( orderArray );
    
-           // this.orderArray.push(orderArray);
+           // this.orderArray.push( orderArray );
    
-           console.log(
+           console.log( 
              "order array inside tgtsl fn",
-             JSON.stringify(this.orderArray)
-           );
+             JSON.stringify( this.orderArray )
+            );
    
-           console.log(trade, "firing stop loss", "@", Price);
+           console.log( trade, "firing stop loss", "@", Price );
    
    
-            let trade1={
+            let trade1 = { 
    
            'type':'stoploss',
            
@@ -485,33 +485,33 @@ console.log(e,'mis target error for ',tradingsymbol)
            'target':CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget,
            'stoploss': sl
          
-         }
+          } 
    
-         let trade2=JSON.stringify(trade1)
+         let trade2 = JSON.stringify( trade1 )
    
-           this.writeTrades(trade2+',');
+           this.writeTrades( trade2+',' );
    
-           console.log(trade, "firing stop loss");
+           console.log( trade, "firing stop loss" );
    
-           // this.$set(
-           //   this.instruments.filter(
-           //     (i) => i.instrument_token == instrument_token
-           //   )[0],
+           // this.$set( 
+           //   this.instruments.filter( 
+           //     ( i )  => i.instrument_token  ==  instrument_token
+           //    )[0],
            //   "PlacedReverseOrder",
            //   true
-           // );
+           //  );
    
-           this.$set(
-             this.instruments.filter(
-               (i) => i.instrument_token == instrument_token
-             )[0],
+           this.$set( 
+             this.instruments.filter( 
+               ( i )  => i.instrument_token  ==  instrument_token
+              )[0],
              "PlacedReverseOrderType",
              "Stop Loss"
-           );
-         } else {
+            );
+          }  else { 
    
    
-           // console.warn(
+           // console.warn( 
            //   "No target or stop for",
            //   CurrentInstrument.tradingsymbol,
            //   "stop loss",
@@ -520,427 +520,427 @@ console.log(e,'mis target error for ',tradingsymbol)
            //  misTarget,
            //   "Last price",
            //   CurrentInstrument.last_price
-           // );
+           //  );
    
-           // this.userMessages.push('No target or stop for ',CurrentInstrument.tradingsymbol,'stop loss',CurrentInstrument.pricePoints.yesterday.high*.9 )
-         }
-       },
+           // this.userMessages.push( 'No target or stop for ',CurrentInstrument.tradingsymbol,'stop loss',CurrentInstrument.pricePoints.yesterday.high*.9  )
+          } 
+        } ,
    
-    async proceedForBuy(instrument_token, CurrentInstrument, element) {
+    async proceedForBuy( instrument_token, CurrentInstrument, element ) { 
 
-        if(this.otherCriteria(element,CurrentInstrument )==false){
+        if( this.otherCriteria( element,CurrentInstrument  ) == false ){ 
           return false
-        }
+         } 
         
         
-              if(this.hours>=15 && this.minutes>10){
+              if( this.hours>= 15 && this.minutes>10 ){ 
         
         
-                console.log('No buying after 15:10 hrs');
+                console.log( 'No buying after 15:10 hrs' );
         
                 // return false;
-              }
+               } 
         
         
-              if(this.livePositionTotalCost==-1){
+              if( this.livePositionTotalCost == -1 ){ 
         
-        // console.log('Positions not loaded properly')
+        // console.log( 'Positions not loaded properly' )
                 return false;
-              }
+               } 
         
         
-              if(this.liveOrders==0){
+              if( this.liveOrders == 0 ){ 
         
         
-        // console.log('liver orders  not loaded properly returning', this.liveOrders)
+        // console.log( 'liver orders  not loaded properly returning', this.liveOrders )
         
-        // let o=await this.getOrders();
-        // console.log(o,'refreshing live orders')
+        // let o = await this.getOrders(  );
+        // console.log( o,'refreshing live orders' )
                 // return false;
         
-              }
+               } 
         
         
         
-        let ln=this.liveOrders.filter(lo=>lo.instrument_token
-        ==instrument_token).length
+        let ln = this.liveOrders.filter( lo =>lo.instrument_token
+         == instrument_token ).length
         
-        if(ln>0){
+        if( ln>0 ){ 
         
-          // console.log('live order palced already for this symbol',CurrentInstrument.tradingsymbol)
+          // console.log( 'live order palced already for this symbol',CurrentInstrument.tradingsymbol )
         return false;
         
-        }
+         } 
         
         
-        let proposedStock=this.instruments.
-        filter(i=>i.instrument_token==instrument_token)[0].name
-        // console.log(proposedStock,'proposedStock');
+        let proposedStock = this.instruments.
+        filter( i =>i.instrument_token == instrument_token )[0].name
+        // console.log( proposedStock,'proposedStock' );
         
         
-        if(this.liveOrderPlacedScripts.includes(proposedStock)){
+        if( this.liveOrderPlacedScripts.includes( proposedStock )){ 
         
-          // console.log(proposedStock,
-          // 'stock already holding ordered')
-        
-        return false
-        }
-        
-        
-        
-        // if(this.proosed)
-        
-        
-        if(this.liveOrderScripts.includes(proposedStock)){
-        
-        // console.log(proposedStock,'stock has live order ',CurrentInstrument.tradingsymbol)
+          // console.log( proposedStock,
+          // 'stock already holding ordered' )
         
         return false
+         } 
         
-        }
         
-        if(this.livePositionScripts.includes(proposedStock)){
+        
+        // if( this.proosed )
+        
+        
+        if( this.liveOrderScripts.includes( proposedStock )){ 
+        
+        // console.log( proposedStock,'stock has live order ',CurrentInstrument.tradingsymbol )
+        
+        return false
+        
+         } 
+        
+        if( this.livePositionScripts.includes( proposedStock )){ 
         
           
         
-        // console.log(proposedStock,'stock already holding')
+        // console.log( proposedStock,'stock already holding' )
         
         return false
         
-        }
+         } 
         
         
         
-        let hasHit=this.hasAlreadyHitTargetBefore(element);
-        if(hasHit){
+        let hasHit = this.hasAlreadyHitTargetBefore( element );
+        if( hasHit ){ 
         
            return true;
-        }
+         } 
         
              
-              this.proposedBuyAmount = 0;
-              this.$set(
-                this.instruments.filter(
-                  (i) => i.instrument_token == instrument_token
-                )[0],
+              this.proposedBuyAmount  =  0;
+              this.$set( 
+                this.instruments.filter( 
+                  ( i )  => i.instrument_token  ==  instrument_token
+                 )[0],
                 "buyNow",
                 true
-              );
+               );
         
-              this.$set(
-                this.instruments.filter(
-                  (i) => i.instrument_token == instrument_token
-                )[0],
+              this.$set( 
+                this.instruments.filter( 
+                  ( i )  => i.instrument_token  ==  instrument_token
+                 )[0],
                 "PlacedReverseOrder",
                 false
-              );
+               );
         
-              this.$set(
-                this.instruments.filter(
-                  (i) => i.instrument_token == instrument_token
-                )[0],
+              this.$set( 
+                this.instruments.filter( 
+                  ( i )  => i.instrument_token  ==  instrument_token
+                 )[0],
                 "seletedBuyingMethod",
                 "MAX"
-              );
+               );
         
-              let date = new Date();
-              this.$set(
-                this.instruments.filter(
-                  (i) => i.instrument_token == instrument_token
-                )[0],
+              let date  =  new Date(  );
+              this.$set( 
+                this.instruments.filter( 
+                  ( i )  => i.instrument_token  ==  instrument_token
+                 )[0],
                 "activatedTime",
                 date
-              );
+               );
         
               /// trigger buy
         
-              // let trade = `Buy instrument ${CurrentInstrument.tradingsymbol} at ${CurrentInstrument.SevenDayMaxMin.Max}`;
-              let trade = `Buy instrument ${CurrentInstrument.tradingsymbol} at ${CurrentInstrument.pricePoints.yesterday.high} . 
-              Target ${CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget} 
-              Strict stop loss at ${
+              // let trade  =  `Buy instrument ${ CurrentInstrument.tradingsymbol }  at ${ CurrentInstrument.SevenDayMaxMin.Max } `;
+              let trade  =  `Buy instrument ${ CurrentInstrument.tradingsymbol }  at ${ CurrentInstrument.pricePoints.yesterday.high }  . 
+              Target ${ CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget }  
+              Strict stop loss at ${ 
                 
         
-                Math.max( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),CurrentInstrument.pricePoints.d1.low)
+                Math.max(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),CurrentInstrument.pricePoints.d1.low )
                
                 
                 
-                } ,
-              TargetProfit ${(CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget-CurrentInstrument.pricePoints.yesterday.high)*CurrentInstrument.lot_size}
-              Possible Loss ${(CurrentInstrument.pricePoints.yesterday.high-CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1))
+                 }  ,
+              TargetProfit ${ ( CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget-CurrentInstrument.pricePoints.yesterday.high )*CurrentInstrument.lot_size } 
+              Possible Loss ${ ( CurrentInstrument.pricePoints.yesterday.high-CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ))
               
-              *CurrentInstrument.lot_size}
+              *CurrentInstrument.lot_size } 
               `;
         
               
-              let trade1={
+              let trade1 = { 
         
                 'type':'Entry',
                 
                 'tradingsymbol':CurrentInstrument.tradingsymbol,
                 'entry_price':CurrentInstrument.pricePoints.yesterday.high,
                 'target':CurrentInstrument.pricePoints.yesterday.rangeBreakOutTarget,
-                'stoploss': Math.max( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),CurrentInstrument.pricePoints.d1.low)
+                'stoploss': Math.max(  CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),CurrentInstrument.pricePoints.d1.low )
               
-              }
+               } 
         
-              let trade2=JSON.stringify(trade1)
+              let trade2 = JSON.stringify( trade1 )
         
-              this.sendToTelegramGroup(trade);
-              this.writeTrades(trade2+',');
+              this.sendToTelegramGroup( trade );
+              this.writeTrades( trade2+',' );
         
               //checking the trade exeeds the maximum tradable amount   add live palced buy order in nfo
         
-              // if(this.livePositionTotalCost<this.maxTradableAmount){
+              // if( this.livePositionTotalCost<this.maxTradableAmount ){ 
         
               
               
-              if (CurrentInstrument.instrument_type == "FUT") {
-                console.log("its a future");
-                var audio1 = new Audio("/sounds/mixkit-sci-fi-confirmation-914.wav");
-                audio1.play();
+              if ( CurrentInstrument.instrument_type  ==  "FUT" ) { 
+                console.log( "its a future" );
+                var audio1  =  new Audio( "/sounds/mixkit-sci-fi-confirmation-914.wav" );
+                audio1.play(  );
         
-                let transaction_type = "BUY";
-                let tradingsymbol = CurrentInstrument.tradingsymbol;
+                let transaction_type  =  "BUY";
+                let tradingsymbol  =  CurrentInstrument.tradingsymbol;
         
-                let lot_size = CurrentInstrument.lot_size;
+                let lot_size  =  CurrentInstrument.lot_size;
         
-                let order_type = "LIMIT";
+                let order_type  =  "LIMIT";
         
-                let Price = CurrentInstrument.pricePoints.yesterday.high;
-                let priceSell1 = element.depth.sell.sort((a, b) => a.price - b.price)[0]
+                let Price  =  CurrentInstrument.pricePoints.yesterday.high;
+                let priceSell1  =  element.depth.sell.sort(( a, b )  => a.price - b.price )[0]
                   .price;
-        let product='NRML'
-                let arr = this.buildOrderArray(
+        let product = 'NRML'
+                let arr  =  this.buildOrderArray( 
                   tradingsymbol,
                   transaction_type,
         
                   lot_size,
                   order_type,
                   Price,product
-                );
+                 );
         
-                console.log(arr, "FUTURE");
+                console.log( arr, "FUTURE" );
         
-                let orderArray = [arr];
+                let orderArray  =  [arr];
         
-                let a = await this.placeOrder(orderArray);
-                console.log("placed order result", a);
+                let a  =  await this.placeOrder( orderArray );
+                console.log( "placed order result", a );
         
-                this.counter = this.counter + 1;
-                console.log(
+                this.counter  =  this.counter + 1;
+                console.log( 
                   "Placing Buy Order for :",
                   tradingsymbol,
                   this.counter,
                   CurrentInstrument.buyNow,
                   CurrentInstrument
-                );
-              } else if (
-                CurrentInstrument.instrument_type == "CE" ||
-                CurrentInstrument.instrument_type == "PE"
-              ) {
-                this.proposedBuyAmount =
+                 );
+               }  else if ( 
+                CurrentInstrument.instrument_type  ==  "CE" ||
+                CurrentInstrument.instrument_type  ==  "PE"
+               ) { 
+                this.proposedBuyAmount  = 
                   CurrentInstrument.pricePoints.yesterday.high *
                   CurrentInstrument.lot_size;
         
-                console.log(
+                console.log( 
                   "Proposed amount ",
                   this.proposedBuyAmount,
                   "for",
                   CurrentInstrument.tradingsymbol
-                );
-                if (this.liveTradablebalance > 0) {
-                  var audio = new Audio("/sounds/mixkit-sci-fi-confirmation-914.wav");
-                  audio.play();
+                 );
+                if ( this.liveTradablebalance > 0 ) { 
+                  var audio  =  new Audio( "/sounds/mixkit-sci-fi-confirmation-914.wav" );
+                  audio.play(  );
         
-                  let transaction_type = "BUY";
+                  let transaction_type  =  "BUY";
         
-                  let tradingsymbol = CurrentInstrument.tradingsymbol;
+                  let tradingsymbol  =  CurrentInstrument.tradingsymbol;
         
-                  let lot_size = CurrentInstrument.lot_size;
-                  //let lot_size=0;
-                  let order_type = "LIMIT";
+                  let lot_size  =  CurrentInstrument.lot_size;
+                  //let lot_size = 0;
+                  let order_type  =  "LIMIT";
         
-                  //  let price1=  element.depth.sell.sort((a,b)=>a.price-b.price)[0]
-                  //  let price2=  element.depth.sell.sort((a,b)=>b.price-a.price)[0]
+                  //  let price1 =   element.depth.sell.sort(( a,b ) =>a.price-b.price )[0]
+                  //  let price2 =   element.depth.sell.sort(( a,b ) =>b.price-a.price )[0]
         
-                  //  console.log('sell price 1',price1,'sell price 2',price2)
+                  //  console.log( 'sell price 1',price1,'sell price 2',price2 )
         
-                  let priceBuy2 = element.depth.buy.sort((a, b) => b.price - a.price)[0]
+                  let priceBuy2  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0]
                     .price;
         
-                  let priceSell1 = element.depth.sell.sort(
-                    (a, b) => a.price - b.price
-                  )[0].price;
+                  let priceSell1  =  element.depth.sell.sort( 
+                    ( a, b )  => a.price - b.price
+                   )[0].price;
         
-                  //  console.log(priceSell1,'priceSell1',priceSell2,'priceSell2');
+                  //  console.log( priceSell1,'priceSell1',priceSell2,'priceSell2' );
         
-                  //  console.log()
+                  //  console.log(  )
         
-                  //  let Price=priceSell1;
-                  let Price = CurrentInstrument.pricePoints.yesterday.high;
+                  //  let Price = priceSell1;
+                  let Price  =  CurrentInstrument.pricePoints.yesterday.high;
         
-                  let currentPrice = lot_size * Price;
-                  this.totalBuyOrderLivePlacedBySoftware =
+                  let currentPrice  =  lot_size * Price;
+                  this.totalBuyOrderLivePlacedBySoftware  = 
                     this.totalBuyOrderLivePlacedBySoftware + currentPrice;
         
-                  this.proposedBuyAmount = 0;
-                  //  let Price=priceSell1;
-        let product='NRML'
-                  let arr = this.buildOrderArray(
+                  this.proposedBuyAmount  =  0;
+                  //  let Price = priceSell1;
+        let product = 'NRML'
+                  let arr  =  this.buildOrderArray( 
                     tradingsymbol,
                     transaction_type,
         
                     lot_size,
                     order_type,
                     Price,product
-                  );
+                   );
         
-                  // console.log(arr);
+                  // console.log( arr );
         
-                  let orderArray = [arr];
+                  let orderArray  =  [arr];
         
-                  let a = await this.placeOrder(orderArray);
-                  // console.log("place order result", a);
+                  let a  =  await this.placeOrder( orderArray );
+                  // console.log( "place order result", a );
         
-                  this.counter = this.counter + 1;
-                  console.log(
+                  this.counter  =  this.counter + 1;
+                  console.log( 
                     "Placing Buy Order for :",
                     tradingsymbol,
                     this.counter,
                     CurrentInstrument.buyNow,
                     CurrentInstrument
-                  );
+                   );
         
-                  this.userMessages.push(
+                  this.userMessages.push( 
                     "firing of auto mode+ buy now false",
                     this.counter,
                     CurrentInstrument.buyNow,
                     CurrentInstrument
-                  );
-                } else {
-                  this.userMessages.push("Maximum tradable amout Exceeded");
-                  console.log("Maximum tradable amout Exceeded");
-                }
-              }
-            },
+                   );
+                 }  else { 
+                  this.userMessages.push( "Maximum tradable amout Exceeded" );
+                  console.log( "Maximum tradable amout Exceeded" );
+                 } 
+               } 
+             } ,
 
-    getStopLoss(instrument_token){
+    getStopLoss( instrument_token ){ 
 
 
-        try{
-        let CurrentInstrument=this.instruments.filter(i=>i.instrument_token==instrument_token)[0];
-         return Math.max(CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed(1),
-         CurrentInstrument.pricePoints.d1.low)
+        try{ 
+        let CurrentInstrument = this.instruments.filter( i =>i.instrument_token == instrument_token )[0];
+         return Math.max( CurrentInstrument.pricePoints.pivotPointObject.bc.toFixed( 1 ),
+         CurrentInstrument.pricePoints.d1.low )
          
         
-        }catch(e){
+         } catch( e ){ 
         
           return 1000;
-        }
+         } 
           
   
-        },
-            getMisPricePointofScript(instrument_tocken){
-        try{
+         } ,
+            getMisPricePointofScript( instrument_tocken ){ 
+        try{ 
         // return ;
         // return instrument_tocken;
         
-        // return this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pricePoints.yesterday.high;;
+        // return this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].pricePoints.yesterday.high;;
         
-        //console.log(instrument_tocken)
-        //console.log(this.instruments.filter(i=>i.instrument_token==instrument_tocken),'this.instruments.filter(i=>i.instrument_token==instrument_tocken)')
-        // console.log(this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0],
-        // 'this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0]');
+        //console.log( instrument_tocken )
+        //console.log( this.instruments.filter( i =>i.instrument_token == instrument_tocken ),'this.instruments.filter( i =>i.instrument_token == instrument_tocken )' )
+        // console.log( this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0],
+        // 'this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0]' );
         
-        if(this.instruments.filter(i=>i.instrument_token==instrument_tocken.length==0))
-        {
+        if( this.instruments.filter( i =>i.instrument_token == instrument_tocken.length == 0 ))
+        { 
         
         
-        }
-        let yesterdayHigh=
-        this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].
+         } 
+        let yesterdayHigh = 
+        this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].
         pricePoints.yesterday.high;
         
         
       
-        let type=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].instrument_type;
-        let name=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].name;
+        let type = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].instrument_type;
+        let name = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].name;
         
        
-        if(name=='BANKNIFTY' && type=='FUT'){
+        if( name == 'BANKNIFTY' && type == 'FUT' ){ 
         
-          let offset=90;
-         let reference= yesterdayHigh+offset
-        
-        
-        return this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].
-        pricePoints.hourlyPricePoints.filter(l=>l.high>reference)[0].high
+          let offset = 90;
+         let reference =  yesterdayHigh+offset
         
         
-        
-        }
+        return this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].
+        pricePoints.hourlyPricePoints.filter( l =>l.high>reference )[0].high
         
         
         
-        
-        if(name=='NIFTY' && type=='FUT'){
-        
-          let offset=45;
-         let reference= yesterdayHigh+offset
-        
-        
-        return this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].pricePoints.hourlyPricePoints.filter(l=>l.high>reference)[0].high
+         } 
         
         
         
         
+        if( name == 'NIFTY' && type == 'FUT' ){ 
+        
+          let offset = 45;
+         let reference =  yesterdayHigh+offset
         
         
-        } 
+        return this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].pricePoints.hourlyPricePoints.filter( l =>l.high>reference )[0].high
         
         
         
-        } catch(e){
         
         
-        let tradingsymbol=this.instruments.filter(i=>i.instrument_token==instrument_tocken)[0].tradingsymbol
-        console.log(e,'mis target error for ',tradingsymbol)
+        
+         }  
+        
+        
+        
+         }  catch( e ){ 
+        
+        
+        let tradingsymbol = this.instruments.filter( i =>i.instrument_token == instrument_tocken )[0].tradingsymbol
+        console.log( e,'mis target error for ',tradingsymbol )
           return 1000
-        }
+         } 
         
         
         
         
-        },
+         } ,
 
 
 
-    ProcedureForFuturesTargetAndStopLoss(
+    ProcedureForFuturesTargetAndStopLoss( 
         CurrentInstrument,
         instrument_token,
         element
-      ) {
-  let misTarget=this.getMisPricePointofScript(instrument_token)
+       ) { 
+  let misTarget = this.getMisPricePointofScript( instrument_token )
   
   
-        console.log(
-          `Target for ${CurrentInstrument.tradingsymbol} is ${
+        console.log( 
+          `Target for ${ CurrentInstrument.tradingsymbol }  is ${ 
             CurrentInstrument.average_price + 90
-          } and Stop loss is ${CurrentInstrument.average_price - 45} and cmp is ${
+           }  and Stop loss is ${ CurrentInstrument.average_price - 45 }  and cmp is ${ 
             CurrentInstrument.last_price
-          }`
-        );
+           } `
+         );
   
   
-        // if (CurrentInstrument.last_price > CurrentInstrument.average_price + 90)
-        if (CurrentInstrument.last_price >=misTarget)
+        // if ( CurrentInstrument.last_price > CurrentInstrument.average_price + 90 )
+        if ( CurrentInstrument.last_price >= misTarget )
         
         
         
-        {
-          let trade = `Target hit at  ${CurrentInstrument.tradingsymbol} at ${
+        { 
+          let trade  =  `Target hit at  ${ CurrentInstrument.tradingsymbol }  at ${ 
             CurrentInstrument.average_price * 90
-          }`;
+           } `;
   
   
   
@@ -955,121 +955,121 @@ console.log(e,'mis target error for ',tradingsymbol)
   
   
   
-          let transaction_type = "SELL";
+          let transaction_type  =  "SELL";
   
-          let tradingsymbol = CurrentInstrument.tradingsymbol;
+          let tradingsymbol  =  CurrentInstrument.tradingsymbol;
   
-          let lot_size = CurrentInstrument.lot_size;
-          let order_type = "LIMIT";
+          let lot_size  =  CurrentInstrument.lot_size;
+          let order_type  =  "LIMIT";
   
-          let priceBuy2 = element.depth.buy.sort((a, b) => b.price - a.price)[0]
+          let priceBuy2  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0]
             .price;
-          let Price = priceBuy2;
-          let product='NRML'
+          let Price  =  priceBuy2;
+          let product = 'NRML'
   
-          let arr = this.buildOrderArray(
+          let arr  =  this.buildOrderArray( 
             tradingsymbol,
             transaction_type,
   
             lot_size,
             order_type,
             Price,product
-          );
+           );
   
-          // console.log(arr);
+          // console.log( arr );
   
-          let orderArray = [arr];
+          let orderArray  =  [arr];
   
-          this.orderArray.push(orderArray);
+          this.orderArray.push( orderArray );
          
   
-          this.$set(
-            this.instruments.filter(
-              (i) => i.instrument_token == instrument_token
-            )[0],
+          this.$set( 
+            this.instruments.filter( 
+              ( i )  => i.instrument_token  ==  instrument_token
+             )[0],
             "PlacedReverseOrderType",
             "Target"
-          );
+           );
   
           //target
-        }
+         } 
   
-        if (CurrentInstrument.last_price < CurrentInstrument.average_price - 45) {
+        if ( CurrentInstrument.last_price < CurrentInstrument.average_price - 45 ) { 
           //stop loss
-          this.writeTrades(trade);
+          this.writeTrades( trade );
   
           /////////////////////////sl
   
-          let trade = `Sl hit  ${CurrentInstrument.tradingsymbol} at ${
+          let trade  =  `Sl hit  ${ CurrentInstrument.tradingsymbol }  at ${ 
             CurrentInstrument.average_price - 45
-          }`;
+           } `;
   
-          // this.sendToTelegramGroup(trade);
+          // this.sendToTelegramGroup( trade );
   
           //target sells
   
-          //    var audio = new Audio('/sounds/mixkit-sci-fi-confirmation-914.wav');
-          // audio.play();
+          //    var audio  =  new Audio( '/sounds/mixkit-sci-fi-confirmation-914.wav' );
+          // audio.play(  );
   
-          let transaction_type = "SELL";
+          let transaction_type  =  "SELL";
   
-          let tradingsymbol = CurrentInstrument.tradingsymbol;
+          let tradingsymbol  =  CurrentInstrument.tradingsymbol;
   
-          let lot_size = CurrentInstrument.lot_size;
-          let order_type = "LIMIT";
+          let lot_size  =  CurrentInstrument.lot_size;
+          let order_type  =  "LIMIT";
   
-          let priceBuy2 = element.depth.buy.sort((a, b) => b.price - a.price)[0]
+          let priceBuy2  =  element.depth.buy.sort(( a, b )  => b.price - a.price )[0]
             .price;
   
-          let Price = priceBuy2;
+          let Price  =  priceBuy2;
   
-          let product='NRML'
+          let product = 'NRML'
   
-          let arr = this.buildOrderArray(
+          let arr  =  this.buildOrderArray( 
             tradingsymbol,
             transaction_type,
   
             lot_size,
             order_type,
             Price,product
-          );
+           );
   
-          console.log("stop loss array below");
-          console.log(JSON.stringify(arr));
+          console.log( "stop loss array below" );
+          console.log( JSON.stringify( arr ));
   
-          let orderArray = [arr];
+          let orderArray  =  [arr];
   
-          this.orderArray.push(orderArray);
+          this.orderArray.push( orderArray );
   
-          //  console.log('order array inside tgtsl fn',JSON.stringify(this.orderArray))
+          //  console.log( 'order array inside tgtsl fn',JSON.stringify( this.orderArray ))
   
-          console.log(trade, "firing stop loss", "@", Price);
+          console.log( trade, "firing stop loss", "@", Price );
   
-          this.writeTrades(trade);
+          this.writeTrades( trade );
   
      
   
-          // this.$set(
-          //   this.instruments.filter(
-          //     (i) => i.instrument_token == instrument_token
-          //   )[0],
+          // this.$set( 
+          //   this.instruments.filter( 
+          //     ( i )  => i.instrument_token  ==  instrument_token
+          //    )[0],
           //   "PlacedReverseOrder",
           //   true
-          // );
+          //  );
   
-          this.$set(
-            this.instruments.filter(
-              (i) => i.instrument_token == instrument_token
-            )[0],
+          this.$set( 
+            this.instruments.filter( 
+              ( i )  => i.instrument_token  ==  instrument_token
+             )[0],
             "PlacedReverseOrderType",
             "Stop Loss"
-          );
+           );
   
           /////////////////////////sl
-        }
-      },
+         } 
+       } ,
 
 
-}
+ } 
 
-}
+ } 

@@ -93,10 +93,7 @@ async updateAccessToken(){
 
 async getmarketQuotes(symbols){
 
-  return new Promise((res,rej)=>{
-
- 
-  let ln=symbols.length;
+  return new Promise((res,rej)=>{  let ln=symbols.length;
 
 
 
@@ -114,7 +111,7 @@ let t=setInterval(async ()=>{
 
   let ln=symbol1.length;
 
-  if(ln==0){
+  if(ln == 0){
 
     res(ln)
   }
@@ -205,7 +202,7 @@ downloadHistoricalData(){
       totalTime/60)
 
 
-   if(ln==ln2)
+   if(ln == ln2)
   // if(ln>100)
   
   {

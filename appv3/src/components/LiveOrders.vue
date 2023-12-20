@@ -15,18 +15,18 @@
    
   </thead>
   <tbody>
-    <tr v-for="(lo,index) in liveOrders" :key="index"
+    <tr v-for="( lo,index ) in liveOrders" :key="index"
     
-    :class="{
-      'text-danger': (lo.transaction_type=='SELL'),
-      'text-success': (lo.transaction_type=='BUY')
+    :class="{ 
+      'text-danger': ( lo.transaction_type == 'SELL' ),
+      'text-success': ( lo.transaction_type == 'BUY' )
     
-    }"
+     } "
     >
-      <td>{{index+1}}</td>
-      <td>{{lo.tradingsymbol}}</td>
-      <td>{{lo.transaction_type}}</td>
-      <td>{{lo.price}} /{{lo.quantity}} Qty </td>
+      <td>{{ index+1 }} </td>
+      <td>{{ lo.tradingsymbol }} </td>
+      <td>{{ lo.transaction_type }} </td>
+      <td>{{ lo.price }}  /{{ lo.quantity }}  Qty </td>
      
     </tr>
   </tbody>
@@ -36,10 +36,10 @@
 </template>
 
 <script>
-    export default {
+    export default { 
         name:'LiveOrders',
-         props:{liveOrders:Array}
-    }
+         props:{ liveOrders:Array } 
+     } 
 </script>
 
 <style lang="scss" scoped>

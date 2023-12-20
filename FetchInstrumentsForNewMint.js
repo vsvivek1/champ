@@ -113,10 +113,10 @@ csvToJson()
 let out=[]
  let jsonObj1=  jsonObj.filter(j=>
   
-  // (j.exchange=='NFO' && j.segment=='NFO-OPT' && j.expiry ==EXPIRY) && ( j.lot_size*20<20000 &&  j.lot_size*20>16000) ||
+  // (j.exchange == 'NFO' && j.segment == 'NFO-OPT' && j.expiry  == EXPIRY) && ( j.lot_size*20<20000 &&  j.lot_size*20>16000) ||
   
 
-  (j.exchange == 'NFO' && j.expiry == EXPIRY && (j.name =="BANKNIFTY" || j.name =="NIFTY") && j.segment=='NFO-FUT')
+  (j.exchange  ==  'NFO' && j.expiry  ==  EXPIRY && (j.name  == "BANKNIFTY" || j.name  == "NIFTY") && j.segment == 'NFO-FUT')
   
   ) 
     
@@ -150,9 +150,6 @@ let t=secondsToHms(sec)
 
   console.log(len1, 'left out of ', len ,' ',t ,' time left');
 
-
- 
-
   if (len1 > 0) {
 
 
@@ -173,7 +170,7 @@ let t=secondsToHms(sec)
 
     console.log(e.tradingsymbol,'nr4',e.nr4)
 
-    if(e.nr4==true || e.segment=='NFO'){
+    if(e.nr4 == true || e.segment == 'NFO'){
       jsonObj2.push(e)
 
     }
@@ -183,7 +180,7 @@ let t=secondsToHms(sec)
     
   }
 
-  if (len1 == 0) {
+  if (len1  ==  0) {
 
     ///push bank nifty and nofty
 
@@ -240,9 +237,9 @@ function secondsToHms(d) {
   var m = Math.floor(d % 3600 / 60);
   var s = Math.floor(d % 3600 % 60);
 
-  var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-  var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-  var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+  var hDisplay = h > 0 ? h + (h  ==  1 ? " hour, " : " hours, ") : "";
+  var mDisplay = m > 0 ? m + (m  ==  1 ? " minute, " : " minutes, ") : "";
+  var sDisplay = s > 0 ? s + (s  ==  1 ? " second" : " seconds") : "";
   return hDisplay + mDisplay + sDisplay; 
 }
 

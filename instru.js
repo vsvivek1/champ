@@ -44,13 +44,13 @@ let access_token= await AccesTocken.findOne({ 'date': today },'access_token').th
 let tradables=[];
 instru.forEach(e=>{
 
-if(e.name=='NIFTY') return false;
+if(e.name == 'NIFTY') return false;
 
 let body=Math.abs(e.pricePoints.yesterday.close-e.pricePoints.yesterday.open);
 let candleColor=(e.pricePoints.yesterday.close-e.pricePoints.yesterday.open>0) ?'green':'red';
 let upperShadow;
 let lowerShadow;
-if(candleColor=='green'){
+if(candleColor == 'green'){
 upperShadow=e.pricePoints.yesterday.high-e.pricePoints.yesterday.close;
 lowerShadow=e.pricePoints.yesterday.open-e.pricePoints.yesterday.low;
 
@@ -70,7 +70,7 @@ lowerShadow=e.pricePoints.yesterday.close-e.pricePoints.yesterday.low;
 let ob={body,upperShadow,candleColor}
 
 // && e.pricePoints.d1.range< e.pricePoints.d2.range
-if( candleColor=='green'  && upperShadow*4<body && e.pricePoints.d1.range< e.pricePoints.d2.range ){
+if( candleColor == 'green'  && upperShadow*4<body && e.pricePoints.d1.range< e.pricePoints.d2.range ){
 
 tradables.push(e.instrument_token)
 // console.log(e.tradingsymbol,'tradable','body',ob)
@@ -91,9 +91,9 @@ let breakouts=[];
 let percentages=[]
 Object.keys(ohlcs).forEach(e=>{
 
-let tradingsymbol=  instru.filter(i=>i.instrument_token==e)[0].tradingsymbol;
-let chart=  instru.filter(i=>i.instrument_token==e)[0].chart;
-let yesterdayHigh=  instru.filter(i=>i.instrument_token==e)[0].pricePoints.d1.high;
+let tradingsymbol=  instru.filter(i=>i.instrument_token == e)[0].tradingsymbol;
+let chart=  instru.filter(i=>i.instrument_token == e)[0].chart;
+let yesterdayHigh=  instru.filter(i=>i.instrument_token == e)[0].pricePoints.d1.high;
 
 // console.log(e)
 
@@ -141,7 +141,7 @@ let last_price=a[e].last_price;
 // console.log(last_price)
 
 
-let ob=instru.filter(i=>i.instrument_token==e)[0];
+let ob=instru.filter(i=>i.instrument_token == e)[0];
 
 
 if(last_price>ob.pricePoints.yesterday.high )

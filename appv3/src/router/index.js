@@ -40,210 +40,210 @@ import FutureTrading from '@/components/FutureTrading.vue'
 // findiserver/appreact/src/App.js
 
 // /home/kseb/findependence/findiapp/src/components/PlaceQuickOrdersForHoldings.vue
-Vue.use(VueRouter)
+Vue.use( VueRouter )
 
-const routes = [
+const routes  =  [
 
-  {
+  { 
     path: '/WraperForInstruments',
     name: 'WraperForInstruments',
     component: WraperForInstruments
-  }, 
+   } , 
   
-  {
+  { 
     path: '/timePriceHigh',
     name: 'TimePriceHigh',
     component: TimePriceHigh
-  },
+   } ,
 
-  {
+  { 
     path: '/FutureTrading',
     name: 'FutureTrading',
     component: FutureTrading
-  },   {
+   } ,   { 
     path: '/testWebSocket',
     name: 'testWebSocket',
     component: testWebSocket
-  },   
+   } ,   
   
-  {
+  { 
     path: '/Tester',
     name: 'Tester',
     component: Tester
-  }, 
+   } , 
   
   
-  // {
+  // { 
   //   path: '/Commodity',
   //   name: 'Commodity',
   //   component: Commodity
-  // },  
+  //  } ,  
   
-  // {
+  // { 
   //   path: '/FutureMining',
   //   name: 'FutureMining',
   //   component: FutureMining,
-  //   props:{"ITYPE":"NFO"}
-  // },  
-  //   {
+  //   props:{ "ITYPE":"NFO" } 
+  //  } ,  
+  //   { 
   //   path: '/BTST',
   //   name: 'BTST',
   //   component: BTST
-  // }, 
+  //  } , 
 
-  // {
+  // { 
   //   path: '/dailyGainers',
   //   name: 'dailyGainers',
   //   component:dailyGainers
-  // },
+  //  } ,
   
 
   
   
-  // {
+  // { 
   //   path: '/REACT',
   //   name: 'REACT',
   //   component:rec
-  // }, 
-    {
+  //  } , 
+    { 
     path: '/GTT',
     name: 'GTT',
     component: GTT
-  }, 
+   } , 
   
   
-  // {
+  // { 
   //   path: '/Mining',
   //   name: 'Mining',
   //   component: Mining
-  // }, 
+  //  } , 
   
   
   
-  // {
+  // { 
   //   path: '/MiningMis',
   //   name: 'MiningMis',
   //   component: MiningMis
-  // }, 
+  //  } , 
   
   
-  // <!-- {
+  // <!-- { 
   //   path: '/mint',
   //   name: 'mint',
   //   component: Mint
-  // },  
+  //  } ,  
   
-  // { -->
+  // {  -->
 
-    {
+    { 
     path: '/NewFutureMining/:itype',
     name: 'NewFutureMining',
     component: NewFutureMining,
  
-    props:{'itype:': 'NFO'}
-  }, 
+    props:{ 'itype:': 'NFO' } 
+   } , 
   
-  // {
+  // { 
   //   path: '/StopLoss',
   //   name: 'StopLoss',
   //   component: StopLoss
-  // }, 
-  //   {
+  //  } , 
+  //   { 
   //   path: '/ManiKandanStrategy',
   //   name: 'ManiKandanStrategy',
   //   component: ManiKandanStrategy
-  // }, 
+  //  } , 
   
-  // {
+  // { 
   //   path: '/OptionChain',
   //   name: 'OptionChain',
   //   component: OptionChain 
-  // },
-  // {
+  //  } ,
+  // { 
   //   path: '/WebSockets',
   //   name: 'WebSockets',
   //   component: WebSockets 
-  // },
-  // {
+  //  } ,
+  // { 
   //   path: '/LongBuildUps',
   //   name: 'LongBuildUp',
   //   component: LongBuildUp 
-  // },
-  {
+  //  } ,
+  { 
     path: '/Strategies',
     name: 'Strategies',
     component: Strategies 
-  },
-  // {
+   } ,
+  // { 
   //   path: '/NarrowRange',
   //   name: 'NarrowRange',
   //   component: NarrowRange 
-  // },
-  {
+  //  } ,
+  { 
     path: '/login',
     name: 'login',
     component: Login 
-  },
-  {
+   } ,
+  { 
     path: '/orders',
     name: 'orders',
     component: OrderBook
-  },
-  // {
+   } ,
+  // { 
   //   path: '/instruments',
   //   name: 'GetInstruments',
   //   component: GetInstruments 
-  // },
-  {
+  //  } ,
+  { 
     path: '/logout',
     name: 'LogOut',
     component: LogOut
-  },
-  // {
+   } ,
+  // { 
   //   path: '/holdings',
   //   name: 'holdings',
   //   component: ListHoldings
-  // },
-  {
+  //  } ,
+  { 
     path: '/Validate',
     name: 'Validate',
     component: Validate 
-  },
-  {
+   } ,
+  { 
     path: '/',
     name: 'Home',
     component: Home
-  },
-  {
+   } ,
+  { 
     path: '/quickTargets',
     name: 'PlaceQuickOrderForHoldings',
     component: PlaceQuickOrderForHoldings
-  },
+   } ,
 
-  {
+  { 
     path: '/about',
     name: 'About',
     // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
+    // this generates a separate chunk ( about.[hash].js ) for this route
     // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
+    component: ( )  => import( /* webpackChunkName: "about" */ '../views/About.vue' )
+   } 
 ]
 
-const router = new VueRouter({
+const router  =  new VueRouter( { 
   routes,
   mode: 'history',
    
-})
+ }  )
 
-// router.beforeEach((to, from, next) => {
-//   if (to.fullPath.substr(0,2) === "/#") {
-//     const path = to.fullPath.substr(2);
-//     next(path);
+// router.beforeEach(( to, from, next )  => { 
+//   if ( to.fullPath.substr( 0,2 )== "/#" ) { 
+//     const path  =  to.fullPath.substr( 2 );
+//     next( path );
 //     return;
-//   }
-//   next();
-// });
+//    } 
+//   next(  );
+//  }  );
 // mode: 'history',
 
 export default router

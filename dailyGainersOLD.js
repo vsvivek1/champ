@@ -65,7 +65,7 @@ let a = await getSymbols();
 //////////////////////////////////////////////
 
 
-              if (typeof e=='undefined') 
+              if (typeof e == 'undefined') 
               {
                 clearInterval(intr);
 
@@ -97,11 +97,11 @@ len --;
           console.log(len, 'left out of ', len1,' ',t ,' time left',e.tradingsymbol);
 
 
-          if(len==(len1-1)){
+          if(len == (len1-1)){
 
             let instruForFuture=require('./appv3/public/instruments/instruments.json');
         
-           let niftyfut= instruForFuture.filter(i=>i.name=='NIFTY' && i.expiry==EXPIRY && i.instrument_type=="FUT" )[0];
+           let niftyfut= instruForFuture.filter(i=>i.name == 'NIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT" )[0];
            let a = new pricePoint(niftyfut.instrument_token, accessToken);
            let c = await a.getPricePoints(7, 'day');
            
@@ -118,7 +118,7 @@ len --;
            jsonObjWithOutCriteria.push(niftyfut)
            
 
-           let bankniftyfut= instruForFuture.filter(i=>i.name=='BANKNIFTY' && i.expiry==EXPIRY && i.instrument_type=="FUT" )[0]
+           let bankniftyfut= instruForFuture.filter(i=>i.name == 'BANKNIFTY' && i.expiry == EXPIRY && i.instrument_type == "FUT" )[0]
           
 
 
@@ -157,12 +157,12 @@ len --;
             e.buyNow = false;
 
 
-            if(typeof e.pricePoints=='undefined'){
+            if(typeof e.pricePoints == 'undefined'){
               console.log('pricePoints undefined ',e.tradingsymbol)
 
               return;
             }
-            if(e.pricePoints.length==0){
+            if(e.pricePoints.length == 0){
 
               console.log('pricePoints not set for ',e.tradingsymbol);
 
@@ -177,7 +177,7 @@ len --;
 let otherCriteriaCheck=otherCriteria(e);
 
 // let otherCriteriaCheck =true; //logic moved lastly
-// if(e.pricePoints.nr4==true)
+// if(e.pricePoints.nr4 == true)
 console.log(otherCriteriaCheck,'otherCriteriaCheck')
 
 if(otherCriteriaCheck)
@@ -191,9 +191,6 @@ if(otherCriteriaCheck)
 
   jsonObjWithOutCriteria.push(e)
   // console.log('no nr 4',e.tradingsymbol)
-
- 
-
 }
               
               
@@ -262,7 +259,7 @@ let body=Math.abs(e.pricePoints.yesterday.close-e.pricePoints.yesterday.open);
 let candleColor=(e.pricePoints.yesterday.close-e.pricePoints.yesterday.open>0) ?'green':'red';
 let upperShadow;
 let lowerShadow;
-if(candleColor=='green'){
+if(candleColor == 'green'){
 upperShadow=e.pricePoints.yesterday.high-e.pricePoints.yesterday.close;
 lowerShadow=e.pricePoints.yesterday.open-e.pricePoints.yesterday.low;
 
@@ -282,7 +279,7 @@ lowerShadow=e.pricePoints.yesterday.close-e.pricePoints.yesterday.low;
 let ob={body,upperShadow,candleColor}
 
 // && e.pricePoints.d1.range< e.pricePoints.d2.range
-if( candleColor=='green'  && upperShadow*4<body && e.pricePoints.d1.range< e.pricePoints.d2.range ){
+if( candleColor == 'green'  && upperShadow*4<body && e.pricePoints.d1.range< e.pricePoints.d2.range ){
 
 tradables.push(e.instrument_token)
 // console.log(e.tradingsymbol,'tradable','body',ob)
@@ -298,18 +295,18 @@ async function getSymbols() {
 
     let instruments = require('./appv3/public/instruments/instruments.json');
   
-    let st = instruments.filter(i => i.exchange == 'NFO')
+    let st = instruments.filter(i => i.exchange  ==  'NFO')
       .map((i) => i.name)
-      .filter((x, i, a) => a.indexOf(x) === i);
+      .filter((x, i, a) => a.indexOf(x)  === i);
   
     let st2 = instruments
       .map((i) => i.instrument_token)
-      .filter((x, i, a) => a.indexOf(x) === i);
+      .filter((x, i, a) => a.indexOf(x)  === i);
   
     let instTockens = st.map((s) => {
       // console.log(s,'s')
       let ar = instruments.filter(
-        (i) => i.tradingsymbol == s && i.exchange == "NSE"
+        (i) => i.tradingsymbol  ==  s && i.exchange  ==  "NSE"
       );
   
       if (typeof ar[0] != "undefined") {
@@ -331,17 +328,17 @@ async function getSymbols() {
   
       console.log('from get symbls', s)
   
-      if (s == 'NIFTY') {
+      if (s  ==  'NIFTY') {
         s = "NIFTY 50"
   
       }
   
-      if (s == 'BANKNIFTY') {
+      if (s  ==  'BANKNIFTY') {
         s = "NIFTY BANK"
   
       }
       return "NSE:" + s;
-    }).filter((x, i, a) => a.indexOf(x) === i);;
+    }).filter((x, i, a) => a.indexOf(x)  === i);;
   
   
   
@@ -371,9 +368,9 @@ async function getSymbols() {
     var m = Math.floor(d % 3600 / 60);
     var s = Math.floor(d % 3600 % 60);
   
-    var hDisplay = h > 0 ? h + (h == 1 ? " hour, " : " hours, ") : "";
-    var mDisplay = m > 0 ? m + (m == 1 ? " minute, " : " minutes, ") : "";
-    var sDisplay = s > 0 ? s + (s == 1 ? " second" : " seconds") : "";
+    var hDisplay = h > 0 ? h + (h  ==  1 ? " hour, " : " hours, ") : "";
+    var mDisplay = m > 0 ? m + (m  ==  1 ? " minute, " : " minutes, ") : "";
+    var sDisplay = s > 0 ? s + (s  ==  1 ? " second" : " seconds") : "";
     return hDisplay + mDisplay + sDisplay; 
   }
   

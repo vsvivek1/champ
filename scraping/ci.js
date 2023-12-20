@@ -69,7 +69,7 @@ static async ChartInkScan(html){
     console.log('number of stocks',ln)
 
     let ois=[];
-    $('.scan_results_table tbody tr').each( (index, element) => {
+    $('.scan_results_table tbody tr').each((index, element) => {
       
      let symbol=  $(element).children("td").eq(2).children('a').text().trim();
         let change=parseFloat($(element).children("td").eq(4).text().trim().split('%')[0]);
@@ -97,7 +97,7 @@ static async scrap(href,accessToken){
  
  
   let url;
-  if(href=="LongBuildUp"){
+  if(href == "LongBuildUp"){
 
  url = 'https://www.moneycontrol.com/stocks/fno/marketstats/futures/openint_inc/homebody.php?opttopic=openint_inc&optinst=allfut&sel_mth=1&sort_order=0';
 
@@ -123,9 +123,9 @@ static async scrap(href,accessToken){
     });
   })
   .then( async  function(html) {
-      console.log('href',href,href=='LongBuildUp')
+      console.log('href',href,href == 'LongBuildUp')
 
-    if(href=='LongBuildUp'){
+    if(href == 'LongBuildUp'){
 
       try {
         var  $ = cheerio.load(html);
@@ -210,7 +210,7 @@ console.log('o.voiPc',parseFloat(o.oiPc));
     console.log('number of stocks',ln)
 
     let ois=[];
-    $('.scan_results_table tbody tr').each( (index, element) => {
+    $('.scan_results_table tbody tr').each((index, element) => {
       
      let symbol=  $(element).children("td").eq(2).children('a').text().trim();
         let change=parseFloat($(element).children("td").eq(4).text().trim().split('%')[0]);
@@ -283,8 +283,8 @@ static async optionChain(href,accessToken){
     console.log('number of stocks',ln)
 
     let ois=[];
-    // $('#optionChainTable-indices tbody tr').each( (index, element) => {
-    $('.table.ed tbody tr ').each( (index, element) => {
+    // $('#optionChainTable-indices tbody tr').each((index, element) => {
+    $('.table.ed tbody tr ').each((index, element) => {
       
      let CallOi = $(element).children("td").eq(1).text().trim().replace('-',0);
      let CallOiChange = $(element).children("td").eq(2).text().trim().replace('-',0);

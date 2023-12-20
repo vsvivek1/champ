@@ -32,16 +32,16 @@ class Gtt {
    
         
         return this.instruments.filter(f=>
-            f.exchange=='NSE')
+            f.exchange == 'NSE')
         
         .map(i=>i.instrument_token).filter((stock,index,arr)=>{
 
    
-            return arr.indexOf(stock)==index
+            return arr.indexOf(stock) == index
 
         })            
         .sort((a,b)=> a-b ).
-        filter(f=>!(f.includes('NIFTY')||f.includes('BANKNIFTY') ))
+        filter(f=>!(f.includes('NIFTY')||f.includes('BANKNIFTY')))
 
     }
 
@@ -98,7 +98,7 @@ try {
             
             var stock=this.stocks.pop();
     
-            if(typeof stock=='undefined' ){
+            if(typeof stock == 'undefined' ){
     
                 res(result);
                 clearInterval(t);
@@ -111,7 +111,7 @@ try {
     
             let instrument=this.instruments.
             filter(i=>i.instrument_token
-                ==stock)[0];
+                 == stock)[0];
     
     
                 let tradingsymbol=instrument.tradingsymbol;

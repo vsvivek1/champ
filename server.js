@@ -54,7 +54,7 @@ process.on('uncaughtException', function(err) {
 app.use(history());
 
 let port = process.env.PORT;
-if (port == null || port == "") {
+if (port  ==  null || port  ==  "") {
   const port =9090;
 }
 
@@ -143,10 +143,7 @@ app.post('/api/setRequestTocken/',(req,res)=>{
 let at=  ZerodhaAPI.generateSession(request_tocken).then(r=>{
   // console.log('at',r)
 
-  let today = new Date().toISOString().slice(0, 10);
-
- 
-let at={};
+  let today = new Date().toISOString().slice(0, 10);let at={};
 at._id=new mongoose.Types.ObjectId();
 at.date=today
 at.user_id=r.user_id;
@@ -325,10 +322,7 @@ res.send(r)
 })
 
 
-app.get('/api/getOrders/:accessToken',(req,res)=>{
-
- 
-  let accessToken=req.params.accessToken;
+app.get('/api/getOrders/:accessToken',(req,res)=>{  let accessToken=req.params.accessToken;
 
   console.log('here it is ',accessToken)
 
@@ -361,7 +355,7 @@ re=>{
       // console.log('h.instrument_tocken',h.instrument_token)
       // console.log('r1.instrument_tocken',r1.instrument_token)
       
-     return  h.instrument_token==r1.instrument_token
+     return  h.instrument_token == r1.instrument_token
      
 
     })[0];
@@ -427,10 +421,7 @@ async function execute (res){
 }
 
 
-app.get('/api/longBuildUp', (req,res) => {
-
- 
-  
+app.get('/api/longBuildUp', (req,res) => {  
   let s2=execute().then(
   s=>{
 
@@ -623,10 +614,7 @@ app.get('/api/getOHLC/symbols/:arr/accessToken/:accessToken', async (req,res) =>
  let arr=JSON.parse(req.params.arr)
  let accessToken=req.params.accessToken;
 
-
- 
-
-//  if(typeof(arr)=='string'){
+//  if(typeof(arr) == 'string'){
 
 //   console.log('newe parse',JSON.parse(arr),typeof(JSON.parse(arr)))
 //  }
@@ -648,9 +636,6 @@ app.post('/api/postOHLC', async (req,res) => {
   
  let arr=JSON.parse(req.body.symbols)
  let accessToken=req.body.accessToken;
-
-
- 
 
  
 try {
@@ -721,9 +706,6 @@ app.post('/api/getLatestPricesOfClosedScripts', async (req,res) => {
   
  let arr=JSON.parse(req.body.symbols)
  let accessToken=req.body.accessToken;
-
-
- 
 
  
 try {
@@ -922,9 +904,6 @@ app.post('/api/fetchSymbolsForTheCategory',async (req,res)=>{
    console.log('ERROR FOR FETCH SYMBOLS FOR CATEGORY',error)
  }
  
-
- 
-
  
 
 });
@@ -943,9 +922,6 @@ app.post('/api/PlaceTarget',async (req,res)=>{
     // console.log('zerodhaparamas after result ',ZerodhaParams)
     res.send(r)
   }).catch(e=>console.log('it happens inside',e));
-
- 
-
 });
 
 app.post('/api/getQuoteFromZerodha',async (req,res)=>{
@@ -961,9 +937,6 @@ app.post('/api/getQuoteFromZerodha',async (req,res)=>{
   res.send(a);
   
   
-
- 
-
 });
 
 
@@ -974,7 +947,7 @@ app.get('/api/getInstruments/:accessToken',(req,res)=>{
 
     let eq=r.filter(r1=> {
       
-     return  r1.segment=='NSE' && r1.exchange=='NSE' && r1.instrument_type=='EQ' && r1.name!=''
+     return  r1.segment == 'NSE' && r1.exchange == 'NSE' && r1.instrument_type == 'EQ' && r1.name!=''
 
 
     })
@@ -1131,9 +1104,6 @@ Promise.all(r).then(values=>{
 })
 
 
-
- 
-
     
   })
 
@@ -1199,17 +1169,11 @@ console.log('start',start,'end',end,intervel)
 res.send(result);
     
   } catch (error) {
-    console.log('errir',error);
-
- 
- 
+    console.log('errir',error); 
   }
    
 
-   
-
- 
-   
+      
     
   });
   
@@ -1222,7 +1186,7 @@ res.send(result);
 
 
     
-    if(typeof(r)=='undefined'){
+    if(typeof(r) == 'undefined'){
 
 console.log('ndefined fired')
   res.status(200).send('err');

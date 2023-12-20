@@ -36,11 +36,11 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
         let last_price = ohlc[item].last_price;
   
   
-        if (symbol == 'NIFTY 50') {
+        if (symbol  ==  'NIFTY 50') {
   
           console.log('NIFTY 50', last_price)
         }
-        if (symbol == 'NIFTY BANK') {
+        if (symbol  ==  'NIFTY BANK') {
   
           console.log('NIFTY BANK', last_price)
         }
@@ -50,38 +50,38 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
   
           i => {
   
-            if (symbol == 'NIFTY 50') {
+            if (symbol  ==  'NIFTY 50') {
   
               symbol = 'NIFTY'
             }
   
   
-            if (symbol == 'NIFTY BANK') {
+            if (symbol  ==  'NIFTY BANK') {
   
               symbol = 'BANKNIFTY'
             }
   
-            return i.name == symbol
+            return i.name  ==  symbol
           }
   
         ).filter(i => {
   
   // console.log('i.name',i.name)
   
-          if (i.name == 'NIFTY') {
+          if (i.name  ==  'NIFTY') {
   
             console.log('NIFTY', i.tradingsymbol, last_price)
           }
-          if (i.name == 'BANKNIFTY') {
+          if (i.name  ==  'BANKNIFTY') {
   
             console.log('NIFTY BANK', i.tradingsymbol, last_price)
           }
   
   
   
-          if(i.instrument_type=='FUT'){
+          if(i.instrument_type == 'FUT'){
   
-          if(i.name=='NIFTY' || i.name=='BANKNIFTY'){
+          if(i.name == 'NIFTY' || i.name == 'BANKNIFTY'){
   
             console.log('its future',i.tradingsymbol)
             return true
@@ -90,7 +90,7 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
           }
   
           // console.log('i.instrument_type',i.instrument_type)
-          if (i.instrument_type == 'CE') {
+          if (i.instrument_type  ==  'CE') {
   
   
             /// if ce strike between 1.05 pc and 1.1 pc
@@ -107,11 +107,11 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
             {
   
   
-              if (i.name == 'NIFTY') {
+              if (i.name  ==  'NIFTY') {
   
                 console.log('NIFTY 50', i.tradingsymbol)
               }
-              if (i.name == 'BANKNIFTY') {
+              if (i.name  ==  'BANKNIFTY') {
   
                 console.log('NIFTY BANK', i.tradingsymbol)
               }
@@ -120,7 +120,7 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
             }
           }
   
-          else if (i.instrument_type == 'PE') {
+          else if (i.instrument_type  ==  'PE') {
   
             // console.log('pee yeee')
   
@@ -128,11 +128,11 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
             if (i.strike < last_price*.99 && i.strike > last_price*.93) {
   
   
-              if (i.name == 'NIFTY') {
+              if (i.name  ==  'NIFTY') {
   
                 console.log('NIFTY 50', i.tradingsymbol)
               }
-              if (i.name == 'BANKNIFTY') {
+              if (i.name  ==  'BANKNIFTY') {
   
                 console.log('NIFTY BANK', i.tradingsymbol)
               }
@@ -167,7 +167,7 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
   
   
   len=len-1;
-        if(len==0){
+        if(len == 0){
               /// currrent positions
   
               currentInstruments1=currentInstruments.map(c=>

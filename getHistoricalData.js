@@ -70,7 +70,7 @@ console.log('previous',global.globalPrevious)
 // console.log('len',XmonthData);
 let maxValue=Math.max.apply(Math, XmonthData.map(function(o) { return o.high; }))
 
-let max=arr.filter(a=>a.high==maxValue)[0];
+let max=arr.filter(a=>a.high == maxValue)[0];
 
 global.globalPrevious=mon1;
 return max;
@@ -86,7 +86,7 @@ let XmonthData=arr.slice(global.globalPreviousMin,mon)
 // console.log('len',XmonthData);
 let minValue=Math.min.apply(Math, XmonthData.map(function(o) { return o.low; }))
 
-let min=arr.filter(a=>a.low==minValue)[0];
+let min=arr.filter(a=>a.low == minValue)[0];
 
 global.globalPreviousMin=mon1;
 return min;
@@ -183,7 +183,7 @@ let st=new Set();
 
 let idea=res.filter(r=>{
     
-    r.instrument_type=='EQ' && r.last_price>5
+    r.instrument_type == 'EQ' && r.last_price>5
 })
 
     console.log('get instruments',idea)

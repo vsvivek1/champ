@@ -1,6 +1,6 @@
 <template>
     <div>
-{{AccessTocken}} margin page
+{{ AccessTocken }}  margin page
     </div>
 </template>
 
@@ -8,63 +8,63 @@
 import axios from 'axios'
 
 import store from '@/store';
-    export default {
+    export default { 
         name:'Margins',
-methods:{
-  getAccessTocken(){
-let url="/api/getAccessTocken";
+methods:{ 
+  getAccessTocken(  ){ 
+let url = "/api/getAccessTocken";
 
 
-axios.get(url).then(res=>{
+axios.get( url ).then( res =>{ 
 
-    this.AccessTocken=res.data
-});
+    this.AccessTocken = res.data
+ }  );
 
 return;
-let AccessTockenPromise=
+let AccessTockenPromise = 
 
-new Promise((resolve, reject) => {
-
-
-resolve(this.AccessTocken);
+new Promise(( resolve, reject )  => { 
 
 
-
-      })   },
-        getMargins(){
+resolve( this.AccessTocken );
 
 
-        }
 
-},
+       }  )    } ,
+        getMargins(  ){ 
 
-        mounted(){
-this.getAccessTocken()
 
-// .then(res=>{
+         } 
 
-// console.log('getAccessTockenfrom resolve',res)
+ } ,
 
-// });
+        mounted(  ){ 
+this.getAccessTocken(  )
 
-        },
-        computed:{
-AccessTocken:{
+// .then( res =>{ 
 
-get(){
+// console.log( 'getAccessTockenfrom resolve',res )
+
+//  }  );
+
+         } ,
+        computed:{ 
+AccessTocken:{ 
+
+get(  ){ 
 
     return store.state.AccessTocken;
-},set(payload){
-    store.commit('setAccessTocken',payload)
-}
+ } ,set( payload ){ 
+    store.commit( 'setAccessTocken',payload )
+ } 
 
-}
+ } 
 
 
-        },
+         } ,
 
      
-    }
+     } 
 </script>
 
 <style scoped>
