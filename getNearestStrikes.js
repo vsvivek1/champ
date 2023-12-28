@@ -1,3 +1,5 @@
+const nearestMultiple=require('./nearestMultiple');
+
 module.exports=function getNearestStrikes(ohlc, instruments) {
 
 
@@ -69,10 +71,16 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
   // console.log('i.name',i.name)
   
           if (i.name  ==  'NIFTY') {
+
+            let {nearestAbove,nearestBelow} = nearestMultiple(last_price,50)
   
             console.log('NIFTY', i.tradingsymbol, last_price)
           }
           if (i.name  ==  'BANKNIFTY') {
+
+            let {nearestAbove,nearestBelow} = nearestMultiple(last_price,25)
+
+            console.log({nearestAbove,nearestBelow},'{nearestAbove,nearestBelow}')
   
             console.log('NIFTY BANK', i.tradingsymbol, last_price)
           }
@@ -100,7 +108,15 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
   
             //           console.log("variable", variable);
             // if (i.strike < last_price_max && i.strike > last_price_min) 
-            if (i.strike > last_price*1.01 && i.strike < last_price*1.07 ) 
+
+
+            // ce_upper_percentage=
+
+          
+
+            // if (i.strike < last_price && i.strike < last_price*1.07 ) 
+
+            if(i.strike==nearestBelow)
   
   
             // console.log('ceeeee yeee')
@@ -125,7 +141,8 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
             // console.log('pee yeee')
   
             // if (i.strike < last_price_max && i.strike > last_price_min) {
-            if (i.strike < last_price*.99 && i.strike > last_price*.93) {
+            // if (i.strike < last_price*.99 && i.strike > last_price*.93) {
+              if(i.strike==nearestAbove){
   
   
               if (i.name  ==  'NIFTY') {

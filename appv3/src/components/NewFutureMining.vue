@@ -540,6 +540,10 @@ import VueGoodTable from "vue-good-table";
 import "vue-good-table/dist/vue-good-table.css";
 import newFutureMiningMixin from './newFutureMiningMixin';
 
+import telegramMixin from './telegramMixin';
+
+import getRequiredTimeMixin from './Tester/getRequiredTimeMixin'
+
 
 import store from '@/store';
  import LogWindow from './LogWindow.vue';
@@ -991,7 +995,7 @@ if( this.hours == 15 ){
 
 
 
-  mixins: [newFutureMiningMixin,sessionMixin,tradingMixin,placeTargetsForLiveScripts],
+  mixins: [getRequiredTimeMixin,newFutureMiningMixin,sessionMixin,tradingMixin,placeTargetsForLiveScripts,telegramMixin],
 
 
 
@@ -1167,7 +1171,56 @@ if( typeof this.livePositions  == 'undefined'  ){
   components: {  ClosedTrades, LiveTickView, LiveOrders,Margin,LivePos,IndicesTable,Messages,IronCondor , VueGoodTable,  } ,
   
 
-  methods: { 
+  methods: {  getRequiredTime( h,m ) { 
+            const today  =  new Date(  ); // Current date
+          
+          //   console.log( today );
+            const dayOfWeek  =  today.getDay(  ); // Get current day of the week ( 0 - Sunday, 6 - Saturday )
+          
+            // Calculate the difference between today and last Friday
+            const daysDiff  =  ( dayOfWeek + 7 - 5 ) % 7; // 5 represents Friday
+          
+            // Calculate the date of last Friday
+           const lastFriday  =  new Date( today + daysDiff );
+          //   lastFriday.setDate( today.getDate(  ) - daysDiff );
+          
+            // Set the time to 9:15 AM
+            lastFriday.setHours( h );
+            lastFriday.setMinutes( m );
+            lastFriday.setSeconds( 0 );
+          
+            // Format the date in YYYY-MM-DD hh:MM:SS
+          
+          
+          const options  =  { 
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour12: false,
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'Asia/Kolkata' // Set the timezone to Indian Standard Time ( IST )
+           } ;
+          
+          // console.log( lastFriday );
+          
+          
+          const date  =  new Date( lastFriday );
+          
+          const year  =  date.getFullYear(  );
+          const month  =  String( date.getMonth(  ) + 1 ).padStart( 2, '0' ); // Month is zero-indexed
+          const day  =  String( date.getDate(  )).padStart( 2, '0' );
+          const hours  =  String( date.getHours(  )).padStart( 2, '0' );
+          const minutes  =  String( date.getMinutes(  )).padStart( 2, '0' );
+          const seconds  =  String( date.getSeconds(  )).padStart( 2, '0' );
+          
+          const formattedDateTime  =  `${ year }-${ month }-${ day } ${ hours }:${ minutes }:${ seconds } `;
+          // console.log( formattedDateTime );
+          
+          // const formattedDateTime  =  lastFriday.toLocaleString( 'en-IN', options ).replace( /\//g, '-' ).replace( /\,/g, '' );
+          return formattedDateTime
+           } ,
 
     getOneMinuteData(){ 
 let intervel = 'minute';
@@ -3567,43 +3620,8 @@ this.stopLossForChild = a;
       ///till here
      } ,
 
-    async getChatId() { 
-      return;
-      this.chat_id  =  -1;
-      if ( this.chat_id !=  1 ) { 
-        let url  =  `https://api.telegram.org/bot${ this.token } /getUpdates`;
 
-        return axios
-          .get( url )
-          .then(( r )  => { 
-            this.chat_id  =  r.data.result[0].channel_post.chat.id;
-
-            return this.chat_id;
-           }  )
-          .catch(( e )  => e );
-
-        var txt  =  "First time";
-       } 
-     } ,
-
-    sendToTelegramGroup( text ) { 
-      return;
-      if ( true ) { 
-        let obj  =  {  } ;
-        obj.chat_id  =  this.chat_id;
-        obj.text  =  text;
-
-        let urlToSendMessage  =  `https://api.telegram.org/bot${ this.token } /sendMessage`;
-
-        axios
-          .post( urlToSendMessage, obj )
-          .then(( r )  => { 
-            // this.cl( 'from bot ',r.data.result[0] )
-           }  )
-          .catch(( e )  => e );
-        // this.cl( 'from bot ',r.data.result[0].channel_post.chat.id )
-       } 
-     } ,
+    
 
     resetUserMessages() { 
       this.userMessages  =  ["no msg"];

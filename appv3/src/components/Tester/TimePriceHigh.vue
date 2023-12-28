@@ -25,14 +25,34 @@
   <tr :style="getRowStyle"
 
   v-for = "( ohlc,index1 ) in ohlcData" :key = "index1 +'-' + ohlc.instrument_token">
-    <td v-if="hasPosition">
-      hasPosition :{{  hasPosition }}
+
+
+  
+  <td v-if=" readyForEntry">
+    <span v-if="readyForEntry"> ready For Entry @ {{ buyPrice }}</span>
+  </td>
+    <td v-if="hasPosition ">
+     
+      <span v-if="ohlc.high>buyPrice">
+      Hit Target
+      </span>
+
+      <span v-if="ohlc.low<stopLossPrice" style="color:red">
+      Hit Stop loss
+      </span>
+
+
     buyPrice:{{  buyPrice }}
     targetPrice:{{ targetPrice }}
     stopLossPrice:{{ stopLossPrice }}
-stopLossHit:{{ stopLossHit }}
-  targetHit:{{ targetHit }}
+
+    targetPoints {{targetPrice-buyPrice }}
+    Sl Points {{stopLossPrice-buyPrice }}
+
     
+
+  <span v-if ="targetHit">Target Hit   {{(targetPrice-buyPrice)*1800  }}</span>
+  <span v-if ="stopLossHit">Stop loss Hit {{(stopLossPrice-buyPrice)*1800  }} </span>
     
     
     </td>
@@ -51,13 +71,15 @@ stopLossHit:{{ stopLossHit }}
     
     <td>{{  ohlc }}  {{}} </td>
     <td>{{  ohlc.entryPrice  }} </td>
-    <td>{{  hasWick( ohlc )  }} </td>
+    <td>{{  hasWick( ohlc,(index1+1) )  }} </td>
     <td>
       {{ currentStatus(ohlc) }}</td>
   </tr>
 
 
 </table>
+
+{{ total }}
     </div>
   </template>
 
@@ -88,6 +110,7 @@ table {
 
     data(  ) { 
       return { 
+        total:0,
         buyPrice:0,
         sellPrice:0,
         targetPrice:0,
@@ -111,7 +134,7 @@ table {
 
       getRowStyle() {
       return {
-        backgroundColor: this.hasPosition ? 'blue' : 'white',
+        backgroundColor: this.hasPosition ? 'lightBlue' : 'white',
         color: this.targetHit ? 'green' : this.stopLossHit ? 'red' : 'black',
         // Add more conditions and styles as needed
       };
@@ -131,7 +154,30 @@ table {
 
       },
 
-      hasWick( ohlc ){ 
+      hasWick( ohlc,idx ){ 
+
+        // this.stopLossHit=false;
+
+        if(this.stopLossHit || this.stopLossHit || idx==375){
+          this.stopLossHit=false;
+          this.targetHit=false;
+          this.stopLossPrice=0;
+          this.targetPrice=0;
+          this.hasPosition=false;
+          this.readyForEntry=false;
+
+          // return;
+
+
+          
+        }
+
+        if(idx==375){
+
+          return;
+        }
+
+        // if(this.targetHit) this.targetHit=false;
 
         let body1=ohlc.open-ohlc.close;
 
@@ -146,28 +192,46 @@ table {
 
         if(this.hasPosition && ohlc.low<=this.stopLossPrice && this.stopLossPrice!=0){
 
-this.targetHit=false;
 
 
-if(this.stopLossPrice!=0) this.stopLossHit=true
+
 
 
 this.hasPosition=false;
 this.readyForEntry=false;
 
+this.targetHit=false;
+
+this.stopLossHit=true;
+this.total+this.stopLossPrice-this.buyPrice
+
+ return;
+
 }
 
         if(this.hasPosition && ohlc.high>=this.targetPrice  && this.targetPrice!=0){
-          if(this.targetHit!=0)  this.targetHit=true;
+
+          this.total+this.targetPrice-this.buyPrice
+          this.targetHit=true;
             this.stopLossHit=false
             this.hasPosition=false;
             this.readyForEntry=false;
 
+             return;
+
         }
 
-        if(!this.hasPosition && this.readyForEntry==true  && ohlc.high>this.buyPrice){
 
+       console.log(this.total,'<<Total',idx,'this.hasPosition',this.hasPosition,'this.readyForEntry',this.readyForEntry,'ohlc.high>this.buyPrice',ohlc.high,this.buyPrice)
+        if((!this.hasPosition) && this.readyForEntry==true  && ohlc.high>this.buyPrice  && this.buyPrice!=0){
+
+
+          console.log('has position')
           this.hasPosition=true
+
+          this.readyForEntry=false;
+
+          // return;
         }
 
         if( !this.readyForEntry && !this.hasPosition && lowerShadow>body*2){
@@ -179,17 +243,19 @@ this.readyForEntry=false;
           this.targetPrice=this.buyPrice+Math.abs(ohlc.high-ohlc.low)
           this.stopLossPrice=ohlc.low;
 
-          this.hasPosition=true;
+          
 
 
 
-return true
+// return true
         }else{
 
           this.readyForEntry=false
           return false;
         }
 
+
+        return;
 // let body=Math.abs(body1);
 
         
@@ -274,12 +340,15 @@ let resultPromise =  await  axios.get( url );
 
 this.ohlcData = resultPromise.data;
 
-console.log(this.ohlcData,'ohlcdata');
+// console.log(this.ohlcData,'ohlcdata');
 
 // Assuming you have an array of OHLC data
 
 
 // Marking flags for entry
+
+return;
+/*
 for ( let i  =  1; i < this.ohlcData.length; i++ ) { 
   const currentCandle  =  this.ohlcData[i];
   const previousCandle  =  this.ohlcData[i - 1];
@@ -293,13 +362,14 @@ for ( let i  =  1; i < this.ohlcData.length; i++ ) {
    } 
  } 
 
+
 // Calculating and setting entry price, exit price, and price difference on OHLC data
 for ( let i  =  0; i < this.ohlcData.length; i++ ) { 
   if ( this.ohlcData[i].flagEntry ) { 
     let entryPrice  =  this.ohlcData[i].high * 1800;
     let j  =  i + 1;
 
-    while ( j < this.ohlcData.length && !ohlcData[j].flagLow ) { 
+    while ( j < this.ohlcData.length && !this.ohlcData[j].flagLow ) { 
       j++;
      } 
 
@@ -311,11 +381,13 @@ for ( let i  =  0; i < this.ohlcData.length; i++ ) {
       this.ohlcData[j].exitPrice  =  exitPrice;
       this.ohlcData[i].priceDifference  =  priceDifference;
 
-      console.log( `Entry Time: ${ ohlcData[i].time } , Exit Time: ${ ohlcData[j].time } , Price Difference: ${ priceDifference } ` );
+      console.log( `Entry Time: ${ this.ohlcData[i].time } , Exit Time: ${ this.ohlcData[j].time } , Price Difference: ${ priceDifference } ` );
      } 
    } 
  } 
 
+
+ */
 // Printing OHLC data with entry price, exit price, and price difference
 console.log( this.ohlcData );
 

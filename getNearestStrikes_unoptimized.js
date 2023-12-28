@@ -1,5 +1,5 @@
 const { ce_lower_percentage, ce_upper_percentage, pe_upper_percentage, pe_lower_percentage, FILE_LOCATION } = require('./FetchInstruments.js');
-
+const nearestMultiple=require('./nearestMultiple');
 function getNearestStrikes_unoptimized(ohlc, instruments) {
 	try {
 
@@ -29,13 +29,15 @@ function getNearestStrikes_unoptimized(ohlc, instruments) {
 				let last_price_min = ohlc[item].last_price * 0.97;
 
 				let last_price = ohlc[item].last_price;
-
+				let {nearestAbove,nearestBelow} = nearestMultiple(last_price,50);
 
 				if (symbol == 'NIFTY 50') {
+					let {nearestAbove,nearestBelow} = nearestMultiple(last_price,50)
 					// console.log( 'NIFTY 50', last_price )
 				}
 				if (symbol == 'NIFTY BANK') {
 					// console.log( 'NIFTY BANK', last_price )
+					let {nearestAbove,nearestBelow} = nearestMultiple(last_price,25)
 				}
 
 				let curInstrument = instruments.filter(
@@ -61,6 +63,7 @@ function getNearestStrikes_unoptimized(ohlc, instruments) {
 					// console.log( 'i.name',i.name )
 
 					if (i.name == 'NIFTY') {
+						
 						// console.log( 'NIFTY', i.tradingsymbol, last_price )
 					}
 					if (i.name == 'BANKNIFTY') {
@@ -89,9 +92,12 @@ function getNearestStrikes_unoptimized(ohlc, instruments) {
 						// if ( i.strike < last_price_max && i.strike > last_price_min ) 
 						// let ce_upper_percentage = 1;
 						// let ce_lower_percentage = .97;
-						if (i.strike > last_price * ce_lower_percentage &&
-							i.strike < last_price * ce_upper_percentage)
+						// if (i.strike > last_price * ce_lower_percentage &&
+						// 	i.strike < last_price * ce_upper_percentage)
 						// console.log( 'ceeeee yeee' )
+						
+						if(i.strike==nearestBelow)
+						
 						{
 
 
@@ -112,8 +118,8 @@ function getNearestStrikes_unoptimized(ohlc, instruments) {
 						// let pe_upper_percentage = 1.03;
 						// let pe_lower_percentage = 1;
 						// if ( i.strike < last_price_max && i.strike > last_price_min ) { 
-						if (i.strike < last_price * pe_upper_percentage && i.strike > last_price * pe_lower_percentage) {
-
+						// if (i.strike < last_price * pe_upper_percentage && i.strike > last_price * pe_lower_percentage) {
+							if(i.strike==nearestAbove){
 
 							if (i.name == 'NIFTY') {
 								// console.log( 'NIFTY 50', i.tradingsymbol )

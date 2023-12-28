@@ -28,7 +28,7 @@ import GTT from '@/components/GTT.vue'
 import Tester from '@/components/Tester/Tester.vue'
 import FutureTrading from '@/components/FutureTrading.vue'
 // import BTST from '@/components/Btst.vue'
-// import dailyGainers from '@/components/dailyGainers.vue'
+import dailyGainers from '@/components/dailyGainers.vue'
 
 // import MiningFuture from '@/components/MiningFuture.vue'
 // import FutureMining from '@/components/FutureMining.vue'
@@ -91,11 +91,11 @@ const routes  =  [
   //   component: BTST
   //  } , 
 
-  // { 
-  //   path: '/dailyGainers',
-  //   name: 'dailyGainers',
-  //   component:dailyGainers
-  //  } ,
+  { 
+    path: '/dailyGainers',
+    name: 'dailyGainers',
+    component:dailyGainers
+   } ,
   
 
   

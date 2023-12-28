@@ -5,7 +5,7 @@
 <a target="_blank"  :href=" instrument.chart">{{ instrument.tradingsymbol }}</a>
             
 
-<div v-if="instrument.tradingsymbol=='DELTACORP'">
+<div v-if="instrument.tradingsymbol=='NIFTY23D2121500CE'">
     <TimePriceHigh  :symbol="instrument.instrument_token"></TimePriceHigh>
 </div>
             

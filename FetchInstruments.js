@@ -450,7 +450,7 @@ async function fetchInstrumentsForMining( accessToken ) { try {
 		if( typeof instruAll.find( i =>i.tradingsymbol == e.name )!== 'undefined' ){ 
 
 			let nameinstrumentToken = instruAll.find( i =>i.tradingsymbol == e.name ).instrument_token;
-			let stockChart = `https://kite.zerodha.com/chart/ext/ciq/NSE/${ name } /${ nameinstrumentToken } `;
+			let stockChart = `https://kite.zerodha.com/chart/ext/ciq/${e.exchange}/${ name } /${ nameinstrumentToken } `;
 			e.stockChart = stockChart;
 	
 
@@ -491,7 +491,7 @@ async function fetchInstrumentsForMining( accessToken ) { try {
 	    niftyfut.pricePoints  =  c;
 	    niftyfut.SevenDayMaxMin  =  c.SevenDayMaxMin;
 	
-	    niftyfut.chart  =  `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${ e.tradingsymbol } /${ e.instrument_token } `;
+	    niftyfut.chart  =  `https://kite.zerodha.com/chart/ext/ciq/${e.exchange}/${ e.tradingsymbol }/${e.instrument_token } `;
 	    niftyfut.seletedBuyingMethod  =  'MAX';
 	    niftyfut.enterNowToTrade  =  false;
 	    niftyfut.PlacedReverseOrder  =  false;
@@ -513,7 +513,7 @@ async function fetchInstrumentsForMining( accessToken ) { try {
 	    bankniftyfut.pricePoints  =  cbnf;
 	    bankniftyfut.SevenDayMaxMin  =  cbnf.SevenDayMaxMin;
 	
-	    bankniftyfut.chart  =  `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${ e.tradingsymbol } /${ e.instrument_token } `;
+	    bankniftyfut.chart  =  `https://kite.zerodha.com/chart/ext/ciq/${e.exchange}/${ e.tradingsymbol } /${ e.instrument_token } `;
 	    bankniftyfut.seletedBuyingMethod  =  'MAX';
 	    bankniftyfut.enterNowToTrade  =  false;
 	    bankniftyfut.PlacedReverseOrder  =  false;
