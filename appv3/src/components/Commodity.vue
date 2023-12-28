@@ -656,7 +656,7 @@ return ;
 
         //reload window
 
-        this.$router.go(  );
+        // this.$router.go(  );
        }  else { 
         this.webSocketNotActive  =  false;
        } 

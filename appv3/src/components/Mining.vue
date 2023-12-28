@@ -619,7 +619,7 @@ export default {
     let FiveMinutesTimer  =  setInterval((  )  => { 
 
 
-      this.$router.go(  );
+      // this.$router.go(  );
      } , TenMinutes );
 
     let thirtyMinute  =  5 * 60 * 1000;
@@ -692,7 +692,7 @@ export default {
 
         //reload window
 
-        this.$router.go(  );
+        // this.$router.go(  );
        }  else { 
         this.webSocketNotActive  =  false;
        } 

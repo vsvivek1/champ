@@ -679,7 +679,7 @@ if( this.hours == 15 ){
      
              //reload window
      
-             this.$router.go();
+            //  this.$router.go();
             }  else { 
              this.webSocketNotActive  =  false;
             } 
