@@ -3,40 +3,18 @@
 
     <v-btn color = "red" prominent @click = "exitPositions()"> Exit all</v-btn>
 
-    <p v-if = "liveMargin && liveMargin.equity && liveMargin.equity.utilised && liveMargin.equity.utilised.debits">
-
-
-      <v-alert color = "red" v-if = "checkSidewaysMovementTime()">
-
-SIDE WISE TIME
-
-      </v-alert>
-
-      <v-alert color = "green" v-if = "!checkSidewaysMovementTime()">
-
-ACTION TIME
-
-      </v-alert>
-
+    <sideWiseAlerts :checkSidewaysMovementTime="checkSidewaysMovementTime" />
 
     
- 
-      Margin: {{  liveMargin.equity.utilised.margin  }} 
-     TOTAL OPTION PRICE: {{  totalOptionPrice  }} 
-     OPTION PREMIUM :{{  liveMargin.equity.utilised.option_premium }} 
-    </p>
-    <p v-else>
-      Margin is not available yet.
-    </p>
+    <MarginView  v-if="liveMargin!=-1" :totalOptionPrice="totalOptionPrice" :liveMargin="liveMargin" />
 
     <!-- <button @click = "downloadLogs">Download Logs</button> -->
     <button @click = "openWindow()">View Logs</button>
     <!-- <a :href = "logFileUrl" target = "_blank" v-if = "logFileUrl">View Logs</a> -->
     <button class = "btn-primary" > toggle  view logs</button>
-    <p v-if = "logs.length  && viewLogs">Logs:</p>
-    <ul v-if = "viewLogs">
-      <li v-for = "log in logs" :key = "log">{{  log  }} </li>
-    </ul>
+   
+   
+    <LogsView :logs="logs" :viewLogs="viewLogs" />
     instruments len{{  instruments.length  }} 
     tradeEntryFlowStatus {{  tradeEntryFlowStatus  }} 
 
@@ -118,7 +96,7 @@ ACTION TIME
 
 
 
-<IndicesTable :indices = "indices"></IndicesTable>
+<!-- <IndicesTable :indices = "indices"></IndicesTable> -->
 
 
 
@@ -133,17 +111,9 @@ ACTION TIME
 
 
 
-      <v-chip color = "green" title = "Current Check Digit">
-      {{  CurrentCheckDigit  }} </v-chip
-    >
-    <v-chip color = "red" title = "Lagging Check Digit">{{ 
-      laggingCheckDigit
-     }} </v-chip>
 
-    <v-chip color = "orange" v-if = "webSocketNotActive">
-      Check Web Sockets
-    </v-chip>
-
+     
+<DigitCheckerForWebsocketHealth :CurrentCheckDigit="CurrentCheckDigit" :laggingCheckDigit="laggingCheckDigit" :webSocketNotActive="webSocketNotActive" />
 
     <v-btn @click = "trailingStopLossWithLtp()">TRAILING STOP LOSS </v-btn>
 
@@ -168,17 +138,9 @@ ACTION TIME
 
      
       </v-col>
-      <v-col>
-        <img
-          v-if = "chat_id < -1"
-          src = "https://img.icons8.com/color/48/000000/twitter--v2.png"
-        />
-      </v-col>
+      <TelegramStatus :chat_id="chat_id" />
 
-      <v-col>
-        <v-icon color = "blue">mdi-clock</v-icon> {{  hours  }} : {{  minutes  }}  :
-        {{  seconds  }} 
-      </v-col>
+      <Clock :hours="hours" :minutes="minutes" :seconds="seconds" />
 
       <v-col>
         <v-btn
@@ -191,15 +153,7 @@ ACTION TIME
         </v-btn></v-col
       >
 
-      <v-col>
-        <input
-          title = "Maximum Tradable Amount"
-          type = "text"
-          class = "form-control"
-          v-model = "maxTradableAmount"
-          placeholder = "Maximum Tradable Amount"
-        />
-      </v-col>
+      <MaxTradableAmount :maxTradableAmount="maxTradableAmount" />
 
       <v-col>
         <v-btn
@@ -256,19 +210,7 @@ ACTION TIME
 </div>
 
 
-<v-dialog
-      v-model = "dialog"
-      max-width = "290"
-    >
-<v-alert>
-<ul>
-  <li v-for = "alert in alerts" :key = "alert.code">
-  {{ alert.message }} 
-  </li>
-</ul>
-
-</v-alert>
-  </v-dialog>
+<DialogForAlerts :dialog="dialog" :alerts="alerts" />
 
 <v-btn color = "green"
 
@@ -283,17 +225,8 @@ ACTION TIME
     <v-alert v-if = "loadingHourlyTradingLows" type = "info">
       Loaiding Hourly candles
     </v-alert>
-    <div class = "row">
- 
-
-      <v-chip
-        >FORGONE :{{  totalForgone.toFixed( 1 )  }}  FORGONE TARGET :{{ 
-          totalForgoneFortarget.toFixed( 1 )
-         }} 
-        FORGONE SL :{{  totalForgoneForStopLoss.toFixed( 1 )  }} 
-      </v-chip>
    
-    </div>
+    <ForGoneProfitData :totalForgone="totalForgone" :totalForgoneFortarget="totalForgoneFortarget" :totalForgoneForStopLoss="totalForgoneForStopLoss" />
 
    
 
@@ -318,49 +251,7 @@ ACTION TIME
 
 
 
-    <div >
-      <table v-if = "false">
-        <tr
-          v-for = "( script, index ) in hourlyPricePointsofLiveDay"
-          :key = "index"
-          class = "col-small"
-        >
-          <td
-            v-for = "( item, index2 ) in script.prices"
-            :key = "index2"
-            class = "col-xs"
-          >
-
-
-         
-            <div class = "text-primary">
-              {{  script.instrument.tradingsymbol  }} 
-              {{  script.instrument_token  }} 
-              {{  convertIsoDateToIST( item.date )  }} 
-            </div>
-
-            <div
-              :class = "{ 
-                'text-success': script.prices[index2].open  ==  item.open,
-               } "
-            >
-              O:{{  item.open  }} 
-              ll
-            </div>
-            ; up {{  ( item.high + ( item.high - item.low ) / 2 ).toFixed( 1 )  }}  H:{{ 
-              item.high
-             }} 
-            L:{{  item.low  }} 
-
-            range {{  item.high - item.low  }} 
-
-            bottom {{  ( item.low - ( item.high - item.low ) / 2 ).toFixed( 1 )  }}  C:{{ 
-              item.close
-             }} 
-          </td>
-        </tr>
-      </table>
-    </div>
+    <ViewHourlyPricePointsOfLiveDay :hourlyPricePointsofLiveDay="hourlyPricePointsofLiveDay" :convertIsoDateToIST="convertIsoDateToIST" />
 
   
 
@@ -385,24 +276,11 @@ ACTION TIME
       <div class = "col offset">
        <h1 class = "text-success">Positions</h1> 
 
-        <v-chip :color = "totalpnl > 0 ? 'green' : 'red'" class = "pb-2 mb-2">
-          Profit and Loss of Live positions {{  totalpnl  }} 
-        </v-chip>
 
-        <v-chip
-          :color = "closedTradesScriptsPnl > 0 ? 'green' : 'red'"
-          class = "pb-2 mb-2"
-        >
-          Profit and Loss of Closed positions {{  closedTradesScriptsPnl  }} 
-        </v-chip>
-
-        <v-chip
-          :color = "closedTradesScriptsPnl + totalpnl > 0 ? 'green' : 'red'"
-          class = "pb-2 mb-2"
-        >
-          Total Profit and Loss {{  closedTradesScriptsPnl + totalpnl  }} 
-        </v-chip>
-
+       <ProfitAndLossView
+       
+       
+       :totalpnl="totalpnl" :closedTradesScriptsPnl="closedTradesScriptsPnl" />
         <!-- <table class = "table" v-if = "livePositions.length > 0"> -->
 
 <div class = "row">
@@ -432,88 +310,7 @@ ACTION TIME
 </div>
 
 
-<div class = "row fixTableHead" v-if = "false">
-      <div class = "col">
-        <table class = "table table bordered table-stripped">
-          <thead>
-            <th>Slno</th>
-            <th>Stock</th>
-            <!-- <th>Spot</th> -->
-            <th>Strike</th>
-
-            <th>tradingSymbol</th>
-            <th>LTP</th>
-            <th>Type</th>
-            <th>Yesterday High</th>
-
-            <th>Action</th>
-          </thead>
-          <tbody>
-            <tr
-              v-for = "( i, index ) in instrumentsFiltered"
-              :key = "i.instrument_tocken"
-            >
-              <td>
-                {{  index + 1  }} 
-              </td>
-              <td>
-                {{  i.name  }} 
-
-                <div class = "row mt-2">
-                  <div class = "col-xs mr-2">
-                    <small>SPOT {{  i.spot_price  }} </small>
-                  </div>
-                  <div class = "col-xs mr-2">
-                    <small>LOT {{  i.lot_size  }} </small>
-                  </div>
-                  <div class = "col-xs mr-2"></div>
-                </div>
-              </td>
-
-              <td>{{  i.strike  }} </td>
-
-              <td>
-                <a target = "_blank" :href = "i.chart">{{  i.tradingsymbol  }}  </a>
-              </td>
-              <td :class = "i.candle">
-                {{  i.last_price  }} 
-                <small> Amt {{  i.lot_size * i.last_price  }}  </small>
-                <!-- Live Profit if executed  <b>{{ i.lot_size *( i.last_price-i.SevenDayMaxMin.Max ) }} </b> -->
-              </td>
-              <td>{{  i.instrument_type  }} </td>
-              <td>{{  i.pricePoints.yesterday.high  }} </td>
-
-              <td>
-                <select
-                  name = ""
-                  id = ""
-                  v-model = "i.seletedBuyingMethod"
-                  @change = "changeBuyingMethod( i )"
-                >
-                  <option v-for = "bp in buyingPoint" :value = "bp" :key = "bp">
-                    {{  bp  }} 
-                  </option>
-                </select>
-
-                <!-- {{ i.seletedBuyingMethod }}  -->
-                <small v-if = "i.SevenDayMaxMin"></small> &nbsp;
-
-                {{  i.pricePoints.d1.high  }} 
-                <v-btn
-                  fab
-                  small
-                  :title = "`ENTER NOW TO TRADE for  Amt ${ 
-                    i.SevenDayMaxMin.Max * i.lot_size
-                   } `"
-                  @click = "enterNowToTrade( i )"
-                  ><v-icon color = "green">mdi-cart</v-icon>
-                </v-btn>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+<InstrumentsAndActions :instrumentsFiltered="instrumentsFiltered" :changeBuyingMethod="changeBuyingMethod" :buyingPoint="buyingPoint" :enterNowToTrade="enterNowToTrade" />
 
 
 
@@ -530,19 +327,12 @@ ACTION TIME
 
 <script>
 
-import {  tradingMixin  }  from './tadingMixin';
 import {  placeTargetsForLiveScripts  }  from './placeTargetsForLiveScripts';
-import moment from 'moment';
-import axios from 'redaxios';
-import sessionMixin from "@/views/sessionMixin";
 // import { placeTargetsForLiveScripts }  from './placeTargetsForLiveScripts';
 import VueGoodTable from "vue-good-table";
 import "vue-good-table/dist/vue-good-table.css";
-import newFutureMiningMixin from './newFutureMiningMixin';
 
-import telegramMixin from './telegramMixin';
 
-import getRequiredTimeMixin from './Tester/getRequiredTimeMixin'
 
 
 import store from '@/store';
@@ -551,12 +341,39 @@ import store from '@/store';
  import {  io  }  from "socket.io-client";
 //import io  from "vue-socket.io"
 
-import Margin from '@/components/Margin.vue'
 import Messages from '@/components/Messages.vue'
 import IronCondor from '@/components/IronCondor.vue'
-// import axios from "axios";
+import sideWiseAlerts from './sideWiseAlerts.vue'
+import MarginView from './MarginView.vue'
+import DigitCheckerForWebsocketHealth from './DigitCheckerForWebsocketHealth.vue'
+import Clock from './Clock.vue'
+import ClosedTrades from './ClosedTrades.vue'
+import LiveOrders from './LiveOrders.vue'
+import Margin from './Margin.vue'
+import LivePos from './LivePos.vue'
+import IndicesTable from './IndicesTable.vue'
+import MaxTradableAmount from './MaxTradableAmount.vue'
+import TelegramStatus from './TelegramStatus.vue'
+import ProfitAndLossView from './ProfitAndLossView.vue'
+import LogsView from './LogsView.vue'
+import DialogForAlerts from './DialogForAlerts.vue'
+import ViewHourlyPricePointsOfLiveDay from './ViewHourlyPricePointsOfLiveDay.vue'
+import InstrumentsAndActions from './InstrumentsAndActions.vue'
+import ForGoneProfitData from './ForGoneProfitData.vue'
+
+import telegramMixin from './telegramMixin'
+import mutateWithLtp from './mutateWithLtpMixin'
+import newFutureMiningMixin from './newFutureMiningMixin'
+import getRequiredTimeMixin from './Tester/getRequiredTimeMixin.js'
+import sessionMixin from '../views/sessionMixin.js'
+import tradingMixin from './tadingMixin.js'
+import axios from "axios";
+
+import moment  from 'moment';
 //import ThemeSwitcherVue from "../../../../theme/materio-free-v1.0.2/materio-vuetify-vuejs-admin-template-free/materio-vuetify-vuejs-admin-template-free-main/src/layouts/components/ThemeSwitcher.vue";
 //import TypographyTextsVue from "../../../../theme/materio-free-v1.0.2/materio-vuetify-vuejs-admin-template-free/materio-vuetify-vuejs-admin-template-free-main/src/views/typography/TypographyTexts.vue";
+
+
 
 export const socket  =  io( "http://127.0.0.1:4000"
 
@@ -591,11 +408,7 @@ var MCXX  =  "MCX";
 
 
 
-import ClosedTrades from "./ClosedTrades.vue";
 import LiveTickView from "./LiveTickView.vue";
-import LiveOrders from "./LiveOrders.vue";
-import LivePos from "./LivePos.vue";
-import IndicesTable from "./IndicesTable.vue";
 // import {  timingSafeEqual  }  from 'crypto';
 
 
@@ -995,7 +808,7 @@ if( this.hours == 15 ){
 
 
 
-  mixins: [getRequiredTimeMixin,newFutureMiningMixin,sessionMixin,tradingMixin,placeTargetsForLiveScripts,telegramMixin],
+  mixins: [mutateWithLtp,getRequiredTimeMixin,newFutureMiningMixin,sessionMixin,tradingMixin,placeTargetsForLiveScripts,telegramMixin],
 
 
 
@@ -1101,7 +914,8 @@ return this.livePositions.filter( lp =>typeof lp.instrument!= 'undefined' )
         return this.closedTradesScripts.reduce(( pvs, cur )  => { 
           return pvs + cur.pnl;
          } , 0 );
-       } 
+       }else return 0;
+
      } ,
 
     totalpnl() { 
@@ -1168,7 +982,7 @@ if( typeof this.livePositions  == 'undefined'  ){
    } ,
 
 
-  components: {  ClosedTrades, LiveTickView, LiveOrders,Margin,LivePos,IndicesTable,Messages,IronCondor , VueGoodTable,  } ,
+  components: { ClosedTrades, LiveTickView, LiveOrders, Margin, LivePos, IndicesTable, Messages, IronCondor, VueGoodTable, sideWiseAlerts, MarginView, DigitCheckerForWebsocketHealth, Clock, MaxTradableAmount, TelegramStatus, ProfitAndLossView, LogsView, DialogForAlerts, ViewHourlyPricePointsOfLiveDay, InstrumentsAndActions, ForGoneProfitData } ,
   
 
   methods: {  getRequiredTime( h,m ) { 
@@ -8731,458 +8545,7 @@ this.cl( 'buys undefined so -1' );
 
 
 
-    mutateWithLtp( s ) { 
-     
-       this.heartBeatAndCurrentCheckDigit()
-
-
-
-      
-
-       if ( this.hasStartedGetOrders || this.hasStartedGetLivePositions || this.refreshingTradeStatus ) { 
-
-        this.tradeEntryFlowStatus = 'updating variuos status on Mount 1'
-        this.cl( 'various status updates  FROM LINE 7820' )
-    return false;
-   } 
-     
-      s.forEach( async ( element )  => { 
-
-        if( !element || !element.instrument_token  ){ 
-
-
-
-          this.tradeEntryFlowStatus = 'Element issue near S loop 2'
-          this.cl( 'element issue near s loop' )
-
-          return false;
-         } 
-        this.cl( 'inside s of mutate with  ltp' );
-        this.tradeEntryFlowStatus = 'Inside mutate with ltp 3'
-        let last_price;
-        let ohlc = element.ohlc;
-
-        
-
-// let minutes = [16,31,46,1]
-// if( minutes.includes( this.minues )){ 
-// this.setD0WithCurrentDayOhlc( element );
-//  } 
-      
-
-        if( !element ){ 
-
-
-          this.tradeEntryFlowStatus = 'Element null  4'
-          return false;
-         } 
-
-      
-
-     
-        
-
-let instrument_token  =  element.instrument_token;
-
-
-let cis  =  this.instruments.filter( i  => i.instrument_token  ==  instrument_token )[0];
-
-// console.log( cis.pricePoints.d1 )
-// this.cl( cis,'cis' )
-
-
-
-
-// console.log( this.seconds )
-let secs = [0,15,30,45]
-
-if( secs.includes( this.seconds ) && false ){ 
-
-  if( this.seconds == 0 ){ 
-let v0 = element.volume_traded;
-this.$set( cis,'v0',element.volume_traded );
-
-// this.cl( v0,'volume' )
- } 
-
-  if( this.seconds == 15 ){ 
-
-    let v1 = element.volume_traded-cis.v0;
-
-    this.$set( cis,'v1',v1 );
-    // this.cl( v1,' v1 nvolume' )
-   } 
-  if( this.seconds == 30 ){ 
-
-    let v2 = element.volume_traded-cis.v1;
-
-this.$set( cis,'v2',v2 );
- } 
-
-if( this.seconds == 30 ){ 
-
-  let v3 = element.volume_traded-cis.v3;
-
-this.$set( cis,'v3',v3 );
-
-// this.cl( 'voulume up 30',cis.tradingsymbol )
-
-if( cis.v1>cis.v2>cis.v3 ){ 
-
- this.cl( 'voulume up 30',cis.tradingsymbol, v1,v2,v3 )
- } 
- } 
-
-  
-
-
- } 
-
-
-
-
-
-if( typeof cis == 'undefined' ){ 
-
-  this.tradeEntryFlowStatus = 'CIS undefined 5'
-
-  let i = [];
-  i.push( instrument_token )
-
-  this.cl( 'cis undefined',instrument_token )
-
-  let k = await this.updateMissingScriptInInstrumetsFile( JSON.stringify( i ))
-
-  return false;
- } 
-
-let mar = ( element.ohlc == element.ohlc.low && ( element.last_price*1.1<= element.ohlc.high || element.last_price == element.ohlc.high )  && this.hours>= 14 );
-
-
-if( mar ){ 
-
-
-this.cl( "MARUBOZU CANDLE FOR",cis.tradingsymbol )
- } 
-
-
-
-
-
-
-// this.cl( 'check point 4a' )
-this.currentTradingsymbol = cis.tradingsymbol
-
-
-let lp1 = element.last_price;
-// this.isOpenLow( ohlc,cis,lp1 );
-
-
-// this.cl( element.depth.sell,'deph' )
-
-
-// let sells = element.depth.sell;
-
-
-
-
-let ma = this. calculateMovingAverage( cis );
-
-
- let ep = ma;
- let exit = element.ohlc.high*1.1;
-
-
-
-
-
-
-if ( !cis ) { 
-
-  this.tradeEntryFlowStatus = 'CIS undefined 6'
-  this.cl( 'cur instru type undefined frpn s so i am return nign false @7071', instrument_token );
-  return false;
- } 
-             
     
-// this.cl( 'check[ point 3]' )
-
-        last_price = element.last_price;
-
-this.setPreviousPriceAndLastPrice( instrument_token,last_price );
-
-let { msg,bs }  =  this.basicCheckers( element,cis,instrument_token,last_price );
-
-
-
-if( bs == false ){ 
-
-  this.tradeEntryFlowStatus = 'BASIC CHECKERS FALSE 6'
-  if( !msg == 'cis.previousPrice' ){ 
-
-    this.cl( 'basic cehckes issue',cis.tradingsymbol,instrument_token,cis.last_price,cis.previousPrice,msg )
-   } 
- return false
- } 
-
-
-///////////////setting live postion and live target
-
-
-let livePosObject = this.livePositions.find( lp =>lp.instrument_token == instrument_token )
-
-
-
-let liveOrderObj = this.liveOrders.find( lo =>lo.instrument_token == instrument_token );
-
-if( livePosObject!== undefined  && liveOrderObj!== undefined ){ 
-
-// IF LIVE POS AND LIVE ORDER RESET THESE
-
-
-this.$set( 
-        this.instruments.filter( 
-          ( i )  => i.instrument_token  ==  instrument_token
-         )[0],
-        "hasLivePosition",
-        true
-       );
-
-
-this.$set( 
-        this.instruments.filter( 
-          ( i )  => i.instrument_token  ==  instrument_token
-         )[0],
-        "hasLiveTarget",
-        true
-       );
-
-
-      this.cl( 'SETTING OF LIVE TARGET LIVE POS' )
- } 
-
-
-// this.$set( 
-//         this.instruments.filter( 
-//           ( i )  => i.instrument_token  ==  l.instrument_token
-//          )[0],
-//         "hasLivePosition",
-//         true
-//        );
-
-
-// this.cl( 'checkpoint 4c' );
-          
-        let hasLivetargetFromcis = cis.hasLiveTarget;
-   let hasLivePositionFromcis = cis.hasLivePosition;
-
- this.cl( 'here after haslivepos' )
-
-
- this.tradeEntryFlowStatus = 'HAS LIVE POSITION CHECK 7'
-
-        if (  hasLivePositionFromcis == true ) {                             
-
-       
-
-          let lpCurrent = this.livePositions.find( 
-            ( lp )  => lp.instrument_token  ==  cis.instrument_token
-           );
-// console.log( lpCurrent,'LP CURRENT' );
-
-
-
-let ln1 = this.livePositions.some( 
-            ( lp )  => lp.instrument_token  ==  cis.instrument_token
-           )
-          let average_price = -1
-
-          if( typeof lpCurrent!= 'undefined' ){ 
-
-
-            if( lpCurrent.quantity<0 ){ 
-              average_price = lpCurrent.sell_price
-
-             } else if( lpCurrent.quantity>0 ){ 
-
-              average_price = lpCurrent.buy_price
-             } 
-            
-
-           } else{ 
-
-            
-            this.cl( 'avaerage price not defined for',cis.tradingsymbol )
-            average_price = cis.pricePoints.d1.high;
-
-           } 
-          let tradingsymbol = cis.tradingsymbol;
-          this.currentTradingsymbolAverage = { instrument_token,tradingsymbol,average_price } 
-
-          // console.log( this.currentTradingsymbolAverage );
-
-
-          if( !ln1 ){ 
-
-
-          this.cl( 'live postition for script is zero' )
-
-           return false;
-           } 
-
-          let { bidPrice,offerPrice,count,stopLoss, target, lstPrice,livePnlOffered,quantity 
-            }  =  await  this.setTargetPricesBasedOnQuantity( cis,element,low,high,instrument_token )
-         
-
-        
-         
-
-     
-
-
-
-var { high,low }  = cis.pricePoints.d1;
-          
-
-let hasLiveTarget;
-          if ( count > 0 ) { 
-            hasLiveTarget  =  true;
-           }  else if ( count == 0 ) { 
-            hasLiveTarget  =  false;
-           } 
-
-
-                        //there is a live position
-
-          //check whether already a reverse order placed
-
-
-         
-
-
-let PlacedReverseOrder  =  this.instruments.find( 
-            ( i )  => i.instrument_token  ==  instrument_token
-           ).PlacedReverseOrder;
-
-
-        
-         
-          if ( hasLivePositionFromcis ==  true && 
-           hasLivetargetFromcis  ==  true ) { 
-
-                     
-           
-      
-
-
-              // console.log( livePnlOffered,'livePnlOffered',cis.tradingsymbol )
-
-
-              this.stopLossTargetSwitch( quantity,last_price,high,
-              low,bidPrice,
-              offerPrice,cis,element,livePnlOffered,lpCurrent )
-             
-       
-
-                       //return false;
-           }  else /// no live target or palced reverse order
-          
-          { 
-
-
-            this.cl( 'NO LIVE TARGETS FOR ',cis.tradingsymbol )
-            //think about placing a reverse order 
-
-            //check thoroughly 
-            
-            let lnLive = this.liveOrders.some( lo =>lo.instrument_token == instrument_token )
-        //  this.cl( 'talakalam onnum cheyyunilla no reverse order placed evide etthiyittum' )
-
-
-         if ( !lnLive ) { 
-
-if(( PlacedReverseOrder!= true  &&  hasLiveTarget !=  true )){ 
-
-  this.cl( 'iam return ning false @7217' )
-
-  if( this.manualReverseOrderStart == true ){ 
-
-
-
-    // let out  = await    this.placeTargetsForSingleScript( instrument_token,quantity )
-
-   } 
- return false;
- } 
-         
-        
-          
-           } 
-
-         
-           } 
-
-       
-         } 
-
-
-
-        this.cl( 'here before entre trade',cis.enterNowToTrade )
-        if ( cis.enterNowToTrade  ==  false ) { 
-
-
-           this.cl( 'inside trade entry after cis entry trade 8' )
-
-           this.tradeEntryFlowStatus = 'INSIDE ENTER NOW TO TRADE 8'
-
-//  this.cl( 'inside trade entry ' );
-let inst = cis;
-
-let isHigherLows = this.higherLowsCheck( cis );
-
-
-
-// this.cl( 'higher lows check',isHigherLows,cis.tradingsymbol )
-
-if( !isHigherLows ){ 
-
-
-  this.tradeEntryFlowStatus = 'HIGHER LOW CHECK FALSE 9'
-  return false
- } 
-
-
-this.cl( 'before hours chk 7812' )
-
-if( 
-  
-!( this.hours>9 || ( this.hours == 9 && this.minutes>15 )  )
-
-
- ){ 
-
-
-  this.tradeEntryFlowStatus = 'LESS THAN 10 HOURS NO TRADE ZONE 10'
-  this.cl( 'NO TRADING TIME' );
-
-  return;
- } 
-
-this.cl( 'reached before trade entry fn' )
-this.tradeEntry( instrument_token,inst,cis,element ) 
-
-// return ;
-       
-         } 
-
-     ///already palced order .... so check whte there is live position
-
-
-
-        
-      
-       }  );
-     } ,
 
     higherLowsCheck( cis ) { 
 

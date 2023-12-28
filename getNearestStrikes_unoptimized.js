@@ -25,19 +25,18 @@ function getNearestStrikes_unoptimized(ohlc, instruments) {
 				let symbol = item.split(':')[1];
 
 				// console.log( 'symbol', symbol )
-				let last_price_max = ohlc[item].last_price * 1.03;
-				let last_price_min = ohlc[item].last_price * 0.97;
+				
 
 				let last_price = ohlc[item].last_price;
 				let {nearestAbove,nearestBelow} = nearestMultiple(last_price,50);
 
 				if (symbol == 'NIFTY 50') {
-					let {nearestAbove,nearestBelow} = nearestMultiple(last_price,50)
+					
 					// console.log( 'NIFTY 50', last_price )
 				}
 				if (symbol == 'NIFTY BANK') {
 					// console.log( 'NIFTY BANK', last_price )
-					let {nearestAbove,nearestBelow} = nearestMultiple(last_price,25)
+					
 				}
 
 				let curInstrument = instruments.filter(
@@ -46,12 +45,17 @@ function getNearestStrikes_unoptimized(ohlc, instruments) {
 					i => {
 
 						if (symbol == 'NIFTY 50') {
+							let {nearestAbove,nearestBelow} = nearestMultiple(last_price,50)
 
+
+							console.log('nifty ',{nearestAbove,nearestBelow})
 							symbol = 'NIFTY';
 						}
 
 
 						if (symbol == 'NIFTY BANK') {
+
+							console.log('bank nifty ',{nearestAbove,nearestBelow})
 
 							symbol = 'BANKNIFTY';
 						}
@@ -60,77 +64,33 @@ function getNearestStrikes_unoptimized(ohlc, instruments) {
 					}
 
 				).filter(i => {
-					// console.log( 'i.name',i.name )
-
-					if (i.name == 'NIFTY') {
-						
-						// console.log( 'NIFTY', i.tradingsymbol, last_price )
-					}
-					if (i.name == 'BANKNIFTY') {
-						// console.log( 'NIFTY BANK', i.tradingsymbol, last_price )
-					}
-
-
+					
 
 					if (i.instrument_type == 'FUT') {
 
+
+						///adding both futures
 						if (i.name == 'NIFTY' || i.name == 'BANKNIFTY') {
 
-							// console.log( 'its future', i.tradingsymbol )
+							
 							return true;
 
 						}
 					}
 
-					// console.log( 'i.instrument_type',i.instrument_type )
-					if (i.instrument_type == 'CE') {
+					
+					if (i.instrument_type == 'CE' && i.strike==nearestAbove) {
 
-
-						/// if ce strike between 1.05 pc and 1.1 pc
-						//if pe between strike .95 to .9
-						//           console.log( "variable", variable );
-						// if ( i.strike < last_price_max && i.strike > last_price_min ) 
-						// let ce_upper_percentage = 1;
-						// let ce_lower_percentage = .97;
-						// if (i.strike > last_price * ce_lower_percentage &&
-						// 	i.strike < last_price * ce_upper_percentage)
-						// console.log( 'ceeeee yeee' )
-						
-						if(i.strike==nearestBelow)
-						
-						{
-
-
-							if (i.name == 'NIFTY') {
-								// console.log( 'NIFTY 50', i.tradingsymbol )
-							}
-							if (i.name == 'BANKNIFTY') {
-								// console.log( 'NIFTY BANK', i.tradingsymbol )
-							}
-
-							return true;
-						}
+					
+						return true
+					
 					}
 
-					else if (i.instrument_type == 'PE') {
+					else if (i.instrument_type == 'PE' && i.strike==nearestBelow) {
+return true;
+						
 
-						// console.log( 'pee yeee' )
-						// let pe_upper_percentage = 1.03;
-						// let pe_lower_percentage = 1;
-						// if ( i.strike < last_price_max && i.strike > last_price_min ) { 
-						// if (i.strike < last_price * pe_upper_percentage && i.strike > last_price * pe_lower_percentage) {
-							if(i.strike==nearestAbove){
-
-							if (i.name == 'NIFTY') {
-								// console.log( 'NIFTY 50', i.tradingsymbol )
-							}
-							if (i.name == 'BANKNIFTY') {
-								// console.log( 'NIFTY BANK', i.tradingsymbol )
-							}
-
-
-							return true;
-						}
+								
 					}
 
 				}).map(r => {
