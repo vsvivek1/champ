@@ -138,36 +138,8 @@ var instruments;
 
 var instrumentsAll;
 
-await  fetch( "../../../instruments/instrumentsForMining.json" )
-      .then(( response )  => response.json(  ))
-      .then(( data )  => 
-      { 
 
-
-        // console.log( data,'data1' )
-        instruments  =  data;
-       } 
-    
       
-      
-      
-       ); 
-
-
-      await  fetch( "../../../instruments/instrumentsAll.json" )
-      .then(( response )  => response.json(  ))
-      .then(( data )  => 
-      { 
-
-
-        // console.log( data,'data1' )
-        instrumentsAll  =  data;
-       } 
-    
-      
-      
-      
-       ); 
 
 
 
@@ -230,6 +202,50 @@ return prv+cur.gain
         name:'Tester',
 
         methods:{ 
+
+          subscribeToTicks(){
+            socket.on( "send-realtime-subscription", ( s )  => { 
+
+// this.generateSignals( s )
+
+this.gainers( s );
+this.CurrentTick  =  [...s];
+ }  );
+
+          },
+
+       async  initialFetch(){
+
+        await  fetch( "../../../instruments/instrumentsForMining.json" )
+      .then(( response )  => response.json(  ))
+      .then(( data )  => 
+      { 
+        this.fetchInstruments(  );
+        this.subscribeToTicks();
+        // console.log( data,'data1' )
+       } 
+    
+      
+      
+      
+       ); 
+
+
+      await  fetch( "../../../instruments/instrumentsAll.json" )
+      .then(( response )  => response.json(  ))
+      .then(( data )  => 
+      { 
+
+
+        // console.log( data,'data1' )
+        instrumentsAll  =  data;
+       } 
+    
+      
+      
+      
+       );   instruments  =  data;
+        },
 
           changeColor(  ) { 
       this.linkColor  =  "red";
@@ -1046,7 +1062,7 @@ columns: [
         mounted(  ){ 
 
 
-
+          initialFetch();
 
           setInterval(( i ) =>{ 
 
@@ -1083,18 +1099,12 @@ this.minuteEnd = true;
 
  } ,60*1000 )
 
-          this.fetchInstruments(  ); 
+           
           // this.generateSignals( [] )
        
              
 
- socket.on( "send-realtime-subscription", ( s )  => { 
 
-// this.generateSignals( s )
-
-this.gainers( s );
-this.CurrentTick  =  [...s];
- }  );
          } 
      } 
 </script>

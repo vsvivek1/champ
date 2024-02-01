@@ -645,8 +645,19 @@ getPreviousDate   =  (  date, daysAgo  )  => {
     let startDay;
 
     let sorted;
-      (  {  sorted, startDay  }    =  await this.fetchHistoricalData
-        (  durationType, startDay, duration, kc2  )  );
+
+try {
+  
+        (  {  sorted, startDay  }    =  await this.fetchHistoricalData
+          (  durationType, startDay, duration, kc2  )  );
+} catch (error) {
+
+  console.log(error);
+
+  return -1;
+
+  
+}
 
 
 
@@ -978,10 +989,14 @@ return new Promise.resolve(  {  }   );
 	
 	      return new Date(  a.date  ) - new Date(  b.date  );
 	     }   );
+
+
 	    return {  sorted, startDay  } ;
 	
 	
  }  catch (  error  ) { 
+
+
 	
 
   console.log(  'error @ 785',error  )

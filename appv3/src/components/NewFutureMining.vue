@@ -332,6 +332,8 @@ import {  placeTargetsForLiveScripts  }  from './placeTargetsForLiveScripts';
 import VueGoodTable from "vue-good-table";
 import "vue-good-table/dist/vue-good-table.css";
 
+import instantiateHistoricalDataFetchMixin from './instantiateHistoricalDataFetchMixin';
+
 
 
 
@@ -439,6 +441,17 @@ export default {
   
 mounted(){ 
 
+  // console.log(this.instrumentTokens,'this.instrumentTokens')
+
+  
+
+  // setInterval(()=>{
+
+   
+
+
+  // },1000)
+
 
   const currentDate  =  new Date().toISOString().split( 'T' )[0];
     const existingData  =  JSON.parse( localStorage.getItem( currentDate ))
@@ -456,6 +469,7 @@ mounted(){
      } ;
 
   this.fetchInstruments(); 
+
 
   setInterval(() =>{ 
 
@@ -657,12 +671,14 @@ if( this.hours == 15 ){
 
          if( this.seconds == 55 ){ 
 
-          this. getOneMinuteData()
+          // this. getOneMinuteData()
 
-          console.log( 'ohlc data at 53 sec',this.ohlcData )
+console.log(this.instrumentTokens);
+          this.initiateHistoricalDataFetch(this.instrumentTokens);
+          console.log( 'ohlc data at 53 sec',this.ohlcData, this.accessToken )
           }  
 
-          } ,1000 )
+          } ,10000 )
      
          let placingTimer  =  window.setInterval( async ()  => { 
      
@@ -808,7 +824,7 @@ if( this.hours == 15 ){
 
 
 
-  mixins: [mutateWithLtp,getRequiredTimeMixin,newFutureMiningMixin,sessionMixin,tradingMixin,placeTargetsForLiveScripts,telegramMixin],
+  mixins: [instantiateHistoricalDataFetchMixin,mutateWithLtp,getRequiredTimeMixin,newFutureMiningMixin,sessionMixin,tradingMixin,placeTargetsForLiveScripts,telegramMixin],
 
 
 
@@ -1037,17 +1053,24 @@ if( typeof this.livePositions  == 'undefined'  ){
            } ,
 
     getOneMinuteData(){ 
+
+      return;
 let intervel = 'minute';
-      this.getHistoricalData( intervel )
+      // this.getHistoricalDataForCustomDuration( intervel )
+
+      console.log(this.instrumentTokens);
+
+
+      // this.initiateHistoricalDataFetch(this.instrumentTokens)
      } ,
 
 
-    async getHistoricalData( intervel ){ 
+    async getHistoricalData( intervel,symbol ){ 
 
       let start  = this.getRequiredTime( 9,15 );
        let end  = this.getRequiredTime( 15,31 );
       //  let intervel = 'minute';
-      let url = "/api/getHistoricalData/symbol/"+ this.symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
+      let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
 
 // console.log( url )
 let resultPromise =  await  axios.get( url );
@@ -6005,6 +6028,8 @@ new Promise( async ( res,rej ) =>{
         this.instruments  =  response.data;
  instruments = this.instruments;
   this.setInstrumentTokens()
+
+  this.initiateHistoricalDataFetch(this.instrumentTokens )
        }  )
       .catch( error  => { 
         console.log( error );

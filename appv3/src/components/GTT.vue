@@ -4,15 +4,15 @@
 
 
 
-<v-btn @click = "deleteGTT( 1 )"></v-btn>
+<v-btn @click = "deleteGTT( 1 )">Delete GTT</v-btn>
 
     <input type = "text" v-model = "gttAmountPerManualOrder" name = "" id = "" class = "form-control">
 
     <v-chip>Total {{ stocksPricePointsFiltered.length }} </v-chip>   
 
-     <v-btn 
+     <v-btn :color="'green'" 
      :loading = "getStockPricePointsLoader"
-     @click = "getStockPricePoints(  )">get </v-btn>
+     @click = "getStockPricePoints(  )">GET GTT </v-btn>
      
     <table
     v-if = "stocksPricePointsFiltered.length"
@@ -104,13 +104,17 @@
 </template>
 
 <script>
-import {  io  }  from "socket.io-client";
-import axios from 'axios';
-
-
-
 import sessionMixin from "@/views/sessionMixin";
-const socket  =  io( "http://localhost:4000" );
+import {  io  }  from "socket.io-client";
+import axios from "axios";
+
+import PlaceGttOrderForThisPrice  from './PlaceGttOrderForThisPrice';
+
+
+
+export const socket  =  io( "http://localhost:4000" );
+
+
 
 
     export default { 
@@ -351,38 +355,11 @@ this.CurrentGttList.
 
              } ,
 
-PlaceGttOrderForThisPrice( stockPpItem,level ){ 
+             PlaceGttOrderForThisPrice( stockPpItem,level){
 
-console.log( stockPpItem,level );
+PlaceGttOrderForThisPrice(stockPpItem,level,this.accessToken)
 
-let ob = {  } ;
-
-ob.params = {  } ;
-
-ob.accessToken = this.accessToken;
-
-ob.params.tradingsymbol = stockPpItem.tradingsymbol;
-ob.params.exchange = stockPpItem.exchange;
-ob.params.trigger_values = [level];
-ob.params.last_price = stockPpItem.last_price;
-
-
-
-console.log( JSON.stringify( ob.params ),'ob params' );
-let order = {  } ;
-order.transaction_type = 'BUY'
-order.quantity = ( this.gttAmountPerManualOrder/level ).toFixed( 0 )
-order.product = 'CNC'
-order.order_type = 'LIMIT'
-order.price = level;
-
-ob.params.orders = [order]
-
-let url = "/api/PlaceGTT";
-axios.post( url,ob ).then( r =>console.log( r,'response' ))
-
-
- } ,
+             } ,
 
 
             mutateWithLtp( s ){ 
@@ -419,12 +396,15 @@ socket.emit( "subscribe-GTT", JSON.stringify( this.instrumentTokens ));
 let ar = stockPpItem.pricePoints.pricePoints;
 
 
-// let instrument = this.instrument.
-// filter( r =>r.instrument_token == instrument_token  )[0];
 
-if( typeof stockPpItem.pricePoints == 'undefined' ) return false;
-if( typeof stockPpItem.pricePoints.d1 == 'undefined' ) return false
-if( typeof stockPpItem.pricePoints.d1.close == 'undefined' ) return false;
+
+if (
+    !stockPpItem.pricePoints ||
+    !stockPpItem.pricePoints.d1 ||
+    typeof stockPpItem.pricePoints.d1.close === 'undefined'
+  ) {
+    return false;
+  }
 
 
 
@@ -436,9 +416,7 @@ return ar.map( r =>r.high || r.level
   .map(( r,index,ar ) =>{ 
 
 
-// console.log( r,refPrice,ar[index+1] )
-let upperlevelCheck;
-let lowerlevelCheck;
+
 if( typeof ar[index+1] == 'undefined' ){ 
 
 
@@ -480,9 +458,11 @@ return ob;
 let url = "/api/GTT"
 let ob = {  } ;
 ob.accessToken = this.accessToken;
+
+
 axios.post( url,ob ).then(  ( r )  => { 
 
-
+console.log(r,'r');
     r.data.forEach( r1 =>{ 
 let a = this.getLevels( r1 );
 r1.supportLevels = a;

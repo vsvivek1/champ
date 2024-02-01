@@ -1,12 +1,11 @@
 "use strict";
 const TIMER=501;
 require('dotenv').config({path:'../../findiserver/.env'});
-const Path = require('path');
-const Fs = require('fs')
 
 let moment=require('moment');
 const mongoose=require('mongoose');
 let AccesTocken=require('../models/AccessTokens');
+const { writeFinalScriptsTofile } = require('./writeFinalScriptsTofile');
 
 
 
@@ -19,7 +18,7 @@ class Gtt {
         this.instruments=require('../appv3/public/instruments/instrumentsAll.json');
 
      let tmp =this.getGttStocks();
-        this.stocks=tmp//.slice(1,100)
+        this.stocks=tmp  //.slice(1,100)
 
         this.accessToken;
 
@@ -56,7 +55,7 @@ let result=[]
   
         return new Promise(async (res,rej)=>{
 
-try {
+// try {
                 const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
                 let mongo=await mongoose.connect(uri,{ useNewUrlParser: true, useUnifiedTopology: true });
                 
@@ -124,8 +123,15 @@ try {
             pp.initiateKiteConnect();
             
     
-            let pp2=await pp.getPricePoints()
-            instrument.pricePoints=pp2
+           try {
+             let pp2=await pp.getPricePoints()
+             instrument.pricePoints=pp2
+           } catch (error) {
+
+            console.error(error,'some error @131')
+            return;
+            
+           }
     
             if(nifty.includes(tradingsymbol)){
                 instrument.group='NIFTY'
@@ -141,18 +147,11 @@ try {
     
     
     }
-} catch (error) {
+} 
 
 
-    console.log('promise rejection error',error)
-    rej(error)
+
     
-}
-   
-
-
-
-    }
 
     )
 
@@ -164,85 +163,31 @@ try {
 
 
 
-async function writeFinalScriptsTofile(result){
-
-
-    return new Promise(async (res,rej)=>{
-  
-        let today = new Date().toISOString().slice(0, 10);
-   
-  
-  let fileOutputName = './'+'pricePoints_'+today+'.json';
-  let targetDir = Path.join(__dirname, '/../pricePoints/'+'pricePoints_'+today+'.json');
-  
-  let out=await createAndMoveFileFromJson(fileOutputName,result,
-    targetDir);
-  
-  
-  
-  res(out)
-  
-  
-  
-  
-  
-                })
-  
-  }
-  
-  
-  
-  function createAndMoveFileFromJson(fileOutputName,jsonObj2,targetDir){
-  
-  return new Promise((res,rej)=>{
-  
-  
-  
-  
-    Fs.writeFile(fileOutputName, JSON.stringify(jsonObj2), 'utf8',
-  
-  function (err) {    
-                    if (err) {
-                    console.log("An error occured while writing JSON Object to File.");
-                    return console.log(err);
-                    }
-                     console.log(fileOutputName+"JSON file has been saved.");
-  
-  
-                  Fs.copyFile(fileOutputName, targetDir, 
-                  (err) => {
-                            if (err) throw err;
-                            console.log('source.txt was copied to destination.txt');
-                            });
-  
-  
-  
-  
-                            res(true);
-  
-                  });
-  
-  
-                })
-    
-  }
-
-
-
-
-
-try{
+  try {
     // const element = array[index];
-    let n=new Gtt();
-    
-    let n2=n.getGttStocks();
-    
-    n.getPricePointsOfStocks()
-}catch(e){
+    (async () => {
+    // Assuming Gtt class is defined
+    let n = new Gtt();
+
+    // Check if the method exists before calling it
+    if (typeof n.getGttStocks === 'function') {
+        let n2 = n.getGttStocks();
+        console.log(n2);
+
+        // Assuming getPricePointsOfStocks is an asynchronous method, use async/await
+        await n.getPricePointsOfStocks();
 
 
-    console.log('GETTING SOME ERROR',e)
+    } else {
+        console.log('getGttStocks method not found on the instance');
+    }
+
+})();
+
+} catch (e) {
+    console.log('GETTING SOME ERROR', e);
 }
+
 
 
 // console.log(n2)

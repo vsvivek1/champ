@@ -1,38 +1,50 @@
+const mar = function checkMarubozo(element) {
+  element.ohlc === element.ohlc.low &&
+    (element.last_price * 1.1 <= element.ohlc.high || element.last_price === element.ohlc.high) &&
+    this.hours >= 14;
+
+  if (mar) {
+    this.cl('MARUBOZU CANDLE FOR', cis.tradingsymbol);
+  }
+}
+
 const mutateWithLtp = {
     methods: {
       async mutateWithLtp(s) {
         this.heartBeatAndCurrentCheckDigit();
+
   
         if (this.hasStartedGetOrders || this.hasStartedGetLivePositions || this.refreshingTradeStatus) {
           this.tradeEntryFlowStatus = 'updating various status on Mount 1';
-          this.cl('various status updates mutate ltp 16');
+          this.cl('UPDATING VARIOS STATUS  ... NO TRADE TIME');
           return false;
         }
   
         for (const element of s) {
+
+
           if (!element || !element.instrument_token) {
             this.tradeEntryFlowStatus = 'Element null 4';
+
+            this.cl('ELEMENET EMPTY');
+            
             return false;
           }
   
           this.tradeEntryFlowStatus = 'Inside mutate with ltp 3';
           const instrument_token = element.instrument_token;
+         
+         
           let cis = this.instruments.find(i => i.instrument_token === instrument_token);
   
           if (typeof cis === 'undefined') {
             this.tradeEntryFlowStatus = 'CIS undefined 5';
-            this.cl('cis undefined', instrument_token);
+            this.cl('CIS ELEMENT NOT FOUND ISSUE QUITING THIS TICK',instrument_token)
             await this.updateMissingScriptInInstrumetsFile(JSON.stringify([instrument_token]));
             return false;
           }
-  
-          const mar = element.ohlc === element.ohlc.low &&
-            (element.last_price * 1.1 <= element.ohlc.high || element.last_price === element.ohlc.high) &&
-            this.hours >= 14;
-  
-          if (mar) {
-            this.cl('MARUBOZU CANDLE FOR', cis.tradingsymbol);
-          }
+          checkMarubozo(element)
+       
   
           this.currentTradingsymbol = cis.tradingsymbol;
           const lp1 = element.last_price;
@@ -125,20 +137,23 @@ const mutateWithLtp = {
           if (cis.enterNowToTrade === false) {
             this.tradeEntryFlowStatus = 'INSIDE ENTER NOW TO TRADE 8';
             let inst = cis;
-            let isHigherLows = this.higherLowsCheck(cis);
+            
+            // let isHigherLows = this.higherLowsCheck(cis);
   
-            if (!isHigherLows) {
-              this.tradeEntryFlowStatus = 'HIGHER LOW CHECK FALSE 9';
-              return false;
-            }
+            // if (!isHigherLows) {
+            //   this.tradeEntryFlowStatus = 'HIGHER LOW CHECK FALSE 9';
+            //   return false;
+            // }
   
-            if (!(this.hours > 9 || (this.hours === 9 && this.minutes > 15))) {
-              this.tradeEntryFlowStatus = 'LESS THAN 10 HOURS NO TRADE ZONE 10';
-              this.cl('NO TRADING TIME');
-              return;
-            }
+            // if (!(this.hours > 9 || (this.hours === 9 && this.minutes > 15))) {
+            //   this.tradeEntryFlowStatus = 'LESS THAN 10 HOURS NO TRADE ZONE 10';
+            //   this.cl('NO TRADING TIME');
+            //   return;
+            // }
   
-            this.tradeEntry(instrument_token, inst, cis, element);
+
+            console.log('BEFORE TRADE ENTRY MUTATE');
+            // this.tradeEntry(instrument_token, inst, cis, element);
           }
         }
       },

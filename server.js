@@ -10,6 +10,7 @@ let AccesTocken=require('./models/AccessTokens');
 let  Enable=true;
 let ProxyTrade=false;
 const cors = require('cors')
+const pgRoutes = require('./postgresDB/pg_routes.js');
 
 const NseApi=require('./scraping/nse');
 
@@ -73,7 +74,7 @@ app.use(express.static(path.join(__dirname, './appv3/dist')));
 // app.use(express.static('files'))
 
 
-
+app.use('/postgres', pgRoutes);
 
 let NarrowRange=require('./models/NarrowRange');
 
@@ -465,13 +466,13 @@ console.log(out,'gtt deletion')
 })
 app.post('/api/GTT',async (req,res)=>{
 console.log('gtt')
-  let today = new Date().toISOString().slice(0, 10);
-  let fileName = './'+'pricePoints_'+today+'.json';
+  // let today = new Date().toISOString().slice(0, 10);
+  let fileName = '/'+'pricePoints.json';
     
   try {
     let pp=0;
-     pp=require('./pricePoints/'+fileName)
-     console.log(pp)
+     pp=require('./pricePoints'+fileName)
+    //  console.log(pp)
 
  res.send(pp)
     
@@ -678,7 +679,7 @@ app.post('/api/PlaceGTT', async (req,res) => {
  let accessToken=req.body.accessToken;
 
 
- print(params);
+//  print(params);
  
 try {
   var kc = new KiteConnect({
@@ -686,7 +687,15 @@ try {
     access_token: accessToken,
     debug:True
   });
+
+  // kc.GTT_STATUS_ACTIVE
+
+  
   params.trigger_type=kc.GTT_TYPE_SINGLE;
+
+  params.orders.order_type=kc.ORDER_TYPE_LIMIT;
+
+  console.log(params,'here');
 
 
 
@@ -1151,9 +1160,9 @@ console.log('start',start,'end',end,intervel)
   try {
 
     console.log(symbol,intervel,start,end)
-    let result= await kc.getHistoricalData(symbol,intervel,start,end);
+    let result= await kc.getHistoricalData(symbol,intervel,start,end,0,1);
 
-    console.log('result',result)
+    // console.log('result',result)
 
 //    let date=result[0].date
 
@@ -1165,11 +1174,11 @@ console.log('start',start,'end',end,intervel)
 
 
 // }
-  console.log('result',result)
+  // console.log('result',result)
 res.send(result);
     
   } catch (error) {
-    console.log('errir',error); 
+    console.log(`GET HISTOTICAL DATE ERROR FOR SYMBOL ${symbol}`,error); 
   }
    
 
