@@ -19,10 +19,11 @@ const mutateWithLtp = {
           this.cl('UPDATING VARIOS STATUS  ... NO TRADE TIME');
           return false;
         }
-  
-        for (const element of s) {
 
+      //  console.log(s);
+        for (let element of s) {
 
+                  // console.log(element)
           if (!element || !element.instrument_token) {
             this.tradeEntryFlowStatus = 'Element null 4';
 
@@ -31,11 +32,17 @@ const mutateWithLtp = {
             return false;
           }
   
+          
+
           this.tradeEntryFlowStatus = 'Inside mutate with ltp 3';
           const instrument_token = element.instrument_token;
          
          
-          let cis = this.instruments.find(i => i.instrument_token === instrument_token);
+
+          
+          let cis = this.instruments.find(i => i.instrument_token == instrument_token);
+
+          console.log(this.instruments,instrument_token,'42',cis)
   
           if (typeof cis === 'undefined') {
             this.tradeEntryFlowStatus = 'CIS undefined 5';
@@ -43,8 +50,9 @@ const mutateWithLtp = {
             await this.updateMissingScriptInInstrumetsFile(JSON.stringify([instrument_token]));
             return false;
           }
-          checkMarubozo(element)
+  //  checkMaru
        
+  // checkMarubozo(element)
   
           this.currentTradingsymbol = cis.tradingsymbol;
           const lp1 = element.last_price;
@@ -62,15 +70,19 @@ const mutateWithLtp = {
           const last_price = element.last_price;
           this.setPreviousPriceAndLastPrice(instrument_token, last_price);
   
-          const { msg, bs } = this.basicCheckers(element, cis, instrument_token, last_price);
+
+
+
+          //// NOT REQUIRED SINCE BASIC CHECKERS USES EVERTY THING EXCEPT UPDATING INSTRUMENTS FILE
+          // const { msg, bs } = this.basicCheckers(element, cis, instrument_token, last_price);
   
-          if (!bs) {
-            this.tradeEntryFlowStatus = 'BASIC CHECKERS FALSE 6';
-            if (msg !== 'cis.previousPrice') {
-              this.cl('basic cehckes issue', cis.tradingsymbol, instrument_token, cis.last_price, cis.previousPrice, msg);
-            }
-            return false;
-          }
+          // if (!bs) {
+          //   this.tradeEntryFlowStatus = 'BASIC CHECKERS FALSE 6';
+          //   if (msg !== 'cis.previousPrice') {
+          //     this.cl('basic cehckes issue', cis.tradingsymbol, instrument_token, cis.last_price, cis.previousPrice, msg);
+          //   }
+          //   return false;
+          // }
   
           let livePosObject = this.livePositions.find(lp => lp.instrument_token === instrument_token);
           let liveOrderObj = this.liveOrders.find(lo => lo.instrument_token === instrument_token);
@@ -134,6 +146,7 @@ const mutateWithLtp = {
             }
           }
   
+          console.log('element here 142');
           if (cis.enterNowToTrade === false) {
             this.tradeEntryFlowStatus = 'INSIDE ENTER NOW TO TRADE 8';
             let inst = cis;

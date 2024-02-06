@@ -6,7 +6,7 @@
 
 <v-btn @click = "deleteGTT( 1 )">Delete GTT</v-btn>
 
-    <input type = "text" v-model = "gttAmountPerManualOrder" name = "" id = "" class = "form-control">
+    <input type = "text" v-model ="gttAmountPerManualOrder" name = "" id = "" class = "form-control">
 
     <v-chip>Total {{ stocksPricePointsFiltered.length }} </v-chip>   
 
@@ -31,7 +31,7 @@
             <span class = "text-primary" v-if = "typeof stockPpItem.group!= 'undefined' ">{{ stockPpItem.group }} </span>
             <a target = "_blank" :href = "stockPpItem.chart">
             
-            {{ stockPpItem.tradingsymbol }} </a>
+            {{ stockPpItem.tradingsymbol }} </a> <span>{{ stockPpItem.last_price }}</span>
             
 <span v-if = "typeof stockPpItem.gttData!== 'undefined' ">
             <b class = "bg-success" 
@@ -357,7 +357,7 @@ this.CurrentGttList.
 
              PlaceGttOrderForThisPrice( stockPpItem,level){
 
-PlaceGttOrderForThisPrice(stockPpItem,level,this.accessToken)
+PlaceGttOrderForThisPrice(stockPpItem,level,this.gttAmountPerManualOrder,this.accessToken)
 
              } ,
 

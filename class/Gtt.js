@@ -10,6 +10,22 @@ const { writeFinalScriptsTofile } = require('./writeFinalScriptsTofile');
 
 
 // {path:__dirname+'/./../'}
+
+// import {getStockPricePoints,
+//     getLevels,
+//     getGTTS,
+//     deleteGTT,
+//     mutateWithLtp,
+//     startSockets,
+//     getPercentage,
+//     getCurrentGttList,
+//     getCurrentTick,
+//     getStocksPricePointsFiltered,
+//     getUpperShadowGreaterThanBody,
+//     getReds,
+//     getGreens,
+//     getGttAmountPerManualOrder,
+//     getStockPricePointsLoader,} from '../appv3/src/components/gttComponent.js'
 class Gtt {
 
     constructor() {
@@ -18,7 +34,7 @@ class Gtt {
         this.instruments=require('../appv3/public/instruments/instrumentsAll.json');
 
      let tmp =this.getGttStocks();
-        this.stocks=tmp  //.slice(1,100)
+        this.stocks=tmp  .slice(1,100)
 
         this.accessToken;
 
@@ -126,6 +142,15 @@ let result=[]
            try {
              let pp2=await pp.getPricePoints()
              instrument.pricePoints=pp2
+
+             console.log(pp2);
+
+            //  instrument.pricePoints.forEach(r1 => {
+            //     const supportLevels = getLevels(r1);
+            //     r1.supportLevels = supportLevels;
+            //   });
+
+
            } catch (error) {
 
             console.error(error,'some error @131')

@@ -1436,6 +1436,8 @@ return { entry,target,stopLoss } ;
       console.log( result.toLocaleUpperCase())
         this.globalConsoleLogs.push( result );
 
+        return false;
+
         const currentDate  =  new Date().toISOString().split( 'T' )[0]; // Get the current date in "yyyy-mm-dd" format
       const timestamp  =  new Date().getTime(); // Get the current timestamp
       const existingData  =  JSON.parse( localStorage.getItem( currentDate )) || {  } ;

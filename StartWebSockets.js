@@ -84,7 +84,7 @@ module.exports=function StartWebSockets(socket,io,access_token){
         var items =JSON.parse(r);
     
     //    console.log({items})
-        // console.log('hre',ticker);
+       console.log('hre',ticker);
     
       // console.log(ticker.connected(),'ticker.connected')
         ticker.on("connect", ()=>{

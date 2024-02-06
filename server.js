@@ -684,8 +684,8 @@ app.post('/api/PlaceGTT', async (req,res) => {
 try {
   var kc = new KiteConnect({
     api_key: api_key,
-    access_token: accessToken,
-    debug:True
+    access_token: accessToken
+    // debug:True
   });
 
   // kc.GTT_STATUS_ACTIVE
@@ -1143,7 +1143,7 @@ let start=req.params.start.replace(/T|Z|\.\d{3}/g, ' ').trim();
 let end=req.params.end.replace(/T|Z|\.\d{3}/g, ' ').trim();
 let intervel=req.params.intervel;
 
-console.log('start',start,'end',end,intervel)
+// console.log('start',start,'end',end,intervel)
 
 
 

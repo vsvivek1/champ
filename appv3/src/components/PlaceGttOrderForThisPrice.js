@@ -1,4 +1,5 @@
-export default function PlaceGttOrderForThisPrice( stockPpItem,level,accessToken){ 
+import axios from 'axios';
+export default function PlaceGttOrderForThisPrice( stockPpItem,level,gttAmountPerManualOrder,accessToken){ 
 
     console.log( stockPpItem,level );
     
@@ -18,7 +19,7 @@ export default function PlaceGttOrderForThisPrice( stockPpItem,level,accessToken
     console.log( JSON.stringify( ob.params ),'ob params' );
     let order = {  } ;
     order.transaction_type = 'BUY'
-    order.quantity = ( this.gttAmountPerManualOrder/level ).toFixed( 0 )
+    order.quantity = ( gttAmountPerManualOrder/level ).toFixed( 0 )
     order.product = 'CNC'
     order.order_type = 'LIMIT'
     order.price = level;
