@@ -166,7 +166,7 @@ const mutateWithLtp = {
   
 
             console.log('BEFORE TRADE ENTRY MUTATE');
-            // this.tradeEntry(instrument_token, inst, cis, element);
+             this.tradeEntry(instrument_token, inst, cis, element);
           }
         }
       },
