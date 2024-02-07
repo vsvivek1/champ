@@ -68,7 +68,7 @@ export default {
             const now = new Date();
             const seconds = now.getSeconds();
             const millisecondsToNextMinute = (60 - seconds) * 1000; // Time until next minute
-            setTimeout(() => this.initiateHistoricalDataFetch(symbolList), millisecondsToNextMinute + 5000);
+            setTimeout(() => this.initiateHistoricalDataFetch(symbolList), millisecondsToNextMinute + 50000);
           }
         };
   

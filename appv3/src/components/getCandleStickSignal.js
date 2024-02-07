@@ -50,7 +50,7 @@ function getCandlestickSignal(ohlcData) {
     }
   
 
-    console.log('funtion called f5');
+   
     // Evening Star
     if (ohlcData.length >= 3) {
       const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - 3];
@@ -105,7 +105,7 @@ function getCandlestickSignal(ohlcData) {
         return { signal: 's', target: low - (high - low), stoploss: high + (high - low) };
       }
     }
-  
+    // console.log('funtion called f5');
     return { signal: 'No signal detected' };
   }
   

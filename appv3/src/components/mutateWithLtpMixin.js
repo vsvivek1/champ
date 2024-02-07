@@ -42,9 +42,10 @@ const mutateWithLtp = {
           
           let cis = this.instruments.find(i => i.instrument_token == instrument_token);
 
-          console.log(this.instruments,instrument_token,'42',cis)
+          
   
-          if (typeof cis === 'undefined') {
+          if (typeof cis == 'undefined') {
+            // console.log(this.instruments,instrument_token,'42',cis)
             this.tradeEntryFlowStatus = 'CIS undefined 5';
             this.cl('CIS ELEMENT NOT FOUND ISSUE QUITING THIS TICK',instrument_token)
             await this.updateMissingScriptInInstrumetsFile(JSON.stringify([instrument_token]));
@@ -146,7 +147,7 @@ const mutateWithLtp = {
             }
           }
   
-          console.log('element here 142');
+         this.cl('element here 142 from mutate with ltp mixin');
           if (cis.enterNowToTrade === false) {
             this.tradeEntryFlowStatus = 'INSIDE ENTER NOW TO TRADE 8';
             let inst = cis;
@@ -165,7 +166,7 @@ const mutateWithLtp = {
             // }
   
 
-            console.log('BEFORE TRADE ENTRY MUTATE');
+            this.cl('BEFORE TRADE ENTRY MUTATE');
              this.tradeEntry(instrument_token, inst, cis, element);
           }
         }

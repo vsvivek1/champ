@@ -476,7 +476,7 @@ this.getStockPricePointsLoader = false;
 
 this.startSockets(  )
 
-this.getGTTS(  )
+// this.getGTTS(  )
     // console.log( r.data,'r.data' )
     // . 
     // sort(( a,b ) =>b.profitPc-a.profitPc )
