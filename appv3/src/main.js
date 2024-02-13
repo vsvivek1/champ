@@ -64,6 +64,12 @@ Vue.use( sessionMixin );
 
 Vue.config.productionTip = false
 
+// import InstrumentsStatusView from './components/InstrumentsStatusView.vue'; // Adjust the path as needed
+
+// // const app = createApp(App);
+
+// app.component('InstrumentsStatusView', InstrumentsStatusView);
+
 
 
 
@@ -153,15 +159,23 @@ if( r ){
 //  } ,
 
 // vuetify,
-new Vue( { 
 
 
+import InstrumentsStatusView from './components/InstrumentsStatusView.vue'; // Adjust the path as needed
+
+// const app = createApp(App);
+
+// app.component('InstrumentsStatusView', InstrumentsStatusView);
 
 
-  router,
-  store,
-  vuetify,
- 
-  render: h => h( App)
- } ).$mount( '#app')
+Vue.component('InstrumentsStatusView', InstrumentsStatusView);
+
+// Create a new Vue instance
+new Vue({
+  el: '#app', // Mount point in the DOM
+  router, // Inject router
+  store, // Inject store
+  vuetify, // Inject vuetify
+  render: h => h(App) // Render the App component
+});
 

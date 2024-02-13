@@ -1137,7 +1137,10 @@ Promise.all(r).then(values=>{
  
 
 app.get('/api/getHistoricalData/symbol/:symbol/accessToken/:accessToken/start/:start/end/:end/intervel/:intervel', async (req, res) => {
-let accessToken=req.params.accessToken;
+
+
+
+  let accessToken=req.params.accessToken;
 let symbol=req.params.symbol;
 let start=req.params.start.replace(/T|Z|\.\d{3}/g, ' ').trim();
 let end=req.params.end.replace(/T|Z|\.\d{3}/g, ' ').trim();
@@ -1162,6 +1165,13 @@ let intervel=req.params.intervel;
     console.log(symbol,intervel,start,end)
     let result= await kc.getHistoricalData(symbol,intervel,start,end,0,1);
 
+
+    result.forEach(r=>{
+
+
+      r.IST=convertToIndianTime(r.date);
+
+    })
     // console.log('result',result)
 
 //    let date=result[0].date
@@ -1338,7 +1348,18 @@ io.on('connection',socket=>{
 
 const proxyTrade=require('./proxyTrade') ;
 
+function convertToIndianTime(utcTimeString) {
+  // Create a Date object from the UTC time string
+  const utcDate = new Date(utcTimeString);
 
+  // Set the time zone to Indian Standard Time (IST)
+  const options = { timeZone: 'Asia/Kolkata' };
+
+  // Format the date and time using IST
+  const indianTimeString = utcDate.toLocaleString('en-IN', options);
+
+  return indianTimeString;
+}
 
   
     

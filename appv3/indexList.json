@@ -1,0 +1,134 @@
+[
+    {
+        "Trading_Index_Name": "Nifty%20Pvt%20Bank",
+        "Index_long_name": "Nifty%20Private%20Bank"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20200",
+        "Index_long_name": "Nifty%20200"
+    },
+    {
+        "Trading_Index_Name": "Nifty%2050",
+        "Index_long_name": "Nifty%2050"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20500",
+        "Index_long_name": "Nifty%20500"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Auto",
+        "Index_long_name": "Nifty%20Auto"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Bank",
+        "Index_long_name": "Nifty%20Bank"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Commodities",
+        "Index_long_name": "Nifty%20Commodities"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Consumption",
+        "Index_long_name": "Nifty%20India%20Consumption"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20CPSE",
+        "Index_long_name": "Nifty%20CPSE"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Div%20Opps%2050",
+        "Index_long_name": "Nifty%20Dividend%20Opportunities%2050"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Energy",
+        "Index_long_name": "Nifty%20Energy"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Fin%20Service",
+        "Index_long_name": "Nifty%20Financial%20Services"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20FMCG",
+        "Index_long_name": "Nifty%20FMCG"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20GrowSect%2015",
+        "Index_long_name": "Nifty%20Growth%20Sectors%2015"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Infra",
+        "Index_long_name": "Nifty%20Infrastructure"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20IT",
+        "Index_long_name": "Nifty%20IT"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Media",
+        "Index_long_name": "Nifty%20Media"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Metal",
+        "Index_long_name": "Nifty%20Metal"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Mid%20Liq%2015",
+        "Index_long_name": "Nifty%20Midcap%20Liquid%2015"
+    },
+    {
+        "Trading_Index_Name": "NIFTY%20MIDCAP%20100",
+        "Index_long_name": "NIFTY%20Midcap%20100"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Midcap%2050",
+        "Index_long_name": "Nifty%20Midcap%2050"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20MNC",
+        "Index_long_name": "Nifty%20MNC"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Next%2050",
+        "Index_long_name": "Nifty%20Next%2050"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Pharma",
+        "Index_long_name": "Nifty%20Pharma"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20PSE",
+        "Index_long_name": "Nifty%20PSE"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20PSU%20Bank",
+        "Index_long_name": "Nifty%20PSU%20Bank"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20100",
+        "Index_long_name": "Nifty%20100"
+    },
+    {
+        "Trading_Index_Name": "NIFTY100%20QUALTY30",
+        "Index_long_name": "Nifty100%20Quality%2030"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Realty",
+        "Index_long_name": "Nifty%20Realty"
+    },
+    {
+        "Trading_Index_Name": "Nifty%20Serv%20Sector",
+        "Index_long_name": "Nifty%20Services%20Sector"
+    },
+    {
+        "Trading_Index_Name": "NIFTY%20SMLCAP%20100",
+        "Index_long_name": "Nifty%20Smallcap%20100"
+    },
+    {
+        "Trading_Index_Name": "Nifty100%20Liq%2015",
+        "Index_long_name": "Nifty100%20Liquid%2015"
+    },
+    {
+        "Trading_Index_Name": "Nifty50%20Div%20Point",
+        "Index_long_name": "Nifty50%20Div%20Point"
+    }
+]

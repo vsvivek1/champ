@@ -3,7 +3,7 @@
 
     <v-btn color = "red" prominent @click = "exitPositions()"> Exit all</v-btn>
 
-    <sideWiseAlerts :checkSidewaysMovementTime="checkSidewaysMovementTime" />
+    <!-- <sideWiseAlerts :checkSidewaysMovementTime="checkSidewaysMovementTime" /> -->
 
     
     <MarginView  v-if="liveMargin!=-1" :totalOptionPrice="totalOptionPrice" :liveMargin="liveMargin" />
@@ -14,7 +14,41 @@
     <button class = "btn-primary" > toggle  view logs</button>
    
    
-    <LogsView :logs="logs" :viewLogs="viewLogs" />
+    <!-- <LogsView :logs="logs" :viewLogs="viewLogs" /> -->
+
+<!-- {{ instruments[0].minuteCandle.data}} -->
+    
+    <div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Trading Symbol</th>
+          <th>Last Price</th>
+          <th>LTP>YDAY HIGH</th>
+          <th>LTP > OPEN</th>
+          <th>candle details</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="(instrument, index) in instruments" :key="index">
+          <td>{{ instrument.tradingsymbol }}</td>
+          <td>{{ instrument.last_price }}
+          
+          <!-- {{ instrument.minuteCandle }} -->
+          </td>
+          <td>{{ instrument.last_price>instrument.pricePoints.d1.high }}</td>
+          
+          <td v-if="typeof instrument.minuteCandle!='undefined'">
+          
+          {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length-1].IST }}ist
+          {{ instrument.minuteCandle.signal.CandleColor}}
+       </td>
+       </tr>
+      </tbody>
+    </table>
+  </div>
+
+    <!-- <InsrtumentsStatusView :instruments="instruments"></InsrtumentsStatusView> -->
     instruments len{{  instruments.length  }} 
     tradeEntryFlowStatus {{  tradeEntryFlowStatus  }} 
 
@@ -326,7 +360,7 @@
 </template>
 
 <script>
-
+import InstrumentsStatusView  from './InstrumentsStatusView.vue';
 import {  placeTargetsForLiveScripts  }  from './placeTargetsForLiveScripts';
 // import { placeTargetsForLiveScripts }  from './placeTargetsForLiveScripts';
 import VueGoodTable from "vue-good-table";
@@ -766,7 +800,9 @@ console.log(this.instrumentTokens);
            this.CurrentTick  =  [...s];
           }  );
      
-         socket.on( "order_update", async ( orderUpdates )  => { 
+        
+        
+          socket.on( "order_update", async ( orderUpdates )  => { 
      
            let temp1,tmp2
            if( orderUpdates.status == "UPDATE" || orderUpdates.pending_quantity!== 0  ){ 
@@ -815,7 +851,10 @@ console.log(this.instrumentTokens);
      
      
      
-          }  );
+          }
+          
+          
+          );
      
     
 
@@ -998,7 +1037,7 @@ if( typeof this.livePositions  == 'undefined'  ){
    } ,
 
 
-  components: { ClosedTrades, LiveTickView, LiveOrders, Margin, LivePos, IndicesTable, Messages, IronCondor, VueGoodTable, sideWiseAlerts, MarginView, DigitCheckerForWebsocketHealth, Clock, MaxTradableAmount, TelegramStatus, ProfitAndLossView, LogsView, DialogForAlerts, ViewHourlyPricePointsOfLiveDay, InstrumentsAndActions, ForGoneProfitData } ,
+  components: {InstrumentsStatusView,ClosedTrades, LiveTickView, LiveOrders, Margin, LivePos, IndicesTable, Messages, IronCondor, VueGoodTable, sideWiseAlerts, MarginView, DigitCheckerForWebsocketHealth, Clock, MaxTradableAmount, TelegramStatus, ProfitAndLossView, LogsView, DialogForAlerts, ViewHourlyPricePointsOfLiveDay, InstrumentsAndActions, ForGoneProfitData } ,
   
 
   methods: {  getRequiredTime( h,m ) { 

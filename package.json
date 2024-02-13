@@ -24,5 +24,6 @@
     "nodemon": "^2.0.22",
     "puppeteer": "^19.6.3",
     "socket.io": "^4.6.0"
-  }
+  },
+  "repository": "https://github.com/vsvivek1/findnew.git"
 }

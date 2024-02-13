@@ -16,7 +16,13 @@ export default {
             //  let intervel = 'minute';
             let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
       
-      //  console.log( url,'utl' )
+    
+
+
+    
+            // console.log(this.instruments,'ins')
+    
+            //  console.log( url,'utl' )
 
       //  return;
       let resultPromise =  await  axios.get( url );
@@ -29,15 +35,29 @@ export default {
         return -1;
       }
 
+// console.log(symbol,'sym')
+      let obj=this.instruments.find(i=>i.instrument_token==symbol);
+
+
+      
+// console.log(obj.minuteCandle,'minc');
+
+let minuteCandle={};
       this.historicalData[symbol]={};
       
-      this.historicalData[symbol]['ohlc'] = data;
+      // this.historicalData[symbol]['ohlc'] = data;
 
+      minuteCandle.data=data;
+      // minuteCandle.signal=
     
-      this.historicalData[symbol]['signal'] = getCandlestickSignal(data);;
-
+      this.historicalData[symbol]['signal']=minuteCandle.signal = getCandlestickSignal(data);;
+      // minuteCandle.data=data;
+     
+      // minuteCandle.signal=getCandlestickSignal(data)
       console.log(symbol,this.historicalData[symbol]['signal'],'signal')
 
+
+      this.$set(obj,'minuteCandle',minuteCandle);
       
 
       // for(let i =0;i<data.lenght;i++){

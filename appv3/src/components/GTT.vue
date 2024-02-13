@@ -1,6 +1,6 @@
 <template>
     <div>
-{{ CurrentGttList[0] }} CurrentGttList
+{{ CurrentGttList.length }} CurrentGttList
 
 
 
@@ -30,8 +30,9 @@
             <td>
             <span class = "text-primary" v-if = "typeof stockPpItem.group!= 'undefined' ">{{ stockPpItem.group }} </span>
             <a target = "_blank" :href = "stockPpItem.chart">
-            
-            {{ stockPpItem.tradingsymbol }} </a> <span>{{ stockPpItem.last_price }}</span>
+            <hr>
+            {{ stockPpItem.tradingsymbol }} </a> <hr>
+            <span>{{ stockPpItem.last_price }}</span>
             
 <span v-if = "typeof stockPpItem.gttData!== 'undefined' ">
             <b class = "bg-success" 
@@ -64,7 +65,7 @@
 
 
                     v-for = "( l,index ) in stockPpItem.supportLevels">
-                   <v-btn 
+                   <v-btn class="my-btn"
                    @click = "PlaceGttOrderForThisPrice( stockPpItem,l.level )"
                    >{{ l.level }} 
 
@@ -499,7 +500,15 @@ this.startSockets(  )
 td{ 
 
     max-width:100%;
-white-space:nowrap;
+//white-space:nowrap;
  } 
+ .overflow-cell {
+  /* Remove any height constraints to allow the cell to expand vertically */
+  white-space: normal; /* Allow content to wrap to multiple lines */
+}
+
+.my-btn {
+  margin: 10px;
+}
 
 </style>

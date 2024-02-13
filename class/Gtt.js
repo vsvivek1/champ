@@ -7,6 +7,7 @@ const mongoose=require('mongoose');
 let AccesTocken=require('../models/AccessTokens');
 const { writeFinalScriptsTofile } = require('./writeFinalScriptsTofile');
 
+let axios=require('axios');
 
 
 // {path:__dirname+'/./../'}
@@ -26,6 +27,48 @@ const { writeFinalScriptsTofile } = require('./writeFinalScriptsTofile');
 //     getGreens,
 //     getGttAmountPerManualOrder,
 //     getStockPricePointsLoader,} from '../appv3/src/components/gttComponent.js'
+
+
+// const axios = require('axios');
+
+// const axios = require('axios');
+
+async function getIndexStocks() {
+    try {
+        const axios = require('axios');
+
+let config = {
+  method: 'get',
+  maxBodyLength: Infinity,
+  url: 'https://www.nseindia.com/api/equity-stockIndices?index=NIFTY%20MIDCAP%2050',
+  headers: { 
+    'Cookie': 'ak_bmsc=934BE0192CC9F8D49910D040C2D9C13F~000000000000000000000000000000~YAAQdSdzaOjj72GNAQAA2Q6VhBZ3Pj8Hso42SsTP6u5dQxOa9K5BxPHqKxjmEAZzOUGgxk4HpAmVt3PRhgGSQj4lBPTj5s97DXuzibPw6ray67xp2VlWi9OpJ/BYzFozkuBS8Q40I3p990L4PW9CNcP96a7b2JFLdlue8UaIjAtbKmpxqySCKHMej2f11hhbsc+IiNbAUhRl+SLeoosTgYmB0Y9TaCMFG7sRG0xKogHzpFAPwhl3DHj2nda+9o5eH9vAcsXtotiV62R3yhAiqYeMUFjQ84hQ9l9Ds+1FzpwaesC/UXJC9Nm1Qs0DjdUFbZKX55lUl9s9GFs50cvCjZZ1zbekKf0JQZbqwdM+mFmmCRmfMX4sTa+LP9/s5w==; bm_sv=B3FA0B05B962A4F6807ED09662013347~YAAQxfY3F+OvhVaNAQAAdReqhBa9MK8JJ7ZAx1/pMveAvn6pVabshtehnD2LPAN4caX8uDl0Kwl/U2AcqHGnN1FE2bVR426+/L2M+UQWCr4BXyBcfHWC7D99fP1KNTGOUdCUDe0fp+YqB0eScA+577hcKtdbULM39eGlbMB7EzCS27WawTtgl7MaZlgHMUk/telpYX8Z5uRIVqKqhcOH4W5n400fFJImJ6PASK1t5aiaI0aWizRd3BP6BQ20kgrQseo=~1'
+  }
+};
+
+axios.request(config)
+.then((response) => {
+  console.log(JSON.stringify(response.data));
+})
+.catch((error) => {
+  console.log(error);
+});
+
+}catch(e){
+
+    
+}
+}
+
+// Call the function
+// getIndexStocks()
+
+
+
+// getIndexStocks();
+
+// process.exit();
+
 class Gtt {
 
     constructor() {
@@ -34,12 +77,16 @@ class Gtt {
         this.instruments=require('../appv3/public/instruments/instrumentsAll.json');
 
      let tmp =this.getGttStocks();
-        this.stocks=tmp  .slice(1,100)
+        this.stocks=tmp  //.slice(1,100)
 
         this.accessToken;
 
     }
+    getStocksTradingSymbolname(stock){
 
+return this.instruments.find(i=>i.instrument_token==stock).tradingsymbol
+
+    }
     getGttStocks() {
 
         
@@ -90,15 +137,29 @@ let result=[]
     
             
             let pricePoint=require('./../pricePoints');
-            let nse1=require('./../nifty.json');
-            let nifty=nse1.data.map(n=>n.symbol)
+            // let nse1=require('./../nifty.json');
+            
+            
+            let nse1=require('../indexComponents/Fo.json');
+            let nifty=nse1.map(n=>n.trading_symbol)
+            // let nifty=nse1.data.map(n=>n.trading_symbol)
+
+          
     
             
     
+    let filtredStocks=this.instruments.filter(i=>nifty.includes(i.tradingsymbol)).map(j=>j.instrument_token);
+
+    // console.log(filtredStocks);
+
+    // return
     
+    // console.log(nifty,stock,this.getStocksTradingSymbolname(stock));
     
-        let ln=this.stocks.length;
+        // let ln=this.stocks.length;
+        let ln=filtredStocks.length;
     
+
     
        
     let count=1;
@@ -111,7 +172,15 @@ let result=[]
     
     
             
-            var stock=this.stocks.pop();
+            // var stock=this.stocks.pop();
+            var stock=filtredStocks.pop();
+
+            // console.log(stock);
+            // return;
+
+            
+            // return;
+            // exit;
     
             if(typeof stock == 'undefined' ){
     
@@ -129,6 +198,10 @@ let result=[]
                  == stock)[0];
     
     
+
+                //  console.log(instrument);
+
+                //  return;
                 let tradingsymbol=instrument.tradingsymbol;
     
                 // console.log(stock,'stock',this.accessToken);
@@ -143,7 +216,7 @@ let result=[]
              let pp2=await pp.getPricePoints()
              instrument.pricePoints=pp2
 
-             console.log(pp2);
+            //  console.log(pp2);
 
             //  instrument.pricePoints.forEach(r1 => {
             //     const supportLevels = getLevels(r1);

@@ -11,6 +11,13 @@ const mar = function checkMarubozo(element) {
 const mutateWithLtp = {
     methods: {
       async mutateWithLtp(s) {
+
+
+        if(this.minutes<59){
+
+          return;
+
+        }
         this.heartBeatAndCurrentCheckDigit();
 
   
@@ -68,6 +75,9 @@ const mutateWithLtp = {
             return false;
           }
   
+          this.$set(cis,'tick',element)
+
+          console.log(cis.tradingsymbol,cis.tick);
           const last_price = element.last_price;
           this.setPreviousPriceAndLastPrice(instrument_token, last_price);
   

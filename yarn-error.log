@@ -1,8 +1,8 @@
 Arguments: 
-  /Users/vivekvs/.nvm/versions/node/v16.20.2/bin/node /opt/homebrew/Cellar/yarn/1.22.19/libexec/bin/yarn.js add pg
+  /Users/vivekvs/.nvm/versions/node/v16.20.2/bin/node /opt/homebrew/Cellar/yarn/1.22.19/libexec/bin/yarn.js -start
 
 PATH: 
-  /opt/homebrew/opt/postgresql@15/bin:/Users/vivekvs/.nvm/versions/node/v16.20.2/bin:/Applications/platform-tools:/Library/Frameworks/Python.framework/Versions/3.12/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/opt/homebrew/opt/postgresql@15/bin:/Users/vivekvs/.nvm/versions/node/v16.20.2/bin:/Applications/platform-tools:/Library/Frameworks/Python.framework/Versions/3.12/bin:/opt/homebrew/bin:/opt/homebrew/sbin
+  /opt/homebrew/opt/php@7.4/sbin:/opt/homebrew/opt/php@7.4/bin:/opt/homebrew/opt/postgresql@15/bin:/Users/vivekvs/.nvm/versions/node/v16.20.2/bin:/Applications/platform-tools:/Library/Frameworks/Python.framework/Versions/3.12/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin
 
 Yarn version: 
   1.22.19
@@ -52,7 +52,8 @@ npm manifest:
       "nodemon": "^2.0.22",
       "puppeteer": "^19.6.3",
       "socket.io": "^4.6.0"
-    }
+    },
+    "repository": "https://github.com/vsvivek1/findnew.git"
   }
 
 yarn manifest: 
