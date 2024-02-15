@@ -49,6 +49,7 @@
   
         <router-link  v-if="session!=null" to="/MiningMis">Mining-MIS</router-link> |
        <router-link  v-if="session!=null" to="/GTT">GTT</router-link> |
+       <router-link  v-if="session!=null" to="/GTTSELL">GTT -SELL</router-link> |
        <router-link  v-if="session!=null" to="/dailyGainers">Daily Gainers</router-link> |
      
      

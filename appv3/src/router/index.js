@@ -25,6 +25,7 @@ import Strategies from '@/components/Strategies.vue'
 // import Mining from '@/components/Mining.vue'
 // import MiningMis from '@/components/MiningMis.vue'
 import GTT from '@/components/GTT.vue'
+import GTTSELL from '@/components/GTTSell.vue'
 import Tester from '@/components/Tester/Tester.vue'
 import FutureTrading from '@/components/FutureTrading.vue'
 // import BTST from '@/components/Btst.vue'
@@ -109,6 +110,11 @@ const routes  =  [
     path: '/GTT',
     name: 'GTT',
     component: GTT
+   } , 
+    { 
+    path: '/GTTSELL',
+    name: 'GTTSELL',
+    component: GTTSELL
    } , 
   
   
