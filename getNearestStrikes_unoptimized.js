@@ -1,5 +1,32 @@
 const { ce_lower_percentage, ce_upper_percentage, pe_upper_percentage, pe_lower_percentage, FILE_LOCATION } = require('./FetchInstruments.js');
 const nearestMultiple=require('./nearestMultiple');
+
+let ar=[]	;
+function getAdjacentStrikes(symbol,instruments,last_price){
+
+
+ar.push(...instruments.filter(i=>
+		
+	
+			
+			i.strike>last_price && i.instrument_type=='CE').slice(0,3))
+
+
+	
+			ar.push(...instruments.filter(i=>
+		
+	
+			
+				i.strike<last_price && i.instrument_type=='PE').slice(0,3))
+		
+	
+
+	console.log(symbol,ar)
+
+	///process.exit()
+}
+
+
 function getNearestStrikes_unoptimized(ohlc, instruments) {
 	try {
 
@@ -24,10 +51,17 @@ function getNearestStrikes_unoptimized(ohlc, instruments) {
 				// console.log( 'item',item )
 				let symbol = item.split(':')[1];
 
+
+				
 				// console.log( 'symbol', symbol )
 				
 
 				let last_price = ohlc[item].last_price;
+
+				getAdjacentStrikes(symbol,instruments,last_price)
+
+
+
 				let {nearestAbove,nearestBelow} = nearestMultiple(last_price,50);
 
 				if (symbol == 'NIFTY 50') {
@@ -153,7 +187,8 @@ return true;
 
 					// console.log( currentInstruments,'cur instr' );
 					// tradingsymbol: 'OBEROIRLTY22FEB880PE',
-					resolve(currentInstruments);
+					//resolve(currentInstruments);
+					resolve(ar);
 
 					return;
 

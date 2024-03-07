@@ -78,10 +78,10 @@
       <div class="row">
         <div class="col">
 
-          <v-btn @click="fetchInstruments( )">
+          <!-- <v-btn @click="fetchInstruments( )">
             Fetch Instruments
             <v-icon></v-icon>
-          </v-btn>
+          </v-btn> -->
 
         </div>
         <div class="col"></div>

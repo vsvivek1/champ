@@ -4,7 +4,7 @@
 
 
 
-<v-btn @click = "deleteGTT( 1 )">Delete GTT</v-btn>
+<!-- <v-btn @click = "deleteGTT( 1 )">Delete GTT</v-btn> -->
 
     <input type = "text" v-model ="gttAmountPerManualOrder" name = "" id = "" class = "form-control">
 
@@ -12,7 +12,7 @@
 
      <v-btn :color="'green'" 
      :loading = "getStockPricePointsLoader"
-     @click = "getStockPricePoints(  )">GET Holdings </v-btn>
+     @click = " getStockPricePoints(  )">GET Holdings </v-btn>
      
     <table
     v-if = "stocksPricePointsFiltered.length"
@@ -268,6 +268,15 @@ loserList:[]
          } ,
         methods:{ 
 
+            getHoldings(  ) { 
+      const url  =  "/api/holdings/" + this.accessToken;
+
+      axios
+        .get( url )
+        .then(( res )  => { 
+
+        })},
+
             deleteGTT( trigger_id ){ 
                 axios.defaults.headers.common  =  { 'Authorization': `bearer ${ this.accessToken } ` } 
                 let url = "/api/deleteGTT/"+trigger_id;
@@ -454,18 +463,17 @@ return ob;
 
             getStockPricePoints(  ){ 
 
-                alert('implement logic here fetch holdings')
-
-return;
+     
 
 
                 this.getStockPricePointsLoader = true
-let url = "/api/GTT"
+// let url = "/api/GTT"
 let ob = {  } ;
 ob.accessToken = this.accessToken;
 
+const url  =  "/api/holdings/" + this.accessToken;
 
-axios.post( url,ob ).then(  ( r )  => { 
+axios.get( url ).then(  ( r )  => { 
 
 console.log(r,'r');
     r.data.forEach( r1 =>{ 

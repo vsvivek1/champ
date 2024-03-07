@@ -13,9 +13,9 @@ const mutateWithLtp = {
       async mutateWithLtp(s) {
 
 
-        if(this.minutes<59){
+        if(!this.seconds%5==0  ){
 
-          return;
+          //return;
 
         }
         this.heartBeatAndCurrentCheckDigit();
@@ -77,7 +77,7 @@ const mutateWithLtp = {
   
           this.$set(cis,'tick',element)
 
-          console.log(cis.tradingsymbol,cis.tick);
+          //console.log(cis.tradingsymbol,cis.tick);
           const last_price = element.last_price;
           this.setPreviousPriceAndLastPrice(instrument_token, last_price);
   
@@ -182,7 +182,7 @@ const mutateWithLtp = {
         }
       },
       mounted() {
-        console.log('hello from mixin!');
+        console.log('hello from mutate with ltp mixin mixin!');
       },
     },
   };

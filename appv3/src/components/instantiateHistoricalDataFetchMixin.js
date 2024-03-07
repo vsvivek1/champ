@@ -54,7 +54,7 @@ let minuteCandle={};
       // minuteCandle.data=data;
      
       // minuteCandle.signal=getCandlestickSignal(data)
-      console.log(symbol,this.historicalData[symbol]['signal'],'signal')
+      //console.log(symbol,this.historicalData[symbol]['signal'],'signal')
 
 
       this.$set(obj,'minuteCandle',minuteCandle);

@@ -1,0 +1,86 @@
+This code appears to be a Node.js script that interacts with various APIs and performs data processing tasks related to stock market instruments. Here's a breakdown of the main logic and functionalities in the code:
+
+1. **Imports and Setup**: The script imports necessary modules such as `fs`, `mongoose`, `axios`, etc., and sets up initial configurations.
+
+2. **Main Function**: The `main()` function serves as the entry point. It establishes a connection to a MongoDB database, retrieves an access token, and then calls `fetchInstrumentsForMining()`.
+
+3. **Fetch Instruments**: `fetchInstrumentsForMining()` downloads instrument data, processes it, and filters instruments based on certain criteria. It also fetches OHLC data and calculates nearest strikes for options.
+
+4. **Write Final Scripts to File**: After processing instruments, the script writes the resulting data to JSON files for further use.
+
+5. **Other Supporting Functions**: There are various supporting functions like `printProgress()`, `setCurrentInstrumentParameters()`, `getNearestStrikes()`, etc., that perform specific tasks such as printing progress, setting instrument parameters, fetching nearest strikes, etc.
+
+6. **Additional Functionality**: The code includes functions to handle overnight positions, get expiry dates, retrieve symbols, etc.
+
+7. **Error Handling**: The code includes some error handling mechanisms such as catching exceptions and logging errors.
+
+Overall, the code seems to be a part of a larger system responsible for fetching, processing, and analyzing stock market instrument data. It uses MongoDB for storage and interacts with various APIs to gather necessary data.                    +----------------------+
+                    |       Main Flow      |
+                    +----------------------+
+                             |
+                             |
+                             v
+               +-----------------------+
+               | fetchInstrumentsForMining |
+               +-----------------------+
+                             |
+                             |
+                             v
+     +-----------------------------------------+
+     | getNearestStrikes        getSymbols   |
+     +-----------------------------------------+
+                             |
+                             |
+                             v
+                +--------------------------+
+                |   writeFinalScriptsToFile  |
+                +--------------------------+
+                             |
+                             |
+                             v
+            +---------------------------------+
+            |  createAndMoveFileFromJson     |
+            +---------------------------------+
+                             |
+                             |
+                             v
+            +---------------------------------+
+            | overnightScripts               |
+            +---------------------------------+
+                             |
+                             |
+                             v
+          +------------------------------------+
+          | attachMIsPricePoints getBankNiftyExpiry |
+          +------------------------------------+
+                             |
+                             |
+                             v
+                   +------------------+
+                   |   getCurrentExpiryDate  |
+                   +------------------+
+                             |
+                             |
+                             v
+                   +------------------+
+                   |  getLastThursdayOfMonth|
+                   +------------------+
+Sure, I can provide a list of functions along with their child functions:
+
+1. `fetchInstrumentsForMining`
+   - `getNearestStrikes`
+   - `getSymbols`
+
+2. `writeFinalScriptsToFile`
+   - `createAndMoveFileFromJson`
+   - `overnightScripts`
+
+3. `overnightScripts`
+   - `attachMIsPricePoints`
+   - `getBankNiftyExpiry`
+
+4. `attachMIsPricePoints`
+   - `getCurrentExpiryDate`
+   - `getLastThursdayOfMonth`
+
+Each function listed above is followed by its child functions, indicating the hierarchical relationship between them.

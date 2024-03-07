@@ -1,8 +1,10 @@
 <template>
     <div>
-{{ CurrentGttList.length }} CurrentGttList
+<!-- {{ CurrentGttList }} CurrentGttList -->
 
+<!-- {{ CurrentGttSymbols }} -->
 
+Showing {{stocksPricePointsFiltered.length  }}
 
 <v-btn @click = "deleteGTT( 1 )">Delete GTT</v-btn>
 
@@ -52,6 +54,10 @@
 
             </td>
             <!-- <td>{{ stockPpItem.profitPc }} </td> -->
+
+
+           <!--  //stockPpItem[index].pricePoints.level
+                   // .pricePoints.level-stockPpItem[index-1].pricePoints.leve -->l
             <td class = "text-left">
                 
 
@@ -65,10 +71,18 @@
 
 
                     v-for = "( l,index ) in stockPpItem.supportLevels">
-                   <v-btn class="my-btn"
+                  
+                    <v-btn class="my-btn"
                    @click = "PlaceGttOrderForThisPrice( stockPpItem,l.level )"
                    >{{ l.level }} 
 
+
+        Diff=           
+<b
+
+
+
+v-if="index>0  && (stockPpItem.supportLevels[index].level-stockPpItem.supportLevels[index-1].level)*100/stockPpItem.supportLevels[index].level">SUP</b>
                    <b v-if = "typeof stockPpItem.pricePoints!== 'undefined' ">
 
 
@@ -79,7 +93,9 @@
                     
                     
                      }}  ) %
-                   </b>
+                  
+                  
+                     </b>
                    </v-btn>  ,
                     
                     </b>
@@ -120,9 +136,8 @@ export const socket  =  io( "http://localhost:4000" );
 
     export default { 
 
-        mounted(  ){ 
-           
-
+        mounted(){ 
+            this.getGTTS()
 
          } ,
 
@@ -252,6 +267,7 @@ if( r.otherCriteria.candleColor == 'green' )
 data(  ){ 
 
     return { 
+        CurrentGttSymbols:[],
         CurrentGttList:[],
         gttAmountPerManualOrder:100000,
         CurrentTick:[],
@@ -261,11 +277,7 @@ stocksPricePoints:[],
 loserList:[]
 
      } 
- } ,
-        mounted(  ){ 
-// this.
-
-         } ,
+ }  ,
         methods:{ 
 
             deleteGTT( trigger_id ){ 
@@ -293,7 +305,7 @@ loserList:[]
 
              } ,
 
-            getGTTS(  ){ 
+            getGTTS( ){ 
                 let ob = {  } ;
 
 
@@ -302,14 +314,16 @@ ob.accessToken = this.accessToken;
 let url = "/api/getGTTs";
 axios.post( url,ob ).then( r =>{ 
 
-// console.log( r.data,'gtts' )
+//console.log( r.data,'gtts' )
     
 this.CurrentGttList = r.data;
 
-this.stocksPricePoints.forEach( e =>{ 
+this.CurrentGttSymbols=this.CurrentGttList.map(r=>r.condition.tradingsymbol);
+
+/* this.stocksPricePoints.forEach( e =>{ 
 
 
-    // console.log( 'e.instrument_token',e.instrument_token )
+    console.log( 'e.instrument_token',e.instrument_token )
 let ln =  r.data.
         filter( r =>r.condition.instrument_token == e.instrument_token )
 
@@ -349,7 +363,9 @@ this.CurrentGttList.
 
 
 
- }  );
+ } 
+ 
+ ); */
     
  }  );
 
@@ -368,6 +384,7 @@ PlaceGttOrderForThisPrice(stockPpItem,level,this.gttAmountPerManualOrder,this.ac
                 
 s.forEach( s1 =>{ 
 
+    if(typeof s1 =='undefined'|| typeof s1.last_price=='undefined') return
 
 let instrument_token = s1.instrument_token;
 
@@ -469,7 +486,7 @@ let a = this.getLevels( r1 );
 r1.supportLevels = a;
 
      }  )
-    this.stocksPricePoints = r.data
+    this.stocksPricePoints = r.data.filter(r=>!this.CurrentGttSymbols.includes(r.tradingsymbol));
 
     this.instrumentTokens = this.stocksPricePoints.map( r =>parseInt( r.instrument_token ))
     

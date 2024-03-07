@@ -4,7 +4,7 @@ const TradeEntryMixin = {
   methods: {
     tradeEntry(instrument_token, inst = 'cis', cis, element) {
       try {
-        // console.log('from trade entry mixin');
+         console.log('from trade entry mixin');
 
         this.triggers(element, cis);
 
@@ -12,26 +12,27 @@ const TradeEntryMixin = {
 
         if (isBefore15Minutes) {
           console.log('LAST TRADED TIME IS BEFORE 15 MINUTES. IGNORING TRADE ENTRY');
-          return false;
+         // return false;
         }
 
         let shouldProceed = true; // Flag to determine whether to proceed
 let metCriteria = []; // Array to store names of conditions that were met
 
-if (!this.checkNiftyStatus("NIFTY 50")) {
-    // this.cl("Condition check for 'checkNiftyStatus' not met");
+//if (!this.checkNiftyStatus("NIFTY 50")) {
+if (false) {
+    this.cl("Condition check for 'checkNiftyStatus' not met no proceeding from shouldProceed");
     shouldProceed = false;
 } else {
     metCriteria.push("checkNiftyStatus");
 }
 if (!this.dailyRangeBreakout(element, cis)) {
-    // this.cl("Condition check for 'dailyRangeBreakout' not met");
+     this.cl("Condition check for 'dailyRangeBreakout' not met");
     shouldProceed = false;
 } else {
     metCriteria.push("dailyRangeBreakout");
 }
 if (!this.yesterdayCloseStrategy(element, cis)) {
-    // this.cl("Condition check for 'yesterdayCloseStrategy' not met");
+     this.cl("Condition check for 'yesterdayCloseStrategy' not met");
     shouldProceed = false;
 } else {
     // metCriteria.push("yesterdayCloseStrategy");
@@ -39,8 +40,11 @@ if (!this.yesterdayCloseStrategy(element, cis)) {
 // Add similar blocks for other conditions...
 
 // If any condition is true, execute the function
-
-
+if(shouldProceed)
+console.log({shouldProceed});
+shouldProceed=true
+//should
+let sellersLowestPrice=cis.last_price;
 if (shouldProceed) {
     // Execute the function with the specified parameters
     this.proceedForEntry(

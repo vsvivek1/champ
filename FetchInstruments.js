@@ -294,6 +294,10 @@ async function fetchInstrumentsForMining( accessToken ) { try {
 		let strikes1  =  await getNearestStrikes_unoptimized( ohlcs, instruments )//.slice( 1,50 );
 	
 
+
+		console.log(strikes1,'strikes');
+
+		//process.exit();
 		let strikes = strikes1//.slice( 1,100 );
 	    let symbols  =  [];
 	    let len1  =  strikes.length;

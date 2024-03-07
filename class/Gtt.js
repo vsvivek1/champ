@@ -140,7 +140,8 @@ let result=[]
             // let nse1=require('./../nifty.json');
             
             
-            let nse1=require('../indexComponents/Fo.json');
+           // let nse1=require('../indexComponents/Fo.json');
+            let nse1=require('../indexComponents/NIFTY500MULTICAP.json');
             let nifty=nse1.map(n=>n.trading_symbol)
             // let nifty=nse1.data.map(n=>n.trading_symbol)
 

@@ -65,6 +65,18 @@ if (port  ==  null || port  ==  "") {
 
 const  bodyParser = require("body-parser");
 
+
+const { Worker, isMainThread } = require('worker_threads');
+
+if (isMainThread) {
+  const worker = new Worker('./workerForFetchInstruments.js');
+  worker.on('message', (message) => {
+    console.log('Received message from secondary thread:', message);
+  });
+} else {
+  console.log('This is the secondary thread.');
+}
+
 app.use(express.static(path.join(__dirname, './appv3/dist')));
 // app.use(express.static(path.join(__dirname, './appreact/build')));
 
