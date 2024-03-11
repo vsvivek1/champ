@@ -1,43 +1,28 @@
 <template>
-	<p v-if = "liveMargin && liveMargin.equity && liveMargin.equity.utilised && liveMargin.equity.utilised.debits">
-	
-	
-	      
-	
-	
-	    
-	 
-	      Margin: {{  liveMargin.equity.utilised.margin  }} 
-	     TOTAL OPTION PRICE: {{  totalOptionPrice  }} 
-	     OPTION PREMIUM :{{  liveMargin.equity.utilised.option_premium }} 
-	    </p>
-	    <p v-else>
-	      Margin is not available yet.
-	    </p>
-</template>
-
-
-<script>
-	export default {
-		props: {
-			liveMargin: {
-				type: Object,
-				default: {}
-			},totalOptionPrice: {
-				type: Number,
-				default: 0
-			},
-		},
+	<p v-if="liveMargin && liveMargin.equity && liveMargin.equity.utilised && liveMargin.equity.utilised.debits">
+	  Margin: {{ liveMargin.equity.utilised.margin }} TOTAL OPTION PRICE: {{ totalOptionPrice }} OPTION PREMIUM :{{ liveMargin.equity.utilised.option_premium }}
+	</p>
+	<p v-else>
+	  Margin is not available yet.
+	</p>
+  </template>
+  
+  <script>
+  export default {
+	props: {
+	  liveMargin: {
+		type: Object,
+		default: () => ({})
+	  },
+	  totalOptionPrice: {
+		type: Number,
+		default: 0
+	  }
 	}
-</script>
-
-<style lang="scss" scoped>
-
-</style>
-
-<script setup lang="ts">
-defineProps<{ 
-	totalOptionPrice: number;
-}>()
-const liveMargin = defineModel<number>('liveMargin', { required: true })
-</script>
+  }
+  </script>
+  
+  <style scoped>
+  /* Add any scoped styles here if needed */
+  </style>
+  

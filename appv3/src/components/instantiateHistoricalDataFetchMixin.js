@@ -79,7 +79,7 @@ let minuteCandle={};
         const makeRequest = () => {
           if (index < symbolList.length) {
 
-            console.log(index,symbolList[index]);
+            //console.log(index,symbolList[index]);
             this.getHistoricalDataForCustomDuration('minute',symbolList[index]);
             index++;
             setTimeout(makeRequest, interval);

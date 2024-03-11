@@ -196,6 +196,9 @@ entryPrice = pos.sell_price
                 ///if has liver order or has reverse order placed /// return
       
                 /// fire a target
+
+
+                targetPoint=Math.round(entryPrice*1.2,1)
                 let
                   transaction_type,
                   rangeBreakOut,
@@ -411,14 +414,14 @@ entryPrice = pos.sell_price
          
           ){ 
        
-           tgt1 = avg*2.5
+           tgt1 = avg*1.2
 
            targetPoint = Math.min( tgt1,uck-.1 )
            
        
           } else{ 
        
-            tgt1 = avg*1.3
+            tgt1 = avg*1.2
             targetPoint = Math.min( tgt1,uck-.1 )
            
        
@@ -427,8 +430,8 @@ entryPrice = pos.sell_price
  
  if( avg<= cis.pricePoints.d1.low ){ 
  
-   tgt1 = cis.pricePoints.d1.high*99;
-   targetPoint = Math.min( tgt1,uck-.1 ).toFixed( 1 )
+  /*  tgt1 = cis.pricePoints.d1.high*99;
+   targetPoint = Math.min( tgt1,uck-.1 ).toFixed( 1 ) */
  
  
   } 

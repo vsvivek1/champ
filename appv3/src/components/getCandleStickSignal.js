@@ -20,7 +20,7 @@ function getCandlestickSignal(ohlcData) {
 
   let indiantime=convertToIndianTime(ohlcData[ohlcData.length-1].date);
 
-  console.log({indiantime});
+  //console.log({indiantime});
   const {open, high, low, close} = ohlcData[ohlcData.length - 1];
   
   const bodySize = Math.abs(close - open);

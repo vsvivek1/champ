@@ -13,11 +13,22 @@ const mutateWithLtp = {
       async mutateWithLtp(s) {
 
 
-        if(!this.seconds%5==0  ){
+        if(this.seconds!=58){
+
+
+          this.cl('not 58')
+          return ;
+        }else{
+          this.cl('yes its  58')
+
+        }
+
+
+       /*  if(!this.seconds<== ){
 
           //return;
 
-        }
+        } */
         this.heartBeatAndCurrentCheckDigit();
 
   

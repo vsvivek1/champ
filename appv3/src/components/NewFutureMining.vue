@@ -44,7 +44,7 @@
       <stopLossHealthIcon :stopLossSwitchHealth="stopLossSwitchHealth" />
 
 
-        <MarketConnectionHelthIcon :tradeEntrySwitchHealth="tradeEntrySwitchHealth" />
+       <!--  --> <MarketConnectionHelthIcon :tradeEntrySwitchHealth="tradeEntrySwitchHealth" />
 
         <HeartBeatIcon :heartBeat="heartBeat" />
     </v-row>
@@ -143,7 +143,7 @@
           >get latest prices</v-btn
         >
         Closed Trades
-        <ProfitAndLossOfClosedPositions v-model:closedTradesScriptsPnl="closedTradesScriptsPnl" />
+        <ProfitAndLossOfClosedPositions props:closedTradesScriptsPnl="closedTradesScriptsPnl" />
 
         Total :{{  closedTradesScripts.length  }} 
         <ClosedTrades :closedTradesScripts = "closedTradesScripts"></ClosedTrades>

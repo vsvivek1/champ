@@ -163,18 +163,14 @@
     color: #2c3e50;
    } 
   
-  #nav { 
+ /*  #nav { 
     padding: 30px;
   
-    a { 
-      font-weight: bold;
-      color: #2c3e50;
-  
-      &.router-link-exact-active { 
+   &.router-link-exact-active { 
         color: #42b983;
        } 
-     } 
-   } 
+     }  */
+   
   
   // @import './assets/styles/app.17a510a7.css';
   // @import './assets/styles/css.css';

@@ -6,8 +6,8 @@ import router from './router'
 import store from './store'
 import axios from 'axios'
 
-import 'bootstrap'
-import 'bootstrap/dist/css/bootstrap.min.css'
+//import 'bootstrap'
+//import 'bootstrap/dist/css/bootstrap.min.css'
 
 import Vddl from 'vddl';
 

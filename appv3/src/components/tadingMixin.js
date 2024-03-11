@@ -88,4 +88,4 @@ export const tradingMixin  =  {
 
  } 
 
- export default tradingMixin;et
+ export default tradingMixin;
