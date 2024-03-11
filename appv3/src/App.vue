@@ -163,13 +163,13 @@
     color: #2c3e50;
    } 
   
- /*  #nav { 
+  #nav { 
     padding: 30px;
   
    &.router-link-exact-active { 
         color: #42b983;
        } 
-     }  */
+     } 
    
   
   // @import './assets/styles/app.17a510a7.css';

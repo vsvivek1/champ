@@ -7,6 +7,7 @@
 			<th>Last Price</th>
 			<th>LTP > YDAY HIGH</th>
 			<th>LTP > OPEN</th>
+			<th>Last Updated time</th>
 			<th>candle details</th>
 		  </tr>
 		</thead>
@@ -15,11 +16,22 @@
 			<td>{{ instrument.tradingsymbol }}</td>
 			<td>{{ instrument.last_price }}</td>
 			<td>{{ instrument.last_price > instrument.pricePoints.d1.high }}</td>
+			<td>{{ instrument.last_price > instrument.pricePoints.d0.open }}
+			{{ instrument.pricePoints.d0.open }}
+			</td>
 			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0">
 			  {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].IST }} IST
 			  {{ instrument.minuteCandle.signal.CandleColor }}
 			</td>
 			<td v-else>N/A</td>
+
+
+			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0">
+			 
+			  {{ instrument.minuteCandle.signal.CandleColor }}
+			</td>
+			<td v-else>N/A</td>
+
 		  </tr>
 		</tbody>
 	  </table>

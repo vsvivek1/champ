@@ -113,6 +113,16 @@ var cl;
 //export default Vue.extend({
 
     export default{ 
+      components: { InstrumentsStatusView, 
+        ClosedTrades, LiveTickView, LiveOrders, Margin, LivePos,
+         IndicesTable, Messages, IronCondor, VueGoodTable, sideWiseAlerts,
+          MarginView, DigitCheckerForWebsocketHealth, Clock, MaxTradableAmount,
+           TelegramStatus, ProfitAndLossView, LogsView, DialogForAlerts, 
+           ViewHourlyPricePointsOfLiveDay, InstrumentsAndActions, ForGoneProfitData, 
+           minuteCandleAnalysis, TotalInstruments, softwareFlowStatus, DoD1Dates, 
+           stopLossTradeEntrySwitchHealth, stopLossHealthIcon, MarketConnectionHelthIcon,
+            HeartBeatIcon, TrailingStopLossButton, TradeCostAndBalnceInfo, 
+            ProfitAndLossOfClosedPositions } ,
 
 
 // import {  timingSafeEqual  }  from 'crypto';
@@ -696,7 +706,6 @@ if( typeof this.livePositions  == 'undefined'  ){
    } ,
 
 
-  components: { InstrumentsStatusView, ClosedTrades, LiveTickView, LiveOrders, Margin, LivePos, IndicesTable, Messages, IronCondor, VueGoodTable, sideWiseAlerts, MarginView, DigitCheckerForWebsocketHealth, Clock, MaxTradableAmount, TelegramStatus, ProfitAndLossView, LogsView, DialogForAlerts, ViewHourlyPricePointsOfLiveDay, InstrumentsAndActions, ForGoneProfitData, minuteCandleAnalysis, TotalInstruments, softwareFlowStatus, DoD1Dates, stopLossTradeEntrySwitchHealth, stopLossHealthIcon, MarketConnectionHelthIcon, HeartBeatIcon, TrailingStopLossButton, TradeCostAndBalnceInfo, ProfitAndLossOfClosedPositions } ,
   
 
   methods: {  getRequiredTime( h,m ) { 

@@ -198,7 +198,7 @@ entryPrice = pos.sell_price
                 /// fire a target
 
 
-                targetPoint=Math.round(entryPrice*1.2,1)
+
                 let
                   transaction_type,
                   rangeBreakOut,
@@ -207,7 +207,7 @@ entryPrice = pos.sell_price
                   PlacedReverseOrder;
       
       
-      
+                  targetPoint=Math.round(entryPrice*1.2,1)
               
       
                   // this.getLatestPricePoints( instrument_token );;
@@ -550,6 +550,8 @@ if( quantity<0 ){
 
 
 
+
+      ////target part real
       if( quantity>0  && overnight_quantity == 0   ){ 
 
 
@@ -591,7 +593,9 @@ if( quantity<0 ){
 
        case ( entryPrice>d1.high ):
 
-       targetPoint = ( d1.high*1.5 ).toFixed( 1 );
+       /// if entry greater than y day high
+
+       targetPoint = ( d1.high*1.1 ).toFixed( 1 );
 
       break;
 
@@ -610,7 +614,7 @@ if( quantity<0 ){
 
 
         console.log( overnight_quantity,'overnight_quantity',quantity )
-        targetPoint = ( avg*2.5 ).toFixed( 1 );
+        //targetPoint = ( avg*1 ).toFixed( 1 );
 
 
 
@@ -639,9 +643,12 @@ if( quantity<0 ){
 
       if( lo.quantity>0 ){ 
 
-        targetPointFinal = Math.max(( cis.pricePoints.d0.high*1.3 ).toFixed( 1 ),uck-.1 ).toFixed( 1 )
+       // targetPointFinal = Math.max(( cis.pricePoints.d0.high*1. ).toFixed( 1 ),uck-.1 ).toFixed( 1 )
 
        } 
+
+
+       targetPointFinal=entryPrice*1.1
       console.log( 'ENTRY PRICE target point of script', cis.tradingsymbol,'is ',entryPrice,' and target point is for ',transaction_type,'is ', targetPointFinal,'Upper circuit is',uck )
                 this.placetargetAndStopLoss( 
                   cis,

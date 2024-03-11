@@ -30,6 +30,7 @@ Showing {{stocksPricePointsFiltered.length  }}
         <tr v-for = "( stockPpItem,index ) in stocksPricePointsFiltered" :key = "index">
             <td>{{ index+1 }} </td>
             <td>
+                {{ stockPpItem.tradingsymbol }} 
             <span class = "text-primary" v-if = "typeof stockPpItem.group!= 'undefined' ">{{ stockPpItem.group }} </span>
             <a target = "_blank" :href = "stockPpItem.chart">
             <hr>

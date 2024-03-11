@@ -20,7 +20,7 @@
     
     <minuteCandleAnalysis :instruments="instruments" />
 
-    <!-- <InsrtumentsStatusView :instruments="instruments"></InsrtumentsStatusView> -->
+   <!--  <InstrumentsStatusView :instruments="instruments"></InstrumentsStatusView> -->
    
    <TotalInstruments :instruments="instruments" />
    
@@ -44,7 +44,7 @@
       <stopLossHealthIcon :stopLossSwitchHealth="stopLossSwitchHealth" />
 
 
-       <!--  --> <MarketConnectionHelthIcon :tradeEntrySwitchHealth="tradeEntrySwitchHealth" />
+     <MarketConnectionHelthIcon :tradeEntrySwitchHealth="tradeEntrySwitchHealth" />
 
         <HeartBeatIcon :heartBeat="heartBeat" />
     </v-row>
@@ -60,7 +60,7 @@
 
 
   
->
+
 
 
 
@@ -143,7 +143,7 @@
           >get latest prices</v-btn
         >
         Closed Trades
-        <ProfitAndLossOfClosedPositions props:closedTradesScriptsPnl="closedTradesScriptsPnl" />
+        <ProfitAndLossOfClosedPositions :closedTradesScriptsPnl="closedTradesScriptsPnl" />
 
         Total :{{  closedTradesScripts.length  }} 
         <ClosedTrades :closedTradesScripts = "closedTradesScripts"></ClosedTrades>
