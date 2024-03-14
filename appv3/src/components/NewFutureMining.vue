@@ -1,336 +1,175 @@
 <template>
-  <div>
+  <v-container fluid>
 
-    <v-btn color = "red" prominent @click = "exitPositions()"> Exit all</v-btn>
+    <v-system-bar class="mb-5 mt-15 pa-5">
+      <ProfitAndLossView :totalpnl="totalpnl"  class="pa-5" :closedTradesScriptsPnl="closedTradesScriptsPnl" />
+<h/>
+<DigitCheckerForWebsocketHealth  class="pa-5" :CurrentCheckDigit="CurrentCheckDigit" :laggingCheckDigit="laggingCheckDigit" :webSocketNotActive="webSocketNotActive" />
+<HeartBeatIcon :heartBeat="heartBeat" />
 
-    <!-- <sideWiseAlerts :checkSidewaysMovementTime="checkSidewaysMovementTime" /> -->
+<softwareFlowStatus :tradeEntryFlowStatus="tradeEntryFlowStatus" />
+      <h />
+      </v-system-bar>
 
-    
-    <MarginView  v-if="liveMargin!=-1" :totalOptionPrice="totalOptionPrice" :liveMargin="liveMargin" />
-
-    <!-- <button @click = "downloadLogs">Download Logs</button> -->
-    <button @click = "openWindow()">View Logs</button>
-    <!-- <a :href = "logFileUrl" target = "_blank" v-if = "logFileUrl">View Logs</a> -->
-    <button class = "btn-primary" > toggle  view logs</button>
-   
-   
-    <!-- <LogsView :logs="logs" :viewLogs="viewLogs" /> -->
-
-<!-- {{ instruments[0].minuteCandle.data}} -->
-    
-    <minuteCandleAnalysis :instruments="instruments" />
-
-   <!--  <InstrumentsStatusView :instruments="instruments"></InstrumentsStatusView> -->
-   
-   <TotalInstruments :instruments="instruments" />
-   
-   
-
-  <softwareFlowStatus :tradeEntryFlowStatus="tradeEntryFlowStatus" />
-
-    
-
-    <v-row v-if = "instruments.length!= 0 && instruments[0] && 
-    instruments[0].pricePoints &&
-    instruments[0].pricePoints.d1">
-      <DoD1Dates :instruments="instruments" />
-
-      <stopLossTradeEntrySwitchHealth :stopLossSwitchHealth="stopLossSwitchHealth" :tradeEntrySwitchHealth="tradeEntrySwitchHealth" />
-  
-    </v-row>
-
-
-    <v-row>
+    <v-system-bar class="mb-5 mt-15 pa-5">
+      
+      
+      <TotalInstruments :instruments="instruments" />
+      <h />
+      <MarginView v-if="liveMargin !== -1" :totalOptionPrice="totalOptionPrice" :liveMargin="liveMargin" />
+      <h />
       <stopLossHealthIcon :stopLossSwitchHealth="stopLossSwitchHealth" />
+      <h />
+          <MarketConnectionHelthIcon :tradeEntrySwitchHealth="tradeEntrySwitchHealth" />
+          <h />
+          <TradeCostAndBalnceInfo :livePositionTotalCost="livePositionTotalCost" :liveBuyOrderAmount="liveBuyOrderAmount" :liveTradablebalance="liveTradablebalance" />
 
 
-     <MarketConnectionHelthIcon :tradeEntrySwitchHealth="tradeEntrySwitchHealth" />
+          <Clock :hours="hours" :minutes="minutes" :seconds="seconds" />
 
-        <HeartBeatIcon :heartBeat="heartBeat" />
+          <ForGoneProfitData :totalForgone="totalForgone" :totalForgoneFortarget="totalForgoneFortarget" :totalForgoneForStopLoss="totalForgoneForStopLoss" />
+
+  <v-icon icon="mdi-wifi-strength-4"></v-icon>
+  <v-icon icon="mdi-signal" class="ms-2">
+
+    
+  </v-icon>
+  <v-icon icon="mdi-battery" class="ms-2"></v-icon>
+
+ 
+
+</v-system-bar>
+    <v-row>
+      <v-col cols="7">
+        <div class="section">
+<v-row>
+          <v-col cols="3">
+            <label>
+
+              
+
+<input type="checkbox" v-model="showLogs">
+Show logs
+</label>
+            <v-btn class="btn-primary">Toggle View Logs</v-btn>
+          
+            
+          
+      
+          <stopLossTradeEntrySwitchHealth v-if="instruments.length !== 0 && instruments[0] && instruments[0].pricePoints && instruments[0].pricePoints.d1" :stopLossSwitchHealth="stopLossSwitchHealth" :tradeEntrySwitchHealth="tradeEntrySwitchHealth" />
+      
+            <TelegramStatus :chat_id="chat_id" />
+           
+
+          </v-col>
+          <v-col cols="7">
+
+           
+         
+         <LiveOrders :liveOrders="liveOrders" />
+       <button @click="openWindow()">View Logs</button>
+          </v-col>
+
+          <v-col cols="2">
+            <MaxTradableAmount :maxTradableAmount="maxTradableAmount" />
+
+
+          </v-col>
+        </v-row>
+        </div>
+      </v-col>
+      <v-col cols="5">
+        <div class="section">
+         
+          <minuteCandleAnalysis :instruments="instruments" />
+          
+        </div>
+      </v-col>
     </v-row>
-
-
-
-
-    {{ globalConsoleLogs.length }} globalConsoleLogs
-   
-
-
-    <v-alert >
-
-
-  
-
-
-
-
-<!-- <IndicesTable :indices = "indices"></IndicesTable> -->
-
-
-
-
-
-<label>
-      <input type = "checkbox" v-model = "showLogs">
-      Show logs
-    </label>
-<!-- <IronCondor :instruments = "instruments"></IronCondor> -->
-
-
-
-
-
-     
-<DigitCheckerForWebsocketHealth :CurrentCheckDigit="CurrentCheckDigit" :laggingCheckDigit="laggingCheckDigit" :webSocketNotActive="webSocketNotActive" />
+    <!-- <v-row>
+      <v-col cols="6">
+        <div class="section">
+          </div>
+      </v-col>
+      <v-col cols="6">
+        <div class="section">
+        
+        </div>
+      </v-col>
+    </v-row> -->
 
     <TrailingStopLossButton :trailingStopLossWithLtp="trailingStopLossWithLtp" />
+    <v-row>
+      <v-col cols="6">
+        <div class="section">
+          <v-alert>
 
-    <v-row class = "mt-1">
-      <v-col>
-        <TradeCostAndBalnceInfo :livePositionTotalCost="livePositionTotalCost" :liveBuyOrderAmount="liveBuyOrderAmount" :liveTradablebalance="liveTradablebalance" />
+
+            
+
+                 <v-btn v-if="!AutoMode" @click="AutoMode = true" title="Switch to Auto" icon color="green">
+              <v-icon>mdi-send-clock-outline</v-icon>
+            </v-btn>
+            <v-btn v-if="AutoMode" @click="AutoMode = false" title=" Switch to Manual" icon color="red">
+              <v-icon>mdi-send-lock</v-icon>
+            </v-btn>
+          </v-alert>
+          <v-btn color="red" prominent @click="exitPositions()">Exit all</v-btn>
+          <DialogForAlerts :dialog="dialog" :alerts="alerts" />
+          <v-btn color="green" @click="placeTargetsForLiveScripts()">PLACE TARGETS FOR LIVE SCRIPTS</v-btn>
+          <v-btn @click="forceUpdateMissingScripts()">Force update Missing scripts</v-btn>
+          <v-alert v-if="loadingHourlyTradingLows" type="info">Loaiding Hourly candles</v-alert>
+          <v-row>
+            <v-col>
+              <label>Force Manual reverseOrder</label>
+              <input type="checkbox" v-model="manualReverseOrder" @change="forceManualReverseOrder">
+            </v-col>
+          </v-row>
+          <ViewHourlyPricePointsOfLiveDay :hourlyPricePointsofLiveDay="hourlyPricePointsofLiveDay" :convertIsoDateToIST="convertIsoDateToIST" />
+          <v-btn @click="showModalForSquareOff()">square off selected</v-btn>
+          <button @click="review()">review</button>
+          <v-btn @click="getOrders()">Refresh orders</v-btn>
+          <v-btn @click="refreshTradeStatus()">Refresh trade status</v-btn>
+          {{ instrumentsFiltered.length }} out of {{ instrumentTokens.length }}
+        </div>
       </v-col>
-      <v-col>
-
-<v-icon>
-
-</v-icon>
-
-
-     
-      </v-col>
-      <TelegramStatus :chat_id="chat_id" />
-
-      <Clock :hours="hours" :minutes="minutes" :seconds="seconds" />
-
-      <v-col>
-        <v-btn
-          @clck = "resetUserMessages()"
-          small
-          color = "red"
-          title = "reset user messages"
-        >
-          <v-icon>mdi-power-cycle</v-icon>
-        </v-btn>
-        
-        </v-col
-      >
-
-      <MaxTradableAmount :maxTradableAmount="maxTradableAmount" />
-
-      <v-col>
-        <v-btn
-          v-if = "!AutoMode"
-          @click = "AutoMode  =  true"
-          title = "Switch to Auto"
-          icon
-          color = "green"
-        >
-          <v-icon>mdi-send-clock-outline</v-icon> </v-btn
-        ><v-btn
-          v-if = "AutoMode"
-          @click = "AutoMode  =  false"
-          title = " Switch to Manual"
-          icon
-          color = "red"
-        >
-          <v-icon>mdi-send-lock</v-icon>
-        </v-btn>
+      <v-col cols="6">
+        <div class="section">
+          <h1 class="text-success">Positions</h1>
+          <LivePos @convertIsoDateToIST="convertIsoDateToISTChild" :convertIsoDateToISTResult="convertIsoDateToISTResultChild" @getReverseOrderAndHasLiveTargetStatusForChild="getReverseOrderAndHasLiveTargetStatusForChild" :getReverseOrderAndHasLiveTargetStatusForChildResult="getReverseOrderAndHasLiveTargetStatusForChildResult" @getStopLossFromChild="getStopLossFromChild" :livePositionsDisplay="livePositionsDisplay" :getStopLossResult="stopLossForChild" />
+          
+          <InstrumentsAndActions :instrumentsFiltered="instrumentsFiltered" :changeBuyingMethod="changeBuyingMethod" :buyingPoint="buyingPoint" :enterNowToTrade="enterNowToTrade" />
+        </div>
       </v-col>
     </v-row>
-
-    <div class = "col" style = "height: 300px; overflow: auto">
-        <v-btn @click = "getLatestPricesOfClosedScripts()"
-          >get latest prices</v-btn
-        >
-        Closed Trades
-        <ProfitAndLossOfClosedPositions :closedTradesScriptsPnl="closedTradesScriptsPnl" />
-
-        Total :{{  closedTradesScripts.length  }} 
-        <ClosedTrades :closedTradesScripts = "closedTradesScripts"></ClosedTrades>
-      </div>
-    </v-alert>
-
-
-
-
-
-
-
-
-<Margin @margin-updated = "marginUpdated"></Margin>
-
-<div>
-
-
-
-
-</div>
-
-
-<DialogForAlerts :dialog="dialog" :alerts="alerts" />
-
-<v-btn color = "green"
-
-@click = "placeTargetsForLiveScripts()"
->PLACE TARGETS FOR LIVE SCRIPTS</v-btn>
-
-
-<v-btn @click = "forceUpdateMissingScripts()">Force update Missing scripts</v-btn>
-   
-
-
-    <v-alert v-if = "loadingHourlyTradingLows" type = "info">
-      Loaiding Hourly candles
-    </v-alert>
-   
-    <ForGoneProfitData :totalForgone="totalForgone" :totalForgoneFortarget="totalForgoneFortarget" :totalForgoneForStopLoss="totalForgoneForStopLoss" />
-
-   
-
-
-
-
-<v-row>
-  <v-col>
-    Force Manual reverseOrder
-
-    {{ manualReverseOrder }} 
-<input type = "checkbox"
-@change = "forceManualReverseOrder" v-model = "manualReverseOrder" 
- >
-
-  </v-col>
-</v-row>
-
-
-
-
-
-
-
-    <ViewHourlyPricePointsOfLiveDay :hourlyPricePointsofLiveDay="hourlyPricePointsofLiveDay" :convertIsoDateToIST="convertIsoDateToIST" />
-
-  
-
-    <v-btn @click = "showModalForSquareOff()">
-      square off selected
-      <v-icon></v-icon>
-    </v-btn>
-
-    <button @click = "review()">review</button>
-
-    <v-btn @click = "getOrders()">Refresh orders</v-btn>
-    <v-btn @click = "refreshTradeStatus()">Refresh trade status</v-btn>
-
-   
-
-
-    {{  instrumentsFiltered.length  }}  out of {{  instrumentTokens.length  }} 
-
-
-
-    <div class = "row">
-      <div class = "col offset">
-       <h1 class = "text-success">Positions</h1> 
-
-
-       <ProfitAndLossView
-       
-       
-       :totalpnl="totalpnl" :closedTradesScriptsPnl="closedTradesScriptsPnl" />
-        <!-- <table class = "table" v-if = "livePositions.length > 0"> -->
-
-<div class = "row">
-  <div class = "col-10">
-   
-    <LivePos
-
-
-    @convertIsoDateToIST = "convertIsoDateToISTChild"
-    :convertIsoDateToISTResult = "convertIsoDateToISTResultChild"
-@getReverseOrderAndHasLiveTargetStatusForChild = "getReverseOrderAndHasLiveTargetStatusForChild"
-:getReverseOrderAndHasLiveTargetStatusForChildResult = "getReverseOrderAndHasLiveTargetStatusForChildResult"
-
-    @getStopLossFromChild = "getStopLossFromChild"
-    
-    :livePositionsDisplay = "livePositionsDisplay"
-    :getStopLossResult = "stopLossForChild"
-    ></LivePos>
-  </div>
-  <div class = "col-2">
-  
-    <LiveOrders 
-    
-    
-    :liveOrders = "liveOrders"></LiveOrders>
-  </div>
-</div>
-
-
-<InstrumentsAndActions :instrumentsFiltered="instrumentsFiltered" :changeBuyingMethod="changeBuyingMethod" :buyingPoint="buyingPoint" :enterNowToTrade="enterNowToTrade" />
-
-
-
-       
-        <hr />
-
-        <!-- {{ livePositions }}  -->
-      </div>
-    </div>
-
-   
-  </div>
+  </v-container>
 </template>
 
 <script>
-
 import NewFutureMining from './NewFutureMining.js'
-    export default {
-        mixins: [NewFutureMining],
-    }
+import h from './h.vue'
+import dataMixin from './dataMixinOfNewFutureMining.js'
+
+export default {
+    mixins: [dataMixin,NewFutureMining],
+    data() {
+        return {
+        // Your data properties here
+        };
+    },
+    methods: {
+        // Your methods here
+        exitPositions() {
+            // Define the exitPositions method if not already defined
+        }
+    },
+    components: { h }
+}
 </script>
 
-
-
-
-
-
-
-<style lang = "scss" scoped>
-
-
-input { 
-  border: 1px solid rgb( 147, 206, 221 );
-  box-shadow: #327094;
- } 
-.fixTableHead { 
+<style scoped>
+.section {
+  height:400px; /* Adjust height as needed */
   overflow-y: auto;
- } 
-.fixTableHead thead th { 
-  position: sticky;
-  top: 0;
- } 
-table { 
-  border-collapse: collapse;
-  width: 100%;
- } 
-th,
-td { 
-  padding: 8px 15px;
-  border: 2px solid #327094;
- } 
-th { 
-  background: #93cedd;
- } 
-// .red { 
-//   background: white;
-//   color: rgb( 109, 86, 86 );
-
-//  } 
-
-// .green { 
-//   background: white;
-//  color: rgb( 94, 136, 94 );
-
-//  } 
+}
 </style>

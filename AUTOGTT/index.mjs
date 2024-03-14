@@ -5,7 +5,7 @@ function CheckNewDayOrInvalidAccessToken(gtt) {
   if (gtt.day !== now.getDay() || gtt.access_token == null) {
 
     gtt.day =now.getDay();
-    console.log("It's a new day or access token is not available.");
+    console.log("It's a new day or access token is not available.",gtt.access_token );
     return true; // Indicate that a new day or invalid access token
   }
   return false;

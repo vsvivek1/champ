@@ -1,10 +1,10 @@
 <template>
-	<p v-if="liveMargin && liveMargin.equity && liveMargin.equity.utilised && liveMargin.equity.utilised.debits">
+	<div v-if="liveMargin && liveMargin.equity && liveMargin.equity.utilised && liveMargin.equity.utilised.debits">
 	  Margin: {{ liveMargin.equity.utilised.margin }} TOTAL OPTION PRICE: {{ totalOptionPrice }} OPTION PREMIUM :{{ liveMargin.equity.utilised.option_premium }}
-	</p>
-	<p v-else>
+	</div>
+	<div v-else>
 	  Margin is not available yet.
-	</p>
+	</div>
   </template>
   
   <script>

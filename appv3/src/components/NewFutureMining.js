@@ -61,6 +61,8 @@ import TrailingStopLossButton from './TrailingStopLossButton.vue'
 import TradeCostAndBalnceInfo from './TradeCostAndBalnceInfo.vue'
 import ProfitAndLossOfClosedPositions from './ProfitAndLossOfClosedPositions.vue'
 import InstrumentsStatusView  from './InstrumentsStatusView.vue';
+
+import  {orderUpdateMixin}  from './order_update_mixin';
 export const socket  =  io( "http://127.0.0.1:4000"
 
 ,
@@ -71,9 +73,11 @@ export const socket  =  io( "http://127.0.0.1:4000"
  );
 
 
-socket.on( "connect_error", ( err )  => { 
+socket.on( "connect_error",async  ( err )  => { 
 
     console.log( `connect_error due to ${ err } ` );
+
+    await this.setInstruments()
   
     // this.cl( `connect_error due to ${ err } ` );
    }  );
@@ -532,7 +536,7 @@ console.log(this.instrumentTokens);
 
 
 
-  mixins: [instantiateHistoricalDataFetchMixin,mutateWithLtp,getRequiredTimeMixin,newFutureMiningMixin,sessionMixin,tradingMixin,placeTargetsForLiveScripts,telegramMixin],
+  mixins: [instantiateHistoricalDataFetchMixin,mutateWithLtp,orderUpdateMixin,getRequiredTimeMixin,newFutureMiningMixin,sessionMixin,tradingMixin,placeTargetsForLiveScripts,telegramMixin],
 
 
 
@@ -708,7 +712,57 @@ if( typeof this.livePositions  == 'undefined'  ){
 
   
 
-  methods: {  getRequiredTime( h,m ) { 
+  methods: { 
+    
+    requireJson( url ){ 
+      console.log( url )
+            return new Promise( async ( res,rej )=>{ 
+            
+            let a =  await fetch
+            ( url ).then( 
+              
+              r=>{ 
+      
+      if( r ){ 
+        return   r.json(  )
+       } 
+      
+             
+               } 
+              
+              
+             
+              
+               );
+            
+            res( a );
+             } )
+            
+            
+            
+             } ,
+    isAfterMarketHours() {
+      const now = new Date();
+      const currentDay = now.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
+      const currentTime = now.getHours() * 100 + now.getMinutes(); // Convert current time to a comparable number (HHMM format)
+    
+      const isWeekend = currentDay === 0 || currentDay === 6; // Sunday or Saturday
+      const isSpecialTime = currentTime > 330 || currentTime < 915; // After 3:30 PM or before 9:15 AM
+    
+      // List of holidays in "YYYY-MM-DD" format
+      const holidays = [
+        "2024-01-01",
+        "2024-05-27",
+        // Add more holidays as needed
+      ];
+    
+      const formattedDate = now.toISOString().split('T')[0];
+      const isHoliday = holidays.includes(formattedDate); // Check if today is a holiday
+    
+      return isWeekend || isSpecialTime || isHoliday;
+    },
+    
+    getRequiredTime( h,m ) { 
             const today  =  new Date(  ); // Current date
           
           //   console.log( today );
@@ -1557,13 +1611,8 @@ else{
       this.itype  =  this.$route.params.itype;
 
   
-
-      if( !instruments || !hourlyPricePointsofLiveDay1 ){ 
-
-
-        console.log( 'instruments not loaded fro setting trading type' )
-        return false;
-       } 
+      //|| !hourlyPricePointsofLiveDay1 
+     
 
     
 
@@ -1616,15 +1665,15 @@ let instrumentsForMining  =  instrumentsForMining1
 this.instruments  =  instrumentsForMining;
 this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
 
-// let kk = await    this.setInstrumentTokens();
+
 
  } else if( this.itype == "NFO" ){ 
   this.setter  =  shareF;
 
   const urlForMiningInstruments = "../../../instruments/instrumentsForMining.json"
-instruments = await requireJson( urlForMiningInstruments );
+instruments = await this.requireJson( urlForMiningInstruments );
 
-console.log( instruments,'inst' )
+
 
 
 
@@ -1638,21 +1687,21 @@ console.log( instruments,'inst' )
 
 
 
-  this.hourlyPricePointsofLiveDay1  = hourlyPricePointsofLiveDay1;
+  //this.hourlyPricePointsofLiveDay1  = hourlyPricePointsofLiveDay1;
 
       // this.cl( 'this.hourlyPricePointsofLiveDay23',this.hourlyPricePointsofLiveDay )
   
   
   
   
-      let hourlyPricePointsofLiveDay  =  Object.
+      /* let hourlyPricePointsofLiveDay  =  Object.
       values( this.hourlyPricePointsofLiveDay1 ).
       
        filter(( i )  => i !=  -1 );
 
 
       
-      this.hourlyPricePointsofLiveDay = [...hourlyPricePointsofLiveDay]
+      this.hourlyPricePointsofLiveDay = [...hourlyPricePointsofLiveDay] */
 
       // this.cl( this.hourlyPricePointsofLiveDay )
     
@@ -1662,9 +1711,16 @@ console.log( instruments,'inst' )
 this.instruments  = instrumentsForMining;
 this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
 
-this.setInstrumentTokens()
+if( !instruments ){ 
 
-// let kk = await    this.setInstrumentTokens();
+
+  console.log( 'instruments not loaded fro setting trading type',instruments )
+  return false;
+ } 
+
+await this.setInstrumentTokens()
+
+
 
  }  else if ( this.itype == "NSE" ){ 
   let instrumentsForMining1  =  
@@ -1676,6 +1732,7 @@ await this.requireJson( "../../../instruments/" + this.setter );
     ( i )  => i.instrument_type  ==  "EQ" 
    )
   .filter(( item, index, arr )  => arr.indexOf( item )== index );
+
   this.hourlyPricePointsofLiveDay1  = 
   await  this.requireJson( "../../../instruments/hourlyCandleData.json" );
 
@@ -3879,62 +3936,7 @@ return
          }  )
  } ,
 
-    setPreviousPriceAndLastPrice( instrument_token,last_price ){ 
-
-
-
-try { 
-	
-	      if( isNaN( instrument_token )){ 
-	
-	
-	        this.cl( 'is nan issue instriment token in setprevios and last price' )
-	        return  false;
-	       } 
-	
-	      if( this.instruments.filter( 
-	            ( i )  => i.instrument_token  ==  instrument_token
-	           ).length == 0 ){ 
-	
-	            this.cl( 'is nan issue instriment token in setprevios and last price' )
-	
-	            return false;
-	           } 
-	
-	
-	
-	
-	      this.$set( 
-	          this.instruments.filter( 
-	            ( i )  => i.instrument_token  ==  instrument_token
-	           )[0],
-	
-	          "previousPrice",
-	                    this.instruments.filter( 
-	            ( i )  => i.instrument_token  ==  instrument_token
-	           )[0].last_price
-	         );
-	        
-
-          this.instruments.filter( 
-	          ( i )  => i.instrument_token  ==  instrument_token
-	         )[0].last_price = last_price;
-	      
-  
-	
-	     
-	
-	        return true;
- }  catch ( error ) { 
-	
-
-  this.cl( error,'error of set previos price' );
-
-  return false
- } 
-
-
-     } ,
+   
 
     setLastPriceBasedOnTradeDirection( cis,element ){ 
 try{ 
@@ -4687,7 +4689,7 @@ new Promise( async ( res,rej ) =>{
       .then( async response  => { 
         this.instruments  =  response.data;
  instruments = this.instruments;
-  this.setInstrumentTokens()
+  await this.setInstrumentTokens()
 
   this.initiateHistoricalDataFetch(this.instrumentTokens )
        }  )
@@ -4876,8 +4878,16 @@ order.variety  =  "AMO";// prevent buy am
         order.variety  =  "regular";
 
        } 
-     
 
+
+       if (this.isAfterMarketHours()) {
+        order.variety  =  "amo";
+        console.log("Action should be executed.");
+      } else {
+        order.variety  =  "regular";
+      }
+     
+      order.variety  =  "regular";
       order.params  =  {  } ;
       order.params.exchange  =  this.itype;
       order.params.tradingsymbol  =  tradingsymbol;
@@ -7270,7 +7280,7 @@ return false;
 
  } ,
 
-    setInstrumentTokens() { 
+    async setInstrumentTokens() { 
 
 
     
@@ -7285,7 +7295,7 @@ return false;
         this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
         let j = JSON.stringify( this.instrumentTokens );
 
-        console.log( 'Number of scripts for Ticks is %s',this.instrumentTokens.length )
+        console.log( 'Going to subscribe ticks Number of scripts for Ticks is %s',this.instrumentTokens.length )
 
         socket.emit( "subscribe-orders", j );
 
@@ -7314,9 +7324,16 @@ return false;
           script.filter(( e )  => e.instrument_token  ==  element.instrument_token )
          );
         // return;
+
+        
+
+
+
         this.instruments.filter( 
           ( e )  => e.instrument_token  ==  instrument_token
          )[0].last_price  =  last_price;
+
+
 
         this.symbols
           .filter(( o )  => o.instr  ==  instrument_token )
@@ -7356,165 +7373,7 @@ return false;
      } ,
    } ,
 
-  data() { 
-    return { 
-      ohlcData:[],
-      allPositions:[],
-      exitNow:false,
-      viewLogs:false,
-      logs: [],
-      tradeEntryFlowStatus:'Ticker not Started 0',
-      missingScriptUpdating:false,
-      stopLossSwitchHealth:false,
-      tradeEntrySwitchHealth:false,
-      columns: [
-        { 
-          label: "Symbol",
-          field: "tradingsymbol",
-         } ,
-        { 
-          label: "Buy Price",
-          field: "buyPrice",
-          type: "number",
-          sortable: true,
-         } ,
-        { 
-          label: "Buy Time",
-          field: "buyTime",
-          sortable: true,
-         } ,
-        { 
-          label: "Sell Price",
-          field: "sellPrice",
-          type: "number",
-          sortable: true,
-         } ,
-        { 
-          label: "Sell Time",
-          field: "sellTime",
-          sortable: true,
-         } ,
-        { 
-          label: "Profit/Loss",
-          field: "profit",
-          type: "number",
-          sortable: true,
-         } ,
-      ],
-      executedTrades:[],
-      currentTradingsymbol:'',
-      currentTradingsymbolAverage:-1,
-
-      newTradingObj : { 
-    tradingsymbol: '',
-    buyPrice: 0,
-    sellPrice: 0,
-    pnl: 0,
-    strategy: '',
-    hasTargetHit: false,
-    hasStopLossHit: false,
-    hasCycleCompleted: false,
-    targetPrice: 0,
-    stopLossPrice: 0,
-    buyTime: '',
-    sellTime: '',
-    typeOfsquareOff: ''
- } ,
-
-
-      scriptsWithConditionGain:-1,
-      scriptsWithCondition:[],
-      instances: [],
-      showLogs:true,
-      globalConsoleLogs:[],
-      nifty:-1,
-
-      banknifty:-1,
-      convertIsoDateToISTResultChild:'',
-      getReverseOrderAndHasLiveTargetStatusForChildResult:{  } ,
-      stopLossForChild:-1,
-      liveInstrumentSymbols:[],
-      proxyTotal:0,
-      proxyPositions:[],
-      proxyTrade:false,
-      dialog:false,
-      alerts:[],
-      liveMargin:-1,
-      showLongtradeShortTradeTable:false,
-      showStrategiesTable:false,
-      showStatusTable:false,
-  hourlyPricePointsofLiveDay1:'',
-       hourlyPricePointsofLiveDay:'',
-      itype:'',
-      setter:'',
-     manualReverseOrder:false,
-     manualReverseOrderStart:false,
-      hasStartedGetLivePositions:false,
-      hasStartedGetOrders:false,
-      currentPriceUpdate:'x',
-      previousPriceUpdate:'y',
-      previousOrderUpdate:{  } ,
-      orderUpdateProcessing:false,
-      times: [0, 16, 31, 46],
-      refreshingTradeStatus: false,
-      placingReverseOrderInProgress: false,
-      refreshingStatus: false,
-
-      holdingScripts: [],
-
-      allOrders: [],
-      executedOrders: [],
-      totalForgoneForStopLoss: 0,
-      totalForgoneFortarget: 0,
-      totalForgone: 0,
-      updatingInProgress: [],
-      newOrder: [],
-      loadingHourlyTradingLows: false,
-      closedTradesScripts: [],
-      tradingAlerts: [],
-      liveScript: {  } ,
-      liveOrders: [],
-      webSocketNotActive: false,
-      laggingCheckDigit: -1,
-      CurrentCheckDigit: 0,
-      hourlyPricePointsofLiveDay: [],
-      livePositionScripts: [],
-      liveOrderScripts: [],
-      liveOrderPlacedScripts: [],
-      livePositionsSelected: [],
-      modalShow: false,
-      proposedBuyAmount: 0,
-      pnl: 0,
-      totalBuyOrderLivePlacedBySoftware: 0,
-
-      CurrentTick: [],
-      orderArray: [],
-      chat_id: -1,
-      token: "2042279965:AAGudvLvwhEzbiz2G8f-RmeeADvzk0aY8YE",
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
-      heartBeat: false,
-      liveBuyOrderAmount: 0,
-      userMessages: [],
-      maxTradableAmount: 100000,
-      placedAmountbyMining: 0,
-      livePositionTotalCost: -2,
-      counter: 0,
-      AutoMode: false,
-      orders: [],
-      buyingPoint: ["LTP", "MARKET", "MAX"],
-
-      targetPc: 1.1,
-      livePositions: [],
-      instrumentTokens: [],
-      symbols: [],
-      ciss: [],
-      displayingInstruments: [],
-      instruments: [],
-      ohlc: [],
-     } 
-   } ,
+  
 
   name: "Mining",
  //} 

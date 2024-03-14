@@ -1,5 +1,6 @@
 process.stdout.write( '\033c' );
 const Fs  =  require( 'fs' )
+const fs = require('fs');
 const mongoose  =  require( 'mongoose' );
 const Path  =  require( 'path' )
 const Axios  =  require( 'axios' );
@@ -770,53 +771,28 @@ async function writeFinalScriptsTofile( jsonObj2, jsonObjWithOutCriteria ) {
 
 
 
-function createAndMoveFileFromJson( fileOutputName, jsonObj2, targetDir ) { 
-
-try { 
-	  return new Promise(( res, rej )  => { 
-	
-	
-	
-	
-	    Fs.writeFile( fileOutputName, JSON.stringify( jsonObj2 ), 'utf8',
-	
-	      function ( err ) { 
-	        if ( err ) { 
-	          console.log( "An error occured while writing JSON Object to File." );
-	          return console.log( err );
-	         } 
-	        // console.log( fileOutputName + "JSON file has been saved." );
-	
-	
-	        Fs.copyFile( FILE_LOCATION+'/instrumentsForMining.json', targetDir,
-	          ( err )  => { 
-	            if ( err ) throw err;
-	            // console.log( 'source.txt was copied to destination.txt' );
-	            res( true );
-	            return;
-	           }  );
-	
-	
-	          res( true );
-	          return;
-	
-	        
-	
-	       }  );
-	      res( true );
-	
-	      return;
-	
-	   }  )
-	
- }  catch ( error ) { 
-  const lineNumber  =  error.stack.split( '\n' )[1].match( /\d+/ )[0];
-  const functionName  =  error.stack.split( '\n' )[1].match( /\w+\s+\w+/ )[0].trim(  );
+ function createAndMoveFileFromJson(fileOutputName, jsonObj2, targetDir) {
+	return new Promise((resolve, reject) => {
+	  fs.writeFile(fileOutputName, JSON.stringify(jsonObj2), 'utf8', (err) => {
+		if (err) {
+		  console.error("An error occurred while writing JSON Object to File.");
+		  reject(err);
+		  return;
+		}
+		
+		fs.copyFile(FILE_LOCATION + '/instrumentsForMining.json', targetDir, (err) => {
+		  if (err) {
+			console.error("An error occurred while copying the file.");
+			reject(err);
+			return;
+		  }
+		  console.log('File copied successfully.');
+		  resolve(true);
+		});
+	  });
+	});
+  }
   
-  console.error( `Error occurred in function "${ functionName } " on line ${ lineNumber } ` );
- } 
- } 
-
 function overnightScripts( jsonObj2 ) { 
 
 

@@ -48,16 +48,19 @@ let minuteCandle={};
       // this.historicalData[symbol]['ohlc'] = data;
 
       minuteCandle.data=data;
+      minuteCandle.signal = getCandlestickSignal(obj)
+
+      console.log(minuteCandle.signal,'minuteCandle.signal')
       // minuteCandle.signal=
-    
-      this.historicalData[symbol]['signal']=minuteCandle.signal = getCandlestickSignal(data);;
+      this.$set(obj,'minuteCandle',minuteCandle);
+    //  this.historicalData[symbol]['signal']=minuteCandle.signal = getCandlestickSignal(obj);;
       // minuteCandle.data=data;
      
       // minuteCandle.signal=getCandlestickSignal(data)
       //console.log(symbol,this.historicalData[symbol]['signal'],'signal')
 
 
-      this.$set(obj,'minuteCandle',minuteCandle);
+     
       
 
       // for(let i =0;i<data.lenght;i++){

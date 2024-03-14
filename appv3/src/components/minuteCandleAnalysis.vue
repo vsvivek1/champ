@@ -21,14 +21,15 @@
 			</td>
 			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0">
 			  {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].IST }} IST
-			  {{ instrument.minuteCandle.signal.CandleColor }}
+			  
 			</td>
 			<td v-else>N/A</td>
 
 
 			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0">
+				{{ instrument.minuteCandle.signal}}
 			 
-			  {{ instrument.minuteCandle.signal.CandleColor }}
+			  
 			</td>
 			<td v-else>N/A</td>
 
@@ -39,6 +40,8 @@
   </template>
   
   <script>
+
+  import getCandlestickSignal from './getCandleStickSignal';
   export default {
 	props: {
 	  instruments: {

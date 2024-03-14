@@ -13,9 +13,37 @@ function convertToIndianTime(utcTimeString) {
 
   return indianTimeString;
 }
-function getCandlestickSignal(ohlcData) {
+function getCandlestickSignal(obj) {
+
+  //console.log(obj,'obj')
+
+  if(
+    typeof obj=='undefined' ||
+    typeof obj['minuteCandle']=='undefined' ||
+    typeof obj['minuteCandle']['data']=='undefined' 
+     
+    
+    
+    ){
+
+      console.log(obj,'issue signal')
+      return 'noSignal';
+    }
+
+  let minuteCandle=obj['minuteCandle']
+
+  
 
 
+let ohlcData=minuteCandle['data'];
+
+//console.log(ohlcData,'od')
+let ts=obj.tradingsymbol
+if(typeof ohlcData[ohlcData.length-1]=='undefined'){
+
+ 
+  return 'noSignal'
+}
   // console.log(ohlcData,'ohlcData')
 
   let indiantime=convertToIndianTime(ohlcData[ohlcData.length-1].date);
@@ -31,7 +59,7 @@ function getCandlestickSignal(ohlcData) {
     // console.log('funtion called f1',ohlcData);
     if (ohlcData.length < 3) {
       console.error('Insufficient OHLC data');
-      return { candleColor:CandleColor,signal: 'No signal detected start' };
+      return { candleColor:CandleColor,signal: 'Insufficient OHLC data' };
     }
   
     // console.log('funtion called',ohlcData[ohlcData.length - 2]);
@@ -44,6 +72,14 @@ function getCandlestickSignal(ohlcData) {
 
     // console.log(lowerShadowSize,'lowerShadowSize')
     // print(lowerShadowSize,'lowerShadowSize')
+
+
+
+    if(lowerShadowSize>bodySize*2 && upperShadowSize<lowerShadowSize){
+
+      console.log('long tail for',ts);
+      return { candleColor:CandleColor,signal: 'longTail', target: high + (high - low), stoploss: low - (high - low) };
+    }
   
     // Bullish Engulfing
     if (close > open && prevClose > prevOpen && close > prevOpen && open < prevClose) {
@@ -130,7 +166,7 @@ function getCandlestickSignal(ohlcData) {
       }
     }
     // console.log('funtion called f5');
-    return { candleColor:CandleColor,signal: 'No signal detected', };
+    return { candleColor:CandleColor,signal: 'No signal detected Fianlly', };
   }
   
   // Example usage:

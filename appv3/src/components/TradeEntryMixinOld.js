@@ -7,7 +7,7 @@ tradeEntry( instrument_token,inst = cis,cis,element ){
     try { 
 
         
-this.cl('from trade entry mixin');
+//this.cl('from trade entry mixin');
         // return;
 
 

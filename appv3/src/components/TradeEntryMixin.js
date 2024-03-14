@@ -4,66 +4,102 @@ const TradeEntryMixin = {
   methods: {
     tradeEntry(instrument_token, inst = 'cis', cis, element) {
       try {
-         console.log('from trade entry mixin');
+          let shouldProceed = false;
+  
+          if (typeof cis.previous_last === 'undefined') {
+              shouldProceed = false;
+              return;
+          }
+  
+          const isBefore15Minutes = this.checkTimeDifference(element.last_traded_time);
+          if (isBefore15Minutes) {
+              this.tradeEntryFlowStatus = 'LAST TRADED TIME IS BEFORE 15 MINUTES. IGNORING TRADE ENTRY for ' + cis.tradingsymbol;
+              return false;
+          }
+  
+          let metCriteria = [];
 
-        this.triggers(element, cis);
+          if(cis.previous_last==0|| typeof cis.previous_last=='undefined' )
 
-        const isBefore15Minutes = this.checkTimeDifference(element.last_traded_time);
+          {
+            this.shouldProceed = false;
+            return false;
 
-        if (isBefore15Minutes) {
-          console.log('LAST TRADED TIME IS BEFORE 15 MINUTES. IGNORING TRADE ENTRY');
-         // return false;
-        }
+          }
 
-        let shouldProceed = true; // Flag to determine whether to proceed
-let metCriteria = []; // Array to store names of conditions that were met
+          if(typeof cis.minuteCandle!='undefined'){
+            console.log(cis.minuteCandle.signal,'minute signal')
 
-//if (!this.checkNiftyStatus("NIFTY 50")) {
-if (false) {
-    this.cl("Condition check for 'checkNiftyStatus' not met no proceeding from shouldProceed");
-    shouldProceed = false;
-} else {
-    metCriteria.push("checkNiftyStatus");
-}
-if (!this.dailyRangeBreakout(element, cis)) {
-     this.cl("Condition check for 'dailyRangeBreakout' not met");
-    shouldProceed = false;
-} else {
-    metCriteria.push("dailyRangeBreakout");
-}
-if (!this.yesterdayCloseStrategy(element, cis)) {
-     this.cl("Condition check for 'yesterdayCloseStrategy' not met");
-    shouldProceed = false;
-} else {
-    // metCriteria.push("yesterdayCloseStrategy");
-}
-// Add similar blocks for other conditions...
+          }
+          
+  
+          switch (true) {
+             /*  case !this.checkNiftyStatus("NIFTY 50"):
+                  this.cl("Condition check for 'checkNiftyStatus' not met no proceeding from shouldProceed");
+                  this.tradeEntryFlowStatus = 'Condition check for \'checkNiftyStatus\' not met no proceeding from shouldProceed ' + cis.tradingsymbol;
+                  shouldProceed = false;
+                  break; */
+              case this.yesterDayHighCross(cis):
 
-// If any condition is true, execute the function
-if(shouldProceed)
-console.log({shouldProceed});
-shouldProceed=true
-//should
-let sellersLowestPrice=cis.last_price;
-if (shouldProceed) {
-    // Execute the function with the specified parameters
-    this.proceedForEntry(
-        instrument_token,
-        cis,
-        element,
-        sellersLowestPrice,
-        "long",
-        metCriteria // Pass the array of met criteria
-    );
-}
+              let exit={};
+              exit.target=cis.dailyRangeBreakout;
+              exit.stopLosss=cis.pricePoints.d1.low*1.1;
+              this.$set(cis,'tradeEntrySignal','yesterdayHighCross');
+              this.$set(cis,'signal',exit)
+                  this.shouldProceed = true;
+                  break;
+              case this.dailyRangeBreakout(element, cis):
+                  this.cl("Condition check for 'dailyRangeBreakout' not met");
+                  this.tradeEntryFlowStatus = 'Condition check for \'dailyRangeBreakout\' not met' + cis.tradingsymbol;
+                
+                  this.$set(cis,'tradeEntrySignal','daiulyRangeBreakout');da
+                  shouldProceed = true;
 
-        
+                  this.$set(cis,'tradeEntrySignal','yesterdayHighBreakOut');
+                
+                  break;
+              case this.yesterdayCloseStrategy(element, cis):
+                  this.cl("Condition check for 'yesterdayCloseStrategy' not met");
+                  shouldProceed = true;
+                  break;
 
+                 // case cis.minuteCandle.signal=='longTail':
+
+                  this.$set(cis,'tradeEntrySignal','longTail');
+
+                  shouldProceed==true;
+                  break;
+              default:
+                  console.log({ shouldProceed }, cis.tradingsymbol);
+
+                  shouldProceed = false;
+                  // metCriteria.push("yesterdayCloseStrategy");
+                  break;
+
+                  
+          }
+  
+          if (shouldProceed) {
+              var sellersLowestPrice = cis.last_price;
+
+
+              var sellersLowestPrice=cis.last_price;
+
+              this.proceedForEntry(
+                  instrument_token,
+                  cis,
+                  element,
+                  sellersLowestPrice,
+                  "long",
+                  metCriteria
+              );
+          }
       } catch (error) {
-        console.log("Error in trade entry function:", error);
-        return false;
+          console.log("Error in trade entry function:", error);
+          return false;
       }
-    },
+  },
+  
 
     checkTimeDifference(lastTradedTime) {
       const lastTradedDate = new Date(lastTradedTime);
@@ -85,7 +121,46 @@ if (shouldProceed) {
       // Example: Your original check Nifty status logic here
     },
 
+    previousPriceCheck(cis){
+      
+if (typeof cis.previous_last=='undefined') {
+
+  return false
+  console.log(cis.previous_last,'pvs lst')
+}
+
+
+      if(cis.previous_last>cis.last_price){
+
+        return false;
+        this.cl('SEEMS PRICE IS COMING DOWN TO BREAK OUT POIINT FOR',cis.tradingsymbol,'pvs',cis.previous_last,'current',)
+        return false;
+      }else{
+
+        return true
+      }
+    },
+
+yesterDayHighCross(cis){
+
+  if(!this.previousPriceCheck(cis)){
+
+    return false;
+  }
+
+  if(cis.pricePoints.d1.high>cis.last_price){
+
+    return true
+  }
+
+},
+
     dailyRangeBreakout(element, cis) {
+
+      if(! this.previousPriceCheck(cis)){
+
+        return false
+      }
         // Calculate the percentage change from open to high
         const percentageChange = (element.ohlc.high - element.ohlc.open) / element.ohlc.open;
       
@@ -139,6 +214,13 @@ if (shouldProceed) {
       ,
 
       yesterdayCloseStrategy(element, cis) {
+
+        if(! this.previousPriceCheck(cis)){
+
+          return false
+        }
+         
+
         // Check if the last traded price is greater than or equal to yesterday's high
         const isLastPriceGreaterThanOrEqualToYesterdayHigh = element.last_price >= cis.pricePoints.d1.high;
       

@@ -386,8 +386,8 @@ async createTargetOrders(){
     
     if(!placedOrder && typeof instrument.last_price!='undefined'){
 
-      console.log('2')
-     let next=t.levels.filter(level=>level>Max(avg*1.01,instrument_last_price))[0];
+      //console.log('2')
+     let next=t.levels.filter(level=>level>Math.max(avg*1.01,instrument.last_price))[0];
 
 
 

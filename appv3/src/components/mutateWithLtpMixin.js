@@ -10,14 +10,105 @@ const mar = function checkMarubozo(element) {
 
 const mutateWithLtp = {
     methods: {
+      setLiveTargetAndPosition(instrument_token, livePosObject, liveOrderObj) {
+        if (typeof livePosObject != undefined && typeof liveOrderObj != undefined) {
+            const instrumentToUpdate = this.instruments.find(i => i.instrument_token == instrument_token);
+            if (instrumentToUpdate) {
+                this.$set(instrumentToUpdate, 'hasLivePosition', true);
+                this.$set(instrumentToUpdate, 'hasLiveTarget', true);
+                this.$set(instrumentToUpdate, 'liveOrder', liveOrderObj);
+                this.$set(instrumentToUpdate, 'livePosition', livePosObject);
+                this.cl('SETTING OF LIVE TARGET LIVE POS');
+            } else {
+                this.cl('Instrument not found for token: ' + instrument_token);
+            }
+        } else {
+            const instrumentToUpdate = this.instruments.find(i => i.instrument_token == instrument_token);
+            if (instrumentToUpdate) {
+                this.$set(instrumentToUpdate, 'hasLivePosition', false);
+                this.$set(instrumentToUpdate, 'hasLiveTarget', false);
+                this.$set(instrumentToUpdate, 'liveOrder', null);
+                this.$set(instrumentToUpdate, 'livePosition', null);
+            }
+            this.cl('Live position or live order is not defined.');
+        }
+    },
+
+      setPreviousPriceAndLastPrice( instrument_token,last_price ){ 
+
+
+
+        try { 
+          
+                if( isNaN( instrument_token )){ 
+          
+          
+                  this.cl( 'is nan issue instriment token in setprevios and last price' )
+                  return  false;
+                 } 
+          
+                if( this.instruments.filter( 
+                      ( i )  => i.instrument_token  ==  instrument_token
+                     ).length == 0 ){ 
+          
+                      this.cl( 'is nan issue instriment token in setprevios and last price' )
+          
+                      return false;
+                     } 
+          
+          
+          
+          
+                this.$set( 
+                    this.instruments.filter( 
+                      ( i )  => i.instrument_token  ==  instrument_token
+                     )[0],
+          
+                    "previousPrice",
+                              this.instruments.filter( 
+                      ( i )  => i.instrument_token  ==  instrument_token
+                     )[0].last_price
+                   );
+                  
+
+                   this.$set( 
+                    this.instruments.filter( 
+                      ( i )  => i.instrument_token  ==  instrument_token
+                     )[0],
+          
+                    "previous_last",
+                              this.instruments.filter( 
+                      ( i )  => i.instrument_token  ==  instrument_token
+                     )[0].last_price
+                   );
+        
+                  this.instruments.filter( 
+                    ( i )  => i.instrument_token  ==  instrument_token
+                   )[0].last_price = last_price;
+                
+          
+          
+               
+          
+                  return true;
+         }  catch ( error ) { 
+          
+        
+          this.cl( error,'error of set previos price' );
+        
+          return false
+         } 
+        
+        
+             } ,
       async mutateWithLtp(s) {
 
-
-        if(this.seconds!=58){
+        this.heartBeatAndCurrentCheckDigit();
+        if(this.seconds<=58){
 
 
           this.cl('not 58')
-          return ;
+        //  return ;
         }else{
           this.cl('yes its  58')
 
@@ -29,7 +120,7 @@ const mutateWithLtp = {
           //return;
 
         } */
-        this.heartBeatAndCurrentCheckDigit();
+        
 
   
         if (this.hasStartedGetOrders || this.hasStartedGetLivePositions || this.refreshingTradeStatus) {
@@ -54,11 +145,14 @@ const mutateWithLtp = {
 
           this.tradeEntryFlowStatus = 'Inside mutate with ltp 3';
           const instrument_token = element.instrument_token;
+          
          
          
 
           
           let cis = this.instruments.find(i => i.instrument_token == instrument_token);
+         
+         
 
           
   
@@ -69,28 +163,35 @@ const mutateWithLtp = {
             await this.updateMissingScriptInInstrumetsFile(JSON.stringify([instrument_token]));
             return false;
           }
+
+          let tradingsymbol = cis.tradingsymbol;
   //  checkMaru
        
   // checkMarubozo(element)
-  
+
           this.currentTradingsymbol = cis.tradingsymbol;
           const lp1 = element.last_price;
+
+          
   
           let ma = this.calculateMovingAverage(cis);
           let ep = ma;
           let exit = element.ohlc.high * 1.1;
   
-          if (!cis) {
-            this.tradeEntryFlowStatus = 'CIS undefined 6';
-            this.cl('cur instru type undefined frpn s so I am return nign false @7071', instrument_token);
-            return false;
-          }
+         
   
           this.$set(cis,'tick',element)
 
           //console.log(cis.tradingsymbol,cis.tick);
           const last_price = element.last_price;
-          this.setPreviousPriceAndLastPrice(instrument_token, last_price);
+          if(!this.setPreviousPriceAndLastPrice(instrument_token, last_price))
+          {
+
+            this.tradeEntryFlowStatus='Some issue with setting last price and previos last price'
+            return false;
+          }
+          
+          
   
 
 
@@ -106,15 +207,12 @@ const mutateWithLtp = {
           //   return false;
           // }
   
-          let livePosObject = this.livePositions.find(lp => lp.instrument_token === instrument_token);
-          let liveOrderObj = this.liveOrders.find(lo => lo.instrument_token === instrument_token);
   
-          if (livePosObject !== undefined && liveOrderObj !== undefined) {
-            this.$set(this.instruments.find(i => i.instrument_token === instrument_token), 'hasLivePosition', true);
-            this.$set(this.instruments.find(i => i.instrument_token === instrument_token), 'hasLiveTarget', true);
-            this.cl('SETTING OF LIVE TARGET LIVE POS');
+          if (typeof livePosObject != 'undefined' && typeof liveOrderObj != 'undefined') {
+        this.setLiveTargetAndPosition(instrument_token, livePosObject, liveOrderObj);
           }
-  
+
+        
           let hasLivetargetFromcis = cis.hasLiveTarget;
           let hasLivePositionFromcis = cis.hasLivePosition;
   
@@ -132,7 +230,7 @@ const mutateWithLtp = {
               average_price = cis.pricePoints.d1.high;
             }
   
-            let tradingsymbol = cis.tradingsymbol;
+           
             this.currentTradingsymbolAverage = { instrument_token, tradingsymbol, average_price };
   
             if (!this.livePositions.some(lp => lp.instrument_token === cis.instrument_token)) {
@@ -150,8 +248,13 @@ const mutateWithLtp = {
             let PlacedReverseOrder = this.instruments.find(i => i.instrument_token === instrument_token).PlacedReverseOrder;
   
             if (hasLivePositionFromcis && hasLivetargetFromcis) {
+
+              ////proceed for stop losss 
               this.stopLossTargetSwitch(quantity, last_price, high, low, bidPrice, offerPrice, cis, element, livePnlOffered, lpCurrent);
             } else {
+
+
+
               this.cl('NO LIVE TARGETS FOR ', cis.tradingsymbol);
   
               let lnLive = this.liveOrders.some(lo => lo.instrument_token === instrument_token);
@@ -170,7 +273,7 @@ const mutateWithLtp = {
   
          this.cl('element here 142 from mutate with ltp mixin');
           if (cis.enterNowToTrade === false) {
-            this.tradeEntryFlowStatus = 'INSIDE ENTER NOW TO TRADE 8';
+            
             let inst = cis;
             
             // let isHigherLows = this.higherLowsCheck(cis);
@@ -188,6 +291,8 @@ const mutateWithLtp = {
   
 
             this.cl('BEFORE TRADE ENTRY MUTATE');
+
+            this.tradeEntryFlowStatus = 'Reached before  trade Entry';
              this.tradeEntry(instrument_token, inst, cis, element);
           }
         }

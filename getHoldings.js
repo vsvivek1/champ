@@ -8,8 +8,12 @@ async function getHoldingInstruments(access_token) {
 			access_token: access_token
 		});
 
-		const positions = await kc.getPositions();
-		return positions.net.map(p => p.tradingsymbol);
+		const positions1 = await kc.getPositions();
+
+		const positions=positions1.net.filter(p=>p.exchange=='NFO' && p.quantity!=0)
+
+		
+		return positions.map(p => p.tradingsymbol);
 	} catch (error) {
 		const lineNumber = error.stack.split('\n')[1].match(/\d+/)[0];
 		const functionName = error.stack.split('\n')[1].match(/\w+\s+\w+/)[0].trim();
