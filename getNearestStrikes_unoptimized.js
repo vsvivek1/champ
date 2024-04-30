@@ -9,15 +9,25 @@ ar.push(...instruments.filter(i=>
 		
 	
 			
-			i.strike>last_price && i.instrument_type=='CE').slice(0,3))
+			i.strike>last_price && i.instrument_type=='CE')
+			.sort((a, b) => a.strike - b.strike).
+			slice(0,1))
+
+
 
 
 	
-			ar.push(...instruments.filter(i=>
-		
-	
+			ar.push(
+				
 			
-				i.strike<last_price && i.instrument_type=='PE').slice(0,3))
+				
+				... instruments
+  .filter(i => i.strike < last_price && i.instrument_type === 'PE')
+  .sort((a, b) => b.strike - a.strike)
+  .slice(0,1)
+				
+				
+				)
 		
 	
 

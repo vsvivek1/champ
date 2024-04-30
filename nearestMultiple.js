@@ -1,6 +1,12 @@
-const nearestMultiple=function nearestMultiplesOfX(number, factor) {
-    const nearestAbove = Math.ceil(number / factor) * factor;
-    const nearestBelow = Math.floor(number / factor) * factor;
+var nearestMultiple=function nearestMultiplesOfX(number, factor) {
+    var nearestAbove = Math.ceil(number / factor) * factor;
+
+
+    /* nearestAbove=nearestAbove+factor*2
+
+    nearestBelow=nearestBelow-factor*2 */
+
+    var nearestBelow = Math.floor(number / factor) * factor;
     
     return {
         nearestAbove: nearestAbove,

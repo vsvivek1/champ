@@ -104,11 +104,11 @@ const mutateWithLtp = {
       async mutateWithLtp(s) {
 
         this.heartBeatAndCurrentCheckDigit();
-        if(this.seconds<=58){
+        if(this.seconds%3!=0){
 
 
-          this.cl('not 58')
-        //  return ;
+         this.cl('not 58')
+          return ;
         }else{
           this.cl('yes its  58')
 
@@ -219,33 +219,43 @@ const mutateWithLtp = {
           this.tradeEntryFlowStatus = 'HAS LIVE POSITION CHECK 7';
   
           if (hasLivePositionFromcis) {
-            let lpCurrent = this.livePositions.find(lp => lp.instrument_token === cis.instrument_token);
+
+            return ;  // have to write stop loss here switch
+            let lpCurrent = this.livePositions.find(lp => lp.instrument_token == instrument_token);
   
+           // console.log(lpCurrent,'current position')
             let average_price = -1;
   
-            if (typeof lpCurrent !== 'undefined') {
-              average_price = lpCurrent.quantity < 0 ? lpCurrent.sell_price : lpCurrent.buy_price;
-            } else {
-              this.cl('avaerage price not defined for', cis.tradingsymbol);
+            if (typeof lpCurrent=='undefined') {
+
+              //this.cl('avaerage price not defined for', cis.tradingsymbol);
               average_price = cis.pricePoints.d1.high;
+           
+           
+            } else {
+
+             // console.log(lpCurrent,'lpcurrent')
+              average_price = lpCurrent.quantity < 0 ? lpCurrent.sell_price : lpCurrent.buy_price;
+
             }
   
            
             this.currentTradingsymbolAverage = { instrument_token, tradingsymbol, average_price };
   
-            if (!this.livePositions.some(lp => lp.instrument_token === cis.instrument_token)) {
+            if (!this.livePositions.some(lp => lp.instrument_token == cis.instrument_token)) {
               this.cl('live postition for script is zero');
               return false;
             }
   
+            
+  
+            let { high, low } = cis.pricePoints.d1;
             let { bidPrice, offerPrice, count, stopLoss, target, lstPrice, livePnlOffered, quantity } =
               await this.setTargetPricesBasedOnQuantity(cis, element, low, high, instrument_token);
   
-            let { high, low } = cis.pricePoints.d1;
-  
             let hasLiveTarget = count > 0;
   
-            let PlacedReverseOrder = this.instruments.find(i => i.instrument_token === instrument_token).PlacedReverseOrder;
+            let PlacedReverseOrder = this.instruments.find(i => i.instrument_token == instrument_token).PlacedReverseOrder;
   
             if (hasLivePositionFromcis && hasLivetargetFromcis) {
 
@@ -257,12 +267,12 @@ const mutateWithLtp = {
 
               this.cl('NO LIVE TARGETS FOR ', cis.tradingsymbol);
   
-              let lnLive = this.liveOrders.some(lo => lo.instrument_token === instrument_token);
+              let lnLive = this.liveOrders.some(lo => lo.instrument_token == instrument_token);
   
               if (!lnLive) {
-                if (PlacedReverseOrder !== true && hasLiveTarget !== true) {
-                  this.cl('iam return ning false @7217');
-                  if (this.manualReverseOrderStart === true) {
+                if (PlacedReverseOrder != true && hasLiveTarget != true) {
+                  this.cl('iam return ning false @7217 means no live targets');
+                  if (this.manualReverseOrderStart == true) {
                     // let out  = await this.placeTargetsForSingleScript(instrument_token, quantity);
                   }
                   return false;
@@ -272,7 +282,7 @@ const mutateWithLtp = {
           }
   
          this.cl('element here 142 from mutate with ltp mixin');
-          if (cis.enterNowToTrade === false) {
+          if (cis.enterNowToTrade == false) {
             
             let inst = cis;
             

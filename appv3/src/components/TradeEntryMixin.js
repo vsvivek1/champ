@@ -7,7 +7,9 @@ const TradeEntryMixin = {
           let shouldProceed = false;
   
           if (typeof cis.previous_last === 'undefined') {
-              shouldProceed = false;
+            console.log(cis.previous_last,'pvs last error') 
+            
+            shouldProceed = false;
               return;
           }
   
@@ -27,18 +29,47 @@ const TradeEntryMixin = {
 
           }
 
-          if(typeof cis.minuteCandle!='undefined'){
-            console.log(cis.minuteCandle.signal,'minute signal')
+
+          let minuteSignalEntry=false;
+          if(typeof cis.minuteCandle!='undefined' && cis.minuteCandle.signal!='noSignal'){
+
+            //console.log(cis.minuteCandle.signal,'minute signal')
+
+            
 
           }
           
-  
-          switch (true) {
+if( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='undefined' || 
+ typeof cis.minuteCandle.signal=='undefined' || cis.minuteCandle.signal=='EntryCheckForSignalFailed'){
+
+  //console.log(cis.minuteCandle,'minute candle signal issue before switch issue')
+  return;
+}else if(cis.minuteCandle.signal.signal=='longTail'){
+
+  console.log('longTail for',cis.tradingsymbol)
+
+}else{
+
+ // console.log('nothiing in minute candle',cis.tradingsymbol,cis.minuteCandle.signal)
+}
+          
+
+          switch (true) { 
              /*  case !this.checkNiftyStatus("NIFTY 50"):
                   this.cl("Condition check for 'checkNiftyStatus' not met no proceeding from shouldProceed");
                   this.tradeEntryFlowStatus = 'Condition check for \'checkNiftyStatus\' not met no proceeding from shouldProceed ' + cis.tradingsymbol;
                   shouldProceed = false;
                   break; */
+
+
+case (cis.minuteCandle.signal.signal=='longTail'):
+
+console.log('inside long Tail  candle signal')
+  this.shouldProceed = true;
+  this.$set(cis,'tradeEntrySignal','longTail');
+
+break;
+
               case this.yesterDayHighCross(cis):
 
               let exit={};
@@ -70,7 +101,7 @@ const TradeEntryMixin = {
                   shouldProceed==true;
                   break;
               default:
-                  console.log({ shouldProceed }, cis.tradingsymbol);
+                  //console.log({ shouldProceed }, cis.tradingsymbol);
 
                   shouldProceed = false;
                   // metCriteria.push("yesterdayCloseStrategy");
@@ -79,7 +110,9 @@ const TradeEntryMixin = {
                   
           }
   
-          if (shouldProceed) {
+
+          console.log('reached should proceed for entry',cis.tradingsymbol,cis.signal,this.shouldProceed)
+          if (this.shouldProceed) {
               var sellersLowestPrice = cis.last_price;
 
 

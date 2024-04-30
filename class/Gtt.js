@@ -1,5 +1,5 @@
 "use strict";
-const TIMER=501;
+const TIMER=333;
 require('dotenv').config({path:'../../findiserver/.env'});
 
 let moment=require('moment');
@@ -214,7 +214,17 @@ let result=[]
             
     
            try {
-             let pp2=await pp.getPricePoints()
+
+            let pp2=null
+            try {
+                 pp2=await pp.getPricePoints()
+            } catch (error2) {
+
+                console.log(error2,'error2')
+
+                return;
+                
+            }
              instrument.pricePoints=pp2
 
             //  console.log(pp2);

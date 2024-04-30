@@ -136,7 +136,12 @@ Show logs
       <v-col cols="6">
         <div class="section">
           <h1 class="text-success">Positions</h1>
-          <LivePos @convertIsoDateToIST="convertIsoDateToISTChild" :convertIsoDateToISTResult="convertIsoDateToISTResultChild" @getReverseOrderAndHasLiveTargetStatusForChild="getReverseOrderAndHasLiveTargetStatusForChild" :getReverseOrderAndHasLiveTargetStatusForChildResult="getReverseOrderAndHasLiveTargetStatusForChildResult" @getStopLossFromChild="getStopLossFromChild" :livePositionsDisplay="livePositionsDisplay" :getStopLossResult="stopLossForChild" />
+          <LivePos @convertIsoDateToIST="convertIsoDateToISTChild"
+           :convertIsoDateToISTResult="convertIsoDateToISTResultChild"
+            @getReverseOrderAndHasLiveTargetStatusForChild="getReverseOrderAndHasLiveTargetStatusForChild"
+             :getReverseOrderAndHasLiveTargetStatusForChildResult="getReverseOrderAndHasLiveTargetStatusForChildResult"
+              @getStopLossFromChild="getStopLossFromChild" :livePositionsDisplay="livePositionsDisplay" 
+              :getStopLossResult="stopLossForChild" />
           
           <InstrumentsAndActions :instrumentsFiltered="instrumentsFiltered" :changeBuyingMethod="changeBuyingMethod" :buyingPoint="buyingPoint" :enterNowToTrade="enterNowToTrade" />
         </div>

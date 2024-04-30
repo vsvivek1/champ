@@ -51,3 +51,6 @@ module.exports = function createAndMoveFileFromJson( fileOutputName,jsonObj2,tar
                    }  )
       
      } 
+
+
+exports.createAndMoveFileFromJson = createAndMoveFileFromJson;

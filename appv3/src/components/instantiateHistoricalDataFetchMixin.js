@@ -2,6 +2,11 @@ import axios from 'axios';
 import getCandlestickSignal from './getCandleStickSignal';
 
 export default {
+
+  mounted(){
+
+    this.initiateHistoricalDataFetch(this.instrumentTokens);
+  },
     data() {
         return {
           historicalData: {}, // Object to store historical data
@@ -17,7 +22,7 @@ export default {
             let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
       
     
-
+let tradingsymbol=this.instruments.find(i=>i.instrument_token==symbol).tradingsymbol
 
     
             // console.log(this.instruments,'ins')
@@ -48,11 +53,17 @@ let minuteCandle={};
       // this.historicalData[symbol]['ohlc'] = data;
 
       minuteCandle.data=data;
-      minuteCandle.signal = getCandlestickSignal(obj)
+      minuteCandle.signal = getCandlestickSignal(data,obj.tradingsymbol)
 
-      console.log(minuteCandle.signal,'minuteCandle.signal')
+      
+
+      //console.log(minuteCandle.signal,'minuteCandle.signal1',tradingsymbol)
       // minuteCandle.signal=
       this.$set(obj,'minuteCandle',minuteCandle);
+
+      let obj2=this.instruments.find(i=>i.instrument_token==symbol)
+
+      ////console.log(obj2.minuteCandle.signal,'minuteCandle.signal2',tradingsymbol,symbol)
     //  this.historicalData[symbol]['signal']=minuteCandle.signal = getCandlestickSignal(obj);;
       // minuteCandle.data=data;
      

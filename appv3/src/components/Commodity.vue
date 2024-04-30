@@ -2026,7 +2026,7 @@ this. allOrders = res.data;
         res.data.net.forEach(( e )  => { 
           let tsl  =  this.getTrailingStopLoss( e.instrument_token, e.pnl );
 
-          // console.log( tsl,'tsl' )
+          // console.log( tsl,'Trailing Stop Loss' )
           this.$set( e, "trailingStopLoss", tsl );
          }  );
 

@@ -13,6 +13,7 @@
              <th>TRAILING STOP LOSS</th>
             <th>Last Price</th>
             <th>TARGET</th>
+            <th>signal</th>
            
 
             <th>ACTION</th>
@@ -129,7 +130,9 @@
 </td>
 
 
-
+<td>
+  {{ pos.instrument.exit }} i
+</td>
 
               <td>
                 <v-icon

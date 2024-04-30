@@ -117,6 +117,7 @@ module.exports=function getNearestStrikes(ohlc, instruments) {
             // if (i.strike < last_price && i.strike < last_price*1.07 ) 
 
             if(i.strike==nearestBelow)
+            //if(i.strike==nearestBelow)
   
   
             // console.log('ceeeee yeee')

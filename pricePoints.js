@@ -8,21 +8,48 @@ module.exports   =
 class pricePoint { 
 
   
-  constructor(  stock_tocken, accessToken  ) { 
-    require(  'dotenv'  ).config()
-    // dotenv.config();
-
+  constructor(stock_token, accessToken) {
+    require('dotenv').config();
     this.counter = 0;
+    this.stock_token = stock_token;
+    this.accessToken = accessToken;
+    this.pricePointData = [];
+    this.kc2 = null; // Initialize kc2 to null
 
-    this.stock_tocken   =  stock_tocken;
+    this.setKiteConnect();
+}
 
-    this.accessToken   =  accessToken;
+async setKiteConnect() {
+    try {
+        this.kc2 = await this.initiateKiteConnect();
+       // console.log(this.kc2, 'KC2');
+        // Now you can use this.kc2 or pass it to other methods as needed
+    } catch (error) {
+        console.error(" 28 Error setting up Kite Connect:", error);
+    }
+}
 
-    // console.log(  'ACCESS TOKEN FROM PRICE POINTS', this.accessToken  )
+async initiateKiteConnect() {
+    try {
+        let today = moment().format('Y-MM-DD');
+        let AccesTocken = require('./models/AccessTokens');
+        let at1 = await AccesTocken.findOne({ 'date': today }, 'access_token');
 
-    this.pricePointData   =  []
-    // this.getPricePoints();
-   } 
+        let access_token = at1.access_token;
+        this.accessToken = access_token;
+
+        this.kc2 = new KiteConnect({
+            api_key: api_key_final,
+            access_token: access_token
+        });
+
+        return this.kc2;
+    } catch (error) {
+
+      console.log('err 49')
+        throw new Error("Error initializing Kite Connect:", error);
+    }
+}
 
   yNdays(  yesterdayData  ){ 
 
@@ -197,7 +224,7 @@ let HourlyPricePoints = require(  './class/misPricePoints'  );
 let interval = '60minute';
 
 
-let hPricePoints = new HourlyPricePoints(  this.stock_tocken,this.accessToken,interval  );
+let hPricePoints = new HourlyPricePoints(  this.stock_token,this.accessToken,interval  );
 
 
 
@@ -248,15 +275,12 @@ return new Promise(  async (  res,rej  ) =>{
 
   
 
-async getXDaysPricePoints(  days,stock_tocken  ){ 
+async getXDaysPricePoints(  days,stock_token  ){ 
 
   console.log(  api_key_final,'api key fromgetXDaysPricePoints'  )
-  var kc2   =  new KiteConnect(  { 
-    api_key: api_key_final,
-    access_token: this.accessToken
-   }   );
+  
 
-  let b   =  await kc2.getHistoricalData(  stock_tocken, 'day', 
+  let b   =  await this.kc2.getHistoricalData(  this.stock_token, 'day', 
   this.dateBforeXMonths(  days  ), this.today(), false  ).then(  
     async res  => { 
       let sorted   =  res.sort(  (  a, b  )  => { 
@@ -390,6 +414,11 @@ if (  now.getDay()  >= 1 && now.getDay()  <= 5 && !holidays.includes(  now.toISO
 
 
 get7DaysData(  data,today  ){ 
+
+  if(typeof data =='undefined'){
+
+    return []
+  }
   let ob = {  } ;
 
   let publicHolidays   =  [
@@ -500,7 +529,7 @@ get7DaysData1x   =  (  data, today  )  => {
 
 let refNo;
 let refHr = 16;
-  let tradingsymbol = instruAll.find(  i =>i.instrument_token == this.stock_tocken  ).tradingsymbol
+  let tradingsymbol = instruAll.find(  i =>i.instrument_token == this.stock_token  ).tradingsymbol
 
   let publicHolidays   =  [
     "2023-01-26",
@@ -568,7 +597,7 @@ refNo = 8
     const matchingData   =  data.find(  item  => { 
       
 item.tradingsymbol = tradingsymbol
-item.instrument_token = this.stock_tocken
+item.instrument_token = this.stock_token
    
   
    
@@ -629,9 +658,9 @@ getPreviousDate   =  (  date, daysAgo  )  => {
 
     try{ 
 
-    var kc2   =  await this.initiateKiteConnect();
+    
 
-    // console.log(  kc2  );
+
 
     return new Promise(  async (  res,rej  )   =>{ 
 
@@ -649,12 +678,14 @@ getPreviousDate   =  (  date, daysAgo  )  => {
 try {
   
         (  {  sorted, startDay  }    =  await this.fetchHistoricalData
-          (  durationType, startDay, duration, kc2  )  );
+          (  durationType, startDay, duration, this.kc2  )  );
 } catch (error) {
 
-  console.log(error);
 
-  return -1;
+  console.log('685')
+  console.log("error @660",error);
+
+  rej('error in feting historical data')
 
   
 }
@@ -666,7 +697,7 @@ try {
 
      var today   =  moment().startOf(  'day'  ).format(  'YYYY-MM-DDTHH:mm:ss.SSSZ'  );
 
-//  const sevenDaysData   =  this.get7DaysData(  sorted, today  );
+
 
 
  let { d7data,d6data,d5data,d4data,d3data,d2data,d1data,d0data }  = this.get7DaysData(  sorted, today  );
@@ -704,15 +735,17 @@ try {
 
       try { 
        
-      yesterdayData.token   =  this.stock_tocken;
+      yesterdayData.token   =  this.stock_token;
      }  catch (  error  ) { 
       yesterdayData = {  } ;
-      yesterdayData.token   =  this.stock_tocken;
+      yesterdayData.token   =  this.stock_token;
+
+      rej('error in data')
      } 
       
       let {  pivotPoints, pivotPointJson, pivotPointObject  }    =  this.setPivotPoints(  yesterdayData  );
 
-      await this.setYesterdayObjectToRetObj(  yesterdayData, pivotPoints, len, kc2, retOb, pivotPointJson  );
+      await this.setYesterdayObjectToRetObj(  yesterdayData, pivotPoints, len, this.kc2, retOb, pivotPointJson  );
       
 
 
@@ -886,11 +919,11 @@ return new Promise.resolve(  {  }   );
     let yesterdayJson   =  JSON.stringify(  yesterDay  );
 
 
-    let qoute   =  await kc2.getQuote(  this.stock_tocken  );
+    let qoute   =  await this.kc2.getQuote(  this.stock_token  );
 
 
 
-    yesterDay.qoute   =  qoute[this.stock_tocken];
+    yesterDay.qoute   =  qoute[this.stock_token];
 
 
 
@@ -948,7 +981,7 @@ return new Promise.resolve(  {  }   );
     return yesterdayData;
    } 
 
-  async fetchHistoricalData(  durationType, startDay, duration, kc2  ) { 
+  async fetchHistoricalData(  durationType, startDay, duration, kc2 ) { 
     
     
     
@@ -963,9 +996,9 @@ return new Promise.resolve(  {  }   );
 	     } 
 	
 	
-	
+	//console.log(this.kc2,'kc2 kc2')
 	    // 
-	    let b   =  await kc2.getHistoricalData(  this.stock_tocken, 'day',
+	    let b   =  await this.kc2.getHistoricalData(  this.stock_token, 'day',
 	      startDay, this.today(), false  ).then(  async (  res  )  => { 
 	
 	        return res;
@@ -999,38 +1032,14 @@ return new Promise.resolve(  {  }   );
 
 	
 
+  //rej('error')
+
   console.log(  'error @ 785',error  )
  } 
 
    } 
 
-  async initiateKiteConnect() { 
-
-    let today = moment().format(  'Y-MM-DD'  );
-
-
-    let AccesTocken = require(  './models/AccessTokens'  );
-    let at1  =  await AccesTocken.findOne(  {  'date': today  } ,'access_token'  )//.
-   // then(  e =>e.access_token  );
-
-   let access_token = at1.access_token;
-  //  let access_token = 'wz7YXDPa5N1t7yG2X5omHwLVTFV0UfXs'
-
-   this.accessToken = at1.access_token;
-  //  this.accessToken = 'wz7YXDPa5N1t7yG2X5omHwLVTFV0UfXs'
-
-  //  console.log(  access_token,'access token from price poits',today  );
-
-  //  return;
-
-// console.log(  `API KEY FROM `,api_key_final  )
-
-// console.log(  api_key_final,'api key from initiate kite connect'  )
-    return new KiteConnect(  { 
-      api_key: api_key_final,
-      access_token: access_token
-     }   );
-   } 
+ 
  } 
 
 

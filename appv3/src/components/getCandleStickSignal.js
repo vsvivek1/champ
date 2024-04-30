@@ -13,43 +13,46 @@ function convertToIndianTime(utcTimeString) {
 
   return indianTimeString;
 }
-function getCandlestickSignal(obj) {
+function getCandlestickSignal(obj,ts) {
 
   //console.log(obj,'obj')
 
+  //let cis=this.instruments.find(i=>i.instrument_token==)
+
   if(
-    typeof obj=='undefined' ||
-    typeof obj['minuteCandle']=='undefined' ||
-    typeof obj['minuteCandle']['data']=='undefined' 
+    typeof obj=='undefined' 
+    
      
     
     
     ){
 
-      console.log(obj,'issue signal')
-      return 'noSignal';
+    console.log(obj,'data inside getCandleSignal Undefined')
+      return 'EntryCheckForSignalFailed';
     }
 
-  let minuteCandle=obj['minuteCandle']
+  //let minuteCandle=obj['minuteCandle']
 
   
 
 
-let ohlcData=minuteCandle['data'];
+let ohlcData=obj
 
 //console.log(ohlcData,'od')
-let ts=obj.tradingsymbol
+//let ts=obj.tradingsymbol
 if(typeof ohlcData[ohlcData.length-1]=='undefined'){
 
  
-  return 'noSignal'
+  return 'ohlcDataNotSufficient'
 }
   // console.log(ohlcData,'ohlcData')
 
-  let indiantime=convertToIndianTime(ohlcData[ohlcData.length-1].date);
+  let lastCandleOffset=1;
+
+  let indiantime=convertToIndianTime(ohlcData[ohlcData.length-lastCandleOffset].date);
 
   //console.log({indiantime});
-  const {open, high, low, close} = ohlcData[ohlcData.length - 1];
+  const {open, high, low, close} = ohlcData[ohlcData.length - lastCandleOffset];
   
   const bodySize = Math.abs(close - open);
   const upperShadowSize = high - Math.max(open, close);
@@ -65,7 +68,7 @@ if(typeof ohlcData[ohlcData.length-1]=='undefined'){
     // console.log('funtion called',ohlcData[ohlcData.length - 2]);
 
 
-    const {prevOpen, prevHigh, prevLow, prevClose} = ohlcData[ohlcData.length - 2];
+    const {prevOpen, prevHigh, prevLow, prevClose} = ohlcData[ohlcData.length - lastCandleOffset-1];
   
 
     // console.log('funtion called f3');
@@ -77,33 +80,33 @@ if(typeof ohlcData[ohlcData.length-1]=='undefined'){
 
     if(lowerShadowSize>bodySize*2 && upperShadowSize<lowerShadowSize){
 
-      console.log('long tail for',ts);
+      //console.log('long tail for',ts);
       return { candleColor:CandleColor,signal: 'longTail', target: high + (high - low), stoploss: low - (high - low) };
     }
   
     // Bullish Engulfing
-    if (close > open && prevClose > prevOpen && close > prevOpen && open < prevClose) {
+  else  if (close > open && prevClose > prevOpen && close > prevOpen && open < prevClose) {
       return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
     }
   
     // Bearish Engulfing
-    if (close < open && prevClose < prevOpen && close < prevOpen && open > prevClose) {
+   else  if (close < open && prevClose < prevOpen && close < prevOpen && open > prevClose) {
       return { candleColor:CandleColor,signal: 's', target: low - (high - low), stoploss: high + (high - low) };
     }
   
     // Hammer
-    if (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && close > open && upperShadowSize >= 2 * bodySize && lowerShadowSize <= bodySize / 2) {
+   else if (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && close > open && upperShadowSize >= 2 * bodySize && lowerShadowSize <= bodySize / 2) {
       return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
     }
   
     // Shooting Star
-    if (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && open > close && lowerShadowSize >= 2 * bodySize && upperShadowSize <= bodySize / 2) {
+  else  if (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && open > close && lowerShadowSize >= 2 * bodySize && upperShadowSize <= bodySize / 2) {
       return { candleColor:CandleColor,signal: 's', target: low - (high - low), stoploss: high + (high - low) };
     }
   
     // Morning Star
-    if (ohlcData.length >= 3) {
-      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - 3];
+    else if (ohlcData.length >= 3) {
+      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - lastCandleOffset-2];
       if (prev2Close < prev2Open && bodySize < Math.abs(prev2Close - prev2Open) / 2 && close > open && prevClose < prevOpen) {
         return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
       }
@@ -112,31 +115,31 @@ if(typeof ohlcData[ohlcData.length-1]=='undefined'){
 
    
     // Evening Star
-    if (ohlcData.length >= 3) {
-      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - 3];
+   else  if (ohlcData.length >= 3) {
+      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - lastCandleOffset-2];
       if (prev2Close > prev2Open && bodySize < Math.abs(prev2Close - prev2Open) / 2 && open > close && prevClose > prevOpen) {
         return { candleColor:CandleColor,signal: 's', target: low - (high - low), stoploss: high + (high - low) };
       }
     }
   
     // Piercing Pattern
-    if (close > open && prevClose < prevOpen && close > prevOpen && open < prevClose && close >= (prevOpen + prevClose) / 2) {
+   else  if (close > open && prevClose < prevOpen && close > prevOpen && open < prevClose && close >= (prevOpen + prevClose) / 2) {
       return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
     }
   
     // Dark Cloud Cover
-    if (close < open && prevClose > prevOpen && close < prevOpen && open > prevClose && close <= (prevOpen + prevClose) / 2) {
+   else  if (close < open && prevClose > prevOpen && close < prevOpen && open > prevClose && close <= (prevOpen + prevClose) / 2) {
       return { candleColor:CandleColor,signal: 's', target: low - (high - low), stoploss: high + (high - low) };
     }
   
     // Harami
-    if (bodySize < Math.abs(prevClose - prevOpen) / 2 && close > open && prevClose > prevOpen && close < prevOpen && open > prevClose) {
+    else if (bodySize < Math.abs(prevClose - prevOpen) / 2 && close > open && prevClose > prevOpen && close < prevOpen && open > prevClose) {
       return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
     }
   
     // Three White Soldiers
-    if (ohlcData.length >= 3) {
-      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - 3];
+   else  if (ohlcData.length >= 3) {
+      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - lastCandleOffset-2];
       if (
         prev2Close < prev2Open &&
         prevClose < prevOpen &&
@@ -151,8 +154,8 @@ if(typeof ohlcData[ohlcData.length-1]=='undefined'){
     }
   
     // Three Black Crows
-    if (ohlcData.length >= 3) {
-      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - 3];
+   else  if (ohlcData.length >= 3) {
+      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - lastCandleOffset-2];
       if (
         prev2Close > prev2Open &&
         prevClose > prevOpen &&
@@ -164,9 +167,12 @@ if(typeof ohlcData[ohlcData.length-1]=='undefined'){
       ) {
         return { candleColor:CandleColor,signal: 's', target: low - (high - low), stoploss: high + (high - low) };
       }
+    } else{
+
+    return { candleColor:CandleColor,signal: 'No signal detected', };
+
     }
     // console.log('funtion called f5');
-    return { candleColor:CandleColor,signal: 'No signal detected Fianlly', };
   }
   
   // Example usage:

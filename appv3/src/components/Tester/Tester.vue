@@ -1011,7 +1011,7 @@ CurrentTick:[], rows: [
           last_price: 2265.5,
          } ,
         { 
-          tradingsymbol: 'TSLA',
+          tradingsymbol: 'Trailing Stop LossA',
           gain: 15.67,
           entry: 600.0,
           exit: 700.0,

@@ -1,11 +1,12 @@
 
 import Vue from 'vue';
 import {  placeTargetsForLiveScripts  }  from './placeTargetsForLiveScripts';
-// import { placeTargetsForLiveScripts }  from './placeTargetsForLiveScripts';
+
 import VueGoodTable from "vue-good-table";
 import "vue-good-table/dist/vue-good-table.css";
 
 import instantiateHistoricalDataFetchMixin from './instantiateHistoricalDataFetchMixin';
+import getPositions from './getPositions';
 
 
 
@@ -62,7 +63,12 @@ import TradeCostAndBalnceInfo from './TradeCostAndBalnceInfo.vue'
 import ProfitAndLossOfClosedPositions from './ProfitAndLossOfClosedPositions.vue'
 import InstrumentsStatusView  from './InstrumentsStatusView.vue';
 
+import trailingStopLossWithLtp from './trailingStopLossWithLtp.js'
+
 import  {orderUpdateMixin}  from './order_update_mixin';
+import  buildOrderArray from './buildOrderArray';
+
+import checkSideWaysMovementTime from '@/checkSideWaysMovementTime';
 export const socket  =  io( "http://127.0.0.1:4000"
 
 ,
@@ -101,6 +107,11 @@ socket.on( "connect_error",async  ( err )  => {
   
   
   import LiveTickView from "./LiveTickView.vue";
+import targetPoints from '@/targetPoints';
+import stopLossCriteria from '@/stopLossCriteria';
+import newFutureMiningComputed from '@/newFutureMiningComputed';
+import timeMixins from '@/timeMixins';
+
 
 
 export var hourlyPricePointsofLiveDay1 ;
@@ -128,6 +139,20 @@ var cl;
             HeartBeatIcon, TrailingStopLossButton, TradeCostAndBalnceInfo, 
             ProfitAndLossOfClosedPositions } ,
 
+            mixins: [
+              timeMixins,
+              newFutureMiningComputed,
+              getPositions,
+              
+              
+              instantiateHistoricalDataFetchMixin,mutateWithLtp,orderUpdateMixin,
+              getRequiredTimeMixin,newFutureMiningMixin,sessionMixin,tradingMixin,
+              placeTargetsForLiveScripts,telegramMixin,
+              buildOrderArray,trailingStopLossWithLtp,targetPoints,
+              checkSideWaysMovementTime,
+              stopLossCriteria,newFutureMiningComputed
+
+            ],
 
 // import {  timingSafeEqual  }  from 'crypto';
 
@@ -146,568 +171,13 @@ var cl;
 
 //export default { 
   
-mounted(){ 
 
-  // console.log(this.instrumentTokens,'this.instrumentTokens')
 
-  
 
-  // setInterval(()=>{
 
-   
 
 
-  // },1000)
 
-
-  const currentDate  =  new Date().toISOString().split( 'T' )[0];
-    const existingData  =  JSON.parse( localStorage.getItem( currentDate ))
-
-    // console.log( existingData,'existingData' )
-    // this.globalConsoleLogs = existingData;
-  const originalLog  =  console.log;
-
-    // Define a new console.log function that writes to the logs array
-
-    console.log  =  ( ...args )  => { 
-      const message  =  args.join( ' ' );
-      this.logs.push( message );
-      originalLog.apply( console, args );
-     } ;
-
-  this.fetchInstruments(); 
-
-
-  setInterval(() =>{ 
-
-this.trailingStopLossWithLtp();
-
-   } ,60*1000 )
-
-
-  // const urlForMiningInstruments = "../../../instruments/instrumentsForMining.json"
-  // fetch( urlForMiningInstruments ).then( r =>r.json()).then( d =>
-  // { 
-
-  //   this.instruments = d;
-
-  //   this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
-
-  //   socket.emit( "subscribe-orders", JSON.stringify( this.instrumentTokens ));
-
-  //  } 
- 
-  
-  
-  //  )
-
-  var urlForHourlyCandles = "../../../instruments/hourlyCandleData.json";
-
-  fetch( urlForHourlyCandles )
-  .then( response  => response.json()) // Convert the response to a JSON object
-  .then( data  => { 
-    // Store the JSON data in a variable
-     hourlyPricePointsofLiveDay1  =  data;
-
-    // Do something with the jsonData variable
-    // console.log( instruments );
-   }  )
-  .catch( error  => console.error( error ));
-       // this.cl( 'mounted' )
-       var cl = this.cl;
-        
-        
-        this.setTradingType();
-     
-         this.itype  =  this.$route.params.itype;
-         this.loopGetQuotesAndMutateInstruments();
-     
-         this.nifty = this.instruments.filter( i =>i.segment == 'INDICES' );
-     
-     
-         this.getMargins();
-         setInterval(() =>{ 
-     
-     this.getMargins();
-     
-     
-     this.loopGetQuotesAndMutateInstruments();
-     this.nifty = this.instruments.filter( i =>i.segment == 'INDICES' );
-     
-      } ,20*60*1000 )  
-     
-     
-     
-     
-     
-     
-     
-     
-         var d  =  new Date();
-         this.hours  =  d.getHours();
-         this.minutes  =  d.getMinutes();
-         this.seconds  =  d.getSeconds();
-     
-     
-         ( async() =>{ 
-     
-           await this.refreshTradeStatus();
-     
-           this. placeTargetsForLiveScripts()
-     
-          }  )()
-     
-     
-     
-         let fifteenSeconds  =  15* 1000;
-         let fifteenSecondsTimer  =  setInterval(()  => { 
-     
-     
-           this.globalConsoleLogs = [];
-           //this.$router.go();
-          } , fifteenSeconds );
-     
-     
-       
-     
-         let TenMinutes  =  10 * 60 * 1000;
-         let FiveMinutesTimer  =  setInterval(()  => { 
-     
-     
-           this.globalConsoleLogs = [];
-           //this.$router.go();
-          } , TenMinutes );
-     
-         let twoMinute  =  2 * 60 * 1000;
-     
-         let thirtyMinuteTimer  =  setInterval( async ()  => { 
-           let thirtyMiniutesBefore  =  new Date();
-           thirtyMiniutesBefore.setMinutes( thirtyMiniutesBefore.getMinutes() - 30 );
-     
-      
-          
-          
-       
-         
-     
-          //  return;
-          
-     
-           let order_ids  =  this.liveOrders
-             .filter(( lo )  => { 
-               return ( 
-                 lo.status  ==  "OPEN" &&
-                 lo.exchange  ==  this.itype &&
-                 // lo.tradingsymbol.includes( "FUT" ) &&
-                 lo.transaction_type  ==  "BUY" &&
-                 thirtyMiniutesBefore - new Date( lo.order_timestamp ) > 0
-                );
-              }  )
-             .map(( o )  => { 
-               let ob  =  {  } ;
-               ob.order_id  =  o.order_id;
-               ob.variety  =  o.variety;
-     
-               return ob;
-              }  );
-     
-           this.cl( order_ids, "live orderss to be canceled" );
-     
-           if ( order_ids.length > 0 ) { 
-            //  this.CancelOrders( order_ids );
-            } 
-
-
-
-          } , twoMinute );
-
-
-
-
-       let misOrderids =   this.allOrders.filter( i =>i.product == 'MIS' )   .map(( o )  => { 
-               let ob  =  {  } ;
-               ob.order_id  =  o.order_id;
-               ob.variety  =  o.variety;
-     
-               return ob;
-              }  );
-
-
-
-     
-         let fifteenSecTimer  =  setInterval( async ()  => { 
-     
-           let a  =  await this.refreshTradeStatus();
-
-
-if( this.hours == 15 ){ 
-
-
-  let misOrderids =   this.allOrders.filter( i =>i.product == 'MIS' )   .map(( o )  => { 
-               let ob  =  {  } ;
-               ob.order_id  =  o.order_id;
-               ob.variety  =  o.variety;
-     
-               return ob;
-              }  );
-
-
-             //LOST 20 K DUE TO THIS STUPIDITY IE NOT CACELLING MIS ORDERS AFTER 3 PM
-             this.cl( misOrderids, "CANCENLLING MIS ORDERS AFTER 3 PM PLS CHECK" );
-     
-     if ( misOrderids.length > 0 ) { 
-       this.CancelOrders( misOrderids );
-      } 
-
-             
-             
-
- } 
-
-          
-          } , 60 * 1000 );
-
-
-
-         let oneSecTimer = setInterval(() =>{ 
-
-          var d  =  new Date();
-           this.hours  =  d.getHours();
-           this.minutes  =  d.getMinutes();
-           this.seconds  =  d.getSeconds();
-
-         if( this.seconds == 55 ){ 
-
-          // this. getOneMinuteData()
-
-console.log(this.instrumentTokens);
-          this.initiateHistoricalDataFetch(this.instrumentTokens);
-          console.log( 'ohlc data at 53 sec',this.ohlcData, this.accessToken )
-          }  
-
-          } ,10000 )
-     
-         let placingTimer  =  window.setInterval( async ()  => { 
-     
-        
-           
-          
-     
-           let ln  =  this.orderArray.length;
-     
-         
-     
-           if ( this.laggingCheckDigit  ==  this.CurrentCheckDigit ) { 
-             this.webSocketNotActive  =  true;
-     
-             //reload window
-     
-            //  this.$router.go();
-            }  else { 
-             this.webSocketNotActive  =  false;
-            } 
-           this.laggingCheckDigit  =  this.CurrentCheckDigit;
-          //  var d  =  new Date();
-          //  this.hours  =  d.getHours();
-          //  this.minutes  =  d.getMinutes();
-          //  this.seconds  =  d.getSeconds();
-     
-           let times = [17,47,37,2]
-                
-     
-                if ( this.hours<16 & times.includes( this.minutes ) && ( this.seconds>56 && this.seconds<58 )
-                 
-                  ){ 
-     
-                 ///procedureTocancelEntryOrdersIfAny
-     
-                 // this.$router.go()
-                 } 
-     
-     
-                this.placeTargetsForLiveScripts()
-     
-           // if ( this.livePositions.length > 0 ) { 
-           //   // let r  =  await this.getHourlyCandleLows();
-           //  } 
-     
-           let hourlyhandleFetchingMinutes  =  [1, 16, 31, 46];
-           if ( hourlyhandleFetchingMinutes.includes( this.minutes )) { 
-             // if ( this.livePositions.length > 0 )
-             if ( true ) { 
-               // let r  =  await this.getHourlyCandleLows();
-              } 
-     
-             if (( this.hours < 15 ) & this.times.includes( this.minutes )) { 
-               //geting candle data in 31 st minutes of each hour
-              } 
-            } 
-          } , 3*60 * 1000 );
-     
-         // *Math.max( this.orderArray.length,1 )
-     
-         if ( this.chat_id  ==  -1 ) { 
-           this.getChatId().then(( chat_id )  => { 
-             var d  =  new Date();
-     
-             let today  =  d.toLocaleString().slice( 0, 10 );
-     
-             var txt  =  "Welcome to Trading on " + today;
-             this.sendToTelegramGroup( txt );
-            }  );
-          } 
-        
-     
-         
-     
-         
-     
-       
-     
-         socket.on( "send-realtime-subscription", ( s )  => { 
-     
-     
- 
-           this.mutateWithLtp( s );
-     
-           this.CurrentTick  =  [...s];
-          }  );
-     
-        
-        
-          socket.on( "order_update", async ( orderUpdates )  => { 
-     
-           let temp1,tmp2
-           if( orderUpdates.status == "UPDATE" || orderUpdates.pending_quantity!== 0  ){ 
-     
-     
-             let temp1 = JSON.stringify( orderUpdates );
-         let tmp2 = JSON.stringify( this.previousOrderUpdate );
-     
-         if( temp1 == tmp2 ){ 
-     
-           // this.cl( 'same order update' );
-           this.previousOrderUpdate = orderUpdates;
-           return false
-          } 
-         this.previousOrderUpdate = orderUpdates
-     
-     
-       let k = await  this.procedureTocancelEntryOrdersIfAny();
-       cansole.log( 'cancelling orders',a )
-             let a   =  await this.refreshTradeStatus();
-     
-     this.cl( 'update order uodate',orderUpdates,{ a }  );
-     
-     
-     
-     return false
-            } 
-           
-      temp1 = JSON.stringify( orderUpdates );
-          tmp2 = JSON.stringify( this.previousOrderUpdate );
-     
-         if( temp1 == tmp2 ){ 
-     
-           // this.cl( 'same order update' );
-           this.previousOrderUpdate = orderUpdates;
-           return false
-          } 
-         this.previousOrderUpdate = orderUpdates;
-     
-         
-     
-     this.processOrderUpdate( orderUpdates )
-     
-        
-     
-     
-     
-     
-          }
-          
-          
-          );
-     
-    
-
-
- } ,
-
-
-
-  mixins: [instantiateHistoricalDataFetchMixin,mutateWithLtp,orderUpdateMixin,getRequiredTimeMixin,newFutureMiningMixin,sessionMixin,tradingMixin,placeTargetsForLiveScripts,telegramMixin],
-
-
-
-  computed: { 
-
-    totalOptionPrice() { 
-    let positionTotal  =  -1;
-    let orderTotal  =  -1;
-
-    if ( this.livePositions && this.livePositions.length > 0 ) { 
-      positionTotal  =  this.livePositions
-      
-      // .filter( lp =>lp.instrument.segment == 'NFO-OPT' )
-      
-      .
-      
-      reduce(( total, position )  => { 
-        const {  buy_price, price, quantity  }   =  position;
-        total+= ( buy_price ) * quantity;
-        return total;
-       } , 0 );
-     } 
-
-    if ( this.liveOrders && this.liveOrders.length > 0 ) { 
-      orderTotal  =  this.liveOrders.filter( lo =>
-      
-      // !lo.tradingsymbol.includes( 'FUT' ) && 
-      
-      lo.transaction_type == 'BUY' ).
-      
-      reduce(( total, order )  => { 
-        const {  buy_price, price, quantity  }   =  order;
-        total+= (  price ) * quantity;
-        return total;
-       } , 0 );
-     } 
-
-    return positionTotal + orderTotal;
-   } ,
-
-
-    logFileUrl() { 
-    if ( this.logs.length ) { 
-      const allLogs  =  this.logs.join( '\n' );
-      const blob  =  new Blob( [allLogs], {  type: 'text/plain'  }  );
-      return URL.createObjectURL( blob );
-     } 
-    return null;
-   } ,
-
-    rows() { 
-      return this.executedTrades.map(( trade )  => { 
-        return { 
-          tradingsymbol: trade.tradingsymbol,
-          buyPrice: trade.buyPrice,
-          buyTime: trade.buyTime,
-          sellPrice: trade.sellPrice,
-          sellTime: trade.sellTime,
-          profit: trade.profit,
-         } ;
-       }  );
-     } ,
-
-    indices(){ 
-
-      return this.instruments.filter( i =>i.segment == 'INDICES' )
-
-     } ,
-
-    proxyPositions1(){ 
-
-return this.proxyPositions.sort(( a,b ) =>{ 
-
- return  b.profit-a.profit
-
- }  )
-
-     } ,
-
-    livePositionsDisplay(){ 
-return this.livePositions.filter( lp =>typeof lp.instrument!= 'undefined' )
-
-     } ,
-    instrumentsDisplay() { 
-      return this.instruments.filter( i =>typeof i.pricePoints!= 'undefined' )
-      
-      // .filter( 
-      //   ( i )  => i.last_price !=  0 && i.pricePoints.d1.range !=  0
-      //  );
-     } ,
-
-    executedBuyOrdersTime() { 
-      return this.executedOrders
-        .filter(( r1 )  => r1.transaction_type  ==  "BUY" )
-        .map(( r )  => { 
-          let {  instrument_token, exchange_update_timestamp  }   =  r;
-
-          return {  instrument_token, exchange_update_timestamp  } ;
-         }  );
-     } ,
-    closedTradesScriptsPnl() { 
-      if ( this.closedTradesScripts.length > 0 ) { 
-        return this.closedTradesScripts.reduce(( pvs, cur )  => { 
-          return pvs + cur.pnl;
-         } , 0 );
-       }else return 0;
-
-     } ,
-
-    totalpnl() { 
-if( typeof this.livePositions  == 'undefined'  ){ 
-
-  return 0;
- } 
-
-      if ( this.livePositions.length  ==  0 ) { 
-        return 0;
-       } 
-      return this.livePositions.reduce(( pvs, cur )  => { 
-        return pvs + cur.pnl;
-       } , 0 );
-     } ,
-    liveTradablebalance() { 
-      return ( 
-        this.maxTradableAmount -
-        this.liveBuyOrderAmount -
-        this.livePositionTotalCost -
-        this.totalBuyOrderLivePlacedBySoftware -
-        this.proposedBuyAmount
-       );
-     } ,
-    //  &&  typeof i.SevenDayMaxMin!= 'undefined'
-
-    // &&  typeof i.SevenDayMaxMin!= 'undefined'
-    totalLiveprofitIfExecuted() { 
-      return 0;
-
-      let total  =  0;
-
-      this.instruments
-        .map(( i )  => i.liveprofitIfExecuted )
-        .forEach(( e )  => { 
-          // this.cl( 'e',e )
-
-          if ( isNaN( e )) { 
-            e  =  0;
-           } 
-
-          total  =  total + e;
-         }  );
-
-      return total;
-
-      return this.instruments
-        .map(( i )  => i.liveprofitIfExecuted )
-        .reduce(( c, p )  => { 
-          if ( isNaN( p )) { 
-            p  =  0;
-           } 
-          c  =  c + p;
-         } , 0 );
-     } ,
-
-    instrumentsFiltered() { 
-      return this.instruments.filter(( i )  => i.enterNowToTrade  ==  true );
-
-      // .sort(( a, b )  => { 
-      //   return a.activatedTime - b.activatedTime;
-      //  }  );
-     } ,
-   } ,
 
 
   
@@ -741,89 +211,7 @@ if( typeof this.livePositions  == 'undefined'  ){
             
             
              } ,
-    isAfterMarketHours() {
-      const now = new Date();
-      const currentDay = now.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
-      const currentTime = now.getHours() * 100 + now.getMinutes(); // Convert current time to a comparable number (HHMM format)
-    
-      const isWeekend = currentDay === 0 || currentDay === 6; // Sunday or Saturday
-      const isSpecialTime = currentTime > 330 || currentTime < 915; // After 3:30 PM or before 9:15 AM
-    
-      // List of holidays in "YYYY-MM-DD" format
-      const holidays = [
-        "2024-01-01",
-        "2024-05-27",
-        // Add more holidays as needed
-      ];
-    
-      const formattedDate = now.toISOString().split('T')[0];
-      const isHoliday = holidays.includes(formattedDate); // Check if today is a holiday
-    
-      return isWeekend || isSpecialTime || isHoliday;
-    },
-    
-    getRequiredTime( h,m ) { 
-            const today  =  new Date(  ); // Current date
-          
-          //   console.log( today );
-            const dayOfWeek  =  today.getDay(  ); // Get current day of the week ( 0 - Sunday, 6 - Saturday )
-          
-            // Calculate the difference between today and last Friday
-            const daysDiff  =  ( dayOfWeek + 7 - 5 ) % 7; // 5 represents Friday
-          
-            // Calculate the date of last Friday
-           const lastFriday  =  new Date( today + daysDiff );
-          //   lastFriday.setDate( today.getDate(  ) - daysDiff );
-          
-            // Set the time to 9:15 AM
-            lastFriday.setHours( h );
-            lastFriday.setMinutes( m );
-            lastFriday.setSeconds( 0 );
-          
-            // Format the date in YYYY-MM-DD hh:MM:SS
-          
-          
-          const options  =  { 
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit',
-            hour12: false,
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            timeZone: 'Asia/Kolkata' // Set the timezone to Indian Standard Time ( IST )
-           } ;
-          
-          // console.log( lastFriday );
-          
-          
-          const date  =  new Date( lastFriday );
-          
-          const year  =  date.getFullYear(  );
-          const month  =  String( date.getMonth(  ) + 1 ).padStart( 2, '0' ); // Month is zero-indexed
-          const day  =  String( date.getDate(  )).padStart( 2, '0' );
-          const hours  =  String( date.getHours(  )).padStart( 2, '0' );
-          const minutes  =  String( date.getMinutes(  )).padStart( 2, '0' );
-          const seconds  =  String( date.getSeconds(  )).padStart( 2, '0' );
-          
-          const formattedDateTime  =  `${ year }-${ month }-${ day } ${ hours }:${ minutes }:${ seconds } `;
-          // console.log( formattedDateTime );
-          
-          // const formattedDateTime  =  lastFriday.toLocaleString( 'en-IN', options ).replace( /\//g, '-' ).replace( /\,/g, '' );
-          return formattedDateTime
-           } ,
-
-    getOneMinuteData(){ 
-
-      return;
-let intervel = 'minute';
-      // this.getHistoricalDataForCustomDuration( intervel )
-
-      console.log(this.instrumentTokens);
-
-
-      // this.initiateHistoricalDataFetch(this.instrumentTokens)
-     } ,
+ 
 
 
     async getHistoricalData( intervel,symbol ){ 
@@ -855,27 +243,7 @@ this.exitNow = true;
      } ,
 
 
-    async  saveTrigger( date, tradingSymbol, entryPrice, exitPrice, entryType, sellTime, triggerName ) { 
-  try { 
-    const response  =  await axios.post( '/api/triggers', { 
-      date,
-      tradingsymbol: tradingSymbol,
-      entryPrice,
-      exitPrice,
-      entryType,
-      sellTime,
-      triggerName
-     }  );
-    
-    console.log( response.data.message ); // Display success message
-    
-    // Perform any additional actions after successful save
-    
-   }  catch ( error ) { 
-    console.error( 'Failed to save trigger:', error );
-    // Handle error case
-   } 
- } ,
+  
    async  exitAll(){ 
 
     // await this.getPositions();
@@ -985,55 +353,11 @@ let a   =  await this.refreshTradeStatus();
 
 
 
-    downloadLogs() { 
-      // Join all logs into a single string
-      const allLogs  =  this.logs.join( '\n' );
-
-      // Create a Blob with the logs and download it
-      const blob  =  new Blob( [allLogs], {  type: 'text/plain'  }  );
-      const url  =  URL.createObjectURL( blob );
-      const link  =  document.createElement( 'a' );
-      link.href  =  url;
-      link.download  =  'log.txt';
-      link.click();
-      URL.revokeObjectURL( url );
-     } ,
 
 
-    async sendTradeStrategy( tradingSymbol,buyPrice,quantity,strategyName ) { 
-    const now  =  new Date(); // Get the current date and time
-    const date  =  now.toISOString().slice( 0, 10 ); // Get today's date in yyyy-mm-dd format
-    const timeOfBuy  =  now.toLocaleString( 'en-US', {  hour12: false  }  ); // Get the current time in 24-hour format as hh:mm:ss
-    const url  =  '/api/writeTradeStrategy';
-    const params  =  { 
-      accessToken: this.accessToken,
-      tradingSymbol: tradingSymbol,
-      timeOfBuy: timeOfBuy,
-      buyPrice: buyPrice,
-      quantity: quantity,
-      strategyName: strategyName,
-      Date: date
-     } ;
-    try { 
-      const response  =  await axios.post( url, params );
-      // console.log( response.data,'rsult of mongose save of trade' );
-     }  catch ( error ) { 
-      console.error( error );
-     } 
-   } ,
+  
 
-storeTradeDataInLocalStrorage( newTradingObj ){ 
-  let today  =  new Date().toISOString().slice( 0, 10 );
 
-// Retrieve existing trading data from local storage
-let tradingData  =  JSON.parse( localStorage.getItem( 'currentDay' )) || [];
-tradingData.push( newTradingObj );
-let updatedDataString  =  JSON.stringify( tradingData );
-
-// Save the updated trading data to local storage with the key 'currentDay'
-localStorage.setItem( today, updatedDataString );
-
- } ,
 
 
     evaluateConditions( element, entry, cis, ts ) { 
@@ -1055,56 +379,8 @@ localStorage.setItem( today, updatedDataString );
    } 
   return errorMessage+' for '+ ts ;
  } ,
-    retrieveTradeDetailsInLocalStorage( tradingSymbol ) { 
-
-try { 
-	
-	      const today  =  new Date().toISOString().slice( 0, 10 )
-	      const objectInStorage  =  localStorage.getItem( tradingSymbol )
-
-
-
-	      if ( objectInStorage && objectInStorage[today] ) { 
-	        const parsedObject  =  JSON.parse( objectInStorage )
-	
-	        return parsedObject[today];
-	     
-	      
-	      
-	       }  else { 
-	       return false
-	       } 
- }  catch ( error ) { 
-	
-console.log( error,'storage retrival error in 1332' )
-  return false;
- } 
+   
     
-    
-    
-     } ,
-
-    saveTradeDetailsInLocalStorage( tradingsymbol,entry,target,stopLoss,strategyName ) { 
-      const today  =  new Date().toISOString().slice( 0, 10 )
-      const objectToStore  = 
-      
-   {     [today]:
-    
-    { 
-        entry: entry,
-        stopLoss: stopLoss,
-        target: target,
-        strategyName:strategyName
-       }} 
-      let storedObjects  =  JSON.parse( localStorage.getItem( tradingsymbol )) || {  } 
-      if ( storedObjects[today] ) { 
-        // alert( `Object for ${ this.tradingSymbol }  with date ${ today }  already exists.` )
-        return
-       } 
-      storedObjects[today]  =  objectToStore
-      localStorage.setItem( tradingsymbol, JSON.stringify( storedObjects ))
-
-     } ,
 
 
 
@@ -1485,16 +761,7 @@ this.$set(
 
      } ,
 
-    writeToMongo(){ 
-
-
-      let url = "/api/writeToMongo";
-
-      let ob = {  } ;
-      ob.session = this.session;
-      ob.time = moment()
-
-     } ,
+   
 
 
     getMargins(){ 
@@ -2210,156 +1477,7 @@ price = element.last_price;
    } 
  } ,
 
-  async   trailingStopLossWithLtp(){ 
-
-      
-
-    this.cl( 'TSL FROM TRAILING STOP LOSS' )
-      await this.getOrders();
-      await this.getPositions();
-
-
-let validOrders = this.allOrders.filter( lo =>
-{ 
-
-  let st = ( lo.status == 'COMPLETE' ||
-lo.status == 'REJECTED' ||
-lo.status == 'CANCELLED' ||
-lo.status == 'CANCEL PENDING' 
- )
-
-st = lo.status == 'OPEN';
-
-return st;
-
- } 
-
-
-
-
- )
-
-
-this.cl( 'TSL FROM TRAILING STOP LOSS validOrders',validOrders.length )
-
-
-const count  =  this.livePositions.filter( pos  => pos.pnl > 1000 ).length;
-console.log( `TSL Number of positions with PnL greater than 2000: ${ count } ` );
-
-this.newOrder  = 
-
   
-  
-  validOrders.filter( o => o.transaction_type == "SELL" ).map( i =>{ 
-
-
-
-
-
-let lp  = this.livePositions.find( j =>j.instrument_token == i.instrument_token )
-let cis = this.instruments.find( k =>k.instrument_token == i.instrument_token );
-
-this.cl( 'TSL 1' )
-if( typeof lp ==  'undefined' || typeof cis == 'undefined' ){ 
-
-  // this.cl( 'TSL INSTRUMENT NOT FOUND IN VALID POSTIONS WTF ',cis.tradingsymbol );
-
-  return ;
- } 
-
-this.cl( 'TSL 2' )
-
-
-if( lp.pnl<500 || cis.last_price == 0 ){ 
-
-
-  this.cl( 'either pnl less than 1000 or last pri e 0',lp.pnl,cis.last_price )
-  return ;
- } 
-
-
-let proposedStopLoss;
-
-let currentSellOrderPrice = i.price;
-
-if( i.status == 'TRIGGER PENDING' ){ 
-
-
-  console.log( 'has current triger' )
-
-// already have stop loss
-
-/// modify if new proposed stop loss is greater than current one
-proposedStopLoss = cis.last_price*.9;
-
-if( i.price< proposedStopLoss*.95 ){ 
-
-  // console.log( 'proposed sgoploss is TSL',proposedSopLossPrice )
-  let o;
-    o.variety = 'regular';
-    o.order_id = i.order_id;
-    let params = {  } ;
-      params.price = proposedSopLossPrice.toFixed( 1 )
-
-params.trigger_price = proposedSopLossPrice.toFixed( 1 )
-params.order_type = "SL"
-    o.params = params;
-
-
-    this.cl( 'PLACING STOP LOSS FOR GAIN  ', )
-
-    // console.log( lp.tradingsymbol,lp.pnl,o )
-  
-    return o;
-
- } 
-
- return;
- } else{ 
-
-
-
-  console.log( 'NO current triger' )
-
-/// no trigger
-let o;
-
-proposedSopLossPrice = cis.last_price*.9
-o.variety = 'regular';
-    o.order_id = i.order_id;
-    let params = {  } ;
-      params.price = proposedSopLossPrice.toFixed( 1 )
-
-params.trigger_price = proposedSopLossPrice.toFixed( 1 )
-params.order_type = "SL"
-    o.params = params;
-
-
-    this.cl( 'PLACING STOP LOSS FOR GAIN  ', )
-
-    // console.log( lp.tradingsymbol,lp.pnl,o )
-  
-    return o;
-
-
-
- } 
-
-
-
-
-
-
-
-           }  ).filter( i =>i!= null );
-
-          let t  =  await this.getOrders();
-
-this. cl( 'Bumber of new orders :',this.newOrder.length,this.newOrder )
-
-
-this.updateOrder();
-         } ,
 
 
 
@@ -3162,7 +2280,7 @@ this.stopLossForChild = a;
            )[0].hasLivetarget;
 
           if ( PlacedReverseOrder  ==  true || hasLivetarget  ==  true ) { 
-            this.cl( "placed reverse order" );
+            this.cl( "placed reverse order",cis.tradingsymbol );
             return false;
            }  else { 
             let lot_size  =  this.instruments.filter( 
@@ -3581,7 +2699,12 @@ if ( typeof pp!= 'undefined' && typeof pp.last_prcie!= 'undefined' && pp.last_pr
 
         // this.cl( res,'from nifty status' )
 
-        this.$set( pp,'indexStatus',res )
+        if(typeof p!='undefined'){
+
+          this.$set( pp,'indexStatus',res )
+        }
+
+        
 return res
 
  } else{ 
@@ -3600,7 +2723,9 @@ res.close = 0
 
 // this.cl( res,'from nifty status' )
 
-this.$set( pp,'indexStatus',res )
+if (typeof pp!='undefined') {
+  this.$set( pp,'indexStatus',res )
+}
 return res
 
 
@@ -4041,333 +3166,13 @@ this.cl( 'error from function',setLastPriceBasedOnTradeDirection )
 
      } ,
 
-    async getPositions() { 
 
+     async getCurrentPositions(){
 
-      // call after get live orders
 
-      if( this.hasStartedGetLivePosition == true ){ 
-        this.cl( 'FROM GET POSITION FOR HEALTH, STARTED FETCHING LIVE POS' )
-        return false
-       } 
-      this.hasStartedGetLivePositions = true;
-     
-      let url  =  "/api/getPositions";
 
-      let obj  =  {  } ;
-      obj.accessToken  =  this.accessToken;
-      return axios.post( url, obj ).then( async ( res )  => { 
-
-
-        this.hasStartedGetLivePositions = false;
-  
-        if ( typeof res.data.net  ==  "undefined" ) return [];
-
-       
-        if ( res.data.net.length > 0 ) { 
-                  this.setLivePositionScripts( res.data.net ) 
-           
-           } 
-        let tmp;
-        let livePositionsTmp  = res.data;
-
-      
-
-        this.allPositions = res.data.net;
-
-        // console.log( 'this.all pos',this.allPositions )
-        if ( typeof livePositionsTmp  ==  "undefined" ) { 
-          this.livePositions  =  "NOT_LOADED";
-
-          this.livePositionTotalCost  =  -1;
-          // this.cl( 'here one 6' )
-          return []
-          // return false;
-         } 
-        if ( typeof livePositionsTmp.net  ==  "undefined" ) { 
-          this.livePositions  =  [];
-
-          this.livePositionTotalCost  =  -1;
-          return true;
-         } 
-
-        tmp  =  livePositionsTmp.net
-              .filter( 
-                ( p )  =>
-                  p.exchange  ==  this.itype &&
-                  // p.tradingsymbol.includes( "FUT" ) &&
-                  p.quantity !=  0
-               )
-              .sort(( a, b )  => b.pnl - a.pnl );
-
-         
-
-        if ( livePositionsTmp.net.length  ==  0 ) { 
-            tmp  =  [];
-
-            this.livePositionTotalCost  =  -2;
-            // this.cl( 'here one 7' )
-            return  tmp;
-           } 
-
-
-          let liveInstrumentSymbols  =  livePositionsTmp.net.map( 
-              ( a )  => a.instrument_token
-             ); 
-            
-          this.liveInstrumentSymbols  =  liveInstrumentSymbols
-
-
-            var quotes  =  await this.getQuoteFromZerodha( liveInstrumentSymbols );
-     
-            tmp.forEach(( e )  => { 
-              let instrument  =  this.instruments.filter( 
-                ( i )  => i.instrument_token  ==  e.instrument_token
-               )[0];
-
-              // this.cl( 'e.instrument_token',e.instrument_token )
-
-              let q  =  quotes[e.instrument_token];
-
-              // this.cl( q,'q' )
-
-              this.$set( e, "instrument", instrument );
-              this.$set( e, "quotes", q );
-
-
-            
-             }  );
-
-            
-
-
-
-           
-
-            this.setClosedTradesScripts( livePositionsTmp.net )
-            
-           
-           
-           
-            this.livePositions  =  tmp;
-
-            this.livePositionTotalCost  =  0;
-
-this.totalBuyOrderLivePlacedBySoftware  =  0;
-this.livePositions
-
-  .filter(( f )  => f.exchange  ==  this.itype 
-  // && f.tradingsymbol.includes( "FUT" )
-   )
-  .forEach( async ( l )  => { 
-
-
-    this.livePositionTotalCost  =  Math.abs( 
-      this.livePositionTotalCost + l.average_price * l.quantity
-     );
-
-    if ( 
-      typeof this.instruments.filter( 
-        ( i )  => i.instrument_token  ==  l.instrument_token
-       )[0] !==  "undefined"
-     ) { 
-      this.$set( 
-        this.instruments.filter( 
-          ( i )  => i.instrument_token  ==  l.instrument_token
-         )[0],
-        "average_price",
-        l.average_price
-       );
-
-
-      this.$set( 
-        this.instruments.filter( 
-          ( i )  => i.instrument_token  ==  l.instrument_token
-         )[0],
-        "hasLivePosition",
-        true
-       );
-
-
-
-     } else{ 
-
-
-      if( this.instruments.filter( 
-          ( i )  => i.instrument_token  ==  l.instrument_token
-         ).length!= 0 ){ 
-
-          this.$set( 
-        this.instruments.filter( 
-          ( i )  => i.instrument_token  ==  l.instrument_token
-         )[0],
-        "hasLivePosition",
-        false
-       );
-         } 
-    
-
-     } 
-
-    this.$set( l, "targetPc", 1.2 );
-
-    try { 
-
-      if( this.instruments.filter( 
-        ( i )  => i.instrument_token  ==  l.instrument_token
-       ).length!= 0 ){ 
-        let rangeBreakOutTarget  =  this.instruments.filter( 
-        ( i )  => i.instrument_token  ==  l.instrument_token
-       )[0].pricePoints.d1.rangeBreakOutTarget;
-
-      
-      this.$set( l, "rangeBreakOutTarget", rangeBreakOutTarget );
-
-
-       } 
-
-
-   
-      // let t = await this.getOrders();
-
-
-let transaction_type;
-
-if( l.quantity>0 ){ 
-  transaction_type = "SELL"
-
- } 
-if( l.quantity<0 ){ 
-
-  transaction_type = "BUY"
- } 
-
-      let ln  =  this.orders
-        .filter(( o )  => 
-        
-        o.tradingsymbol  ==  l.tradingsymbol && 
-        o.quantity ==  Math.abs( l.quantity )
-        
-        && o.transaction_type == transaction_type
-        
-         )
-      .length;
-
-
-// this.cl( l.quantity,'tt',transaction_type,'ln',ln,this.orders )
-
-
-        // this.cl( { ln }  )
-
-        
-     
-
-if(    this.instruments.filter( 
-            ( i )  => i.instrument_token  ==  l.instrument_token
-           ).length!= 0 ){ 
-
-          
-
-      if ( ln  ==  0 ) { 
-
-
-        
-        this.$set( 
-          this.instruments.filter( 
-            ( i )  => i.instrument_token  ==  l.instrument_token
-           )[0],
-          "hasLiveTarget",
-          false
-         );
-       }  else if ( ln > 0 ) { 
-
-
-
-        this.$set( 
-          this.instruments.filter( 
-            ( i )  => i.instrument_token  ==  l.instrument_token
-           )[0],
-          "hasLiveTarget",
-          true
-         );
-
-        this.$set( l, "hasLiveTarget", true );
-
-
-        if( this.orders
-        .filter(( o )  => o.tradingsymbol  ==  l.tradingsymbol )
-       .length!= 0 ){ 
-
-        let targetPrice  =  this.orders
-        .filter(( o )  => o.tradingsymbol  ==  l.tradingsymbol )
-       [0].price
-
-       this.$set( l, "targetPrice", targetPrice );
-        } 
-
-      
-
-     
-
-        let element  =  quotes[l.instrument_token];
-
-          
-
-        
-       } 
-
-     }  else{ 
-
-      // this.cl( 'has live target canoot be updated in intruments .. update instrument with the script' )
-     } 
-
-      this.hasStartedGetLivePositions = false
-     }  catch ( error ) { 
-      this.cl( 'here one 9',error )
-      this.$set( l, "rangeBreakOutTarget", 9999 );
-      this.$set( l, "hasLiveTarget", false );
-
-      this.hasStartedGetLivePositions = false;
-     } 
-
-    // this.$set( l, "target", Math.ceil( l.average_price * l.targetPc ), 1 );
-
-    // no live target so set a live target
-
-    if ( 
-      typeof this.instruments.filter( 
-        ( i )  => i.instrument_token  ==  l.instrument_token
-       )[0]  ==  "undefined"
-     ) { 
-
-      let tmp = JSON.stringify( l.instrument_token )
-      let k = await this.updateMissingScriptInInstrumetsFile( tmp );
-
-      this.cl( 
-        "l.instrument_token absent",
-        l.tradingsymbol,
-        l.instrument_token
-       );
-      this.hasStartedGetLivePositions = false;
-      return false;
-     } 
-   }  );
-
-
-  this.hasStartedGetLivePositions = false;
-        
-  
-  return this.livePositions;
-
-
-
-     
-
-  
-       }  );
-    
-    
      } ,
+    
 
     async getLastPriceForClosedTrades() { 
       let ar  =  this.closedTradesScripts.map(( cts )  => cts.instrument_token );
@@ -4672,15 +3477,7 @@ new Promise( async ( res,rej ) =>{
      }  )
      } ,
 
-    writeTrades( trade ) { 
-      return false;
-      // this.cl( "writing trade from write trade", trade );
-      let obj  =  {  } ;
-      obj.trade  =  trade;
-      const url  =  "/api/WriteTrades";
-
-      axios.post( url, obj );
-     } ,
+  
 
 
    async  fetchInstruments() { 
@@ -4761,164 +3558,7 @@ new Promise( async ( res,rej ) =>{
    ,
 
 
-    buildOrderArray( 
-      tradingsymbol,
-      transaction_type,
-      qty,
-      order_type,
-      Price,
-      product  =  "NRML",reverseOrder
-     ) { 
-
-this.cl( 'build order array' )
-
-// this.cl( reverseOrder,'reverseOrder from build arrya ' )
-
-if( reverseOrder == false ){ 
-//for diableing entry
-  //return;
- } 
-
-
-if( reverseOrder == true ){ 
-
-  let PlacedReverseOrder = this.instruments.filter( 
-              ( i )  => i.tradingsymbol  ==  tradingsymbol
-             )[0].PlacedReverseOrder
-
-            if( PlacedReverseOrder == true ){ 
-
-              return false;
-             } 
-
- } 
- 
-
-      let order  =  {  } ;
-      let proposedStock;
-
-
      
-
-      //   proposedStock  =  this.instruments.filter( 
-      //     ( i )  => i.tradingsymbol  ==  tradingsymbol
-      //    )[0].name;
-
-      
-      //  } 
-
-      //   order.variety  =  this.selectedVariety;
-
-      proposedStock  =  this.instruments.filter( 
-        ( i )  => i.tradingsymbol  ==  tradingsymbol
-       )[0].name;
-
-      this.liveOrderPlacedScripts.push( proposedStock );
-
-      // this.cl( 'hrs, min',this.hours,this.minutes )
-      let exchange  =  this.itype;
-
-      if ( exchange !=  this.itype ) { 
-        if ( 
-          ( this.hours  ==  15 && this.minutes > 30 ) ||
-          this.hours > 15 ||
-          this.hours < 9 ||
-          ( this.hours  ==  9 && this.minutes < 15 )
-         ) { 
-
-
-          order.variety  =  "amo";
-
-          console.log( order.variety,'ov' )
-         }  
-        
-        else { 
-          order.variety  =  "regular";
-         } 
-
-
-       }  else if ( exchange  ==  this.itype ) { 
-        if ( 
-          ( this.hours  ==  23 && this.minutes >=  30 ) ||
-          this.hours  ==  0 ||
-          this.hours < 9 ||
-          ( this.hours  ==  9 && this.minutes < 15 )
-         ) { 
-          order.variety  =  "amo";
-         }  else { 
-          order.variety  =  "regular";
-         } 
-       } 
-
-      //  order.variety  =  "regular";
-
-this.cl( this.hours,'hours' );
-
-      if(( this.hours>15 || ( this.hours == 15 && this.minutes>35 )) ){ 
-
-        order.variety  =  "amo";
-
-        this.cl( 'amo' )
-
-
-        if( transaction_type == 'BUY' && !reverseOrder ){ 
-
-order.variety  =  "regular";// prevent buy amos 
- } else{ 
-
-order.variety  =  "AMO";// prevent buy am
-
- } 
-
-       } 
-
-
-      if( this.hours>9 || ( this.hours == 9 && this.minutes>15 )){ 
-
-        order.variety  =  "regular";
-
-       } 
-
-
-       if (this.isAfterMarketHours()) {
-        order.variety  =  "amo";
-        console.log("Action should be executed.");
-      } else {
-        order.variety  =  "regular";
-      }
-     
-      order.variety  =  "regular";
-      order.params  =  {  } ;
-      order.params.exchange  =  this.itype;
-      order.params.tradingsymbol  =  tradingsymbol;
-      order.params.transaction_type  =  transaction_type;
-
-      order.params.quantity  =  qty;
-
-      order.params.product  =  product;
-      order.params.order_type  =  order_type;
-      order.params.validity  =  "DAY";
-
-      order.params.price  =  Price;
-
-
-
-      if( reverseOrder == true ){ 
-        this.$set( 
-            this.instruments.filter( 
-              ( i )  => i.tradingsymbol  ==  tradingsymbol
-             )[0],
-            "PlacedReverseOrder",
-            true
-           );
-
-          
-
-       } 
-       
-
-      return order;
-     } ,
 
     setScriptTradedStatus( symbol, property, value ) { 
       let today  =  this.today();
@@ -5039,7 +3679,7 @@ let e = orderUpdates;
   let livePosition =  this.livePositions.
   filter( l =>l.instrument_token == instrument_token )[0];
 
-
+debugger
   // this.cl( { livePosition }  )
   if( typeof livePosition == 'undefined' ){ 
 
@@ -5047,12 +3687,14 @@ let e = orderUpdates;
    } 
   let quantity = livePosition.quantity
 
+  debugger
 
   // this.cl( { quantity }  )
           if ( quantity  ==  0 ) { 
             this.placingReverseOrderInProgress  ==  false;
 
             this.cl( 'this.placingReverseOrderInProgress ',this.placingReverseOrderInProgress,quantity   )
+         debugger
             return;
            } 
 
@@ -5135,7 +3777,7 @@ let e = orderUpdates;
             targetPoint  =  lowerBreakOutTarget //rangeBreakOutMath.max( rangeBreakOut,upper_circuit_limit );
 
            
-
+debugger
 
            }  else if ( quantity > 0 ) { 
             transaction_type  =  "SELL";
@@ -5174,6 +3816,7 @@ let e = orderUpdates;
            ) { 
 
 
+            debugger
             this.orderUpdateProcessing = false;
             // this.cl( 'PlacedReverseOrder ',PlacedReverseOrder  )
             // this.placingReverseOrderInProgress  ==  false;
@@ -5195,7 +3838,7 @@ let e = orderUpdates;
            
           //  );
 
-
+debugger
 
    this.placetargetAndStopLoss( 
             cis,
@@ -5336,12 +3979,15 @@ break;
       // this.cl( 'before entry undefined',cis.tradingsymbol,cis.last_price ,entryLong )
 
       if ( typeof entryPrice  ==  "undefined" ) { 
+
+        console.log('Entry price not defined inside Proceed for entry fn',cis.tradingsymbol)
         return false;
        } 
 
       // this.cl( 'before entry point 0a',cis.tradingsymbol,cis.last_price ,entryLong )
 
       if ( entryPrice <=  0 ) { 
+        console.log('Entry price < 0> inside Proceed for entry fn',cis.tradingsymbol)
         return false;
        } 
       let {  otherCriteriaCheck, message  }   =  this.otherCriteria( 
@@ -5393,7 +4039,9 @@ break;
         ( lo )  => lo.instrument_token  ==  instrument_token
        ).length;
 
-      if ( ln > 0 ) { 
+      if ( ln > 0 ) {
+        
+        console.log('live order palced already for this symbol inside Proceed for entry fn',cis.tradingsymbol)
         // this.cl( 'live order palced already for this symbol',cis.tradingsymbol )
         return false;
        } 
@@ -5548,6 +4196,9 @@ break;
           //audio.play();
           let transaction_type;
 
+
+          console.log('direction is   inside Proceed for entry fn',cis.tradingsymbol,direction)
+
           if ( direction  ==  "long" ) { 
             transaction_type  =  "BUY";
 
@@ -5575,7 +4226,7 @@ return false;
 
           let tradingsymbol  =  cis.tradingsymbol;
 
-          let lot_size  =  cis.lot_size*1;
+          let lot_size  =  cis.lot_size*36;
           //let lot_size = 0;
           let order_type  =  "LIMIT";
 
@@ -5618,7 +4269,7 @@ return false;
           let orderArray  =  [arr];
           // return;
           let a  =  await this.placeOrder( orderArray );
-          // this.cl( "place order result", a );
+          this.cl( "place order result", a );
 
           this.counter  =  this.counter + 1;
         
@@ -5709,6 +4360,11 @@ return false;
       const targetPointLong  =  Math.round( targetPointLong1 * 10 ) / 10;
 
 
+      console.log(targetPointLong);
+
+      //debugger
+
+
       if ( fireTargetDefault  ==  false ) { 
 
         this.cl( { fireTargetDefault } ,'returnring' )
@@ -5731,7 +4387,7 @@ return false;
          );
 
 if( !livePosLen ){ 
-
+  console.log('return5')
   return false;
  } 
     
@@ -5749,6 +4405,7 @@ if( !livePosLen ){
 
           if ( hasLiveTarget  ==  true || PlacedReverseOrder == true  ) { 
          
+            console.log('return6')
             return false;
            } 
         
@@ -5784,6 +4441,14 @@ if( !livePosLen ){
              )[0],
             "PlacedReverseOrderType",
             "Target"
+           );
+     
+           this.$set( 
+            this.instruments.filter( 
+              ( i )  => i.instrument_token  ==  instrument_token
+             )[0],
+            "PlacedReverseOrder",
+            true
            );
      
 
@@ -6041,53 +4706,7 @@ let ts = cis.tradingsymbol;
 
      } ,
 
-    checkSidewaysMovementTime() { 
-      // Extract hours and minutes from data properties
-
-      /// true  = no trade
-
-      //false  = trade
-      const {  hours, minutes  }   =  this;
-      
-      // Opening Period: 9:15 AM to 10:00 AM IST
-      if ( hours== 9 && minutes >=  15  ) { 
-        return false;
-       } 
-
-      // Mid-Morning Session: 10:00 AM to 11:30 AM IST
-      if ( hours== 10 && minutes >=  0 && minutes < 60 ) { 
-        return true;
-       } 
-
-      if ( hours== 11 && minutes >=  30 && minutes < 60 ) { 
-        return false;
-       } 
-
-
-      if ( hours== 12 && minutes >=  0 && minutes < 30 ) { 
-        return false;
-       } 
-
     
-
-      // Post-Lunch Session: 1:00 PM to 2:30 PM IST
-      if ( hours== 13 && minutes >=  0 && minutes < 60 ) { 
-        return true;
-       } 
-
-      // Closing Period: 2:30 PM to 3:30 PM IST
-      if ( hours== 14 && minutes >=  30 && minutes < 60 ) { 
-        return false;
-       } 
-
-
-      if ( hours== 15 && minutes >=  0 && minutes < 30 ) { 
-        return false;
-       } 
-
-      // If none of the above conditions are met, consider it as sideways movement time
-      return true;
-     } ,
 
    
 
@@ -6107,13 +4726,9 @@ return false;
 //to prevent accidental modifications of amo
  } 
 
-    let sideWisetime = this.checkSidewaysMovementTime();
+   
 
-    if(  sideWisetime ){ 
-// this.cl( 'no sl in side wiseß ' )
-      // return false;
-     } 
-
+   
       /// gapped up yesteddays high then going below 5% of yesterddays high stop loss
 
 
@@ -6349,597 +4964,7 @@ let sellersLowestPrice = element.depth.sell[0].price;
  let buyPriceGreaterThanTodaysOpen = lp.buy_price>element.ohlc.open
 
  /// exitswitch
-      switch ( true ) { 
-
-
-        case ( isGapDown && isOverNightScript && buyPriceGreaterThanTodaysOpen  ) :
-
-
-
-        let exitingPrice;
-        if(  element.last_price<element.ohlc.open ){ 
-
-          exitingPrice = element.last_price;
-         } else if( element.last_price>element.ohlc.open  ){ 
-
-
-          let exitingPrice = element.last_price>= ( Math.min( cis.pricePoints.d1.close,cis.pricePoints.d1.open ))
-         } 
-
-
-
-        msg = `EXITING POSITIONS FOR  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ formattedTime }  in GapDownOpeneing strategy for overnight scripts`
-         this.cl( msg )
-
-         this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           exitingPrice
-          );
-
-        break;
-
-
-        case ( this.exitNow ):
-
-        msg = `EXITING POSITIONS FOR  ${ cis.tradingsymbol }   for ${ buyersHighestPrice }  at ${ formattedTime } `
-         this.cl( msg )
-
-         this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           buyersHighestPrice
-          );
-
-
-        break;
-
-
-        case ( element.last_price<cis.pricePoints.d0.low ):
-        msg = `STOP LOSS  EXECUTION SEND BY  DAILY  LOW STRATEGY FOR ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
-         this.cl( msg )
-
-         this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           element.last_price
-          );
-
-        break;
-
-
-
-        case ( element.last_price<element.ohlc.open ) :
-        msg = `STOP LOSS  EXECUTION SEND BY  DAILY price less than open price  ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
-         this.cl( msg )
-
-         this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           element.last_price
-          );
-
-        break;
-
-        case ( 
-        
-        
-       normalShorCovering
-        
-         ):
-
-// console.log( 'yesterDayLowStopLoss 5 sl at ',cis.tradingsymbol )
-
-
-msg = `STOP LOSS  EXECUTION SEND BY  DAILY yesterDayLowStopLoss STRATEGY FOR ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
-         this.cl( msg )
-
-         this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           element.last_price
-          );
-      
-
-
-break;  
-
-
-
-
-
-        case ( sellersLowestPrice<element.last_price && false ):
-
-
-this.cl( ' line-7559 has to sell this :sellersLowestPrice is less  than last price for',cis.tradingsymbol, 'sellersLowestPrice', sellersLowestPrice,' last price', element.last_price )
-this.updateSquareOfforderWithDesiredPrice( 
-    cis,
-    element,
-    false,
-    buyersHighestPrice
-   );
-
-break;
-
-  //       case ( lp.quantity>0 && bestBuyOffer>element.last_price ):
-
-
-  //       this.cl( 
-  //  "Firing stop loss order for bestSellOffer  less than last price ",
-  //  cis.tradingsymbol,
-  //  offerPrice,
-  //   high,last_price
-  //  );
-  //       this.updateSquareOfforderWithDesiredPrice( 
-  //   cis,
-  //   element,
-  //   false,
-  //   element.last_price
-  //  );
-
-
-  //       break;
-
-
-//         case ( lp.quantity<0 && bestSellOffer<element.last_price ):
-
-
-// this.cl( 
-// "Firing stop loss order for buy offer less than last price ",
-// cis.tradingsymbol,
-// offerPrice,
-// high,last_price
-//  );
-// this.updateSquareOfforderWithDesiredPrice( 
-// cis,
-// element,
-// false,
-// element.last_price
-//  );
-
-
-// break;
-
-
-
-        case ( lp.quantity>0 &&  element.last_price<element.ohlc.high*97  && false ):
-
-        this.cl( 
-   "Firing stop loss order for 3% less than high ",
-   cis.tradingsymbol,
-   offerPrice,
-    high,last_price
-   );
-  
-  this.updateSquareOfforderWithDesiredPrice( 
-    cis,
-    element,
-    false,
-    element.last_price
-   );
-        break
- 
-
-        case ( lp.quantity < 0 && element.last_price >=  lp.sell_price*1.05 && waitForShortCovering   && false  ):
-
-              
-
-this.cl( 
-   "Firing shortcover stop loss order for %s bidprice is %s and high is %s  and last price is %s",
-   cis.tradingsymbol,
-   offerPrice,
-    high,last_price
-   );
-  
-  this.updateSquareOfforderWithDesiredPrice( 
-    cis,
-    element,
-    false,
-    element.last_price
-   );
-
-  break;
-        
-
-        case this.exitNow:
-
-        // if( lp.quantity>0 )
-
-
-        msg = `EXITING NOW, ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime }  SQUARING OFF`
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-        
-        break;
-
-
-
-        case ( lp.quantity>0 && openBelowYesterdayHigh && false ):
-        
-        msg = `open below yesterdays high , touched y day high and thebn  retturning to yesterdays high , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime }  SQUARING OFF`
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-        
-        break;
-        
-        
-        case ( lp.quantity>0 && openLowTouchedYdayHigh && false ):
-        
-        msg = `open below yesterdays low, touched y day high and thebn  retturning to yesterdays high , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime }  SQUARING OFF`
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-        
-        break;
-
-
-        case ( lp.quantity>0 && hitHighStopLoss && false ):
-        
-        msg = `open below yesterdays candle body crossed yesterdays body, retturning to yesterdays body stop loss , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime }  SQUARING OFF`
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-        
-        break;
-
-        case ( lp.quantity>0 && element.last_price<element.ohlc.open*.98 && false ):
-
-
-        msg = `GONE BELOW OPEN PRICE FOR , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime }  SQUARING OFF`
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-
-        break;
-
-
-        case ( lp.quantity>0 && NineFiftySquareOff && false ):
-
-
-        msg = `SQUARING OFF ALL GREENS AT 9 :58 , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-
-        break;
-
-case ( lp.quantity>0 && buyPriceAboveOpenAndLastPriceFallsBelowOpen && false ):
-
-msg = `SQUARING OFF IF BUY PRICE ABOVE OPEN AND LAST PRICE FELL BELOW 5% OPEN , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-
-break;
-
-
-
-
-
-        case  ( lp.quantity>0 && squareoffDuringSideWise && false ):
-
-
-       
-
-        msg = `SQUARING OFF DURING SIDE WISE TIME WITH AVAILABLE PROFIT , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-
-        break;
-
-
-
-
-case ((  (  lp.quantity>0 && element.last_price<element.ohlc.open && false && ( this.hours == 15 && this.minutes>15 ) && positionObj.buy_price>= element.ohlc.open )  )):
-
-
-msg = `STOP LOSS  EXECUTION  PRICE AFTER 3 :15 PM WAS BELOW TODAYS OPEN EXIT FOR , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-
-break;
-
-
-        case(  (   lp.quantity>0 && element.ohlc.low<= cis.pricePoints.d1.low && false && ( this.hours == 15 && this.minutes>15 ) && positionObj.buy_price>= element.ohlc.low )):
-        msg = `STOP LOSS  EXECUTION TODAYS LOW CROESSED AT SOME TIME YESTERDAYS LOW DANGER EXIT , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-
-        break;
-
-
-
-
-
-
-        case(  lp.quantity>0 && todayOpenYesterDayhigh && false ):
-        msg = `STOP LOSS  EXECUTION  BY  GAP UP YESTERDAY HIGH , THEN FALLED BELOW 5% OF YESTERDAY HIGH ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-
-        break;
-
-
-        case ( lp.quantity>0 &&todayOpenYesterDayClose && false ):
-        msg = `STOP LOSS  EXECUTION  BY  GAP UP YESTERDAY close , THEN FALLED BELOW 5% OF YESTERDAY close ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
-         this.cl( msg )
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-
-        break;
-
-
-        case ( lp.quantity>0 &&momentFire && false ):
-
-
-
-         this.cl( 'FIRING TARGETED PRFIT BOOKING FOR',cis.tradingsymbol,'at', last_price,'FOR PROFIT',livePnlOffered );
-        this.updateSquareOfforderWithDesiredPrice( 
-           cis,
-           element,
-           false,
-           last_price
-          );
-
-        break;
-
-
-
-
-
-
-// case daySqOff:
-
-// console.log( 'daySqOff 5 sl at ',cis.tradingsymbol )
-
-//          this.updateSquareOfforderWithDesiredPrice( 
-//            cis,
-//            element,
-//            false,
-//            last_price
-//           );
-      
-
-
-// break;
-
-
-// case quickProfit:
-// console.log( 'quickProfit  of %s for %s ',livePnlOffered,cis.tradingsymbol )
-
-//          this.updateSquareOfforderWithDesiredPrice( 
-//            cis,
-//            element,
-//            false,
-//            last_price
-//           );
-
-//   break;
-
-
-
-
-
-        // case livePnlOffe<-500:
-//         case ( livePnlHere <- 500 ):
-
-// console.log( '-500 sl at ',cis.tradingsymbol )
-
-//          this.updateSquareOfforderWithDesiredPrice( 
-//            cis,
-//            element,
-//            false,
-//            last_price
-//           );
-      
-
-
-// break;
-
-
-//         case livePnlOffered<-2500:
-
-// console.log( '2500 sl at ',cis.tradingsymbol )
-
-//          this.updateSquareOfforderWithDesiredPrice( 
-//            cis,
-//            element,
-//            false,
-//            last_price
-//           );
-      
-
-
-// break;
-
-
-
-
-// case ( element.last_price<= stopLoss ):
-
-
-
-// console.log( 'stopLoss sl at  for averagge stop loss @ %s for %s ',stopLoss,cis.tradingsymbol )
-
-//          this.updateSquareOfforderWithDesiredPrice( 
-//            cis,
-//            element,
-//            false,
-//            last_price
-//           );
-      
-
-
-// break;
-
-
-
-
-
-
-case ( lp.quantity>0 && maxOfYdayTodayLow && false && positionObj.buy_price>= Math.max( cis.pricePoints.d0.low,cis.pricePoints.d1.low )  ):
-
-
-this.cl( 'sltrigger  trigger minimum of y day low todays low for  %s at squareoffPrice of %s',
-cis.tradingsymbol,Math.max( cis.pricePoints.d0.low,cis.pricePoints.d1.low ))
-       
-
-this.updateSquareOfforderWithDesiredPrice( 
-                   cis,
-                   element,
-                   false,
-                   Math.max( cis.pricePoints.d0.low,cis.pricePoints.d1.low )
-                  );
-
-                 msg = `STOP LOSS  EXECUTION SEND BY  DAILY maxOfYdayTodayLow  STRATEGY FOR ${ cis.tradingsymbol }   for ${ Math.max( cis.pricePoints.d0.low,cis.pricePoints.d1.low ) }  at ${ formattedTime } `
-         this.cl( msg )
-              
-
-        break;
-
-
-
-
-
-
-
-
-//         case livePnlOffered>500 && false:
-
-     
-
-
-// this.cl( '1000 trigger' )
-//         this.updateSquareOfforderWithDesiredPrice( 
-//                    cis,
-//                    element,
-//                    false,
-//                    last_price
-//                   );
-              
-
-//         break;
-
-
-
-        // testForHasLivetarget
-        // case ( this.hours == 15 && this.minutes>10 && false ):
-
-
-        // this.cl( 
-        //            "Firing 15:10 square offf  order for %s bidprice is %s and high is %s ",
-        //            cis.tradingsymbol, bidPrice,
-        //            high
-        //           );
-
-        //          this.updateSquareOfforderWithDesiredPrice( 
-        //            cis,
-        //            element,
-        //            false,
-        //            last_price
-        //           );
-              
-waitForShortCovering
-        // break;
-               
-
-
-
-
-            
-
-               case ( lp.quantity > 0 && last_price < low  && positionObj.buy_price>low ):
-
-                 this.cl( 
-                  "Firing long cover stop loss order for %s bidprice is %s and low  is %s  and last price is %s",
-                  cis.tradingsymbol,
-                  offerPrice,
-                   low,last_price
-                  );
-
-                 //simple long covering
-                //  this.updateSquareOfforderWithDesiredPrice( 
-                //    cis,
-                //    element,
-                //    false,
-                //    offerPrice
-                //   ); 
-                 
-                 this.updateSquareOfforderWithDesiredPrice( 
-                   cis,
-                   element,
-                   false,
-                   squareoffPrice
-                  );
-
-
-                 msg = `STOP LOSS  EXECUTION SEND BY  DAILY quantity > 0 && last_price < low  STRATEGY FOR ${ cis.tradingsymbol }   for ${ squareoffPrice }  at ${ formattedTime } `
-         this.cl( msg )
-              
-
-                 break;
-
-              
-              } 
+     this.stoplossCriteria();
 
 
      } ,
