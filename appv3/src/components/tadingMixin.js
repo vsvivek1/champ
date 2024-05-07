@@ -2,6 +2,11 @@ export const tradingMixin  =  {
     methods: { 
         checkForBuySignal(  ) { 
             for ( const element of this.s ) { 
+
+              if(element.last_price<1){
+
+                return;
+              }
               const correspondingInstrument  =  this.instruments.find( 
                 ( instrumentObj )  => instrumentObj.instrument_token== element.instrument_token
                );

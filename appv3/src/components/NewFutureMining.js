@@ -63,6 +63,8 @@ import TradeCostAndBalnceInfo from './TradeCostAndBalnceInfo.vue'
 import ProfitAndLossOfClosedPositions from './ProfitAndLossOfClosedPositions.vue'
 import InstrumentsStatusView  from './InstrumentsStatusView.vue';
 
+import updateJsonFileMixin from '../../updateJsonFileMixin';
+
 import trailingStopLossWithLtp from './trailingStopLossWithLtp.js'
 
 import  {orderUpdateMixin}  from './order_update_mixin';
@@ -113,6 +115,7 @@ import newFutureMiningComputed from '@/newFutureMiningComputed';
 import timeMixins from '@/timeMixins';
 
 
+import newFutureMiningMixinsList from './newFutureMiningMixinsList';
 
 export var hourlyPricePointsofLiveDay1 ;
 
@@ -140,6 +143,8 @@ var cl;
             ProfitAndLossOfClosedPositions } ,
 
             mixins: [
+              newFutureMiningMixinsList,
+              updateJsonFileMixin ,
               timeMixins,
               newFutureMiningComputed,
               getPositions,
@@ -977,6 +982,7 @@ instruments = await this.requireJson( urlForMiningInstruments );
 
 this.instruments  = instrumentsForMining;
 this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
+this.initiateHistoricalDataFetch(this.instrumentTokens);
 
 if( !instruments ){ 
 
@@ -4226,7 +4232,7 @@ return false;
 
           let tradingsymbol  =  cis.tradingsymbol;
 
-          let lot_size  =  cis.lot_size*36;
+          let lot_size  =  cis.lot_size*3;
           //let lot_size = 0;
           let order_type  =  "LIMIT";
 
@@ -5321,6 +5327,7 @@ return false;
         let j = JSON.stringify( this.instrumentTokens );
 
         console.log( 'Going to subscribe ticks Number of scripts for Ticks is %s',this.instrumentTokens.length )
+
 
         socket.emit( "subscribe-orders", j );
 

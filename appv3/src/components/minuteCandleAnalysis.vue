@@ -20,9 +20,9 @@
 			{{ instrument.pricePoints.d0.open }}
 			</td>
 			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0">
-			    {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 2].close}} price
+			    {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].close}} price
 				
-				{{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 2].IST }} 
+				{{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].IST }} 
 
 			  
 			  

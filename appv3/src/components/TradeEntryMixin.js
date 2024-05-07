@@ -4,6 +4,11 @@ const TradeEntryMixin = {
   methods: {
     tradeEntry(instrument_token, inst = 'cis', cis, element) {
       try {
+
+        if(element.last_price<1){
+
+          return;
+        }
           let shouldProceed = false;
   
           if (typeof cis.previous_last === 'undefined') {
@@ -43,16 +48,22 @@ if( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='un
  typeof cis.minuteCandle.signal=='undefined' || cis.minuteCandle.signal=='EntryCheckForSignalFailed'){
 
   //console.log(cis.minuteCandle,'minute candle signal issue before switch issue')
-  return;
+  //return;
 }else if(cis.minuteCandle.signal.signal=='longTail'){
 
   console.log('longTail for',cis.tradingsymbol)
 
-}else{
-
- // console.log('nothiing in minute candle',cis.tradingsymbol,cis.minuteCandle.signal)
 }
-          
+        
+
+if(element.ohlc.open>element.last_price){
+
+
+  console.log('NO BUYING BELOW OPENING POINT',cis.tradingsymbol)
+  return;
+
+}
+console.log('before crietriea switch',cis.tradingsymbol)
 
           switch (true) { 
              /*  case !this.checkNiftyStatus("NIFTY 50"):
@@ -62,21 +73,29 @@ if( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='un
                   break; */
 
 
-case (cis.minuteCandle.signal.signal=='longTail'):
+case (
+  
+  !( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='undefined' || 
+  typeof cis.minuteCandle.signal=='undefined' || cis.minuteCandle.signal=='EntryCheckForSignalFailed')
+  && cis.minuteCandle.signal.signal=='longTail'
+):
 
 console.log('inside long Tail  candle signal')
   this.shouldProceed = true;
   this.$set(cis,'tradeEntrySignal','longTail');
+  cis.minuteCandle.signal.signal=='';
 
 break;
 
-              case this.yesterDayHighCross(cis):
+              case (this.yesterDayHighCross(cis)):
 
               let exit={};
               exit.target=cis.dailyRangeBreakout;
               exit.stopLosss=cis.pricePoints.d1.low*1.1;
               this.$set(cis,'tradeEntrySignal','yesterdayHighCross');
-              this.$set(cis,'signal',exit)
+              this.$set(cis,'exit',exit)
+
+
                   this.shouldProceed = true;
                   break;
               case this.dailyRangeBreakout(element, cis):
@@ -113,6 +132,9 @@ break;
 
           console.log('reached should proceed for entry',cis.tradingsymbol,cis.signal,this.shouldProceed)
           if (this.shouldProceed) {
+
+            this.updateInstrumentsFile(this.instruments,'./appv3/public/instruments/instrumentsForMiningY.json')
+
               var sellersLowestPrice = cis.last_price;
 
 

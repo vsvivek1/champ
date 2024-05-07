@@ -13,6 +13,7 @@ const { getUniqueTradingSymbols } = require('./getUniqueNames.js');
 const { getKiteConnectInstance } = require('./getKiteConnectInstance.js');
 
 const fs = require('fs').promises;
+//const restartPM2Process = require('./restartPM2Process');
 const scriptDirectory  =  Path.dirname( process.argv[1] );
 const FILE_LOCATION  =  Path.join( scriptDirectory, 'appv3', 'public', 'instruments' );
 
@@ -21,7 +22,7 @@ let indexOptions={
     "NIFTYNXT50": "NIFTY NEXT 50",
     "BANKNIFTY": "NIFTY BANK",
     "FINNIFTY": "NIFTY FIN SERVICE",
-    "MIDCPNIFTY": "NIFTY MID SELECT"
+    "MIDCPNIFTY": "NIFTY MIDCAP SELECT (MIDCPNIFTY)"
   }
 
 async function writeJsonToFile(jsonData, fileName) {
@@ -215,13 +216,13 @@ var diff =calculateStrikeDifferences(expToday,name,ltp);
 
 
 
-var strikeAbove=(Math.floor(ltp/diff)*diff+diff)
+var strikeAbove=(Math.ceil(ltp/diff)*diff)
 var strikeBelow=(Math.floor(ltp/diff)*diff)
 
 
 
-var requiredAbove=strikeAbove+diff;
-var requiredBelow=strikeBelow-diff;
+var requiredAbove=strikeAbove//+diff;
+var requiredBelow=strikeBelow//-diff;
 
 /* let callOptions = niftyBankNiftyBeforeNearestExpiry.filter(option => {
    return requiredAbove && option.instrument_type === 'CE' && parseInt(option.strike) > requiredAbove;
@@ -277,6 +278,15 @@ console.log("Put option below:", putOptionBelow); */
 await popOption(selectedOptions,fullJson,accessTokenDoc);
 
 console.log('here 158')
+
+
+
+
+
+//const { exec } = require('child_process');
+
+// Command to restart PM2 process
+
 //await closeDatabaseConnection();
 return;
 
@@ -341,6 +351,23 @@ async function popOption(selectedOptions,fullJson,accessTokenDoc) {
             clearInterval(timer);
             console.log("Array is empty. Resetting timer.");
 
+            const command = 'pm2 restart ./server.js';
+
+// Execute the command
+exec(command, (error, stdout, stderr) => {
+  if (error) {
+    console.error(`Error executing command: ${error.message}`);
+    return;
+  }
+  if (stderr) {
+    console.error(`stderr: ${stderr}`);
+    return;
+  }
+  console.log(`stdout: ${stdout}`);
+});
+
+            //disconnect();
+
             //return;
            // return;
            //clearTimeout(timer);
@@ -355,7 +382,9 @@ async function popOption(selectedOptions,fullJson,accessTokenDoc) {
     
 }
 
-main();
+
+
+
 
 async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
 
@@ -374,6 +403,10 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             option.selectedBuyingMethod = 'MAX';
             option.buyNow = false;
 
+            option.enterNowToTrade=false;
+            option.canTakeFreshTrade=true;
+            
+
             console.log('pushing option', option.tradingsymbol);
             fullJson.push(option);
             console.log('new length', fullJson.length);
@@ -388,4 +421,10 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
     });
 }
 
+main();
+ setInterval(()=>{
+
+   main();
+//disconnect()
+},15*60*1000) 
 //disconnect();

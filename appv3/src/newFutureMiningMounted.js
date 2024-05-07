@@ -12,7 +12,7 @@ export default{
       
       
         // },1000)
-      
+        this.getCurrentFNOPositions() ;
       
         const currentDate  =  new Date().toISOString().split( 'T' )[0];
           const existingData  =  JSON.parse( localStorage.getItem( currentDate ))
@@ -229,13 +229,18 @@ export default{
                  this.hours  =  d.getHours();
                  this.minutes  =  d.getMinutes();
                  this.seconds  =  d.getSeconds();
+
+                 if(this.seconds==2){
+
+                  this.initiateHistoricalDataFetch(this.instrumentTokens);
+                 }
       
                if( this.seconds == 55 ){ 
       
                 // this. getOneMinuteData()
       
       //console.log(this.instrumentTokens);
-                this.initiateHistoricalDataFetch(this.instrumentTokens);
+              
                 console.log( 'ohlc data at 53 sec',this.ohlcData, this.accessToken )
                 }  
       

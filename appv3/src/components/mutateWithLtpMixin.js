@@ -10,6 +10,74 @@ const mar = function checkMarubozo(element) {
 
 const mutateWithLtp = {
     methods: {
+
+     async stopLossprocedure(instrument_token,tradingsymbol,cis,element,hasLivePositionFromcis,last_price) {
+
+    console.log('from stop loss procedure ');
+        //return ;  // have to write stop loss here switch
+        let lpCurrent = this.livePositions.find(lp => lp.instrument_token == instrument_token);
+
+       // console.log(lpCurrent,'current position')
+        let average_price = -1;
+
+        if (typeof lpCurrent=='undefined') {
+
+          //this.cl('avaerage price not defined for', cis.tradingsymbol);
+          average_price = cis.pricePoints.d1.high;
+       
+       
+        } else {
+
+         // console.log(lpCurrent,'lpcurrent')
+          average_price = lpCurrent.quantity < 0 ? lpCurrent.sell_price : lpCurrent.buy_price;
+
+        }
+
+       
+        this.currentTradingsymbolAverage = { instrument_token, tradingsymbol, average_price };
+
+        if (!this.livePositions.some(lp => lp.instrument_token == cis.instrument_token)) {
+          this.cl('live postition for script is zero');
+          return false;
+        }
+
+        
+
+        let { high, low } = cis.pricePoints.d1;
+        let { bidPrice, offerPrice, count, stopLoss, target, lstPrice, livePnlOffered, quantity } =
+          await this.setTargetPricesBasedOnQuantity(cis, element, low, high, instrument_token);
+
+        let hasLiveTarget = count > 0;
+
+        let PlacedReverseOrder = this.instruments.find(i => i.instrument_token == instrument_token).PlacedReverseOrder;
+
+
+        let hasLivetargetFromcis=cis.hasLiveTarget
+      
+       
+        if (hasLivePositionFromcis && hasLivetargetFromcis) {
+
+          ////proceed for stop losss 
+          this.stopLossTargetSwitch(quantity, last_price, high, low, bidPrice, offerPrice, cis, element, livePnlOffered, lpCurrent);
+        } else {
+
+
+
+          this.cl('NO LIVE TARGETS FOR ', cis.tradingsymbol);
+
+          let lnLive = this.liveOrders.some(lo => lo.instrument_token == instrument_token);
+
+          if (!lnLive) {
+            if (PlacedReverseOrder != true && hasLiveTarget != true) {
+              this.cl('iam return ning false @7217 means no live targets');
+              if (this.manualReverseOrderStart == true) {
+                // let out  = await this.placeTargetsForSingleScript(instrument_token, quantity);
+              }
+              return false;
+            }
+          }
+        }
+    },
       setLiveTargetAndPosition(instrument_token, livePosObject, liveOrderObj) {
         if (typeof livePosObject != undefined && typeof liveOrderObj != undefined) {
             const instrumentToUpdate = this.instruments.find(i => i.instrument_token == instrument_token);
@@ -107,10 +175,10 @@ const mutateWithLtp = {
         if(this.seconds%3!=0){
 
 
-         this.cl('not 58')
+         //this.cl('not 58')
           return ;
         }else{
-          this.cl('yes its  58')
+         // this.cl('yes its  58')
 
         }
 
@@ -125,7 +193,7 @@ const mutateWithLtp = {
   
         if (this.hasStartedGetOrders || this.hasStartedGetLivePositions || this.refreshingTradeStatus) {
           this.tradeEntryFlowStatus = 'updating various status on Mount 1';
-          this.cl('UPDATING VARIOS STATUS  ... NO TRADE TIME');
+          //this.cl('UPDATING VARIOS STATUS  ... NO TRADE TIME');
           return false;
         }
 
@@ -220,68 +288,11 @@ const mutateWithLtp = {
   
           if (hasLivePositionFromcis) {
 
-            return ;  // have to write stop loss here switch
-            let lpCurrent = this.livePositions.find(lp => lp.instrument_token == instrument_token);
-  
-           // console.log(lpCurrent,'current position')
-            let average_price = -1;
-  
-            if (typeof lpCurrent=='undefined') {
-
-              //this.cl('avaerage price not defined for', cis.tradingsymbol);
-              average_price = cis.pricePoints.d1.high;
-           
-           
-            } else {
-
-             // console.log(lpCurrent,'lpcurrent')
-              average_price = lpCurrent.quantity < 0 ? lpCurrent.sell_price : lpCurrent.buy_price;
-
-            }
-  
-           
-            this.currentTradingsymbolAverage = { instrument_token, tradingsymbol, average_price };
-  
-            if (!this.livePositions.some(lp => lp.instrument_token == cis.instrument_token)) {
-              this.cl('live postition for script is zero');
-              return false;
-            }
-  
-            
-  
-            let { high, low } = cis.pricePoints.d1;
-            let { bidPrice, offerPrice, count, stopLoss, target, lstPrice, livePnlOffered, quantity } =
-              await this.setTargetPricesBasedOnQuantity(cis, element, low, high, instrument_token);
-  
-            let hasLiveTarget = count > 0;
-  
-            let PlacedReverseOrder = this.instruments.find(i => i.instrument_token == instrument_token).PlacedReverseOrder;
-  
-            if (hasLivePositionFromcis && hasLivetargetFromcis) {
-
-              ////proceed for stop losss 
-              this.stopLossTargetSwitch(quantity, last_price, high, low, bidPrice, offerPrice, cis, element, livePnlOffered, lpCurrent);
-            } else {
-
-
-
-              this.cl('NO LIVE TARGETS FOR ', cis.tradingsymbol);
-  
-              let lnLive = this.liveOrders.some(lo => lo.instrument_token == instrument_token);
-  
-              if (!lnLive) {
-                if (PlacedReverseOrder != true && hasLiveTarget != true) {
-                  this.cl('iam return ning false @7217 means no live targets');
-                  if (this.manualReverseOrderStart == true) {
-                    // let out  = await this.placeTargetsForSingleScript(instrument_token, quantity);
-                  }
-                  return false;
-                }
-              }
-            }
+         this.stopLossprocedure(instrument_token,tradingsymbol,cis,element,hasLivePositionFromcis,last_price);
           }
   
-         this.cl('element here 142 from mutate with ltp mixin');
+         //this.cl('cis.enterNowToTrade @142',cis.enterNowToTrade,cis.tradingsymbol);
+
           if (cis.enterNowToTrade == false) {
             
             let inst = cis;
@@ -308,7 +319,7 @@ const mutateWithLtp = {
         }
       },
       mounted() {
-        console.log('hello from mutate with ltp mixin mixin!');
+        console.log('hello from mutatewithltpmixin mixin  yyy!');
       },
     },
   };

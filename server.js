@@ -36,6 +36,8 @@ let access_token_global;
 
 
 
+
+
 const fs = require('fs');
 require('dotenv').config()
 
@@ -45,6 +47,9 @@ const Scraping=require("./scraping/index.js")
 const CI=require("./scraping/ci.js")
 
 const app=express();
+
+app.use(express.json({limit: '50mb'}));
+app.use(express.urlencoded({limit: '50mb'}));
 var history = require('connect-history-api-fallback');
 
 process.on('uncaughtException', function(err) {
@@ -333,6 +338,26 @@ res.send(r)
 
 });
 })
+
+
+
+app.post('/api/updateJsonFileWithData',(req,res)=>{
+  const updateJSONFile =require('./updateJsonFile.js') ;
+
+  let filePath=req.body.filePath;
+  let newData=req.body.instruments;
+
+  console.log('here filw writing');
+  const replaceExisting = true; // Set this flag to true if you want to replace existing data, false to merge
+
+  updateJSONFile(filePath, newData, replaceExisting)
+    .then((message) => {
+      console.log(message);
+    })
+    .catch((error) => {
+      console.error('Error updating/creating JSON file:', error);
+    })
+});
 
 
 app.get('/api/getOrders/:accessToken',(req,res)=>{  let accessToken=req.params.accessToken;

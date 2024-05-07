@@ -81,7 +81,7 @@ if(typeof ohlcData[ohlcData.length-1]=='undefined'){
     if(lowerShadowSize>bodySize*2 && upperShadowSize<lowerShadowSize){
 
       //console.log('long tail for',ts);
-      return { candleColor:CandleColor,signal: 'longTail', target: high + (high - low), stoploss: low - (high - low) };
+      return { candleColor:CandleColor,signal: 'longTail', target: high + (high - low)/2, stoploss: low - (high - low)/2 };
     }
   
     // Bullish Engulfing

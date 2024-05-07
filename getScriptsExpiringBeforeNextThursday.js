@@ -19,7 +19,7 @@ function getScriptsExpiringToday(jsonArray) {
   
 
 
-   tommorow.setDate(today.getDate());
+   tommorow.setDate(today.getDate()+6);
 
    
 
@@ -38,11 +38,14 @@ function getScriptsExpiringToday(jsonArray) {
 
    return jsonArray.filter(item => {
       if (item.expiry) {
-         const expiryDate = item.expiry;
+         //const expiryDate = item.expiry;
 
-         //console.log(item.expiry)
-       //  const expiryDate = new Date(item.expiry);
-         return expiryDate ==tm;
+      //console.log(item.expiry)
+
+      const nextThursday = new Date(today.getTime() + (7 - today.getDay() + 4) % 7 * 24 * 60 * 60 * 1000); // Calculate next Thursday
+
+        const expiryDate = new Date(item.expiry);
+         return expiryDate<=nextThursday;
       }
       return false;
    });
