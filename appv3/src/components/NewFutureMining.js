@@ -1,6 +1,6 @@
 
 import Vue from 'vue';
-import {  placeTargetsForLiveScripts  }  from './placeTargetsForLiveScripts';
+import placeTargetsForLiveScripts    from './placeTargetsForLiveScripts';
 
 import VueGoodTable from "vue-good-table";
 import "vue-good-table/dist/vue-good-table.css";
@@ -943,6 +943,10 @@ this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token )
   this.setter  =  shareF;
 
   const urlForMiningInstruments = "../../../instruments/instrumentsForMining.json"
+  const urlForAll  = "../../../instruments/instrumentsAll.json"
+  //const urlForAll = "../../../instrumentsAll.json"
+
+ // appv3/public/instruments/instrumentsAll.json
 instruments = await this.requireJson( urlForMiningInstruments );
 
 
@@ -957,8 +961,14 @@ instruments = await this.requireJson( urlForMiningInstruments );
    )
   .filter(( item, index, arr )  => arr.indexOf( item )== index );
 
+let instruAll1=await this.requireJson( urlForAll );
 
-
+let instruAll= instruAll1
+.filter( 
+  ( i )  =>  true
+  
+ )
+.filter(( item, index, arr )  => arr.indexOf( item )== index );
   //this.hourlyPricePointsofLiveDay1  = hourlyPricePointsofLiveDay1;
 
       // this.cl( 'this.hourlyPricePointsofLiveDay23',this.hourlyPricePointsofLiveDay )
@@ -981,6 +991,8 @@ instruments = await this.requireJson( urlForMiningInstruments );
 
 
 this.instruments  = instrumentsForMining;
+
+this.instruAll=instruAll;
 this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
 this.initiateHistoricalDataFetch(this.instrumentTokens);
 
@@ -1631,9 +1643,11 @@ price = element.last_price;
         return instrument_token;
        } 
      } ,
-    async updateMissingScriptInInstrumetsFile( instrument_token ) { 
+    async updateMissingScriptInInstrumetsFile( instrument_token1 ) { 
 
 
+
+let instrument_token=[instrument_token1];
       if( this.missingScriptUpdating == true ){ 
 
       this.cl( 'updating missing scripts' );
@@ -1656,7 +1670,7 @@ price = element.last_price;
 
 
       
-     let a =  await axios.post( url, params );
+     let ax =  await axios.post( url, params );
      
 
       this.missingScriptUpdating = false;
@@ -3661,7 +3675,7 @@ new Promise( async ( res,rej ) =>{
 async proceedForReverseOrderPlacement( cis,instrument_token,orderUpdates ){ 
 
 let upper_circuit_limit
-let lower_circuit_limit
+let lower_circuit_limit 
 //   if( this.instruments.filter( i =>i.instrument_token == instrument_token ).length>0 )
 //   { 
 
@@ -3685,7 +3699,7 @@ let e = orderUpdates;
   let livePosition =  this.livePositions.
   filter( l =>l.instrument_token == instrument_token )[0];
 
-debugger
+
   // this.cl( { livePosition }  )
   if( typeof livePosition == 'undefined' ){ 
 
@@ -3693,14 +3707,14 @@ debugger
    } 
   let quantity = livePosition.quantity
 
-  debugger
+
 
   // this.cl( { quantity }  )
           if ( quantity  ==  0 ) { 
             this.placingReverseOrderInProgress  ==  false;
 
             this.cl( 'this.placingReverseOrderInProgress ',this.placingReverseOrderInProgress,quantity   )
-         debugger
+        // debugger
             return;
            } 
 
@@ -3783,7 +3797,7 @@ debugger
             targetPoint  =  lowerBreakOutTarget //rangeBreakOutMath.max( rangeBreakOut,upper_circuit_limit );
 
            
-debugger
+//debugger
 
            }  else if ( quantity > 0 ) { 
             transaction_type  =  "SELL";
@@ -3822,7 +3836,7 @@ debugger
            ) { 
 
 
-            debugger
+           // debugger
             this.orderUpdateProcessing = false;
             // this.cl( 'PlacedReverseOrder ',PlacedReverseOrder  )
             // this.placingReverseOrderInProgress  ==  false;
@@ -3844,8 +3858,11 @@ debugger
            
           //  );
 
-debugger
+//debugger
 
+
+alert(' this is happenoing at 3864 of new future mining  proceed for reverrse order placement')
+return;
    this.placetargetAndStopLoss( 
             cis,
             instrument_token,
@@ -4232,7 +4249,7 @@ return false;
 
           let tradingsymbol  =  cis.tradingsymbol;
 
-          let lot_size  =  cis.lot_size*3;
+          let lot_size  =  cis.lot_size*20;
           //let lot_size = 0;
           let order_type  =  "LIMIT";
 
@@ -4366,7 +4383,7 @@ return false;
       const targetPointLong  =  Math.round( targetPointLong1 * 10 ) / 10;
 
 
-      console.log(targetPointLong);
+      console.log(targetPointLong,'targetpoint long',cis.tradingsymbol);
 
       //debugger
 
@@ -4393,7 +4410,7 @@ return false;
          );
 
 if( !livePosLen ){ 
-  console.log('return5')
+  console.log('NO LIVE POSITION LENGTH')
   return false;
  } 
     
@@ -4411,7 +4428,7 @@ if( !livePosLen ){
 
           if ( hasLiveTarget  ==  true || PlacedReverseOrder == true  ) { 
          
-            console.log('return6')
+            console.log('HAS TARGET')
             return false;
            } 
         
@@ -4874,7 +4891,7 @@ var formattedTime  =  now.format( "DD-MM-YY H:mm" );
 
 
 
-let squareoffDuringSideWise = ( sideWisetime && livePnlOffered>0 );
+//let squareoffDuringSideWise = ( sideWisetime && livePnlOffered>0 );
 // let squareoffDuringSideWise = ( sideWisetime && livePnlOffered>0 );
 
 
@@ -4970,7 +4987,7 @@ let sellersLowestPrice = element.depth.sell[0].price;
  let buyPriceGreaterThanTodaysOpen = lp.buy_price>element.ohlc.open
 
  /// exitswitch
-     this.stoplossCriteria();
+     this.stoplossCriteria(element,cis);
 
 
      } ,

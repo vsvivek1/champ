@@ -2,12 +2,39 @@ export default{
 
 methods:{
 
-    stoplossCriteria(){
-
+    stoplossCriteria(element,cis){
+     /*  let normalShorCovering = false;
+      if( element.ohlc.open< cis.pricePoints.d1.low  ){ 
+     
+     
+       if( this.hours>9 ){ 
+     
+     
+         if( element.ohlc.open = element.ohlc.high ){ 
+     
+     
+           normalShorCovering = lp.quantity>0 && ( yesterDayLowStopLoss ) && positionObj.buy_price>cis.pricePoints.d1.low;
+          } 
+     
+     
+        
+        }  else if( this.hours>14 ){ 
+     
+         normalShorCovering = lp.quantity>0 && ( yesterDayLowStopLoss ) && positionObj.buy_price>cis.pricePoints.d1.low;
+     
+     
+        } 
+     
+       } else{ 
+     
+       normalShorCovering = lp.quantity>0 && ( yesterDayLowStopLoss ) && positionObj.buy_price>cis.pricePoints.d1.low;
+     
+       }  */
+      
         switch ( true ) { 
 
-
-            case ( isGapDown && isOverNightScript && buyPriceGreaterThanTodaysOpen  ) :
+ //check later
+            /* case ( isGapDown && isOverNightScript && buyPriceGreaterThanTodaysOpen  ) :
     
     
     
@@ -33,7 +60,7 @@ methods:{
                exitingPrice
               );
     
-            break;
+            break; */
     
     
             case ( this.exitNow ):
@@ -80,7 +107,7 @@ methods:{
     
             break;
     
-            case ( 
+            /* case ( 
             
             
            normalShorCovering
@@ -102,13 +129,13 @@ methods:{
           
     
     
-    break;  
+    break; */  
     
     
     
     
     
-            case ( sellersLowestPrice<element.last_price && false ):
+          /*   case ( sellersLowestPrice<element.last_price && false ):
     
     
     this.cl( ' line-7559 has to sell this :sellersLowestPrice is less  than last price for',cis.tradingsymbol, 'sellersLowestPrice', sellersLowestPrice,' last price', element.last_price )
@@ -119,7 +146,7 @@ methods:{
         buyersHighestPrice
        );
     
-    break;
+    break; */
     
       //       case ( lp.quantity>0 && bestBuyOffer>element.last_price ):
     
@@ -160,7 +187,7 @@ methods:{
     
     // break;
     
-    
+    /* 
     
             case ( lp.quantity>0 &&  element.last_price<element.ohlc.high*97  && false ):
     
@@ -177,10 +204,11 @@ methods:{
         false,
         element.last_price
        );
-            break
+            break */
      
     
-            case ( lp.quantity < 0 && element.last_price >=  lp.sell_price*1.05 && waitForShortCovering   && false  ):
+         /*    case ( lp.quantity < 0 && element.last_price >=
+              lp.sell_price*1.05 && waitForShortCovering   && false  ):
     
                   
     
@@ -198,7 +226,7 @@ methods:{
         element.last_price
        );
     
-      break;
+      break; */
             
     
             case this.exitNow:
@@ -219,7 +247,7 @@ methods:{
     
     
     
-            case ( lp.quantity>0 && openBelowYesterdayHigh && false ):
+           /*  case ( lp.quantity>0 && openBelowYesterdayHigh && false ):
             
             msg = `open below yesterdays high , touched y day high and thebn  retturning to yesterdays high , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime }  SQUARING OFF`
              this.cl( msg )
@@ -230,10 +258,10 @@ methods:{
                last_price
               );
             
-            break;
+            break; */
             
             
-            case ( lp.quantity>0 && openLowTouchedYdayHigh && false ):
+           /*  case ( lp.quantity>0 && openLowTouchedYdayHigh && false ):
             
             msg = `open below yesterdays low, touched y day high and thebn  retturning to yesterdays high , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime }  SQUARING OFF`
              this.cl( msg )
@@ -244,10 +272,10 @@ methods:{
                last_price
               );
             
-            break;
+            break */;
     
     
-            case ( lp.quantity>0 && hitHighStopLoss && false ):
+           /*  case ( lp.quantity>0 && hitHighStopLoss && false ):
             
             msg = `open below yesterdays candle body crossed yesterdays body, retturning to yesterdays body stop loss , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime }  SQUARING OFF`
              this.cl( msg )
@@ -258,8 +286,8 @@ methods:{
                last_price
               );
             
-            break;
-    
+            break; */
+    /* 
             case ( lp.quantity>0 && element.last_price<element.ohlc.open*.98 && false ):
     
     
@@ -272,10 +300,10 @@ methods:{
                last_price
               );
     
-            break;
+            break; */
     
     
-            case ( lp.quantity>0 && NineFiftySquareOff && false ):
+        /*     case ( lp.quantity>0 && NineFiftySquareOff && false ):
     
     
             msg = `SQUARING OFF ALL GREENS AT 9 :58 , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
@@ -287,9 +315,9 @@ methods:{
                last_price
               );
     
-            break;
+            break; */
     
-    case ( lp.quantity>0 && buyPriceAboveOpenAndLastPriceFallsBelowOpen && false ):
+  /*   case ( lp.quantity>0 && buyPriceAboveOpenAndLastPriceFallsBelowOpen && false ):
     
     msg = `SQUARING OFF IF BUY PRICE ABOVE OPEN AND LAST PRICE FELL BELOW 5% OPEN , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
              this.cl( msg )
@@ -301,12 +329,12 @@ methods:{
               );
     
     break;
+     */
     
     
     
     
-    
-            case  ( lp.quantity>0 && squareoffDuringSideWise && false ):
+         /*    case  ( lp.quantity>0 && squareoffDuringSideWise && false ):
     
     
            
@@ -320,12 +348,12 @@ methods:{
                last_price
               );
     
-            break;
+            break; */
     
     
     
     
-    case ((  (  lp.quantity>0 && element.last_price<element.ohlc.open && false && ( this.hours == 15 && this.minutes>15 ) && positionObj.buy_price>= element.ohlc.open )  )):
+   /*  case ((  (  lp.quantity>0 && element.last_price<element.ohlc.open && false && ( this.hours == 15 && this.minutes>15 ) && positionObj.buy_price>= element.ohlc.open )  )):
     
     
     msg = `STOP LOSS  EXECUTION  PRICE AFTER 3 :15 PM WAS BELOW TODAYS OPEN EXIT FOR , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
@@ -337,10 +365,10 @@ methods:{
                last_price
               );
     
-    break;
+    break; */
     
     
-            case(  (   lp.quantity>0 && element.ohlc.low<= cis.pricePoints.d1.low && false && ( this.hours == 15 && this.minutes>15 ) && positionObj.buy_price>= element.ohlc.low )):
+          /*   case(  (   lp.quantity>0 && element.ohlc.low<= cis.pricePoints.d1.low && false && ( this.hours == 15 && this.minutes>15 ) && positionObj.buy_price>= element.ohlc.low )):
             msg = `STOP LOSS  EXECUTION TODAYS LOW CROESSED AT SOME TIME YESTERDAYS LOW DANGER EXIT , ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
              this.cl( msg )
             this.updateSquareOfforderWithDesiredPrice( 
@@ -350,14 +378,14 @@ methods:{
                last_price
               );
     
-            break;
+            break; */
     
     
     
     
     
     
-            case(  lp.quantity>0 && todayOpenYesterDayhigh && false ):
+          /*   case(  lp.quantity>0 && todayOpenYesterDayhigh && false ):
             msg = `STOP LOSS  EXECUTION  BY  GAP UP YESTERDAY HIGH , THEN FALLED BELOW 5% OF YESTERDAY HIGH ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
              this.cl( msg )
             this.updateSquareOfforderWithDesiredPrice( 
@@ -368,9 +396,9 @@ methods:{
               );
     
             break;
+     */
     
-    
-            case ( lp.quantity>0 &&todayOpenYesterDayClose && false ):
+         /*    case ( lp.quantity>0 &&todayOpenYesterDayClose && false ):
             msg = `STOP LOSS  EXECUTION  BY  GAP UP YESTERDAY close , THEN FALLED BELOW 5% OF YESTERDAY close ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
              this.cl( msg )
             this.updateSquareOfforderWithDesiredPrice( 
@@ -380,10 +408,10 @@ methods:{
                last_price
               );
     
-            break;
+            break; */
     
     
-            case ( lp.quantity>0 &&momentFire && false ):
+         /*    case ( lp.quantity>0 &&momentFire && false ):
     
     
     
@@ -395,7 +423,7 @@ methods:{
                last_price
               );
     
-            break;
+            break; */
     
     
     
@@ -491,7 +519,7 @@ methods:{
     
     
     
-    case ( lp.quantity>0 && maxOfYdayTodayLow && false && positionObj.buy_price>= Math.max( cis.pricePoints.d0.low,cis.pricePoints.d1.low )  ):
+    /* case ( lp.quantity>0 && maxOfYdayTodayLow && false && positionObj.buy_price>= Math.max( cis.pricePoints.d0.low,cis.pricePoints.d1.low )  ):
     
     
     this.cl( 'sltrigger  trigger minimum of y day low todays low for  %s at squareoffPrice of %s',
@@ -509,7 +537,7 @@ methods:{
              this.cl( msg )
                   
     
-            break;
+            break; */
     
     
     
@@ -562,7 +590,7 @@ methods:{
     
                 
     
-                   case ( lp.quantity > 0 && last_price < low  && positionObj.buy_price>low ):
+              /*      case ( lp.quantity > 0 && last_price < low  && positionObj.buy_price>low ):
     
                      this.cl( 
                       "Firing long cover stop loss order for %s bidprice is %s and low  is %s  and last price is %s",
@@ -591,7 +619,7 @@ methods:{
              this.cl( msg )
                   
     
-                     break;
+                     break; */
     
                   
                   } 

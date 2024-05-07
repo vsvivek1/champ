@@ -4,6 +4,7 @@ var dataMixin=
 
     data() { 
         return { 
+          instruAll:[],
           ohlcData:[],
           allPositions:[],
           exitNow:false,

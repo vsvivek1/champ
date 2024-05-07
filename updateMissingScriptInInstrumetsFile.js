@@ -64,12 +64,14 @@ function otherCriteria( e ) {
 
    } 
  } 
+
+ //let instrument_token_arr=require('./appv3/public/instruments/instrumentsAll.json');
 module.exports = 
 
 async function updateMissingScriptInInstrumetsFile( instrument_token_arr,accessToken ){ 
 
 
-let instrus = JSON.parse( instrument_token_arr );
+let instrus = instrument_token_arr //JSON.parse( instrument_token_arr );
 
 
 console.log( instrus,'instrus' );
@@ -115,6 +117,13 @@ return false;
 
 let instrument = sourceInstru.filter( i =>i.instrument_token == instrument_token )[0]
 let a  =  new pricePoint( instrument_token, accessToken );
+await a.initiateKiteConnect();
+let kc2=await a.initiateKiteConnect();
+
+console.log(kc2,'kc2')
+
+
+
 let c  =  await a.getPricePoints( 7, 'day' );
 instrument.pricePoints  =  c;
 

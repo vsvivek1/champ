@@ -59,7 +59,7 @@ if( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='un
 if(element.ohlc.open>element.last_price){
 
 
-  console.log('NO BUYING BELOW OPENING POINT',cis.tradingsymbol)
+  //console.log('NO BUYING BELOW OPENING POINT',cis.tradingsymbol)
   return;
 
 }

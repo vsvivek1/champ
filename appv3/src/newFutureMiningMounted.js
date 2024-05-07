@@ -56,6 +56,8 @@ export default{
         //  )
       
         var urlForHourlyCandles = "../../../instruments/hourlyCandleData.json";
+
+       // var urlAll='./appv3/public/instruments/instrumentsAll.json';'
       
         fetch( urlForHourlyCandles )
         .then( response  => response.json()) // Convert the response to a JSON object

@@ -1,7 +1,7 @@
 import axios from 'axios'
 //import vue from 'vue';
 //vue.use(axios);
-export const placeTargetsForLiveScripts = {
+export default {
   methods: {
 
 
@@ -42,6 +42,14 @@ async getRawPositions(){
       async placeTargetsForLiveScripts() {
      await    this.getRawPositions();
 
+
+     const urlForAll  = "../../../instruments/instrumentsAll.json"
+     let instruAll1=await this.requireJson( urlForAll );
+
+     this.instruAll=instruAll1;
+
+     //debugger;
+
           if (this.placingReverseOrderInProgress) {
               return false;
           }
@@ -70,17 +78,20 @@ let livePositions=await this.getNFOPositions();
 
 
           await this.getPositions();
-          let positions = await this.getNFOPositions()
+          let positions1 = await this.getNFOPositions()
+
+          let positions=positions1.filter(p=>p.quantity!=0);
 
 
 
-         
         
 
           //console.log('live positions numbers from reverse orders',symbols.length,symbols)
-          let timer = setInterval(() => {
+          let timer = setInterval(async () => {
 
             console.log('inside timer',positions.length)
+
+
               if (positions.length == 0) {
                   clearInterval(timer);
                   this.placingReverseOrderInProgress = false;
@@ -90,7 +101,7 @@ let livePositions=await this.getNFOPositions();
               let position = positions.pop();
 
               
-
+         
 
              // let p=this.livePositions.pop()
               if (!position) {
@@ -103,21 +114,59 @@ let livePositions=await this.getNFOPositions();
               let lower_circuit_limit = quote.lower_circuit_limit;
               let cis = this.instruments.find(i => i.instrument_token == position.instrument_token);
 
+
+             
               if (!cis) {
-                  this.placingReverseOrderInProgress = false;
 
-                  console.log('return1')
-                  return false;
+               cis= this.instruAll.find(i => i.instrument_token == position.instrument_token);
+
+//debugger;
+             let pp=  await axios.get(`/api/getPricePoints/accessToken/:${this.accessToken}/token/${position.instrument_token}`)
+               
+             console.log(pp)
+            // debugger;
+
+                 this.placingReverseOrderInProgress = false;
+
+                  console.log('FETCHIG CIS FROM ALL INSTRUMENTS',cis.tradingsymbol)
+                  //return false;
               }
-
+              if (!cis){
+                console.log('cis issue still')
+                return;
+              }
               let entryPrice = position.quantity < 0 ? position.sell_price : position.buy_price;
               let transaction_type = position.quantity > 0 ? "SELL" : "BUY";
-              let targetPoint = this.calculateTargetPoint(entryPrice, transaction_type, cis, upper_circuit_limit, lower_circuit_limit);
+             // let targetPoint = this.calculateTargetPoint(entryPrice, transaction_type, cis, upper_circuit_limit, lower_circuit_limit);
+              let targetPoint //= this.calculateTargetPoint(entryPrice, transaction_type, cis, upper_circuit_limit, lower_circuit_limit);
+
+
+
+
+             // debugger;
+
+             if(
+              cis.minuteCandle &&
+              cis.minuteCandle.target
+
+            ){
+
+              targetPoint=cis.minuteCandle.target;
+            }else{
+
+              targetPoint=cis.pricePoints.d1.high*1.1;
+            }
+              
+
+              //debugger;
+
+             
+
 
               if (targetPoint ==false) {
-                console.log('return2')
+                console.log('return2 target poitn no')
                   this.placingReverseOrderInProgress = false;
-                  return false;
+                 // return false;
               }
 
               let livePnl = position.pnl;
