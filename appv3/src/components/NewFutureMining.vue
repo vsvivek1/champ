@@ -1,7 +1,30 @@
 <template>
   <v-container fluid>
 
+   <!--  <v-alert
+    v-if="flashMessage.status"
+      color="primary"
+      icon="$vuetify"
+      theme="dark"
+      prominent
+    >
+
+    {{ flashMessage.message }}
+    </v-alert> -->
+
+    <v-alert
+    v-if="placingReverseOrderInProgress"
+    
+    title="Placing Reverse Orders"
+    type="success"
+  >
+  Placing Reverse Orders
+</v-alert>
+ 
     <v-system-bar class="mb-5 mt-15 pa-5">
+
+
+
       <ProfitAndLossView :totalpnl="totalpnl"  class="pa-5" :closedTradesScriptsPnl="closedTradesScriptsPnl" />
 <h/>
 <DigitCheckerForWebsocketHealth  class="pa-5" :CurrentCheckDigit="CurrentCheckDigit" :laggingCheckDigit="laggingCheckDigit" :webSocketNotActive="webSocketNotActive" />
