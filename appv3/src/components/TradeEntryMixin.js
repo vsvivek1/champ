@@ -2,6 +2,19 @@ import Vue from "vue";
 
 const TradeEntryMixin = {
   methods: {
+
+    setCis(cis,entry,entryStrategy,target,targetStrategy,stopLoss,stopLossStrategy){
+
+
+      this.$set(cis,'entry',entry)
+      this.$set(cis,'entryStrategy',entryStrategy)
+      this.$set(cis,'entryStrategy',entryStrategy)
+      this.$set(cis,'targetStrategy',targetStrategy)
+      this.$set(cis,'target',target)
+      this.$set(cis,'stopLoss',stopLoss)
+      this.$set(cis,'stopLossStrategy',stopLossStrategy);
+
+    },
     tradeEntry(instrument_token, inst = 'cis', cis, element) {
       try {
 
@@ -44,26 +57,57 @@ const TradeEntryMixin = {
 
           }
           
-if( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='undefined' || 
- typeof cis.minuteCandle.signal=='undefined' || cis.minuteCandle.signal=='EntryCheckForSignalFailed'){
 
-  //console.log(cis.minuteCandle,'minute candle signal issue before switch issue')
-  //return;
-}else if(cis.minuteCandle.signal.signal=='longTail'){
-
-  console.log('longTail for',cis.tradingsymbol)
-
-}
         
 
 if(element.ohlc.open>element.last_price){
 
 
-  //console.log('NO BUYING BELOW OPENING POINT',cis.tradingsymbol)
+  this.cl('NO BUYING BELOW OPENING POINT',cis.tradingsymbol)
   return;
 
 }
-console.log('before crietriea switch',cis.tradingsymbol)
+
+
+
+
+if( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='undefined' || 
+ typeof cis.minuteCandle.signal=='undefined' || cis.minuteCandle.signal=='EntryCheckForSignalFailed'){
+
+  this.cl(cis.minuteCandle,'minute candle signal issue before switch issue for',cis.tradingsymbol)
+  return;
+}else 
+
+if(cis.lastHigh>cis.last_price && cis.minuteCandle.signal.signal=='longTail'){
+
+  this.cl('longTail abouve last high',cis.tradingsymbol)
+
+}
+
+try {
+  
+  if( (this.hours>9  && (typeof cis.minuteCandle=='undefined' || cis.minuteCandle.lastHigh>element.last_price))){
+  
+    if(typeof cis.minuteCandle!='undefined' ){
+    this.cl('LAST HOUR HIGH GREATER THAN LAST PRICE FOR',cis.tradingsymbol,'last hour high',cis.minuteCandle.lastHigh , element.last_price,'is the last price so returning')
+
+
+    }
+  
+    this.shouldProceed=false;
+    return;
+  }else{
+
+       console.log('LAST HOUR check ok',cis.tradingsymbol,'last hour high',cis.minuteCandle.lastHigh , element.last_price,'is the last price so returning')
+
+  }
+} catch (error) {
+console.log(error,'here eror')
+  this.shouldProceed=false;
+    return;
+  
+}
+console.log('BEFORE ACTUAL TRADE SWITCH',cis.tradingsymbol)
 
           switch (true) { 
              /*  case !this.checkNiftyStatus("NIFTY 50"):
@@ -81,9 +125,16 @@ case (
 ):
 
 console.log('inside long Tail  candle signal')
+
+if(cis.minuteCandle.lastHigh>element.last_price){
+
+  break;
+  return
+
+}
   this.shouldProceed = true;
   this.$set(cis,'tradeEntrySignal','longTail');
-  cis.minuteCandle.signal.signal=='';
+  cis.minuteCandle.signal=='Signal Executed';
 
 break;
 
@@ -102,7 +153,7 @@ break;
                   this.cl("Condition check for 'dailyRangeBreakout' not met");
                   this.tradeEntryFlowStatus = 'Condition check for \'dailyRangeBreakout\' not met' + cis.tradingsymbol;
                 
-                  this.$set(cis,'tradeEntrySignal','daiulyRangeBreakout');da
+                  this.$set(cis,'tradeEntrySignal','daiulyRangeBreakout');
                   shouldProceed = true;
 
                   this.$set(cis,'tradeEntrySignal','yesterdayHighBreakOut');
@@ -131,6 +182,18 @@ break;
   
 
           console.log('reached should proceed for entry',cis.tradingsymbol,cis.signal,this.shouldProceed)
+          
+          //debugger;
+          if(typeof cis.minuteCandle==undefined ||this.hours>9 && cis.minuteCandle.lastHigh>element.last_price){
+
+            console.log('LAST HOUR HIGH GREATER THAN LAST PRICE FOR',cis.tradingsymbol,'last hour high',cis.minuteCandle.lastHigh , element.last_price,'is the last price so returning')
+          
+            this.shouldProceed=false;
+            return;
+          }
+
+
+         // shouldProceed = false;
           if (this.shouldProceed) {
 
             this.updateInstrumentsFile(this.instruments,'./appv3/public/instruments/instrumentsForMiningY.json')

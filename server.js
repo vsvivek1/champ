@@ -1299,18 +1299,7 @@ app.get('/api/fetchInstrumentsForMining/accessToken/:accessToken',(req,res)=>{
 
 });
 
-app.get('/api/getPricePoints/accessToken/:accessToken/token/instrument_token',async (req,res) =>{
 
-  let accessToken=req.params.accessToken;
-  let token=req.params.token;
-
-  let a=await ExeCPriceFunction(token,accessToken)
-
-  debugger;
-
-  res.status(200).send(a)
-
-});
 
 
 app.get('/api/triggerWebsocktsInServer/accessToken/:accessToken',(req,res)=>{
@@ -1321,7 +1310,18 @@ app.get('/api/triggerWebsocktsInServer/accessToken/:accessToken',(req,res)=>{
 
 });
 
+/* app.get('/api/getPricePoints/accessToken/:accessToken/token/instrument_token',async (req,res) =>{
 
+  let accessToken=req.params.accessToken;
+  let token=req.params.token;
+
+  let a=await ExeCPriceFunction(token,accessToken)
+
+  debugger;
+
+  res.status(200).send(a)
+
+}); */
 
   app.get('/api/pricePoints/:instrument_tocken/accessToken/:accessToken',(req,res)=>{
 

@@ -1,7 +1,9 @@
 import axios from 'axios';
-import getCandlestickSignal from './getCandleStickSignal';
+import getCandlestickSignalMixin from './getCandleStickSignal';
 
 export default {
+
+  mixins:[getCandlestickSignalMixin],
 
   mounted(){
 
@@ -11,6 +13,8 @@ export default {
     this.initiateHistoricalDataFetch(symbolList);
 
     setInterval(()=>{
+
+
       this.date=new Date();
 
       this.minutes=this.date.getMinutes();
@@ -19,7 +23,9 @@ export default {
       //console.log('completed',this.completed,'this.seconds,',this.seconds);
       
 
-      if(this.completed && [2,10,30,45,55].includes(this.seconds)){
+      if(this.completed && this.seconds%5==0){
+
+        this.fetchingMinuteCandle=true
         this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
         
        let  symbolList=[...this.instrumentTokens];
@@ -56,10 +62,12 @@ export default {
 
             let minute=date.getMinutes();
             let hour=date.getHours();
+
+
              let end  = this.getRequiredTime( hour,minute+2 );
 
 
-            //  let intervel = 'minute';
+              intervel = 'minute';
             let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
       
     
@@ -76,6 +84,8 @@ let tradingsymbol=this.instruments.find(i=>i.instrument_token==symbol).tradingsy
       
      
       let data=resultPromise.data;
+
+    //  debugger;
      // console.log(data,'from minute candles');
 
       if(!data|| !symbol ){
@@ -85,6 +95,8 @@ let tradingsymbol=this.instruments.find(i=>i.instrument_token==symbol).tradingsy
 
 // console.log(symbol,'sym')
       let obj=this.instruments.find(i=>i.instrument_token==symbol);
+
+      let tick=obj.tick
 
 
       
@@ -96,12 +108,30 @@ let minuteCandle={};
       // this.historicalData[symbol]['ohlc'] = data;
 
       minuteCandle.data=data;
-      minuteCandle.signal = getCandlestickSignal(data,obj.tradingsymbol)
+      minuteCandle.signal = this.getCandlestickSignal(data,obj.tradingsymbol)
+
+      minuteCandle.lastHigh=this.calculateHighestPrice(data);
+
+      //alert(minuteCandle.lastHigh);
 
       
 
      
       this.$set(obj,'minuteCandle',minuteCandle);
+      this.fetchingMinuteCandle=false;
+
+      if(minuteCandle.signal.signal!='No signal detected'){
+
+
+       if(tick&& tick.ohlc.open<tick.last_price && minuteCandle.lastHigh<tick.last_price){
+          console.log('MINUTE CANDLE HAS A SIGNAL FOR YOU with last high',obj.tick,minuteCandle.signal.signal,minuteCandle.signal.candleColor,obj.tradingsymbol, Date(),'last high',minuteCandle.lastHigh);
+
+
+        }
+      }
+
+     
+      
 
    
 

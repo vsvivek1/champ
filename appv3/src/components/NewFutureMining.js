@@ -85,7 +85,12 @@ socket.on( "connect_error",async  ( err )  => {
 
     console.log( `connect_error due to ${ err } ` );
 
-    await this.setInstruments()
+    setTimeout(()=>{
+console.clear()
+
+    },3000)
+
+   // await this.setInstruments()
   
     // this.cl( `connect_error due to ${ err } ` );
    }  );
@@ -113,6 +118,7 @@ import targetPoints from '@/targetPoints';
 import stopLossCriteria from '@/stopLossCriteria';
 import newFutureMiningComputed from '@/newFutureMiningComputed';
 import timeMixins from '@/timeMixins';
+import clearConsoleMixin from './../clearConsoleMixin';
 
 
 import newFutureMiningMixinsList from './newFutureMiningMixinsList';
@@ -131,7 +137,7 @@ var cl;
 //export default Vue.extend({
 
     export default{ 
-      components: { InstrumentsStatusView, 
+      components: {clearConsoleMixin, InstrumentsStatusView, 
         ClosedTrades, LiveTickView, LiveOrders, Margin, LivePos,
          IndicesTable, Messages, IronCondor, VueGoodTable, sideWiseAlerts,
           MarginView, DigitCheckerForWebsocketHealth, Clock, MaxTradableAmount,
@@ -2401,7 +2407,7 @@ this.stopLossForChild = a;
       let orderArray  =  [arr];
 
       let a  =  await this.placeOrder( orderArray );
-      this.cl( "place order result", a );
+     // this.cl( "place order result", a );
       let { livePositions,liveOrders }   =   this.refreshTradeStatus();
      } ,
 
@@ -3571,7 +3577,7 @@ new Promise( async ( res,rej ) =>{
       this.orderArray.push( a );
 
      
-      this.cl( "place order result", arr );
+      //this.cl( "place order result", arr );
      } 
 
 
@@ -3635,11 +3641,14 @@ new Promise( async ( res,rej ) =>{
 
       // this.cl( data1,'data1 of orders just before palcing order ' )
 
+
+      console.log('before placing order , here is order array',orderArray)
+
       return axios.post( url, data ).then( async ( res )  => { 
 
 
 
-// this.cl( res,'result of order placement' )
+ this.cl( res,'result of order placement' )
 
 // this.$router.go();
 
@@ -4013,24 +4022,24 @@ break;
         console.log('Entry price < 0> inside Proceed for entry fn',cis.tradingsymbol)
         return false;
        } 
-      let {  otherCriteriaCheck, message  }   =  this.otherCriteria( 
+    /*   let {  otherCriteriaCheck, message  }   =  this.otherCriteria( 
         element,
         cis
-       );
+       ); */
 
       //  this.cl( 'inside after other criteria',cis.tradingsymbol,cis.last_price ,entryLong )
 
-      if ( otherCriteriaCheck  ==  true ) { 
+      /* if ( otherCriteriaCheck  ==  true ) { 
         // this.cl( otherCriteriaCheck,'otherCriteriaCheck for ',cis.tradingsymbol,'msg',message )
-       } 
+       }  */
 
-      if ( 
+      /* if ( 
         otherCriteriaCheck  ==  false ||
         typeof otherCriteriaCheck  ==  "undefined"
        ) { 
         // this.cl( otherCriteriaCheck,'otherCriteriaCheck' )
         // return false;
-       } 
+       }  */
 
       let hoursExcluded  =  [15];
 
@@ -4059,7 +4068,7 @@ break;
        } 
 
       let ln  =  this.liveOrders.filter( 
-        ( lo )  => lo.instrument_token  ==  instrument_token
+        ( lo )  => lo.instrument_token  ==  instrument_token && lo.transaction_type=='BUY'
        ).length;
 
       if ( ln > 0 ) {
@@ -4068,6 +4077,23 @@ break;
         // this.cl( 'live order palced already for this symbol',cis.tradingsymbol )
         return false;
        } 
+
+
+
+
+       let livePos  =  this.livePositions
+   
+        .find( 
+        ( lo )  => lo.instrument_token  ==  instrument_token
+       ) 
+
+
+       if(livePos){
+
+        console.log('HAS LIVE POS FOR 4089',cis.tradingsymbol);
+
+        return;
+       }
 
       let proposedStock  =  this.instruments.filter( 
         ( i )  => i.instrument_token  ==  instrument_token
@@ -4153,10 +4179,18 @@ break;
         date
        );
 
+       this.$set( 
+        this.instruments.filter( 
+          ( i )  => i.instrument_token  ==  instrument_token
+         )[0],
+        "minuteCandle",''
+      
+       );
+
       /// trigger buy
 
       // let trade  =  `Buy instrument ${ cis.tradingsymbol }  at ${ cis.SevenDayMaxMin.Max } `;
-      let trade  =  `Buy instrument ${ cis.tradingsymbol }  at ${ 
+   /*    let trade  =  `Buy instrument ${ cis.tradingsymbol }  at ${ 
         cis.pricePoints.yesterday.high
        }  . 
       Target ${ cis.pricePoints.yesterday.rangeBreakOutTarget }  
@@ -4174,9 +4208,9 @@ break;
           cis.pricePoints.pivotPointObject.bc.toFixed( 1 )) *
         cis.lot_size
        } 
-      `;
+      `; */
 
-      let trade1  =  { 
+ /*      let trade1  =  { 
         type: "Entry",
 
         tradingsymbol: cis.tradingsymbol,
@@ -4188,7 +4222,7 @@ break;
          ),
        } ;
 
-      let trade2  =  JSON.stringify( trade1 );
+      let trade2  =  JSON.stringify( trade1 ); */
 
       // this.sendToTelegramGroup( trade );
       // this.writeTrades( trade2 + "," );
@@ -4216,7 +4250,7 @@ break;
 
 
           var audio  =  new Audio( "/sounds/mixkit-sci-fi-confirmation-914.wav" );
-          //audio.play();
+          audio.play();
           let transaction_type;
 
 
@@ -4239,7 +4273,7 @@ break;
             if ( element.ohlc.low < cis.pricePoints.d1.low ) { 
 
 this.cl( 'low hit already hit for %s, so no trade ',cis.tradingsymbol )
-return false;
+//return false;
  } 
 
 
@@ -4249,10 +4283,13 @@ return false;
 
           let tradingsymbol  =  cis.tradingsymbol;
 
-          let lot_size  =  cis.lot_size*20;
+          let lot_size  =  cis.lot_size * 72  //*4;
           //let lot_size = 0;
           let order_type  =  "LIMIT";
 
+       
+         let  iceberg_legs=4
+         let  iceberg_quantity=lot_size /iceberg_legs
           //  let price1 =   element.depth.sell.sort(( a,b ) =>a.price-b.price )[0]
           //  let price2 =   element.depth.sell.sort(( a,b ) =>b.price-a.price )[0]
 
@@ -4277,7 +4314,11 @@ return false;
           let product  =  "NRML";  
 
           let reverseOrder = false;
+
+          console.log('before build order array ',tradingsymbol,transaction_type,Price,Date())
           let arr  =  this.buildOrderArray( 
+           /*  iceberg_legs,
+            iceberg_quantity, */
             tradingsymbol,
             transaction_type,
 
@@ -4292,7 +4333,7 @@ return false;
           let orderArray  =  [arr];
           // return;
           let a  =  await this.placeOrder( orderArray );
-          this.cl( "place order result", a );
+         // this.cl( "place order result", a );
 
           this.counter  =  this.counter + 1;
         
@@ -4383,7 +4424,7 @@ return false;
       const targetPointLong  =  Math.round( targetPointLong1 * 10 ) / 10;
 
 
-      console.log(targetPointLong,'targetpoint long',cis.tradingsymbol);
+      console.log(targetPointLong,'targetpoint long',cis.tradingsymbol,Date(),{targetPointLong1});
 
       //debugger
 
@@ -4420,10 +4461,12 @@ if( !livePosLen ){
           
           await this.getOrders();
 
-          let hasLiveTarget =  this.liveOrders.some( 
-            ( i )  => i.instrument_token  ==  instrument_token
-           )
 
+          console.log('transaction_type',transaction_type)
+          let hasLiveTarget =  this.liveOrders.some( 
+            ( i )  => i.instrument_token  ==  instrument_token && i.transaction_type==transaction_type
+           )
+           console.log('hasLiveTarget',hasLiveTarget)
    
 
           if ( hasLiveTarget  ==  true || PlacedReverseOrder == true  ) { 
@@ -5343,7 +5386,7 @@ return false;
         this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
         let j = JSON.stringify( this.instrumentTokens );
 
-        console.log( 'Going to subscribe ticks Number of scripts for Ticks is %s',this.instrumentTokens.length )
+        console.log( 'Going to subscribe ticks Number of scripts for Ticks is %s',this.instrumentTokens )
 
 
         socket.emit( "subscribe-orders", j );

@@ -13,7 +13,7 @@ const mutateWithLtp = {
 
      async stopLossprocedure(instrument_token,tradingsymbol,cis,element,hasLivePositionFromcis,last_price) {
 
-    console.log('from stop loss procedure ');
+   // console.log('from stop loss procedure ');
         //return ;  // have to write stop loss here switch
         let lpCurrent = this.livePositions.find(lp => lp.instrument_token == instrument_token);
 
@@ -37,7 +37,7 @@ const mutateWithLtp = {
         this.currentTradingsymbolAverage = { instrument_token, tradingsymbol, average_price };
 
         if (!this.livePositions.some(lp => lp.instrument_token == cis.instrument_token)) {
-          this.cl('live postition for script is zero');
+         // this.cl('live postition for script is zero');
           return false;
         }
 
@@ -176,7 +176,7 @@ const mutateWithLtp = {
 
 
          //this.cl('not 58')
-          return ;
+          //return ;
         }else{
          // this.cl('yes its  58')
 

@@ -1,10 +1,14 @@
 <template>
 	<div>
+
+		<v-alert v-if="fetchingMinuteCandle==true">Fetching Minute candle Now {{ Date().now() }}</v-alert>
+	
 	  <table class="table">
 		<thead>
 		  <tr>
 			<th>Trading Symbol</th>
 			<th>Last Price</th>
+			<th>Last High Price</th>
 			<th>LTP > YDAY HIGH</th>
 			<th>LTP > OPEN</th>
 			<th>Last Updated time</th>
@@ -15,6 +19,7 @@
 		  <tr v-for="(instrument, index) in instruments" :key="index">
 			<td>{{ instrument.tradingsymbol }}</td>
 			<td>{{ instrument.last_price }}</td>
+			<td v-if="typeof instrument.minuteCandle!='undefined'">{{ instrument.minuteCandle.lastHigh }}</td>
 			<td>{{ instrument.last_price > instrument.pricePoints.d1.high }}</td>
 			<td>{{ instrument.last_price > instrument.pricePoints.d0.open }}
 			{{ instrument.pricePoints.d0.open }}
@@ -48,8 +53,19 @@
   
   <script>
 
-  import getCandlestickSignal from './getCandleStickSignal';
+  import getCandlestickSignalMixin from './getCandleStickSignal';
   export default {
+
+	data(){
+
+
+		return{
+
+			fetchingMinuteCandle:false,
+		}
+	},
+
+	mixins:[getCandlestickSignalMixin],
 	props: {
 	  instruments: {
 		type: Array,

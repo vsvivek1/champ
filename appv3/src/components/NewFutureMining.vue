@@ -116,7 +116,7 @@ Show logs
           </v-alert>
           <v-btn color="red" prominent @click="exitPositions()">Exit all</v-btn>
           <DialogForAlerts :dialog="dialog" :alerts="alerts" />
-          <v-btn color="green" @click="placeTargetsForLiveScripts()">PLACE TARGETS FOR LIVE SCRIPTS</v-btn>
+          <v-btn color="green" @click="placeTargetsForLiveScripts('ho')">PLACE TARGETS FOR LIVE SCRIPTS</v-btn>
           <v-btn @click="forceUpdateMissingScripts()">Force update Missing scripts</v-btn>
           <v-alert v-if="loadingHourlyTradingLows" type="info">Loaiding Hourly candles</v-alert>
           <v-row>
@@ -154,9 +154,10 @@ Show logs
 import NewFutureMining from './NewFutureMining.js'
 import h from './h.vue'
 import dataMixin from './dataMixinOfNewFutureMining.js'
+import placeTargetsForLiveScripts from './placeTargetsForLiveScripts';
 
 export default {
-    mixins: [dataMixin,NewFutureMining],
+    mixins: [dataMixin,NewFutureMining,placeTargetsForLiveScripts],
     data() {
         return {
         // Your data properties here

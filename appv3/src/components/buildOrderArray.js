@@ -3,6 +3,8 @@ export default{
     methods:{ 
 
         buildOrderArray( 
+         /*  iceberg_legs=0,
+            iceberg_quantity=0, */
             tradingsymbol,
             transaction_type,
             qty,
@@ -50,11 +52,11 @@ export default{
       
             //   order.variety  =  this.selectedVariety;
       
-            proposedStock  =  this.instruments.filter( 
+          /*   proposedStock  =  this.instruments.filter( 
               ( i )  => i.tradingsymbol  ==  tradingsymbol
-             )[0].name;
+             )[0].name; */
       
-            this.liveOrderPlacedScripts.push( proposedStock );
+           // this.liveOrderPlacedScripts.push( proposedStock );
       
             // this.cl( 'hrs, min',this.hours,this.minutes )
             let exchange  =  this.itype;
@@ -138,7 +140,12 @@ export default{
       
             order.params.product  =  product;
             order.params.order_type  =  order_type;
+           
+           
             order.params.validity  =  "DAY";
+
+            /* order.params.iceberg_legs=iceberg_legs,
+            order.params.iceberg_quantity=iceberg_quantity, */
       
             order.params.price  =  Price;
       

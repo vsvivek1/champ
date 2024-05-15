@@ -219,34 +219,39 @@ var diff =calculateStrikeDifferences(expToday,name,ltp);
 var strikeAbove=(Math.ceil(ltp/diff)*diff)
 var strikeBelow=(Math.floor(ltp/diff)*diff)
 
+/* console.log(strikeBelow,'above',indexInstrument.tradingsymbol);
 
+process.exit(); */
 
-var requiredAbove=strikeAbove//+diff;
-var requiredBelow=strikeBelow//-diff;
+var requiredAbove=strikeAbove+diff;
+var requiredBelow=strikeBelow-diff;
 
 /* let callOptions = niftyBankNiftyBeforeNearestExpiry.filter(option => {
    return requiredAbove && option.instrument_type === 'CE' && parseInt(option.strike) > requiredAbove;
 }); */
 
 let callOptions = expToday.filter(option => {
-   return requiredAbove && option.instrument_type === 'CE' && parseInt(option.strike) > requiredAbove;
+   return requiredAbove && option.instrument_type === 'CE' && parseInt(option.strike) == requiredAbove;
 });
 
 let putOptions = expToday.filter(option => {
-   return requiredBelow && option.instrument_type === 'PE' && parseInt(option.strike) < requiredBelow;
+   return requiredBelow && option.instrument_type === 'PE' && parseInt(option.strike) == requiredBelow;
 });
 /* let putOptions = niftyBankNiftyBeforeNearestExpiry.filter(option => {
    return requiredBelow && option.instrument_type === 'PE' && parseInt(option.strike) < requiredBelow;
 }); */
 
 // Sort options based on strike price
-callOptions.sort((a, b) => parseInt(a.strike) - parseInt(b.strike));
+
+
+callOptions.sort((a, b) => parseInt(b.strike) - parseInt(a.strike));
 putOptions.sort((a, b) => parseInt(b.strike) - parseInt(a.strike));
 
 // Select the nearest option in each category
 const callOptionAbove = callOptions.length > 0 ? callOptions[0] : null;
 const putOptionBelow = putOptions.length > 0 ? putOptions[0] : null;
-
+/* console.log(callOptions[callOptions.length-1]);
+process.exit(); */
 
 if (callOptionAbove) {
     selectedOptions.push(callOptionAbove);
@@ -354,18 +359,47 @@ async function popOption(selectedOptions,fullJson,accessTokenDoc) {
             const command = 'pm2 restart ./server.js';
 
 // Execute the command
-exec(command, (error, stdout, stderr) => {
-  if (error) {
-    console.error(`Error executing command: ${error.message}`);
-    return;
-  }
-  if (stderr) {
-    console.error(`stderr: ${stderr}`);
-    return;
-  }
-  console.log(`stdout: ${stdout}`);
-});
+setTimeout(()=> {
+    exec(command, (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Error executing command: ${error.message}`);
+        return;
+      }
+      if (stderr) {
+        console.error(`stderr: ${stderr}`);
+        return;
+      }
+      console.log(`stdout: ${stdout}`);
+    });
+    
+    
+    const command2 = 'pm2  save';
+    exec(command2, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`Error executing command: ${error.message}`);
+          return;
+        }
+        if (stderr) {
+          console.error(`stderr: ${stderr}`);
+          return;
+        }
+        console.log(`stdout: ${stdout}
+        
+        \n
+  LAST TIME EXECUTED',${Date()})
+        
+        
+        `);
+      });
 
+      
+    
+},3*1000);
+
+setTimeout(()=>{
+  console.log(`LAST TIME EXECUTED',${Date()}`)
+
+},5*1000)
             //disconnect();
 
             //return;
@@ -421,10 +455,13 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
     });
 }
 
+//main();
+
 main();
  setInterval(()=>{
-
+console.time('start')
    main();
+   console.timeEnd('start')
 //disconnect()
-},15*60*1000) 
+},30*60*1000) 
 //disconnect();

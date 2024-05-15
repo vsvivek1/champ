@@ -95,8 +95,21 @@ methods:{
     
     
             case ( element.last_price<element.ohlc.open ) :
-            msg = `STOP LOSS  EXECUTION SEND BY  DAILY price less than open price  ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
+           let msg = `STOP LOSS  EXECUTION SEND BY  DAILY price less than open price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `
              this.cl( msg )
+    
+             this.updateSquareOfforderWithDesiredPrice( 
+               cis,
+               element,
+               false,
+               element.last_price
+              );
+    
+            break;  
+            
+            case ( element.last_price<cis.minuteCandle.lastHigh*.95 ) :
+           let msg1 = `STOP LOSS  EXECUTION SEND BY  last price  less than last hourly high price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `
+             this.cl( msg1 )
     
              this.updateSquareOfforderWithDesiredPrice( 
                cis,

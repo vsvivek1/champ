@@ -1,7 +1,158 @@
 
 // import convertToIndianTime from '../../getIndianTimeFromIst'
+export default{
+methods:{
 
-function convertToIndianTime(utcTimeString) {
+calculateHighestPrice(ohlcData) {
+    // Get the current time
+    const currentTime = new Date();
+
+    // Get the start time (9:15 AM) timestamp
+    const startTime = new Date(currentTime);
+    startTime.setHours(9, 15, 0, 0); // Set time to 9:15 AM
+
+    // Calculate the end time based on the current completed hour
+    let endTime = new Date(currentTime);
+    if (currentTime.getMinutes() < 15) {
+        // If current time is before 15 minutes past the hour, set end time to the previous hour
+        endTime.setHours(endTime.getHours() - 1, 15, 0, 0);
+    } else {
+        // Otherwise, set end time to the current completed hour
+        endTime.setHours(endTime.getHours(), 15, 0, 0);
+    }
+
+    // Filter OHLC data for timestamps falling within today and up to the calculated end time
+    const filteredData = ohlcData.filter((candle) => {
+        const candleDate = new Date(candle.date);
+        return candleDate >= startTime && candleDate <= endTime;
+    });
+
+    // Find the highest price from the filtered data
+    let highestPrice = null;
+    filteredData.forEach((candle) => {
+        if (highestPrice === null || candle.close > highestPrice) {
+            highestPrice = candle.close;
+        }
+    });
+
+    return highestPrice;
+},
+
+
+
+
+
+  convertToIndianTime(utcTimeString) {
+    // Create a Date object from the UTC time string
+    const utcDate = new Date(utcTimeString);
+  
+    // Set the time zone to Indian Standard Time (IST)
+    const options = { timeZone: 'Asia/Kolkata' };
+  
+    // Format the date and time using IST
+    const indianTimeString = utcDate.toLocaleString('en-IN', options);
+  
+    return indianTimeString;
+  }, getCandlestickSignal(obj, ts='') {
+    if (typeof obj == 'undefined') {
+        console.log(obj, 'data inside getCandleSignal Undefined');
+        return 'EntryCheckForSignalFailed';
+    }
+
+    let ohlcData = obj;
+
+    if (typeof ohlcData[ohlcData.length - 1] == 'undefined') {
+        return 'ohlcDataNotSufficient';
+    }
+
+    let lastCandleOffset = 1;
+
+    const { open, high, low, close } = ohlcData[ohlcData.length - lastCandleOffset];
+    const bodySize = Math.abs(close - open);
+    const upperShadowSize = high - Math.max(open, close);
+    const lowerShadowSize = Math.min(open, close) - low;
+    const CandleColor = close - open > 0 ? 'GreenCandle' : 'RedCandle';
+
+    if (ohlcData.length < 3) {
+        console.error('Insufficient OHLC data');
+        return { candleColor: CandleColor, signal: 'Insufficient OHLC data' };
+    }
+
+    const { prevOpen, prevHigh, prevLow, prevClose } = ohlcData[ohlcData.length - lastCandleOffset - 1];
+
+    if (lowerShadowSize > bodySize * 2 && upperShadowSize < lowerShadowSize) {
+        return { candleColor: CandleColor, signal: 'longTail', target: high + (high - low) / 2, stoploss: low - (high - low) / 2 };
+    }
+    else if (close > open && prevClose > prevOpen && close > prevOpen && open < prevClose) {
+        return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
+    }
+    else if (close < open && prevClose < prevOpen && close < prevOpen && open > prevClose) {
+        return { candleColor: CandleColor, signal: 's', target: low - (high - low), stoploss: high + (high - low) };
+    }
+    else if (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && close > open && upperShadowSize >= 2 * bodySize && lowerShadowSize <= bodySize / 2) {
+        return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
+    }
+    else if (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && open > close && lowerShadowSize >= 2 * bodySize && upperShadowSize <= bodySize / 2) {
+        return { candleColor: CandleColor, signal: 's', target: low - (high - low), stoploss: high + (high - low) };
+    }
+    else if (ohlcData.length >= 3) {
+        const { prev2Open, prev2High, prev2Low, prev2Close } = ohlcData[ohlcData.length - lastCandleOffset - 2];
+        if (prev2Close < prev2Open && bodySize < Math.abs(prev2Close - prev2Open) / 2 && close > open && prevClose < prevOpen) {
+            return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
+        }
+    }
+    else if (ohlcData.length >= 3) {
+        const { prev2Open, prev2High, prev2Low, prev2Close } = ohlcData[ohlcData.length - lastCandleOffset - 2];
+        if (prev2Close > prev2Open && bodySize < Math.abs(prev2Close - prev2Open) / 2 && open > close && prevClose > prevOpen) {
+            return { candleColor: CandleColor, signal: 's', target: low - (high - low), stoploss: high + (high - low) };
+        }
+    }
+    else if (close > open && prevClose < prevOpen && close > prevOpen && open < prevClose && close >= (prevOpen + prevClose) / 2) {
+        return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
+    }
+    else if (close < open && prevClose > prevOpen && close < prevOpen && open > prevClose && close <= (prevOpen + prevClose) / 2) {
+        return { candleColor: CandleColor, signal: 's', target: low - (high - low), stoploss: high + (high - low) };
+    }
+    else if (bodySize < Math.abs(prevClose - prevOpen) / 2 && close > open && prevClose > prevOpen && close < prevOpen && open > prevClose) {
+        return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
+    }
+    else if (ohlcData.length >= 3) {
+        const { prev2Open, prev2High, prev2Low, prev2Close } = ohlcData[ohlcData.length - lastCandleOffset - 2];
+        if (
+            prev2Close < prev2Open &&
+            prevClose < prevOpen &&
+            close > open &&
+            prevClose < open &&
+            prev2Close < open &&
+            close > (prevOpen + prevClose) / 2 &&
+            open > (prev2Open + prev2Close) / 2
+        ) {
+            return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
+        }
+    }
+    else if (ohlcData.length >= 3) {
+        const { prev2Open, prev2High, prev2Low, prev2Close } = ohlcData[ohlcData.length - lastCandleOffset - 2];
+        if (
+            prev2Close > prev2Open &&
+            prevClose > prevOpen &&
+            close < open &&
+            prevClose > open &&
+            prev2Close > open &&
+            close < (prevOpen + prevClose) / 2 &&
+            open < (prev2Open + prev2Close) / 2
+        ) {
+            return { candleColor: CandleColor, signal: 's', target: low - (high - low), stoploss: high + (high - low) };
+        }
+    }
+
+    return { candleColor: CandleColor, signal: 'No signal detected' };
+}
+
+  
+
+},
+}
+/* function convertToIndianTime(utcTimeString) {
   // Create a Date object from the UTC time string
   const utcDate = new Date(utcTimeString);
 
@@ -12,8 +163,8 @@ function convertToIndianTime(utcTimeString) {
   const indianTimeString = utcDate.toLocaleString('en-IN', options);
 
   return indianTimeString;
-}
-function getCandlestickSignal(obj,ts) {
+} */
+/* function getCandlestickSignal(obj,ts) {
 
   //console.log(obj,'obj')
 
@@ -174,7 +325,7 @@ if(typeof ohlcData[ohlcData.length-1]=='undefined'){
     }
     // console.log('funtion called f5');
   }
-  
+   */
   // Example usage:
   // const ohlcData = [
   //   /* Your OHLC data for the previous day */,
@@ -187,7 +338,7 @@ if(typeof ohlcData[ohlcData.length-1]=='undefined'){
   // console.log(`Target: ${candlestickSignal.target}`);
   // console.log(`Stop Loss: ${candlestickSignal.stoploss}`);
 
-  export default getCandlestickSignal;
+  //export default getCandlestickSignal;
 
 //   =getCandlestickSignal;
   

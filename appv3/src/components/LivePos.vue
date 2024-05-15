@@ -6,6 +6,7 @@
           <thead>
             <th>Sl#</th>
             <th>Symbol</th>
+            <th>Entry Criteria</th>
 
             <th>AVG/QTY</th>
             <th>YDAY Sl</th>
@@ -63,6 +64,11 @@
                 <span v-else>{{  pos.tradingsymbol  }} </span>
               </td>
 
+
+              <td>
+                pos.instrument.entryCriteria
+                {{ pos.instrument.entryCriteria }}
+                </td>
               <td>
                 {{  pos.average_price  }}  <br />
                 <small class = "text-danger">

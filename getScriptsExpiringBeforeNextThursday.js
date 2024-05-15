@@ -2,6 +2,7 @@ function getScriptsExpiringBeforeNextThursday(jsonArray) {
    const today = new Date();
    const nextThursday = new Date(today.getTime() + (7 - today.getDay() + 4) % 7 * 24 * 60 * 60 * 1000); // Calculate next Thursday
 
+   console.log('EXPITY',nextThursday)
    return jsonArray.filter(item => {
       if (item.expiry) {
          const expiryDate = new Date(item.expiry);

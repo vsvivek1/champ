@@ -1,13 +1,18 @@
 import axios from 'axios'
+import getCandleStickSignalMixin from './getCandleStickSignal';
 //import vue from 'vue';
 //vue.use(axios);
 export default {
+
+  mixins:[getCandleStickSignalMixin],
   methods: {
 
 
    async getNFOPositions(){
 
     let net=await this.getRawPositions();
+
+    //debugger;
 
     return net.filter(n=>n.exchange=='NFO');
 
@@ -39,7 +44,10 @@ async getRawPositions(){
 
 },
 
-      async placeTargetsForLiveScripts() {
+      async placeTargetsForLiveScripts(s='n') {
+
+      
+
      await    this.getRawPositions();
 
 
@@ -89,7 +97,7 @@ let livePositions=await this.getNFOPositions();
           //console.log('live positions numbers from reverse orders',symbols.length,symbols)
           let timer = setInterval(async () => {
 
-            console.log('inside timer',positions.length)
+            console.log('PLACING REVERTSE ORDERS',positions.length)
 
 
               if (positions.length == 0) {
@@ -106,7 +114,9 @@ let livePositions=await this.getNFOPositions();
              // let p=this.livePositions.pop()
               if (!position) {
                 console.log('NO LIVE POSITION FROM TARGETFORLIVESSCRIPTS MIXIN 94',position)
-                  return false;
+                 
+                this.placingReverseOrderInProgress = false;
+                return false;
               }
 
               let quote = quotes[position.instrument_token];
@@ -118,21 +128,41 @@ let livePositions=await this.getNFOPositions();
              
               if (!cis) {
 
-               cis= this.instruAll.find(i => i.instrument_token == position.instrument_token);
-
-//debugger;
-             let pp=  await axios.get(`/api/getPricePoints/accessToken/:${this.accessToken}/token/${position.instrument_token}`)
                
-             console.log(pp)
+               cis= this.instruAll.find(i => i.instrument_token == position.instrument_token);
+               console.log('NO CIS found fetching cis from all insstruments',cis,'here is new cis')
+//debugger;
+
+let url=`/api/pricePoints/${position.instrument_token}/accessToken/${this.accessToken}`
+            // let pp=  await axios.get(`/api/getPricePoints/accessToken/:${this.accessToken}/token/${position.instrument_token}`)
+             
+            //debugger;
+            let pp
+           try {
+              pp=  await axios.get(url);
+           } catch (error) {
+            
+console.log(error);
+            debugger;
+           }
+              
+          
+
+            debugger;
+               
+            console.log(cis,'cis fetched',pp,'pp')
+            cis.pricePoints=pp;
+             console.log(pp,'price points fetched from server')
             // debugger;
 
-                 this.placingReverseOrderInProgress = false;
+                // this.placingReverseOrderInProgress = false;
 
                   console.log('FETCHIG CIS FROM ALL INSTRUMENTS',cis.tradingsymbol)
                   //return false;
               }
               if (!cis){
-                console.log('cis issue still')
+                console.log('cis issue still after fetching')
+                this.placingReverseOrderInProgress = false;
                 return;
               }
               let entryPrice = position.quantity < 0 ? position.sell_price : position.buy_price;
@@ -152,9 +182,80 @@ let livePositions=await this.getNFOPositions();
             ){
 
               targetPoint=cis.minuteCandle.target;
+
+              
             }else{
 
-              targetPoint=cis.pricePoints.d1.high*1.1;
+
+            
+
+                let start  = this.getRequiredTime( 9,15 );
+    
+                let date=new Date();
+    
+                let minute=date.getMinutes();
+                let hour=date.getHours();
+                 let end  = this.getRequiredTime( hour,minute+2 );
+    
+
+                 let symbol=cis.instrument_token;
+
+                 let intervel='minute';
+    
+                //  let intervel = 'minute';
+                let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
+          
+        
+    let tradingsymbol=this.instruments.find(i=>i.instrument_token==symbol).tradingsymbol
+    
+       
+                // console.log(this.instruments,'ins')
+        
+                //  console.log( url,'utl' )
+    
+          //  return;
+          let resultPromise =  await  axios.get( url );
+    
+          
+         
+          let data=resultPromise.data;
+
+         // let signal=this.getCandleStickSignal(data)
+          let minuteCandle={};
+          minuteCandle.data=data;
+      minuteCandle.signal = this.getCandlestickSignal(data,cis.tradingsymbol)
+
+      
+      //debugger;
+     
+      this.$set(cis,'minuteCandle',minuteCandle);
+
+         // debugger;
+
+         if(
+          
+          cis.minuteCandle.signal.target &&
+          cis.minuteCandle.signal&&
+          cis.minuteCandle.signal.target
+        
+        ){
+
+          targetPoint=cis.minuteCandle.signal.target;
+        }else{
+
+          targetPoint=data[data.length-1].high*1.1
+          
+          //.high*1.1;
+
+          //debugger
+
+          console.log(cis,cis.tradingsymbol,targetPoint,'targetPoint as minute candle high')
+        }
+
+            
+              
+
+             
             }
               
 
@@ -185,6 +286,12 @@ let livePositions=await this.getNFOPositions();
                ); */
 
 
+if(typeof cis.target!='undefined'){
+  targetPoint=cis.target
+
+}
+
+
               this.placetargetAndStopLoss(
                   cis,
                   position.instrument_token,
@@ -197,12 +304,12 @@ let livePositions=await this.getNFOPositions();
                   transaction_type
               );
 
-          }, 333);
+          }, 2*1000);
 
-
+          this.placingReverseOrderInProgress = false;
       },
 
       
-    
+  
   }
 };
