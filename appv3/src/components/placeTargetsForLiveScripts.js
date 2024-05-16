@@ -243,7 +243,7 @@ console.log(error);
           targetPoint=cis.minuteCandle.signal.target;
         }else{
 
-          targetPoint=data[data.length-1].high*1.1
+          targetPoint=data[data.length-1].high*1.05
           
           //.high*1.1;
 

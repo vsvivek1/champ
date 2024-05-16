@@ -135,6 +135,7 @@ var symbols=getUniqueTradingSymbols(expToday)
 const kite =await  getKiteConnectInstance();
 
 let indexInstruments=allScriptJson.filter(i=> i.segment== 'INDICES' && i.exchange=='NSE');
+//let indexInstrumentsAndStocks=allScriptJson.filter(i=>  i.exchange=='NSE' && i.segment== 'INDICES');
 
 
 
@@ -165,8 +166,8 @@ names.forEach(async (name)=>{
 
 
 
-let instruNameFeild=indexOptions[name]
-
+let instruNameFeild=typeof indexOptions[name]=='undefined'?name:indexOptions[name];
+;
 //var instruments=getUniqueInstruments(niftyBankNiftyBeforeNearestExpiry)
 
 
@@ -192,7 +193,16 @@ console.log('THE NAME IS ',name,instruNameFeild)
 
 
 
+
 let indexInstrument=indexInstruments.find(i=>i.name==instruNameFeild)
+
+
+if(typeof indexInstrument=='undefined'){
+
+  return;
+}
+
+//let indexInstrument=indexInstruments.find(i=>i.name==instruNameFeild)
 
 
 
@@ -223,8 +233,8 @@ var strikeBelow=(Math.floor(ltp/diff)*diff)
 
 process.exit(); */
 
-var requiredAbove=strikeAbove+diff;
-var requiredBelow=strikeBelow-diff;
+var requiredAbove=strikeAbove//+diff;
+var requiredBelow=strikeBelow//-diff;
 
 /* let callOptions = niftyBankNiftyBeforeNearestExpiry.filter(option => {
    return requiredAbove && option.instrument_type === 'CE' && parseInt(option.strike) > requiredAbove;

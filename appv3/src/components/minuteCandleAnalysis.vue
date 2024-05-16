@@ -9,8 +9,10 @@
 			<th>Trading Symbol</th>
 			<th>Last Price</th>
 			<th>Last High Price</th>
-			<th>LTP > YDAY HIGH</th>
-			<th>LTP > OPEN</th>
+			<th>DAY OPEN</th>
+			<th>Y DAY HIGH</th>
+			<th>Moving average</th>
+			<th>HAS LIVE POS</th>
 			<th>Last Updated time</th>
 			<th>candle details</th>
 		  </tr>

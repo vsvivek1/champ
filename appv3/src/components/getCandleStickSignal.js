@@ -9,7 +9,25 @@ calculateHighestPrice(ohlcData) {
 
     // Get the start time (9:15 AM) timestamp
     const startTime = new Date(currentTime);
-    startTime.setHours(9, 15, 0, 0); // Set time to 9:15 AM
+
+  
+   
+    if(currentTime.getMinutes()<15){
+      startTime .setHours(currentTime.getHours()-2)
+      startTime .setMinutes(15);
+
+    }else{
+      startTime .setHours(currentTime.getHours()-1)
+      startTime .setMinutes(15);
+
+    }
+   
+
+    if(currentTime.getHours()==9 || (currentTime.getHours()==10 && currentTime.getMinutes()<15))
+    {
+
+      startTime.setHours(9, 15, 0, 0); 
+     }
 
     // Calculate the end time based on the current completed hour
     let endTime = new Date(currentTime);
@@ -22,6 +40,9 @@ calculateHighestPrice(ohlcData) {
     }
 
     // Filter OHLC data for timestamps falling within today and up to the calculated end time
+
+//console.log('startTime',startTime,'endTime',endTime)
+
     const filteredData = ohlcData.filter((candle) => {
         const candleDate = new Date(candle.date);
         return candleDate >= startTime && candleDate <= endTime;

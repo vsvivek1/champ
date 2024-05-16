@@ -243,6 +243,7 @@ const mutateWithLtp = {
           
   
           let ma = this.calculateMovingAverage(cis);
+this.$set(cis,'movingAverage',ma)
           let ep = ma;
           let exit = element.ohlc.high * 1.1;
   
