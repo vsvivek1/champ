@@ -161,7 +161,7 @@ async function fetchInstrumentsForMining(accessToken) {
 
         e.chart = `https://kite.zerodha.com/chart/ext/ciq/MCX-OPT/${e.tradingsymbol } /${e.instrument_token } `;
         e.seletedBuyingMethod = 'MAX'
-        e.enterNowToTrade = false;
+        e.noTradingNow = false;
         e.PlacedReverseOrder = false;
 
 
@@ -515,7 +515,7 @@ function overnightScripts(jsonObj2, jsonObjWithOutCriteria) {
 
           i.chart = `https://kite.zerodha.com/chart/ext/ciq/MCX-OPT/${i.tradingsymbol } /${i.instrument_token } `;
           i.seletedBuyingMethod = 'MAX'
-          i.enterNowToTrade = false;
+          i.noTradingNow = false;
 
           console.log('pushing', e)
           jsonObj2.push(i);

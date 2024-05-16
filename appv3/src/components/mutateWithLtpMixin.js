@@ -292,9 +292,9 @@ this.$set(cis,'movingAverage',ma)
          this.stopLossprocedure(instrument_token,tradingsymbol,cis,element,hasLivePositionFromcis,last_price);
           }
   
-         //this.cl('cis.enterNowToTrade @142',cis.enterNowToTrade,cis.tradingsymbol);
+         //this.cl('cis.noTradingNow @142',cis.noTradingNow,cis.tradingsymbol);
 
-          if (cis.enterNowToTrade == false) {
+          if (cis.noTradingNow == false) {
             
             let inst = cis;
             

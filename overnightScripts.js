@@ -77,7 +77,7 @@ function overnightScripts(jsonObj2) {
 
 					i.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${i.tradingsymbol} /${i.instrument_token} `;
 					i.seletedBuyingMethod = 'MAX';
-					i.enterNowToTrade = false;
+					i.noTradingNow = false;
 					i.PlacedReverseOrder = false;
 
 					console.log('pushing ', e, 'the overnight script');

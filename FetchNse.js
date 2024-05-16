@@ -382,7 +382,7 @@ async function fetchInstrumentsForMining( accessToken ) { try {
 		
 
 	    e.seletedBuyingMethod  =  'MAX';
-	    e.enterNowToTrade  =  false;
+	    e.noTradingNow  =  false;
 	    e.PlacedReverseOrder  =  false;
 	    e.hasLiveTarget  =  false;
 	    e.hasLivePosition  =  false;
@@ -417,7 +417,7 @@ async function fetchInstrumentsForMining( accessToken ) { try {
 	
 	    niftyfut.chart  =  `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${ e.tradingsymbol } /${ e.instrument_token } `;
 	    niftyfut.seletedBuyingMethod  =  'MAX';
-	    niftyfut.enterNowToTrade  =  false;
+	    niftyfut.noTradingNow  =  false;
 	    niftyfut.PlacedReverseOrder  =  false;
 	
 	
@@ -439,7 +439,7 @@ async function fetchInstrumentsForMining( accessToken ) { try {
 	
 	    bankniftyfut.chart  =  `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${ e.tradingsymbol } /${ e.instrument_token } `;
 	    bankniftyfut.seletedBuyingMethod  =  'MAX';
-	    bankniftyfut.enterNowToTrade  =  false;
+	    bankniftyfut.noTradingNow  =  false;
 	    bankniftyfut.PlacedReverseOrder  =  false;
 	
 	    //  console.log( bankniftyfut )
@@ -1215,7 +1215,7 @@ function overnightScripts( jsonObj2 ) {
 
           i.chart  =  `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${ i.tradingsymbol } /${ i.instrument_token } `;
           i.seletedBuyingMethod  =  'MAX'
-          i.enterNowToTrade  =  false;
+          i.noTradingNow  =  false;
           i.PlacedReverseOrder  =  false;
 
           console.log( 'pushing ', e, 'the overnight script' );

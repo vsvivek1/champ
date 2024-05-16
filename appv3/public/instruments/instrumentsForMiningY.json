@@ -2649,7 +2649,7 @@
     "chart": "https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/BANKNIFTY2450848800PE/11195650",
     "selectedBuyingMethod": "MAX",
     "buyNow": false,
-    "enterNowToTrade": false,
+    "noTradingNow": false,
     "canTakeFreshTrade": true,
     "minuteCandle": {
       "data": [
@@ -5490,7 +5490,7 @@
     "chart": "https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/BANKNIFTY2450849100CE/11198466",
     "selectedBuyingMethod": "MAX",
     "buyNow": false,
-    "enterNowToTrade": false,
+    "noTradingNow": false,
     "canTakeFreshTrade": true,
     "minuteCandle": {
       "data": [
@@ -8344,7 +8344,7 @@
     "chart": "https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/NIFTY2450921700PE/11998466",
     "selectedBuyingMethod": "MAX",
     "buyNow": false,
-    "enterNowToTrade": true,
+    "noTradingNow": true,
     "canTakeFreshTrade": true,
     "minuteCandle": {
       "data": [
@@ -11145,7 +11145,7 @@
     "chart": "https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/NIFTY2450921850CE/12002562",
     "selectedBuyingMethod": "MAX",
     "buyNow": false,
-    "enterNowToTrade": false,
+    "noTradingNow": false,
     "canTakeFreshTrade": true,
     "minuteCandle": {
       "data": [],
@@ -13881,7 +13881,7 @@
     "chart": "https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/NIFTY2450922400PE/12015106",
     "selectedBuyingMethod": "MAX",
     "buyNow": false,
-    "enterNowToTrade": false,
+    "noTradingNow": false,
     "canTakeFreshTrade": true,
     "minuteCandle": {
       "data": [
@@ -16728,7 +16728,7 @@
     "chart": "https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/NIFTY2450922550CE/12016898",
     "selectedBuyingMethod": "MAX",
     "buyNow": false,
-    "enterNowToTrade": false,
+    "noTradingNow": false,
     "canTakeFreshTrade": true,
     "minuteCandle": {
       "data": [

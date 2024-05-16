@@ -447,7 +447,7 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             option.selectedBuyingMethod = 'MAX';
             option.buyNow = false;
 
-            option.enterNowToTrade=false;
+            option.noTradingNow=false;
             option.canTakeFreshTrade=true;
             
 

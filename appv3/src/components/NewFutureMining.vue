@@ -166,7 +166,7 @@ Show logs
               @getStopLossFromChild="getStopLossFromChild" :livePositionsDisplay="livePositionsDisplay" 
               :getStopLossResult="stopLossForChild" />
           
-          <InstrumentsAndActions :instrumentsFiltered="instrumentsFiltered" :changeBuyingMethod="changeBuyingMethod" :buyingPoint="buyingPoint" :enterNowToTrade="enterNowToTrade" />
+          <InstrumentsAndActions :instrumentsFiltered="instrumentsFiltered" :changeBuyingMethod="changeBuyingMethod" :buyingPoint="buyingPoint" :noTradingNow="noTradingNow" />
         </div>
       </v-col>
     </v-row>

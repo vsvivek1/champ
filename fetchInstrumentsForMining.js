@@ -276,7 +276,7 @@ async function fetchInstrumentsForMining(accessToken) {
 
 
 			e.seletedBuyingMethod = 'MAX';
-			e.enterNowToTrade = false;
+			e.noTradingNow = false;
 			e.PlacedReverseOrder = false;
 			e.hasLiveTarget = false;
 			e.hasLivePosition = false;
@@ -311,7 +311,7 @@ async function fetchInstrumentsForMining(accessToken) {
 
 			niftyfut.chart = `https://kite.zerodha.com/chart/ext/ciq/${e.exchange}/${e.tradingsymbol}/${e.instrument_token} `;
 			niftyfut.seletedBuyingMethod = 'MAX';
-			niftyfut.enterNowToTrade = false;
+			niftyfut.noTradingNow = false;
 			niftyfut.PlacedReverseOrder = false;
 
 
@@ -333,7 +333,7 @@ async function fetchInstrumentsForMining(accessToken) {
 
 			bankniftyfut.chart = `https://kite.zerodha.com/chart/ext/ciq/${e.exchange}/${e.tradingsymbol} /${e.instrument_token} `;
 			bankniftyfut.seletedBuyingMethod = 'MAX';
-			bankniftyfut.enterNowToTrade = false;
+			bankniftyfut.noTradingNow = false;
 			bankniftyfut.PlacedReverseOrder = false;
 
 			//  console.log( bankniftyfut )

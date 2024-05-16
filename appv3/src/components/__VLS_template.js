@@ -1575,9 +1575,9 @@ let __VLS_624 = { 'click': __VLS_pickEvent(__VLS_623['click'], ({} as __VLS_Func
 __VLS_624 = {
 click: $event => {
 if (!((false))) return;
-__VLS_ctx.enterNowToTrade(i);
+__VLS_ctx.noTradingNow(i);
 // @ts-ignore
-[enterNowToTrade,];
+[noTradingNow,];
 }
 };
 {

@@ -756,7 +756,7 @@ this.$set(
        );
      } 
       this.instruments.filter( i =>i.instrument_token == instrument_token )[0].
-      enterNowToTrade = false; 
+      noTradingNow = false; 
 
 
 
@@ -3529,7 +3529,7 @@ new Promise( async ( res,rej ) =>{
 
     //   axios.post( url, obj );
     //  } ,
-    async enterNowToTrade( i ) { 
+    async noTradingNow( i ) { 
       let tradingsymbol  =  i.tradingsymbol;
       let lot_size  =  i.lot_size;
       let order_type;
@@ -3943,7 +3943,7 @@ let instrument_token = orderUpdates.instrument_token;
     this.cl( 'seems order update from some other script' )
     return false;
    } 
-let enterNowToTrade = cis.enterNowToTrade;
+let noTradingNow = cis.noTradingNow;
 let PlacedReverseOrder = cis.PlacedReverseOrder;
 
 let livePositions = await this.getPositions();
@@ -4150,7 +4150,7 @@ break;
         this.instruments.filter( 
           ( i )  => i.instrument_token  ==  instrument_token
          )[0],
-        "enterNowToTrade",
+        "noTradingNow",
         true
        );
 
@@ -4339,7 +4339,7 @@ this.cl( 'low hit already hit for %s, so no trade ',cis.tradingsymbol )
         
 
           const timestamp  =  new Date().getTime();
-          // var text =  "firing of auto mode+ ENTER NOW TO TRADE false",this.counter,cis.enterNowToTrade,cis";
+          // var text =  "firing of auto mode+ ENTER NOW TO TRADE false",this.counter,cis.noTradingNow,cis";
           let ob = { text,timestamp } ;
 
           this.userMessages.push( ob );
@@ -4347,7 +4347,7 @@ this.cl( 'low hit already hit for %s, so no trade ',cis.tradingsymbol )
           this.userMessages.push( 
             "firing of auto mode+ ENTER NOW TO TRADE false",
             this.counter,
-            cis.enterNowToTrade,
+            cis.noTradingNow,
             cis
            );
          }  else { 

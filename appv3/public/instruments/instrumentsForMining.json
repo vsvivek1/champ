@@ -3673,7 +3673,7 @@
     "chart": "https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/NIFTY2451622050PE/13227010",
     "selectedBuyingMethod": "MAX",
     "buyNow": false,
-    "enterNowToTrade": false,
+    "noTradingNow": false,
     "canTakeFreshTrade": true
   },
   {
@@ -7350,7 +7350,7 @@
     "chart": "https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/NIFTY2451622100CE/13227266",
     "selectedBuyingMethod": "MAX",
     "buyNow": false,
-    "enterNowToTrade": false,
+    "noTradingNow": false,
     "canTakeFreshTrade": true
   }
 ]

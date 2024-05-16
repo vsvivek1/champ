@@ -37,7 +37,7 @@
 		type: Array,
 		default: () => []
 	  },
-	  enterNowToTrade: {
+	  noTradingNow: {
 		type: Function,
 		default: () => {}
 	  }

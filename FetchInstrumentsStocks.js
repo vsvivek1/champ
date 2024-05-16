@@ -199,7 +199,7 @@ async function fetchInstrumentsForMining(accessToken) {
 
         e.chart = `https://kite.zerodha.com/chart/ext/ciq/NSE-OPT/${e.tradingsymbol}/${e.instrument_token}`;
         e.seletedBuyingMethod = 'MAX'
-        e.enterNowToTrade = false;
+        e.noTradingNow = false;
         e.PlacedReverseOrder = false;
 
 

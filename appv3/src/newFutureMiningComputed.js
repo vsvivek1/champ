@@ -161,7 +161,7 @@ export default{
          } ,
     
         instrumentsFiltered() { 
-          return this.instruments.filter(( i )  => i.enterNowToTrade  ==  true );
+          return this.instruments.filter(( i )  => i.noTradingNow  ==  true );
     
           // .sort(( a, b )  => { 
           //   return a.activatedTime - b.activatedTime;
