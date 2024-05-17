@@ -3,8 +3,8 @@ export default{
     methods:{ 
 
         buildOrderArray( 
-         /*  iceberg_legs=0,
-            iceberg_quantity=0, */
+          iceberg_legs=0,
+            iceberg_quantity=0, 
             tradingsymbol,
             transaction_type,
             qty,
@@ -144,8 +144,8 @@ export default{
            
             order.params.validity  =  "DAY";
 
-            /* order.params.iceberg_legs=iceberg_legs,
-            order.params.iceberg_quantity=iceberg_quantity, */
+             order.params.iceberg_legs=iceberg_legs,
+            order.params.iceberg_quantity=iceberg_quantity, 
       
             order.params.price  =  Price;
       

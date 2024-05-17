@@ -1,52 +1,47 @@
 <template>
 	<div>
-
-		<v-alert v-if="fetchingMinuteCandle==true">Fetching Minute candle Now {{ Date().now() }}</v-alert>
-	
+	  <v-alert v-if="fetchingMinuteCandle" color="info">Fetching Minute candle Now {{ new Date().toLocaleString() }}</v-alert>
+  
 	  <table class="table">
 		<thead>
 		  <tr>
 			<th>Trading Symbol</th>
-			<th>Last Price</th>
 			<th>Last High Price</th>
-			<th>DAY OPEN</th>
-			<th>Y DAY HIGH</th>
-			<th>Moving average</th>
-			<th>HAS LIVE POS</th>
-			<th>Last Updated time</th>
-			<th>candle details</th>
+			<th>Day Open</th>
+			<th>Yesterday High</th>
+			<th>Moving Average</th>
+			<th>Has Live Position</th>
+			<th>No Trading Now</th>
+			<th>Candle Details</th>
 		  </tr>
 		</thead>
 		<tbody>
 		  <tr v-for="(instrument, index) in instruments" :key="index">
 			<td>{{ instrument.tradingsymbol }}</td>
-			<td>{{ instrument.last_price }}</td>
-			<td v-if="typeof instrument.minuteCandle!='undefined'">{{ instrument.minuteCandle.lastHigh }}</td>
-			<td>{{ instrument.last_price > instrument.pricePoints.d1.high }}</td>
-			<td>{{ instrument.last_price > instrument.pricePoints.d0.open }}
-			{{ instrument.pricePoints.d0.open }}
+			<td v-if="instrument.minuteCandle">
+			  <div>Last Price High: {{ instrument.minuteCandle.lastHigh }}</div>
+			  <div>Open: <span :class="{'text-success': instrument.last_price > instrument.pricePoints.d0.open, 'text-danger': instrument.last_price < instrument.pricePoints.d0.open}">{{ instrument.pricePoints.d0.open }}</span></div>
+			  <div>Low: {{ instrument.pricePoints.d0.low }}</div>
+			  <div>High: {{ instrument.pricePoints.d0.high }}</div>
+			  <div>Last Price: {{ instrument.last_price }}</div>
 			</td>
+			<td v-else>N/A</td>
+			<td>Yday High: {{ instrument.pricePoints.d1.high }}</td>
+			<td>{{ instrument.last_price > instrument.pricePoints.d0.open }}</td>
 			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0">
-			    {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].close}} price
-				
-				{{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].IST }} 
-
-			  
-			  
+			  {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].close }} price
+			  {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].IST }}
 			</td>
 			<td v-else>N/A</td>
-
-
-			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0
-				&& instrument.minuteCandle.signal && instrument.minuteCandle.signal.signal
-				
-				">
-				{{ instrument.minuteCandle.signal.signal}}
-			 
-			  
+			<td><span v-if="instrument.hasLivePositionFromcis" class="text-success">Yes</span><span v-else class="text-danger">No</span></td>
+			<td>{{ instrument.noTradingNow }}</td>
+			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0 && instrument.minuteCandle.signal && instrument.minuteCandle.signal.signal">
+			  {{ instrument.minuteCandle.signal.signal }}
 			</td>
 			<td v-else>N/A</td>
-
+		  </tr>
+		  <tr v-if="instruments.length === 0">
+			<td colspan="8" class="text-center">No data available</td>
 		  </tr>
 		</tbody>
 	  </table>
@@ -54,26 +49,31 @@
   </template>
   
   <script>
-
   import getCandlestickSignalMixin from './getCandleStickSignal';
+  import mutateWithLtp from './mutateWithLtpMixin';
+  
   export default {
-
-	data(){
-
-
-		return{
-
-			fetchingMinuteCandle:false,
-		}
+	data() {
+	  return {
+		fetchingMinuteCandle: false,
+	  };
 	},
-
-	mixins:[getCandlestickSignalMixin],
+	mixins: [getCandlestickSignalMixin, mutateWithLtp],
 	props: {
 	  instruments: {
 		type: Array,
-		required: true
-	  }
-	}
-  }
+		required: true,
+	  },
+	},
+  };
   </script>
+  
+  <style scoped>
+  .text-success {
+	color: green;
+  }
+  .text-danger {
+	color: red;
+  }
+  </style>
   

@@ -29,6 +29,8 @@ let obj={}
                         this.setLivePositionScripts( res.data.net ) 
                  
                  } 
+
+                 
               let tmp;
               let livePositionsTmp  = res.data;
       

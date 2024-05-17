@@ -4283,7 +4283,21 @@ this.cl( 'low hit already hit for %s, so no trade ',cis.tradingsymbol )
 
           let tradingsymbol  =  cis.tradingsymbol;
 
-          let lot_size  =  cis.lot_size * 72  //*4;
+
+          
+          let obj={"NIFTY":72,"BANKNIFTY":56}
+
+          let multiplier = 1;
+
+// Iterate over each key in obj and check if tradingsymbol includes it
+Object.keys(obj).forEach(key => {
+  if (tradingsymbol.includes(key)) {
+    multiplier = obj[key];
+  }
+});
+
+
+          let lot_size  =  cis.lot_size * multiplier   *4;
           //let lot_size = 0;
           let order_type  =  "LIMIT";
 
@@ -4317,8 +4331,8 @@ this.cl( 'low hit already hit for %s, so no trade ',cis.tradingsymbol )
 
           console.log('before build order array ',tradingsymbol,transaction_type,Price,Date())
           let arr  =  this.buildOrderArray( 
-           /*  iceberg_legs,
-            iceberg_quantity, */
+            iceberg_legs,
+            iceberg_quantity, 
             tradingsymbol,
             transaction_type,
 

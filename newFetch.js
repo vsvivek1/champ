@@ -180,7 +180,6 @@ let instruNameFeild=typeof indexOptions[name]=='undefined'?name:indexOptions[nam
 
 
 
-
 //var diff =calculateStrikeDifferences(niftyBankNiftyBeforeNearestExpiry,name);
 
 

@@ -62,6 +62,15 @@
  
 
 </v-system-bar>
+
+<v-row>
+  <v-col cols="12">
+    <minuteCandleAnalysis :instruments="instruments" />
+
+
+  </v-col>
+</v-row>
+
     <v-row>
       <v-col cols="7">
         <div class="section">
@@ -85,7 +94,7 @@ Show logs
            
 
           </v-col>
-          <v-col cols="7">
+          <v-col cols="3">
 
            
          
@@ -101,10 +110,10 @@ Show logs
         </v-row>
         </div>
       </v-col>
-      <v-col cols="5">
+      <v-col cols="12">
         <div class="section">
          
-          <minuteCandleAnalysis :instruments="instruments" />
+         
           
         </div>
       </v-col>
