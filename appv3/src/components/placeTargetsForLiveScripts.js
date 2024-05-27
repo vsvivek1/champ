@@ -91,10 +91,11 @@ async placeTargetsForLiveScripts(s = 'n') {
 
     let livePositions = await this.getNFOPositions();
     let liveInstrumentSymbols = livePositions.map(position => parseInt(position.instrument_token));
-    let quotes = await this.getQuoteFromZerodha(liveInstrumentSymbols);
+   // let quotes = await this.getQuoteFromZerodha(liveInstrumentSymbols);
 
     let positions = livePositions.filter(p => p.quantity != 0);
     let positionIndex = positions.length - 1;
+    let minuteData;
 
     console.log('Point 5: Starting position processing loop');
     while (positionIndex >= 0) {
@@ -142,8 +143,11 @@ async placeTargetsForLiveScripts(s = 'n') {
             let date = new Date();
             let end = this.getRequiredTime(date.getHours(), date.getMinutes() + 2);
             let symbol = cis.instrument_token;
+            let intervel='minute';
 
-            let url = `/api/getHistoricalData/symbol/${symbol}/accessToken/${this.accessToken}/start/${start}/end/${end}/interval/minute`;
+           // let url = `/api/getHistoricalData/symbol/${symbol}/accessToken/${this.accessToken}/start/${start}/end/${end}/interval/minute`;
+            let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
+            
             try {
                 let resultPromise = await axios.get(url, {
                     headers: {
@@ -152,6 +156,7 @@ async placeTargetsForLiveScripts(s = 'n') {
                     }
                   });
                 let data = resultPromise.data;
+                minuteData =data;
 
                 let minuteCandle = {
                     data: data,
@@ -176,7 +181,10 @@ async placeTargetsForLiveScripts(s = 'n') {
         console.log('Reached before place target and stop loss for', position.instrument_token);
 if(isNaN(targetPoint)){
 
-    debugger;
+    targetPoint=position.buy_price*1.05
+
+    console.log('GETTING REVERSE PRICE FROM POSITIONS ')
+   // debugger;
 }
         this.placetargetAndStopLoss(
             cis,

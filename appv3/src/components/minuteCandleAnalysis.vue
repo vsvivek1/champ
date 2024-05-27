@@ -33,7 +33,12 @@
 			  </div>
 			</td>
 			<td v-else>N/A</td>
-			<td>Yday High: {{ instrument.pricePoints.d1.high }}</td>
+			<td>
+				
+				Yday High: {{ instrument.pricePoints.d1.high }} <hr>
+				LAst high :{{instrument.minuteCandle?instrument.minuteCandle.lastHigh:-1 }}
+			
+			</td>
 			<td>{{ instrument.last_price > instrument.pricePoints.d0.open }}</td>
 			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0">
 			  {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].close }} price

@@ -4918,7 +4918,7 @@ let lp = this.livePositions.find( i =>i.instrument_token == cis.instrument_token
 
 
 
-this.cl( 'inside stop loss switch fbefore return' )
+
 // console.log( lp );
 
 // return;
@@ -5141,7 +5141,8 @@ this.cl( "pp1.length == 0" )
 
 
 
-
+ this.cl( 'B4 STOP LOSS SWITCH' )
+ this.flashMessage='B4 STOP LOSS SWITCH';
 
 switch( true ){ 
 

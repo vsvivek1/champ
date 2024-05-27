@@ -1190,7 +1190,7 @@ let start=req.params.start.replace(/T|Z|\.\d{3}/g, ' ').trim();
 let end=req.params.end.replace(/T|Z|\.\d{3}/g, ' ').trim();
 let intervel=req.params.intervel;
 
-console.log('get historical data : start',start,'end',end,intervel)
+//console.log('get historical data : start',start,'end',end,intervel)
 
 
 
@@ -1231,7 +1231,7 @@ console.log('get historical data : start',start,'end',end,intervel)
 
 
 // }
-  console.log('result',result,'histoicaldata minuytre')
+ // console.log('result',result,'histoicaldata minuytre')
 
 res.send(result);
     
