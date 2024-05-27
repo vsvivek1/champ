@@ -1,16 +1,15 @@
 <template>
   <v-container fluid>
 
-   <!--  <v-alert
-    v-if="flashMessage.status"
+    <v-alert
+    v-if="flashMessage"
       color="primary"
-      icon="$vuetify"
-      theme="dark"
-      prominent
+    
+    
     >
 
-    {{ flashMessage.message }}
-    </v-alert> -->
+    {{ flashMessage}}
+    </v-alert>
 
     <v-alert
     v-if="placingReverseOrderInProgress"
@@ -192,6 +191,8 @@ export default {
     mixins: [dataMixin,NewFutureMining,placeTargetsForLiveScripts],
     data() {
         return {
+
+          flashMessage:'NOT SHOWING ANYTHING'
         // Your data properties here
         };
     },

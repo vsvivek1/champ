@@ -17,13 +17,20 @@
 		</thead>
 		<tbody>
 		  <tr v-for="(instrument, index) in instruments" :key="index">
-			<td>{{ instrument.tradingsymbol }}</td>
+			<td :style="{ backgroundColor: calculateBackgroundColor(instrument) }">
+				
+<button @click="gotoChart(instrument.chart)">{{ instrument.tradingsymbol }}</button>
+			
+		
+			</td>
 			<td v-if="instrument.minuteCandle">
 			  <div>Last Price High: {{ instrument.minuteCandle.lastHigh }}</div>
-			  <div>Open: <span :class="{'text-success': instrument.last_price > instrument.pricePoints.d0.open, 'text-danger': instrument.last_price < instrument.pricePoints.d0.open}">{{ instrument.pricePoints.d0.open }}</span></div>
+			  <div>Open: <span :class="{'text-yellow': instrument.last_price > instrument.pricePoints.d0.open, 'text-danger': instrument.last_price < instrument.pricePoints.d0.open}">{{ instrument.pricePoints.d0.open }}</span></div>
 			  <div>Low: {{ instrument.pricePoints.d0.low }}</div>
 			  <div>High: {{ instrument.pricePoints.d0.high }}</div>
-			  <div>Last Price: {{ instrument.last_price }}</div>
+			  <div>Last Price: 
+				<span :class="{'text-green': instrument.last_price > instrument.pricePoints.d0.open && instrument.last_price > instrument.minuteCandle.lastHigh, 'text-brown': instrument.last_price > instrument.pricePoints.d0.open && instrument.last_price <= instrument.minuteCandle.lastHigh, 'text-danger': instrument.last_price <= instrument.pricePoints.d0.open}">{{ instrument.last_price }}</span>
+			  </div>
 			</td>
 			<td v-else>N/A</td>
 			<td>Yday High: {{ instrument.pricePoints.d1.high }}</td>
@@ -65,6 +72,26 @@
 		required: true,
 	  },
 	},
+	methods: {
+		gotoChart(chart){
+
+			//window.location.href=chart
+		},
+	  calculateBackgroundColor(instrument) {
+
+		if(typeof instrument.minuteCandle =='undefined'){
+
+			return
+		}
+		if (instrument.minuteCandle && instrument.last_price > instrument.pricePoints.d0.open && instrument.last_price > instrument.minuteCandle.lastHigh) {
+		  return 'green';
+		} else if (instrument.last_price > instrument.pricePoints.d0.open && instrument.last_price <= instrument.minuteCandle.lastHigh) {
+		  return 'yellow';
+		} else {
+		  return 'red';
+		}
+	  }
+	}
   };
   </script>
   
@@ -74,6 +101,16 @@
   }
   .text-danger {
 	color: red;
+  }
+  .text-yellow {
+	color: orange;
+	background-color: black;
+  }
+  .text-green {
+	color: green;
+  }
+  .text-brown {
+	color: brown;
   }
   </style>
   

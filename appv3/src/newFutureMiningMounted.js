@@ -32,11 +32,11 @@ export default{
         this.fetchInstruments(); 
       
       
-        setInterval(() =>{ 
+    /*     setInterval(() =>{ 
       
       this.trailingStopLossWithLtp();
       
-         } ,60*1000 )
+         } ,60*1000 ) */
       
       
         // const urlForMiningInstruments = "../../../instruments/instrumentsForMining.json"
@@ -70,13 +70,15 @@ export default{
          }  )
         .catch( error  => console.error( error ));
              // this.cl( 'mounted' )
+           
+           
              var cl = this.cl;
               
               
               this.setTradingType();
            
                this.itype  =  this.$route.params.itype;
-               this.loopGetQuotesAndMutateInstruments();
+              // this.loopGetQuotesAndMutateInstruments();
            
                this.nifty = this.instruments.filter( i =>i.segment == 'INDICES' );
            
@@ -87,7 +89,7 @@ export default{
            this.getMargins();
            
            
-           this.loopGetQuotesAndMutateInstruments();
+           //this.loopGetQuotesAndMutateInstruments();
            this.nifty = this.instruments.filter( i =>i.segment == 'INDICES' );
            
             } ,20*60*1000 )  
@@ -260,6 +262,8 @@ export default{
            
                  if ( this.laggingCheckDigit  ==  this.CurrentCheckDigit ) { 
                    this.webSocketNotActive  =  true;
+
+                   this.setInstrumentTokens();
            
                    //reload window
            

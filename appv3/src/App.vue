@@ -12,26 +12,26 @@
        
         <router-link v-if="session!=null" to="/quickTargets">One Click Targets</router-link> |
         <router-link  v-if="session!=null" to="/holdings">Holdings</router-link> |
-        <router-link  v-if="session!=null" to="/instruments">Instruments</router-link> |
+       <!--  <router-link  v-if="session!=null" to="/instruments">Instruments</router-link> | -->
         <router-link  v-if="session!=null" to="/orders">Order Book</router-link> |
-        <router-link  v-if="session!=null" to="/NarrowRange">NarrowRange</router-link> |
-        <router-link  v-if="session!=null" to="/LongBuildUps">Long Build Ups</router-link> |
+      <!--   <router-link  v-if="session!=null" to="/NarrowRange">NarrowRange</router-link> | -->
+    <!--     <router-link  v-if="session!=null" to="/LongBuildUps">Long Build Ups</router-link> | -->
         <router-link  v-if="session!=null" to="/Strategies">Strategies</router-link> |
-        <router-link  v-if="session!=null" to="/FutureTrading">Future Trading</router-link> |
-
+       <!--  <router-link  v-if="session!=null" to="/FutureTrading">Future Trading</router-link> |
+ -->
         <!-- <router-link  v-if="session!=null" to="/timePriceHigh">Time Price High</router-link> | -->
-        <router-link  v-if="session!=null" to="/WraperForInstruments">WraperForInstruments</router-link> |
+    <!--     <router-link  v-if="session!=null" to="/WraperForInstruments">WraperForInstruments</router-link> | -->
        
   
        
        
-        <router-link  v-if="session!=null" to="/WebSockets">WebSockets</router-link> |
-        <router-link  v-if="session!=null" to="/ManiKandanStrategy">ManiKandan Strategy</router-link> |
-        <router-link  v-if="session!=null" to="/StopLoss">StopLoss</router-link> |
-        <router-link  v-if="session!=null" to="/Mint">Mint</router-link> |
+      <!--   <router-link  v-if="session!=null" to="/WebSockets">WebSockets</router-link> | -->
+      <!--   <router-link  v-if="session!=null" to="/ManiKandanStrategy">ManiKandan Strategy</router-link> | -->
+<!--         <router-link  v-if="session!=null" to="/StopLoss">StopLoss</router-link> | -->
+      <!--   <router-link  v-if="session!=null" to="/Mint">Mint</router-link> | -->
   
-  
-        <router-link  v-if="session!=null" to="/Mining">Mining</router-link> |
+  <!-- 
+        <router-link  v-if="session!=null" to="/Mining">Mining</router-link> | -->
        
         <router-link   to="/Tester" >Tester</router-link> |
        <router-link  v-if="session!=null" to="/NewFutureMining/NFO" >New Future Mining</router-link> |
@@ -39,27 +39,27 @@
   
    <!-- {  name: 'NewFutureMining', params: {  ITYPE: "NFO"  }   }  -->
   
-   <router-link  v-if="session!=null" to="/NewFutureMining/MCX" >Commodity</router-link>|
-   <router-link  v-if="session!=null" to="/NewFutureMining/NSE" >NSE intraday</router-link>|
+ <!--   <router-link  v-if="session!=null" to="/NewFutureMining/MCX" >Commodity</router-link>|
+   <router-link  v-if="session!=null" to="/NewFutureMining/NSE" >NSE intraday</router-link>| -->
 
-   <router-link  v-if="session!=null" to="/testWebSocket">testWebSocket</router-link> |
+<!--    <router-link  v-if="session!=null" to="/testWebSocket">testWebSocket</router-link> | -->
 
   
   
   
-        <router-link  v-if="session!=null" to="/MiningMis">Mining-MIS</router-link> |
+        <!-- <router-link  v-if="session!=null" to="/MiningMis">Mining-MIS</router-link> | -->
        <router-link  v-if="session!=null" to="/GTT">GTT</router-link> |
        <router-link  v-if="session!=null" to="/GTTSELL">GTT -SELL</router-link> |
-       <router-link  v-if="session!=null" to="/dailyGainers">Daily Gainers</router-link> |
+     <!--   <router-link  v-if="session!=null" to="/dailyGainers">Daily Gainers</router-link> | -->
      
      
-       <router-link  v-if="session!=null" to="/BTST">BTST</router-link> |
+<!--        <router-link  v-if="session!=null" to="/BTST">BTST</router-link> | -->
        
        
   
        
-        <router-link  v-if="session!=null" to="/OptionChain">OptionChains</router-link> |
-  
+    <!--     <router-link  v-if="session!=null" to="/OptionChain">OptionChains</router-link> |
+   -->
         
   
         <!-- <router-link  v-if="session!=null" to="/REACT">REACT</router-link> | -->

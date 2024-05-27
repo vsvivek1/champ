@@ -1,10 +1,18 @@
+//import instruments from '../assets/instruments/instrumentsForMining'
+
 export default{ 
+  mounted(){
 
+    console.log('instruments from mounted hook of build order arrat',this.instruments)
+    console.clear();
+
+    //this.instruments=instruments;
+
+},
     methods:{ 
-
         buildOrderArray( 
-          iceberg_legs=0,
-            iceberg_quantity=0, 
+         /*  iceberg_legs=0,
+            iceberg_quantity=0,  */
             tradingsymbol,
             transaction_type,
             qty,
@@ -13,6 +21,13 @@ export default{
             product  =  "NRML",reverseOrder
            ) { 
       
+
+            if(typeof this.instruments=='undefined' ||this.instruments.length==0){
+
+              console.log('FROM BUILD ORDER ARRAY INSTRUMENTS NOT LOADED ...',this.instruments )
+              return;
+            }
+
       this.cl( 'build order array' )
       
       // this.cl( reverseOrder,'reverseOrder from build arrya ' )
@@ -25,15 +40,22 @@ export default{
       
       if( reverseOrder == true ){ 
       
-        let PlacedReverseOrder = this.instruments.filter( 
+    /*     let PlacedReverseOrder1 = this.instruments.filter( 
                     ( i )  => i.tradingsymbol  ==  tradingsymbol
-                   )[0].PlacedReverseOrder
-      
+                   )
+                   
+                
+                 //  let PlacedReverseOrder=    PlacedReverseOrder1    [0].PlacedReverseOrder
+                   
+                   
+                  
                   if( PlacedReverseOrder == true ){ 
       
                     return false;
-                   } 
+                   }  */
       
+
+                  
        } 
        
       
@@ -144,14 +166,18 @@ export default{
            
             order.params.validity  =  "DAY";
 
-             order.params.iceberg_legs=iceberg_legs,
-            order.params.iceberg_quantity=iceberg_quantity, 
+            /*  order.params.iceberg_legs=iceberg_legs,
+            order.params.iceberg_quantity=iceberg_quantity,  */
       
             order.params.price  =  Price;
       
       
-      
-            if( reverseOrder == true ){ 
+      let i= this.instruments.some( 
+        ( i )  => i.tradingsymbol  ==  tradingsymbol
+       );
+            if( reverseOrder == true  && i){ 
+
+             
               this.$set( 
                   this.instruments.filter( 
                     ( i )  => i.tradingsymbol  ==  tradingsymbol

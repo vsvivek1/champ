@@ -9,7 +9,7 @@ export default new Vuex.Store( {
     Request_token:'',
     accessToken:'',
     session:null,
-    Instruments:[],
+
     NrInstruments:[],
     
     logs: [],

@@ -74,7 +74,9 @@ calculateHighestPrice(ohlcData) {
     const indianTimeString = utcDate.toLocaleString('en-IN', options);
   
     return indianTimeString;
-  }, getCandlestickSignal(obj, ts='') {
+  },
+  
+  getCandlestickSignal(obj, ts='') {
     if (typeof obj == 'undefined') {
         console.log(obj, 'data inside getCandleSignal Undefined');
         return 'EntryCheckForSignalFailed';

@@ -31,6 +31,8 @@ methods:{
      
        }  */
       
+
+       //this.fla
         switch ( true ) { 
 
  //check later
@@ -94,8 +96,8 @@ methods:{
     
     
     
-            case ( element.last_price<element.ohlc.open ) :
-           let msg = `STOP LOSS  EXECUTION SEND BY  DAILY price less than open price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `
+            case ( element.last_price<element.ohlc.open && element.last_price>0 ) :
+           let msg = `STOP LOSS  EXECUTION SEND BY  DAILY price less than open price: ${element.ohlc.open}  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() }  ohlc ${element.ohlc}`
              this.cl( msg )
     
              this.updateSquareOfforderWithDesiredPrice( 
@@ -107,7 +109,7 @@ methods:{
     
             break;  
             
-            case ( element.last_price<cis.minuteCandle.lastHigh*.95 ) :
+            case (cis && cis.minuteCandle &&  element.last_price<cis.minuteCandle.lastHigh*.95 ) :
            let msg1 = `STOP LOSS  EXECUTION SEND BY  last price  less than last hourly high price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `
              this.cl( msg1 )
     

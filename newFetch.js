@@ -94,6 +94,8 @@ async function main(params) {
   let allScriptJson=await  downLoadAllInstrumentsAndReturnJson()
 
   await writeJsonToFile(allScriptJson,'./appv3/public/instruments/instrumentsAll.json')
+  await writeJsonToFile(allScriptJson,'./appv3/src/assets/instruments/instrumentsAll.json')
+
 
 
  
@@ -456,6 +458,7 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
 
             //console.log(fullJson.length,'full json len',selectedOptions.length)
             writeJsonToFile(fullJson,'./appv3/public/instruments/instrumentsForMining.json')
+            writeJsonToFile(fullJson,'./appv3/src/assets/instruments/instrumentsForMining.json')
 
             resolve(fullJson);
         } catch (error) {

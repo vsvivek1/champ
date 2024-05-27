@@ -7,10 +7,7 @@ export default {
 
   mounted(){
 
-    this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
-
-   let  symbolList=[...this.instrumentTokens];
-    this.initiateHistoricalDataFetch(symbolList);
+  
 
     setInterval(()=>{
 
@@ -54,6 +51,61 @@ export default {
       },
     methods: {
 
+      async getHourlyData(symbol){
+        let start  = this.getRequiredTime( 9,15 );
+
+        let date=new Date();
+
+        let minute=date.getMinutes();
+        let hour=date.getHours();
+        let end
+        if(hour==9 || (hour==10 && minute<15)){
+
+          end  = this.getRequiredTime( hour,15 );
+        }else{
+
+          if(minute<15){
+
+            hour=hour-1;
+            minute=15
+            
+          }else{
+
+            //hour=hour
+
+            minute=15
+          }
+
+          end  = this.getRequiredTime( hour,minute );
+        }
+
+          
+
+
+        let  intervel = '60minute';
+          let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
+          let resultPromise =  await  axios.get( url );
+
+      
+     
+          let data=resultPromise.data;
+          let lastHour=data.pop();
+//debugger;
+          if(lastHour){
+
+           
+            let close=lastHour.close
+            let open=lastHour.open
+  let high=Math.max(close,open)
+            return high;
+          }else{
+
+            return false
+          }
+          
+
+      },
+
         async getHistoricalDataForCustomDuration( intervel='minute',symbol ){ 
 
             let start  = this.getRequiredTime( 9,15 );
@@ -67,7 +119,7 @@ export default {
              let end  = this.getRequiredTime( hour,minute+2 );
 
 
-              intervel = 'minute';
+             intervel = 'minute';
             let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
       
     
@@ -110,9 +162,16 @@ let minuteCandle={};
       minuteCandle.data=data;
       minuteCandle.signal = this.getCandlestickSignal(data,obj.tradingsymbol)
 
-      minuteCandle.lastHigh=this.calculateHighestPrice(data);
+     // minuteCandle.lastHigh=this.calculateHighestPrice(data);
+     // minuteCandle.lastHigh=await this.getHourlyData(symbol)
 
-      //alert(minuteCandle.lastHigh);
+
+      let h1=this.calculateHighestPrice(data)
+
+      let h2=await this.getHourlyData(symbol)
+
+      minuteCandle.lastHigh=h2||h1;
+    
 
       
 
@@ -120,34 +179,9 @@ let minuteCandle={};
       this.$set(obj,'minuteCandle',minuteCandle);
       this.fetchingMinuteCandle=false;
 
-      if(minuteCandle.signal.signal!='No signal detected'){
-
-
-       if(tick&& tick.ohlc.open<tick.last_price && minuteCandle.lastHigh<tick.last_price){
-          console.log('MINUTE CANDLE HAS A SIGNAL FOR YOU with last high',obj.tick,minuteCandle.signal.signal,minuteCandle.signal.candleColor,obj.tradingsymbol, Date(),'last high',minuteCandle.lastHigh);
-
-
-        }
-      }
-
-     
-      
-
-   
-
      
 
      
-      
-
-      // for(let i =0;i<data.lenght;i++){
-
-
-      // }
-      // this.historicalData[symbol].signals = data;
-
-
-      // console.log(this.historicalData[symbol]['signal'],'from historical data')
       
            },
       

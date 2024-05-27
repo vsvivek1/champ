@@ -4,7 +4,7 @@ var dataMixin=
 
     data() { 
         return { 
-          instruAll:[],
+     
           ohlcData:[],
           allPositions:[],
           exitNow:false,
@@ -158,7 +158,7 @@ var dataMixin=
           symbols: [],
           ciss: [],
           displayingInstruments: [],
-          instruments: [],
+        
           ohlc: [],
          } 
        } ,

@@ -71,7 +71,32 @@ const mutateWithLtp = {
             if (PlacedReverseOrder != true && hasLiveTarget != true) {
               this.cl('iam return ning false @7217 means no live targets');
               if (this.manualReverseOrderStart == true) {
+                
                 // let out  = await this.placeTargetsForSingleScript(instrument_token, quantity);
+            
+                let  livePnl=0;
+                let product='NRML'
+                let transaction_type='SELL';
+
+                let qty=lpCurrent.quantity;
+                let targetPoint=lpCurrent.price*1.05
+
+                debugger;
+
+
+                this.placetargetAndStopLoss(
+                  cis,
+                  cis.instrument_token,
+                  0,
+                 product,
+                  Math.abs(order.quantity),
+                  targetPoint,
+                  livePnl,
+                  true,
+                  transaction_type
+              );
+            
+            
               }
               return false;
             }
@@ -312,7 +337,9 @@ this.$set(cis,'movingAverage',ma)
             // }
   
 
-            this.cl('BEFORE TRADE ENTRY MUTATE');
+           // this.cl('BEFORE TRADE ENTRY MUTATE');
+
+            this.flashMessage='BEFORE TRADE ENTRY MUTATE';
 
             this.tradeEntryFlowStatus = 'Reached before  trade Entry';
              this.tradeEntry(instrument_token, inst, cis, element);

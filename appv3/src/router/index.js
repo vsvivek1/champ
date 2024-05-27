@@ -8,7 +8,7 @@ import NewFutureMining from '@/components/NewFutureMining.vue'
 import TimePriceHigh from '@/components/Tester/TimePriceHigh.vue'
 import WraperForInstruments from '@/components/Tester/WraperForInstruments.vue'
 
-import ListHoldings from '@/components/ListHoldings.vue'
+//import ListHoldings from '@/components/ListHoldings.vue'
 import testWebSocket from '@/components/testWebSocket.vue'
 
  import PlaceQuickOrderForHoldings from '@/components/PlaceQuickOrdersForHoldingsNew.vue'
@@ -27,7 +27,7 @@ import Strategies from '@/components/Strategies.vue'
 import GTT from '@/components/GTT.vue'
 import GTTSELL from '@/components/GTTSell.vue'
 import Tester from '@/components/Tester/Tester.vue'
-import FutureTrading from '@/components/FutureTrading.vue'
+/* import FutureTrading from '@/components/FutureTrading.vue' */
 // import BTST from '@/components/Btst.vue'
 import dailyGainers from '@/components/dailyGainers.vue'
 
@@ -45,33 +45,30 @@ Vue.use( VueRouter )
 
 const routes  =  [
 
-  { 
+/*   { 
     path: '/WraperForInstruments',
     name: 'WraperForInstruments',
     component: WraperForInstruments
-   } , 
+   } ,  */
   
-  { 
+/*   { 
     path: '/timePriceHigh',
     name: 'TimePriceHigh',
     component: TimePriceHigh
-   } ,
+   } , */
 
-  { 
+ /*  { 
     path: '/FutureTrading',
     name: 'FutureTrading',
     component: FutureTrading
-   } ,   { 
-    path: '/testWebSocket',
-    name: 'testWebSocket',
-    component: testWebSocket
-   } ,   
+   } ,  */  //{ 
+ /*  */  
   
-  { 
+ /*  { 
     path: '/Tester',
     name: 'Tester',
     component: Tester
-   } , 
+   } ,  */
   
   
   // { 
@@ -92,11 +89,11 @@ const routes  =  [
   //   component: BTST
   //  } , 
 
-  { 
+/*   { 
     path: '/dailyGainers',
     name: 'dailyGainers',
     component:dailyGainers
-   } ,
+   } , */
   
 
   

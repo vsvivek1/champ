@@ -18,7 +18,7 @@ export default {
            this.setTradingType(  );
         
             this.itype  =  this.$route.params.itype;
-            this.loopGetQuotesAndMutateInstruments(  );
+           // this.loopGetQuotesAndMutateInstruments(  );
         
             this.nifty = this.instruments.filter( i =>i.segment == 'INDICES' );
         
@@ -29,7 +29,7 @@ export default {
         this.getMargins(  );
         
         
-        this.loopGetQuotesAndMutateInstruments(  );
+       // this.loopGetQuotesAndMutateInstruments(  );
         this.nifty = this.instruments.filter( i =>i.segment == 'INDICES' );
         
          } ,20*60*1000 )  

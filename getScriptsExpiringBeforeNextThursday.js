@@ -20,7 +20,7 @@ function getScriptsExpiringToday(jsonArray) {
   
 
 
-   tommorow.setDate(today.getDate()+6);
+   tommorow.setDate(today.getDate()+8);
 
    
 
@@ -48,8 +48,8 @@ let filtered= jsonArray.filter(item => {
 
       //console.log(item.expiry)
 
-      const nextThursday = new Date(today.getTime() + (7 - today.getDay() + 4) % 7 * 24 * 60 * 60 * 1000); // Calculate next Thursday
-
+     // const nextThursday = new Date(today.getTime() + (14 - today.getDay() + 4) % 7 * 24 * 60 * 60 * 1000); // Calculate next Thursday
+      const nextThursday =new Date('2024-06-03');
         const expiryDate = new Date(item.expiry);
         // return expiryDate<=nextThursday;
          return expiryDate<=nextThursday;

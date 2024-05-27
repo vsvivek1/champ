@@ -206,7 +206,7 @@ return false;
       if(access_token){
        
         // getHoldingsFromZerodha();
-        // getHistoricalData(access_token);
+      
       }
   })
 
@@ -343,6 +343,8 @@ res.send(r)
 
 app.post('/api/updateJsonFileWithData',(req,res)=>{
   const updateJSONFile =require('./updateJsonFile.js') ;
+
+  return;
 
   let filePath=req.body.filePath;
   let newData=req.body.instruments;
@@ -1176,6 +1178,11 @@ Promise.all(r).then(values=>{
 app.get('/api/getHistoricalData/symbol/:symbol/accessToken/:accessToken/start/:start/end/:end/intervel/:intervel', async (req, res) => {
 
 
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  res.setHeader('Surrogate-Control', 'no-store');
+
 
   let accessToken=req.params.accessToken;
 let symbol=req.params.symbol;
@@ -1183,7 +1190,7 @@ let start=req.params.start.replace(/T|Z|\.\d{3}/g, ' ').trim();
 let end=req.params.end.replace(/T|Z|\.\d{3}/g, ' ').trim();
 let intervel=req.params.intervel;
 
-// console.log('start',start,'end',end,intervel)
+console.log('get historical data : start',start,'end',end,intervel)
 
 
 
@@ -1199,8 +1206,10 @@ let intervel=req.params.intervel;
 
   try {
 
-    console.log(symbol,intervel,start,end)
-    let result= await kc.getHistoricalData(symbol,intervel,start,end,0,1);
+    //console.log(symbol,intervel,start,end)
+
+     let result= await kc.getHistoricalData(symbol,intervel,start,end,0,1);
+
 
 
     result.forEach(r=>{
@@ -1209,6 +1218,7 @@ let intervel=req.params.intervel;
       r.IST=convertToIndianTime(r.date);
 
     })
+    
     // console.log('result',result)
 
 //    let date=result[0].date
@@ -1221,10 +1231,12 @@ let intervel=req.params.intervel;
 
 
 // }
-  // console.log('result',result)
+  console.log('result',result,'histoicaldata minuytre')
+
 res.send(result);
     
   } catch (error) {
+    rej.send([]);
     console.log(`GET HISTOTICAL DATE ERROR FOR SYMBOL ${symbol}`,error); 
   }
    

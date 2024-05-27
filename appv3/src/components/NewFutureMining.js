@@ -44,6 +44,7 @@ import getRequiredTimeMixin from './Tester/getRequiredTimeMixin.js'
 import sessionMixin from '../views/sessionMixin.js'
 import tradingMixin from './tadingMixin.js'
 import axios from "axios";
+import instruments from '../assets/instruments/instrumentsForMining'
 
 import moment  from 'moment';
 //import ThemeSwitcherVue from "../../../../theme/materio-free-v1.0.2/materio-vuetify-vuejs-admin-template-free/materio-vuetify-vuejs-admin-template-free-main/src/layouts/components/ThemeSwitcher.vue";
@@ -67,10 +68,12 @@ import updateJsonFileMixin from '../../updateJsonFileMixin';
 
 import trailingStopLossWithLtp from './trailingStopLossWithLtp.js'
 
-import  {orderUpdateMixin}  from './order_update_mixin';
+import orderUpdateMixin  from './order_update_mixin';
 import  buildOrderArray from './buildOrderArray';
 
 import checkSideWaysMovementTime from '@/checkSideWaysMovementTime';
+
+
 export const socket  =  io( "http://127.0.0.1:4000"
 
 ,
@@ -125,7 +128,7 @@ import newFutureMiningMixinsList from './newFutureMiningMixinsList';
 
 export var hourlyPricePointsofLiveDay1 ;
 
-export var instruments;
+//export  instruments;
 
 
 // var hourlyPricePointsofLiveDay1  = 
@@ -137,18 +140,37 @@ var cl;
 //export default Vue.extend({
 
     export default{ 
-      components: {clearConsoleMixin, InstrumentsStatusView, 
+      data() { 
+        return { 
+          instruAll:[],
+          instruments: [],
+        }},
+      mounted(){
+
+
+        this.instruments=instruments;
+
+        console.log('TOTAL INSTRUMENTS',this.instruments.length)
+
+
+        this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
+
+        let  symbolList=[...this.instrumentTokens];
+         this.initiateHistoricalDataFetch(symbolList);
+      },
+      components: {minuteCandleAnalysis, InstrumentsStatusView,clearConsoleMixin, 
         ClosedTrades, LiveTickView, LiveOrders, Margin, LivePos,
          IndicesTable, Messages, IronCondor, VueGoodTable, sideWiseAlerts,
           MarginView, DigitCheckerForWebsocketHealth, Clock, MaxTradableAmount,
            TelegramStatus, ProfitAndLossView, LogsView, DialogForAlerts, 
            ViewHourlyPricePointsOfLiveDay, InstrumentsAndActions, ForGoneProfitData, 
-           minuteCandleAnalysis, TotalInstruments, softwareFlowStatus, DoD1Dates, 
+            TotalInstruments, softwareFlowStatus, DoD1Dates, 
            stopLossTradeEntrySwitchHealth, stopLossHealthIcon, MarketConnectionHelthIcon,
             HeartBeatIcon, TrailingStopLossButton, TradeCostAndBalnceInfo, 
             ProfitAndLossOfClosedPositions } ,
 
             mixins: [
+              orderUpdateMixin,
               newFutureMiningMixinsList,
               updateJsonFileMixin ,
               timeMixins,
@@ -566,7 +588,7 @@ this.proxyTotal =  tot;
  } ,
 
 
-    loopGetQuotesAndMutateInstruments(){ 
+   /*  loopGetQuotesAndMutateInstruments(){ 
 
 this.cl( 'hi' )
       let a = [...this.instruments];
@@ -619,7 +641,7 @@ this.$set( this.instruments.filter( i =>i.instrument_token == e )[0],
 
 
      } ,
-   
+    */
 
     triggerAlert( code,msg ){ 
 
@@ -902,8 +924,8 @@ else{
 
      if( this.itype == "MCX" ){ 
       this.setter  =  comF;
-      let instrumentsForMining1  =  
-await this.requireJson( "../../../instruments/" + this.setter );
+      let instrumentsForMining1  =  insgtruments;
+//await this.requireJson( "../../../instruments/" + this.setter );
    
 let instrumentsForMining  =  instrumentsForMining1
   .filter( 
@@ -953,7 +975,8 @@ this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token )
   //const urlForAll = "../../../instrumentsAll.json"
 
  // appv3/public/instruments/instrumentsAll.json
-instruments = await this.requireJson( urlForMiningInstruments );
+//instruments = await this.requireJson( urlForMiningInstruments );
+
 
 
 
@@ -1005,7 +1028,7 @@ this.initiateHistoricalDataFetch(this.instrumentTokens);
 if( !instruments ){ 
 
 
-  console.log( 'instruments not loaded fro setting trading type',instruments )
+ // console.log( 'instruments not loaded fro setting trading type',instruments )
   return false;
  } 
 
@@ -1014,8 +1037,8 @@ await this.setInstrumentTokens()
 
 
  }  else if ( this.itype == "NSE" ){ 
-  let instrumentsForMining1  =  
-await this.requireJson( "../../../instruments/" + this.setter );
+  let instrumentsForMining1  =  instruments
+//await this.requireJson( "../../../instruments/" + this.setter );
 
 
   let instrumentsForMining  =  instrumentsForMining1
@@ -3208,7 +3231,7 @@ this.cl( 'error from function',setLastPriceBasedOnTradeDirection )
 
     
     
-    async placeTargetsForSingleScript( instrument_token,quantity ) { 
+ /*    async placeTargetsForSingleScript( instrument_token,quantity ) { 
 
       //  return;
 
@@ -3403,7 +3426,7 @@ if (
    } 
 
  }  )
- } ,
+ } , */
 
 checkReverseOrderTallyAndReturnNoTargetScripts(){ 
 
@@ -3723,7 +3746,7 @@ let e = orderUpdates;
             this.placingReverseOrderInProgress  ==  false;
 
             this.cl( 'this.placingReverseOrderInProgress ',this.placingReverseOrderInProgress,quantity   )
-        // debugger
+        // 
             return;
            } 
 
@@ -3806,7 +3829,7 @@ let e = orderUpdates;
             targetPoint  =  lowerBreakOutTarget //rangeBreakOutMath.max( rangeBreakOut,upper_circuit_limit );
 
            
-//debugger
+//
 
            }  else if ( quantity > 0 ) { 
             transaction_type  =  "SELL";
@@ -3845,7 +3868,7 @@ let e = orderUpdates;
            ) { 
 
 
-           // debugger
+           // 
             this.orderUpdateProcessing = false;
             // this.cl( 'PlacedReverseOrder ',PlacedReverseOrder  )
             // this.placingReverseOrderInProgress  ==  false;
@@ -3867,7 +3890,7 @@ let e = orderUpdates;
            
           //  );
 
-//debugger
+//
 
 
 alert(' this is happenoing at 3864 of new future mining  proceed for reverrse order placement')
@@ -4090,7 +4113,7 @@ break;
 
        if(livePos){
 
-        console.log('HAS LIVE POS FOR 4089',cis.tradingsymbol);
+        //console.log('HAS LIVE POS FOR 4089',cis.tradingsymbol);
 
         return;
        }
@@ -4250,11 +4273,11 @@ break;
 
 
           var audio  =  new Audio( "/sounds/mixkit-sci-fi-confirmation-914.wav" );
-          audio.play();
+        //  audio.play();
           let transaction_type;
 
 
-          console.log('direction is   inside Proceed for entry fn',cis.tradingsymbol,direction)
+          console.log('INSIDE PROCEED FOR ENTRY FOR',cis.tradingsymbol,direction)
 
           if ( direction  ==  "long" ) { 
             transaction_type  =  "BUY";
@@ -4285,7 +4308,15 @@ this.cl( 'low hit already hit for %s, so no trade ',cis.tradingsymbol )
 
 
           
-          let obj={"NIFTY":72,"BANKNIFTY":56}
+          let obj={
+            
+            "NIFTY":72,
+            
+           // "BANKNIFTY":60,
+            "BANKNIFTY":60,
+            'MIDCPNIFTY':56,
+            "FINNIFTY":40
+          }
 
           let multiplier = 1;
 
@@ -4297,12 +4328,12 @@ Object.keys(obj).forEach(key => {
 });
 
 
-          let lot_size  =  cis.lot_size * multiplier   *4;
+          let lot_size  =  cis.lot_size *multiplier;
           //let lot_size = 0;
           let order_type  =  "LIMIT";
 
        
-         let  iceberg_legs=4
+         let  iceberg_legs=lot_size/multiplier;
          let  iceberg_quantity=lot_size /iceberg_legs
           //  let price1 =   element.depth.sell.sort(( a,b ) =>a.price-b.price )[0]
           //  let price2 =   element.depth.sell.sort(( a,b ) =>b.price-a.price )[0]
@@ -4329,10 +4360,12 @@ Object.keys(obj).forEach(key => {
 
           let reverseOrder = false;
 
+          //
+
           console.log('before build order array ',tradingsymbol,transaction_type,Price,Date())
           let arr  =  this.buildOrderArray( 
-            iceberg_legs,
-            iceberg_quantity, 
+            /* iceberg_legs,
+            iceberg_quantity,  */
             tradingsymbol,
             transaction_type,
 
@@ -4440,7 +4473,7 @@ Object.keys(obj).forEach(key => {
 
       console.log(targetPointLong,'targetpoint long',cis.tradingsymbol,Date(),{targetPointLong1});
 
-      //debugger
+
 
 
       if ( fireTargetDefault  ==  false ) { 
@@ -4449,51 +4482,81 @@ Object.keys(obj).forEach(key => {
         return false;
        } 
 
-
+console.log('reverse order desending  5')
 
       let PlacedReverseOrder = this.instruments.some( i  => i.instrument_token== instrument_token && i.PlacedReverseOrder );
 
           if( PlacedReverseOrder ){ 
 
             this.cl( 'placed reverse order' );
+
+           // debugger;
             return false;
            } 
+         
 
-
+           console.log('reverse order desending  4')
           let livePosLen = this.livePositions.some( 
           ( lp )  => lp.instrument_token  ==  instrument_token
          );
+       
+         console.log('reverse order desending  3')
+         let livePos= this.livePositions.find( 
+          ( lp )  => lp.instrument_token  ==  instrument_token
+         );
 
-if( !livePosLen ){ 
+       // let  livePosQuantity=livePos.quanity?livePos.quanity:0;
+
+       console.log('reverse order desending  2',livePosLen )
+
+  /*      if( !livePosLen ){ 
   console.log('NO LIVE POSITION LENGTH')
   return false;
- } 
-    
+ }  */
+ 
         let lot_size  =  Math.abs( quantity );
         let order_type  =  "LIMIT";
 
           
-          await this.getOrders();
+          //await this.getOrders();
 
+          console.log('reverse order desending  2a')
 
           console.log('transaction_type',transaction_type)
+      
           let hasLiveTarget =  this.liveOrders.some( 
             ( i )  => i.instrument_token  ==  instrument_token && i.transaction_type==transaction_type
            )
-           console.log('hasLiveTarget',hasLiveTarget)
-   
+        
+        let livetarget= this.liveOrders.find( 
+          ( i )  => i.instrument_token  ==  instrument_token && i.transaction_type==transaction_type
+         )
 
+       //  let livetargetQuantity=livetarget.quanity?livetarget.quanity:0;
+       console.log('reverse order desending  2b')
+
+           console.log('hasLiveTarget',hasLiveTarget)
+
+   
+         
           if ( hasLiveTarget  ==  true || PlacedReverseOrder == true  ) { 
          
             console.log('HAS TARGET')
+            
             return false;
            } 
         
           let Price  =  targetPointLong;
           
-
+          console.log('reverse order desending  2c')
           // let reverseOrder = true;
+
+      //  let netQuantity=livePosQuantity-livetargetQuantity;
    
+        
+      console.log('reverse order desending  1a')
+
+
           let arr  =  this.buildOrderArray( 
             tradingsymbol,
             transaction_type,
@@ -4511,10 +4574,10 @@ if( !livePosLen ){
 
           orderArray.push( arr );
 
-
+          console.log('reverse order desending  0:firing order')
 
            await this.placeOrder( orderArray );
-
+         
           this.$set( 
             this.instruments.filter( 
               ( i )  => i.instrument_token  ==  instrument_token
@@ -4532,7 +4595,7 @@ if( !livePosLen ){
            );
      
 
-      
+           console.log('reverse order desending  -1')
      
    
    
@@ -4936,7 +4999,8 @@ Math.max( cis.pricePoints.d0.low,cis.pricePoints.d1.low ) &&
 //  } 
 
 
-    this.cl( 'NEAR STOP LOSS SWITCH FOR HEALTH CHECK ONLY' )
+this.flashMessage="NEAR STOP LOSS SWITCH FOR HEALTH CHECK ONLY";
+    //this.cl( 'NEAR STOP LOSS SWITCH FOR HEALTH CHECK ONLY' )
 
     var msg;
 
@@ -5400,7 +5464,7 @@ return false;
         this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
         let j = JSON.stringify( this.instrumentTokens );
 
-        console.log( 'Going to subscribe ticks Number of scripts for Ticks is %s',this.instrumentTokens )
+        console.log('FOR SUBSCRIBING TICKS ',this.instrumentTokens )
 
 
         socket.emit( "subscribe-orders", j );

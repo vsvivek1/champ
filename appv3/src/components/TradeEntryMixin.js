@@ -18,6 +18,11 @@ const TradeEntryMixin = {
     tradeEntry(instrument_token, inst = 'cis', cis, element) {
       try {
 
+        if(cis.tradingsymbol=='NIFTY2452321500CE'){
+
+          return;
+        }
+
         if(element.last_price<1){
 
           return;
@@ -60,10 +65,10 @@ const TradeEntryMixin = {
 
         
 
-if(element.ohlc.open>element.last_price){
+if(element.ohlc.open*1.05>element.last_price){
 
-
-  this.cl('NO BUYING BELOW OPENING POINT',cis.tradingsymbol)
+this.flashMessage=`'NO BUYING BELOW OPENING POINT ${cis.tradingsymbol}`;
+  //this.cl('NO BUYING BELOW OPENING POINT',cis.tradingsymbol)
   return;
 
 }
@@ -74,12 +79,16 @@ if(element.ohlc.open>element.last_price){
 if( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='undefined' || 
  typeof cis.minuteCandle.signal=='undefined' || cis.minuteCandle.signal=='EntryCheckForSignalFailed'){
 
+  this.flashMessage=`${cis.minuteCandle},'minute candle signal issue before switch issue for',${cis.tradingsymbol}`;
+
   this.cl(cis.minuteCandle,'minute candle signal issue before switch issue for',cis.tradingsymbol)
   return;
 }else 
 
 if(cis.lastHigh>cis.last_price && cis.minuteCandle.signal.signal=='longTail'){
 
+
+  this.flashMessage=`'longTail abouve last high',${cis.tradingsymbol}`;
   this.cl('longTail abouve last high',cis.tradingsymbol)
 
 }
@@ -89,7 +98,7 @@ try {
   if( (this.hours>9  && (typeof cis.minuteCandle=='undefined' || cis.minuteCandle.lastHigh>element.last_price))){
   
     if(typeof cis.minuteCandle!='undefined' ){
-    this.cl('LAST HOUR HIGH GREATER THAN LAST PRICE FOR',cis.tradingsymbol,'last hour high',cis.minuteCandle.lastHigh , element.last_price,'is the last price so returning')
+    //this.cl('LAST HOUR HIGH GREATER THAN LAST PRICE FOR',cis.tradingsymbol,'last hour high',cis.minuteCandle.lastHigh , element.last_price,'is the last price so returning')
 
 
     }
@@ -98,7 +107,9 @@ try {
     return;
   }else{
 
-       console.log('LAST HOUR check ok',cis.tradingsymbol,'last hour high',cis.minuteCandle.lastHigh , element.last_price,'is the last price so returning')
+
+    this.flashMessage=`'LAST HOUR check ok',${cis.tradingsymbol},'last hour high'${cis.minuteCandle.lastHigh} , ${element.last_price},'is the last price so returning'`
+       //console.log(`'LAST HOUR check ok',cis.tradingsymbol,'last hour high',cis.minuteCandle.lastHigh , element.last_price,'is the last price so returning'`)
 
   }
 } catch (error) {
@@ -107,7 +118,11 @@ console.log(error,'here eror')
     return;
   
 }
-console.log('BEFORE ACTUAL TRADE SWITCH',cis.tradingsymbol)
+//console.log('BEFORE ACTUAL TRADE SWITCH',cis.tradingsymbol)
+
+this.flashMessage='BEFORE ACTUAL TRADE SWITCH'+cis.tradingsymbol;
+
+
 
           switch (true) { 
              /*  case !this.checkNiftyStatus("NIFTY 50"):
@@ -181,12 +196,12 @@ break;
           }
   
 
-          console.log('reached should proceed for entry',cis.tradingsymbol,cis.signal,this.shouldProceed)
+          //console.log('reached should proceed for entry',cis.tradingsymbol,cis.signal,this.shouldProceed)
           
           //debugger;
           if(typeof cis.minuteCandle==undefined ||this.hours>9 && cis.minuteCandle.lastHigh>element.last_price){
 
-            console.log('LAST HOUR HIGH GREATER THAN LAST PRICE FOR',cis.tradingsymbol,'last hour high',cis.minuteCandle.lastHigh , element.last_price,'is the last price so returning')
+            //console.log('LAST HOUR HIGH GREATER THAN LAST PRICE FOR',cis.tradingsymbol,'last hour high',cis.minuteCandle.lastHigh , element.last_price,'is the last price so returning')
           
             this.shouldProceed=false;
             return;
@@ -196,12 +211,29 @@ break;
          // shouldProceed = false;
           if (this.shouldProceed) {
 
-            this.updateInstrumentsFile(this.instruments,'./appv3/public/instruments/instrumentsForMiningY.json')
+          //  this.updateInstrumentsFile(this.instruments,'./appv3/public/instruments/instrumentsForMining.json')
 
               var sellersLowestPrice = cis.last_price;
 
 
               var sellersLowestPrice=cis.last_price;
+
+
+              this.$set( 
+                this.instruments.filter( 
+                  ( i )  => i.instrument_token  ==  instrument_token
+                 )[0],
+                "PlacedReverseOrderType",
+                "nil"
+               );
+         
+               this.$set( 
+                this.instruments.filter( 
+                  ( i )  => i.instrument_token  ==  instrument_token
+                 )[0],
+                "PlacedReverseOrder",
+                false
+               );
 
               this.proceedForEntry(
                   instrument_token,

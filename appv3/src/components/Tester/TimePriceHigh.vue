@@ -119,7 +119,7 @@ table {
         targetHit:false,
         stopLossHit:false,
         hasPosition:false,
-        instruments:[],
+    
         ohlcData: [
           // Your OHLC data here
         ],
