@@ -3,8 +3,36 @@
 export default{
 methods:{
 
+ findHighestAndLowest (ohlcArray){
+    if (ohlcArray.length === 0) {
+      return { highest: null, lowest: null };
+    }
+  
+    let highest = ohlcArray[0].high;
+    let lowest = ohlcArray[0].low;
+  
+    ohlcArray.forEach(({ high, low }) => {
+      if (high > highest) {
+        highest = high;
+      }
+      if (low < lowest) {
+        lowest = low;
+      }
+    });
+  
+    return { highest, lowest };
+  },
+  
+/*   const result = findHighestAndLowest(ohlcArray);
+  console.log(`Highest point till now: ${result.highest}`);
+  console.log(`Lowest point till now: ${result.lowest}`);
+   */
+
 calculateHighestPrice(ohlcData) {
     // Get the current time
+
+
+    //// bad method
     const currentTime = new Date();
 
     // Get the start time (9:15 AM) timestamp

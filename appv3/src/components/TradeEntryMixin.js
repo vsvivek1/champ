@@ -18,13 +18,11 @@ const TradeEntryMixin = {
     tradeEntry(instrument_token, inst = 'cis', cis, element) {
       try {
 
-        if(cis.tradingsymbol=='NIFTY2452321500CE'){
-
-          return;
-        }
+       
 
         if(element.last_price<1){
 
+         // shouldProceed=false;
           return;
         }
           let shouldProceed = false;
@@ -65,7 +63,7 @@ const TradeEntryMixin = {
 
         
 
-if(element.ohlc.open*1.05>element.last_price){
+if(element.ohlc.open>element.last_price){
 
 this.flashMessage=`'NO BUYING BELOW OPENING POINT ${cis.tradingsymbol}`;
   //this.cl('NO BUYING BELOW OPENING POINT',cis.tradingsymbol)
@@ -120,9 +118,25 @@ console.log(error,'here eror')
 }
 //console.log('BEFORE ACTUAL TRADE SWITCH',cis.tradingsymbol)
 
+/* if(this.seconds<40){
+
+  ///check time 
+  this.flashMessage='TIME LESS THAN 40 SECONDS '+cis.tradingsymbol;
+  return;
+}
+ */
 this.flashMessage='BEFORE ACTUAL TRADE SWITCH'+cis.tradingsymbol;
 
+let  { highest, lowest }=this.findHighestAndLowest (ohlcArray)
 
+let lastPriceBelowDailyHigh=false;
+if(element.last_price<highest){
+
+this.flashMessage="LAST PRICE BELOW DAILY HIGH";
+lastPriceBelowDailyHigh=true;
+shouldProceed=false;
+return;
+}
 
           switch (true) { 
              /*  case !this.checkNiftyStatus("NIFTY 50"):
@@ -233,6 +247,14 @@ break;
                  )[0],
                 "PlacedReverseOrder",
                 false
+               );
+
+               this.$set( 
+                this.instruments.filter( 
+                  ( i )  => i.instrument_token  ==  instrument_token
+                 )[0],
+                "latestBuyPrice",
+                sellersLowestPrice
                );
 
               this.proceedForEntry(

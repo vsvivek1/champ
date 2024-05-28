@@ -80,6 +80,22 @@ methods:{
     
             break;
     
+
+
+            case ( element.last_price<element.ohlc.open ):
+             let msgy = `STOP LOSS  EXECUTION SEND BY below  daily open point ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ Date() } `
+               this.cl( msgy )
+
+               this.flashMessage=msgy;
+      
+               this.updateSquareOfforderWithDesiredPrice( 
+                 cis,
+                 element,
+                 false,
+                 element.last_price
+                );
+      
+              break;
     
             case ( element.last_price<cis.pricePoints.d0.low ):
             msg = `STOP LOSS  EXECUTION SEND BY  DAILY  LOW STRATEGY FOR ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
@@ -108,6 +124,22 @@ methods:{
               );
     
             break;  
+
+
+            case (element.last_price<cis.sellersLowestPrice*.95):
+
+            let msg2 = `STOP LOSS  EXECUTION SEND BY last price less than .95 of buy price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `
+         
+            this.flashMessage=msg2;
+            this.cl( msg2 )
+   
+            this.updateSquareOfforderWithDesiredPrice( 
+              cis,
+              element,
+              false,
+              element.last_price
+             );
+            break;
             
             case (cis && cis.minuteCandle &&  element.last_price<cis.minuteCandle.lastHigh*.95 ) :
            let msg1 = `STOP LOSS  EXECUTION SEND BY  last price  less than last hourly high price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `

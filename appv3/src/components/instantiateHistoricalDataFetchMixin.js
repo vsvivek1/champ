@@ -97,6 +97,8 @@ export default {
             let close=lastHour.close
             let open=lastHour.open
   let high=Math.max(close,open)
+
+high=lastHour.high;
             return high;
           }else{
 
@@ -170,7 +172,7 @@ let minuteCandle={};
 
       let h2=await this.getHourlyData(symbol)
 
-      minuteCandle.lastHigh=h2||h1;
+      minuteCandle.lastHigh=h2//||h1;
     
 
       

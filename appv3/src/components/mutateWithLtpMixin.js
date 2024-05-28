@@ -57,6 +57,9 @@ const mutateWithLtp = {
        
         if (hasLivePositionFromcis && hasLivetargetFromcis) {
 
+
+
+
           ////proceed for stop losss 
           this.stopLossTargetSwitch(quantity, last_price, high, low, bidPrice, offerPrice, cis, element, livePnlOffered, lpCurrent);
         } else {
@@ -285,7 +288,14 @@ this.$set(cis,'movingAverage',ma)
             return false;
           }
           
-          
+         let lastSeenHigh=cis.lastSeenHigh;
+         
+
+         if(!lastSeenHigh|| element.last_price>lastSeenHigh){
+
+          this.$set(cis,'lastSeenHigh',element.last_price);
+         }
+         
   
 
 
@@ -311,6 +321,34 @@ this.$set(cis,'movingAverage',ma)
           let hasLivePositionFromcis = cis.hasLivePosition;
   
           this.tradeEntryFlowStatus = 'HAS LIVE POSITION CHECK 7';
+
+if(hasLivetargetFromcis && hasLivePositionFromcis){
+
+let condition=
+
+    element.last_price<element.ohlc.open
+/* || element.last_price <cis.lastBuyPrice-10
+|| element.last_price <cis.lastBuyPrice*.95 */
+|| element.last_price <cis.lastSeenHigh*.90
+
+
+if(condition){
+
+ let  msgx = `SL HIT UPFRONT FROM MUTATE FOR  ${ cis.tradingsymbol } @ ${ last_price }  ON ${ Date() } `
+  this.cl( msgx )
+
+  this.flashMessage=msgx;
+
+  this.updateSquareOfforderWithDesiredPrice( 
+    cis,
+    element,
+    false,
+    element.last_price
+   );
+}
+
+}
+
   
           if (hasLivePositionFromcis) {
 

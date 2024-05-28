@@ -4310,12 +4310,12 @@ this.cl( 'low hit already hit for %s, so no trade ',cis.tradingsymbol )
           
           let obj={
             
-            "NIFTY":72,
+            "NIFTY":72/2,
             
            // "BANKNIFTY":60,
-            "BANKNIFTY":60,
-            'MIDCPNIFTY':56,
-            "FINNIFTY":40
+            "BANKNIFTY":60/3,
+            'MIDCPNIFTY':56/2,
+            "FINNIFTY":40/2
           }
 
           let multiplier = 1;

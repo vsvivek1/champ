@@ -18,6 +18,11 @@ export default {
 
         socket.on( "order_update", async ( order )  => { 
 
+
+
+
+            ///// 
+
             if ( order.transaction_type=='BUY' &&
                 
                 order.status === "COMPLETE" && order.exchange == "NFO" && order.pending_quantity === 0) {
@@ -29,16 +34,26 @@ export default {
                   
                   
                     this.instruAll.find(i => i.instrument_token == order.instrument_token);
-                   // this.placeTargetsForLiveScripts();
+                  
+                  /*   let hasLivetargetFromcis = cis.hasLiveTarget;
+                    let hasLivePositionFromcis = cis.hasLivePosition; */
+                  this.$set(cis,'hasLiveTarget',true)
+                  this.$set(cis,'hasLivePosition',true)
+
+                  this.$set(cis,'lastBuyPrice',order.price);
+                  this.$set(cis,'lastSeenHigh',order.price);
+
+
+                    // this.placeTargetsForLiveScripts();
                    
 
                    let targetPoint;
                    if(cis.tick){
-                    targetPoint=cis.tick.last_price+5
+                    targetPoint=cis.tick.last_price+10
 
                    }else{
 
-                    targetPoint= order.price+5
+                    targetPoint= order.price+10
                    }
               
                   
@@ -75,6 +90,7 @@ if(cis){
     this.$set(cis,'noTradingNow',false)
     this.$set(cis, 'hasLivePosition', false);
     this.$set(cis, 'hasLiveTarget', false);
+    this.$set(cis, 'lastSeenHigh', -1);
 }
 
                     

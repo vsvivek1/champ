@@ -49,7 +49,7 @@ let filtered= jsonArray.filter(item => {
       //console.log(item.expiry)
 
      // const nextThursday = new Date(today.getTime() + (14 - today.getDay() + 4) % 7 * 24 * 60 * 60 * 1000); // Calculate next Thursday
-      const nextThursday =new Date('2024-06-03');
+      const nextThursday =new Date(getPreviousDayOfNextWeek());
         const expiryDate = new Date(item.expiry);
         // return expiryDate<=nextThursday;
          return expiryDate<=nextThursday;
@@ -62,5 +62,21 @@ let filtered= jsonArray.filter(item => {
    process.exit() */
    return filtered;
 }
+
+
+function getPreviousDayOfNextWeek() {
+   const today = new Date();
+   const currentDayOfWeek = today.getDay(); // 0 (Sun) to 6 (Sat)
+ 
+   // Calculate the same day next week
+   const sameDayNextWeek = new Date(today);
+   sameDayNextWeek.setDate(today.getDate() + 7);
+ 
+   // Subtract one day to get the previous day
+   const previousDayOfNextWeek = new Date(sameDayNextWeek);
+   previousDayOfNextWeek.setDate(sameDayNextWeek.getDate() - 1);
+ 
+   return previousDayOfNextWeek;
+ }
 exports.getScriptsExpiringBeforeNextThursday = getScriptsExpiringBeforeNextThursday;
 exports.getScriptsExpiringToday= getScriptsExpiringToday;
