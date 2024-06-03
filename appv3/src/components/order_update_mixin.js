@@ -48,15 +48,23 @@ export default {
                    
 
                    let targetPoint;
-                   if(cis.tick){
-                    targetPoint=cis.tick.last_price+10
+                 /*   if(cis.tick && cis.tick.last_price!=0){
+                    targetPoint=cis.tick.last_price+5
 
-                   }else{
+                   }else{ */
 
-                    targetPoint= order.price+10
-                   }
+                    targetPoint= order.price+5
+
+                    //debugger;
+                  /*  */// }
               
-                  
+                 
+
+/* if(cis.lowCandleEntry){
+
+    targetPoint=cis.lowCandleEntryTarget;
+} */
+
                  let  livePnl=0;
                    let product='NRML'
                    let transaction_type='SELL';
@@ -91,6 +99,14 @@ if(cis){
     this.$set(cis, 'hasLivePosition', false);
     this.$set(cis, 'hasLiveTarget', false);
     this.$set(cis, 'lastSeenHigh', -1);
+
+    if(cis.lowCandleEntry){
+
+        this.$set(cis,'lowCandleEntry',false);
+    this.$set(cis,'lowCandleEntryTarget','');
+    this.$set(cis,'lowCandleEntryStopLoss','');
+    }
+  
 }
 
                     

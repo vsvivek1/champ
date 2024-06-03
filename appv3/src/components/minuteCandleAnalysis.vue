@@ -13,12 +13,15 @@
 			<th>Has Live Position</th>
 			<th>No Trading Now</th>
 			<th>Candle Details</th>
+			<th>Lower tail points</th>
 		  </tr>
 		</thead>
 		<tbody>
 		  <tr v-for="(instrument, index) in instruments" :key="index">
 			<td :style="{ backgroundColor: calculateBackgroundColor(instrument) }">
 				
+
+<!-- 				<a :href="instrument.chart">india india</a> -->
 <button @click="gotoChart(instrument.chart)">{{ instrument.tradingsymbol }}</button>
 			
 		
@@ -37,9 +40,15 @@
 				
 				Yday High: {{ instrument.pricePoints.d1.high }} <hr>
 				LAst high :{{instrument.minuteCandle?instrument.minuteCandle.lastHigh:-1 }}
-			
+			LP>Do Open :{{ instrument.last_price > instrument.pricePoints.d0.open }}
 			</td>
-			<td>{{ instrument.last_price > instrument.pricePoints.d0.open }}</td>
+		
+		
+			<td>
+				{{ instrument.livePositions }}
+				{{ instrument.liveOrders }}
+
+			</td>
 			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0">
 			  {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].close }} price
 			  {{ instrument.minuteCandle.data[instrument.minuteCandle.data.length - 1].IST }}
@@ -49,8 +58,28 @@
 			<td>{{ instrument.noTradingNow }}</td>
 			<td v-if="instrument.minuteCandle && instrument.minuteCandle.data.length > 0 && instrument.minuteCandle.signal && instrument.minuteCandle.signal.signal">
 			  {{ instrument.minuteCandle.signal.signal }}
+
+
+			Sp  {{ 	instrument.minuteCandle.lowerShadowPoints }}
 			</td>
+
 			<td v-else>N/A</td>
+			<td 
+			
+			
+			colspan="8" class="text-center">
+			
+		<span v-if="instrument.minuteCandle">	{{ 
+			
+			instrument.minuteCandle.lowerShadowPoints
+			
+			
+			}}
+			</span>
+			
+		
+		</td>
+
 		  </tr>
 		  <tr v-if="instruments.length === 0">
 			<td colspan="8" class="text-center">No data available</td>
@@ -80,7 +109,8 @@
 	methods: {
 		gotoChart(chart){
 
-			//window.location.href=chart
+			window.open(chart, '_blank');
+	
 		},
 	  calculateBackgroundColor(instrument) {
 

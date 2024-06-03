@@ -7,8 +7,12 @@ export default {
 
   mounted(){
 
-  
-
+    this.fetchingMinuteCandle=true
+        this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
+        
+       let  symbolList=[...this.instrumentTokens];
+       this.initiateHistoricalDataFetch(symbolList);
+       this.fetchingMinuteCandle=false;
     setInterval(()=>{
 
 
@@ -20,7 +24,7 @@ export default {
       //console.log('completed',this.completed,'this.seconds,',this.seconds);
       
 
-      if(this.completed && this.seconds%5==0){
+      if(this.completed && this.seconds%2==0){
 
         this.fetchingMinuteCandle=true
         this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
@@ -84,7 +88,15 @@ export default {
 
         let  intervel = '60minute';
           let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
-          let resultPromise =  await  axios.get( url );
+          let resultPromise
+          
+         try {
+           resultPromise =  await  axios.get( url );
+         } catch (error) {
+          
+          console.log(error,'hourly data @97 instatmtiitate')
+          this.$router.go()
+         }
 
       
      
@@ -110,6 +122,8 @@ high=lastHour.high;
 
         async getHistoricalDataForCustomDuration( intervel='minute',symbol ){ 
 
+
+
             let start  = this.getRequiredTime( 9,15 );
 
             let date=new Date();
@@ -124,8 +138,18 @@ high=lastHour.high;
              intervel = 'minute';
             let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
       
-    
-let tradingsymbol=this.instruments.find(i=>i.instrument_token==symbol).tradingsymbol
+    let cs=this.instruments.find(i=>i.instrument_token==symbol)||this.instruAll.find(i=>i.instrument_token==symbol) ;
+
+    if(cs){
+      let tradingsymbol=cs.tradingsymbol
+
+    }else{
+
+
+      debugger;
+      return;
+    }
+
 
     
             // console.log(this.instruments,'ins')
@@ -133,7 +157,16 @@ let tradingsymbol=this.instruments.find(i=>i.instrument_token==symbol).tradingsy
             //  console.log( url,'utl' )
 
       //  return;
-      let resultPromise =  await  axios.get( url );
+      let resultPromise
+      
+    try {
+        resultPromise =  await  axios.get( url );
+    } catch (error) {
+      
+      console.log(error,'error axios @158 instantiate')
+
+      this.$router.go()
+    }
 
       
      
@@ -172,7 +205,18 @@ let minuteCandle={};
 
       let h2=await this.getHourlyData(symbol)
 
-      minuteCandle.lastHigh=h2//||h1;
+      let {lowest,highest,highestClose}=this. findHighestAndLowest(data);
+
+     // minuteCandle.lastHigh=h2//||h1;
+      //minuteCandle.lastHigh=highest//||h1;
+      //minuteCandle.lastHigh=highestClose//||h1;
+      minuteCandle.lastHigh=h2;///||h1;
+
+
+      minuteCandle.lowerShadowPoints=this.getCandleSupportResistancePoints(data);
+
+
+    // 9747706204
     
 
       

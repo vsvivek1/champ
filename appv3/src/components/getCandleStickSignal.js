@@ -4,23 +4,44 @@ export default{
 methods:{
 
  findHighestAndLowest (ohlcArray){
-    if (ohlcArray.length === 0) {
+
+
+    if (!ohlcArray || ohlcArray.length === 0|| !Array.isArray(ohlcArray)) {
       return { highest: null, lowest: null };
     }
   
     let highest = ohlcArray[0].high;
     let lowest = ohlcArray[0].low;
+
+    let highestClose=ohlcArray[0].close;
   
-    ohlcArray.forEach(({ high, low }) => {
-      if (high > highest) {
-        highest = high;
-      }
-      if (low < lowest) {
-        lowest = low;
-      }
-    });
+   // ohlcArray.splice(0,ohlcArray.length/3).forEach(({ high, low }) => {
+    //ohlcArray.splice(0,ohlcArray.length).forEach(({ high, low,close,open }) => {
+   try {
+     ohlcArray.forEach(({ high, low,close,open }) => {
+ 
+      /*  if(ohlcArray.length<10){
+ ///highs and lows before 10 minutes only
+         return;
+       } */
+ 
+       if (close > highestClose) {
+         highestClose = close;
+       }
+ 
+       if (high > highest) {
+         highest = high;
+       }
+       if (low < lowest) {
+         lowest = low;
+       }
+     });
+   } catch (error) {
+    
+    debugger;
+   }
   
-    return { highest, lowest };
+    return { highest, lowest,highestClose };
   },
   
 /*   const result = findHighestAndLowest(ohlcArray);
@@ -28,7 +49,38 @@ methods:{
   console.log(`Lowest point till now: ${result.lowest}`);
    */
 
+
+  getCandleSupportResistancePoints(ohlcData){
+   if(!ohlcData|| !Array.isArray(ohlcData)){
+
+    return []
+   }
+
+    let longTails=ohlcData.filter(o=>{
+
+let lowerShadowPoints=Math.min(o.open,o.close)-o.low;
+
+let body=Math.abs(o.open-o.close);
+
+//console.log({body},{lowerShadowPoints})
+if(lowerShadowPoints>body*10){
+
+return true;
+
+}
+
+   
+    }).map(o1=>Math.floor(o1.low)).sort((a,b)=>a-b);
+
+    return longTails;
+
+  },
 calculateHighestPrice(ohlcData) {
+
+  if(ohlcData || ohlcData.length==0){
+
+    return;
+  }
     // Get the current time
 
 
@@ -104,292 +156,119 @@ calculateHighestPrice(ohlcData) {
     return indianTimeString;
   },
   
-  getCandlestickSignal(obj, ts='') {
-    if (typeof obj == 'undefined') {
+ getCandlestickSignal(obj, ts = '') {
+    if (typeof obj === 'undefined') {
         console.log(obj, 'data inside getCandleSignal Undefined');
         return 'EntryCheckForSignalFailed';
     }
 
-    let ohlcData = obj;
+    const ohlcData = obj;
 
-    if (typeof ohlcData[ohlcData.length - 1] == 'undefined') {
+    if (typeof ohlcData[ohlcData.length - 1] === 'undefined') {
         return 'ohlcDataNotSufficient';
     }
 
-    let lastCandleOffset = 1;
+    const lastCandleOffset = 1;
+
+    if (ohlcData.length < 3) {
+        console.error('Insufficient OHLC data');
+        return { candleColor: this.getCandleColor(ohlcData[ohlcData.length - lastCandleOffset]), signal: 'Insufficient OHLC data' };
+    }
 
     const { open, high, low, close } = ohlcData[ohlcData.length - lastCandleOffset];
     const bodySize = Math.abs(close - open);
     const upperShadowSize = high - Math.max(open, close);
     const lowerShadowSize = Math.min(open, close) - low;
-    const CandleColor = close - open > 0 ? 'GreenCandle' : 'RedCandle';
+    const candleColor = this.getCandleColor({ open, close });
 
-    if (ohlcData.length < 3) {
-        console.error('Insufficient OHLC data');
-        return { candleColor: CandleColor, signal: 'Insufficient OHLC data' };
-    }
+    const prevCandle = ohlcData[ohlcData.length - lastCandleOffset - 1];
+    const prev2Candle = ohlcData[ohlcData.length - lastCandleOffset - 2];
 
-    const { prevOpen, prevHigh, prevLow, prevClose } = ohlcData[ohlcData.length - lastCandleOffset - 1];
+    const signalData = { candleColor, target: null, stoploss: null };
 
-    if (lowerShadowSize > bodySize * 2 && upperShadowSize < lowerShadowSize) {
-        return { candleColor: CandleColor, signal: 'longTail', target: high + (high - low) / 2, stoploss: low - (high - low) / 2 };
-    }
-    else if (close > open && prevClose > prevOpen && close > prevOpen && open < prevClose) {
-        return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-    }
-    else if (close < open && prevClose < prevOpen && close < prevOpen && open > prevClose) {
-        return { candleColor: CandleColor, signal: 's', target: low - (high - low), stoploss: high + (high - low) };
-    }
-    else if (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && close > open && upperShadowSize >= 2 * bodySize && lowerShadowSize <= bodySize / 2) {
-        return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-    }
-    else if (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && open > close && lowerShadowSize >= 2 * bodySize && upperShadowSize <= bodySize / 2) {
-        return { candleColor: CandleColor, signal: 's', target: low - (high - low), stoploss: high + (high - low) };
-    }
-    else if (ohlcData.length >= 3) {
-        const { prev2Open, prev2High, prev2Low, prev2Close } = ohlcData[ohlcData.length - lastCandleOffset - 2];
-        if (prev2Close < prev2Open && bodySize < Math.abs(prev2Close - prev2Open) / 2 && close > open && prevClose < prevOpen) {
-            return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-        }
-    }
-    else if (ohlcData.length >= 3) {
-        const { prev2Open, prev2High, prev2Low, prev2Close } = ohlcData[ohlcData.length - lastCandleOffset - 2];
-        if (prev2Close > prev2Open && bodySize < Math.abs(prev2Close - prev2Open) / 2 && open > close && prevClose > prevOpen) {
-            return { candleColor: CandleColor, signal: 's', target: low - (high - low), stoploss: high + (high - low) };
-        }
-    }
-    else if (close > open && prevClose < prevOpen && close > prevOpen && open < prevClose && close >= (prevOpen + prevClose) / 2) {
-        return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-    }
-    else if (close < open && prevClose > prevOpen && close < prevOpen && open > prevClose && close <= (prevOpen + prevClose) / 2) {
-        return { candleColor: CandleColor, signal: 's', target: low - (high - low), stoploss: high + (high - low) };
-    }
-    else if (bodySize < Math.abs(prevClose - prevOpen) / 2 && close > open && prevClose > prevOpen && close < prevOpen && open > prevClose) {
-        return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-    }
-    else if (ohlcData.length >= 3) {
-        const { prev2Open, prev2High, prev2Low, prev2Close } = ohlcData[ohlcData.length - lastCandleOffset - 2];
-        if (
-            prev2Close < prev2Open &&
-            prevClose < prevOpen &&
-            close > open &&
-            prevClose < open &&
-            prev2Close < open &&
-            close > (prevOpen + prevClose) / 2 &&
-            open > (prev2Open + prev2Close) / 2
-        ) {
-            return { candleColor: CandleColor, signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-        }
-    }
-    else if (ohlcData.length >= 3) {
-        const { prev2Open, prev2High, prev2Low, prev2Close } = ohlcData[ohlcData.length - lastCandleOffset - 2];
-        if (
-            prev2Close > prev2Open &&
-            prevClose > prevOpen &&
-            close < open &&
-            prevClose > open &&
-            prev2Close > open &&
-            close < (prevOpen + prevClose) / 2 &&
-            open < (prev2Open + prev2Close) / 2
-        ) {
-            return { candleColor: CandleColor, signal: 's', target: low - (high - low), stoploss: high + (high - low) };
-        }
+    if (close === high) {
+        signalData.signal = 'marbuzuo';
+        signalData.target = low - (high - low);
+        signalData.stoploss = high + (high - low);
+        return signalData;
     }
 
-    return { candleColor: CandleColor, signal: 'No signal detected' };
-}
-
-  
-
+   // debugger;
+    switch (true) {
+        case (lowerShadowSize > bodySize * 2 && upperShadowSize < lowerShadowSize):
+            signalData.signal = 'longTail';
+            signalData.target = high + (high - low) / 2;
+            signalData.stoploss = low - (high - low) / 2;
+            break;
+        case (close > open && prevCandle.close > prevCandle.open && close > prevCandle.open && open < prevCandle.close):
+            signalData.signal = 'b';
+            signalData.target = high + (high - low);
+            signalData.stoploss = low - (high - low);
+            break;
+        case (close < open && prevCandle.close < prevCandle.open && close < prevCandle.open && open > prevCandle.close):
+            signalData.signal = 's';
+            signalData.target = low - (high - low);
+            signalData.stoploss = high + (high - low);
+            break;
+        case (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && close > open && upperShadowSize >= 2 * bodySize && lowerShadowSize <= bodySize / 2):
+            signalData.signal = 'b';
+            signalData.target = high + (high - low);
+            signalData.stoploss = low - (high - low);
+            break;
+        case (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && open > close && lowerShadowSize >= 2 * bodySize && upperShadowSize <= bodySize / 2):
+            signalData.signal = 's';
+            signalData.target = low - (high - low);
+            signalData.stoploss = high + (high - low);
+            break;
+        case (prev2Candle.close < prev2Candle.open && bodySize < Math.abs(prev2Candle.close - prev2Candle.open) / 2 && close > open && prevCandle.close < prevCandle.open):
+            signalData.signal = 'b';
+            signalData.target = high + (high - low);
+            signalData.stoploss = low - (high - low);
+            break;
+        case (prev2Candle.close > prev2Candle.open && bodySize < Math.abs(prev2Candle.close - prev2Candle.open) / 2 && open > close && prevCandle.close > prevCandle.open):
+            signalData.signal = 's';
+            signalData.target = low - (high - low);
+            signalData.stoploss = high + (high - low);
+            break;
+        case (close > open && prevCandle.close < prevCandle.open && close > prevCandle.open && open < prevCandle.close && close >= (prevCandle.open + prevCandle.close) / 2):
+            signalData.signal = 'b';
+            signalData.target = high + (high - low);
+            signalData.stoploss = low - (high - low);
+            break;
+        case (close < open && prevCandle.close > prevCandle.open && close < prevCandle.open && open > prevCandle.close && close <= (prevCandle.open + prevCandle.close) / 2):
+            signalData.signal = 's';
+            signalData.target = low - (high - low);
+            signalData.stoploss = high + (high - low);
+            break;
+        case (bodySize < Math.abs(prevCandle.close - prevCandle.open) / 2 && close > open && prevCandle.close > prevCandle.open && close < prevCandle.open && open > prevCandle.close):
+            signalData.signal = 'b';
+            signalData.target = high + (high - low);
+            signalData.stoploss = low - (high - low);
+            break;
+        case (prev2Candle.close < prev2Candle.open && prevCandle.close < prevCandle.open && close > open && prevCandle.close < open && prev2Candle.close < open && close > (prevCandle.open + prevCandle.close) / 2 && open > (prev2Candle.open + prev2Candle.close) / 2):
+            signalData.signal = 'b';
+            signalData.target = high + (high - low);
+            signalData.stoploss = low - (high - low);
+            break;
+        case (prev2Candle.close > prev2Candle.open && prevCandle.close > prevCandle.open && close < open && prevCandle.close > open && prev2Candle.close > open && close < (prevCandle.open + prevCandle.close) / 2 && open < (prev2Candle.open + prev2Candle.close) / 2):
+            signalData.signal = 's';
+            signalData.target = low - (high - low);
+            signalData.stoploss = high + (high - low);
+            break;
+        default:
+            signalData.signal = 'No signal detected in the end';
+            break;
+    }
+   // debugger;
+    return signalData;
 },
+
+getCandleColor({ open, close }) {
+    return close - open > 0 ? 'GreenCandle' : 'RedCandle';
 }
-/* function convertToIndianTime(utcTimeString) {
-  // Create a Date object from the UTC time string
-  const utcDate = new Date(utcTimeString);
-
-  // Set the time zone to Indian Standard Time (IST)
-  const options = { timeZone: 'Asia/Kolkata' };
-
-  // Format the date and time using IST
-  const indianTimeString = utcDate.toLocaleString('en-IN', options);
-
-  return indianTimeString;
-} */
-/* function getCandlestickSignal(obj,ts) {
-
-  //console.log(obj,'obj')
-
-  //let cis=this.instruments.find(i=>i.instrument_token==)
-
-  if(
-    typeof obj=='undefined' 
-    
-     
-    
-    
-    ){
-
-    console.log(obj,'data inside getCandleSignal Undefined')
-      return 'EntryCheckForSignalFailed';
-    }
-
-  //let minuteCandle=obj['minuteCandle']
 
   
 
 
-let ohlcData=obj
-
-//console.log(ohlcData,'od')
-//let ts=obj.tradingsymbol
-if(typeof ohlcData[ohlcData.length-1]=='undefined'){
-
- 
-  return 'ohlcDataNotSufficient'
 }
-  // console.log(ohlcData,'ohlcData')
-
-  let lastCandleOffset=1;
-
-  let indiantime=convertToIndianTime(ohlcData[ohlcData.length-lastCandleOffset].date);
-
-  //console.log({indiantime});
-  const {open, high, low, close} = ohlcData[ohlcData.length - lastCandleOffset];
-  
-  const bodySize = Math.abs(close - open);
-  const upperShadowSize = high - Math.max(open, close);
-  const lowerShadowSize = Math.min(open, close) - low;
-  const CandleColor=close-open>0?'GreenCandle':'RedCandle';
-
-    // console.log('funtion called f1',ohlcData);
-    if (ohlcData.length < 3) {
-      console.error('Insufficient OHLC data');
-      return { candleColor:CandleColor,signal: 'Insufficient OHLC data' };
-    }
-  
-    // console.log('funtion called',ohlcData[ohlcData.length - 2]);
-
-
-    const {prevOpen, prevHigh, prevLow, prevClose} = ohlcData[ohlcData.length - lastCandleOffset-1];
-  
-
-    // console.log('funtion called f3');
-
-    // console.log(lowerShadowSize,'lowerShadowSize')
-    // print(lowerShadowSize,'lowerShadowSize')
-
-
-
-    if(lowerShadowSize>bodySize*2 && upperShadowSize<lowerShadowSize){
-
-      //console.log('long tail for',ts);
-      return { candleColor:CandleColor,signal: 'longTail', target: high + (high - low)/2, stoploss: low - (high - low)/2 };
-    }
-  
-    // Bullish Engulfing
-  else  if (close > open && prevClose > prevOpen && close > prevOpen && open < prevClose) {
-      return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-    }
-  
-    // Bearish Engulfing
-   else  if (close < open && prevClose < prevOpen && close < prevOpen && open > prevClose) {
-      return { candleColor:CandleColor,signal: 's', target: low - (high - low), stoploss: high + (high - low) };
-    }
-  
-    // Hammer
-   else if (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && close > open && upperShadowSize >= 2 * bodySize && lowerShadowSize <= bodySize / 2) {
-      return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-    }
-  
-    // Shooting Star
-  else  if (bodySize < Math.min(upperShadowSize, lowerShadowSize) / 2 && open > close && lowerShadowSize >= 2 * bodySize && upperShadowSize <= bodySize / 2) {
-      return { candleColor:CandleColor,signal: 's', target: low - (high - low), stoploss: high + (high - low) };
-    }
-  
-    // Morning Star
-    else if (ohlcData.length >= 3) {
-      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - lastCandleOffset-2];
-      if (prev2Close < prev2Open && bodySize < Math.abs(prev2Close - prev2Open) / 2 && close > open && prevClose < prevOpen) {
-        return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-      }
-    }
-  
-
-   
-    // Evening Star
-   else  if (ohlcData.length >= 3) {
-      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - lastCandleOffset-2];
-      if (prev2Close > prev2Open && bodySize < Math.abs(prev2Close - prev2Open) / 2 && open > close && prevClose > prevOpen) {
-        return { candleColor:CandleColor,signal: 's', target: low - (high - low), stoploss: high + (high - low) };
-      }
-    }
-  
-    // Piercing Pattern
-   else  if (close > open && prevClose < prevOpen && close > prevOpen && open < prevClose && close >= (prevOpen + prevClose) / 2) {
-      return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-    }
-  
-    // Dark Cloud Cover
-   else  if (close < open && prevClose > prevOpen && close < prevOpen && open > prevClose && close <= (prevOpen + prevClose) / 2) {
-      return { candleColor:CandleColor,signal: 's', target: low - (high - low), stoploss: high + (high - low) };
-    }
-  
-    // Harami
-    else if (bodySize < Math.abs(prevClose - prevOpen) / 2 && close > open && prevClose > prevOpen && close < prevOpen && open > prevClose) {
-      return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-    }
-  
-    // Three White Soldiers
-   else  if (ohlcData.length >= 3) {
-      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - lastCandleOffset-2];
-      if (
-        prev2Close < prev2Open &&
-        prevClose < prevOpen &&
-        close > open &&
-        prevClose < open &&
-        prev2Close < open &&
-        close > (prevOpen + prevClose) / 2 &&
-        open > (prev2Open + prev2Close) / 2
-      ) {
-        return { candleColor:CandleColor,signal: 'b', target: high + (high - low), stoploss: low - (high - low) };
-      }
-    }
-  
-    // Three Black Crows
-   else  if (ohlcData.length >= 3) {
-      const {prev2Open, prev2High, prev2Low, prev2Close} = ohlcData[ohlcData.length - lastCandleOffset-2];
-      if (
-        prev2Close > prev2Open &&
-        prevClose > prevOpen &&
-        close < open &&
-        prevClose > open &&
-        prev2Close > open &&
-        close < (prevOpen + prevClose) / 2 &&
-        open < (prev2Open + prev2Close) / 2
-      ) {
-        return { candleColor:CandleColor,signal: 's', target: low - (high - low), stoploss: high + (high - low) };
-      }
-    } else{
-
-    return { candleColor:CandleColor,signal: 'No signal detected', };
-
-    }
-    // console.log('funtion called f5');
-  }
-   */
-  // Example usage:
-  // const ohlcData = [
-  //   /* Your OHLC data for the previous day */,
-  //   /* Your OHLC data for the current day */
-  // ];
-
-  
-  // const candlestickSignal = getCandlestickSignal(ohlcData);
-  // console.log(`Candlestick Signal: ${candlestickSignal.signal}`);
-  // console.log(`Target: ${candlestickSignal.target}`);
-  // console.log(`Stop Loss: ${candlestickSignal.stoploss}`);
-
-  //export default getCandlestickSignal;
-
-//   =getCandlestickSignal;
-  
+}

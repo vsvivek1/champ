@@ -332,7 +332,7 @@ let condition=
 || element.last_price <cis.lastSeenHigh*.90
 
 
-if(condition){
+if(condition && !cis.lowCandleEntry){
 
  let  msgx = `SL HIT UPFRONT FROM MUTATE FOR  ${ cis.tradingsymbol } @ ${ last_price }  ON ${ Date() } `
   this.cl( msgx )

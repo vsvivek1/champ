@@ -88,9 +88,11 @@ socket.on( "connect_error",async  ( err )  => {
 
     console.log( `connect_error due to ${ err } ` );
 
-    setTimeout(()=>{
-console.clear()
+    
 
+    setTimeout(()=>{
+//console.clear()
+location.reload();
     },3000)
 
    // await this.setInstruments()
@@ -149,6 +151,64 @@ var cl;
 
 
         this.instruments=instruments;
+
+        this.instruments.forEach(e=>{
+
+          this.$set(e,'livePositions',[]);
+          this.$set(e,'liveOrders',[]);
+          this.$set(e,'liveTarget',-1);
+          this.$set(e,'liveStopLoss',-1);
+        })
+
+        setInterval(async()=>{
+
+
+          let body={};
+          body.accessToken=this.accessToken;
+          let url  =  "/api/getPositions";
+         
+      let pos= await  axios.post(url,body).then(res=>res.data);
+       url  =  "/api/getOrdersPost";
+      let orders1= await  axios.post(url,body).then(res=>res.data);
+      let orders=orders1.filter(o=>o.status='OPEN')
+
+      orders.forEach((o)=>{
+
+        let cis=this.instruments.find(c=>c.instrument_token==o.instrument_token);
+if(cis){
+
+  this.$set(cis,'liveOrder',o);
+}
+ 
+
+      })
+     /*  debugger; */
+     pos .day.find(d=>
+        d.quantity>0 &&
+        
+        d.exchange=='NFO');
+        
+        if(pos && pos.length>0){
+
+pos.forEach((e)=>{
+
+
+  let cis=this.instruments.find(c=>c.instrument_token==e.instrument_token);
+if(cis){
+  this.$set(cis,'livePositions',e);
+
+}
+
+
+})
+        }
+       
+        
+        
+       
+
+
+        },2*1000)
 
         console.log('TOTAL INSTRUMENTS',this.instruments.length)
 
@@ -3534,7 +3594,7 @@ new Promise( async ( res,rej ) =>{
       axios.post( '/api/FetchInstruments' )
       .then( async response  => { 
         this.instruments  =  response.data;
- instruments = this.instruments;
+/*  instruments = this.instruments; */
   await this.setInstrumentTokens()
 
   this.initiateHistoricalDataFetch(this.instrumentTokens )
@@ -3671,7 +3731,7 @@ new Promise( async ( res,rej ) =>{
 
 
 
- this.cl( res,'result of order placement' )
+ //this.cl( res,'result of order placement' )
 
 // this.$router.go();
 
@@ -4310,12 +4370,12 @@ this.cl( 'low hit already hit for %s, so no trade ',cis.tradingsymbol )
           
           let obj={
             
-            "NIFTY":72/2,
+            "NIFTY":72/3,
             
            // "BANKNIFTY":60,
             "BANKNIFTY":60/3,
-            'MIDCPNIFTY':56/2,
-            "FINNIFTY":40/2
+            'MIDCPNIFTY':56/3,
+            "FINNIFTY":40/4
           }
 
           let multiplier = 1;
@@ -4578,21 +4638,29 @@ console.log('reverse order desending  5')
 
            await this.placeOrder( orderArray );
          
-          this.$set( 
-            this.instruments.filter( 
-              ( i )  => i.instrument_token  ==  instrument_token
-             )[0],
-            "PlacedReverseOrderType",
-            "Target"
-           );
+
+           let ins=this.instruments.filter( 
+            ( i )  => i.instrument_token  ==  instrument_token
+           )[0];
+          
+          if(ins){
+
+            this.$set( 
+              ins,
+              "PlacedReverseOrderType",
+              "Target"
+             );
+
+
+             this.$set( 
+             ins,
+              "PlacedReverseOrder",
+              true
+             );
+          }
+          
      
-           this.$set( 
-            this.instruments.filter( 
-              ( i )  => i.instrument_token  ==  instrument_token
-             )[0],
-            "PlacedReverseOrder",
-            true
-           );
+          
      
 
            console.log('reverse order desending  -1')

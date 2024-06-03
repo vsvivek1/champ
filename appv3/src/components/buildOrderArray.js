@@ -4,7 +4,7 @@ export default{
   mounted(){
 
     console.log('instruments from mounted hook of build order arrat',this.instruments)
-    console.clear();
+   // console.clear();
 
     //this.instruments=instruments;
 
@@ -145,13 +145,13 @@ export default{
              } 
       
       
-             if (this.isAfterMarketHours()) {
+           /*   if (this.isAfterMarketHours()) {
               order.variety  =  "amo";
               console.log("Action should be executed.");
             } else {
               order.variety  =  "regular";
             }
-           
+            */
             order.variety  =  "regular";
             order.params  =  {} ;
             order.params.exchange  =  this.itype;

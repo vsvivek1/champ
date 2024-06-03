@@ -1,8 +1,25 @@
 import Vue from "vue";
 
 const TradeEntryMixin = {
+
+  data(){
+
+    return{
+belowDaysHighEntry:false,
+
+    }
+  },
   methods: {
 
+
+    checkNumberInArray(arr, num) {
+      // Calculate the ±2% range of the given number
+      const lowerBound = num * 0.98;
+      const upperBound = num * 1.02;
+  
+      // Check if any number in the array falls within the ±2% range
+      return arr.some(n => n >= lowerBound && n <= upperBound);
+  },
     setCis(cis,entry,entryStrategy,target,targetStrategy,stopLoss,stopLossStrategy){
 
 
@@ -99,6 +116,8 @@ try {
     //this.cl('LAST HOUR HIGH GREATER THAN LAST PRICE FOR',cis.tradingsymbol,'last hour high',cis.minuteCandle.lastHigh , element.last_price,'is the last price so returning')
 
 
+    this.shouldProceed=false;
+    return;
     }
   
     this.shouldProceed=false;
@@ -127,15 +146,40 @@ console.log(error,'here eror')
  */
 this.flashMessage='BEFORE ACTUAL TRADE SWITCH'+cis.tradingsymbol;
 
-let  { highest, lowest }=this.findHighestAndLowest (ohlcArray)
+let  { highest, lowest }=this.findHighestAndLowest (cis.minuteCandle.data)
+
+
+
 
 let lastPriceBelowDailyHigh=false;
 if(element.last_price<highest){
 
-this.flashMessage="LAST PRICE BELOW DAILY HIGH";
-lastPriceBelowDailyHigh=true;
-shouldProceed=false;
-return;
+if(cis.minuteCandle.lowerShadowPoints && 
+  
+
+
+this.checkNumberInArray(cis.minuteCandle.lowerShadowPoints, element.last_price)
+
+){
+
+  //alert('hi')
+  this.flashMessage="Low candle entry";
+  lastPriceBelowDailyHigh=false;
+  shouldProceed=true;
+
+
+  this.belowDaysHighEntry=true;
+ // return;
+}else{
+  this.flashMessage="LAST PRICE BELOW DAILY HIGH";
+  lastPriceBelowDailyHigh=true;
+  shouldProceed=false;
+  return;
+
+}
+
+
+//return;
 }
 
           switch (true) { 
@@ -144,6 +188,19 @@ return;
                   this.tradeEntryFlowStatus = 'Condition check for \'checkNiftyStatus\' not met no proceeding from shouldProceed ' + cis.tradingsymbol;
                   shouldProceed = false;
                   break; */
+
+case this.belowDaysHighEntry:
+
+
+
+console.log('LOW CANDLE ENTRY FOR ',cis.tradingsymbol)
+let sl=cis.minuteCandle.lowerShadowPoints.filter(i=>i<element.last_price)[0];
+let target=cis.minuteCandle.lowerShadowPoints.filter(i=>i>element.last_price)[0];
+  this.$set(cis,'lowCandleEntry',true);
+  this.$set(cis,'lowCandleEntryTarget',target);
+  this.$set(cis,'lowCandleEntryStopLoss',sl);
+  this.shouldProceed = true;
+break;
 
 
 case (

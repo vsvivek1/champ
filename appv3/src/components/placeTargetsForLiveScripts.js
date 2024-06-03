@@ -38,6 +38,16 @@ export default {
 
    },
 
+
+  async  getOrders(  ) { 
+    let url = "/api/getOrders/" + this.accessToken;
+
+ let o=  await  axios.get(url).then(res=>res.data)//.filter(a=>a.);
+     return o;
+ 
+
+    
+   },
 async getRawPositions(){
     let url  =  "/api/getPositions";
     let obj={}
@@ -68,7 +78,15 @@ async getRawPositions(){
 },
 
 async placeTargetsForLiveScripts(s = 'n') {
-    console.log('Point 10: Start of placeTargetsForLiveScripts');
+
+
+    let o=await this.getOrders(  );
+
+    let o1=o.filter(o2=>o2.transaction_type=='SELL' && 
+    o2.exchange=='NFO' && o2.status=='OPEN')
+    .map(b=>b.tradingsymbol);
+    
+   //debugger;
 
     if (!this.instruments) {
         console.log('Point 9: Instruments not available');
@@ -110,8 +128,9 @@ async placeTargetsForLiveScripts(s = 'n') {
             return false;
         }
 
-        console.log('Point 1: Retrieved position for instrument token', position.instrument_token);
 
+
+  
         let cis = this.instruments.find(i => i.instrument_token == position.instrument_token) ||
                   this.instruAll.find(i => i.instrument_token == position.instrument_token);
 
@@ -120,16 +139,24 @@ async placeTargetsForLiveScripts(s = 'n') {
             debugger;
             return;
         }
+        console.log('Point 1: Retrieved position for instrument token', cis.tradingsymbol);
 
+
+        if(o1.includes(cis.tradingsymbol)){
+            console.log('HAS LIVE REVERSE BUY ORDER FOR ',cis.tradingsymbol);
+           // this.placingReverseOrderInProgress = false;
+           // debugger;
+                        return;
+                    }
         if (!cis.pricePoints) {
             let url = `/api/pricePoints/${position.instrument_token}/accessToken/${this.accessToken}`;
             try {
                 let pp = await axios.get(url);
                 cis.pricePoints = pp.data;
-                console.log('Fetched price points from server for', position.instrument_token);
+                console.log('Fetched price points from server for', cis.tradingsymbol);
             } catch (error) {
                 console.log('Error fetching price points:', error);
-                this.placingReverseOrderInProgress = false;
+              //  this.placingReverseOrderInProgress = false;
                 return;
             }
         }
@@ -172,7 +199,7 @@ async placeTargetsForLiveScripts(s = 'n') {
                 return;
             }
         } else {
-            targetPoint = cis.minuteCandle.data[cis.minuteCandle.data.length - 1].high * 1.05;
+            targetPoint = cis.minuteCandle.data[cis.minuteCandle.data.length - 1].high +5;
             console.log('Used existing minuteCandle data to calculate targetPoint for', position.instrument_token);
         }
 
@@ -181,7 +208,7 @@ async placeTargetsForLiveScripts(s = 'n') {
         console.log('Reached before place target and stop loss for', position.instrument_token);
 if(isNaN(targetPoint)){
 
-    targetPoint=position.buy_price*1.05
+    targetPoint=position.buy_price+5
 
     console.log('GETTING REVERSE PRICE FROM POSITIONS ')
    // debugger;
@@ -201,9 +228,9 @@ if(isNaN(targetPoint)){
         console.log('Placed target and stop loss for', position.instrument_token);
 
         // Delay before the next iteration to prevent overlap
-        await this.delay(5000); // 5000ms delay between each iteration
+        await this.delay(3000); // 5000ms delay between each iteration
     }
-
+    this.placingReverseOrderInProgress = false;
     console.log('End of placeTargetsForLiveScripts');
     this.placingReverseOrderInProgress = false;
 }

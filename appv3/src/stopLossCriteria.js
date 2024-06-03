@@ -33,8 +33,46 @@ methods:{
       
 
        //this.fla
+
+/*        this.$set(cis,'lowCandleEntry',true);
+       this.$set(cis,'lowCandleEntryTarget',target);
+       this.$set(cis,'lowCandleEntryStopLoss',sl);
+ */
         switch ( true ) { 
 
+
+
+          case (false && cis && cis.minuteCandle && cis.lowCandleEntry && element.last_price<(cis.lowCandleEntryStopLoss*.8) ) :
+            let msg22 = `STOP LOSS  EXECUTION SEND BY  last price  less than last hourly high price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `
+              this.cl( msg22 )
+     
+
+              this.$set(cis,'lowCandleEntry',false);
+              this.$set(cis,'lowCandleEntryTarget','');
+              this.$set(cis,'lowCandleEntryStopLoss','');
+              this.updateSquareOfforderWithDesiredPrice( 
+                cis,
+                element,
+                false,
+                element.last_price
+               );
+     
+             break
+
+          case (cis && cis.minuteCandle &&  element.last_price<cis.minuteCandle.lastHigh*.8 && !cis.lowCandleEntry ) :
+           
+          
+          let msg1 = `STOP LOSS  EXECUTION SEND BY  last price  less than last hourly high price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `
+              this.cl( msg1 )
+     
+              this.updateSquareOfforderWithDesiredPrice( 
+                cis,
+                element,
+                false,
+                element.last_price
+               );
+     
+             break
  //check later
             /* case ( isGapDown && isOverNightScript && buyPriceGreaterThanTodaysOpen  ) :
     
@@ -97,8 +135,8 @@ methods:{
       
               break;
     
-            case ( element.last_price<cis.pricePoints.d0.low ):
-            msg = `STOP LOSS  EXECUTION SEND BY  DAILY  LOW STRATEGY FOR ${ cis.tradingsymbol }   for ${ last_price }  at ${ formattedTime } `
+            case ( element.last_price<cis.pricePoints.d0.low  && false):
+            msg = `STOP LOSS  EXECUTION SEND BY  DAILY  LOW STRATEGY FOR ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ Date() } `
              this.cl( msg )
     
              this.updateSquareOfforderWithDesiredPrice( 
@@ -141,18 +179,7 @@ methods:{
              );
             break;
             
-            case (cis && cis.minuteCandle &&  element.last_price<cis.minuteCandle.lastHigh*.95 ) :
-           let msg1 = `STOP LOSS  EXECUTION SEND BY  last price  less than last hourly high price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `
-             this.cl( msg1 )
-    
-             this.updateSquareOfforderWithDesiredPrice( 
-               cis,
-               element,
-               false,
-               element.last_price
-              );
-    
-            break;
+          ;
     
             /* case ( 
             

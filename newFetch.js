@@ -170,6 +170,11 @@ names.forEach(async (name)=>{
 
 let instruNameFeild=typeof indexOptions[name]=='undefined'?name:indexOptions[name];
 ;
+
+
+console.log(instruNameFeild,'instrummebts  name feild');
+
+//return;
 //var instruments=getUniqueInstruments(niftyBankNiftyBeforeNearestExpiry)
 
 
@@ -189,7 +194,7 @@ let instruNameFeild=typeof indexOptions[name]=='undefined'?name:indexOptions[nam
 
 
 
-console.log('THE NAME IS ',name,instruNameFeild)
+
 
 
 
@@ -221,18 +226,16 @@ var ltp=quote[indexInstrument.instrument_token]['last_price']
 
 var diff =calculateStrikeDifferences(expToday,name,ltp);
 
+console.log('THE NAME IS ',name,instruNameFeild,ltp,'diff',diff)
 
 
 
 
+let depth=3
+var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
+var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
 
 
-var strikeAbove=(Math.ceil(ltp/diff)*diff)
-var strikeBelow=(Math.floor(ltp/diff)*diff)
-
-/* console.log(strikeBelow,'above',indexInstrument.tradingsymbol);
-
-process.exit(); */
 
 var requiredAbove=strikeAbove//+diff;
 var requiredBelow=strikeBelow//-diff;
@@ -242,11 +245,17 @@ var requiredBelow=strikeBelow//-diff;
 }); */
 
 let callOptions = expToday.filter(option => {
-   return requiredAbove && option.instrument_type === 'CE' && parseInt(option.strike) == requiredAbove;
+
+  //console.log(option,'option')
+   return requiredAbove && option.name === name &&
+   
+   
+   option.instrument_type === 'CE' && parseInt(option.strike) == requiredAbove;
 });
 
 let putOptions = expToday.filter(option => {
-   return requiredBelow && option.instrument_type === 'PE' && parseInt(option.strike) == requiredBelow;
+   return requiredBelow && option.name === name &&
+    option.instrument_type === 'PE' && parseInt(option.strike) == requiredBelow;
 });
 /* let putOptions = niftyBankNiftyBeforeNearestExpiry.filter(option => {
    return requiredBelow && option.instrument_type === 'PE' && parseInt(option.strike) < requiredBelow;
@@ -255,7 +264,7 @@ let putOptions = expToday.filter(option => {
 // Sort options based on strike price
 
 
-callOptions.sort((a, b) => parseInt(b.strike) - parseInt(a.strike));
+callOptions.sort((a, b) => parseInt(a.strike) - parseInt(b.strike));
 putOptions.sort((a, b) => parseInt(b.strike) - parseInt(a.strike));
 
 // Select the nearest option in each category
