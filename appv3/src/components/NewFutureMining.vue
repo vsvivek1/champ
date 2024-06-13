@@ -1,6 +1,6 @@
 <template>
   <v-container fluid>
-
+    <NetworkStatus />
     <v-alert
     v-if="flashMessage"
       color="primary"
@@ -182,6 +182,7 @@ Show logs
 </template>
 
 <script>
+ import NetworkStatus from './NetworkStatus.vue';
 import NewFutureMining from './NewFutureMining.js'
 import h from './h.vue'
 import dataMixin from './dataMixinOfNewFutureMining.js'
@@ -202,7 +203,7 @@ export default {
             // Define the exitPositions method if not already defined
         }
     },
-    components: { h }
+    components: { h,NetworkStatus }
 }
 </script>
 

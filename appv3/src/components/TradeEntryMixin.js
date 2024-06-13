@@ -96,7 +96,21 @@ if( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='un
 
   this.flashMessage=`${cis.minuteCandle},'minute candle signal issue before switch issue for',${cis.tradingsymbol}`;
 
-  this.cl(cis.minuteCandle,'minute candle signal issue before switch issue for',cis.tradingsymbol)
+  console.log(cis.minuteCandle,'minute candle signal issue before switch issue for',cis.tradingsymbol)
+ 
+  if(! this.fetchingMinuteCandle){
+    setTimeout(() => {
+      this.fetchingMinuteCandle=true
+      this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
+      
+     let  symbolList=[...this.instrumentTokens];
+     this.initiateHistoricalDataFetch(symbolList);
+     this.fetchingMinuteCandle=false;
+    }, 20*1000);
+
+  }
+
+  //debugger;
   return;
 }else 
 
@@ -163,7 +177,7 @@ this.checkNumberInArray(cis.minuteCandle.lowerShadowPoints, element.last_price)
 ){
 
   //alert('hi')
-  this.flashMessage="Low candle entry";
+  this.flashMessage="Low candle entry for "+cis.tradingsymbol;
   lastPriceBelowDailyHigh=false;
   shouldProceed=true;
 
@@ -193,7 +207,7 @@ case this.belowDaysHighEntry:
 
 
 
-console.log('LOW CANDLE ENTRY FOR ',cis.tradingsymbol)
+console.log('LOW CANDLE ENTRY FOR ',cis.tradingsymbol,cis.lowCandleEntry)
 let sl=cis.minuteCandle.lowerShadowPoints.filter(i=>i<element.last_price)[0];
 let target=cis.minuteCandle.lowerShadowPoints.filter(i=>i>element.last_price)[0];
   this.$set(cis,'lowCandleEntry',true);

@@ -102,8 +102,9 @@ async function getKiteConnectInstance() {
 
    require('dotenv').config();
    const api_secret = process.env.api_secret;
-   const api_key = process.env.api_key;
-
+   //const api_key = process.env.api_key;
+   const api_key = 'wkcurst2vu5obug7';
+console.log(api_key,'api_key')
 
    var accessToken = await getTodaysAccessToken();
    const kite = new KiteConnect({

@@ -91,7 +91,7 @@
   
   <script>
   import getCandlestickSignalMixin from './getCandleStickSignal';
-  import mutateWithLtp from './mutateWithLtpMixin';
+  //import mutateWithLtp from './mutateWithLtpMixin';
   
   export default {
 	data() {
@@ -99,7 +99,7 @@
 		fetchingMinuteCandle: false,
 	  };
 	},
-	mixins: [getCandlestickSignalMixin, mutateWithLtp],
+	mixins: [getCandlestickSignalMixin],
 	props: {
 	  instruments: {
 		type: Array,

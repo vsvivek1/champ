@@ -466,8 +466,8 @@ console.log( e,'mis target error for ',tradingsymbol )
    
             let a  =  await this.placeOrder( orderArray );
    
-           // this.orderArray.push( orderArray );
-   
+            this.orderArray.push( orderArray );
+  
            console.log( 
              "order array inside tgtsl fn",
              JSON.stringify( this.orderArray )

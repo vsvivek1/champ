@@ -38,6 +38,21 @@ module.exports=function StartWebSockets(socket,io,access_token){
     
     
     
+
+    socket.on('json-updated',e=>{
+      
+      console.log('json updated')
+
+      //socket.emit('json-updated');
+      io.emit('json-updated',e)//emit to all
+    
+    
+      // socket.broadcast.emit('send-order',e) //emit to all exept tosender
+      // console.log('orderbook',e)
+    
+    });
+
+
     
     socket.on('order-book',e=>{
       

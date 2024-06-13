@@ -689,7 +689,7 @@ export default {
 
       if ( this.laggingCheckDigit  ==  this.CurrentCheckDigit ) { 
         this.webSocketNotActive  =  true;
-
+this.closeAndOpenNewTab();
         //reload window
 
         // this.$router.go(  );
@@ -786,6 +786,14 @@ try{
    } catch( e ){ 
 
     console.log( 'websocket error',e )
+
+    const currentURL = window.location.href;
+
+// Open a new tab with the same URL
+//window.open(currentURL, '_blank');
+
+// Close the current window
+//window.close();
    } 
 
     //   setInterval( async (  )  => { 

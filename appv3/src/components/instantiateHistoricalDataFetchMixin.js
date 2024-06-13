@@ -13,6 +13,8 @@ export default {
        let  symbolList=[...this.instrumentTokens];
        this.initiateHistoricalDataFetch(symbolList);
        this.fetchingMinuteCandle=false;
+
+       this.loopingAndFetching(symbolList,1);
     setInterval(()=>{
 
 
@@ -30,8 +32,8 @@ export default {
         this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
         
        let  symbolList=[...this.instrumentTokens];
-       this.initiateHistoricalDataFetch(symbolList);
-
+       this.initiateHistoricalDataFetch2(symbolList);
+       this.fetchingMinuteCandle=false
 
        
        
@@ -101,7 +103,7 @@ export default {
       
      
           let data=resultPromise.data;
-          let lastHour=data.pop();
+          let lastHour=data[data.length-1];
 //debugger;
           if(lastHour){
 
@@ -111,7 +113,13 @@ export default {
   let high=Math.max(close,open)
 
 high=lastHour.high;
-            return high;
+
+let out=data.reduce((max, obj) => obj.high > max ? obj.high : max, -Infinity);
+
+
+//debugger;
+            return out;
+           // return high;
           }else{
 
             return false
@@ -120,152 +128,153 @@ high=lastHour.high;
 
       },
 
-        async getHistoricalDataForCustomDuration( intervel='minute',symbol ){ 
+      async getHistoricalDataForCustomDuration(intervel = 'minute', symbol) {
 
+        if(typeof symbol=='undefined'){
 
+          return false;
+        }
+        let start = this.getRequiredTime(9, 15);
+        let date = new Date();
+        let minute = date.getMinutes();
+        let hour = date.getHours();
+        let end = this.getRequiredTime(hour, minute + 2);
+        intervel = 'minute';
+        
+        // Construct the URL and encode components
+        let url = `/api/getHistoricalData/symbol/${encodeURIComponent(symbol)}/accessToken/${encodeURIComponent(this.accessToken)}/start/${encodeURIComponent(start)}/end/${encodeURIComponent(end)}/intervel/${encodeURIComponent(intervel)}`;
+        
+        let cs = this.instruments.find(i => i.instrument_token == symbol) || this.instruAll.find(i => i.instrument_token == symbol);
+    
+        if (!cs) {
+            console.warn(`Symbol ${symbol} not found in instruments or instruAll from historic data fetch`);
+            return;
+        }
+    
+        let tradingsymbol = cs.tradingsymbol;
+        let resultPromise;
+        
+        try {
+            resultPromise = await axios.get(url);
+            if (typeof resultPromise === 'undefined') {
+                throw new Error('axios error');
+            }
+        } catch (error) {
 
-            let start  = this.getRequiredTime( 9,15 );
+          //window.location.reload(true);
+            console.error('Error fetching historical data:', error);
+            console.log('Issue URL:', url);
+            // Optional: additional error handling logic here
+            return;
+        }
+    
+        let data = resultPromise.data;
+    
+        if (!data || !symbol) {
+            return -1;
+        }
+    
+        let obj = this.instruments.find(i => i.instrument_token == symbol);
+        if (!obj) {
+            console.warn(`Instrument for symbol ${symbol} not found`);
+            return -1;
+        }
+    
+        let minuteCandle = {};
+        this.historicalData[symbol] = {};
+        
+        minuteCandle.data = data;
+        minuteCandle.signal = this.getCandlestickSignal(data, obj.tradingsymbol);
+    
 
-            let date=new Date();
-
-            let minute=date.getMinutes();
-            let hour=date.getHours();
-
-
-             let end  = this.getRequiredTime( hour,minute+2 );
-
-
-             intervel = 'minute';
-            let url = "/api/getHistoricalData/symbol/"+ symbol+'/accessToken/'+this.accessToken+'/start/'+start+'/end/'+end+'/intervel/'+intervel;
+        if((typeof obj.minuteCandle==='undefined') || !obj.minuteCandle.lastHigh || (this.minutes==0 && this.seconds==1)){
+//console.log('FETCHING HOURL CANDLE FOR ',obj.tradingsymbol,'at', Date(),obj.minuteCandle)
+          let h1 = this.calculateHighestPrice(data);
+          let h2 = await this.getHourlyData(symbol);
+          let { lowest, highest, highestClose } = this.findHighestAndLowest(data);
       
-    let cs=this.instruments.find(i=>i.instrument_token==symbol)||this.instruAll.find(i=>i.instrument_token==symbol) ;
+          minuteCandle.lastHigh = h2 || h1;
 
-    if(cs){
-      let tradingsymbol=cs.tradingsymbol
+        }
+        
+      
+      
+        minuteCandle.lowerShadowPoints = this.getCandleSupportResistancePoints(data);
+    
+        this.$set(obj, 'minuteCandle', minuteCandle);
+        this.fetchingMinuteCandle = false;
+    },
+    loopingAndFetching(symbolList,mounted){
 
-    }else{
 
 
-      debugger;
-      return;
-    }
+      let ln=symbolList.length;
+      let endloop=false;
+       
+      
+      let sec=0
+      let pvsSymbol;
+      let symbol;
+       setInterval(()=>{
+
+sec=new Date().getSeconds();
+
+
+let intervel = 'minute';
+
+
+if(mounted==1){
+
+  sec=0
+}
+symbol=symbolList[sec];
+
+if(!symbol){
+
+  return;
+}
+
+
+if(pvsSymbol===symbol){
+
+  return false;
+
+}
+   
+pvsSymbol=symbol;
+
+
+if(symbol){
+
+  this.getHistoricalDataForCustomDuration(intervel, symbol)
+}
+
+if(mounted==1){
+
+  sec=sec+1;
+}
+
+       },1000)
+
+
+
+
+    },
+    initiateHistoricalDataFetch(symbolList) {
+      this.loopingAndFetching(symbolList);
+      
+      
+    
 
 
     
-            // console.log(this.instruments,'ins')
-    
-            //  console.log( url,'utl' )
-
-      //  return;
-      let resultPromise
-      
-    try {
-        resultPromise =  await  axios.get( url );
-    } catch (error) {
-      
-      console.log(error,'error axios @158 instantiate')
-
-      this.$router.go()
-    }
 
       
-     
-      let data=resultPromise.data;
-
-    //  debugger;
-     // console.log(data,'from minute candles');
-
-      if(!data|| !symbol ){
-
-        return -1;
-      }
-
-// console.log(symbol,'sym')
-      let obj=this.instruments.find(i=>i.instrument_token==symbol);
-
-      let tick=obj.tick
-
-
-      
-// console.log(obj.minuteCandle,'minc');
-
-let minuteCandle={};
-      this.historicalData[symbol]={};
-      
-      // this.historicalData[symbol]['ohlc'] = data;
-
-      minuteCandle.data=data;
-      minuteCandle.signal = this.getCandlestickSignal(data,obj.tradingsymbol)
-
-     // minuteCandle.lastHigh=this.calculateHighestPrice(data);
-     // minuteCandle.lastHigh=await this.getHourlyData(symbol)
-
-
-      let h1=this.calculateHighestPrice(data)
-
-      let h2=await this.getHourlyData(symbol)
-
-      let {lowest,highest,highestClose}=this. findHighestAndLowest(data);
-
-     // minuteCandle.lastHigh=h2//||h1;
-      //minuteCandle.lastHigh=highest//||h1;
-      //minuteCandle.lastHigh=highestClose//||h1;
-      minuteCandle.lastHigh=h2;///||h1;
-
-
-      minuteCandle.lowerShadowPoints=this.getCandleSupportResistancePoints(data);
-
-
-    // 9747706204
-    
-
-      
-
-     
-      this.$set(obj,'minuteCandle',minuteCandle);
-      this.fetchingMinuteCandle=false;
-
-     
-
-     
-      
-           },
-      
+    },
   
-      initiateHistoricalDataFetch(symbolList) {
-
-        this.completed=false;
-
-       // console.log('initiateHistoricalDataFetch WORKING',symbolList)
-        
-        let index = 0;
-        const interval = 1000 / 3; // 3 requests per second
   
-        const makeRequest = () => {
-          if (index < symbolList.length) {
 
-           
-            //console.log(index,symbolList[index]);
-            this.getHistoricalDataForCustomDuration('minute',symbolList[index]);
-            index++;
-            setTimeout(makeRequest, interval);
-          } else {
-
-        
-            
-            this.completed=true;
-            // All symbols processed, schedule the next batch at the 5th second of each minute
-          /*   const now = new Date();
-            const seconds = now.getSeconds();
-            const millisecondsToNextMinute = (60 - seconds) * 1000; / *//// Time until next minute
-           // setTimeout(() => this.initiateHistoricalDataFetch(symbolList), millisecondsToNextMinute + 50000);
-          
-        
-          }
-        };
-  
-        makeRequest();
-      },
+     
     },
   };
   

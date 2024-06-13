@@ -8,8 +8,142 @@ const mar = function checkMarubozo(element) {
   }
 }
 
+import axios from 'axios';
 const mutateWithLtp = {
+
+  mounted() {
+
+    this. periodicSettingofPos()
+     console.log('hello from mutatewithltpmixin mixin  yyy!');
+   },
     methods: {
+      closeAndOpenNewTab() {
+        const currentURL = window.location.href;
+      
+        // Open a new tab with the same URL
+       // window.open(currentURL, '_blank');
+      
+        // Close the current window
+        window.close();
+      },
+
+      periodicSettingofPos(){
+        
+        setInterval(async()=>{
+          this.hasStartedGetLivePositions =true;
+          let body={};
+          body.accessToken=this.accessToken;
+          let url1  =  "/api/getPositions";
+         
+
+          
+      let pos= await  axios.post(url1,body).then(res=>res.data);
+
+     
+     /*  let hasLivetargetFromcis = cis.hasLiveTarget;
+      let hasLivePositionFromcis = cis.hasLivePosition; */
+
+      ///look here
+
+      let url  =  "/api/getOrdersPost";
+      let orders1= await  axios.post(url,body).then(res=>res.data);
+      this.hasStartedGetLivePositions =false;
+    
+      if(orders1 && orders1.length>0)
+{
+
+      let orders=orders1.filter(o=>o.status=='OPEN' && o.filled_quantity!=o.quantity);
+
+      orders.forEach((o)=>{
+  
+        let cis=this.instruments.find(c=>c.instrument_token==o.instrument_token);
+
+
+        let cis2=this.instruments.find(c=>c.instrument_token==o.instrument_token 
+          && o.transaction_type=='SELL')
+
+
+        if(cis2){
+
+          this.$set(this.instruments.find(c=>c.instrument_token==o.instrument_token 
+            && o.transaction_type=='SELL'),'hasLiveTarget',true)
+        }else{
+          /* this.$set(this.instruments.find(c=>c.instrument_token==o.instrument_token 
+            && o.transaction_type=='SELL'),'hasLiveTarget',false) */
+
+        }
+           /*  let hasLivetargetFromcis = cis.hasLiveTarget;
+      let hasLivePositionFromcis = cis.hasLivePosition; */
+
+if(cis){
+
+  this.$set(this.instruments.find(c=>c.instrument_token==o.instrument_token),'liveOrder',o);
+
+
+
+}
+ 
+
+      })
+    
+    
+        }
+    
+
+    if(pos.day && pos.day.length>0){
+
+
+  let livePos=   pos .day.filter(d=>
+        d.quantity>0 &&
+        
+        d.exchange=='NFO');
+   
+        if(livePos && livePos.length>0){
+
+          livePos.forEach((e)=>{
+
+//console.log(e.tradingsymbol)
+  let cis=this.instruments.find(c=>c.tradingsymbol==e.tradingsymbol);
+
+   //debugger;
+if(cis){
+  this.$set(this.instruments.find(c=>c.tradingsymbol==e.tradingsymbol),'livePosition',e);
+ 
+
+  this.$set(this.instruments.find(c=>c.tradingsymbol==e.tradingsymbol),'hasLivePosition',true);
+
+
+
+  // this.$set(cis,'livePositions',e);
+   //console.log(cis.livePosition,'cis.livePositions')
+
+ // console.log('cis ivePositions',cis.livePositions )
+
+}else{
+ /*  this.$set(this.instruments.find(c=>c.tradingsymbol==e.tradingsymbol),'livePosition',null);
+ 
+
+  this.$set(this.instruments.find(c=>c.tradingsymbol==e.tradingsymbol),'hasLivePosition',false);
+ */
+
+
+}
+
+
+})
+
+        }
+
+      }
+       
+        
+    
+       
+     
+
+        },20*1000)
+        this.hasStartedGetLivePositions =false;
+      },
 
      async stopLossprocedure(instrument_token,tradingsymbol,cis,element,hasLivePositionFromcis,last_price) {
 
@@ -84,7 +218,7 @@ const mutateWithLtp = {
                 let qty=lpCurrent.quantity;
                 let targetPoint=lpCurrent.price*1.05
 
-                debugger;
+               // debugger;
 
 
                 this.placetargetAndStopLoss(
@@ -199,36 +333,36 @@ const mutateWithLtp = {
              } ,
       async mutateWithLtp(s) {
 
-        this.heartBeatAndCurrentCheckDigit();
-        if(this.seconds%3!=0){
-
-
-         //this.cl('not 58')
-          //return ;
-        }else{
-         // this.cl('yes its  58')
-
+        if(this.seconds%5!=0){
+//console.log('limiting ticks');
+          return;
         }
 
+        this.heartBeatAndCurrentCheckDigit();
+      
 
-       /*  if(!this.seconds<== ){
-
-          //return;
-
-        } */
+      
         
 
-  
-        if (this.hasStartedGetOrders || this.hasStartedGetLivePositions || this.refreshingTradeStatus) {
+        //|| this.refreshingTradeStatus
+        if (this.hasStartedGetOrders || this.hasStartedGetLivePositions ) {
           this.tradeEntryFlowStatus = 'updating various status on Mount 1';
-          //this.cl('UPDATING VARIOS STATUS  ... NO TRADE TIME');
-          return false;
+     /*    console.log('UPDATING VARIOS STATUS  ... NO TRADE TIME',
+          this.hasStartedGetOrders,'this.hasStartedGetOrders\n',
+          this.hasStartedGetLivePositions,'this.hasStartedGetLivePositions\n',
+          this.refreshingTradeStatus,'this.refreshingTradeStatus\n'
+
+
+
+
+          ); */
+          //return false;
         }
 
       //  console.log(s);
         for (let element of s) {
 
-                  // console.log(element)
+                
           if (!element || !element.instrument_token) {
             this.tradeEntryFlowStatus = 'Element null 4';
 
@@ -255,15 +389,13 @@ const mutateWithLtp = {
           if (typeof cis == 'undefined') {
             // console.log(this.instruments,instrument_token,'42',cis)
             this.tradeEntryFlowStatus = 'CIS undefined 5';
-            this.cl('CIS ELEMENT NOT FOUND ISSUE QUITING THIS TICK',instrument_token)
+           // this.cl('CIS ELEMENT NOT FOUND ISSUE QUITING THIS TICK',instrument_token)
             await this.updateMissingScriptInInstrumetsFile(JSON.stringify([instrument_token]));
             return false;
           }
 
           let tradingsymbol = cis.tradingsymbol;
-  //  checkMaru
-       
-  // checkMarubozo(element)
+
 
           this.currentTradingsymbol = cis.tradingsymbol;
           const lp1 = element.last_price;
@@ -272,6 +404,8 @@ const mutateWithLtp = {
   
           let ma = this.calculateMovingAverage(cis);
 this.$set(cis,'movingAverage',ma)
+
+
           let ep = ma;
           let exit = element.ohlc.high * 1.1;
   
@@ -279,8 +413,9 @@ this.$set(cis,'movingAverage',ma)
   
           this.$set(cis,'tick',element)
 
-          //console.log(cis.tradingsymbol,cis.tick);
+   
           const last_price = element.last_price;
+
           if(!this.setPreviousPriceAndLastPrice(instrument_token, last_price))
           {
 
@@ -299,28 +434,27 @@ this.$set(cis,'movingAverage',ma)
   
 
 
-
-          //// NOT REQUIRED SINCE BASIC CHECKERS USES EVERTY THING EXCEPT UPDATING INSTRUMENTS FILE
-          // const { msg, bs } = this.basicCheckers(element, cis, instrument_token, last_price);
-  
-          // if (!bs) {
-          //   this.tradeEntryFlowStatus = 'BASIC CHECKERS FALSE 6';
-          //   if (msg !== 'cis.previousPrice') {
-          //     this.cl('basic cehckes issue', cis.tradingsymbol, instrument_token, cis.last_price, cis.previousPrice, msg);
-          //   }
-          //   return false;
-          // }
-  
-  
+/* console.log(cis.livePosition ,'LIVE POS  @ 290 ',cis.tradingsymbol)
+console.log( cis.liveOrder,'LIVE ORDERS @ 291 ',cis.tradingsymbol) */
+      
+  /* 
           if (typeof livePosObject != 'undefined' && typeof liveOrderObj != 'undefined') {
         this.setLiveTargetAndPosition(instrument_token, livePosObject, liveOrderObj);
-          }
+          }  */
+          
+          /* if (cis.livePosition.length != 0 &&
+            
+            typeof liveOrderObj != 'undefined') {
+        this.setLiveTargetAndPosition(instrument_token, livePosObject, liveOrderObj);
+          } */
 
         
           let hasLivetargetFromcis = cis.hasLiveTarget;
           let hasLivePositionFromcis = cis.hasLivePosition;
   
           this.tradeEntryFlowStatus = 'HAS LIVE POSITION CHECK 7';
+
+          //debugger;
 
 if(hasLivetargetFromcis && hasLivePositionFromcis){
 
@@ -332,7 +466,11 @@ let condition=
 || element.last_price <cis.lastSeenHigh*.90
 
 
-if(condition && !cis.lowCandleEntry){
+
+//debugger;
+
+//&& !cis.lowCandleEntry
+if(condition ){
 
  let  msgx = `SL HIT UPFRONT FROM MUTATE FOR  ${ cis.tradingsymbol } @ ${ last_price }  ON ${ Date() } `
   this.cl( msgx )
@@ -349,7 +487,7 @@ if(condition && !cis.lowCandleEntry){
 
 }
 
-  
+  //debugger;
           if (hasLivePositionFromcis) {
 
          this.stopLossprocedure(instrument_token,tradingsymbol,cis,element,hasLivePositionFromcis,last_price);
@@ -361,21 +499,7 @@ if(condition && !cis.lowCandleEntry){
             
             let inst = cis;
             
-            // let isHigherLows = this.higherLowsCheck(cis);
-  
-            // if (!isHigherLows) {
-            //   this.tradeEntryFlowStatus = 'HIGHER LOW CHECK FALSE 9';
-            //   return false;
-            // }
-  
-            // if (!(this.hours > 9 || (this.hours === 9 && this.minutes > 15))) {
-            //   this.tradeEntryFlowStatus = 'LESS THAN 10 HOURS NO TRADE ZONE 10';
-            //   this.cl('NO TRADING TIME');
-            //   return;
-            // }
-  
-
-           // this.cl('BEFORE TRADE ENTRY MUTATE');
+           
 
             this.flashMessage='BEFORE TRADE ENTRY MUTATE';
 
@@ -384,9 +508,7 @@ if(condition && !cis.lowCandleEntry){
           }
         }
       },
-      mounted() {
-        console.log('hello from mutatewithltpmixin mixin  yyy!');
-      },
+      
     },
   };
   

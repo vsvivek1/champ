@@ -1,5 +1,5 @@
 Arguments: 
-  /Users/vivekvs/.nvm/versions/node/v16.20.2/bin/node /opt/homebrew/Cellar/yarn/1.22.19/libexec/bin/yarn.js add pm2
+  /Users/vivekvs/.nvm/versions/node/v16.20.2/bin/node /opt/homebrew/Cellar/yarn/1.22.19/libexec/bin/yarn.js add socket.io-client
 
 PATH: 
   /opt/homebrew/opt/php@7.4/sbin:/opt/homebrew/opt/php@7.4/bin:/opt/homebrew/opt/postgresql@15/bin:/Users/vivekvs/.nvm/versions/node/v16.20.2/bin:/Applications/platform-tools:/Library/Frameworks/Python.framework/Versions/3.12/bin:/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/Apple/usr/bin:/opt/homebrew/opt/php@7.4/sbin:/opt/homebrew/opt/php@7.4/bin:/opt/homebrew/opt/postgresql@15/bin:/Users/vivekvs/.nvm/versions/node/v16.20.2/bin:/Applications/platform-tools:/Library/Frameworks/Python.framework/Versions/3.12/bin:/opt/homebrew/bin:/opt/homebrew/sbin

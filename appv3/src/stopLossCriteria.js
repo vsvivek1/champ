@@ -38,11 +38,13 @@ methods:{
        this.$set(cis,'lowCandleEntryTarget',target);
        this.$set(cis,'lowCandleEntryStopLoss',sl);
  */
+
+      // debugger;
         switch ( true ) { 
 
 
 
-          case (false && cis && cis.minuteCandle && cis.lowCandleEntry && element.last_price<(cis.lowCandleEntryStopLoss*.8) ) :
+          case ( cis && cis.minuteCandle  && element.last_price<(cis.lowCandleEntryStopLoss*.8) ) :
             let msg22 = `STOP LOSS  EXECUTION SEND BY  last price  less than last hourly high price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `
               this.cl( msg22 )
      
@@ -50,11 +52,13 @@ methods:{
               this.$set(cis,'lowCandleEntry',false);
               this.$set(cis,'lowCandleEntryTarget','');
               this.$set(cis,'lowCandleEntryStopLoss','');
+
+             // debugger;
               this.updateSquareOfforderWithDesiredPrice( 
                 cis,
                 element,
                 false,
-                element.last_price
+                element.last_price+1
                );
      
              break
@@ -65,11 +69,12 @@ methods:{
           let msg1 = `STOP LOSS  EXECUTION SEND BY  last price  less than last hourly high price  ${ cis.tradingsymbol }   for ${ element.last_price }  at ${ new Date() } `
               this.cl( msg1 )
      
+           
               this.updateSquareOfforderWithDesiredPrice( 
                 cis,
                 element,
                 false,
-                element.last_price
+                element.last_price+1
                );
      
              break
@@ -130,7 +135,7 @@ methods:{
                  cis,
                  element,
                  false,
-                 element.last_price
+                 element.last_price+1
                 );
       
               break;

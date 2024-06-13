@@ -2,7 +2,7 @@ import axios from 'axios'
 import getCandleStickSignalMixin from './getCandleStickSignal';
 
 //import instruments from '/instruments/instrumentsForMining.json?import.'
-import instruments from '../assets/instruments/instrumentsForMining'
+//import instruments from '../assets/instruments/instrumentsForMining'
 import insAll from '../assets/instruments/instrumentsAll.json';
 
 
@@ -13,7 +13,7 @@ export default {
     mounted(){
 
 
-        this.instruments=instruments;
+       // this.instruments=instruments;
         let x=this.instruments
 
     },
@@ -62,7 +62,7 @@ async getRawPositions(){
                 
                 obj.accessToken  =  this.accessToken;
                let res=await axios.post( url, obj );
-
+               this.hasStartedGetLivePositions = false;
                let {data:{net}}=res
 
                return net;
@@ -77,11 +77,19 @@ async getRawPositions(){
     return new Promise(resolve => setTimeout(resolve, ms));
 },
 
-async placeTargetsForLiveScripts(s = 'n') {
+async placeTargetsForLiveScripts(s = 'n')
+ {
 
+    try{
 
     let o=await this.getOrders(  );
 
+    if(typeof o=='string'){
+
+        throw new Error('Some issue with getting orders')
+    }
+   // console.log(typeof o)
+//debugger;
     let o1=o.filter(o2=>o2.transaction_type=='SELL' && 
     o2.exchange=='NFO' && o2.status=='OPEN')
     .map(b=>b.tradingsymbol);
@@ -116,7 +124,7 @@ async placeTargetsForLiveScripts(s = 'n') {
     let minuteData;
 
     console.log('Point 5: Starting position processing loop');
-    while (positionIndex >= 0) {
+    while (positionIndex > 0) {
         console.log('Point 4: Loop iteration - Positions left:', positionIndex + 1);
 
         let position = positions[positionIndex];
@@ -143,7 +151,7 @@ async placeTargetsForLiveScripts(s = 'n') {
 
 
         if(o1.includes(cis.tradingsymbol)){
-            console.log('HAS LIVE REVERSE BUY ORDER FOR ',cis.tradingsymbol);
+            console.log('HAS LIVE REVERSE BUY ORDER FOR -BY  PALCE TARGETS FOR LIVE SCRIPTS',cis.tradingsymbol);
            // this.placingReverseOrderInProgress = false;
            // debugger;
                         return;
@@ -228,11 +236,16 @@ if(isNaN(targetPoint)){
         console.log('Placed target and stop loss for', position.instrument_token);
 
         // Delay before the next iteration to prevent overlap
-        await this.delay(3000); // 5000ms delay between each iteration
+        await this.delay(500); // 5000ms delay between each iteration
     }
     this.placingReverseOrderInProgress = false;
     console.log('End of placeTargetsForLiveScripts');
     this.placingReverseOrderInProgress = false;
+}catch(e){
+
+    console.log(e)
+}
+ }
 }
 
 
@@ -243,4 +256,5 @@ if(isNaN(targetPoint)){
       
   
   }
-};
+
+

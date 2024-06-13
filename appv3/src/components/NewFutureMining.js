@@ -87,12 +87,26 @@ export const socket  =  io( "http://127.0.0.1:4000"
 socket.on( "connect_error",async  ( err )  => { 
 
     console.log( `connect_error due to ${ err } ` );
+    //location.reload();
 
+    const currentURL = window.location.href;
+
+    // Open a new tab with the same URL
+   // window.open(currentURL, '_blank');
+  
+    // Close the current window
+    //window.close();
     
 
     setTimeout(()=>{
 //console.clear()
-location.reload();
+const currentURL = window.location.href;
+
+// Open a new tab with the same URL
+//window.open(currentURL, '_blank');
+
+// Close the current window
+//window.close();
     },3000)
 
    // await this.setInstruments()
@@ -146,69 +160,37 @@ var cl;
         return { 
           instruAll:[],
           instruments: [],
+
+      socket: null,
         }},
       mounted(){
+       // this.fetchLatestJson();
+        this.setupSocketIo();
 
 
+        if(this.webSocketNotActive){
+
+          const currentURL = window.location.href;
+
+  // Open a new tab with the same URL
+  //window.open(currentURL, '_blank');
+
+  // Close the current window
+  //window.close();
+        }
         this.instruments=instruments;
 
         this.instruments.forEach(e=>{
 
-          this.$set(e,'livePositions',[]);
-          this.$set(e,'liveOrders',[]);
+          this.$set(e,'livePosition',[]);
+          this.$set(e,'liveOrder',[]);
           this.$set(e,'liveTarget',-1);
           this.$set(e,'liveStopLoss',-1);
         })
 
-        setInterval(async()=>{
 
 
-          let body={};
-          body.accessToken=this.accessToken;
-          let url  =  "/api/getPositions";
-         
-      let pos= await  axios.post(url,body).then(res=>res.data);
-       url  =  "/api/getOrdersPost";
-      let orders1= await  axios.post(url,body).then(res=>res.data);
-      let orders=orders1.filter(o=>o.status='OPEN')
-
-      orders.forEach((o)=>{
-
-        let cis=this.instruments.find(c=>c.instrument_token==o.instrument_token);
-if(cis){
-
-  this.$set(cis,'liveOrder',o);
-}
- 
-
-      })
-     /*  debugger; */
-     pos .day.find(d=>
-        d.quantity>0 &&
-        
-        d.exchange=='NFO');
-        
-        if(pos && pos.length>0){
-
-pos.forEach((e)=>{
-
-
-  let cis=this.instruments.find(c=>c.instrument_token==e.instrument_token);
-if(cis){
-  this.$set(cis,'livePositions',e);
-
-}
-
-
-})
-        }
-       
-        
-        
-       
-
-
-        },2*1000)
+    
 
         console.log('TOTAL INSTRUMENTS',this.instruments.length)
 
@@ -230,6 +212,7 @@ if(cis){
             ProfitAndLossOfClosedPositions } ,
 
             mixins: [
+              stopLossCriteria,
               orderUpdateMixin,
               newFutureMiningMixinsList,
               updateJsonFileMixin ,
@@ -238,12 +221,14 @@ if(cis){
               getPositions,
               
               
-              instantiateHistoricalDataFetchMixin,mutateWithLtp,orderUpdateMixin,
+               instantiateHistoricalDataFetchMixin, 
+              
+              mutateWithLtp,orderUpdateMixin,
               getRequiredTimeMixin,newFutureMiningMixin,sessionMixin,tradingMixin,
               placeTargetsForLiveScripts,telegramMixin,
               buildOrderArray,trailingStopLossWithLtp,targetPoints,
               checkSideWaysMovementTime,
-              stopLossCriteria,newFutureMiningComputed
+             newFutureMiningComputed
 
             ],
 
@@ -276,6 +261,39 @@ if(cis){
   
 
   methods: { 
+
+    async fetchLatestJson() {
+      try {
+        const response = await axios.get('/instruments/instrumentsForMining.json');
+        this.instruments = response.data;
+
+        console.log(this.instruments,'this.instruments new');
+      } catch (error) {
+        console.error('Error fetching latest JSON file:', error);
+      }
+    },
+
+    setupSocketIo() {
+      this.socket = io('http://localhost:4000'); // Adjust the URL as necessary
+
+      this.socket.on('json-updated', () => {
+
+   
+        this.fetchLatestJson();
+      });
+
+      /* this.socket.on('connect', () => {
+        console.log('Socket.IO connection established');
+      }); */
+
+    /*   this.socket.on('disconnect', () => {
+        console.log('Socket.IO connection disconnected');
+      }); */
+
+     /*  this.socket.on('connect_error', (error) => {
+        console.error('Socket.IO connection error:', error);
+      }); */
+    },
     
     requireJson( url ){ 
       console.log( url )
@@ -1406,12 +1424,25 @@ console.log( 'get latestpricepoints errr @2294',error );
 
       let instrument_token  =  cis.instrument_token;
 
+let o=await this.getFullOrders();
+
+let openSell=o.filter(ox=>ox.status=='OPEN' && ox.transaction_type=='SELL' && ox.instrument_token==cis.instrument_token);
+
+
+if(!openSell){
+debugger;
+  return false;
+
+}
+
       ///was normally false but activating now for a while
       if ( squaringOff ) { 
         let test  =  this.updatingInProgress.some( 
           ( u )  => u  ==  instrument_token
          );
 
+
+   
         if ( test ) { 
           // this.cl( cis.tradingsymbol,'alrady script updated upated' );
           return false;
@@ -1421,17 +1452,22 @@ console.log( 'get latestpricepoints errr @2294',error );
        } 
 
       // o.transaction_type  ==  "SELL" &&
-      let CurrentOrderObj  =  this.orders.filter( 
+    /*   let CurrentOrderObj  =  this.orders.filter( 
         ( o )  => o.instrument_token  ==  instrument_token
        );
+ */
+       let CurrentOrderObj  = openSell
 
-      if ( CurrentOrderObj.length  ==  0 ) { 
+
+     /*  if ( CurrentOrderObj.length  ==  0 ) { 
         this.cl( 
           " curentorder not presnt for %s",
           cis.tradingsymbol
          );
+
+         debugger;
         return false;
-       } 
+       }  */
 
       let price;
       if ( p  ==  0 ) { 
@@ -1464,7 +1500,7 @@ price = element.last_price;
 
       if ( CurrentOrderObj[0].price  ==  price ) { 
         //  this.cl( 'new order already plaed' )
-
+//debugger;
         return false;
        } 
  
@@ -1519,7 +1555,7 @@ price = element.last_price;
 
 
        this.previousPriceUpdate = this.currentPriceUpdate;
-
+//debugger;
        this.newOrder  = 
 
        CurrentOrderObj.map(( i )  => { 
@@ -1555,6 +1591,8 @@ price = element.last_price;
         return o;
        }  )
 
+//debugger;
+       console.log(this.newOrder,'NEW ORDER FRON PRODEDURE FOR UPDATING DESIRED')
       this.updateOrder();
 
       let t  =  await this.getOrders();
@@ -1739,7 +1777,7 @@ price = element.last_price;
 let instrument_token=[instrument_token1];
       if( this.missingScriptUpdating == true ){ 
 
-      this.cl( 'updating missing scripts' );
+     // this.cl( 'updating missing scripts' );
         return false;
        } 
 
@@ -2558,7 +2596,31 @@ return false
 
      } ,
 
+     async getFullPositions(){
 
+      obj.accessToken  =  this.accessToken;
+   
+
+      let url  =  "/api/getPositions";
+
+      let obj  =  {  } ;
+      obj.accessToken  =  this.accessToken;
+      return axios.post( url, obj ).then(res=>res.data);
+       
+
+     },
+
+     
+    async getFullOrders(){
+      this.hasStartedGetOrders = true;
+      this.accessToken  =  this.accessToken;
+      let url  =  "/api/getOrdersPost";
+      let obj={};
+      obj.accessToken=this.accessToken;
+
+      return axios.post( url, obj ).then(r=>r.data);
+
+     },
 
     async getOrders() { 
 
@@ -3353,7 +3415,7 @@ if ( liveReverseOrder.length>0 ){
   // this.cl( 'reverse order tallied change lgic here' )
    return false;
  } 
-this.placingReverseOrderInProgress  =  true;
+
 
 
   let output  =  [];
@@ -4370,15 +4432,15 @@ this.cl( 'low hit already hit for %s, so no trade ',cis.tradingsymbol )
           
           let obj={
             
-            "NIFTY":72/3,
+            "NIFTY":72,
             
            // "BANKNIFTY":60,
-            "BANKNIFTY":60/3,
-            'MIDCPNIFTY':56/3,
-            "FINNIFTY":40/4
+            "BANKNIFTY":60,
+            'MIDCPNIFTY':56,
+            "FINNIFTY":40
           }
-
-          let multiplier = 1;
+let multiplier;
+        
 
 // Iterate over each key in obj and check if tradingsymbol includes it
 Object.keys(obj).forEach(key => {
@@ -4388,6 +4450,12 @@ Object.keys(obj).forEach(key => {
 });
 
 
+if(typeof multiplier =='undefined'){
+
+  multiplier =10
+} ;
+
+multiplier =1;
           let lot_size  =  cis.lot_size *multiplier;
           //let lot_size = 0;
           let order_type  =  "LIMIT";
@@ -5536,7 +5604,9 @@ return false;
         console.log('FOR SUBSCRIBING TICKS ',this.instrumentTokens )
 
 
-        socket.emit( "subscribe-orders", j );
+      let a=  socket.emit( "subscribe-orders", j );
+
+      console.log(a,'subscribe orders result');
 
       
         res( true );

@@ -16,13 +16,26 @@ const fs = require('fs').promises;
 //const restartPM2Process = require('./restartPM2Process');
 const scriptDirectory  =  Path.dirname( process.argv[1] );
 const FILE_LOCATION  =  Path.join( scriptDirectory, 'appv3', 'public', 'instruments' );
-
+const io = require('socket.io-client');
+const socket = io('http://localhost:4000'); 
 let indexOptions={
     "NIFTY": "NIFTY 50",
     "NIFTYNXT50": "NIFTY NEXT 50",
     "BANKNIFTY": "NIFTY BANK",
     "FINNIFTY": "NIFTY FIN SERVICE",
     "MIDCPNIFTY": "NIFTY MIDCAP SELECT (MIDCPNIFTY)"
+  }
+  function removeDuplicates(array, key) {
+    const seen = new Set();
+    return array.filter(item => {
+      const keyValue = item[key];
+      if (seen.has(keyValue)) {
+        return false;
+      } else {
+        seen.add(keyValue);
+        return true;
+      }
+    });
   }
 
 async function writeJsonToFile(jsonData, fileName) {
@@ -231,7 +244,7 @@ console.log('THE NAME IS ',name,instruNameFeild,ltp,'diff',diff)
 
 
 
-let depth=3
+let depth=1
 var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
 var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
 
@@ -294,7 +307,46 @@ console.log("Put option below:", putOptionBelow); */
 
  // Your array of selected options
 
+///
 
+//getorders and oush to selected option
+
+let o=await kite.getOrders();
+let p=await kite.getPositions();
+
+let o1=o.filter(ox=>ox.exchange=='NFO' && ox.status=='OPEN' && ox.transaction_type=='BUY').map(k=>{
+  
+  
+  let script=allScriptJson.find(as=>as.tradingsymbol==k.tradingsymbol)
+
+  return script
+
+}
+
+
+);
+
+let p1=p.day.filter(px=>px.quantity>0).map(k=>{
+
+  let script=allScriptJson.find(as=>as.tradingsymbol==k.tradingsymbol)
+
+  return script
+
+});
+
+
+console.log(o1, 'orders')
+console.log(p1,'positions')
+
+
+
+selectedOptions.push(...o1)
+selectedOptions.push(...p1)
+selectedOptions = removeDuplicates(selectedOptions, 'instrument_token');
+//console.log(selectedOptions);
+
+//process.exit();
+//getposition and  and oush to selected option
 
 // Initial call to popOption() to start the process
 
@@ -380,7 +432,11 @@ async function popOption(selectedOptions,fullJson,accessTokenDoc) {
 
 // Execute the command
 setTimeout(()=> {
-    exec(command, (error, stdout, stderr) => {
+
+  socket.emit('json-updated');
+
+  console.log('jason updated');
+  /*   exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error executing command: ${error.message}`);
         return;
@@ -390,10 +446,10 @@ setTimeout(()=> {
         return;
       }
       console.log(`stdout: ${stdout}`);
-    });
+    }); */
     
     
-    const command2 = 'pm2  save';
+  /*   const command2 = 'pm2  save';
     exec(command2, (error, stdout, stderr) => {
         if (error) {
           console.error(`Error executing command: ${error.message}`);
@@ -410,11 +466,11 @@ setTimeout(()=> {
         
         
         `);
-      });
+      }); */
 
       
     
-},3*1000);
+},30*60*1000);
 
 setTimeout(()=>{
   console.log(`LAST TIME EXECUTED',${Date()}`)
@@ -459,6 +515,11 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
 
             option.noTradingNow=false;
             option.canTakeFreshTrade=true;
+            option.hasStartedGetOrders=false
+            option.hasStartedGetLivePositions=false
+            option.refreshingTradeStatus=false
+            option.hasLiveTarget =false
+            option.hasLivePosition =false
             
 
             console.log('pushing option', option.tradingsymbol);
@@ -484,5 +545,5 @@ console.time('start')
    main();
    console.timeEnd('start')
 //disconnect()
-},30*60*1000) 
+},5*60*1000) 
 //disconnect();

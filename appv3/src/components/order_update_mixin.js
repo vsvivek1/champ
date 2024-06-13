@@ -28,24 +28,29 @@ export default {
                 order.status === "COMPLETE" && order.exchange == "NFO" && order.pending_quantity === 0) {
                     //console.clear()
 
-                    console.log('PLACING REVERSE ORDER FROM ORDER UPDATES');
+                    
+
+//debugger;
+                   // console.log('PLACING REVERSE ORDER FROM ORDER UPDATES');
 
                     let cis = this.instruments.find(i => i.instrument_token == order.instrument_token) ||
-                  
+                 
                   
                     this.instruAll.find(i => i.instrument_token == order.instrument_token);
                   
                   /*   let hasLivetargetFromcis = cis.hasLiveTarget;
                     let hasLivePositionFromcis = cis.hasLivePosition; */
-                  this.$set(cis,'hasLiveTarget',true)
-                  this.$set(cis,'hasLivePosition',true)
+               
+                    if(cis.hasLiveTarget){
 
-                  this.$set(cis,'lastBuyPrice',order.price);
-                  this.$set(cis,'lastSeenHigh',order.price);
+                        //console.log(cis.tradingsymbol,'HAS ALREADY GOT A TARGET')
 
-
+                        return;
+                    
+                    }
+//debugger;
                     // this.placeTargetsForLiveScripts();
-                   
+                    //debugger;
 
                    let targetPoint;
                  /*   if(cis.tick && cis.tick.last_price!=0){
@@ -53,9 +58,17 @@ export default {
 
                    }else{ */
 
-                    targetPoint= order.price+5
 
-                    //debugger;
+                   if(order.price==0){
+
+                    targetPoint= order.average_price+5
+                   }else{
+
+                    targetPoint= order.price+5
+                   }
+                   
+
+                  //  debugger;
                   /*  */// }
               
                  
@@ -69,9 +82,27 @@ export default {
                    let product='NRML'
                    let transaction_type='SELL';
 
-                
+                let  order_type='LIMIT';
+                  // debugger;
+/* 
+                   let arr  =  this.buildOrderArray( 
+                    cis.tradingsymbol,
+                    transaction_type,
+          
+                    Math.abs(order.quantity),
+                    order_type,
+                    targetPoint
+                   );
+           */
+             
+                /*   console.log( JSON.stringify( arr ));
+          
+                  let orderArray  =  [arr];
+          
+                   let a  =  await this.placeOrder( orderArray ); */
 
-                   this.placetargetAndStopLoss(
+
+                  this.placetargetAndStopLoss(
                     cis,
                     order.instrument_token,
                     0,
@@ -82,6 +113,12 @@ export default {
                     true,
                     transaction_type
                 );
+ 
+                this.$set(cis,'hasLiveTarget',true)
+                this.$set(cis,'hasLivePosition',true)
+
+                this.$set(cis,'lastBuyPrice',order.price);
+                this.$set(cis,'lastSeenHigh',order.price);
 
                 //;
 
@@ -90,7 +127,7 @@ export default {
 
             if ( order.transaction_type=='SELL' &&
                 
-                order.status === "COMPLETE" && order.exchange === "NFO" && order.pending_quantity === 0) {
+                order.status === "COMPLETE" && order.exchange === "NFO" ) {
                     //console.clear()
 let cis=this.instruments.find(i=>i.instrument_token==order.instrument_token);
 if(cis){
@@ -99,6 +136,12 @@ if(cis){
     this.$set(cis, 'hasLivePosition', false);
     this.$set(cis, 'hasLiveTarget', false);
     this.$set(cis, 'lastSeenHigh', -1);
+
+  /*   this.$set(this.instruments.find(c=>c.tradingsymbol==e.tradingsymbol),'hasLiveTar',e);
+ 
+
+    this.$set(this.instruments.find(c=>c.tradingsymbol==e.tradingsymbol),'hasLivePosition',false);
+   */
 
     if(cis.lowCandleEntry){
 

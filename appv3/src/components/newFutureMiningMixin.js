@@ -14,8 +14,11 @@ export default {
         // this.cl( 'mounted' )
            var cl = this.cl;
         
-        
-           this.setTradingType(  );
+        if(!this.instruments || !this.instruALL){
+          this.setTradingType();
+
+        }
+           
         
             this.itype  =  this.$route.params.itype;
            // this.loopGetQuotesAndMutateInstruments(  );
@@ -49,9 +52,9 @@ export default {
         
             ( async(  ) =>{ 
         
-              await this.refreshTradeStatus(  );
+             // await this.refreshTradeStatus(  );
         
-              this. placeTargetsForLiveScripts(  )
+              //this. placeTargetsForLiveScripts(  )
         
              }  )(  )
         
@@ -120,7 +123,7 @@ export default {
         
             let fifteenSecTimer  =  setInterval( async (  )  => { 
         
-              let a  =  await this.refreshTradeStatus(  );
+            //  let a  =  await this.refreshTradeStatus(  );
              
              } , 60 * 1000 );
         
@@ -140,7 +143,7 @@ export default {
         
               if ( this.laggingCheckDigit  ==  this.CurrentCheckDigit ) { 
                 this.webSocketNotActive  =  true;
-        
+        this.close
                 //reload window
         
                 // this.$router.go(  );
@@ -153,7 +156,7 @@ export default {
               this.minutes  =  d.getMinutes(  );
               this.seconds  =  d.getSeconds(  );
         
-              let times = [17,47,37,2]
+              let times = [45]
                    
         
                    if ( this.hours<16 & times.includes( this.minutes ) && ( this.seconds>56 && this.seconds<58 )
@@ -166,7 +169,7 @@ export default {
                     } 
         
         
-                   this.placeTargetsForLiveScripts(  )
+                  // this.placeTargetsForLiveScripts(  )
         
               // if ( this.livePositions.length > 0 ) { 
               //   // let r  =  await this.getHourlyCandleLows(  );
