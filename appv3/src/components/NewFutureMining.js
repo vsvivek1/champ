@@ -279,7 +279,7 @@ var cl;
       this.socket.on('json-updated', () => {
 
    
-        this.fetchLatestJson();
+        //this.fetchLatestJson();
       });
 
       /* this.socket.on('connect', () => {
@@ -4455,14 +4455,16 @@ if(typeof multiplier =='undefined'){
   multiplier =10
 } ;
 
-multiplier =1;
-          let lot_size  =  cis.lot_size *multiplier;
+
+let ice=2;
+//multiplier =1;
+          let lot_size  =  cis.lot_size *multiplier*ice;
           //let lot_size = 0;
           let order_type  =  "LIMIT";
 
        
-         let  iceberg_legs=lot_size/multiplier;
-         let  iceberg_quantity=lot_size /iceberg_legs
+         let  iceberg_legs=ice;
+         let  iceberg_quantity=lot_size /iceberg_legs;
           //  let price1 =   element.depth.sell.sort(( a,b ) =>a.price-b.price )[0]
           //  let price2 =   element.depth.sell.sort(( a,b ) =>b.price-a.price )[0]
 
@@ -4491,9 +4493,9 @@ multiplier =1;
           //
 
           console.log('before build order array ',tradingsymbol,transaction_type,Price,Date())
-          let arr  =  this.buildOrderArray( 
-            /* iceberg_legs,
-            iceberg_quantity,  */
+          let arr  =  this.buildOrderArrayIceberg( 
+            iceberg_legs,
+            iceberg_quantity,  
             tradingsymbol,
             transaction_type,
 

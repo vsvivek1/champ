@@ -98,7 +98,7 @@ if( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='un
 
   console.log(cis.minuteCandle,'minute candle signal issue before switch issue for',cis.tradingsymbol)
  
-  if(! this.fetchingMinuteCandle){
+/*   if(! this.fetchingMinuteCandle){
     setTimeout(() => {
       this.fetchingMinuteCandle=true
       this.instrumentTokens = this.instruments.map( i =>parseInt( i.instrument_token ));
@@ -108,7 +108,7 @@ if( typeof cis.minuteCandle =='undefined' || typeof cis.minuteCandle.signal=='un
      this.fetchingMinuteCandle=false;
     }, 20*1000);
 
-  }
+  } */
 
   //debugger;
   return;

@@ -97,7 +97,7 @@ export default {
          } catch (error) {
           
           console.log(error,'hourly data @97 instatmtiitate')
-          this.$router.go()
+          //this.$router.go()
          }
 
       
@@ -161,7 +161,7 @@ let out=data.reduce((max, obj) => obj.high > max ? obj.high : max, -Infinity);
             }
         } catch (error) {
 
-          //window.location.reload(true);
+          
             console.error('Error fetching historical data:', error);
             console.log('Issue URL:', url);
             // Optional: additional error handling logic here
@@ -254,7 +254,7 @@ if(mounted==1){
   sec=sec+1;
 }
 
-       },1000)
+       },2*1000)
 
 
 

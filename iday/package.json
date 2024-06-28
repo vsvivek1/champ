@@ -3,5 +3,8 @@
   "version": "y",
   "main": "index.js",
   "type": "module",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "moment": "^2.30.1"
+  }
 }

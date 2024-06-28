@@ -1,7 +1,12 @@
 const { getTodaysAccessToken } = require('./getTodaysAccessToken.js');
+const KiteConnect = require("kiteconnect").KiteConnect;
+
+async function getKiteConnectInstance(accessToken ) {
 
 
-async function getKiteConnectInstance() {
+
+   
+   
    /*  api_key: 'wkcurst2vu5obug7',
     root: 'https://api.kite.trade',
     timeout: 7000,
@@ -97,20 +102,33 @@ async function getKiteConnectInstance() {
     modifyGTT: [Function (anonymous)],
     deleteGTT: [Function (anonymous)],
     validatePostback: [Function (anonymous)] */
-   const KiteConnect = require("kiteconnect").KiteConnect;
 
 
+  
    require('dotenv').config();
    const api_secret = process.env.api_secret;
    //const api_key = process.env.api_key;
    const api_key = 'wkcurst2vu5obug7';
-console.log(api_key,'api_key')
 
-   var accessToken = await getTodaysAccessToken();
+if(!accessToken ){
+
+   accessToken = await getTodaysAccessToken();
+
+}
+
+   console.log(accessToken ,'accessToken ');
+   
+
+
    const kite = new KiteConnect({
       api_key: api_key
    });
+
+  // console.log('4m kc inst',accessToken );
    kite.setAccessToken(accessToken);
+
+  
    return kite;
 }
+//module.exports=getKiteConnectInstance;
 exports.getKiteConnectInstance = getKiteConnectInstance;

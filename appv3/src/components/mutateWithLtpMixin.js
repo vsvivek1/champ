@@ -141,7 +141,7 @@ if(cis){
        
      
 
-        },20*1000)
+        },60*1000)
         this.hasStartedGetLivePositions =false;
       },
 
@@ -335,7 +335,7 @@ if(cis){
 
         if(this.seconds%5!=0){
 //console.log('limiting ticks');
-          return;
+         // return;
         }
 
         this.heartBeatAndCurrentCheckDigit();
@@ -470,6 +470,8 @@ let condition=
 //debugger;
 
 //&& !cis.lowCandleEntry
+
+
 if(condition ){
 
  let  msgx = `SL HIT UPFRONT FROM MUTATE FOR  ${ cis.tradingsymbol } @ ${ last_price }  ON ${ Date() } `

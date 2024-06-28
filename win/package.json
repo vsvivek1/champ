@@ -1,0 +1,14 @@
+{
+  "name": "y",
+  "version": "y",
+  "main": "y",
+  "type": "module",
+  "license": "'y",
+  "dependencies": {
+    "moment": "^2.30.1"
+  },
+  "description": "y",
+  "repository": "y",
+  "author": "y",
+  "private": true
+}

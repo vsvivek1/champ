@@ -111,12 +111,19 @@ calculateHighestPrice(ohlcData) {
 
     // Calculate the end time based on the current completed hour
     let endTime = new Date(currentTime);
+
+
     if (currentTime.getMinutes() < 15) {
         // If current time is before 15 minutes past the hour, set end time to the previous hour
         endTime.setHours(endTime.getHours() - 1, 15, 0, 0);
     } else {
         // Otherwise, set end time to the current completed hour
         endTime.setHours(endTime.getHours(), 15, 0, 0);
+    }
+
+    if(currentTime.getHours()==9){
+      endTime = new Date(currentTime);
+
     }
 
     // Filter OHLC data for timestamps falling within today and up to the calculated end time

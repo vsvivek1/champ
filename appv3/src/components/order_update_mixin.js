@@ -61,10 +61,10 @@ export default {
 
                    if(order.price==0){
 
-                    targetPoint= order.average_price+5
+                    targetPoint= order.average_price+2
                    }else{
 
-                    targetPoint= order.price+5
+                    targetPoint= order.price+2
                    }
                    
 

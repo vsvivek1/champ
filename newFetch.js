@@ -433,7 +433,7 @@ async function popOption(selectedOptions,fullJson,accessTokenDoc) {
 // Execute the command
 setTimeout(()=> {
 
-  socket.emit('json-updated');
+  //socket.emit('json-updated');
 
   console.log('jason updated');
   /*   exec(command, (error, stdout, stderr) => {
@@ -520,6 +520,7 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             option.refreshingTradeStatus=false
             option.hasLiveTarget =false
             option.hasLivePosition =false
+            option.hasLiveOrder=false;
             
 
             console.log('pushing option', option.tradingsymbol);
