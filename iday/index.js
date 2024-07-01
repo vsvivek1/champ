@@ -214,12 +214,21 @@ i.status=='OPEN'
 );
 
 
+console.log(target_order,'to');
 
-// else  placetargetOrder
 
-if(!target_order){
+// else  placetargetOrder//
 
+if(!target_order && cis.hasLivePosition && (!cis.hasPlacedTarget)){
+
+    console.log('is there a live postion without target?',cis.tradingsymbol,cis.hasLiveOrder,cis.hasLivePosition,cis.hasPlacedOrder,cis.hasBuySignal);
+    
+
+  //process.exit();
+  
 placeTargetOrderForScript(cis);
+cis.hasPlacedTarget=true
+
 
     return;
 }
@@ -231,13 +240,13 @@ let squareOff=false;
 
 switch (true){
 
-    case (cis.tick.ohlc.open>cis.tick.last_price):
+    case (cis.tick.ohlc.open>cis.tick.last_price && !cis.updated):
         squareOff=true;
         console.log(`Danger ${cis.tradingsymbol} is below opening price, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
     
     break;
 
-    case (cis.hourlyHigh<cis.tick.last_price):
+    case (cis.hourlyHigh<cis.tick.last_price  &&  !cis.updated):
         squareOff=true;
         console.log(`Danger ${cis.tradingsymbol} is below last hourly high, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
     
@@ -250,6 +259,7 @@ switch (true){
 
 
     if(squareOff){
+console.log('after sq off');
 
         if(!cis.updated){
 
@@ -262,7 +272,7 @@ switch (true){
                if(order){
 
                 let order_id=order.order_id;
-                updateOpenOrderPrice(kite,order_id, cis.instrument_token, cis.tick.last_price+2);
+                updateOpenOrderPrice(kite,order_id, cis.instrument_token, cis.tick.last_price);
                 cis.updated=true;
                }
                 
@@ -287,13 +297,15 @@ return;
     
 
     cis.placedTarget=true;
+
+    
     const orderParams = {
         exchange: "NFO", // or other exchanges as per requirement
         tradingsymbol: cis.tradingsymbol,
         transaction_type: "SELL", // or "SELL"
         order_type: "LIMIT", // or "MARKET", "SL", "SL-M"
         quantity: cis.position.quantity, // specify the quantity
-        price: cis.position.average_price+10,
+        price: Math.ceil(cis.position.buy_price)+4,
         product: "NRML", // or "CNC", "NRML"
         validity: "DAY", // or "IOC"
     };
@@ -356,12 +368,38 @@ if(!minuteCandle) return;
 //debugger;
         cis.ordered=true;
 
+        let obj={
+            
+            "NIFTY":72,
+            
+           // "BANKNIFTY":60,
+            "BANKNIFTY":60,
+            'MIDCPNIFTY':56,
+            "FINNIFTY":40
+          }
+let multiplier;
+
+Object.keys(obj).forEach(key => {
+    if (cis.tradingsymbol.includes(key)) {
+      multiplier = obj[key];
+    }
+  });
+  
+  
+  if(typeof multiplier =='undefined'){
+  
+    multiplier =10
+  } ;
+  
+  //multiplier=1;
+  //99176
+
         const orderParams = {
             exchange: "NFO", // or other exchanges as per requirement
             tradingsymbol:cis.tradingsymbol,
             transaction_type: "BUY", // or "SELL"
             order_type: "LIMIT", // or "MARKET", "SL", "SL-M"
-            quantity: cis.lot_size, // specify the quantity
+            quantity: cis.lot_size* multiplier, // specify the quantity
             price: cis.tick.last_price,
             product: "NRML", // or "CNC", "NRML"
             validity: "DAY", // or "IOC"
@@ -374,8 +412,10 @@ if(!minuteCandle) return;
             console.error("Error placing order:", error);
         }
 
+        console.log(cis.tradingsymbol,'has buy signal',hasBuySignal);
+
       }
-console.log(cis.tradingsymbol,'has buy signal',hasBuySignal,cis.hasPlacedOrder);
+
       //console.log(cis.tradingsymbol, ti)
 
     }
@@ -393,20 +433,35 @@ console.log(cis.tradingsymbol,'has buy signal',hasBuySignal,cis.hasPlacedOrder);
 
 function isTickAboveHourlyHistoricalValue(cis){
 let tick=cis.tick;
-    let a=  hourlyHistoricalData[tick.instrument_token]
-    if(!a || (a[a.length-1].high<tick.last_price)){
+    
+let a1=  hourlyHistoricalData[tick.instrument_token]
+if(!a1){
+
+    return false;
+}
+let a=a1.map(a1=>a1.high).sort((a,b)=>b-a);
+
+   
+
+
+console.log(a,'hourly high pri es sorted',a[0]);
+
+
+if(!a && (a[0]<tick.last_price)){
 
 
        cis.isTickAboveHourlyHistoricalValue=true
-        return false;
+       
+       
+       return true
     }else{
 
-        let ti=  convertToIndianTime(a[a.length-1].date)
+       // let ti=  convertToIndianTime(a[a.length-1])
 
         cis.isTickAboveHourlyHistoricalValue=false;
       
 
-return true
+return false
     }
 
 }
@@ -566,6 +621,8 @@ cis.ordered=false;
   cis.hasLivePosition=false;
   cis.updated=false;
   cis.placedTarget=false;
+  cis.hasPlacedTarget=false;
+  
 
   await  fetchOrdersAndSetCis();
   await fetchPositionsAndSetCis();
@@ -583,13 +640,14 @@ const orderParams = {
     transaction_type: "SELL", // or "SELL"
     order_type: "LIMIT", // or "MARKET", "SL", "SL-M"
     quantity: order.quantity, // specify the quantity
-    price: order.price+10,
+    price: order.price+4,
     product: "NRML", // or "CNC", "NRML"
     validity: "DAY", // or "IOC"
 };
 
 try {
     const orderId = await kite.placeOrder("regular", orderParams);
+    cis.hasPlacedTarget=true;
     console.log("Order placed successfully. Order ID:", orderId);
     //cis.ordered=false;
   //  cis.hasLivePosition=false;

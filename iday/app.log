@@ -12516,3 +12516,52 @@
 [ERROR] (node:90088) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
 (Use `node --trace-warnings ...` to show where the warning was created)
 [ERROR] Error placing order:
+[ERROR] (node:71485) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] Error updating order:
+[ERROR] Error updating order:
+[ERROR] (node:73744) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:76046) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:76060) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:76102) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:76160) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:76257) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:76627) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:76657) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:76712) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] Error fetching 60minute data:
+[ERROR] (node:78086) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:78378) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:78763) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:78822) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:78918) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:78975) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:79044) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:79063) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:79099) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:79137) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:79275) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:79570) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+[ERROR] (node:79584) ExperimentalWarning: Importing JSON modules is an experimental feature. This feature could change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
