@@ -1,8 +1,10 @@
 var KiteConnect   =  require(  "kiteconnect"  ).KiteConnect;
 var moment = require(  'moment'  );
-const FILE_LOCATION = './appv3/public/instruments'
+const FILE_LOCATION = './appv3/src/assets/instruments/'
 const instruAll   =  require(  './'+FILE_LOCATION+'/instrumentsAll.json'  );
 
+
+///Users/vivekvs/findnew/appv3/src/assets/instruments/instrumentsForMining.json
 var api_key_final  =  'wkcurst2vu5obug7';
 module.exports   =  
 class pricePoint { 

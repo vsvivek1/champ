@@ -11,6 +11,8 @@ import WraperForInstruments from '@/components/Tester/WraperForInstruments.vue'
 //import ListHoldings from '@/components/ListHoldings.vue'
 import testWebSocket from '@/components/testWebSocket.vue'
 
+//appv3/src/components/CisUpdates.vue
+import CisUpdates from '@/components/CisUpdates.vue';
  import PlaceQuickOrderForHoldings from '@/components/PlaceQuickOrdersForHoldingsNew.vue'
 // import GetInstruments from '@/components/GetInstruments.vue'
  import OrderBook from '@/components/OrderBook.vue'
@@ -108,11 +110,20 @@ const routes  =  [
     name: 'GTT',
     component: GTT
    } , 
-    { 
+   
+   
+   { 
     path: '/GTTSELL',
     name: 'GTTSELL',
     component: GTTSELL
    } , 
+
+   { 
+    path: '/CisUpdates',
+    name: 'CisUpdates',
+    component: CisUpdates
+   } , 
+  
   
   
   // { 

@@ -69,7 +69,18 @@ function filterByName(jsonArray, names = ['NIFTY', 'BANKNIFTY']) {
 var con=connectToDatabase();
 
 function calculateStrikeDifferences(instruments1, name,ltp) {
-    var instruments = instruments1.filter(i => i.name == name && i.segment == 'NFO-OPT' && i.instrument_type == 'PE');
+
+  console.log(name,'name');
+  
+if('BANKNIFTY'==name){
+
+  return 100
+}
+  //let exp=instruments1[].expiry;
+
+    var instruments = instruments1.filter(i =>i.name == name && i.segment == 'NFO-OPT' && i.instrument_type == 'PE');
+
+
 
     // Sort instruments by strike price
     let sortedInstruments = instruments.sort((a, b) => parseInt(a.strike) - parseInt(b.strike));
@@ -185,7 +196,7 @@ let instruNameFeild=typeof indexOptions[name]=='undefined'?name:indexOptions[nam
 ;
 
 
-console.log(instruNameFeild,'instrummebts  name feild');
+//console.log(instruNameFeild,'instrummebts  name feild');
 
 //return;
 //var instruments=getUniqueInstruments(niftyBankNiftyBeforeNearestExpiry)
@@ -215,6 +226,8 @@ console.log(instruNameFeild,'instrummebts  name feild');
 
 let indexInstrument=indexInstruments.find(i=>i.name==instruNameFeild)
 
+//console.log(indexInstrument,'indexInstrument');
+
 
 if(typeof indexInstrument=='undefined'){
 
@@ -239,12 +252,12 @@ var ltp=quote[indexInstrument.instrument_token]['last_price']
 
 var diff =calculateStrikeDifferences(expToday,name,ltp);
 
-console.log('THE NAME IS ',name,instruNameFeild,ltp,'diff',diff)
+//console.log('THE NAME IS ',name,instruNameFeild,ltp,'diff',diff)
 
 
 
 
-let depth=2
+let depth=-1
 var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
 var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
 
@@ -428,7 +441,11 @@ async function popOption(selectedOptions,fullJson,accessTokenDoc) {
             clearInterval(timer);
             console.log("Array is empty. Resetting timer.");
 
-            const command = 'pm2 restart ./server.js';
+            //const command = 'pm2 restart ./iday/index2.js';
+
+            const command='ls'
+
+
 
 // Execute the command
 setTimeout(()=> {
@@ -436,7 +453,7 @@ setTimeout(()=> {
   //socket.emit('json-updated');
 
   console.log('jason updated');
-  /*   exec(command, (error, stdout, stderr) => {
+    exec(command, (error, stdout, stderr) => {
       if (error) {
         console.error(`Error executing command: ${error.message}`);
         return;
@@ -446,10 +463,10 @@ setTimeout(()=> {
         return;
       }
       console.log(`stdout: ${stdout}`);
-    }); */
+    }); 
     
     
-  /*   const command2 = 'pm2  save';
+    const command2 = 'pm2  save';
     exec(command2, (error, stdout, stderr) => {
         if (error) {
           console.error(`Error executing command: ${error.message}`);
@@ -466,13 +483,15 @@ setTimeout(()=> {
         
         
         `);
-      }); */
+      }); 
 
       
     
-},30*60*1000);
+},10*1000);
 
 setTimeout(()=>{
+
+  fs.appendFile('./iday/last_time.text',`\n${Date()}`)
   console.log(`LAST TIME EXECUTED',${Date()}`)
 
 },5*1000)

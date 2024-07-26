@@ -11,6 +11,8 @@ const pool = new Pool({
 
 // CREATE operation
 async function createStrategyLog(strategyData) {
+
+  return;
   const {
     strategy_name,
     buy_price,
@@ -149,9 +151,9 @@ createStrategyLog(strategyData)
   .catch((error) => console.error('Error creating log:', error));
 
 // Similar usage for other CRUD functions...
-module.exports = {
+/* module.exports = {
     createStrategyLog,
     getAllStrategyLogs,
     updateStrategyLog,
     deleteStrategyLog,
-  };
+  }; */

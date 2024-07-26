@@ -21,7 +21,7 @@ function fetchHistorical(){
     
             setTimeout(()=>{
         
-                console.log('gistory to be fetched foer',instrumentsAboveOpen[i])
+                //console.log('gistory to be fetched foer',instrumentsAboveOpen[i])
                 kite.getHistoricalData()
             },500)
        

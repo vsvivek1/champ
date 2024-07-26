@@ -48,6 +48,7 @@ const CI=require("./scraping/ci.js")
 
 const app=express();
 
+
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb'}));
 var history = require('connect-history-api-fallback');
@@ -1392,7 +1393,7 @@ StartServerConnections(app,port,today)///
 
 
 
-const StartWebSockets=require('./StartWebSockets');
+ const StartWebSockets=require('./StartWebSockets');
 
 var io = require('socket.io')(4000,{
 
@@ -1403,12 +1404,37 @@ var io = require('socket.io')(4000,{
 })
 
 
+/* const server4200 = http.createServer(app);
+const io4200 = require('socket.io')(4200, {
+  cors: {
+    origin: "*", // Adjust this for production use, e.g., specify your frontend URL
+  }
+}); */
+
+/* module.exports = {io4200,app,server4200};
+module.exports */
+
 io.on('connection',socket=>{
-  StartWebSockets(socket,io)
+  StartWebSockets(socket,io);
+
+initCisSending(socket,io);
+ 
 });
 
 
+function initCisSending(socket,io){
+
+  socket.on('sendCis',(cis)=>{
+
+    io.emit('sendCis',cis)
+
+//console.log(cis,'cis');
+  })
+}
+
+
 const proxyTrade=require('./proxyTrade') ;
+
 
 function convertToIndianTime(utcTimeString) {
   // Create a Date object from the UTC time string

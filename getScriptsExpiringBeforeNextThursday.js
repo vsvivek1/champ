@@ -70,7 +70,7 @@ function getPreviousDayOfNextWeek() {
  
    // Calculate the same day next week
    const sameDayNextWeek = new Date(today);
-   sameDayNextWeek.setDate(today.getDate() + 7);
+   sameDayNextWeek.setDate(today.getDate() + 8);
  
    // Subtract one day to get the previous day
    const previousDayOfNextWeek = new Date(sameDayNextWeek);

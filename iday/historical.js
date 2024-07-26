@@ -12,14 +12,14 @@ async function getHistoricalData(kite, instrument, fromTime, toTime, dataType) {
         
         const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
         console.log( instrument, fromTime, toTime, dataType,'connected');
-        console.log(data,'d')
+       // console.log(data,'d')
         // Store data in the appropriate object
         if (dataType === 'hourly') {
             hourlyHistoricalData[instrument] = data;
-            console.log(`Hourly data for ${instrument} from ${fromTime} to ${toTime}:`, data);
+           // console.log(`Hourly data for ${instrument} from ${fromTime} to ${toTime}:`, data);
         } else if (dataType === 'minute') {
             minuteHistoricalData[instrument] = data;
-            console.log(`Minute data for ${instrument} from ${fromTime} to ${toTime}:`, data);
+           // console.log(`Minute data for ${instrument} from ${fromTime} to ${toTime}:`, data);
         }
     } catch (error) {
         console.error(`Error fetching data for ${instrument}:`, error);
@@ -35,7 +35,7 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType) {
         
      let d=   await getHistoricalData(kite, instruments[i], fromTime, toTime, dataType);
      
-     console.log( instruments[i], fromTime, toTime, dataType);
+    // console.log( instruments[i], fromTime, toTime, dataType);
         await new Promise(resolve => setTimeout(resolve, 333));
     }
 
