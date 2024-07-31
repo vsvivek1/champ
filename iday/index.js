@@ -250,7 +250,7 @@ function processTicks(tick){
 
         
 
-        cis.liveMinute.open=tick.last_price;
+        cis.liveMinute.open=tick.last_price;  
         cis.liveMinute.high=tick.last_price;
     }
 
@@ -273,7 +273,7 @@ function processTicks(tick){
     if(!cis) {
         
         cis.returns.push('NO CIS')
-        return;
+        return ;
     }
 
     var hasPosition=cis.hasLivePosition
@@ -340,7 +340,7 @@ if(!target_order && cis.hasLivePosition && (!cis.hasPlacedTarget)){
 cis.hasPlacedTarget=true
 
 cis.returns.push('No live position')
-    return;
+    return false;
 }
 
 
@@ -397,12 +397,32 @@ if(cis.minuteData){
 cis.msg='Reached SL switch';
 switch (true){
 
-case (cis.minuteData && pv0.close<pv1.close && cis.position.pnl>0):
+    case (cis.tick.last_price<cis.stoploss):
+        squareOff=true;
+        cis.msg=`candle low stop loss triggered`;
+    
+        console.log(cis.msg);
+
+    break;
+
+
+
+
+case (cis.minuteData && pv0.close<pv1.close && pv0.high<pv1.high && pv0.low<pv1.low ):
     squareOff=true;
     cis.msg=`Candle0 Close ${pv0.close} is less than ${pv1.close}`;
 
     console.log(cis.msg);
 break;
+
+case (cis.position.buy_price-2*(cis.minuteCandleMedianRange) >cis.tick.last_price
+):
+    squareOff=true;
+    cis.msg=`last tick below 2 cndles  ${cis.position.buy_price-2*(cis.minuteCandleMedianRange)} is less than ${cis.tick.last_price}`;
+
+    console.log(cis.msg);
+break;
+   
    
 
 /* case(cis.stopLoss && cis.tick.last_price<=cis.stopLoss):
@@ -474,7 +494,7 @@ break;
     case (cis.tick.last_price<cis.hourlyHigh  &&  !cis.updated && date.getHours()!=9 &&   (!cis.belowOpenTrade) ):
         squareOff=false;
 
-        console.log(`last price less than hourly high${cis.tradingsymbol}`)
+        //console.log(`last price less than hourly high${cis.tradingsymbol}`)
         cis.message=`last price less than hourly high${cis.tradingsymbol}`
        //msgx(`Danger ${cis.tradingsymbol} is below last hourly high, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
     
@@ -702,6 +722,22 @@ cis.message='Live minute has long upper shadow\nNot Entering'
    }
 
 
+if(cis.minuteData){
+
+    let pv1=cis.minuteData[cis.minuteData.length-1];
+    let pv2=cis.minuteData[cis.minuteData.length-2];
+ 
+    if(pv1.close>pv2.high && (cis.ordered==undefined || cis.ordered==false)){
+ 
+        cis.ordered=true;
+     cis.target=pv1.close+2
+     cis.message
+     executeBuy(cis);
+     return;
+    }
+}
+  
+
 
    if(!cis.minuteData){
 cis.message='No Minute Data return'
@@ -736,7 +772,13 @@ cis.returns.push(cis.message)
 if(
   
     
-    cis.minuteData && isLastPriceAboveMaxOfPrev15(cis.minuteData,cis) &&  ( (cis.ordered==undefined || cis.ordered==false)  )
+    cis.minuteData && isLastPriceAboveMaxOfPrev15(cis.minuteData,cis) && 
+     ( (cis.ordered==undefined || cis.ordered==false) 
+    
+    
+    
+    
+    )
 
 ){
 
@@ -744,11 +786,18 @@ cis.msg='max 15 cnadle ';
     cis.belowOpenTrade=true
 
     cis.message='15 min high entry for'+cis.tradingsymbol
-console.log('15 min high entry for',cis.tradingsymbol)
+//console.log('15 min high entry for',cis.tradingsymbol)
 //msgx('15 min high entry for',cis.tradingsymbol)
+  
+var x=isTickAboveHourlyHistoricalValueChkFn(cis);
+
+if(x){
     executeBuy(cis)
     cis.returns.push('after exe buy')
     return;
+
+}
+
 }
 
    // console.log(cis.tradingsymbol);
@@ -773,7 +822,8 @@ async function handleTickAboveOpen(cis){
        // return;
     } */
 
-  var x=isTickAboveHourlyHistoricalValue(cis)
+  var x=isTickAboveHourlyHistoricalValueChkFn(cis)
+
 
 
  
@@ -791,7 +841,6 @@ async function handleTickAboveOpen(cis){
 
 
 
-   
 
     if(cis.last_candle){
         //cis.last_candle=last_candle;
@@ -802,11 +851,18 @@ async function handleTickAboveOpen(cis){
 
       const hasBuySignal = detectBuySignal(cis);
 
+
+         
+  
+
       cis.msg='has Buy signal'+hasBuySignal;
 
       //console.log('above historic',x,cis.tradingsymbol,{hasBuySignal});
 
-      if(hasBuySignal && ( (cis.ordered==undefined || cis.ordered==false)  
+
+     // console.log(hasBuySignal,'hasBuySignal',cis.tradingsymbol,cis.ordered);
+
+      if(hasBuySignal &&  (!cis.ordered)  
         
       
 
@@ -819,7 +875,7 @@ async function handleTickAboveOpen(cis){
 
 
 
-        )
+        
 
 
 
@@ -880,10 +936,13 @@ function findMedianRange(ohlcData) {
 }
 async function executeBuy(cis) {
 
-    if(!cis.minuteData){
+ /*    if(!cis.minuteData){
 
         return
     }
+ */
+
+
 
 
     let pv2=cis.minuteData.slice(-2, -1)[0]
@@ -893,7 +952,28 @@ async function executeBuy(cis) {
      pv2.candle=getCandle(pv2)
      pv1.candle=getCandle(pv1)
 
+     if(pv1.close<pv2.close){
+
+        cis.message='candles are closiing in bearishh no entry'
+        //console.log('candles are closiing in bullish no entry pv1c<pv2c')
+
+        return;
+        
+     }
     
+
+     if(cis.tick.last_price<pv1.candle.low){
+
+cis.message='last tick is bewlow signal low'
+        
+        return;
+     }
+
+     if(pv1.candle.upperShadow>pv1.candle.body*.75){
+
+cis.message='candle has a upper wick not entering now'
+        return false;
+     }
     
 let price=pv1.close
     cis.msg='EXE buy';
@@ -917,8 +997,8 @@ if(pv1.range<liveRange*.5 || pv2.candle.range<pv1.candle.range*.33){
   
     cis.message='some kida shooting star';
     console.log(cis.message);
-    cis.returns.push('shooting star it seems')
-    return
+    cis.returns.push('shooting star it seems for ',cis.tradingsymbol)
+    return false;
 }
 
 if(true){
@@ -927,7 +1007,7 @@ if(true){
    // price=cis.tick.last_price-((pv1.high-pv1.low)/2)
     price=pv1.close
 
-    console.log(price,'price4 ',price)
+    //console.log(price,'price4 ',price)
 
 
 
@@ -949,12 +1029,12 @@ if(true){
     
             let obj={
                 
-                "NIFTY":72,
+                "NIFTY":36,//72,
                 
                // "BANKNIFTY":60,
-                "BANKNIFTY":60,
-                'MIDCPNIFTY':37,
-                "FINNIFTY":40
+                "BANKNIFTY":30,//,
+                'MIDCPNIFTY':20,//,
+                "FINNIFTY":20,//40
               }
     let multiplier;
     
@@ -967,13 +1047,18 @@ if(true){
       
       if(typeof multiplier =='undefined'){
       
-        multiplier =10
+        multiplier =20
       } ;
-      multiplier =2
+     // multiplier =4
       //multiplier=1;
       //99176
     
       //multiplier=2;
+
+
+      multiplier=multiplier/2
+
+     // multiplier=10;
 
 
 var noLots=1;///max 10
@@ -991,14 +1076,14 @@ for(let i=0;i<noLots;i++)
                 transaction_type: "BUY", // or "SELL"
                 order_type: "LIMIT", // or "MARKET", "SL", "SL-M"
                 quantity: cis.lot_size* multiplier, // specify the quantity
-                price: price-(priceDecrement*i),
+                price: Math.min(price-(priceDecrement*i),cis.tick.last_price),
                 product: "NRML", // or "CNC", "NRML"
                 validity: "DAY", // or "IOC"
             };
         
             try {
 
-                cis.msg='placing orders at '+cis.pv1.close;
+                cis.msg='placing orders at '+pv1.close;
 
 
                 const orderId = await kite.placeOrder("regular", orderParams);
@@ -1099,7 +1184,7 @@ function getCandle(ohlc){
 }
 
 
-function isTickAboveHourlyHistoricalValue(cis){
+function isTickAboveHourlyHistoricalValueChkFn(cis){
 
     
     
@@ -1118,8 +1203,10 @@ if(!a1){
 }
 let a=a1.map(a1=>a1.high)
 
-.sort((a,b)=>a-b);
+.sort((a2,b2)=>a2-b2);
 
+
+//console.log(a,'a');
 
 
  if(date.getHours()==9){
@@ -1131,22 +1218,25 @@ let a=a1.map(a1=>a1.high)
     cis.entryBelowHourlyCandle=true;
     if(!msg.includes(z)){
 
-      //  console.log(z);
+       // console.log(z);
         
     }
 
     return true
     
 }
-//console.log(a);
+/* console.log(a,);
+console.log(a[a.length-1],tick.last_price,//cis.tradingsymbol); */
 
+
+//console.log(cis.hourlyHigh,'cis.hourlyHigh')
 //process.exit();
 
 
 let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${date}`);
 
 
-    if(a && (a[a.length-1]<tick.last_price))
+    if(a && (tick.last_price>a[a.length-1]))
 
       {
         let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${date} `);
@@ -1157,7 +1247,7 @@ let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    las
             
         }
 
-        return true
+    return true
       }
     
     
@@ -1181,9 +1271,12 @@ let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    las
 
        // cis.returns.push('return at 1122')
 
-        return true/// trial
+       // return true/// trial
         return false;
       }
+
+
+      return false;
     
 //console.log(chalk.red('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk}`))
 
@@ -1508,11 +1601,11 @@ function isLastPriceAboveMaxOfPrev15(ohlcData, cis) {
 
     // Check if there are at least 16 candles
     if (ohlcData.length < 16) {
-        console.log('ohlc less than 16')
+      //  console.log('ohlc less than 16')
 
        /* console.log(
        'Not enough data. Need at least 16 candles.'); */
-       return;
+       return false;
     }
 
     // Extract the previous 15 candles
@@ -1605,7 +1698,7 @@ cis.ordered=false;
 await fetchPositionsAndSetCis();
 
 
-let targetPoints=Math.floor(cis.minuteCandleMedianRange*1.5)
+let targetPoints=Math.floor(cis.minuteCandleMedianRange*1)
 cis.buyPrice=order.price;
 cis.order=order;
 
@@ -1625,8 +1718,13 @@ if(cis.target){
     target=order.average_price * targetPoint
 }
 
+targetPoints=5
 target=order.average_price + targetPoints
 target=order.price + targetPoints
+
+let targetE=cis.target?cis.target:target;
+
+
 
 const orderParams = {
     exchange: "NFO", // or other exchanges as per requirement
@@ -1634,7 +1732,7 @@ const orderParams = {
     transaction_type: "SELL", // or "SELL"
     order_type: "LIMIT", // or "MARKET", "SL", "SL-M"
     quantity: order.quantity, // specify the quantity
-   price: Math.ceil(target ),
+   price: Math.ceil(targetE ),
    // price: Math.ceil( order.average_price + 4),
     product: "NRML", // or "CNC", "NRML"
     validity: "DAY", // or "IOC"

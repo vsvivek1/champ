@@ -56,11 +56,10 @@ export function detectBuySignal(cis) {
     let ohlcData = cis.minuteData;
     let lastPrice = cis.tick.last_price;
 
-    if (!ohlcData || ohlcData.length < 3) {
 
-        cis.location.ohlcNotSufficieant=true;cis.location.ohlcNotSufficieant=true;
-        return false;
-    }
+   
+
+   
 
     // Helper function to create a candle object
     function candle(data) {
@@ -70,7 +69,7 @@ export function detectBuySignal(cis) {
         const lowerShadow = Math.min(open, close) - low;
         const range = high - low;
         const color = close > open ? 'green' : 'red';
-        const isHammer = lowerShadow > 2 * body && upperShadow < body;
+        const isHammer = lowerShadow > 2 * body ;//&& upperShadow < body;
         const isBullishEngulfing = (previous) => close > open && previous.close < previous.open && open < previous.close && close > previous.open;
         const isMorningStar = (prev, prev2) => close > open && prev.close < open && prev2.close > open;
         const isBullishHarami = (previous) => close > open && previous.close < previous.open && close < previous.open && open > previous.close;
@@ -79,6 +78,30 @@ export function detectBuySignal(cis) {
         return { open, high, low, close, body, upperShadow, lowerShadow, range, color, isHammer, isBullishEngulfing, isMorningStar, isBullishHarami, isPiercing, volume };
     }
 
+    let pvsLast = ohlcData[ohlcData.length - 1];
+    if (!pvsLast) {
+
+       
+        
+        return false;
+    }
+    pvsLast.candle = candle(pvsLast);
+   // console.log(pvsLast.candle);
+    if(pvsLast.candle.isHammer){
+
+        return true
+    }
+
+    return false;
+
+
+
+
+    if (!ohlcData || ohlcData.length < 3) {
+
+        cis.location.ohlcNotSufficieant=true;cis.location.ohlcNotSufficieant=true;
+        return false;
+    }
     let twoPvsLast = ohlcData[ohlcData.length - 2];
     if (!twoPvsLast) {
 
@@ -88,12 +111,9 @@ export function detectBuySignal(cis) {
 
     twoPvsLast.candle = candle(twoPvsLast);
 
-    let pvsLast = ohlcData[ohlcData.length - 1];
-    if (!pvsLast) {
-        return false;
-    }
+   
 
-    pvsLast.candle = candle(pvsLast);
+
 
     // Calculate target and stoploss based on candle sizes
     function calculateTargetAndStoploss(entryPoint, candle) {

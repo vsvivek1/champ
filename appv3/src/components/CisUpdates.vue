@@ -32,7 +32,9 @@
 
 >
          
-            <td >{{ index + 1 }}</td>
+            <td >{{ index + 1 }}
+            
+            </td>
             <td
             :class="priceClass(item)"
             >
@@ -48,7 +50,10 @@
                
             </td>
 
-            <td>{{ item.message }}</td>
+            <td>{{ item.message }}
+              <br>
+              Live Minute{{ item.liveMinute }}
+            </td>
             <td>{{ item.returns}}</td>
            
             <td>{{ item.location }}</td>
@@ -69,7 +74,7 @@
             
             </td>
            
-            <td>{{ item.hourlyHigh }}</td>
+            <td>{{ item.position }}</td>
             <td v-if="item.position">{{ item.position.price }}</td>
             <td v-if="item.order">{{ item.order.status }}</td>
             

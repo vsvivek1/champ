@@ -257,7 +257,7 @@ var diff =calculateStrikeDifferences(expToday,name,ltp);
 
 
 
-let depth=-1
+let depth=0
 var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
 var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
 
@@ -453,7 +453,12 @@ setTimeout(()=> {
   //socket.emit('json-updated');
 
   console.log('jason updated');
-    exec(command, (error, stdout, stderr) => {
+    exec(command, async (error, stdout, stderr)  => {
+
+          await   writeJsonToFile(fullJson,'./iday/instrumentsForMining.json')
+
+
+
       if (error) {
         console.error(`Error executing command: ${error.message}`);
         return;
@@ -491,7 +496,7 @@ setTimeout(()=> {
 
 setTimeout(()=>{
 
-  fs.appendFile('./iday/last_time.text',`\n${Date()}`)
+ // fs.appendFile('./iday/last_time.text',`\n${Date()}`)
   console.log(`LAST TIME EXECUTED',${Date()}`)
 
 },5*1000)
@@ -549,6 +554,7 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             //console.log(fullJson.length,'full json len',selectedOptions.length)
             writeJsonToFile(fullJson,'./appv3/public/instruments/instrumentsForMining.json')
             writeJsonToFile(fullJson,'./appv3/src/assets/instruments/instrumentsForMining.json')
+            
 
             resolve(fullJson);
         } catch (error) {
