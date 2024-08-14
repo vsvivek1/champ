@@ -10,6 +10,7 @@ import updateOpenOrderPrice from "./updateOrder.js";
 import terminalLink from 'terminal-link';
 import chalk from 'chalk';
 import open from 'open';
+import notifyWithSound from  './notifier.js'
 //import { createSocketServer } from './socketServer.js'; // Adjust the path as necessary
 //import express from 'express'
 
@@ -128,6 +129,28 @@ if(seconds==1){
     }
 }
 
+let lastPrice = null; // To store the last price of the previous tick
+let lowerLowsCount = 0; // Counter for consecutive lower lows
+
+function isMakingLowerLows(tick, cis) {
+    if (lastPrice === null) {
+        // Initialize the last price on the first tick
+        lastPrice = tick.last_price;
+        return false; // Not enough data to determine lower lows
+    }
+
+    // Check if the current tick's last_price is lower than both lastSeenHigh and lastPrice
+    const isLowerLow = tick.last_price < cis.lastSeenHigh && tick.last_price < lastPrice;
+    
+    // Update the counter based on the condition
+    lowerLowsCount = isLowerLow ? lowerLowsCount + 1 : 0;
+
+    // Update lastPrice for the next comparison
+    lastPrice = tick.last_price;
+
+    // Return true if we have at least 3 consecutive lower lows
+    return lowerLowsCount >= 3;
+}
 
 
 async function fetchPositionsAndSetCis(){
@@ -280,13 +303,22 @@ function processTicks(tick){
     
 
     if(hasPosition){
+
+
+        if(typeof cis.lastSeenHigh!='undefined'){
+            if(cis.lastSeenHighT1==undefined) cis.lastSeenHighT1
+            if(cis.lastSeenHigh)
+         if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')   console.log('last seen high',cis.lastSeenHigh,cis.tradingsymbol,"LP:",cis.tick.last_price ,"BP:",cis.buyPrice,'prof:',(cis.tick_size.last_price-cis.buyPrice)*cis.lot_size);
+
+        }
+        
         handlePositionPresent(cis)
 
     }else{
         
         //cis.location.reachedNoPos=true;
 
-        //console.log(cis.location)
+        if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('handle no position b4',cis.tradingsymbol)
         handleNoPosition(cis)
     }
     
@@ -397,6 +429,28 @@ if(cis.minuteData){
 cis.msg='Reached SL switch';
 switch (true){
 
+
+    case ( (cis.lastSeenHigh>cis.buyPrice+13 && cis.tick.last_price<cis.lastSeenHigh-3)):
+
+    squareOff=true;
+    cis.msg=`profit booking`;
+
+    console.log(cis.msg);
+
+break;
+
+
+    case (isMakingLowerLows(cis.tick, cis)&& (cis.tick.last_price>cis.buyPrice+2)):
+
+    squareOff=true;
+    cis.msg=`lower ticks `;
+
+    console.log(cis.msg);
+
+break;
+
+
+
     case (cis.tick.last_price<cis.stoploss):
         squareOff=true;
         cis.msg=`candle low stop loss triggered`;
@@ -410,7 +464,7 @@ switch (true){
 
 case (cis.minuteData && pv0.close<pv1.close && pv0.high<pv1.high && pv0.low<pv1.low ):
     squareOff=true;
-    cis.msg=`Candle0 Close ${pv0.close} is less than ${pv1.close}`;
+    cis.msg=`Lower lows (${pv0.close},${pv1.close} ) and Lower Highs for ${cis.tradingsymbol} is less than `;
 
     console.log(cis.msg);
 break;
@@ -644,143 +698,136 @@ function isCloseOf3AboveEachOther(ohlcData, cis) {
     return closesIncreasing;
 }
 function handleNoPosition(cis){
+    if(!cis.minuteData){
+
+        return;
+    }
+    
+
+    if(cis.noBuy &&  cis.noBuyTime && date<cis.noBuyTime ){
 
 
+        cis.message ='NO RE -ENTRY COLLING TIME TILL ' +cis.noBuyTime ;
+if(seconds==15){
 
+    if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')   console.log('NO RE -ENTRY COLLING TIME FOR ',cis.tradingsymbol,'till',cis.noBuyTime ,cis.noBuyTime)
+
+}
+
+
+       cis.returns.push('No re entry time till'+cis.noBuyTime,cis.tradingsymbol )
+        return;
+    }
+    
+    if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('after no buy cis handleNo pos',cis.tradingsymbol)
+
+    if( (cis.tick.last_price<cis.tick.ohlc.open && hours<=12) ){
+
+        if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('hrs less than 12 and tick less than open return',cis.tradingsymbol)
+        ///no buy below open in the moring session 
+            cis.location.ohlcBewlowcheck=false;
+            cis.returns.push('LTP less than open')
+            return false;
+          }
  
 
+         
+          let h2= highestPointAfter12PM(cis.minuteData);
 
+          console.log(h2,cis.tradingsymbol,'h2'); return;
+          if( (cis.tick.last_price<h2 && hours>12) ){
+            if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')      console.log('hrs lgreater   h2 and tick less tha h2 return',cis.tradingsymbol)
+          cis.afterNoonTrade=true;
+          ///no buy below open in the moring session 
+              cis.location.ohlcBewlowcheck=true;
+              cis.returns.push('LTP less than open')
+              return false;
+            }
+            
+           /*  else{
+          
+             // console.log('truing afternoon trade for :',cis.tradingsymbol,'12 hr highest price is',h2, 'trying to buy aboue this');
+              
+            }
+           */
 
-    if(cis.minuteData){
-
-        cis.location.cisDataCheck=true;
-       let pv0=cis.minuteData[cis.minuteData.length-1]
-       let pv1=cis.minuteData[cis.minuteData.length-2]
-   
-
-if(pv0!=undefined || pv1!=undefined){
-
-
-
-
-       if(pv0.close<pv1.close){
-
-        cis.message='CANDLE 0 CLOSE <CANDLE1 CLOSE RETURN'
-
-       /*  cis.returns.push('CANDLE 0 CLOSE <CANDLE1 CLOSE RETURN') */
-       // return;
-       }else{
-
-        cis.message='check nice CANDLE 0 CLOSE >CANDLE1 CLOSE RETURN'
-
-       }
-       
-    }
-       //console.log(pv0.close,pv1.close,'pv0',cis.minuteData.length);
-       
-       //return;
-   
-   }
-
-   // console.log(cis.noBuyTime,'nobuytime',cis.tradingsymbol,cis.position)
+  
 
    cis.msg='Handle No pos';
-  if( cis.tick.last_price<cis.tick.ohlc.open){
 
-    cis.location.ohlcBewlowcheck=false;
-    cis.returns.push('LTP less than open')
-    return false;
-  }
+  
+
+
+
+
+
+
+
   cis.location.ohlcBewlowcheck=true
-if(cis.noBuy &&  cis.noBuyTime && date<cis.noBuyTime ){
+
+  
+  if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('763',cis.tradingsymbol)
 
 
-    cis.message ='NO RE -ENTRY COLLING TIME TILL ' +cis.noBuyTime ;
-   // console.log('NO RE -ENTRY COLLING TIME FOR ',cis.tradingsymbol,'till',cis.noBuyTime ,cis.noBuyTime)
-   cis.returns.push('No re entry time till'+cis.noBuyTime )
-    return;
-}
-
-
-if(cis.noBuy){
-
-    //return;
-}
 
 
 //if(seconds<30) return;
 if(cis.liveMinute.hasLongUpperShadow){
 
 cis.message='Live minute has long upper shadow\nNot Entering'
-    ///have to work on this
-
-   /*  console.log('symbol have long upper shadow , not entering ',cis.tradingsymbol,cis.liveMinute,seconds,'seconds')
-    return; */
-
-    //return;
+//console.log('liveMinuteHAsLargeUpper shadow no Entry',cis.tradingsymbol);
+//return;
+;
 
    }
 
+   if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('778',cis.tradingsymbol)
+if(typeof  cis.minuteData=='undefined'){
 
-if(cis.minuteData){
+    //console.log('cis not set',cis.tradingsymbol);
+    if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')     console.log('minute data nio  return',cis.tradingsymbol)
+    return
+}
+
+/* else{
+    //console.log('cis is ok',cis.tradingsymbol);
+    
+} */
 
     let pv1=cis.minuteData[cis.minuteData.length-1];
     let pv2=cis.minuteData[cis.minuteData.length-2];
  
-    if(pv1.close>pv2.high && (cis.ordered==undefined || cis.ordered==false)){
- 
-        cis.ordered=true;
-     cis.target=pv1.close+2
+    if(true){
+    //if(pv1.close>pv2.high){
+        if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')      console.log('b4 execute buy',cis.tradingsymbol)
+        //cis.ordered=true;
+     cis.target=pv1.close+4
      cis.message
      executeBuy(cis);
      return;
     }
-}
+
+    if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('803',cis.tradingsymbol,pv1.close,pv1.high)
+
+
+
+
+
   
-
-
-   if(!cis.minuteData){
-cis.message='No Minute Data return'
-cis.returns.push(cis.message)
-    //console.log('no minute data for',cis.tradingsymbol);
-    return;
-   }
-
-  // let b=isBodyIncreasing(cis.minuteData, cis);
-
-
-  let b=false;
-
-  // let c=isCloseOf3AboveEachOther(cis.minuteData, cis)
-
-   if(  (b)  && seconds<10
-    
-    
-    &&  ( (cis.ordered==undefined || cis.ordered==false)  )){
-
-
-    cis.belowOpenTrade=true
-    //console.log('3 body candle increasing|| 3 closes above',cis.tradingsymbol)
-      // executeBuy(cis)
-      cis.returns.push('b return')
-        return;
-
-   }
 
 
 
 if(
   
     
-    cis.minuteData && isLastPriceAboveMaxOfPrev15(cis.minuteData,cis) && 
-     ( (cis.ordered==undefined || cis.ordered==false) 
+    cis.minuteData && isLastPriceAboveMaxOfPrev15(cis.minuteData,cis) 
     
     
     
     
     )
 
-){
+{
 
 cis.msg='max 15 cnadle ';
     cis.belowOpenTrade=true
@@ -790,6 +837,8 @@ cis.msg='max 15 cnadle ';
 //msgx('15 min high entry for',cis.tradingsymbol)
   
 var x=isTickAboveHourlyHistoricalValueChkFn(cis);
+
+console.log('reached 834');
 
 if(x){
     executeBuy(cis)
@@ -908,6 +957,40 @@ executeBuy(cis)
 
 }
 
+function highestPointAfter12PM(data) {
+    // Ensure data contains timestamp information
+    if (!data|| !data.length || !data[0].hasOwnProperty('timestamp')) {
+
+        console.log('error in data',data);
+        
+        return false;
+        throw new Error("Each data entry must have a 'timestamp' property.");
+    }
+
+    // Filter data to include only entries after 12 PM
+    const after12PMData = data.filter(candle => {
+        const date = new Date(candle.timestamp);
+        return date.getHours() >= 12;
+    });
+
+    // Ensure there's data after 12 PM
+    if (!after12PMData.length) {
+
+        return true
+        throw new Error("No data available after 12 PM.");
+    }
+
+    // Find the highest point in the filtered data
+    let highestPoint = after12PMData[0].high;
+    for (let i = 1; i < after12PMData.length; i++) {
+        if (after12PMData[i].high > highestPoint) {
+            highestPoint = after12PMData[i].high;
+        }
+    }
+
+    return highestPoint;
+}
+
 function findMeanRange(ohlcData) {
     // Step 1: Calculate the sum of ranges for each candle (high - low)
     const totalRange = ohlcData.reduce((sum, data) => sum + (data.high - data.low), 0);
@@ -936,6 +1019,8 @@ function findMedianRange(ohlcData) {
 }
 async function executeBuy(cis) {
 
+    ///notifyWithSound(true,cis);
+  // return;
  /*    if(!cis.minuteData){
 
         return
@@ -943,6 +1028,41 @@ async function executeBuy(cis) {
  */
 
 
+    
+    if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')      console.log('1024',cis.tradingsymbol,cis.ordered)
+
+if(cis.ordered){
+
+    return false;
+}
+if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')      console.log('1026',cis.tradingsymbol)
+cis.ordered=true
+  /*  let h= highestPointBeforeLast5Minutes(cis.minuteData);
+
+   if(cis.tick.last_price<h && hours<12){
+
+cis.message='not above  highest point before last 5 min of '+cis.tradingsymbol;
+
+console.log(cis.message);
+    return;
+   } */
+
+ /*  let h2= highestPointAfter12PM(cis.minuteData);
+
+  if(cis.tick.last_price<h2 && (hours>12 )){
+
+    cis.message='not above last 5 min candle'+cis.tradingsymbol;
+
+    console.log(cis.message);
+        return;
+
+  }else{
+
+
+    cis.aboveNoonOpening=true;
+    console.log('highest price after 12 pm for  ',cis.tradingsymbol);
+    
+  } */
 
 
     let pv2=cis.minuteData.slice(-2, -1)[0]
@@ -961,7 +1081,7 @@ async function executeBuy(cis) {
         
      }
     
-
+     if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')      console.log('1072',cis.tradingsymbol)
      if(cis.tick.last_price<pv1.candle.low){
 
 cis.message='last tick is bewlow signal low'
@@ -995,12 +1115,12 @@ let liveRange=Math.abs(cis.tick.last_price-pv1.close)
 if(pv1.range<liveRange*.5 || pv2.candle.range<pv1.candle.range*.33){
   
   
-    cis.message='some kida shooting star';
+    cis.message='some kida shooting star'+ cis.tradingsymbol;
     console.log(cis.message);
     cis.returns.push('shooting star it seems for ',cis.tradingsymbol)
     return false;
 }
-
+if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')      console.log('1111',cis.tradingsymbol)
 if(true){
 
 ///proiceding for actual buy
@@ -1025,7 +1145,7 @@ if(true){
     //console.log('Aggregated Candle:', cis.liveHourCandle,cis.tradingsymbol,'last price',cis.tick.last_price);
            
     
-    cis.ordered=true;
+
     
             let obj={
                 
@@ -1047,7 +1167,7 @@ if(true){
       
       if(typeof multiplier =='undefined'){
       
-        multiplier =20
+        multiplier =40
       } ;
      // multiplier =4
       //multiplier=1;
@@ -1056,10 +1176,12 @@ if(true){
       //multiplier=2;
 
 
-      multiplier=multiplier/2
+      multiplier=multiplier
 
      // multiplier=10;
 
+multiplier=20
+/// pv5,pv4,pv3,pv2,pv1  --->> if pv3 and 2 are higher high do not entry water has flown 
 
 var noLots=1;///max 10
 
@@ -1096,6 +1218,27 @@ for(let i=0;i<noLots;i++)
         }
            // console.log(cis.tradingsymbol,'has buy signal',hasBuySignal);
 }
+}
+
+function highestPointBeforeLast5Minutes(data) {
+    if (data.length < 6) {
+
+        return true;
+        throw new Error("Insufficient data. The array must have at least 6 elements.");
+    }
+
+    // Slice the array to exclude the last 5 minutes
+    const relevantData = data.slice(0, data.length - 5);
+
+    // Find the highest point in the remaining data
+    let highestPoint = relevantData[0].high;
+    for (let i = 1; i < relevantData.length; i++) {
+        if (relevantData[i].high > highestPoint) {
+            highestPoint = relevantData[i].high;
+        }
+    }
+
+    return highestPoint;
 }
 function getCurrentHourlyCandleFromMinuteCandle(candles) {
     // Function to get the start time of the nearest 15-minute interval from the completed hour
@@ -1195,6 +1338,8 @@ const lnk = terminalLink('Chart', cis.chart); // Replace with your actual URL
 
     
 let a1=  hourlyHistoricalData[tick.instrument_token]
+
+
 if(!a1){
 
 
@@ -1236,6 +1381,7 @@ console.log(a[a.length-1],tick.last_price,//cis.tradingsymbol); */
 let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${date}`);
 
 
+//console.log(a,'a')
     if(a && (tick.last_price>a[a.length-1]))
 
       {
@@ -1263,7 +1409,7 @@ let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    las
             
         }
 
-        if([14,29,44,59].includes(seconds)){
+        if([30].includes(seconds)){
            // process.stdout.write('\x1Bc');
             console.log(chalk.bgYellow('---------------------------------------------'))
            // console.clear();
@@ -1336,6 +1482,8 @@ function convertToIndianTime(utcTimeString) {
 async function subscribe() {
     try {
         const instrument_tokens = instruAll.map(a => parseInt(a.instrument_token));
+
+        var ts= instruAll.map(a =>a. tradingsymbol);
        // console.log('Subscribing to instruments:', instrument_tokens);
 
         // Subscribe to instruments
@@ -1343,7 +1491,7 @@ async function subscribe() {
         ticker.unsubscribe([]);
         ticker.subscribe(instrument_tokens);
 
-        console.log('NUMBER OF TOKSN',instrument_tokens.length,instrument_tokens);
+        console.log('NUMBER OF TOKSN',instrument_tokens.length,ts);
         
         ticker.setMode(ticker.modeFull, instrument_tokens);
     } catch (error) {
@@ -1465,6 +1613,50 @@ function getCandleTimesGreaterThanMedian(ohlcData, medianRange) {
     return timesInIST;
 }
 
+function calculateBollingerBands(ohlcData, period = 20, stdDevMultiplier = 2) {
+    const movingAverages = [];
+    const bollingerBands = [];
+
+    for (let i = 0; i < ohlcData.length; i++) {
+        if (i >= period - 1) {
+            const slicedData = ohlcData.slice(i - period + 1, i + 1);
+            const closingPrices = slicedData.map(data => data.close);
+
+            const sum = closingPrices.reduce((acc, price) => acc + price, 0);
+            const average = sum / period;
+            movingAverages.push(average);
+
+            const variance = closingPrices.reduce((acc, price) => acc + Math.pow(price - average, 2), 0) / period;
+            const stdDev = Math.sqrt(variance);
+
+            const upperBand = average + stdDevMultiplier * stdDev;
+            const lowerBand = average - stdDevMultiplier * stdDev;
+
+            bollingerBands.push({ middle: average, upper: upperBand, lower: lowerBand });
+        } else {
+            movingAverages.push(null);
+            bollingerBands.push({ middle: null, upper: null, lower: null });
+        }
+    }
+
+    return bollingerBands;
+}
+
+function findSupportsUsingBollingerBands(ohlcData, bollingerBands) {
+    const supports = [];
+
+    for (let i = 1; i < ohlcData.length; i++) {
+        const { close } = ohlcData[i];
+        const { lower } = bollingerBands[i];
+
+        if (close < lower) {
+            supports.push({ index: i, value: lower });
+        }
+    }
+
+    return supports;
+}
+
 // Function to fetch minute historical data
 async function fetchMinuteData() {
     try {
@@ -1485,6 +1677,14 @@ async function fetchMinuteData() {
 
 
             cis.minuteData=minuteHistoricalData[key];
+
+            const period = 5; // Period for Bollinger Bands
+const bollingerBands = calculateBollingerBands(cis.minuteData, period);
+
+cis.bollingerBands=bollingerBands;
+
+const supports = findSupportsUsingBollingerBands(cis.minuteData, bollingerBands);
+cis.bollingerSupport=supports;
            
            
             cis.lastCandle=cis.minuteData.slice(-1)[0];
@@ -1665,11 +1865,18 @@ if(!cis) {
 
     cis.sellPrice=order.price;
 
-    cis.noBuy=true;
+  /*   cis.noBuy=true;
 
     let dt=new Date()
-    cis.noBuyTime=dt.setMinutes(dt.getMinutes()+15);
+    cis.noBuyTime=dt.setMinutes(dt.getMinutes()+1); */
 
+
+    cis.noBuy = true;
+
+let dt = new Date();
+dt.setMinutes(dt.getMinutes() + 1); // Modifies the date object
+
+cis.noBuyTime = dt.getTime();
 
 
     cis.lastSeenHigh=0;
@@ -1698,7 +1905,8 @@ cis.ordered=false;
 await fetchPositionsAndSetCis();
 
 
-let targetPoints=Math.floor(cis.minuteCandleMedianRange*1)
+//let targetPoints=Math.floor(cis.minuteCandleMedianRange*1)
+let targetPoints=10;
 cis.buyPrice=order.price;
 cis.order=order;
 
@@ -1709,16 +1917,17 @@ cis.updated=false;
 
 
 let target;
-
+console.log(cis.target,'is the cis.target')
 if(cis.target){
 
     target=cis.target;
-}else{
+}
+else{
 
     target=order.average_price * targetPoint
 }
 
-targetPoints=5
+targetPoints=7
 target=order.average_price + targetPoints
 target=order.price + targetPoints
 
@@ -1732,8 +1941,8 @@ const orderParams = {
     transaction_type: "SELL", // or "SELL"
     order_type: "LIMIT", // or "MARKET", "SL", "SL-M"
     quantity: order.quantity, // specify the quantity
-   price: Math.ceil(targetE ),
-   // price: Math.ceil( order.average_price + 4),
+  // price: Math.ceil(targetE ),
+    price: Math.ceil( order.average_price + 5),
     product: "NRML", // or "CNC", "NRML"
     validity: "DAY", // or "IOC"
 };

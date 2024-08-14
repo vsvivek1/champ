@@ -75,7 +75,7 @@
             </td>
            
             <td>{{ item.position }}</td>
-            <td v-if="item.position">{{ item.position.price }}</td>
+            <td v-if="item.position">{{ item.position.buy_price }}</td>
             <td v-if="item.order">{{ item.order.status }}</td>
             
 
@@ -117,11 +117,18 @@ import instruments from '../assets/instruments/instrumentsForMining'
         },
       priceClass(cis) {
 
-if(!cis.tick){
+      if(cis.aboveNoonOpening){
+
+        return 'pink'
+      }
+
+/* if(!cis.tick || !cis.minuteData || !cis.minuteData[cis.minuteData.length-2]){
 
   return 'grey';
 }
-
+ */
+/* if(cis.tick.last_price < cis.tick.ohlc.open && cis.minuteData[cis.minuteData.length-1].close>cis.minuteData[cis.minuteData.length-2].close)
+return 'blue'; */
   return cis.tick.last_price < cis.tick.ohlc.open ? 'red' : 'green';
 },
 
@@ -152,12 +159,21 @@ if(!cis.tick){
   
   <style>
 
+  .pink{
+
+    color: rgb(212, 8, 137);
+
+  }
+
 .red {
             color: rgb(171, 95, 95);
             background-color: black;
         }
         .green {
             color: rgb(65, 105, 65);
+        }
+        .blue {
+            color: rgb(40, 7, 229);
         }
   table {
     width: 100%;

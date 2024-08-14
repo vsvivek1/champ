@@ -6,6 +6,7 @@ const { downLoadAllInstrumentsAndReturnJson } = require('./downLoadAllInstrument
 const Path  =  require( 'path' );
 const { getNFOScripts } = require('./getNFOScripts.js');
 const { getScriptsExpiringBeforeNextThursday } = require('./getScriptsExpiringBeforeNextThursday.js');
+const { getScriptsExpiringBeforeSameDayNextWeek } = require('./getScriptsExpiringBeforeNextThursday.js');
 const { getScriptsExpiringToday } = require('./getScriptsExpiringBeforeNextThursday.js');
 const { getUniqueNames } = require('./getUniqueNames.js');
 const { getUniqueInstruments } = require('./getUniqueNames.js');
@@ -48,7 +49,7 @@ async function writeJsonToFile(jsonData, fileName) {
 
         
 
-        console.log('JSON data has been written to', fileName);
+        //console.log('JSON data has been written to', fileName);
 
       
 
@@ -75,6 +76,11 @@ function calculateStrikeDifferences(instruments1, name,ltp) {
 if('BANKNIFTY'==name){
 
   return 100
+}
+
+if('NIFTY'==name){
+
+  return 50
 }
   //let exp=instruments1[].expiry;
 
@@ -133,8 +139,9 @@ async function main(params) {
    
 var nfoScripts=getNFOScripts(allScriptJson)
 
-var exp=getScriptsExpiringBeforeNextThursday(nfoScripts);
-var expToday=getScriptsExpiringToday(nfoScripts);
+//var exp=getScriptsExpiringBeforeNextThursday(nfoScripts);
+//var expToday=getScriptsExpiringToday(nfoScripts);
+var expToday=getScriptsExpiringBeforeSameDayNextWeek(nfoScripts);
 
 
 
@@ -226,7 +233,7 @@ let instruNameFeild=typeof indexOptions[name]=='undefined'?name:indexOptions[nam
 
 let indexInstrument=indexInstruments.find(i=>i.name==instruNameFeild)
 
-//console.log(indexInstrument,'indexInstrument');
+
 
 
 if(typeof indexInstrument=='undefined'){
@@ -240,7 +247,6 @@ if(typeof indexInstrument=='undefined'){
 
 var quote=await kite.getLTP(indexInstrument.instrument_token)
 
-
 var ltp=quote[indexInstrument.instrument_token]['last_price']
 
 
@@ -252,12 +258,15 @@ var ltp=quote[indexInstrument.instrument_token]['last_price']
 
 var diff =calculateStrikeDifferences(expToday,name,ltp);
 
+console.log(indexInstrument,'indexInstrumentx',diff);
+
+
 //console.log('THE NAME IS ',name,instruNameFeild,ltp,'diff',diff)
 
 
 
 
-let depth=0
+let depth=1
 var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
 var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
 
@@ -443,7 +452,7 @@ async function popOption(selectedOptions,fullJson,accessTokenDoc) {
 
             //const command = 'pm2 restart ./iday/index2.js';
 
-            const command='ls'
+            const command='pwd'
 
 
 
@@ -547,7 +556,7 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             option.hasLiveOrder=false;
             
 
-            console.log('pushing option', option.tradingsymbol);
+            console.log('pushing option', option.tradingsymbol,option.expiry);
             fullJson.push(option);
             console.log('new length', fullJson.length);
 

@@ -1,4 +1,6 @@
 function getUniqueNames(jsonArray) {
+
+   
    const uniqueNames = new Set();
    jsonArray.forEach(item => {
       if (item.name) {

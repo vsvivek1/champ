@@ -60,7 +60,7 @@ export function detectBuySignal(cis) {
    
 
    
-
+/// pv5,pv4,pv3,pv2,pv1  --->> if pv3 and 2 are higher high do not entry water has flown 
     // Helper function to create a candle object
     function candle(data) {
         const { open, high, low, close, volume } = data;
@@ -78,57 +78,41 @@ export function detectBuySignal(cis) {
         return { open, high, low, close, body, upperShadow, lowerShadow, range, color, isHammer, isBullishEngulfing, isMorningStar, isBullishHarami, isPiercing, volume };
     }
 
+    function volumeFilter(current, previous) {
+        return current.volume > previous.volume; // Ensure current volume is greater than previous volume
+    }
+
+
+    function calculateTargetAndStoploss(entryPoint, candle) {
+        const target = entryPoint + candle.range; // Target is entry point plus the range of the candle
+        const stoploss = entryPoint - candle.range; // Stoploss is entry point minus the range of the candle
+        return { target, stoploss };
+    }
+    
+    
     let pvsLast = ohlcData[ohlcData.length - 1];
-    if (!pvsLast) {
+   var twoPvsLast= ohlcData[ohlcData.length - 2];
+    if (!pvsLast ) {
 
        
         
         return false;
     }
     pvsLast.candle = candle(pvsLast);
+
+
+    twoPvsLast.candle=candle(twoPvsLast);
+
+   // twoPvsLast=twoPvsLast
    // console.log(pvsLast.candle);
-    if(pvsLast.candle.isHammer){
+   /*  if(pvsLast.candle.isHammer){
 
         return true
-    }
+    } */
 
-    return false;
+        //&& pvsLast.close > pvsLast.candle.high
 
-
-
-
-    if (!ohlcData || ohlcData.length < 3) {
-
-        cis.location.ohlcNotSufficieant=true;cis.location.ohlcNotSufficieant=true;
-        return false;
-    }
-    let twoPvsLast = ohlcData[ohlcData.length - 2];
-    if (!twoPvsLast) {
-
-        cis.location.ohlcNotSufficieant=true;
-        return false;
-    }
-
-    twoPvsLast.candle = candle(twoPvsLast);
-
-   
-
-
-
-    // Calculate target and stoploss based on candle sizes
-    function calculateTargetAndStoploss(entryPoint, candle) {
-        const target = entryPoint + candle.range; // Target is entry point plus the range of the candle
-        const stoploss = entryPoint - candle.range; // Stoploss is entry point minus the range of the candle
-        return { target, stoploss };
-    }
-
-    // Volume filter to confirm breakouts
-    function volumeFilter(current, previous) {
-        return current.volume > previous.volume; // Ensure current volume is greater than previous volume
-    }
-
-    // Detect Hammer pattern
-    if (pvsLast.candle.isHammer && pvsLast.close > pvsLast.candle.high && volumeFilter(pvsLast, twoPvsLast)) {
+    if (pvsLast.candle.isHammer  && volumeFilter(pvsLast, twoPvsLast)) {
         cis.entryStrategy = "Hammer Pattern";
         cis.entryPoint = pvsLast.close;
         const { target, stoploss } = calculateTargetAndStoploss(pvsLast.close, pvsLast.candle);
@@ -142,6 +126,37 @@ export function detectBuySignal(cis) {
         }
     }
 
+
+    return false;
+
+
+
+
+    if (!ohlcData || ohlcData.length < 3) {
+
+        cis.location.ohlcNotSufficieant=true;cis.location.ohlcNotSufficieant=true;
+        return false;
+    }
+   // let twoPvsLast = ohlcData[ohlcData.length - 2];
+    if (!twoPvsLast) {
+
+        cis.location.ohlcNotSufficieant=true;
+        return false;
+    }
+
+    twoPvsLast.candle = candle(twoPvsLast);
+
+   
+
+
+
+    // Calculate target and stoploss based on candle sizes
+
+
+    // Volume filter to confirm breakouts
+ 
+    // Detect Hammer pattern
+  
     // Iterate through the OHLC data to check for other buy signals
     for (let i = 2; i < ohlcData.length; i++) {
         const current = ohlcData[i];
