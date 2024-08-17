@@ -332,10 +332,165 @@ function processTicks(tick){
 
 
 }
+async function squareOffAfter13Hrs(cis, orders, date) {
+
+    if(cis.minuteData){
+        pv0=cis.minuteData[cis.minuteData.length-1]
+        pv1=cis.minuteData[cis.minuteData.length-2]
+   
+   
+   }else{
+
+    console.log('some issue in 411',cis.tradingsymbol);
+    
+   }
+    let squareOff = false;
+
+    // Assume highestPointAfter12PM is an async function that returns highAfter12
+    let highAfter12 = await highestPointAfter12PM(cis.minuteData);
+
+    switch (true) {
+        case (cis.lastSeenHigh > cis.buyPrice + 13 && cis.tick.last_price < cis.lastSeenHigh - 3):
+            squareOff = true;
+            cis.msg = `profit booking`;
+            console.log(cis.msg);
+            break;
+
+        case (isMakingLowerLows(cis.tick, cis) && cis.tick.last_price > cis.buyPrice + 2):
+            squareOff = true;
+            cis.msg = `lower ticks `;
+            console.log(cis.msg);
+            break;
+
+        case (cis.tick.last_price < cis.stoploss):
+            squareOff = true;
+            cis.msg = `candle low stop loss triggered`;
+            console.log(cis.msg);
+            break;
+
+        case (cis.minuteData && pv0.close < pv1.close && pv0.high < pv1.high && pv0.low < pv1.low):
+            squareOff = true;
+            cis.msg = `Lower lows (${pv0.close},${pv1.close} ) and Lower Highs for ${cis.tradingsymbol}`;
+            console.log(cis.msg);
+            break;
+
+        case (cis.position.buy_price - 2 * cis.minuteCandleMedianRange > cis.tick.last_price):
+            squareOff = true;
+            cis.msg = `last tick below 2 candles  ${cis.position.buy_price - 2 * cis.minuteCandleMedianRange} is less than ${cis.tick.last_price}`;
+            console.log(cis.msg);
+            break;
+
+        case (cis.liveHourCandle && cis.tick.last_price < cis.liveHourCandle.low && !cis.updated):
+            squareOff = true;
+            console.log(`Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`);
+            cis.msg = `Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`;
+            break;
+
+        case (
+            cis.liveHourCandle && cis.tick.last_price < cis.liveHourCandle.high * 0.8 &&
+            !cis.updated 
+          
+        ):
+            squareOff = false;
+            console.log(`Danger ${cis.tradingsymbol} is below half of live hour sq off @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`);
+            break;
+
+        case (cis.tick.last_price < highAfter12 && !cis.updated):
+            squareOff = true;
+            console.log(`last price less than high after 12 for ${cis.tradingsymbol}`);
+            cis.message = `last price less than high after 12 for ${cis.tradingsymbol}`;
+            break;
+
+        case (cis.tick.last_price < cis.hourlyHigh && !cis.updated && date.getHours() != 9):
+            squareOff = false;
+            cis.message = `last price less than hourly high ${cis.tradingsymbol}`;
+            break;
+    }
+
+    return squareOff;
+}
+
+
+function squareOffBefore13Hrs(cis, orders, date) {
+    let   pv0;
+    let pv1
+    if(cis.minuteData){
+      pv0=cis.minuteData[cis.minuteData.length-1]
+    pv1=cis.minuteData[cis.minuteData.length-2]
+   
+   
+   }else{
+
+    console.log('some issue in 411',cis.tradingsymbol);
+    
+   }
+    let squareOff = false;
+
+    switch (true) {
+        case (cis.lastSeenHigh > cis.buyPrice + 13 && cis.tick.last_price < cis.lastSeenHigh - 3):
+            squareOff = true;
+            cis.msg = `profit booking`;
+            console.log(cis.msg);
+            break;
+
+        case (isMakingLowerLows(cis.tick, cis) && cis.tick.last_price > cis.buyPrice + 2):
+            squareOff = true;
+            cis.msg = `lower ticks `;
+            console.log(cis.msg);
+            break;
+
+        case (cis.tick.last_price < cis.stoploss):
+            squareOff = true;
+            cis.msg = `candle low stop loss triggered`;
+            console.log(cis.msg);
+            break;
+
+        case (pv0 && pv1 && cis.minuteData && pv0.close < pv1.close && pv0.high < pv1.high && pv0.low < pv1.low):
+            squareOff = true;
+            cis.msg = `Lower lows (${pv0.close},${pv1.close} ) and Lower Highs for ${cis.tradingsymbol}`;
+            console.log(cis.msg);
+            break;
+
+        case (cis.position.buy_price - 2 * cis.minuteCandleMedianRange > cis.tick.last_price):
+            squareOff = true;
+            cis.msg = `last tick below 2 candles  ${cis.position.buy_price - 2 * cis.minuteCandleMedianRange} is less than ${cis.tick.last_price}`;
+            console.log(cis.msg);
+            break;
+
+        case (cis.liveHourCandle && cis.tick.last_price < cis.liveHourCandle.low && !cis.updated && !(cis.belowOpenTrade == 'false' || typeof cis.belowOpenTrade == 'undefined')):
+            squareOff = true;
+            console.log(`Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`);
+            cis.msg = `Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`;
+            break;
+
+        case (
+            cis.liveHourCandle && cis.tick.last_price < cis.liveHourCandle.high * 0.8 &&
+            !cis.updated && !(cis.belowOpenTrade == 'false' || typeof cis.belowOpenTrade == 'undefined') &&
+            (cis.entryBelowHourlyCandle == undefined || cis.entryBelowHourlyCandle == false)
+        ):
+            squareOff = false;
+            console.log(`Danger ${cis.tradingsymbol} is below half of live hour sq off @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`);
+            break;
+
+        case (cis.tick.last_price < cis.tick.ohlc.open && !cis.updated && (!cis.belowOpenTrade)):
+            squareOff = true;
+            console.log(`last price less than open for ${cis.tradingsymbol}`);
+            cis.message = `last price less than open for ${cis.tradingsymbol}`;
+            break;
+
+        case (cis.tick.last_price < cis.hourlyHigh && !cis.updated && date.getHours() != 9 && (!cis.belowOpenTrade)):
+            squareOff = false;
+            cis.message = `last price less than hourly high ${cis.tradingsymbol}`;
+            break;
+    }
+
+    return squareOff;
+}
+
 
 function handlePositionPresent(cis){
 
-
+   let squareOff=false;
 cis.lastSeenHighForPosition=cis.tick.last_price>cis.lastSeenHighForPosition?cis.tick.last_price:cis.lastSeenHighForPosition;
 
 cis.lastSeenHigh=cis.tick.last_price>cis.lastSeenHigh?cis.tick.last_price:cis.lastSeenHigh;
@@ -377,7 +532,7 @@ cis.returns.push('No live position')
 
 
 
-let squareOff=false;
+
  if(cis.liveHourCandle)  {
 
     let x=chalk.blue(`last price,${cis.tick.last_price}, hourly high ${cis.liveHourCandle.high} for ${cis.tradingsymbol}`)
@@ -412,9 +567,6 @@ if(cis.minuteData){
      pv0=cis.minuteData[cis.minuteData.length-1]
      pv1=cis.minuteData[cis.minuteData.length-2]
 
-    //console.log(pv0.close,pv1.close,'pv0',cis.minuteData.length);
-    
-    //return;
 
 }
 
@@ -427,133 +579,14 @@ if(cis.minuteData){
 
 
 cis.msg='Reached SL switch';
-switch (true){
 
 
-    case ( (cis.lastSeenHigh>cis.buyPrice+13 && cis.tick.last_price<cis.lastSeenHigh-3)):
+if(hours<=12){
 
-    squareOff=true;
-    cis.msg=`profit booking`;
+    squareOff=squareOffBefore13Hrs(cis, orders, date);
+}else{
 
-    console.log(cis.msg);
-
-break;
-
-
-    case (isMakingLowerLows(cis.tick, cis)&& (cis.tick.last_price>cis.buyPrice+2)):
-
-    squareOff=true;
-    cis.msg=`lower ticks `;
-
-    console.log(cis.msg);
-
-break;
-
-
-
-    case (cis.tick.last_price<cis.stoploss):
-        squareOff=true;
-        cis.msg=`candle low stop loss triggered`;
-    
-        console.log(cis.msg);
-
-    break;
-
-
-
-
-case (cis.minuteData && pv0.close<pv1.close && pv0.high<pv1.high && pv0.low<pv1.low ):
-    squareOff=true;
-    cis.msg=`Lower lows (${pv0.close},${pv1.close} ) and Lower Highs for ${cis.tradingsymbol} is less than `;
-
-    console.log(cis.msg);
-break;
-
-case (cis.position.buy_price-2*(cis.minuteCandleMedianRange) >cis.tick.last_price
-):
-    squareOff=true;
-    cis.msg=`last tick below 2 cndles  ${cis.position.buy_price-2*(cis.minuteCandleMedianRange)} is less than ${cis.tick.last_price}`;
-
-    console.log(cis.msg);
-break;
-   
-   
-
-/* case(cis.stopLoss && cis.tick.last_price<=cis.stopLoss):
-squareOff=true;
-console.log(`CIS inherent stop loss ${cis.stopLossit} stop loss ${cis.tradingsymbol} and current is ${cis.position.pnl} order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
-
-break;
- */
-
-    /* case (cis.position.pnl<cis.highestProfit*.98 && !cis.updated && cis.highestProfit!=0):
-    squareOff=true;
-    console.log(`profit ${cis.highestProfit}Profit booking ${cis.tradingsymbol} is below less than 98 % of max profit of${cis.highestProfit}, and current is ${cis.position.pnl} order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
-
-    break; */
-
-
-   /*  case ( cis.highestProfit>5000 && cis.lastSeenHighForPosition && cis.tick.last_price<cis.lastSeenHighForPosition*.98   && !cis.updated):
-       
-    
-    
-    squareOff=true;
-        console.log(`Danger ${cis.tradingsymbol} is below less than 2% of last seen high of ${cis.lastSeenHighForPosition} current @ ${cis.tick.last_price}, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
-    
-    break
- */
-
-
-   /*  case (cis.position && cis.position.average_price &&  cis.tick.last_price <cis.position.average_price*.95 && !cis.updated):
-        squareOff=true;
-        console.log(`Danger ${cis.tradingsymbol} is below less than 5% of  position avegrage price low @ ${cis.tick.last_price}, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
-    
-    break;
- */
-  
-
-
-    case (cis.liveHourCandle && cis.tick.last_price <cis.liveHourCandle.low && !cis.updated && !(cis.belowOpenTrade=='false' || typeof cis.belowOpenTrade=='undefined')):
-       
-    
-    squareOff=true;
-    squareOff=false;
-        
-        console.log(`Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
-      cis.msg=`Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`;
-        //msgx(`Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
-    
-    break;
-
-
-    case (
-       ( cis.liveHourCandle && cis.tick.last_price <cis.liveHourCandle.high*.8 &&
-         !cis.updated && !(cis.belowOpenTrade=='false' || typeof cis.belowOpenTrade=='undefined')
-        ) && (cis.entryBelowHourlyCandle==undefined || cis.entryBelowHourlyCandle==false)
-        ):
-        squareOff=false;
-        console.log(`Danger ${cis.tradingsymbol} is below half of live hour sq off @ ${cis.tick.last_price}, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
-        //msgx(`Danger ${cis.tradingsymbol} is below half of live hour sq off @ ${cis.tick.last_price}, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
-    
-    break;
-
-    case (cis.tick.last_price<cis.tick.ohlc.open && !cis.updated && (!cis.belowOpenTrade)  ):
-        squareOff=true;
-        console.log(`last price less than open for ${cis.tradingsymbol}`)
-         cis.message=`last price lessopen for ${cis.tradingsymbol}`
-        //msgx(`Danger ${cis.tradingsymbol} is below opening price, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
-    
-    break;
-
-    case (cis.tick.last_price<cis.hourlyHigh  &&  !cis.updated && date.getHours()!=9 &&   (!cis.belowOpenTrade) ):
-        squareOff=false;
-
-        //console.log(`last price less than hourly high${cis.tradingsymbol}`)
-        cis.message=`last price less than hourly high${cis.tradingsymbol}`
-       //msgx(`Danger ${cis.tradingsymbol} is below last hourly high, order id is ${orders.find(o=>o.tradingsymbol==cis.tradingsymbol).order_id}`);
-    
-    break;
-
+squareOff=squareOffAfter13Hrs(cis, orders, date)
 
 }
 
@@ -698,6 +731,8 @@ function isCloseOf3AboveEachOther(ohlcData, cis) {
     return closesIncreasing;
 }
 function handleNoPosition(cis){
+
+    let proceedToTrade=false;
     if(!cis.minuteData){
 
         return;
@@ -721,35 +756,36 @@ if(seconds==15){
     
     if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('after no buy cis handleNo pos',cis.tradingsymbol)
 
-    if( (cis.tick.last_price<cis.tick.ohlc.open && hours<=12) ){
+    if( (cis.tick.last_price>=cis.tick.ohlc.open && hours<=12) ){
 
+        proceedToTrade=true;
         if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('hrs less than 12 and tick less than open return',cis.tradingsymbol)
         ///no buy below open in the moring session 
             cis.location.ohlcBewlowcheck=false;
             cis.returns.push('LTP less than open')
-            return false;
+            //return false;
           }
  
 
          
           let h2= highestPointAfter12PM(cis.minuteData);
 
-          console.log(h2,cis.tradingsymbol,'h2'); return;
-          if( (cis.tick.last_price<h2 && hours>12) ){
+        
+
+        
+          if( (cis.tick.last_price>h2 && hours>12) ){
             if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')      console.log('hrs lgreater   h2 and tick less tha h2 return',cis.tradingsymbol)
-          cis.afterNoonTrade=true;
+       
+       
+                cis.afterNoonTrade=true;
+                proceedToTrade=true;
           ///no buy below open in the moring session 
               cis.location.ohlcBewlowcheck=true;
               cis.returns.push('LTP less than open')
-              return false;
+             // return false;
             }
             
-           /*  else{
           
-             // console.log('truing afternoon trade for :',cis.tradingsymbol,'12 hr highest price is',h2, 'trying to buy aboue this');
-              
-            }
-           */
 
   
 
@@ -782,12 +818,6 @@ cis.message='Live minute has long upper shadow\nNot Entering'
    }
 
    if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('778',cis.tradingsymbol)
-if(typeof  cis.minuteData=='undefined'){
-
-    //console.log('cis not set',cis.tradingsymbol);
-    if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')     console.log('minute data nio  return',cis.tradingsymbol)
-    return
-}
 
 /* else{
     //console.log('cis is ok',cis.tradingsymbol);
@@ -797,11 +827,11 @@ if(typeof  cis.minuteData=='undefined'){
     let pv1=cis.minuteData[cis.minuteData.length-1];
     let pv2=cis.minuteData[cis.minuteData.length-2];
  
-    if(true){
+    if(proceedToTrade){
     //if(pv1.close>pv2.high){
         if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')      console.log('b4 execute buy',cis.tradingsymbol)
         //cis.ordered=true;
-     cis.target=pv1.close+4
+  if(pv1)   cis.target=pv1.close+4;
      cis.message
      executeBuy(cis);
      return;
@@ -838,7 +868,7 @@ cis.msg='max 15 cnadle ';
   
 var x=isTickAboveHourlyHistoricalValueChkFn(cis);
 
-console.log('reached 834');
+console.log('reached 834',x,cis.highestPointAfter12PM,cis.tick.last_price,cis.tradingsymbol);
 
 if(x){
     executeBuy(cis)
@@ -957,38 +987,22 @@ executeBuy(cis)
 
 }
 
-function highestPointAfter12PM(data) {
-    // Ensure data contains timestamp information
-    if (!data|| !data.length || !data[0].hasOwnProperty('timestamp')) {
+function highestPointAfter12PM(ohlcData) {
+    if (!ohlcData || ohlcData.length < 225) {
+        return -1
+    } else {
+        // Strip the first 225 entries
 
-        console.log('error in data',data);
+       
         
-        return false;
-        throw new Error("Each data entry must have a 'timestamp' property.");
+        let strippedData = ohlcData.slice(225);
+
+        // Find the highest "High" value in the remaining data
+        let highestPoint = Math.max(...strippedData.map(entry => entry.high));
+
+        return highestPoint;
     }
-
-    // Filter data to include only entries after 12 PM
-    const after12PMData = data.filter(candle => {
-        const date = new Date(candle.timestamp);
-        return date.getHours() >= 12;
-    });
-
-    // Ensure there's data after 12 PM
-    if (!after12PMData.length) {
-
-        return true
-        throw new Error("No data available after 12 PM.");
-    }
-
-    // Find the highest point in the filtered data
-    let highestPoint = after12PMData[0].high;
-    for (let i = 1; i < after12PMData.length; i++) {
-        if (after12PMData[i].high > highestPoint) {
-            highestPoint = after12PMData[i].high;
-        }
-    }
-
-    return highestPoint;
+   // return highestPoint;
 }
 
 function findMeanRange(ohlcData) {
@@ -1183,7 +1197,7 @@ if(true){
 multiplier=20
 /// pv5,pv4,pv3,pv2,pv1  --->> if pv3 and 2 are higher high do not entry water has flown 
 
-var noLots=1;///max 10
+var noLots=2;///max 10
 
 
 var priceDecrement=0;
@@ -1310,7 +1324,10 @@ function getCurrentHourlyCandleFromMinuteCandle(candles) {
 function getCandle(ohlc){
 
 
+if(!ohlc){
 
+    return
+}
 
     let {open,close,high,low}=ohlc;
 
@@ -1354,7 +1371,15 @@ let a=a1.map(a1=>a1.high)
 //console.log(a,'a');
 
 
- if(date.getHours()==9){
+ if(date.getHours()>12 && cis.highestPointAfter12PM<cis.tick.last_price){
+
+    let m=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${date}`);
+    console.log(m)
+    return true
+
+ }
+    
+    else if(date.getHours()==9){
 
    // cis.liveHourCandle && cis.tick.last_price <cis.liveHourCandle.high*.8 
     let z=chalk.yellowBright('The breath morning',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price}  ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${date} `);
@@ -1678,6 +1703,8 @@ async function fetchMinuteData() {
 
             cis.minuteData=minuteHistoricalData[key];
 
+            cis.highestPointAfter12PM=highestPointAfter12PM(cis.minuteData);
+
             const period = 5; // Period for Bollinger Bands
 const bollingerBands = calculateBollingerBands(cis.minuteData, period);
 
@@ -1906,7 +1933,7 @@ await fetchPositionsAndSetCis();
 
 
 //let targetPoints=Math.floor(cis.minuteCandleMedianRange*1)
-let targetPoints=10;
+let targetPoints=12;
 cis.buyPrice=order.price;
 cis.order=order;
 
@@ -1927,7 +1954,7 @@ else{
     target=order.average_price * targetPoint
 }
 
-targetPoints=7
+targetPoints=10
 target=order.average_price + targetPoints
 target=order.price + targetPoints
 
