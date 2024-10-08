@@ -266,7 +266,7 @@ console.log(indexInstrument,'indexInstrumentx',diff);
 
 
 
-let depth=1
+let depth=0
 var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
 var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
 

@@ -6,7 +6,7 @@ import getKiteConnectInstance from '../getKiteConnectInstanceRequire.js';
 import moment from 'moment';
 import instruAll from '../appv3/public/instruments/instrumentsForMining.json' assert { type: "json" };
 import { detectBuySignal } from './candleStickSignals.js';
-import updateOpenOrderPrice from "./updateOrder.js";
+import upglobal.dateOpenOrderPrice from "./upglobal.dateOrder.js";
 import terminalLink from 'terminal-link';
 import chalk from 'chalk';
 import open from 'open';
@@ -18,6 +18,9 @@ import notifyWithSound from  './notifier.js'
 
 
 /* a(); */
+
+
+
 
 import io from 'socket.io-client';
 const socket = io('http://localhost:4000');
@@ -44,17 +47,17 @@ let kite;
 // Initialize ticker variable
 let ticker;
 
-let date,day,hours,minutes,seconds;
-date=new Date();
-day=date.getDay();
-hours=date.getHours();
-minutes=date.getMinutes();
-seconds=date.getSeconds();
+let global.date,day,global.hours,global.minutes,global.seconds;
+global.date=new Date();
+day=global.date.getDay();
+global.hours=global.date.hours();
+global.minutes=global.date.minutes();
+global.seconds=global.date.seconds();
 
 //let text=fs.readFileSync('./last_time.text');
 //console.log(text);
 
-//process.exit();
+ //process.exit();
 
 
 // Function to initialize KiteConnect instance and fetch data
@@ -73,19 +76,19 @@ async function main() {
        
 
 setInterval(async ()=>{
-date=new Date();
-day=date.getDay();
-hours=date.getHours();
-minutes=date.getMinutes();
-seconds=date.getSeconds();
+global.date=new Date();
+day=global.date.getDay();
+global.hours=global.date.hours();
+global.minutes=global.date.minutes();
+global.seconds=global.date.seconds();
 
 
-if(minutes%5==0 && seconds==10){
+if(global.minutes%5==0 && global.seconds==10){
 
     fetchHourlyData();
 }
 
-if(seconds==1){
+if(global.seconds==1){
     await fetchOrdersAndSetCis();
     await fetchPositionsAndSetCis();
     await fetchMinuteData();
@@ -142,10 +145,10 @@ function isMakingLowerLows(tick, cis) {
     // Check if the current tick's last_price is lower than both lastSeenHigh and lastPrice
     const isLowerLow = tick.last_price < cis.lastSeenHigh && tick.last_price < lastPrice;
     
-    // Update the counter based on the condition
+    // Upglobal.date the counter based on the condition
     lowerLowsCount = isLowerLow ? lowerLowsCount + 1 : 0;
 
-    // Update lastPrice for the next comparison
+    // Upglobal.date lastPrice for the next comparison
     lastPrice = tick.last_price;
 
     // Return true if we have at least 3 consecutive lower lows
@@ -221,14 +224,14 @@ function initTicker() {
     });
 
     // Connect to ticker
-    ticker.disconnect()
+    ticker.disconnect;//()
     ticker.connect();
     ticker.on("connect", subscribe);
 
     // Subscribe to ticks and set tick mode
     ticker.on("ticks", onTicks);
    
-    ticker.on("order_update", orderUpdates);
+    ticker.on("order_upglobal.date", orderupdates);
 }
 
 // Function to handle ticks from ticker
@@ -254,7 +257,7 @@ function processTicks(tick){
 
    
 
-/* if(date.getSeconds()%3!=0){
+/* if(global.date.seconds()%3!=0){
 
     return;
 } */
@@ -267,7 +270,7 @@ function processTicks(tick){
 
     cis.location={}
     if(!cis.liveMinute)  cis.liveMinute={};
-    if(seconds==1 ){
+    if(global.seconds==1 ){
 
        
 
@@ -332,7 +335,7 @@ function processTicks(tick){
 
 
 }
-async function squareOffAfter13Hrs(cis, orders, date) {
+async function squareOffAfter13Hrs(cis, orders, global.date) {
 
     if(cis.minuteData){
         pv0=cis.minuteData[cis.minuteData.length-1]
@@ -380,7 +383,7 @@ async function squareOffAfter13Hrs(cis, orders, date) {
             console.log(cis.msg);
             break;
 
-        case (cis.liveHourCandle && cis.tick.last_price < cis.liveHourCandle.low && !cis.updated):
+        case (cis.liveHourCandle && cis.tick.last_price < cis.liveHourCandle.low && !cis.upglobal.dated):
             squareOff = true;
             console.log(`Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`);
             cis.msg = `Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`;
@@ -388,20 +391,20 @@ async function squareOffAfter13Hrs(cis, orders, date) {
 
         case (
             cis.liveHourCandle && cis.tick.last_price < cis.liveHourCandle.high * 0.8 &&
-            !cis.updated 
+            !cis.upglobal.dated 
           
         ):
             squareOff = false;
             console.log(`Danger ${cis.tradingsymbol} is below half of live hour sq off @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`);
             break;
 
-        case (cis.tick.last_price < highAfter12 && !cis.updated):
+        case (cis.tick.last_price < highAfter12 && !cis.upglobal.dated):
             squareOff = true;
             console.log(`last price less than high after 12 for ${cis.tradingsymbol}`);
             cis.message = `last price less than high after 12 for ${cis.tradingsymbol}`;
             break;
 
-        case (cis.tick.last_price < cis.hourlyHigh && !cis.updated && date.getHours() != 9):
+        case (cis.tick.last_price < cis.hourlyHigh && !cis.upglobal.dated && global.date.hours() != 9):
             squareOff = false;
             cis.message = `last price less than hourly high ${cis.tradingsymbol}`;
             break;
@@ -411,7 +414,7 @@ async function squareOffAfter13Hrs(cis, orders, date) {
 }
 
 
-function squareOffBefore13Hrs(cis, orders, date) {
+function squareOffBefore13Hrs(cis, orders, global.date) {
     let   pv0;
     let pv1
     if(cis.minuteData){
@@ -457,7 +460,7 @@ function squareOffBefore13Hrs(cis, orders, date) {
             console.log(cis.msg);
             break;
 
-        case (cis.liveHourCandle && cis.tick.last_price < cis.liveHourCandle.low && !cis.updated && !(cis.belowOpenTrade == 'false' || typeof cis.belowOpenTrade == 'undefined')):
+        case (cis.liveHourCandle && cis.tick.last_price < cis.liveHourCandle.low && !cis.upglobal.dated && !(cis.belowOpenTrade == 'false' || typeof cis.belowOpenTrade == 'undefined')):
             squareOff = true;
             console.log(`Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`);
             cis.msg = `Danger ${cis.tradingsymbol} is below live candle low @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`;
@@ -465,20 +468,20 @@ function squareOffBefore13Hrs(cis, orders, date) {
 
         case (
             cis.liveHourCandle && cis.tick.last_price < cis.liveHourCandle.high * 0.8 &&
-            !cis.updated && !(cis.belowOpenTrade == 'false' || typeof cis.belowOpenTrade == 'undefined') &&
+            !cis.upglobal.dated && !(cis.belowOpenTrade == 'false' || typeof cis.belowOpenTrade == 'undefined') &&
             (cis.entryBelowHourlyCandle == undefined || cis.entryBelowHourlyCandle == false)
         ):
             squareOff = false;
             console.log(`Danger ${cis.tradingsymbol} is below half of live hour sq off @ ${cis.tick.last_price}, order id is ${orders.find(o => o.tradingsymbol == cis.tradingsymbol).order_id}`);
             break;
 
-        case (cis.tick.last_price < cis.tick.ohlc.open && !cis.updated && (!cis.belowOpenTrade)):
+        case (cis.tick.last_price < cis.tick.ohlc.open && !cis.upglobal.dated && (!cis.belowOpenTrade)):
             squareOff = true;
             console.log(`last price less than open for ${cis.tradingsymbol}`);
             cis.message = `last price less than open for ${cis.tradingsymbol}`;
             break;
 
-        case (cis.tick.last_price < cis.hourlyHigh && !cis.updated && date.getHours() != 9 && (!cis.belowOpenTrade)):
+        case (cis.tick.last_price < cis.hourlyHigh && !cis.upglobal.dated && global.date.hours() != 9 && (!cis.belowOpenTrade)):
             squareOff = false;
             cis.message = `last price less than hourly high ${cis.tradingsymbol}`;
             break;
@@ -581,12 +584,12 @@ if(cis.minuteData){
 cis.msg='Reached SL switch';
 
 
-if(hours<=12){
+if(global.hours<=12){
 
-    squareOff=squareOffBefore13Hrs(cis, orders, date);
+    squareOff=squareOffBefore13Hrs(cis, orders, global.date);
 }else{
 
-squareOff=squareOffAfter13Hrs(cis, orders, date)
+squareOff=squareOffAfter13Hrs(cis, orders, global.date)
 
 }
 
@@ -596,7 +599,7 @@ squareOff=squareOffAfter13Hrs(cis, orders, date)
     if(squareOff){
 //console.log('after sq off');
 
-        if(!cis.updated){
+        if(!cis.upglobal.dated){
 
             //console.log('danger ',orders)
         
@@ -607,8 +610,8 @@ squareOff=squareOffAfter13Hrs(cis, orders, date)
                if(order){
 
                 let order_id=order.order_id;
-                updateOpenOrderPrice(kite,order_id, cis.instrument_token, cis.tick.last_price);
-                cis.updated=true;
+                upglobal.dateOpenOrderPrice(kite,order_id, cis.instrument_token, cis.tick.last_price);
+                cis.upglobal.dated=true;
                }
                 
         
@@ -739,11 +742,11 @@ function handleNoPosition(cis){
     }
     
 
-    if(cis.noBuy &&  cis.noBuyTime && date<cis.noBuyTime ){
+    if(cis.noBuy &&  cis.noBuyTime && global.date<cis.noBuyTime ){
 
 
         cis.message ='NO RE -ENTRY COLLING TIME TILL ' +cis.noBuyTime ;
-if(seconds==15){
+if(global.seconds==15){
 
     if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')   console.log('NO RE -ENTRY COLLING TIME FOR ',cis.tradingsymbol,'till',cis.noBuyTime ,cis.noBuyTime)
 
@@ -756,7 +759,7 @@ if(seconds==15){
     
     if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('after no buy cis handleNo pos',cis.tradingsymbol)
 
-    if( (cis.tick.last_price>=cis.tick.ohlc.open && hours<=12) ){
+    if( (cis.tick.last_price>=cis.tick.ohlc.open && global.hours<=12) ){
 
         proceedToTrade=true;
         if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')    console.log('hrs less than 12 and tick less than open return',cis.tradingsymbol)
@@ -773,7 +776,7 @@ if(seconds==15){
         
 
         
-          if( (cis.tick.last_price>h2 && hours>12) ){
+          if( (cis.tick.last_price>h2 && global.hours>12) ){
             if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')      console.log('hrs lgreater   h2 and tick less tha h2 return',cis.tradingsymbol)
        
        
@@ -807,7 +810,7 @@ if(seconds==15){
 
 
 
-//if(seconds<30) return;
+//if(global.seconds<30) return;
 if(cis.liveMinute.hasLongUpperShadow){
 
 cis.message='Live minute has long upper shadow\nNot Entering'
@@ -896,7 +899,7 @@ async function handleTickAboveOpen(cis){
 
     ///if current tick has long upper wick dont buy
 
-   /*  if(seconds<55){
+   /*  if(global.seconds<55){
 
        // return;
     } */
@@ -924,7 +927,7 @@ async function handleTickAboveOpen(cis){
     if(cis.last_candle){
         //cis.last_candle=last_candle;
         
-      let ti=  convertToIndianTime(cis.last_candle.date)
+      let ti=  convertToIndianTime(cis.last_candle.global.date)
       cis.lastCandleTime=ti
        
 
@@ -1051,9 +1054,9 @@ if(cis.ordered){
 }
 if(cis.tradingsymbol=='MIDCPNIFTY2481912625CE')      console.log('1026',cis.tradingsymbol)
 cis.ordered=true
-  /*  let h= highestPointBeforeLast5Minutes(cis.minuteData);
+  /*  let h= highestPointBeforeLast5global.minutes(cis.minuteData);
 
-   if(cis.tick.last_price<h && hours<12){
+   if(cis.tick.last_price<h && global.hours<12){
 
 cis.message='not above  highest point before last 5 min of '+cis.tradingsymbol;
 
@@ -1063,7 +1066,7 @@ console.log(cis.message);
 
  /*  let h2= highestPointAfter12PM(cis.minuteData);
 
-  if(cis.tick.last_price<h2 && (hours>12 )){
+  if(cis.tick.last_price<h2 && (global.hours>12 )){
 
     cis.message='not above last 5 min candle'+cis.tradingsymbol;
 
@@ -1083,6 +1086,8 @@ console.log(cis.message);
     let pv1=cis.minuteData.slice( -1)[0];
    
 
+
+    if(typeof pv2=='undefined' || typeof pv1=='undefined') return;
      pv2.candle=getCandle(pv2)
      pv1.candle=getCandle(pv1)
 
@@ -1150,7 +1155,7 @@ if(true){
 
     //open(cis.chart, {app: {name: 'chrome'}}).catch(console.error);
     //process.exit();
-  /*   if( hours!=9 && ( !cis.liveHourCandle || cis.liveHourCandle.high>cis.tick.last_price+10)){
+  /*   if( global.hours!=9 && ( !cis.liveHourCandle || cis.liveHourCandle.high>cis.tick.last_price+10)){
     
         console.log('NOT ENTERING BELOW HIGH OF CURRENT CANDLE FOR ',cis.tradingsymbol,'last price',cis.tick.last_price, 'current high :', );
         //msgx('NOT ENTERING BELOW HIGH OF CURRENT CANDLE FOR ',cis.tradingsymbol,'last price',cis.tick.last_price, 'current high :', cis.liveHourCandle.high);
@@ -1194,7 +1199,7 @@ if(true){
 
      // multiplier=10;
 
-multiplier=20
+multiplier=5
 /// pv5,pv4,pv3,pv2,pv1  --->> if pv3 and 2 are higher high do not entry water has flown 
 
 var noLots=2;///max 10
@@ -1234,14 +1239,14 @@ for(let i=0;i<noLots;i++)
 }
 }
 
-function highestPointBeforeLast5Minutes(data) {
+function highestPointBeforeLast5global.minutes(data) {
     if (data.length < 6) {
 
         return true;
         throw new Error("Insufficient data. The array must have at least 6 elements.");
     }
 
-    // Slice the array to exclude the last 5 minutes
+    // Slice the array to exclude the last 5 global.minutes
     const relevantData = data.slice(0, data.length - 5);
 
     // Find the highest point in the remaining data
@@ -1256,14 +1261,14 @@ function highestPointBeforeLast5Minutes(data) {
 }
 function getCurrentHourlyCandleFromMinuteCandle(candles) {
     // Function to get the start time of the nearest 15-minute interval from the completed hour
-    function getStartTime(date) {
-        const start = new Date(date);
-        start.setMinutes(0, 0, 0); // Reset minutes and seconds to 0
-        const hour = start.getHours();
-        if (start.getMinutes() > 15) {
-            start.setHours(hour, 15, 0, 0); // Set to the nearest 15-minute interval after the completed hour
+    function getStartTime(global.date) {
+        const start = new global.date(global.date);
+        start.setglobal.minutes(0, 0, 0); // Reset global.minutes and global.seconds to 0
+        const hour = start.getglobal.hours();
+        if (start.getglobal.minutes() > 15) {
+            start.setglobal.hours(hour, 15, 0, 0); // Set to the nearest 15-minute interval after the completed hour
         } else {
-            start.setHours(hour, 0, 0, 0); // Set to the completed hour
+            start.setglobal.hours(hour, 0, 0, 0); // Set to the completed hour
         }
         return start;
     }
@@ -1279,11 +1284,11 @@ function getCurrentHourlyCandleFromMinuteCandle(candles) {
     const relevantCandles = candles.filter(candle =>{
 
        
-       // console.log(startTime<candle.date ,currentTime>candle.date,candle.date >= startTime && candle.date <= currentTime)
-      //  console.log('candle date',candle.date);
+       // console.log(startTime<candle.global.date ,currentTime>candle.global.date,candle.global.date >= startTime && candle.global.date <= currentTime)
+      //  console.log('candle global.date',candle.global.date);
         
 
-       return candle.date >= startTime && candle.date <= currentTime;
+       return candle.global.date >= startTime && candle.global.date <= currentTime;
 
     }) ;
 
@@ -1371,18 +1376,18 @@ let a=a1.map(a1=>a1.high)
 //console.log(a,'a');
 
 
- if(date.getHours()>12 && cis.highestPointAfter12PM<cis.tick.last_price){
+ if(global.date.hours()>12 && cis.highestPointAfter12PM<cis.tick.last_price){
 
-    let m=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${date}`);
+    let m=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${global.date}`);
     console.log(m)
     return true
 
  }
     
-    else if(date.getHours()==9){
+    else if(global.date.hours()==9){
 
    // cis.liveHourCandle && cis.tick.last_price <cis.liveHourCandle.high*.8 
-    let z=chalk.yellowBright('The breath morning',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price}  ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${date} `);
+    let z=chalk.yellowBright('The breath morning',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price}  ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${global.date} `);
     cis.isTickAboveHourlyHistoricalValue=true;
 
     cis.entryBelowHourlyCandle=true;
@@ -1403,16 +1408,16 @@ console.log(a[a.length-1],tick.last_price,//cis.tradingsymbol); */
 //process.exit();
 
 
-let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${date}`);
+let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${global.date}`);
 
 
 //console.log(a,'a')
     if(a && (tick.last_price>a[a.length-1]))
 
       {
-        let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${date} `);
+        let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk} @ ${global.date} `);
         cis.isTickAboveHourlyHistoricalValue=true
-        if(!msg.includes(x) && [46].includes(seconds)){
+        if(!msg.includes(x) && [46].includes(global.seconds)){
 
             console.log(x);
             
@@ -1428,13 +1433,13 @@ let x=chalk.green('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    las
 
         let y=chalk.red('The breath',cis.tradingsymbol,`open= ${tick.ohlc.open}    last price hourly ( ${tick.last_price} ,  ${a[a.length-1]} ) ohlc high:${tick.ohlc.high},Chart :${lnk}`);
         cis.isTickAboveHourlyHistoricalValue=false;
-        if(!msg.includes(y) && [46].includes(seconds)){
+        if(!msg.includes(y) && [46].includes(global.seconds)){
 
           console.log(y);
             
         }
 
-        if([30].includes(seconds)){
+        if([30].includes(global.seconds)){
            // process.stdout.write('\x1Bc');
             console.log(chalk.bgYellow('---------------------------------------------'))
            // console.clear();
@@ -1486,14 +1491,14 @@ return false
 
 
 function convertToIndianTime(utcTimeString) {
-    // Create a Date object from the UTC time string
-    const utcDate = new Date(utcTimeString);
+    // Create a global.date object from the UTC time string
+    const utcglobal.date = new global.date(utcTimeString);
 
     // Set the time zone to Indian Standard Time (IST)
     const options = { timeZone: 'Asia/Kolkata' };
 
-    // Format the date and time using IST
-    const indianTimeString = utcDate.toLocaleString('en-IN', options);
+    // Format the global.date and time using IST
+    const indianTimeString = utcglobal.date.toLocaleString('en-IN', options);
 
     return indianTimeString;
 }
@@ -1531,7 +1536,7 @@ async function fetchHourlyData() {
         let fromTime = moment().startOf('day').subtract(1,'days').
         
         
-        add(13, 'hours').add(0, 'minutes').format('YYYY-MM-DD HH:mm:ss');
+        add(13, 'global.hours').add(0, 'global.minutes').format('YYYY-MM-DD HH:mm:ss');
         
         let toTime;
 
@@ -1576,7 +1581,7 @@ console.log('totime',toTime,'now.minute',now.minute());
             
             hourlyHistoricalData[key].forEach((h)=>{
 
-h.time=convertToIndianTime(h.date);
+h.time=convertToIndianTime(h.global.date);
             });
 
             //console.log(hourlyHistoricalData[key]);
@@ -1601,7 +1606,7 @@ h.time=convertToIndianTime(h.date);
             
             cis.hourlyHighTime= convertToIndianTime(
                 
-                hourlyHistoricalData[key][ hourlyHistoricalData[key].length-1 ].date
+                hourlyHistoricalData[key][ hourlyHistoricalData[key].length-1 ].global.date
                
              
             );             
@@ -1621,19 +1626,19 @@ function getCandleTimesGreaterThanMedian(ohlcData, medianRange) {
     const rangeThreshold = 3 * medianRange;
 
     // Helper function to convert TZ time to Indian Standard Time (IST)
-    function convertToIST(isoDate) {
-        const date = new Date(isoDate);
+    function convertToIST(isoglobal.date) {
+        const global.date = new global.date(isoglobal.date);
         // IST is UTC+5:30
-        const istOffset = 5 * 60 + 30; // Offset in minutes
-        const utcOffset = date.getTimezoneOffset();
-        const istTime = new Date(date.getTime() + (istOffset + utcOffset) * 60000);
+        const istOffset = 5 * 60 + 30; // Offset in global.minutes
+        const utcOffset = global.date.getTimezoneOffset();
+        const istTime = new global.date(global.date.getTime() + (istOffset + utcOffset) * 60000);
         return istTime.toISOString().replace('T', ' ').split('.')[0]; // Convert to local time and format
     }
 
     // Filter the candles and extract their times
     const timesInIST = ohlcData
         .filter(data => (data.high - data.low) > rangeThreshold)
-        .map(data => convertToIndianTime(data.date));
+        .map(data => convertToIndianTime(data.global.date));
 
     return timesInIST;
 }
@@ -1686,7 +1691,7 @@ function findSupportsUsingBollingerBands(ohlcData, bollingerBands) {
 async function fetchMinuteData() {
     try {
         const now = moment();
-        const fromTime = moment().startOf('day').add(9, 'hours').add(15, 'minutes').format('YYYY-MM-DD HH:mm:ss');
+        const fromTime = moment().startOf('day').add(9, 'global.hours').add(15, 'global.minutes').format('YYYY-MM-DD HH:mm:ss');
         const toTime = now.startOf('minute').subtract(0, 'minute').format('YYYY-MM-DD HH:mm:ss');
         const dataType = 'minute';
         const instrument_tokens = instruAll.map(a => parseInt(a.instrument_token));
@@ -1773,7 +1778,7 @@ cis.bollingerSupport=supports;
         }
             cis.lastMinuteTime= convertToIndianTime(
                 
-                minuteHistoricalData[key][minuteHistoricalData[key].length-1].date
+                minuteHistoricalData[key][minuteHistoricalData[key].length-1].global.date
                
             );             
             
@@ -1876,7 +1881,7 @@ function isLastPriceAboveMaxOfPrev15(ohlcData, cis) {
 }
 
 // Function to handle order updates from ticker
-async function orderUpdates(order) {
+async function orderupdates(order) {
     //console.log('completed',order)
     let cis=instruAll.find(i=>i.instrument_token==order.instrument_token)
 
@@ -1894,14 +1899,14 @@ if(!cis) {
 
   /*   cis.noBuy=true;
 
-    let dt=new Date()
-    cis.noBuyTime=dt.setMinutes(dt.getMinutes()+1); */
+    let dt=new global.date()
+    cis.noBuyTime=dt.setglobal.minutes(dt.getglobal.minutes()+1); */
 
 
     cis.noBuy = true;
 
 let dt = new Date();
-dt.setMinutes(dt.getMinutes() + 1); // Modifies the date object
+dt.setglobal.minutes(dt.getglobal.minutes() + 1); // Modifies the global.date object
 
 cis.noBuyTime = dt.getTime();
 
@@ -1913,10 +1918,10 @@ cis.ordered=false;
 
   cis.hasLivePosition=false;
 
-  cis.updated=false;
+  cis.upglobal.dated=false;
   cis.placedTarget=false;
   cis.hasPlacedTarget=false;
-  cis.updated=false;
+  cis.upglobal.dated=false;
   
   cis.highestProfit=0;
 
@@ -1940,7 +1945,7 @@ cis.order=order;
 cis.lastSeenHighForPosition=order.price;
 
 cis.lastSeenHigh=order.price;
-cis.updated=false;
+cis.upglobal.dated=false;
 
 
 let target;
@@ -1988,7 +1993,7 @@ try {
 }
     }
     // Handle order updates here
-   // console.log('Order Update:', order);
+   // console.log('Order Upglobal.date:', order);
     // Add your logic to process order updates as needed
 }
 
@@ -1998,12 +2003,12 @@ function scheduleHourlyDataFetch() {
     const currentMinute = now.minute();
 
     if (currentMinute < 15) {
-        const delaySeconds = (15 - currentMinute) * 60 - now.seconds();
-        setTimeout(fetchHourlyData, delaySeconds * 1000);
+        const delayglobal.seconds = (15 - currentMinute) * 60 - now.global.seconds();
+        setTimeout(fetchHourlyData, delayglobal.seconds * 1000);
     } else {
-        const nextHour = now.startOf('hour').add(1, 'hour').add(15, 'minutes');
-        const delaySeconds = nextHour.diff(now, 'seconds');
-        setTimeout(fetchHourlyData, delaySeconds * 1000);
+        const nextHour = now.startOf('hour').add(1, 'hour').add(15, 'global.minutes');
+        const delayglobal.seconds = nextHour.diff(now, 'global.seconds');
+        setTimeout(fetchHourlyData, delayglobal.seconds * 1000);
     }
 }
 
@@ -2012,7 +2017,7 @@ function scheduleHourlyDataFetch() {
 //import { io4200 } from '../server.js';
 
 // Create a writable stream
-//const logFile = fs.createWriteStream(`app${Date('dd-mm-yy')}.log`, { flags: 'a' });
+//const logFile = fs.createWriteStream(`app${global.date('dd-mm-yy')}.log`, { flags: 'a' });
 
 // Override console methods
 
