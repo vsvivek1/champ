@@ -26,6 +26,12 @@ function checkColorWithFlags(cis) {
     }
 
     // Return true if any of the flags are set
+
+    if(flagAfter30 && cis.hasPosition){
+
+        if(global.minutes%15==0 && global.seconds==0)        console.log('EXECUTING STOP LOSS flagAfter30')
+    }
+
     return  flagAfter30;
     //return flag15 || flag30 || flagAfter30;
 }

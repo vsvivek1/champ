@@ -11,11 +11,178 @@ import {handle9to10AM} from './handle9to10Am.js'
 import {isOpenLowAtSpecificSeconds}from './isOpenLowAtSpecifiedSeconds.js';
 import {checkLowerLowsAndLowerHighs} from './checkLowerLowsAndLowerHighs.js';
 import {checkGapDown} from './gapDownChecker.js'
+import {findSupportPoints} from './findSupportPoints.js'
+import {checkLastCandleOverSupportPoint} from './checkLastCandleOverSupportPoints.js'
+import { canInitiateLongTrade } from './tradeCheckFunctions.js'; // Adjust the path based on file location
+
+
 let trades = [];
 
 
+async function getMargins(kite){
 
-export function handleNoPosition(cis, kite) {
+    return await kite.getMargins();
+
+}
+
+export async function handleNoPosition(cis, kite) {
+
+
+////
+//console.log(cis.name);
+//let m=await getMargins(kite)
+//console.log(m.equity.net,'getMargins(kite)');
+
+
+if (!canInitiateLongTrade(cis)) {
+
+ if(global.minutes%15==0 && global.seconds==0)   console.log("Conditions are not favorable for a long trade.",cis.tradingsymbol);
+
+    return;
+    // Proceed with initiating a long trade
+    // Your code to initiate a long trade goes here
+} else {
+    if(global.minutes%15==0 && global.seconds==0)     console.log("Not bearish",cis.tradingsymbol);
+}
+
+    if(cis.noBuy){
+
+
+        return;
+    }
+
+
+    if(!cis.minuteData || !cis.tick){
+
+        return;
+    }
+
+    if(checkLowerLowsAndLowerHighs(cis.minuteData)) {
+        
+                return
+              }
+        
+
+    const result = findSupportPoints(cis.minuteData);
+
+    // Output the results
+  
+let lp1=cis.tick.last_price;
+    let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
+   // console.log("Support Points:", result,cis.tradingsymbol,sup);
+ 
+
+    if(sup && cis.tick.last_price> cis.minuteData.slice(-1)[0].high){
+
+
+        console.log('SUPPORT BUYING OF,',sup,cis.tradingsymbol,lp1);
+        let noLots = 2; // Adjust as needed
+        for (let i = 0; i < noLots; i++) {
+            executeBuy(cis, kite,lp1);
+        }
+    }
+    
+
+
+   // if(global.seconds%5==0)console.log('cis.highBeforeThreeMinutes',cis.highBeforeThreeMinutes,cis.tradingsymbol);
+    
+   if (cis && cis.tick.last_price > cis.highBeforeThreeMinutes && !cis.ordered) {
+    // Capture the entire cis object to preserve its state at this moment
+    const capturedCis = JSON.parse(JSON.stringify(cis));
+
+    // Log the intention to execute the trade after 2 minutes
+    console.log('Trade condition met, will execute trade after 2 minutes:', capturedCis.tradingsymbol, capturedCis.tick.last_price);
+
+    // Set a timeout to delay the trade execution by 2 minutes (120,000 milliseconds)
+    setTimeout(() => {
+        console.log('Executing trade for last high before 1 minute buy strategy:', capturedCis.tradingsymbol, capturedCis.tick.last_price);
+        
+        let noLots = 2; // Adjust the number of lots as needed
+        for (let i = 0; i < noLots; i++) {
+            executeBuy(capturedCis, kite, lp1);
+        }
+    }, 120000); // 2 minutes in milliseconds
+}
+
+    
+
+
+if(cis.tick.last_price<cis.pricePoints.d1.low){
+
+if(global.minutes%10==0 && global.seconds%30==0){
+
+
+    console.log('less than yesterday low for',cis.tradingsymbol,'going for support buy only');
+}
+
+   
+
+
+ 
+    
+    return;
+}else{
+
+
+    if( global.minutes%10==0 && global.seconds%30==0){
+
+        console.log('above than yesterday low for',cis.tradingsymbol,'looking for breakout');
+        
+    }
+     
+}
+
+
+//added positve close ranges only
+  
+let c = cis.minuteData.slice(-5, -1)
+  .map(c1 => c1.high - c1.low);
+
+let lp = cis.tick.last_price;
+
+// Calculate the average range of the last 5 candles
+let sum = c.reduce((acc, value) => acc + value, 0);
+let average = sum / c.length;
+
+let isMoreThan10Percent = average > (0.05 * lp);
+
+/* && cis.tick.last_price > cis.tick.open 
+    && cis.tick.last_price > cis.pricePoints.d1.low */
+
+
+if (isMoreThan10Percent ) {
+    let min = Math.min(...c);
+    let max = Math.max(...c);
+ 
+/*  
+    if (global.seconds % 5 === 0) {
+   
+
+    console.log('more than 10 pc average', 
+                `Min: ${min}, Max: ${max}, Average: ${average}`, 
+                cis.tradingsymbol);
+  } */
+
+  if (global.seconds % 30 === 0 && global.minutes%10==0) {
+    console.log('range IS greater than 5 pc average. So trading possible', 
+                cis.tradingsymbol,'range=',average, 'last price=',cis.tick.last_price,{isMoreThan10Percent});
+  }
+
+} else {
+  if (global.seconds % 30 === 0 && global.minutes%10==0) {
+    console.log('range not greater than 5 pc average. So no trading', 
+                cis.tradingsymbol, 'range=',average, 'last price=',cis.tick.last_price,{isMoreThan10Percent});
+  }
+  return;
+}
+
+
+
+    if(global.seconds<55){
+
+        return false;
+        
+            }
 
 
     if (!cis.minuteData || cis.minuteData.length < 1) return;
@@ -43,16 +210,7 @@ export function handleNoPosition(cis, kite) {
      
        
 
-      if(checkLowerLowsAndLowerHighs(cis.minuteData)) {
-//if(global.seconds==31)console.log('Lower lows and no entry for ',cis.tradingsymbol);
-
-        return
-      }else{
-
-      //  if(global.seconds==31)console.log('NO Lower lows can try tests ',cis.tradingsymbol);
-
-      }
-
+     
 
 
 
@@ -158,7 +316,7 @@ return;
        // console.log('Just before hammer check ',cis.tradingsymbol,'checking');
 
         console.log(cis.tradingsymbol,'Before Proceed to trade',cis.tradingsymbol,{proceedToTrade });
-    
+       
 
     }
         

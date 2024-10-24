@@ -15,5 +15,17 @@ export function checkLowerLowsAndLowerHighs(minuteData) {
     const isLowerHigh = lastCandle.high < secondLastCandle.high;
 
     // Return true if both conditions are satisfied
-    return isLowerLow && isLowerHigh;
+
+
+    if(isLowerLow && isLowerHigh){
+
+        //some issue will c later
+
+       // console.log('EXECUTING STOP LOSS isLowerLow && isLowerHigh') 
+    }
+
+
+   /// EXECUTING STOP LOSS isLowerLow && isLowerHigh
+return false;
+   // return isLowerLow && isLowerHigh;
 }

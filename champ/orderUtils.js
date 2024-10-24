@@ -2,6 +2,8 @@
 
 import { fetchOrdersAndSetCis, fetchPositionsAndSetCis } from './fetchData.js';
 
+import { calculateVolatility } from './compareVolatility.js';
+
 export async function updateOpenOrderPrice(kite, order_id, instrument_token, last_price) {
     const updatedPrice = last_price; // Modify as per your logic
 
@@ -25,19 +27,28 @@ export async function handleOrderUpdates(order, kite) {
 
     if (order.status == 'COMPLETE' && order.transaction_type == 'SELL') {
         cis.sellPrice = order.price;
-        cis.noBuy = true;
-        let dt = new Date();
-        cis.noBuyTime = dt.getTime() + (1 * 60 * 1000);
+        cis.noBuy = true;  // Ensure noBuy is initially false
+
+        // Set noBuy to true after 2 seconds
+        setTimeout(() => {
+            cis.noBuy = false;
+
+
+            console.log('no buy locl released',cis.tradingsymbol,cis.noBuy)
+        }, 2 * 60*  1000);
+
+        /* let dt = new Date();
+        cis.noBuyTime = dt.getTime() + (1 * 60 * 1000); */
 
         cis.lastSeenHigh = 0;
         cis.lastSeenHighForPosition = 0;
-       // cis.ordered = false;
-       cis.hasLivePosition = false;
-       // cis.updated = false;
-       //cis.placedTarget = false;
-       // cis.hasPlacedTarget = false;
-       // cis.updated = false;
-        //cis.highestProfit = 0;
+        cis.ordered = false;
+        cis.hasLivePosition = false;
+        cis.updated = false;
+        cis.placedTarget = false;
+        cis.hasPlacedTarget = false;
+        cis.updated = false;
+        cis.highestProfit = 0;
 
         await fetchOrdersAndSetCis(kite);
         await fetchPositionsAndSetCis(kite);
@@ -50,15 +61,45 @@ export async function handleOrderUpdates(order, kite) {
     }
 }
 
+
 async function placeTargetOrder(cis, order, kite) {
+
+
+    
+    const lastFiveCandles = cis.minuteData.slice(-5);
+    const lastFiveVolatility = calculateVolatility(lastFiveCandles);
+
+    let averageRange=calculateVolatility(lastFiveCandles);
     const targetPoints = 5; // Adjust target points as needed
    
   //  var targetPrice = order.price + targetPoints;
-    var targetPrice = order.price *1.08
+   // var targetPrice = order.price +averageRange/4  ///2//*2
+    var targetPrice = order.price *1.2  ///2//*2
+   
+   if(global.hours==9){
+
+    //targetPrice=order.price+averageRange/4
+    targetPrice=order.price *1.2
+   }
+   else if(global.hours==10){
+
+    var targetPrice = order.price +averageRange/3
+   // var targetPrice = order.price +averageRange/4
+   }
+
+   else if(global.hours>10 && global.hours<14 ){
+
+    var targetPrice = order.price +averageRange/3
+   }else if(global.hours>=14 ){
+
+    var targetPrice = order.price +averageRange/3
+   }
+   
     if(cis.colorTrading==true){
 
        // targetPrice=order.sprice+ Math.ceil(order.price*.01);
-        targetPrice=order.price*1.08;//Math.ceil(order.price+1);
+       // targetPrice=order.price   *1.2;//Math.ceil(order.price+1);
+       // targetPrice=order.price  + averageRange/2//*2;//Math.ceil(order.price+1);
     }
     
     const orderParams = {

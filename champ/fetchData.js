@@ -4,6 +4,41 @@ import moment from 'moment';
 let hourlyHistoricalData = {};
 let minuteHistoricalData = {};
 
+
+export function aggregateOHLC(cis) {
+    const minuteData = cis.minuteData; // The array of OHLC data (Open, High, Low, Close)
+
+    const startMinuteIndex = 9 * 60 + 15; // 9:15 AM in minutes
+    let dataAfter915 = minuteData.slice(startMinuteIndex);
+
+    // Helper function to aggregate OHLC data
+    function aggregateCandles(data) {
+        const open = data[0].open;
+        const close = data[data.length - 1].close;
+        const high = Math.max(...data.map(candle => candle.high));
+        const low = Math.min(...data.map(candle => candle.low));
+        return { open, high, low, close };
+    }
+
+    // Function to group data into specified time frames
+    function groupIntoTimeFrames(data, frameSize) {
+        const grouped = [];
+        for (let i = 0; i < data.length; i += frameSize) {
+            const frameData = data.slice(i, i + frameSize);
+            if (frameData.length === frameSize) { // Only complete frames
+                grouped.push(aggregateCandles(frameData));
+            }
+        }
+        return grouped;
+    }
+
+    // Aggregate data for each time frame and set it to cis object
+    cis.ohlc15Min = groupIntoTimeFrames(dataAfter915, 15); // 15-minute candles
+    cis.ohlc30Min = groupIntoTimeFrames(dataAfter915, 30); // 30-minute candles
+    cis.ohlc1Hour = groupIntoTimeFrames(dataAfter915, 60); // 1-hour candles
+}
+
+
 // Function to fetch orders and set CIS data
 export async function fetchOrdersAndSetCis(kite) {
     try {

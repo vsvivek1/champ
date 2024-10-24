@@ -6,6 +6,9 @@ import {checkLowerLowsAndLowerHighs} from './checkLowerLowsAndLowerHighs.js';
 import {checkLastPriceAgainstPreviousCandles} from './checkLastPriceAgainstPreviousCandles.js'; // Adjust the path based on file location
 import checkColorWithFlags from './checkColorWithFlags.js'; // Adjust the path based on file location
 import { checkPenultimateGreenAndLastSmallBodyOrLowerHigh } from './checkPenultimateGreenAndLastSmallBodyOrLowerHigh.js';
+import { isMakingLowerLows, hasLargeUpperWick, isBearishAt50Sec, isOpenHighAtSpecificSeconds } from './criteriaFunctions.js';  // Import your criteria functions
+import {redCandleStartAfterGreenCandles} from './redCandleStartAfterGreenCandles.js'
+
 
 export function handlePositionPresent(cis, kite) {
     // Update the highest seen prices
@@ -26,41 +29,41 @@ export function handlePositionPresent(cis, kite) {
     // Determine whether to square off the position based on the time of day
     let squareOff = false;
 
-    switch (true) {
-        case (global.hours < 10):
-            squareOff = squareOffBefore9Hrs(cis, global.orders, global.date);
-            break;
-        case (global.hours >= 10 && global.hours <= 12):
-            squareOff = squareOffBetween9And12Hrs(cis, global.orders, global.date);
-            break;
-        case (global.hours > 12):
-            squareOff = squareOffAfter12Hrs(cis, global.orders, global.date);
-            break;
-        default:
-            // Optional: handle any unexpected cases
-            break;
-    }
-
-    // Execute square off if needed
+  
 
 
-    squareOff = (checkLowerLowsAndLowerHighs(cis.minuteData)
-    || 
+    squareOff = 
+ (
+checkLowerLowsAndLowerHighs(cis.minuteData)
+|| 
 
-    checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis.minuteData) /// lst cndle green with (lower highs or very small body)
-
-||checkLastPriceAgainstPreviousCandles(cis)||
-
-checkColorWithFlags(cis)
-
+checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis.minuteData) /// lst cndle green with (lower highs or very small body)
+||
+isMakingLowerLows(cis) /// is making lower lows
+||
+checkLastPriceAgainstPreviousCandles(cis) //last price bewlow low of last three candles
+||
+checkColorWithFlags(cis) /// if current candle is red after 30 seconds
+||redCandleStartAfterGreenCandles(cis) /// red candle start after atleawt 2 grenn candles after 5 sec
 ); /// no matter what squarewoff on lower lows
 
-    if(squareOff  && cis.minuteData && cis.tick && cis.tick.last_price>cis.minuteData.slice(-1).low){
-console.log('No sq off since signs of recovery',cis.tradingsymbol);
+ /*    if(squareOff  && cis.minuteData && cis.tick &&
+         cis.tick.last_price>cis.minuteData.slice(-1)[0].low
+        
+        
+        ){
+////  check later and re write for huge gap downs check later
+
+if(global.seconds%30==0)            console.log('No sq off since signs of recovery',cis.tradingsymbol);
 
 return;
-    }
+    } */
+  
+if(squareOff ){
+
     executeSquareOff(squareOff, cis, kite);
+}
+
 }
 
 function executeSquareOff(squareOff, cis, kite) {
@@ -73,9 +76,12 @@ function executeSquareOff(squareOff, cis, kite) {
             // Reset `cis.updated` after 1 minute
             setTimeout(() => {
                 if (cis) {
-                    cis.updated = false;
+
+                    console.log('CIS UPdated Lock REleased for',cis.tradingsymbol);
+                    
+                    cis.updated = false;   /// retrying of squareoff if order is still not [resend]
                 }
-            }, 1 * 60 * 1000);
+            }, 10 * 1000);
         }
     }
 }

@@ -9,10 +9,11 @@ import getKiteConnectInstance from '../getKiteConnectInstanceRequire.js';
 import io from 'socket.io-client';
 import { handlePositionPresent } from './handleHasPosition.js';
 import { handleNoPosition } from './handleNoPosition.js';
-import { fetchOrdersAndSetCis, fetchPositionsAndSetCis, fetchHourlyData, fetchMinuteData } from './fetchData.js';
+import { fetchOrdersAndSetCis, fetchPositionsAndSetCis, fetchHourlyData, fetchMinuteData,aggregateOHLC } from './fetchData.js';
 
 import { handleOrderUpdates } from './orderUtils.js';
 import { updateOpenOrderPrice } from './orderUtils.js';
+import { displayScripts } from './displayScripts.js';
 import moment from 'moment';
 
 const socket = io('http://localhost:4000');
@@ -60,6 +61,13 @@ async function main() {
                 await fetchOrdersAndSetCis(kite);
                 await fetchPositionsAndSetCis(kite);
                 await fetchMinuteData(kite);
+                //aggregateOHLC(cis);
+            }
+
+
+
+            if (global.seconds === 30) {
+               displayScripts();
             }
 
         }, 1000);
@@ -72,7 +80,9 @@ async function main() {
         await fetchPositionsAndSetCis(kite);
         await fetchHourlyData(kite);
         await fetchMinuteData(kite);
+        //aggregateOHLC(cis) 
         scheduleHourlyDataFetch();
+        
 
     } catch (error) {
         console.error('Error in main function:', error);
@@ -111,6 +121,8 @@ function extractTicks(ticks) {
 function processTicks(tick) {
     var cis = global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
     
+
+   
     
     if (!cis) return;
     
@@ -139,6 +151,17 @@ function processTicks(tick) {
 
     cis.currentMinute=cis.liveMinute;
     cis.tick = tick;
+
+
+    let tempHigh = tick.ohlc.high;
+
+    setTimeout(() => {
+        // After 3 minutes, set the stored high value to cis.highBeforeThreeMinutes
+        cis.highBeforeThreeMinutes = tempHigh;
+
+       // console.log(cis.highBeforeThreeMinutes,'cis.highBeforeThreeMinutes',cis.tradingsymbol);
+        
+    }, 1 * 60 * 1000);
 
     if (cis.hasLivePosition) {
        // console.log('cis has position @126');

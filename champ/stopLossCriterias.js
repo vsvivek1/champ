@@ -4,7 +4,9 @@ import { isMakingLowerLows, hasLargeUpperWick, isBearishAt50Sec, isOpenHighAtSpe
 
 export function squareOffBefore9Hrs(cis, orders, date) {
     // Logic for squaring off before 9 AM
-    return isMakingLowerLows(cis) || hasLargeUpperWick(cis) || isBearishAt50Sec(cis) || isOpenHighAtSpecificSeconds(cis);
+    return isMakingLowerLows(cis) 
+    
+    //|| hasLargeUpperWick(cis) || isBearishAt50Sec(cis) || isOpenHighAtSpecificSeconds(cis);
 }
 
 export function squareOffBetween9And12Hrs(cis, orders, date) {
@@ -13,7 +15,9 @@ export function squareOffBetween9And12Hrs(cis, orders, date) {
 
         return true
     }else{
-        return isMakingLowerLows(cis) || hasLargeUpperWick(cis) || isBearishAt50Sec(cis) || isOpenHighAtSpecificSeconds(cis);
+        return isMakingLowerLows(cis) 
+        
+        //|| hasLargeUpperWick(cis) || isBearishAt50Sec(cis) || isOpenHighAtSpecificSeconds(cis);
 
         return false;
     }
@@ -23,5 +27,7 @@ export function squareOffBetween9And12Hrs(cis, orders, date) {
 
 export function squareOffAfter12Hrs(cis, orders, date) {
     // Logic for squaring off after 12 PM
-    return isMakingLowerLows(cis) || hasLargeUpperWick(cis) || isBearishAt50Sec(cis) || isOpenHighAtSpecificSeconds(cis);
+    return isMakingLowerLows(cis) 
+    
+    //|| hasLargeUpperWick(cis) || isBearishAt50Sec(cis) || isOpenHighAtSpecificSeconds(cis);
 }

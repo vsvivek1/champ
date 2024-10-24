@@ -5,18 +5,40 @@ import { isOpenLowAtSpecificSeconds } from './isOpenLowAtSpecifiedSeconds.js';
 import { checkThreeBlackCrowsBullishReversal } from './checkThreeBlackCrowsBullishReversal.js';
 import findHourlyHighestPrice from './findElapsedHourHigh.js';
 import { compareVolatility } from './compareVolatility.js';
+import { hasManyUpperWicks } from './hasManyUpperWicks.js';
 export function handle12to4PM(cis, kite) {
 
+    if(global.seconds<50){
 
+return false;
+
+    }
+
+    let h2 = findHourlyHighestPrice(cis);
+    let previousCandleClose = cis.minuteData.slice(-2, -1)[0].close;
+    let lastCandleClose = cis.minuteData.slice(-1)[0].close;
+    let lastCandleHigh = cis.minuteData.slice(-2, -1)[0].high;
     if(cis.tick.last_price<1){
 
         return;
     }
+   // Exit if live minute is bearish
+   if (cis.liveMinute.color === 'bearish') {
+    cis.message = 'Live minute Color bearish, no entry ' + cis.tradingsymbol;
+    if (global.seconds == 57 && global.minutes%5==0)  //console.log(cis.message, cis.liveMinute.color, 'live color red rejection');
+    return;
+}
+
+if (cis.tick.last_price < lastCandleHigh) {
+     if (global.seconds == 57 && global.minutes%5==0) console.log('ltp less than last candle high', cis.tradingsymbol, lastCandleHigh);
+     return;
+ }
 
 
 const result = compareVolatility(cis.minuteData);
 //console.log('Last 5 candles volatility:',cis.tradingsymbol, result.lastFiveVolatility);
 //console.log('Previous 10 candles volatility:',cis.tradingsymbol, result.previousTenVolatility);
+
 if(result.lastFiveVolatility>result.previousTenVolatility*1.4
 
     && cis.tick.last_price>cis.minuteData.slice(-1)[0].high
@@ -33,35 +55,26 @@ if(result.lastFiveVolatility>result.previousTenVolatility*1.4
                 executeBuy(cis, kite, price);
             }
             console.log('Comparison result:',cis.tradingsymbol, result.comparison);
+
+            return;
     }
    
-    
-    return;
+            if (global.seconds == 57 && global.minutes%5==0)  console.log('health here', cis.tradingsymbol);
+
+   // return;
 
     let proceedToTrade = false;
 
-    let h2 = findHourlyHighestPrice(cis);
-    let previousCandleClose = cis.minuteData.slice(-2, -1)[0].close;
-    let lastCandleClose = cis.minuteData.slice(-1)[0].close;
-    let lastCandleHigh = cis.minuteData.slice(-2, -1)[0].high;
+ 
 
     // Exit if last price is less than the last candle's high
-    if (cis.tick.last_price < lastCandleHigh) {
-       // if (global.seconds == 30) console.log('ltp less than last candle high', cis.tradingsymbol, lastCandleHigh);
-        return;
-    }
+   
 
-    // Exit if live minute is bearish
-    if (cis.liveMinute.color === 'bearish') {
-        cis.message = 'Live minute Color bearish, no entry ' + cis.tradingsymbol;
-       /*  if (global.seconds == 30) */ //console.log(cis.message, cis.liveMinute.color, 'live color red rejection');
-        return;
-    }
-
+ 
     // Strategy 1: h2 breakout condition (previous close < h2 and current close > h2)
     if (previousCandleClose < h2 && lastCandleClose > h2) {
         proceedToTrade = true;
-        /* if (global.seconds == 30)  *///console.log('h2 breakout occurred', cis.tradingsymbol);
+ console.log('h2 breakout occurred', cis.tradingsymbol);
     }
 
     // Strategy 2: 15-minute breakout
@@ -71,13 +84,13 @@ if(result.lastFiveVolatility>result.previousTenVolatility*1.4
 
     if (breakoutOccurred) {
         proceedToTrade = true;
-       /*  if (global.seconds == 30) */// console.log('15-minute breakout occurred', cis.tradingsymbol);
+       console.log('15-minute breakout occurred', cis.tradingsymbol);
     }
 
     // Strategy 3: Three Black Crows Bullish Reversal
     if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
         proceedToTrade = true;
-       /*  if (global.seconds == 30) */ //console.log('Three Black Crows pattern detected', cis.tradingsymbol);
+       console.log('Three Black Crows pattern detected', cis.tradingsymbol);
     }
 
     // Strategy 4: Hammer Candle
@@ -86,6 +99,21 @@ if(result.lastFiveVolatility>result.previousTenVolatility*1.4
         proceedToTrade = true;
      console.log('Hammer candle pattern detected', cis.tradingsymbol);
     }
+
+    if ( hasManyUpperWicks(cis.minuteData)) {
+        proceedToTrade = true;
+      console.log('has many upper wick', cis.tradingsymbol);
+    }
+
+
+    if(cis.tick.last_price>cis.tick.ohlc.high){
+        proceedToTrade = true;
+        console.log('break day high', cis.tradingsymbol,'alst_price=',cis.tick.last_price,'day high','cis.tick.ohlc.high');
+
+    }
+
+  if(global.minutes%5==0) if(global.seconds==58) console.log('procced to health 12-15 health check');
+    
 
     // Execute buy logic if any of the strategies meet the criteria
     if (proceedToTrade) {

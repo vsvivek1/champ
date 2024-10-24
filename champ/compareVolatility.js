@@ -1,5 +1,17 @@
 // Function to calculate the volatility of a given set of candles
-function calculateVolatility(candles) {
+function calculateVolatility1(candles) {
+    // Calculate the volatility for each candle (high - low)
+    const volatilityValues = candles.map(candle => candle.high - candle.low);
+
+    // Calculate the average volatility
+    const totalVolatility = volatilityValues.reduce((sum, vol) => sum + vol, 0);
+    const averageVolatility = totalVolatility / candles.length;
+
+    return averageVolatility;
+}
+
+
+export function calculateVolatility(candles) {
     // Calculate the volatility for each candle (high - low)
     const volatilityValues = candles.map(candle => candle.high - candle.low);
 
@@ -24,8 +36,8 @@ export function compareVolatility(minuteData) {
     const previousTenCandles = minuteData.slice(-10, -5);
 
     // Calculate the volatility for both sets of candles
-    const lastFiveVolatility = calculateVolatility(lastFiveCandles);
-    const previousTenVolatility = calculateVolatility(previousTenCandles);
+    const lastFiveVolatility = calculateVolatility1(lastFiveCandles);
+    const previousTenVolatility = calculateVolatility1(previousTenCandles);
 
     // Compare and return the result
     return {
@@ -34,3 +46,4 @@ export function compareVolatility(minuteData) {
         comparison: lastFiveVolatility > previousTenVolatility ? 'Last 5 candles have higher volatility' : 'Previous 10 candles have higher or equal volatility'
     };
 }
+

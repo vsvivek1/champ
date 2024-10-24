@@ -19,6 +19,11 @@ export function isMakingLowerLows(cis) {
     const lowerHigh = lastCandle.high < previousCandle.high;
 
     // If both conditions are met, return true
+
+    if(lowerLow && lowerHigh){
+
+        if(global.minutes%15==0 && global.seconds==0)   console.log('EXECUTING STOP LOSS lowerLow && lowerHigh')
+    }
     return lowerLow && lowerHigh;
 }
 

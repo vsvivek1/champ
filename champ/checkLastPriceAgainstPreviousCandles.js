@@ -1,7 +1,7 @@
 export function checkLastPriceAgainstPreviousCandles(cis) {
     // Ensure there are at least 3 candles to compare
     if (!cis || !cis.minuteData ||cis.minuteData.length < 3) {
-        console.log("Not enough candles to compare.");
+       // console.log("Not enough candles to compare.");
         return false; // Return false if there are fewer than 3 candles
     }
 

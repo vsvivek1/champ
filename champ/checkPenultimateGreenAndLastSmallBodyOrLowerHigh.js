@@ -2,7 +2,10 @@
 export function checkPenultimateGreenAndLastSmallBodyOrLowerHigh(minuteData) {
     // Ensure there are at least 2 candles
     if (!minuteData || minuteData.length < 2) {
-        throw new Error('Not enough data to perform the check. At least 2 candles are required.');
+       
+        return;
+       
+       // throw new Error('Not enough data to perform the check. At least 2 candles are required.');
     }
 
     // Get the penultimate (second-to-last) and last candles
@@ -22,6 +25,11 @@ export function checkPenultimateGreenAndLastSmallBodyOrLowerHigh(minuteData) {
     // Define the threshold for what we consider a small body (e.g., less than 10% of the total range)
     const isSmallBody = bodySize < 0.1 * totalRange;
 
+
+    if(isPenultimateGreen && (hasLowerHigh || isSmallBody)){
+
+        if(global.minutes%15==0 && global.seconds==0)      console.log('EXECUTING STOP LOSS isPenultimateGreen && (hasLowerHigh || isSmallBody')
+    }
     // Return true if the penultimate candle is green and the last candle has either a lower high or a small body
     return isPenultimateGreen && (hasLowerHigh || isSmallBody);
 }

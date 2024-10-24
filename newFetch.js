@@ -117,7 +117,7 @@ const { disconnect, set } = require('mongoose');
 
 async function main(params) {
     
-    exec('clear');
+   // exec('clear');
    console.clear();
  
    var accessTokenDoc= await getTodaysAccessToken(params)
@@ -266,7 +266,7 @@ console.log(indexInstrument,'indexInstrumentx',diff);
 
 
 
-let depth=0
+let depth=-1
 var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
 var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
 
@@ -382,7 +382,7 @@ console.log('here 158')
 
 
 
-//const { exec } = require('child_process');
+const { exec } = require('child_process');
 
 // Command to restart PM2 process
 
@@ -452,7 +452,8 @@ async function popOption(selectedOptions,fullJson,accessTokenDoc) {
 
             //const command = 'pm2 restart ./iday/index2.js';
 
-            const command='pwd'
+            //const command='pwd'
+            const command='./champ/main.js'
 
 
 
