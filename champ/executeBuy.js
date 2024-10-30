@@ -73,6 +73,8 @@ async function placeOrder(cis, kite,price) {
  */ 
 
 
+      cis.entryPrice=price;
+
     const orderParams = {
         exchange: "NFO",
         tradingsymbol: cis.tradingsymbol,

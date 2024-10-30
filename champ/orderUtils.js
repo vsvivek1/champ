@@ -80,19 +80,20 @@ async function placeTargetOrder(cis, order, kite) {
 
     //targetPrice=order.price+averageRange/4
     targetPrice=order.price *1.2
+
    }
    else if(global.hours==10){
 
-    var targetPrice = order.price +averageRange/3
+    var targetPrice = order.price +averageRange/2
    // var targetPrice = order.price +averageRange/4
    }
 
    else if(global.hours>10 && global.hours<14 ){
 
-    var targetPrice = order.price +averageRange/3
+    var targetPrice = order.price +averageRange/2
    }else if(global.hours>=14 ){
 
-    var targetPrice = order.price +averageRange/3
+    var targetPrice = order.price +averageRange/2
    }
    
     if(cis.colorTrading==true){
@@ -102,6 +103,8 @@ async function placeTargetOrder(cis, order, kite) {
        // targetPrice=order.price  + averageRange/2//*2;//Math.ceil(order.price+1);
     }
     
+
+    cis.exitType='target';
     const orderParams = {
         exchange: "NFO",
         tradingsymbol: order.tradingsymbol,

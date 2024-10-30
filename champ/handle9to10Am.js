@@ -60,28 +60,41 @@ export function handle9to10AM(cis, kite) {
 
     if (breakoutOccurred) {
         proceedToTrade = true;
+
+        cis.timeDelayRequired=true;
+        cis.timer=1000*60;
+
+         cis.entryStrategy='15minbreakoutOccurred'
         if (global.seconds == 57) console.log('15-minute breakout occurred in 9-10 AM', cis.tradingsymbol);
     }
 
     // Strategy 1: Check for Open=Low condition at specific seconds
     if (isOpenLowAtSpecificSeconds(cis)) {
+
+         cis.entryStrategy='openLowAtSpeceficSecond'
         proceedToTrade = true;
         if (global.seconds == 57) console.log('Open=Low condition detected at specific seconds', cis.tradingsymbol);
     }
 
     // Strategy 2: Check for Three Black Crows Bullish Reversal
     if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
+
+         cis.entryStrategy='3blackCrows'
         proceedToTrade = true;
         if (global.seconds == 57) console.log('Three Black Crows Bullish Reversal pattern detected', cis.tradingsymbol);
     }
 
     // Strategy 3: Check for Hammer Candle
     if (isHammerCandle(cis.minuteData.slice(-1)[0])) {
+
+         cis.entryStrategy='isHammer'
         proceedToTrade = true;
         if (global.seconds == 57) console.log('Hammer candle pattern detected', cis.tradingsymbol);
     } 
     
     if ( hasManyUpperWicks(cis.minuteData)) {
+
+             cis.entryStrategy='hasManyUpperWicks'
         proceedToTrade = true;
         if (global.seconds == 57) console.log('has many upper wick', cis.tradingsymbol);
     }
@@ -97,6 +110,8 @@ export function handle9to10AM(cis, kite) {
     ){
 
         if (global.seconds ==58) {
+
+                       cis.entryStrategy='yesterdayHighCross'
             console.log('yesterday high cross', cis.tradingsymbol, { proceedToTrade });
         }
 

@@ -12,6 +12,11 @@ import {redCandleStartAfterGreenCandles} from './redCandleStartAfterGreenCandles
 
 export function handlePositionPresent(cis, kite) {
     // Update the highest seen prices
+
+    if(cis.tradingsymbol.includes('NXT')){
+
+        return;
+    }
     cis.lastSeenHighForPosition = Math.max(cis.tick.last_price, cis.lastSeenHighForPosition);
     cis.lastSeenHigh = Math.max(cis.tick.last_price, cis.lastSeenHigh);
 
@@ -67,11 +72,16 @@ if(squareOff ){
 }
 
 function executeSquareOff(squareOff, cis, kite) {
+
+   
     if (squareOff && !cis.updated) {
         let order = global.orders.find(o => o.tradingsymbol === cis.tradingsymbol && o.status === 'OPEN');
         if (order) {
             updateOpenOrderPrice(kite, order.order_id, cis.instrument_token, cis.tick.last_price);
             cis.updated = true;
+
+            cis.exitType='stopLoss';
+            cis.exitPrice=cis.tick.last_price;
 
             // Reset `cis.updated` after 1 minute
             setTimeout(() => {

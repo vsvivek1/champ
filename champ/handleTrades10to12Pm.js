@@ -58,6 +58,8 @@ export function handle10to12PM(cis, kite) {
 
     // Separate checks for different strategies
     if (breakoutOccurred) {
+        cis.timeDelayRequired=true;
+        cis.timer=1000*60;
         proceedToTrade = true;
         if (global.seconds == 57) console.log('15-minute breakout occurred in 10-12 PM', cis.tradingsymbol);
     }

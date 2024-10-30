@@ -57,7 +57,21 @@ if (!canInitiateLongTrade(cis)) {
         return;
     }
 
-    if(checkLowerLowsAndLowerHighs(cis.minuteData)) {
+    if(
+        
+        checkLowerLowsAndLowerHighs(cis.minuteData)
+
+        || (cis.tick.last_price<cis.pricePoints.d1.low)
+        
+        ||cis.tick.last_price<cis.tick.ohlc.open
+        
+        /// if below yesterday low no trade what ever
+    
+    
+    ) {
+        
+
+    if(global.minutes%10==0 && global.seconds==5) console.log(cis.tradingsymbol,'d1low=',cis.pricePoints.d1.low,'lp=',cis.tick.last_price,checkLowerLowsAndLowerHighs(cis.minuteData),cis.tick.last_price<cis.pricePoints.d1.low,cis.tick.last_price<cis.tick.ohlc.open);
         
                 return
               }

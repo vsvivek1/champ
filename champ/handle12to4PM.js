@@ -83,6 +83,9 @@ if(result.lastFiveVolatility>result.previousTenVolatility*1.4
     } = is15MinuteBreakout(cis.minuteData, cis.last_price);
 
     if (breakoutOccurred) {
+
+        cis.timeDelayRequired=true;
+        cis.timer=1000*60;
         proceedToTrade = true;
        console.log('15-minute breakout occurred', cis.tradingsymbol);
     }
@@ -116,6 +119,8 @@ if(result.lastFiveVolatility>result.previousTenVolatility*1.4
     
 
     // Execute buy logic if any of the strategies meet the criteria
+
+
     if (proceedToTrade) {
         cis.buyCriteria = '12-4 PM';
         let noLots = 3; // Adjust as needed

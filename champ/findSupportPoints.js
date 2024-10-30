@@ -4,6 +4,7 @@
 * @returns {Object} - Object containing two arrays: `supportPoints` and `rejectedPoints`.
 */
 export function findSupportPoints(minuteData) {
+   return; //support point buying diabled
    const totalRecords = minuteData.length;
    
    // Determine the number of lowest points to select (n/6)

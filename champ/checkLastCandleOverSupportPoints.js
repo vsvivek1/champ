@@ -2,5 +2,7 @@ export function checkLastCandleOverSupportPoint(lastMinuteData, rangeNumbers,las
     // Check if the low value is exactly equal to any point in rangeNumbers
    // return rangeNumbers.includes(lastMinuteData.low) || 
     
-    return rangeNumbers.includes(lastPrice);
+
+   
+   // return rangeNumbers.includes(lastPrice);
 }

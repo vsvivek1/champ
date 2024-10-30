@@ -67,7 +67,7 @@ async function main() {
 
 
             if (global.seconds === 30) {
-               displayScripts();
+               displayScripts(kite);
             }
 
         }, 1000);
@@ -127,6 +127,12 @@ function processTicks(tick) {
     if (!cis) return;
     
 
+
+    if(cis.tradingsymbol.includes('NXT')){
+
+        //block niftyt nxt
+        return;
+    }
 //console.log('process ticks @107');
 
     cis.returns = [];
