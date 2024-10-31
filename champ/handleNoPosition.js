@@ -16,6 +16,13 @@ import {checkLastCandleOverSupportPoint} from './checkLastCandleOverSupportPoint
 import { canInitiateLongTrade } from './tradeCheckFunctions.js'; // Adjust the path based on file location
 
 
+
+
+///logs
+
+import { savePlaceOrder } from './savePlaceOrder.js';
+import { setTargetForTrade } from './setTargetForTrade.js';
+import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
 let trades = [];
 
 
@@ -38,7 +45,9 @@ if (!canInitiateLongTrade(cis)) {
 
  if(global.minutes%15==0 && global.seconds==0)   console.log("Conditions are not favorable for a long trade.",cis.tradingsymbol);
 
-    return;
+   ///removed on 31st oct
+ 
+ //return;
     // Proceed with initiating a long trade
     // Your code to initiate a long trade goes here
 } else {
@@ -59,9 +68,9 @@ if (!canInitiateLongTrade(cis)) {
 
     if(
         
-        checkLowerLowsAndLowerHighs(cis.minuteData)
+       // checkLowerLowsAndLowerHighs(cis.minuteData) ||  removed on 31st 
 
-        || (cis.tick.last_price<cis.pricePoints.d1.low)
+         (cis.tick.last_price<cis.pricePoints.d1.low)
         
         ||cis.tick.last_price<cis.tick.ohlc.open
         
@@ -82,11 +91,16 @@ if (!canInitiateLongTrade(cis)) {
     // Output the results
   
 let lp1=cis.tick.last_price;
-    let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
+  
+
+let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
    // console.log("Support Points:", result,cis.tradingsymbol,sup);
  
 
-    if(sup && cis.tick.last_price> cis.minuteData.slice(-1)[0].high){
+
+   //disabled temp
+
+    if(sup && cis.tick.last_price> cis.minuteData.slice(-1)[0].high   && false){
 
 
         console.log('SUPPORT BUYING OF,',sup,cis.tradingsymbol,lp1);
@@ -105,17 +119,20 @@ let lp1=cis.tick.last_price;
     const capturedCis = JSON.parse(JSON.stringify(cis));
 
     // Log the intention to execute the trade after 2 minutes
-    console.log('Trade condition met, will execute trade after 2 minutes:', capturedCis.tradingsymbol, capturedCis.tick.last_price);
+    console.log('Trade condition met, will execute trade after 1 minutes:', capturedCis.tradingsymbol, capturedCis.tick.last_price);
 
     // Set a timeout to delay the trade execution by 2 minutes (120,000 milliseconds)
-    setTimeout(() => {
+
+    let noLots = 2; // Adjust the number of lots as needed
+    for (let i = 0; i < noLots; i++) {
+      //  executeBuy(capturedCis, kite, cis.tick.last_price);
+        executeBuy(cis, kite, cis.tick.last_price);
+    }
+ /*    setTimeout(() => {
         console.log('Executing trade for last high before 1 minute buy strategy:', capturedCis.tradingsymbol, capturedCis.tick.last_price);
         
-        let noLots = 2; // Adjust the number of lots as needed
-        for (let i = 0; i < noLots; i++) {
-            executeBuy(capturedCis, kite, lp1);
-        }
-    }, 120000); // 2 minutes in milliseconds
+       
+    }, 600000); // 2 minutes in milliseconds */
 }
 
     
@@ -239,199 +256,6 @@ if (isMoreThan10Percent ) {
 
 
 
-function handle9to10AMx(cis, kite) {
-
-    if(
-    
-        checkGapDown(cis) ||
-    
-        cis.tick.last_price<cis.tick.ohlc.open
-      
-      ){
-    
-       if(global.minutes%5==0 && global.seconds==30) console.log(cis.tradingsymbol,'is gap down no morning trades or less than open price');
-        
-        return false;
-      }
-    
-
-    if(cis.noBuyTime>global.date){
-
-        console.log('no buy till ',cis.noBuyTime);
-        
-    }
-
-    let proceedToTrade = false;
-    cis.buyCriteria = null; // Reset the buy criteria flag
-
-    // Morning session logic (9 AM - 10 AM)
-    if (cis.tick.last_price< cis.tick.ohlc.open) {
-        proceedToTrade = true;
-        cis.location.ohlcBewlowcheck = false;
-        cis.returns.push('LTP greater than or equal to open in 9-10 AM');
-    
-    return;
-    }
-
-  /*   if (cis.liveMinute.hasLongUpperShadow) {
-        cis.message = 'Live minute has long upper shadow, not entering in 9-10 AM';
-       // return;
-    }
- */
-   // const isLastCandleHammer = checkLastCandleIsHammer(cis.minuteData);
-
-    //console.log(isHammerCandle(cis.minuteData.slice(-1)));
-   
-   // cis.colorTrading=true;
-
-
-   let {
-    breakoutOccurred,
-    lastPrice,
-    highestHigh,
-    lowestLow,
-    priceRange,
-    targetPrice,
-    stopLoss,
-}=is15MinuteBreakout(cis.minuteData,cis.tick.last_price);
-
-   ///conditions
-   if 
-    
-    (
-        breakoutOccurred||
-        
-        isOpenLowAtSpecificSeconds(cis) ||
-
-
-    checkThreeBlackCrowsBullishReversal(cis.minuteData)
-    ||
-
-    isHammerCandle(cis.minuteData.slice(-1)) 
-    
-    
-    ) {
-        proceedToTrade = true;
-    }
 
 
 
-    if(cis.tick.last_price<cis.minuteData.slice(-1).high){
-console.log('buy signal is there waiting for cross over last candl high',cis.tradingsymbol);
-return;
-
-    }
-
-
-  
-  
-
-    if (global.seconds % 20==0){
-       // console.log('Just before hammer check ',cis.tradingsymbol,'checking');
-
-        console.log(cis.tradingsymbol,'Before Proceed to trade',cis.tradingsymbol,{proceedToTrade });
-       
-
-    }
-        
-
-         // || isLastPriceAboveMaxOfPrev15(cis.minuteData, cis)
-    if (proceedToTrade ) {
-        cis.buyCriteria = '9-10 AM'; // Set the buy criteria flag
-        let noLots = 3; // Adjust as needed
-        for (let i = 0; i < noLots; i++) {
-            executeBuy(cis, kite,cis.tick.last_price);
-        }
-    }
-}
-
-
-
-function handle12to4PMX(cis, kite) {
-
-  
-    
-    
-    let h2 =  OpenPriceAfter12PM(cis.minuteData);
-
-    if (cis.tick.last_price < h2 || h2==-1){
-
-        return;
-    }
-
-
-
-  //  console.log("opening price after 12 is ",h2,cis.tradingsymbol);
-
-   /*  if (!isOpenLowAtSpecificSeconds(cis)) {
-       
-
-
-        return false;
-        proceedToTrade = true;
-    } */
-
-    //console.log('open low suceeded',cis.tradingsymbol);
-    let proceedToTrade = false;
-    cis.buyCriteria = null; // Reset the buy criteria flag
-
-    // Afternoon session logic (12 PM - 4 PM)
-   
-
-
-    if (cis.liveMinute.color == 'bearish') {
-        cis.message = 'Bearish Live candle No Return' + cis.tradingsymbol;
-      
-        if(global.seconds%15==0) console.log(cis.message,cis.liveMinute.color);
-   
-       //return;
-    }
-
-   
-    if(global.seconds%31==0)  console.log('isHammerCandle ->',isHammerCandle(cis.minuteData.slice(-1)),'',cis.tradingsymbol,h2,cis.tick.last_price,cis.liveMinute.color );
-    if(global.seconds%31==0)console.log(checkThreeBlackCrowsBullishReversal(cis.minuteData),'is 3 black crows is');
-    if(global.seconds%31==0)console.log(cis.liveMinute.color == 'bullish','Live candle bullish');
-    
-   
-   // cis.colorTrading=true;
-
-
-
- if(
-    
-   ( isHammerCandle(cis.minuteData.slice(-1))
-    || checkThreeBlackCrowsBullishReversal(cis.minuteData)
-
-
-
-    && cis.tick.last_price>cis.minuteData.slice(-1).high
-
-
-)
-|| (cis.liveMinute.color == 'bullish' && global.seconds==58))
-
-
-    {
-    proceedToTrade=true
- if (global.seconds==10)   console.log('is hammer',cis.tradingsymbol);
-    
-   }
-   
-  
-
-
-   if (proceedToTrade ) {
-        cis.buyCriteria = '12-4 PM'; // Set the buy criteria flag
-        let noLots = 2; // Adjust as needed
-        for (let i = 0; i < noLots; i++) {
-
-            let price = cis.tick.last_price
-
-            console.log('execute buy ',cis.tradingsymbol);
-            
-            executeBuy(cis, kite,price);
-        }
-    }
-
-    //return;
-}

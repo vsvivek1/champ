@@ -9,6 +9,8 @@ import { checkPenultimateGreenAndLastSmallBodyOrLowerHigh } from './checkPenulti
 import { isMakingLowerLows, hasLargeUpperWick, isBearishAt50Sec, isOpenHighAtSpecificSeconds } from './criteriaFunctions.js';  // Import your criteria functions
 import {redCandleStartAfterGreenCandles} from './redCandleStartAfterGreenCandles.js'
 
+import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
+
 
 export function handlePositionPresent(cis, kite) {
     // Update the highest seen prices
@@ -39,10 +41,10 @@ export function handlePositionPresent(cis, kite) {
 
     squareOff = 
  (
-checkLowerLowsAndLowerHighs(cis.minuteData)
+checkLowerLowsAndLowerHighs(cis)
 || 
 
-checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis.minuteData) /// lst cndle green with (lower highs or very small body)
+checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis) /// lst cndle green with (lower highs or very small body)
 ||
 isMakingLowerLows(cis) /// is making lower lows
 ||
@@ -63,6 +65,24 @@ if(global.seconds%30==0)            console.log('No sq off since signs of recove
 
 return;
     } */
+
+///temp on oct 30
+
+/* squareOff=false;
+
+if(cis.tick.last_price<cis.tick.open 
+    ||redCandleStartAfterGreenCandles(cis)
+
+    || checkLowerLowsAndLowerHighs(cis.minuteData)
+
+    || isMakingLowerLows(cis) 
+
+){
+
+    squareOff=true;
+} */
+///temp on oct 30
+
   
 if(squareOff ){
 
@@ -71,7 +91,7 @@ if(squareOff ){
 
 }
 
-function executeSquareOff(squareOff, cis, kite) {
+async function executeSquareOff(squareOff, cis, kite) {
 
    
     if (squareOff && !cis.updated) {
@@ -80,8 +100,18 @@ function executeSquareOff(squareOff, cis, kite) {
             updateOpenOrderPrice(kite, order.order_id, cis.instrument_token, cis.tick.last_price);
             cis.updated = true;
 
-            cis.exitType='stopLoss';
-            cis.exitPrice=cis.tick.last_price;
+            cis.sellType='stopLoss';
+            cis.sellStrategy='stoploss'
+            cis.sellPrice=cis.tick.last_price;
+
+            const sellOrder = await handleStopLossOrTarget(
+                cis.tradingsymbol,
+                cis.sellPrice || -140, // Example sell price, fallback if not set in cis
+                cis.sellType || 'stopLoss',
+                cis.sellStrategy || 'fixed stop loss',
+                cis.stopLossStrategy || 'trailing stop loss'
+            );
+            console.log('Sell Order after Stop Loss:', sellOrder);
 
             // Reset `cis.updated` after 1 minute
             setTimeout(() => {

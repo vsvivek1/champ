@@ -5,7 +5,11 @@ import { isHammerCandle } from "./hammerStrategy.js";
 import { isOpenLowAtSpecificSeconds } from './isOpenLowAtSpecifiedSeconds.js';
 import { checkGapDown } from './gapDownChecker.js';
 import { hasManyUpperWicks } from './hasManyUpperWicks.js';
-export function handle9to10AM(cis, kite) {
+
+import { savePlaceOrder } from './savePlaceOrder.js';
+import { setTargetForTrade } from './setTargetForTrade.js';
+import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
+export async function handle9to10AM(cis, kite) {
 
     // Check if there is a gap down or last price is less than open price
     if (
@@ -72,7 +76,7 @@ export function handle9to10AM(cis, kite) {
     if (isOpenLowAtSpecificSeconds(cis)) {
 
          cis.entryStrategy='openLowAtSpeceficSecond'
-        proceedToTrade = true;
+       // proceedToTrade = true;
         if (global.seconds == 57) console.log('Open=Low condition detected at specific seconds', cis.tradingsymbol);
     }
 
@@ -80,7 +84,7 @@ export function handle9to10AM(cis, kite) {
     if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
 
          cis.entryStrategy='3blackCrows'
-        proceedToTrade = true;
+       // proceedToTrade = true;
         if (global.seconds == 57) console.log('Three Black Crows Bullish Reversal pattern detected', cis.tradingsymbol);
     }
 
@@ -132,6 +136,11 @@ export function handle9to10AM(cis, kite) {
     }
     // Execute the trade if any of the conditions are met
     if (proceedToTrade) {
+
+
+        
+
+
         cis.buyCriteria = '9-10 AM'; // Set the buy criteria flag
         let noLots = 3; // Adjust the number of lots as needed
         for (let i = 0; i < noLots; i++) {

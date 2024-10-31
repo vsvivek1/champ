@@ -16,9 +16,11 @@ export function handle10to12PM(cis, kite) {
             if (cis.liveMinute.color === 'bearish') {
                 cis.message = 'Live minute Color bearish, no entry ' + cis.tradingsymbol;
                 if (global.seconds == 57) {
-                    console.log(cis.message, cis.liveMinute.color, 'live color red rejection');
+                   // console.log(cis.message, cis.liveMinute.color, 'live color red rejection');
                 }
-                return; // Exit if the candle is bearish
+
+
+               // return; // Exit if the candle is bearish  removed on 31st 
             }
     // Check if there is a gap down or last price is less than open price
     if (
@@ -37,11 +39,13 @@ export function handle10to12PM(cis, kite) {
     // Exit if last price is less than last candle's high
     if (lastCandleHigh > cis.tick.last_price) {
         if (global.seconds == 57) {
-            console.log(cis.tradingsymbol, 'below last candle high', cis.tradingsymbol);
+           // console.log(cis.tradingsymbol, 'below last candle high', cis.tradingsymbol); on 31st
         }
-        return; // Exit condition
+        // return; // Exit condition  removed on 31st
     }
 
+
+    cis.qualifiedForTrade=true;
     let h = findHighestPrice(cis);
 
     if (global.seconds == 57) {

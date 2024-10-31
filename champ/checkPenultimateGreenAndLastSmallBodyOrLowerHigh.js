@@ -1,6 +1,10 @@
 // Function to check if the penultimate candle is green and the last candle has either a lower high or a small body
-export function checkPenultimateGreenAndLastSmallBodyOrLowerHigh(minuteData) {
+export function checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis) {
     // Ensure there are at least 2 candles
+
+    if(!cis) return false;
+
+    let minuteData=cis.minuteData
     if (!minuteData || minuteData.length < 2) {
        
         return;

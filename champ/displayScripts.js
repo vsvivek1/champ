@@ -1,9 +1,17 @@
 export async function displayScripts(kc) {
+
+
   // Create a mapping of instrument tokens to their respective trading symbols
   const tokenToSymbolMap = global.instrumentsForMining.reduce((map, instrument) => {
     map[instrument.instrument_token] = instrument.tradingsymbol;
     return map;
   }, {});
+
+let it= global.instrumentsForMining.filter(x=>x.qualifiedForTrade).map(r=>r.tradingsymbol )
+
+console.log(it,'qualified scripts');
+
+return;
 
   // Map instruments to their instrument tokens
   let tokens = global.instrumentsForMining.map(i => i.instrument_token);

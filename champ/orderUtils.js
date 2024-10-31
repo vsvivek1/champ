@@ -3,6 +3,8 @@
 import { fetchOrdersAndSetCis, fetchPositionsAndSetCis } from './fetchData.js';
 
 import { calculateVolatility } from './compareVolatility.js';
+import { setTargetForTrade } from './setTargetForTrade.js';
+
 
 export async function updateOpenOrderPrice(kite, order_id, instrument_token, last_price) {
     const updatedPrice = last_price; // Modify as per your logic
@@ -64,7 +66,7 @@ export async function handleOrderUpdates(order, kite) {
 
 async function placeTargetOrder(cis, order, kite) {
 
-
+let tgtStrategy='';
     
     const lastFiveCandles = cis.minuteData.slice(-5);
     const lastFiveVolatility = calculateVolatility(lastFiveCandles);
@@ -75,7 +77,7 @@ async function placeTargetOrder(cis, order, kite) {
   //  var targetPrice = order.price + targetPoints;
    // var targetPrice = order.price +averageRange/4  ///2//*2
     var targetPrice = order.price *1.2  ///2//*2
-   
+    tgtStrategy='order*1.2'
    if(global.hours==9){
 
     //targetPrice=order.price+averageRange/4
@@ -85,15 +87,21 @@ async function placeTargetOrder(cis, order, kite) {
    else if(global.hours==10){
 
     var targetPrice = order.price +averageRange/2
+
+     tgtStrategy='order+averageRange/2'
    // var targetPrice = order.price +averageRange/4
    }
 
    else if(global.hours>10 && global.hours<14 ){
 
     var targetPrice = order.price +averageRange/2
+
+     tgtStrategy='order+averageRange/2'
    }else if(global.hours>=14 ){
 
     var targetPrice = order.price +averageRange/2
+
+     tgtStrategy='order+averageRange/2'
    }
    
     if(cis.colorTrading==true){
@@ -103,6 +111,16 @@ async function placeTargetOrder(cis, order, kite) {
        // targetPrice=order.price  + averageRange/2//*2;//Math.ceil(order.price+1);
     }
     
+
+
+    ////// temp change on oct 30
+
+    targetPrice = order.price +averageRange*2
+
+     tgtStrategy='order+2*averageRange'
+
+
+    ////// temp change on oct 30
 
     cis.exitType='target';
     const orderParams = {
@@ -119,6 +137,10 @@ async function placeTargetOrder(cis, order, kite) {
     try {
         const orderId = await kite.placeOrder("regular", orderParams);
         cis.hasPlacedTarget = true;
+
+
+        const updatedOrderWithTarget = await setTargetForTrade(cis.tradingsymbol, Math.ceil(targetPrice), tgtStrategy);
+        console.log('Updated Order with Target:', updatedOrderWithTarget);
         console.log("Target order placed successfully. Order ID:", orderId);
     } catch (error) {
         console.error("Error placing target order:", error);

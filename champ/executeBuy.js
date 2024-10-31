@@ -1,5 +1,7 @@
 // executeBuy.js
-
+import { savePlaceOrder } from './savePlaceOrder.js';
+import { setTargetForTrade } from './setTargetForTrade.js';
+import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
 
 async function getMargins(kite){
 
@@ -61,7 +63,7 @@ async function placeOrder(cis, kite,price) {
 
    let m=await getMargins(kite);
    let m2=m.equity.net;
-    multiplier=Math.floor(Math.min(m2*.9,80000)/(price*cis.lot_size));
+    multiplier=Math.floor(Math.min(m2*.8,50000)/(price*cis.lot_size));
                 
  /*        "NIFTY":36,//72,
         
@@ -73,22 +75,36 @@ async function placeOrder(cis, kite,price) {
  */ 
 
 
+      const buyOrder = await savePlaceOrder('AAPL', 'breakout', 100, 150, 'fixed target');
+
       cis.entryPrice=price;
 
+
+      let qty=cis.lot_size * multiplier;
     const orderParams = {
         exchange: "NFO",
         tradingsymbol: cis.tradingsymbol,
         transaction_type: "BUY",
         order_type: "LIMIT",
-        quantity: cis.lot_size * multiplier,
+        quantity: qty,
         price: price,
         product: "NRML",
         validity: "DAY"
     };
 
+
+
+
     try {
         const orderId = await kite.placeOrder("regular", orderParams);
         console.log("Order placed successfully. Order ID:", orderId);
+
+
+        const buyOrder = await savePlaceOrder(cis.tradingsymbol, cis.buyStrategy, qty, price, 'fixed target');
+
+
+
+
     } catch (error) {
         console.error("Error placing order:", error, cis.tradingsymbol);
     }
