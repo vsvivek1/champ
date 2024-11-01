@@ -61,6 +61,14 @@ export async function handleOrderUpdates(order, kite) {
         await fetchPositionsAndSetCis(kite);
         placeTargetOrder(cis, order, kite);
     }
+
+    if (order.status == 'REJECTED' && order.transaction_type == 'BUY') {
+        //await fetchOrdersAndSetCis(kite);
+       //// await fetchPositionsAndSetCis(kite);
+        //placeTargetOrder(cis, order, kite);
+
+        cis.ordered=false;
+    }
 }
 
 

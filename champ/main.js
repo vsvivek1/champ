@@ -66,9 +66,7 @@ async function main() {
 
 
 
-            if (global.seconds === 30) {
-               displayScripts(kite);
-            }
+          
 
         }, 1000);
 

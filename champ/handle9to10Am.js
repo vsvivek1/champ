@@ -63,19 +63,21 @@ export async function handle9to10AM(cis, kite) {
     } = is15MinuteBreakout(cis.minuteData, cis.tick.last_price);
 
     if (breakoutOccurred) {
+
+        cis.buyStrategy='15minBreakOut'
         proceedToTrade = true;
 
         cis.timeDelayRequired=true;
         cis.timer=1000*60;
 
-         cis.entryStrategy='15minbreakoutOccurred'
+          cis.buyStrategy='15minbreakoutOccurred'
         if (global.seconds == 57) console.log('15-minute breakout occurred in 9-10 AM', cis.tradingsymbol);
     }
 
     // Strategy 1: Check for Open=Low condition at specific seconds
     if (isOpenLowAtSpecificSeconds(cis)) {
 
-         cis.entryStrategy='openLowAtSpeceficSecond'
+          cis.buyStrategy='openLowAtSpeceficSecond'
        // proceedToTrade = true;
         if (global.seconds == 57) console.log('Open=Low condition detected at specific seconds', cis.tradingsymbol);
     }
@@ -83,7 +85,8 @@ export async function handle9to10AM(cis, kite) {
     // Strategy 2: Check for Three Black Crows Bullish Reversal
     if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
 
-         cis.entryStrategy='3blackCrows'
+          cis.buyStrategy='3blackCrows'
+         cis.buyStrategy='3Crows'
        // proceedToTrade = true;
         if (global.seconds == 57) console.log('Three Black Crows Bullish Reversal pattern detected', cis.tradingsymbol);
     }
@@ -91,14 +94,14 @@ export async function handle9to10AM(cis, kite) {
     // Strategy 3: Check for Hammer Candle
     if (isHammerCandle(cis.minuteData.slice(-1)[0])) {
 
-         cis.entryStrategy='isHammer'
+          cis.buyStrategy='isHammer'
         proceedToTrade = true;
         if (global.seconds == 57) console.log('Hammer candle pattern detected', cis.tradingsymbol);
     } 
     
     if ( hasManyUpperWicks(cis.minuteData)) {
 
-             cis.entryStrategy='hasManyUpperWicks'
+              cis.buyStrategy='hasManyUpperWicks'
         proceedToTrade = true;
         if (global.seconds == 57) console.log('has many upper wick', cis.tradingsymbol);
     }
@@ -115,7 +118,7 @@ export async function handle9to10AM(cis, kite) {
 
         if (global.seconds ==58) {
 
-                       cis.entryStrategy='yesterdayHighCross'
+                        cis.buyStrategy='yesterdayHighCross'
             console.log('yesterday high cross', cis.tradingsymbol, { proceedToTrade });
         }
 

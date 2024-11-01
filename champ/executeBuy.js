@@ -14,6 +14,9 @@ export async function executeBuy(cis, kite,price) {
     if (cis.ordered) {
 
 
+        console.log(cis.ordered,'cis.ordered');
+        
+
         return false;
     }
 
@@ -63,7 +66,7 @@ async function placeOrder(cis, kite,price) {
 
    let m=await getMargins(kite);
    let m2=m.equity.net;
-    multiplier=Math.floor(Math.min(m2*.8,50000)/(price*cis.lot_size));
+    multiplier=Math.floor(Math.min(m2*.8,40000)/(price*cis.lot_size));
                 
  /*        "NIFTY":36,//72,
         
@@ -75,7 +78,6 @@ async function placeOrder(cis, kite,price) {
  */ 
 
 
-      const buyOrder = await savePlaceOrder('AAPL', 'breakout', 100, 150, 'fixed target');
 
       cis.entryPrice=price;
 
@@ -100,6 +102,7 @@ async function placeOrder(cis, kite,price) {
         console.log("Order placed successfully. Order ID:", orderId);
 
 
+       // const buyOrder = await savePlaceOrder('AAPL', 'breakout', 100, 150, 'fixed target');
         const buyOrder = await savePlaceOrder(cis.tradingsymbol, cis.buyStrategy, qty, price, 'fixed target');
 
 

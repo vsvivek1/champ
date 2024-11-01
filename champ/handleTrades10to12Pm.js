@@ -9,7 +9,12 @@ import { hasManyUpperWicks } from './hasManyUpperWicks.js';
 
 export function handle10to12PM(cis, kite) {
 
+    cis.qualifiedForTrade=true;
 
+   
+    if (global.seconds === 30) {
+        displayScripts(kite);
+     }
    
 
 
@@ -45,7 +50,8 @@ export function handle10to12PM(cis, kite) {
     }
 
 
-    cis.qualifiedForTrade=true;
+ 
+    
     let h = findHighestPrice(cis);
 
     if (global.seconds == 57) {
@@ -62,6 +68,7 @@ export function handle10to12PM(cis, kite) {
 
     // Separate checks for different strategies
     if (breakoutOccurred) {
+         cis.buyStrategy='15minBreakOut'
         cis.timeDelayRequired=true;
         cis.timer=1000*60;
         proceedToTrade = true;
@@ -82,12 +89,15 @@ export function handle10to12PM(cis, kite) {
 
     // Strategy 2: Check for Three Black Crows Bullish Reversal
     if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
+        cis.buyStrategy='3Crows'
         proceedToTrade = true;
         if (global.seconds == 57) console.log('Three Black Crows Bullish Reversal pattern detected', cis.tradingsymbol);
     }
 
     // Strategy 3: Check for Hammer Candle and price above last candle's high
     if (isHammerCandle(cis.minuteData.slice(-1)) && cis.tick.last_price > cis.minuteData.slice(-1)[0].high) {
+       
+        cis.buyStrategy='isHammer'
         proceedToTrade = true;
         if (global.seconds == 57) console.log('Hammer candle pattern detected and price above last candle high', cis.tradingsymbol);
     }

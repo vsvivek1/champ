@@ -31,7 +31,7 @@ return false;
 
 if (cis.tick.last_price < lastCandleHigh) {
      if (global.seconds == 57 && global.minutes%5==0) console.log('ltp less than last candle high', cis.tradingsymbol, lastCandleHigh);
-     return;
+    // return;
  }
 
 
@@ -84,6 +84,8 @@ if(result.lastFiveVolatility>result.previousTenVolatility*1.4
 
     if (breakoutOccurred) {
 
+        cis.buyStrategy='15MinBreakout'
+
         cis.timeDelayRequired=true;
         cis.timer=1000*60;
         proceedToTrade = true;
@@ -92,31 +94,42 @@ if(result.lastFiveVolatility>result.previousTenVolatility*1.4
 
     // Strategy 3: Three Black Crows Bullish Reversal
     if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
+        cis.buyStrategy='3Crows'
         proceedToTrade = true;
        console.log('Three Black Crows pattern detected', cis.tradingsymbol);
     }
 
     // Strategy 4: Hammer Candle
     if (isHammerCandle(cis.minuteData.slice(-1)[0])) {
-
+ cis.buyStrategy='isHammer'
         proceedToTrade = true;
      console.log('Hammer candle pattern detected', cis.tradingsymbol);
     }
 
     if ( hasManyUpperWicks(cis.minuteData)) {
+         cis.buyStrategy='hasManyUpperWicks'
         proceedToTrade = true;
       console.log('has many upper wick', cis.tradingsymbol);
     }
 
 
     if(cis.tick.last_price>cis.tick.ohlc.high){
+
+        cis.buyStrategy='lastPriceAboveOHLCHigh'
         proceedToTrade = true;
         console.log('break day high', cis.tradingsymbol,'alst_price=',cis.tick.last_price,'day high','cis.tick.ohlc.high');
 
     }
 
-  if(global.minutes%5==0) if(global.seconds==58) console.log('procced to health 12-15 health check');
+  if(global.minutes%5==0){
+
+
+
+    if(global.seconds==58) console.log('procced to health 12-15 health check');
+  } 
     
+
+
 
     // Execute buy logic if any of the strategies meet the criteria
 

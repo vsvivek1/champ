@@ -25,7 +25,53 @@ import { setTargetForTrade } from './setTargetForTrade.js';
 import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
 let trades = [];
 
+function isRangeGreaterThanFive(cis) {
+    let c = cis.minuteData.slice(-5, -1)
+      .map(c1 => c1.high - c1.low);
+    
+    let lp = cis.tick.last_price;
+    
+    // Calculate the average range of the last 5 candles
+    let sum = c.reduce((acc, value) => acc + value, 0);
+    let average = sum / c.length;
+    
+    let isMoreThan10Percent = average > (0.05 * lp);
+    
+    
+    
+    
+    if (isMoreThan10Percent ) {
+        let min = Math.min(...c);
+        let max = Math.max(...c);
+     
+    /*  
+        if (global.seconds % 5 === 0) {
+       
+    
+        console.log('more than 10 pc average', 
+                    `Min: ${min}, Max: ${max}, Average: ${average}`, 
+                    cis.tradingsymbol);
+      } */
+    
+      if (global.seconds % 30 === 0 && global.minutes%10==0) {
+        console.log('range IS greater than 5 pc average. So trading possible', 
+                    cis.tradingsymbol,'range=',average, 'last price=',cis.tick.last_price,{isMoreThan10Percent});
 
+                    
+      }
+    
+
+      return true;
+    } else {
+      if (global.seconds % 30 === 0 && global.minutes%10==0) {
+        console.log('range not greater than 5 pc average. So no trading', 
+                    cis.tradingsymbol, 'range=',average, 'last price=',cis.tick.last_price,{isMoreThan10Percent});
+      }
+      return false;
+    }
+    
+    
+}
 async function getMargins(kite){
 
     return await kite.getMargins();
@@ -164,49 +210,14 @@ if(global.minutes%10==0 && global.seconds%30==0){
 }
 
 
+/* if(!isRangeGreaterThanFive(cis)){
+
+   // return;
+
+} */
+
 //added positve close ranges only
   
-let c = cis.minuteData.slice(-5, -1)
-  .map(c1 => c1.high - c1.low);
-
-let lp = cis.tick.last_price;
-
-// Calculate the average range of the last 5 candles
-let sum = c.reduce((acc, value) => acc + value, 0);
-let average = sum / c.length;
-
-let isMoreThan10Percent = average > (0.05 * lp);
-
-/* && cis.tick.last_price > cis.tick.open 
-    && cis.tick.last_price > cis.pricePoints.d1.low */
-
-
-if (isMoreThan10Percent ) {
-    let min = Math.min(...c);
-    let max = Math.max(...c);
- 
-/*  
-    if (global.seconds % 5 === 0) {
-   
-
-    console.log('more than 10 pc average', 
-                `Min: ${min}, Max: ${max}, Average: ${average}`, 
-                cis.tradingsymbol);
-  } */
-
-  if (global.seconds % 30 === 0 && global.minutes%10==0) {
-    console.log('range IS greater than 5 pc average. So trading possible', 
-                cis.tradingsymbol,'range=',average, 'last price=',cis.tick.last_price,{isMoreThan10Percent});
-  }
-
-} else {
-  if (global.seconds % 30 === 0 && global.minutes%10==0) {
-    console.log('range not greater than 5 pc average. So no trading', 
-                cis.tradingsymbol, 'range=',average, 'last price=',cis.tick.last_price,{isMoreThan10Percent});
-  }
-  return;
-}
-
 
 
     if(global.seconds<55){
@@ -242,7 +253,6 @@ if (isMoreThan10Percent ) {
        
 
      
-
 
 
     if (global.hours >= 9 && global.hours < 10) {

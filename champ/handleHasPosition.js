@@ -91,6 +91,9 @@ if(squareOff ){
 
 }
 
+
+
+
 async function executeSquareOff(squareOff, cis, kite) {
 
    
@@ -104,12 +107,36 @@ async function executeSquareOff(squareOff, cis, kite) {
             cis.sellStrategy='stoploss'
             cis.sellPrice=cis.tick.last_price;
 
+            let conditionsMet = [];
+
+            if (checkLowerLowsAndLowerHighs(cis)) {
+                conditionsMet.push("lowerLowsAndLowerHighs");
+            }
+            if (checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis)) {
+                conditionsMet.push("penultimateGreenLastSmallBodyOrLowerHigh");
+            }
+            if (isMakingLowerLows(cis)) {
+                conditionsMet.push("makingLowerLows");
+            }
+            if (checkLastPriceAgainstPreviousCandles(cis)) {
+                conditionsMet.push("lastPriceAgainstPreviousCandles");
+            }
+            if (checkColorWithFlags(cis)) {
+                conditionsMet.push("colorWithFlags");
+            }
+            if (redCandleStartAfterGreenCandles(cis)) {
+                conditionsMet.push("redCandleAfterGreenCandles");
+            }
+        
+            // Set stopLossStrategy with the stringified conditionsMet
+            cis.stopLossStrategy = JSON.stringify({ conditionsMet: conditionsMet });
+
             const sellOrder = await handleStopLossOrTarget(
                 cis.tradingsymbol,
-                cis.sellPrice || -140, // Example sell price, fallback if not set in cis
-                cis.sellType || 'stopLoss',
-                cis.sellStrategy || 'fixed stop loss',
-                cis.stopLossStrategy || 'trailing stop loss'
+                cis.sellPrice , // Example sell price, fallback if not set in cis
+                cis.sellType ,
+                cis.sellStrategy ,
+                cis.stopLossStrategy 
             );
             console.log('Sell Order after Stop Loss:', sellOrder);
 
