@@ -85,7 +85,7 @@ let tgtStrategy='';
   //  var targetPrice = order.price + targetPoints;
    // var targetPrice = order.price +averageRange/4  ///2//*2
     var targetPrice = order.price *1.2  ///2//*2
-    tgtStrategy='order*1.2'
+    let targtStrategy='order*1.2'
    if(global.hours==9){
 
     //targetPrice=order.price+averageRange/4
@@ -96,7 +96,7 @@ let tgtStrategy='';
 
     var targetPrice = order.price +averageRange/2
 
-     tgtStrategy='order+averageRange/2'
+    targtStrategy='order+averageRange/2'
    // var targetPrice = order.price +averageRange/4
    }
 
@@ -104,12 +104,12 @@ let tgtStrategy='';
 
     var targetPrice = order.price +averageRange/2
 
-     tgtStrategy='order+averageRange/2'
+    targtStrategy='order+averageRange/2'
    }else if(global.hours>=14 ){
 
     var targetPrice = order.price +averageRange/2
 
-     tgtStrategy='order+averageRange/2'
+    targtStrategy='order+averageRange/2'
    }
    
     if(cis.colorTrading==true){
@@ -125,7 +125,9 @@ let tgtStrategy='';
 
     targetPrice = order.price +averageRange*2
 
-     tgtStrategy='order+2*averageRange'
+    
+
+    targtStrategy='order+2*averageRange'
 
 
     ////// temp change on oct 30
@@ -142,6 +144,9 @@ let tgtStrategy='';
         validity: "DAY",
     };
 
+
+
+    console.log(order,'order');
     try {
         const orderId = await kite.placeOrder("regular", orderParams);
         cis.hasPlacedTarget = true;

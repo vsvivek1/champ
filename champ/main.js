@@ -16,7 +16,10 @@ import { updateOpenOrderPrice } from './orderUtils.js';
 import { displayScripts } from './displayScripts.js';
 import moment from 'moment';
 
-const socket = io('http://localhost:4000');
+//const socket = io('http://localhost:4000');
+
+const socket = io('http://tradingsimham.in:4000');  // Using a domain
+
 
 //import { startLogging } from './logger.js';
 
