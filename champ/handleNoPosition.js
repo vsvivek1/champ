@@ -115,10 +115,10 @@ if (!canInitiateLongTrade(cis)) {
     if(
         
        // checkLowerLowsAndLowerHighs(cis.minuteData) ||  removed on 31st 
-
-         (cis.tick.last_price<cis.pricePoints.d1.low)
+(cis.pricePoints&& cis.pricePoints.d1) &&
+        ( (cis.tick.last_price<cis.pricePoints.d1.low)
         
-        ||cis.tick.last_price<cis.tick.ohlc.open
+        ||cis.tick.last_price<cis.tick.ohlc.open)
         
         /// if below yesterday low no trade what ever
     
