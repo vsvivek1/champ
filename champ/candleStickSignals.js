@@ -30,6 +30,10 @@ export function detectBuySignal(cis) {
                      lastCandle.high - lastCandle.close < (lastCandle.close - lastCandle.open) * 0.5 &&
                      lastCandle.low < lastCandle.open - (lastCandle.open - lastCandle.low) * 2;
 
+
+
+                     return false;
+
     if (isHammer) {
         return true;
     }

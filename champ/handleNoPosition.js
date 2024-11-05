@@ -81,6 +81,17 @@ async function getMargins(kite){
 export async function handleNoPosition(cis, kite) {
 
 
+    if (!cis.minuteData || cis.minuteData.length < 1){
+
+       // console.log('no min data',cis.minuteData,cis.tradingsymbol);
+        
+
+        global.addOrIncrementRejection('NO MINUTE DATA'+cis.tradingsymbol,cis.minuteData)
+
+        return;
+    } 
+
+
 ////
 //console.log(cis.name);
 //let m=await getMargins(kite)
@@ -89,6 +100,8 @@ export async function handleNoPosition(cis, kite) {
 
 if (!canInitiateLongTrade(cis)) {
 
+
+    global.addOrIncrementRejection('can InitiateLongTrade is false')
  if(global.minutes%15==0 && global.seconds==0)   console.log("Conditions are not favorable for a long trade.",cis.tradingsymbol);
 
    ///removed on 31st oct
@@ -102,13 +115,15 @@ if (!canInitiateLongTrade(cis)) {
 
     if(cis.noBuy){
 
-
+        global.addOrIncrementRejection('cis no buy')
         return;
     }
 
 
     if(!cis.minuteData || !cis.tick){
 
+
+        global.addOrIncrementRejection('cis no tick')
         return;
     }
 
@@ -126,6 +141,7 @@ if (!canInitiateLongTrade(cis)) {
     ) {
         
 
+        global.addOrIncrementRejection('below yesterday low or below days open'+cis.tradingsymbol)
     if(global.minutes%10==0 && global.seconds==5) console.log(cis.tradingsymbol,'d1low=',cis.pricePoints.d1.low,'lp=',cis.tick.last_price,checkLowerLowsAndLowerHighs(cis.minuteData),cis.tick.last_price<cis.pricePoints.d1.low,cis.tick.last_price<cis.tick.ohlc.open);
         
                 return
@@ -184,30 +200,7 @@ let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
     
 
 
-if(cis.tick.last_price<cis.pricePoints.d1.low){
 
-if(global.minutes%10==0 && global.seconds%30==0){
-
-
-    console.log('less than yesterday low for',cis.tradingsymbol,'going for support buy only');
-}
-
-   
-
-
- 
-    
-    return;
-}else{
-
-
-    if( global.minutes%10==0 && global.seconds%30==0){
-
-        console.log('above than yesterday low for',cis.tradingsymbol,'looking for breakout');
-        
-    }
-     
-}
 
 
 /* if(!isRangeGreaterThanFive(cis)){
@@ -227,8 +220,7 @@ if(global.minutes%10==0 && global.seconds%30==0){
             }
 
 
-    if (!cis.minuteData || cis.minuteData.length < 1) return;
-
+   
     /* if (global.seconds == 10) {
         if (cis.liveMinute.color == 'bullish') {
   

@@ -1,5 +1,7 @@
 // Function to check if there are many upper wicks and fewer lower wicks in the last 10 candles
 export function hasManyUpperWicks(minuteData) {
+
+    return false;
     // Ensure there are at least 10 candles
     if (!minuteData || minuteData.length < 10) {
         

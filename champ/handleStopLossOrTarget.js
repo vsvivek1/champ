@@ -28,6 +28,7 @@ export const handleStopLossOrTarget = async (tradingSymbol, sellPrice, sellType,
         return cis;
     } catch (error) {
         console.error('Error handling stop loss or target:', error);
-        throw error;
+        return;
+        //throw error;
     }
 };

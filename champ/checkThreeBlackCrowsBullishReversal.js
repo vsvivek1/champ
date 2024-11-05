@@ -26,6 +26,8 @@ export function checkThreeBlackCrowsBullishReversal(minuteData) {
                        (secondLastCandle.low > thirdLastCandle.low);
   
     // Return true if the pattern matches, otherwise false
+
+    return false  /// three crows disabled on nov 2
     return isLastCandleBullish && isFirstLastBearish && isSecondLastBearish && isThirdLastBearish && isLowerLow;
   }
   

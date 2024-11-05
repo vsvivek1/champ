@@ -8,6 +8,14 @@ import { compareVolatility } from './compareVolatility.js';
 import { hasManyUpperWicks } from './hasManyUpperWicks.js';
 export function handle12to4PM(cis, kite) {
 
+
+    console.log('hre 12');
+    
+    if (global.seconds === 30) {
+        displayScripts(kite);
+     }
+   
+
     if(global.seconds<50){
 
 return false;
@@ -19,6 +27,8 @@ return false;
     let lastCandleClose = cis.minuteData.slice(-1)[0].close;
     let lastCandleHigh = cis.minuteData.slice(-2, -1)[0].high;
     if(cis.tick.last_price<1){
+
+        global.addOrIncrementRejection('LAST PRICE LESS THAN 1'+cis.tradingsymbol)
 
         return;
     }
@@ -35,11 +45,12 @@ if (cis.tick.last_price < lastCandleHigh) {
  }
 
 
+ 
 const result = compareVolatility(cis.minuteData);
 //console.log('Last 5 candles volatility:',cis.tradingsymbol, result.lastFiveVolatility);
 //console.log('Previous 10 candles volatility:',cis.tradingsymbol, result.previousTenVolatility);
 
-if(result.lastFiveVolatility>result.previousTenVolatility*1.4
+if(cis.minuteData && cis.minuteData.length>15 &&  result && result.lastFiveVolatility>result.previousTenVolatility*1.4
 
     && cis.tick.last_price>cis.minuteData.slice(-1)[0].high
     
@@ -47,7 +58,7 @@ if(result.lastFiveVolatility>result.previousTenVolatility*1.4
     ){
 
 
-      
+       cis.buyStrategy='volatality cross'
             cis.buyCriteria = 'volatality cross';
             let noLots = 3; // Adjust as needed
             for (let i = 0; i < noLots; i++) {
@@ -73,6 +84,7 @@ if(result.lastFiveVolatility>result.previousTenVolatility*1.4
  
     // Strategy 1: h2 breakout condition (previous close < h2 and current close > h2)
     if (previousCandleClose < h2 && lastCandleClose > h2) {
+        cis.buyStrategy='Noon High BreakOut'
         proceedToTrade = true;
  console.log('h2 breakout occurred', cis.tradingsymbol);
     }
@@ -125,7 +137,7 @@ if(result.lastFiveVolatility>result.previousTenVolatility*1.4
 
 
 
-    if(global.seconds==58) console.log('procced to health 12-15 health check');
+    if(global.seconds==58) console.log('JUST BEFORE PROCEED TO TRADE procced to health 12-15 health check',cis.tradingsymbol,{proceedToTrade});
   } 
     
 

@@ -16,6 +16,9 @@ export async function handle9to10AM(cis, kite) {
         checkGapDown(cis) || 
         cis.tick.last_price < cis.tick.ohlc.open
     ) {
+
+        global.addOrIncrementRejection('GAP DOWN NO MORNING TRADE'+cis.tradingsymbol)
+
         if (global.minutes % 5 == 0 && global.seconds == 57) {
             console.log(cis.tradingsymbol, 'is gap down, no morning trades or less than open price');
         }
@@ -23,11 +26,7 @@ export async function handle9to10AM(cis, kite) {
     }
 
     // Check for a no-buy time restriction
-    if (cis.noBuyTime > global.date) {
-        console.log('No buy allowed until ', cis.noBuyTime);
-        return;
-    }
-
+   
     if(global.seconds<50){
 
         return false;
@@ -54,6 +53,8 @@ export async function handle9to10AM(cis, kite) {
         if (global.seconds == 57) {
             console.log(cis.message, cis.liveMinute.color, 'live color red rejection');
         }
+
+        global.addOrIncrementRejection('LIVE CANDLE BEARISH'+cis.tradingsymbol)
         return; // Exit if the candle is bearish
     }
 

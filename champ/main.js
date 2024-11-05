@@ -16,6 +16,8 @@ import { updateOpenOrderPrice } from './orderUtils.js';
 import { displayScripts } from './displayScripts.js';
 import moment from 'moment';
 
+import addOrIncrementRejection from './addOrIncrementRejection.js';
+
 //const socket = io('http://localhost:4000');
 
 const socket = io('http://tradingsimham.in:4000');  // Using a domain
@@ -36,6 +38,8 @@ global.day = global.date.getDay();
 global.hours = global.date.getHours()
 global.minutes = global.date.getMinutes();
 global.seconds = global.date.getSeconds();
+
+global.addOrIncrementRejection = addOrIncrementRejection;
 
 // Declare global variables
 global.positions = [];
@@ -61,6 +65,9 @@ async function main() {
             }
 
             if (global.seconds === 1) {
+
+                console.log('@ seconds 1');
+                
                 await fetchOrdersAndSetCis(kite);
                 await fetchPositionsAndSetCis(kite);
                 await fetchMinuteData(kite);

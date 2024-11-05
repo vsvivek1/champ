@@ -7,7 +7,11 @@ export async function displayScripts(kc) {
     return map;
   }, {});
 
-let it= global.instrumentsForMining.filter(x=>x.qualifiedForTrade).map(r=>r.tradingsymbol )
+let it= global.instrumentsForMining
+
+/* .filter(x=>x.qualifiedForTrade) */
+
+.map(r=>r.tradingsymbol )
 
 console.log(it,'qualified scripts');
 

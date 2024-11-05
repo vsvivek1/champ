@@ -19,6 +19,8 @@ function isHammer(candle) {
         : candle.close - candle.low;
     const upperShadow = candle.high - Math.max(candle.open, candle.close);
 
+
+    return false;
     return lowerShadow > 2 * body && upperShadow < body;
 }
 

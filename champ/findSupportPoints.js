@@ -67,7 +67,7 @@ function isHammer(point) {
     const isShootingStar = upperShadow >= 2 * bodySize && lowerShadow <= bodySize * 0.5;
     
  
- 
+ return false;
     return isHammer ;
  }
 

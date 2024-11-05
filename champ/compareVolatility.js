@@ -26,7 +26,9 @@ export function calculateVolatility(candles) {
 export function compareVolatility(minuteData) {
     // Ensure there are at least 15 candles
     if (!minuteData || minuteData.length < 15) {
-        throw new Error('Not enough data to compare volatility. At least 15 candles are required.');
+
+        return false;
+        //throw new Error('Not enough data to compare volatility. At least 15 candles are required.');
     }
 
     // Get the last 5 candles

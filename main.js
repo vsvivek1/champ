@@ -2,6 +2,9 @@ let AccesTocken = require('./models/AccessTokens');
 const { connectToDatabase } = require('./connectToDatabase.js');
 const { fetchInstrumentsForMining } = require('./fetchInstrumentsForMining.js');
 const { today } = require('./FetchInstruments.js');
+import { addOrIncrementRejection } from './rejectionService.js';
+
+
 
 
 async function main() {
@@ -19,6 +22,9 @@ async function main() {
 		//const today = new Date(); // Assuming 'today' is defined somewhere
 		const accessTokenDoc = await AccesTocken.findOne({ 'date': today }, 'access_token');
 		if (!accessTokenDoc) {
+
+			//global.addOrIncrementRejection()
+
 			console.log("Access token not found for today");
 			return;
 		}

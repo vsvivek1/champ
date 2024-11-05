@@ -140,9 +140,18 @@ export async function fetchMinuteData(kite) {
         const dataType = 'minute';
         const instrument_tokens = global.instrumentsForMining.map(a => parseInt(a.instrument_token));
 
+        console.log('fetch all data start');
+        
         await fetchAllData(kite, instrument_tokens, fromTime, toTime, dataType, minuteHistoricalData);
+        console.log('fetch all data stop','global.instrumentsForMining len',global.instrumentsForMining.length);
+       
+       var instrument;
+        global.instrumentsForMining.forEach(instrument1 => {
 
-        global.instrumentsForMining.forEach(instrument => {
+
+            instrument=instrument1;
+            console.log('instrument token',instrument.tradingsymbol,typeof instrument.minuteData,'=mindata len');
+            
             instrument.minuteData = minuteHistoricalData[instrument.instrument_token];
             if (instrument.minuteData && instrument.minuteData.length>0) {
                 instrument.highestPointAfter12PM = highestPointAfter12PM(instrument.minuteData);
@@ -169,30 +178,52 @@ export async function fetchMinuteData(kite) {
                 instrument.lastMinuteTime = convertToIndianTime(instrument.minuteData[instrument.minuteData.length - 1].date);
             }
         });
+
+
     } catch (error) {
-        console.error("Error fetching minute data:", error);
+        console.error("Error fetching minute datax:", error,instrument.tradingsymbol);
     }
 }
 
 // Helper function to fetch all data
 async function fetchAllData(kite, instruments, fromTime, toTime, dataType, historicalData) {
-    try {
-        for (let i = 0; i < instruments.length; i++) {
-            const instrument = instruments[i];
+    let index = 0;
+
+    const intervalId = setInterval(async () => {
+        if (index >= instruments.length) {
+            clearInterval(intervalId); // Clear interval when all instruments are processed
+            return;
+        }
+
+        let instrument = instruments[index];
+
+        try {
             const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
 
-            if(!data){
+            if (!data) {
+                console.log('Issue in fetching historical data for', instrument);
+            }
 
-                //console.log('issue in fetching historical data for'instrument.);
+            let script = global.instrumentsForMining.find(i => i.instrument_token == instrument);
+            if (script) {
+                script.minuteData = data;
+
+                if(data){
+                    console.log(script.tradingsymbol, 'minutedata addded');
+
+                }
                 
             }
+
             historicalData[instrument] = data;
-            await new Promise(resolve => setTimeout(resolve, 333)); // Adjust delay as needed
+        } catch (error) {
+            console.error(`Error fetching ${dataType} data for ${instrument}:`, error);
         }
-    } catch (error) {
-        console.error(`Error fetching ${dataType} data:`, error);
-    }
+
+        index++; // Move to the next instrument
+    }, 3*1000); // Adjust interval duration as needed
 }
+
 
 // Convert UTC to Indian Time
 function convertToIndianTime(utcTimeString) {

@@ -18,6 +18,8 @@ export function handle10to12PM(cis, kite) {
    
 
 
+   
+
             if (cis.liveMinute.color === 'bearish') {
                 cis.message = 'Live minute Color bearish, no entry ' + cis.tradingsymbol;
                 if (global.seconds == 57) {
@@ -35,6 +37,8 @@ export function handle10to12PM(cis, kite) {
         if (global.minutes % 5 == 0 && global.seconds == 57) {
             console.log(cis.tradingsymbol, 'is gap down, no morning trades or less than open price');
         }
+
+        global.addOrIncrementRejection('GAP DOWN 12-14'+cis.tradingsymbol)
         return false; // Exit condition
     }
 
