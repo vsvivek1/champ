@@ -50,10 +50,12 @@ const result = compareVolatility(cis.minuteData);
 //console.log('Last 5 candles volatility:',cis.tradingsymbol, result.lastFiveVolatility);
 //console.log('Previous 10 candles volatility:',cis.tradingsymbol, result.previousTenVolatility);
 
-if(cis.minuteData && cis.minuteData.length>15 &&  result && result.lastFiveVolatility>result.previousTenVolatility*1.4
+if(cis.minuteData && cis.minuteData.length>15 &&  result && 
+    result.lastFiveVolatility>result.previousTenVolatility*1.4
 
     && cis.tick.last_price>cis.minuteData.slice(-1)[0].high
     
+    && (global.seconds ==59)
     
     ){
 
@@ -83,7 +85,7 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result && result.lastFiveVolat
 
  
     // Strategy 1: h2 breakout condition (previous close < h2 and current close > h2)
-    if (previousCandleClose < h2 && lastCandleClose > h2) {
+    if (previousCandleClose < h2 && lastCandleClose > h2  && (global.seconds ==59)) {
         cis.buyStrategy='Noon High BreakOut'
         proceedToTrade = true;
  console.log('h2 breakout occurred', cis.tradingsymbol);
@@ -94,7 +96,7 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result && result.lastFiveVolat
         breakoutOccurred,
     } = is15MinuteBreakout(cis.minuteData, cis.last_price);
 
-    if (breakoutOccurred) {
+    if (breakoutOccurred  && (global.seconds ==59)) {
 
         cis.buyStrategy='15MinBreakout'
 
@@ -125,7 +127,7 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result && result.lastFiveVolat
     }
 
 
-    if(cis.tick.last_price>cis.tick.ohlc.high){
+    if(cis.tick.last_price>cis.tick.ohlc.high  && (global.seconds ==59)){
 
         cis.buyStrategy='lastPriceAboveOHLCHigh'
         proceedToTrade = true;

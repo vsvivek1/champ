@@ -63,7 +63,7 @@ export async function handle9to10AM(cis, kite) {
         breakoutOccurred,
     } = is15MinuteBreakout(cis.minuteData, cis.tick.last_price);
 
-    if (breakoutOccurred) {
+    if (breakoutOccurred  && (global.seconds ==59)) {
 
         cis.buyStrategy='15minBreakOut'
         proceedToTrade = true;
@@ -115,15 +115,18 @@ export async function handle9to10AM(cis, kite) {
 
         && cis.minuteData.slice(-1)[0].close>cis.pricePoints.d1.high
     
+
+        && (global.seconds ==59)
     ){
 
-        if (global.seconds ==58) {
+      
+            
 
                         cis.buyStrategy='yesterdayHighCross'
             console.log('yesterday high cross', cis.tradingsymbol, { proceedToTrade });
-        }
+        
 
-        proceedToTrade = true;
+       
 
     }
 
@@ -146,7 +149,7 @@ export async function handle9to10AM(cis, kite) {
 
 
         cis.buyCriteria = '9-10 AM'; // Set the buy criteria flag
-        let noLots = 3; // Adjust the number of lots as needed
+        let noLots = 1; // Adjust the number of lots as needed
         for (let i = 0; i < noLots; i++) {
             executeBuy(cis, kite, cis.tick.last_price);
         }

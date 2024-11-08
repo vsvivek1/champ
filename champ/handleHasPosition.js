@@ -148,7 +148,7 @@ async function executeSquareOff(squareOff, cis, kite) {
                     
                     cis.updated = false;   /// retrying of squareoff if order is still not [resend]
                 }
-            }, 10 * 1000);
+            }, 5 * 1000);
         }
     }
 }

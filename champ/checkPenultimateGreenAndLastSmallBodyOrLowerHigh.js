@@ -7,7 +7,7 @@ export function checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis) {
     let minuteData=cis.minuteData
     if (!minuteData || minuteData.length < 2) {
        
-        return;
+        return false;
        
        // throw new Error('Not enough data to perform the check. At least 2 candles are required.');
     }
