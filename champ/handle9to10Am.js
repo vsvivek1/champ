@@ -11,6 +11,13 @@ import { setTargetForTrade } from './setTargetForTrade.js';
 import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
 export async function handle9to10AM(cis, kite) {
 
+    if(global.seconds<50){
+
+        return false;
+        
+            }
+    console.log('HERE6',cis.tradingsymbol);
+    
     // Check if there is a gap down or last price is less than open price
     if (
         checkGapDown(cis) || 
@@ -24,15 +31,11 @@ export async function handle9to10AM(cis, kite) {
         }
         return false; // Exit condition
     }
-
+    console.log('HERE5');
     // Check for a no-buy time restriction
    
-    if(global.seconds<50){
-
-        return false;
-        
-            }
-
+    
+            console.log('HERE4',cis.tradingsymbol);
 
     let proceedToTrade = false;
     cis.buyCriteria = null; // Reset the buy criteria flag
@@ -58,6 +61,9 @@ export async function handle9to10AM(cis, kite) {
         return; // Exit if the candle is bearish
     }
 
+
+
+    console.log('HERE3',cis.tradingsymbol);
     // Breakout Strategy: 15-minute breakout condition
     let {
         breakoutOccurred,
@@ -142,6 +148,8 @@ export async function handle9to10AM(cis, kite) {
 
     }
     // Execute the trade if any of the conditions are met
+
+    console.log('before proceed to trade',cis.tradingsymbol);
     if (proceedToTrade) {
 
 

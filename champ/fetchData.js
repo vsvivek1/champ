@@ -150,7 +150,7 @@ export async function fetchMinuteData(kite) {
 
 
             instrument=instrument1;
-            console.log('instrument token',instrument.tradingsymbol,typeof instrument.minuteData,'=mindata len');
+            //console.log('instrument token',instrument.tradingsymbol,typeof instrument.minuteData,'=mindata len');
             
             instrument.minuteData = minuteHistoricalData[instrument.instrument_token];
             if (instrument.minuteData && instrument.minuteData.length>0) {

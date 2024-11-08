@@ -174,7 +174,7 @@ let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
     
 
 
-   // if(global.seconds%5==0)console.log('cis.highBeforeThreeMinutes',cis.highBeforeThreeMinutes,cis.tradingsymbol);
+    if(global.seconds%2==0 && global.minutes%5==0)console.log('cis.highBeforeThreeMinutes',"last high :",cis.highBeforeThreeMinutes,"LTP:",cis.tick.last_price,cis.tradingsymbol);
     
    if (cis && cis.tick.last_price > cis.highBeforeThreeMinutes && !cis.ordered) {
     // Capture the entire cis object to preserve its state at this moment
