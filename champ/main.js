@@ -9,114 +9,109 @@ import getKiteConnectInstance from '../getKiteConnectInstanceRequire.js';
 import io from 'socket.io-client';
 import { handlePositionPresent } from './handleHasPosition.js';
 import { handleNoPosition } from './handleNoPosition.js';
-import { fetchOrdersAndSetCis, fetchPositionsAndSetCis, fetchHourlyData, fetchMinuteData,aggregateOHLC } from './fetchData.js';
-
+import { fetchOrdersAndSetCis, fetchPositionsAndSetCis, fetchHourlyData, fetchMinuteData } from './fetchData.js';
 import { handleOrderUpdates } from './orderUtils.js';
 import { updateOpenOrderPrice } from './orderUtils.js';
-import { displayScripts } from './displayScripts.js';
 import moment from 'moment';
 
-//import r
-
-
 import addOrIncrementRejection from './addOrIncrementRejection.js';
+import { Worker } from 'worker_threads';
+const fetchWorker = new Worker('./fetchWorker.js');
 
-//const socket = io('http://localhost:4000');
 
 const socket = io('http://tradingsimham.in:4000');  // Using a domain
 
+// Get the instrument name from command line argument
+const instrumentName = process.argv[2];
+const instrumentData = instrumentsForMining.find(inst => inst.name === instrumentName);
 
-//import { startLogging } from './logger.js';
-
-// Start the logging mechanism
-//startLogging();
-
-
-let con = connectToDatabase();
-let kite, ticker;
- global.date, global.day, global.hours, global.minutes, global.seconds;
-
-global.date = new Date();
-global.day = global.date.getDay();
-global.hours = global.date.getHours()
-global.minutes = global.date.getMinutes();
-global.seconds = global.date.getSeconds();
-
-global.addOrIncrementRejection = addOrIncrementRejection;
-
-// Declare global variables
-global.positions = [];
-global.orders = [];
 global.instrumentsForMining=instrumentsForMining
 
-global.allInstruments=allInstruments;
+global.allInstruments=allInstruments//.find(inst => inst.name === instrumentName);
+
+console.log(global.allInstruments,instrumentName);
+
+
+if (!instrumentData) {
+    console.error(`Instrument ${instrumentName} not found in instrumentsForMining`);
+    process.exit(1);
+}
+
+// Set global variables for the specified instrument
+global.instrumentName = instrumentName;
+global.instrumentData = instrumentData;
+global.addOrIncrementRejection = addOrIncrementRejection;
+global.positions = [];
+global.orders = [];
+
+// Initialize Kite Connect and database connection
+let con = connectToDatabase();
+let kite, ticker;
 
 async function main() {
     try {
-
-
-
         const accessTokenDoc = await getTodaysAccessToken();
         kite = await getKiteConnectInstance();
 
         setInterval(async () => {
             global.date = new Date();
             global.day = global.date.getDay();
-            global.hours = global.date.getHours()
+            global.hours = global.date.getHours();
             global.minutes = global.date.getMinutes();
             global.seconds = global.date.getSeconds();
 
-            if (global.minutes % 5 === 0 && global.seconds === 10) {
-                fetchHourlyData(kite);
+          /*   if (global.minutes % 15 === 0 && global.seconds === 10) {
+                await fetchHourlyData(kite);
+            } */
+
+            if (global.minutes=== 15 && global.seconds === 10) {
+                
+                fetchWorker.postMessage({ type: 'fetchHourly', kite });
+
+                //await fetchHourlyData(kite);
             }
 
-            if (global.seconds ==1) {
-
-                console.log('@ seconds 1');
+            if (global.seconds === 1) {
+                console.log(`@ seconds 1 for ${instrumentName}`);
                 
-                await fetchOrdersAndSetCis(kite);
+                     // Schedule fetches every minute
+   
+                     fetchWorker.postMessage({ type: 'fetchData', kite });
+            /*     await fetchOrdersAndSetCis(kite);
                 await fetchPositionsAndSetCis(kite);
                 await fetchMinuteData(kite);
-                //aggregateOHLC(cis);
-
-                console.log('@ seconds 1 end');
+                 */
+                console.log(`@ seconds 1 end for ${instrumentName}`);
             }
 
 
-
-          
 
         }, 1000);
 
-let i=global.instrumentsForMining[0];
-
-//console.log(i);
-
-
-if(i.minuteData){
-
-    regressionBreakoutTrading(i);
-}
-
-
-
-
-
-
-        initTicker();
-
-       // console.log(instrumentsForMining);
+        // Start ticker and fetch initial data
+       
         
-        await fetchOrdersAndSetCis(kite);
+
+             // Send an immediate fetch request to the worker on startup
+             fetchWorker.postMessage({ type: 'fetchData', kite });
+             initTicker();
+
+             setTimeout(()=>{
+                fetchWorker.postMessage({ type: 'fetchHourly', kite });
+
+             },15*1000)
+                    
+
+         
+
+     /*    await fetchOrdersAndSetCis(kite);
         await fetchPositionsAndSetCis(kite);
         await fetchHourlyData(kite);
-        await fetchMinuteData(kite);
-        //aggregateOHLC(cis) 
-        scheduleHourlyDataFetch();
-        
+        await fetchMinuteData(kite); */
 
+       // scheduleHourlyDataFetch();
     } catch (error) {
-        console.error('Error in main function:', error);
+        console.error(`Error in main function for ${instrumentName}:`, error);
     }
 }
 
@@ -126,7 +121,6 @@ function initTicker() {
         access_token: kite.access_token
     });
 
-    ticker.disconnect//();
     ticker.connect();
     ticker.on("connect", subscribe);
     ticker.on("ticks", onTicks);
@@ -135,18 +129,9 @@ function initTicker() {
 
 function onTicks(ticks) {
 
-    //console.log('on ticks 86');
     
-    extractTicks(ticks);
-}
-
-function extractTicks(ticks) {
-    for (let i = 0; i < ticks.length; i++) {
-
-       // console.log('extract ticks @94');
-        
-        processTicks(ticks[i]);
-    }
+    
+    ticks.forEach(tick => processTicks(tick));
 }
 
 function processTicks(tick) {
@@ -212,59 +197,34 @@ function processTicks(tick) {
     socket.emit('sendCis', cis);
 }
 
+
 async function orderUpdates(order) {
     await handleOrderUpdates(order, kite);
 }
 
 async function subscribe() {
     try {
-        const instrument_tokens = global.instrumentsForMining.map(a => parseInt(a.instrument_token));
-
+        const instrumentToken = parseInt(global.instrumentData.instrument_token);
         ticker.unsubscribe([]);
-        ticker.subscribe(instrument_tokens);
-
-        ticker.setMode(ticker.modeFull, instrument_tokens);
+        ticker.subscribe([instrumentToken]);
+        ticker.setMode(ticker.modeFull, [instrumentToken]);
     } catch (error) {
-        console.error('Error subscribing to instruments:', error);
+        console.error(`Error subscribing to ${global.instrumentData.name}:`, error);
     }
 }
 
-function scheduleHourlyDataFetch() {
+/* function scheduleHourlyDataFetch() {
     const now = moment();
     const currentMinute = now.minute();
 
     if (currentMinute < 15) {
-        const delayseconds = (15 - currentMinute) * 60 - now.seconds();
-        setTimeout(() => fetchHourlyData(kite), delayseconds * 1000);
+        const delaySeconds = (15 - currentMinute) * 60 - now.seconds();
+        setTimeout(() => fetchHourlyData(kite), delaySeconds * 1000);
     } else {
-        const nextHour = now.startOf('hour').add(1, 'hour').add(15, 'global.minutes');
-        const delayseconds = nextHour.diff(now, 'global.seconds');
-        setTimeout(() => fetchHourlyData(kite), delayseconds * 1000);
+        const nextHour = now.startOf('hour').add(1, 'hour').add(15, 'minutes');
+        const delaySeconds = nextHour.diff(now, 'seconds');
+        setTimeout(() => fetchHourlyData(kite), delaySeconds * 1000);
     }
-}
+} */
 
-
-setInterval(() => {
-    const now = new Date();
-    global.day = now.getDay();
-    global.hours = now.getHours();
-    global.minutes = now.getMinutes();
-
-    // Define the time window: Weekdays from 9:15 AM to 3:30 PM
-    const isWeekday = global.day >= 1 && global.day <= 5; // Monday to Friday
-    const isWithinTimeWindow = (global.hours > 9 || (global.hours === 9 && global.minutes >= 15)) &&
-                               (global.hours < 15 || (global.hours === 15 && global.minutes <= 30));
-
-    if (isWeekday && isWithinTimeWindow) {
-        if (!global.isMainRunning) {
-            global.isMainRunning = true;
-            console.log("Running main() within time window.");
-            main();
-        }
-    } else {
-        if (global.isMainRunning) {
-            console.log("Time window ended or it's a weekend. Resetting flag.");
-        }
-        global.isMainRunning = false; // Reset the flag outside of the time window
-    }
-}, 1 * 60 * 1000); 
+main();

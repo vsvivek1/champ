@@ -1,4 +1,5 @@
 export function isLastCandleBodySmallAndLastPriceCrossedItsHigh(cis) {
+    return false;
     const { minuteData } = cis;
     
     // Ensure we have at least 10 candles to analyze
@@ -20,5 +21,7 @@ export function isLastCandleBodySmallAndLastPriceCrossedItsHigh(cis) {
     const lastCandleBodySize = Math.abs(lastCandle.close - lastCandle.open);
     
     // Check if the last candle's body size is less than 1/5 of the average body size
+
+  
     return lastCandleBodySize < (averageBodySize / 5) && cis.tick.last_price>lastCandle.high;
 }

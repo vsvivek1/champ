@@ -82,10 +82,14 @@ async function getMargins(kite){
 export async function handleNoPosition(cis, kite) {
 
 
+
+
+  //  console.log('tick','m');
     if (!cis.minuteData || cis.minuteData.length < 1){
 
        // console.log('no min data',cis.minuteData,cis.tradingsymbol);
         
+      
 
         global.addOrIncrementRejection('NO MINUTE DATA'+cis.tradingsymbol,cis.minuteData)
 
@@ -107,17 +111,21 @@ export async function handleNoPosition(cis, kite) {
 if (!canInitiateLongTrade(cis)) {
 
 
+
     global.addOrIncrementRejection('can InitiateLongTrade is false')
  if(global.minutes%15==0 && global.seconds==0)   console.log("Conditions are not favorable for a long trade.",cis.tradingsymbol);
 
    ///removed on 31st oct
  
- //return;
+//return;
     // Proceed with initiating a long trade
     // Your code to initiate a long trade goes here
 } else {
     if(global.minutes%15==0 && global.seconds==0)     console.log("Not bearish",cis.tradingsymbol);
 }
+
+
+//console.log('escaped bear',cis.tradingsymbol);
 
     if(cis.noBuy){
 
@@ -180,7 +188,7 @@ let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
     
 
 
-    if(global.seconds%5==0 && global.minutes%5==0)console.log('cis.highBeforeThreeMinutes',"last high :",cis.highBeforeThreeMinutes,"LTP:",cis.tick.last_price,cis.tradingsymbol);
+    if(global.seconds%15==0 && global.minutes%5==0)console.log('cis.highBeforeThreeMinutes',"last high :",cis.highBeforeThreeMinutes,"LTP:",cis.tick.last_price,cis.tradingsymbol);
     
    if (cis && cis.tick.last_price > cis.highBeforeThreeMinutes && !cis.ordered) {
     // Capture the entire cis object to preserve its state at this moment

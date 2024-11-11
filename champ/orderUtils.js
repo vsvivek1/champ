@@ -24,7 +24,7 @@ export async function updateOpenOrderPrice(kite, order_id, instrument_token, las
 }
 
 export async function handleOrderUpdates(order, kite) {
-    let cis = instrumentsForMining.find(i => i.instrument_token == order.instrument_token);
+    let cis = global.instrumentsForMining.find(i => i.instrument_token == order.instrument_token);
     if (!cis) return;
 
     if (order.status == 'COMPLETE' && order.transaction_type == 'SELL') {
@@ -73,6 +73,12 @@ export async function handleOrderUpdates(order, kite) {
 
 
 async function placeTargetOrder(cis, order, kite) {
+
+    if(!cis){
+
+console.log('No CIS sell reverse');
+
+    }
 
 let tgtStrategy='';
     

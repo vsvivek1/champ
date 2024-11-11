@@ -45,7 +45,9 @@ export async function fetchOrdersAndSetCis(kite) {
         global.orders = await kite.getOrders(); // Upglobal.date global variable
 
         orders.forEach(order => {
-            const matchingInstrument = global.instrumentsForMining.find(instrument => instrument.instrument_token === order.instrument_token);
+            const matchingInstrument = global.instrumentsForMining.
+            
+            find(instrument => instrument.instrument_token === order.instrument_token);
             
             if (matchingInstrument) {
                 matchingInstrument.orderStatus = order.status;
@@ -140,7 +142,7 @@ export async function fetchMinuteData(kite) {
         const dataType = 'minute';
         const instrument_tokens = global.instrumentsForMining.map(a => parseInt(a.instrument_token));
 
-        console.log('fetch all data start');
+       // console.log('fetch all data start');
         
         await fetchAllData(kite, instrument_tokens, fromTime, toTime, dataType, minuteHistoricalData);
         console.log('fetch all data stop','global.instrumentsForMining len',global.instrumentsForMining.length);
@@ -177,6 +179,10 @@ export async function fetchMinuteData(kite) {
                 
                 instrument.lastMinuteTime = convertToIndianTime(instrument.minuteData[instrument.minuteData.length - 1].date);
             }
+
+
+            
+
         });
 
 

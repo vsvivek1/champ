@@ -7,7 +7,7 @@ import findHourlyHighestPrice from './findElapsedHourHigh.js';
 import { compareVolatility } from './compareVolatility.js';
 import { hasManyUpperWicks } from './hasManyUpperWicks.js';
 import {isLastCandleBodySmallAndLastPriceCrossedItsHigh} from './isLastCandleBodySmall.js'
-
+import { regressionBreakoutTrading } from "./regressionBreakOutTrading.js";
 export function handle12to4PM(cis, kite) {
 
 
@@ -146,14 +146,32 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
     
 
 
+ // proceedToTrade=false;
+
+  console.log('ivide',regressionBreakoutTrading(cis),'regressionBreakoutTrading(cis)',{proceedToTrade});
+  
+
+ if(regressionBreakoutTrading(cis))  {
 
 
-  if(isLastCandleBodySmallAndLastPriceCrossedItsHigh ){
+       cis.buyStrategy='REGRESSION TRADING'
+       console.log('regression trading',cis.tradingsymbol);
+       
+
+    proceedToTrade=true;
+ }
+
+
+ /*  if(isLastCandleBodySmallAndLastPriceCrossedItsHigh ){
      cis.buyStrategy='lastCandleBodySmallAndPriceCrossedHigh'
     proceedToTrade=true;
-  }
+  } */
     // Execute buy logic if any of the strategies meet the criteria
 
+    console.log(global.instrumentsForMining.map(i=>i.tradingsymbol,),'trading symbols');
+    
+
+if(global.minutes%2==0 && global.seconds==1)console.log('12-4 health check sample',cis.tradingsymbol,{proceedToTrade});
 
     if (proceedToTrade) {
         cis.buyCriteria = '12-4 PM';

@@ -10,7 +10,7 @@ export  default async  function addOrIncrementRejection(rejectionPoint) {
       { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
-  //  console.log('Operation result:', result);
+//   console.log('Operation result:', result);
   } catch (error) {
     console.error('Error updating rejection entry:', error);
   }

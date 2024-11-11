@@ -2,7 +2,7 @@
 import { fork } from 'child_process';
 
 // Define your instrument names
-const instruments = ['BANKNIFTY', 'NIFTY', 'MIDCPNIFTY', 'FINNIFTY'];
+const instruments = ['BANKNIFTY', 'NIFTY', 'MIDCPNIFTY', 'FINNIFTY' ];
 
 // Function to start a new process for each instrument
 function startProcess(instrumentName) {
