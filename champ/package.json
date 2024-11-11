@@ -5,8 +5,10 @@
   "license": "MIT",
   "type": "module",
   "dependencies": {
+    "blessed": "^0.1.81",
     "express": "^4.21.0",
     "kiteconnect": "^5.0.0",
+    "regression": "^2.0.1",
     "socket.io": "^4.8.0",
     "terminal-link": "^3.0.0"
   }

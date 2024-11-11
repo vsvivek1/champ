@@ -149,7 +149,27 @@ export async function handle9to10AM(cis, kite) {
     }
     // Execute the trade if any of the conditions are met
 
-    console.log('before proceed to trade',cis.tradingsymbol);
+    console.log('before proceed to trade',cis.tradingsymbol,{proceedToTrade});
+
+
+    if(
+        
+        cis.tick.last_price>   cis.pricePoints.d1.high  
+    || cis.tick.last_price>   cis.pricePoints.d2.high  
+    || cis.tick.last_price>   cis.pricePoints.d3.high  
+    || cis.tick.last_price>   cis.pricePoints.d4.high  
+    
+    
+    
+    ){
+
+        console.log('yday break strategy');
+        
+        proceedToTrade=true;
+
+    }
+
+    //proceedToTrade=true;
     if (proceedToTrade) {
 
 

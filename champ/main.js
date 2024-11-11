@@ -16,6 +16,9 @@ import { updateOpenOrderPrice } from './orderUtils.js';
 import { displayScripts } from './displayScripts.js';
 import moment from 'moment';
 
+//import r
+
+
 import addOrIncrementRejection from './addOrIncrementRejection.js';
 
 //const socket = io('http://localhost:4000');
@@ -50,6 +53,9 @@ global.allInstruments=allInstruments;
 
 async function main() {
     try {
+
+
+
         const accessTokenDoc = await getTodaysAccessToken();
         kite = await getKiteConnectInstance();
 
@@ -64,7 +70,7 @@ async function main() {
                 fetchHourlyData(kite);
             }
 
-            if (global.seconds === 1) {
+            if (global.seconds ==1) {
 
                 console.log('@ seconds 1');
                 
@@ -72,6 +78,8 @@ async function main() {
                 await fetchPositionsAndSetCis(kite);
                 await fetchMinuteData(kite);
                 //aggregateOHLC(cis);
+
+                console.log('@ seconds 1 end');
             }
 
 
@@ -79,6 +87,21 @@ async function main() {
           
 
         }, 1000);
+
+let i=global.instrumentsForMining[0];
+
+//console.log(i);
+
+
+if(i.minuteData){
+
+    regressionBreakoutTrading(i);
+}
+
+
+
+
+
 
         initTicker();
 
@@ -220,4 +243,28 @@ function scheduleHourlyDataFetch() {
     }
 }
 
-main();
+
+setInterval(() => {
+    const now = new Date();
+    global.day = now.getDay();
+    global.hours = now.getHours();
+    global.minutes = now.getMinutes();
+
+    // Define the time window: Weekdays from 9:15 AM to 3:30 PM
+    const isWeekday = global.day >= 1 && global.day <= 5; // Monday to Friday
+    const isWithinTimeWindow = (global.hours > 9 || (global.hours === 9 && global.minutes >= 15)) &&
+                               (global.hours < 15 || (global.hours === 15 && global.minutes <= 30));
+
+    if (isWeekday && isWithinTimeWindow) {
+        if (!global.isMainRunning) {
+            global.isMainRunning = true;
+            console.log("Running main() within time window.");
+            main();
+        }
+    } else {
+        if (global.isMainRunning) {
+            console.log("Time window ended or it's a weekend. Resetting flag.");
+        }
+        global.isMainRunning = false; // Reset the flag outside of the time window
+    }
+}, 1 * 60 * 1000); 

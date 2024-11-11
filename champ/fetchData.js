@@ -208,11 +208,11 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType, histo
             if (script) {
                 script.minuteData = data;
 
-                if(data){
-                    console.log(script.tradingsymbol, 'minutedata addded');
+               /*  if(data){
+               //     console.log(script.tradingsymbol, 'minutedata addded');
 
                 }
-                
+                 */
             }
 
             historicalData[instrument] = data;

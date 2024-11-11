@@ -7,7 +7,13 @@ import { executeBuy } from './executeBuy.js';
 import { checkGapDown } from './gapDownChecker.js';
 import { hasManyUpperWicks } from './hasManyUpperWicks.js';
 
+import { regressionBreakoutTrading } from './regressionBreakOutTrading.js';
+//global.regressionBreakoutTrading=regressionBreakoutTrading;
+
 export function handle10to12PM(cis, kite) {
+
+    regressionBreakoutTrading(cis);
+    
 
     cis.qualifiedForTrade=true;
 

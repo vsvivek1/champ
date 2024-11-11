@@ -6,10 +6,12 @@ import { checkThreeBlackCrowsBullishReversal } from './checkThreeBlackCrowsBulli
 import findHourlyHighestPrice from './findElapsedHourHigh.js';
 import { compareVolatility } from './compareVolatility.js';
 import { hasManyUpperWicks } from './hasManyUpperWicks.js';
+import {isLastCandleBodySmallAndLastPriceCrossedItsHigh} from './isLastCandleBodySmall.js'
+
 export function handle12to4PM(cis, kite) {
 
 
-    console.log('hre 12');
+    
     
     if (global.seconds === 30) {
         displayScripts(kite);
@@ -139,12 +141,17 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
 
 
 
-    if(global.seconds==58) console.log('JUST BEFORE PROCEED TO TRADE procced to health 12-15 health check',cis.tradingsymbol,{proceedToTrade});
+    if(global.seconds==58) console.log('Do not Trade manually \nJUST BEFORE PROCEED TO TRADE procced to health 12-15 health check',cis.tradingsymbol,{proceedToTrade});
   } 
     
 
 
 
+
+  if(isLastCandleBodySmallAndLastPriceCrossedItsHigh ){
+     cis.buyStrategy='lastCandleBodySmallAndPriceCrossedHigh'
+    proceedToTrade=true;
+  }
     // Execute buy logic if any of the strategies meet the criteria
 
 
