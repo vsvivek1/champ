@@ -170,6 +170,15 @@ export async function handle9to10AM(cis, kite) {
     }
 
     //proceedToTrade=true;
+
+    if(cis.minuteData && cis.minuteData.splice(-1)[0].high<cis.tick.ohlc.open && cis.tick.last_price>cis.tick.last_price){
+
+
+        console.log('crossing oepon from bottom',cis.tradingsymbol);
+        proceedToTrade=true;
+    }
+
+
     if (proceedToTrade) {
 
 

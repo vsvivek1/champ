@@ -66,9 +66,9 @@ async function main() {
 
             if (global.minutes=== 15 && global.seconds === 10) {
                 
-                fetchWorker.postMessage({ type: 'fetchHourly', kite });
+               // fetchWorker.postMessage({ type: 'fetchHourly', kite });
 
-                //await fetchHourlyData(kite);
+                await fetchHourlyData(kite);
             }
 
             if (global.seconds === 1) {
@@ -76,11 +76,11 @@ async function main() {
                 
                      // Schedule fetches every minute
    
-                     fetchWorker.postMessage({ type: 'fetchData', kite });
-            /*     await fetchOrdersAndSetCis(kite);
+                    // fetchWorker.postMessage({ type: 'fetchData', kite });
+                 await fetchOrdersAndSetCis(kite);
                 await fetchPositionsAndSetCis(kite);
                 await fetchMinuteData(kite);
-                 */
+                 
                 console.log(`@ seconds 1 end for ${instrumentName}`);
             }
 
@@ -93,21 +93,21 @@ async function main() {
         
 
              // Send an immediate fetch request to the worker on startup
-             fetchWorker.postMessage({ type: 'fetchData', kite });
+             //fetchWorker.postMessage({ type: 'fetchData', kite });
              initTicker();
 
              setTimeout(()=>{
-                fetchWorker.postMessage({ type: 'fetchHourly', kite });
+                //fetchWorker.postMessage({ type: 'fetchHourly', kite });
 
              },15*1000)
                     
 
          
 
-     /*    await fetchOrdersAndSetCis(kite);
+         await fetchOrdersAndSetCis(kite);
         await fetchPositionsAndSetCis(kite);
         await fetchHourlyData(kite);
-        await fetchMinuteData(kite); */
+        await fetchMinuteData(kite); 
 
        // scheduleHourlyDataFetch();
     } catch (error) {
