@@ -14,7 +14,7 @@ import {checkGapDown} from './gapDownChecker.js'
 import {findSupportPoints} from './findSupportPoints.js'
 import {checkLastCandleOverSupportPoint} from './checkLastCandleOverSupportPoints.js'
 import { canInitiateLongTrade } from './tradeCheckFunctions.js'; // Adjust the path based on file location
-import { flashMessage } from './flasher.js';
+//import { flashMessage } from './flasher.js';
 
 
 
@@ -80,8 +80,21 @@ async function getMargins(kite){
 }
 
 export async function handleNoPosition(cis, kite) {
+    if(cis.noBuy){
+
+        global.addOrIncrementRejection('cis no buy')
+        return;
+    }
 
 
+    if(!cis.minuteData || !cis.tick){
+
+
+        global.addOrIncrementRejection('cis no tick')
+        return;
+    }
+
+    let noLots = 2;
 
 
   //  console.log('tick','m');
@@ -97,8 +110,17 @@ export async function handleNoPosition(cis, kite) {
     } 
 
 
-    if(global.seconds%5==0 && global.minutes%5==0)
-        console.log('BE PATIENT DONT TRADE MANUAL. NO OVERNIGHTS . IF I CANT U NEVER CANT . TRUST ME');
+let told=false;
+
+
+    //let a=chalk.
+    if(global.seconds%5==0 && global.minutes%5==0){
+if(told) return;
+
+        console.log('BE PATIENT DONT TRADE MANUAL. NO OVERNIGHTS . IF I CANT U NEVER CANT . TRUST ME DONT SWITCH ME OFF time:',global.clock);
+
+        told=true;
+    }
 
 
 
@@ -108,12 +130,28 @@ export async function handleNoPosition(cis, kite) {
 //console.log(m.equity.net,'getMargins(kite)');
 
 
+
+
 if (!canInitiateLongTrade(cis)) {
 
 
 
     global.addOrIncrementRejection('can InitiateLongTrade is false')
  if(global.minutes%15==0 && global.seconds==0)   console.log("Conditions are not favorable for a long trade.",cis.tradingsymbol);
+
+ if(global.seconds==59 && cis.liveMinute.color=='bullish'){
+
+    for (let i = 0; i < noLots; i++) {
+      //  executeBuy(cis, kite,cis.tick.last_price);
+    }
+
+
+    cis.buyStrategy='green candle and high at 59 sec';
+
+   // return;
+}
+
+
 
    ///removed on 31st oct
  
@@ -125,21 +163,11 @@ if (!canInitiateLongTrade(cis)) {
 }
 
 
+
+
 //console.log('escaped bear',cis.tradingsymbol);
 
-    if(cis.noBuy){
-
-        global.addOrIncrementRejection('cis no buy')
-        return;
-    }
-
-
-    if(!cis.minuteData || !cis.tick){
-
-
-        global.addOrIncrementRejection('cis no tick')
-        return;
-    }
+  
 
     if(
         
@@ -162,12 +190,17 @@ if (!canInitiateLongTrade(cis)) {
               }
         
 
+
+
+
     const result = findSupportPoints(cis.minuteData);
 
     // Output the results
   
 let lp1=cis.tick.last_price;
   
+
+
 
 let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
    // console.log("Support Points:", result,cis.tradingsymbol,sup);
@@ -188,7 +221,7 @@ let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
     
 
 
-    if(global.seconds%15==0 && global.minutes%5==0)console.log('cis.highBeforeThreeMinutes',"last high :",cis.highBeforeThreeMinutes,"LTP:",cis.tick.last_price,cis.tradingsymbol);
+    //if(global.seconds%15==0 && global.minutes%5==0)console.log('cis.highBeforeThreeMinutes',"last high :",cis.highBeforeThreeMinutes,"LTP:",cis.tick.last_price,cis.tradingsymbol);
     
    if (cis && cis.tick.last_price > cis.highBeforeThreeMinutes && !cis.ordered) {
     // Capture the entire cis object to preserve its state at this moment
@@ -199,7 +232,7 @@ let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
 
     // Set a timeout to delay the trade execution by 2 minutes (120,000 milliseconds)
 
-    let noLots = 2; // Adjust the number of lots as needed
+    // Adjust the number of lots as needed
     for (let i = 0; i < noLots; i++) {
       //  executeBuy(capturedCis, kite, cis.tick.last_price);
         executeBuy(cis, kite, cis.tick.last_price);

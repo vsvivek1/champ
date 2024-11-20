@@ -33,7 +33,7 @@ function is15MinuteBreakout(ohlcData, lastPrice) {
         }
     }
 
-    const last15Candles = ohlcData.slice(-15);
+    const last15Candles = ohlcData.slice(-60);
 
      highestHigh = -Infinity;
      lowestLow = Infinity;
@@ -52,6 +52,8 @@ function is15MinuteBreakout(ohlcData, lastPrice) {
     });
 
      priceRange = highestHigh - lowestLow;
+
+     let rangePc=priceRange/lastPrice
    targetPrice = highestHigh + priceRange;
   stopLoss = lowestLow - priceRange;
    breakoutOccurred = lastPrice > highestHigh;

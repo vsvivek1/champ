@@ -57,18 +57,20 @@ export function regressionBreakoutTrading(cis) {
         const penultimatePrediction = predictedValues[predictedValues.length - 2];
         const lastPrediction = predictedValues[predictedValues.length - 1];
 
-        console.log(
+     /*    console.log(
             'penultimateCandle.close:', penultimateCandle.close, 
             'penultimatePrediction.highPrediction:', penultimatePrediction.highPrediction,
             'lastCandle.close:', lastCandle.close,
             'lastPrediction.highPrediction:', lastPrediction.highPrediction
-        ); 
+        );  */
 
         // Check if penultimate and last candle conditions are met
         if (
             penultimateCandle.close < penultimatePrediction.highPrediction &&
             lastCandle.close > lastPrediction.highPrediction
         ) {
+            
+            return false/// regression off
             return true;
         }
     }

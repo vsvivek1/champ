@@ -24,7 +24,29 @@ export async function updateOpenOrderPrice(kite, order_id, instrument_token, las
 }
 
 export async function handleOrderUpdates(order, kite) {
-    let cis = global.instrumentsForMining.find(i => i.instrument_token == order.instrument_token);
+
+    //console.log(order.tradingsymbol.includes(global.instrumentName));
+
+   // process.exit();
+    
+
+
+
+    let cis=-1 ;
+ try {
+        cis = global.instrumentsForMining. filter(inst => inst.name === global.instrumentName).
+        
+        find(i => i.instrument_token == order.instrument_token);
+ } catch (error) {
+    
+
+    cis=-1;
+    console.log(error,cis,'line 40 order util --ERROR','length',global.instrumentName);
+    
+ }
+
+ if(cis==-1) return;
+   // global.instrumentsForMining
     if (!cis) return;
 
     if (order.status == 'COMPLETE' && order.transaction_type == 'SELL') {
@@ -67,12 +89,21 @@ export async function handleOrderUpdates(order, kite) {
        //// await fetchPositionsAndSetCis(kite);
         //placeTargetOrder(cis, order, kite);
 
-        cis.ordered=false;
+
+        let temp=cis;
+        setTimeout(()=>{
+          
+temp.ordered=false;
+        },30*1000)
+       // cis.ordered=false;
     }
 }
 
 
 async function placeTargetOrder(cis, order, kite) {
+
+    console.log(global.instrumentName,'placed order line 85');
+    
 
     if(!cis){
 
@@ -82,7 +113,7 @@ console.log('No CIS sell reverse');
 
 let tgtStrategy='';
     
-    const lastFiveCandles = cis.minuteData.slice(-5);
+    const lastFiveCandles = cis.minuteData//.slice(-5);
     const lastFiveVolatility = calculateVolatility(lastFiveCandles);
 
     let averageRange=calculateVolatility(lastFiveCandles);
@@ -90,12 +121,14 @@ let tgtStrategy='';
    
   //  var targetPrice = order.price + targetPoints;
    // var targetPrice = order.price +averageRange/4  ///2//*2
+    //var targetPrice = order.price *1.2  ///2//*2
     var targetPrice = order.price *1.2  ///2//*2
     let targtStrategy='order*1.2'
    if(global.hours==9){
 
     //targetPrice=order.price+averageRange/4
-    targetPrice=order.price *1.2
+   // targetPrice=order.price *1.2
+    targetPrice=order.price +1.1
 
    }
    else if(global.hours==10){
@@ -129,7 +162,7 @@ let tgtStrategy='';
 
     ////// temp change on oct 30
 
-    targetPrice = order.price +averageRange*2
+    targetPrice = order.price +averageRange///2
 
     
 
@@ -159,7 +192,7 @@ let tgtStrategy='';
 
 
         const updatedOrderWithTarget = await setTargetForTrade(cis.tradingsymbol, Math.ceil(targetPrice), tgtStrategy);
-        console.log('Updated Order with Target:', updatedOrderWithTarget);
+        console.log('Updated Order with Target:', updatedOrderWithTarget,global.clock);
         console.log("Target order placed successfully. Order ID:", orderId);
     } catch (error) {
         console.error("Error placing target order:", error);

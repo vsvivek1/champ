@@ -128,6 +128,16 @@ export function handle10to12PM(cis, kite) {
         console.log('break day high', cis.tradingsymbol,'alst_price=',cis.tick.last_price,'day high','cis.tick.ohlc.high');
 
     }
+
+
+   // console.log('cis.minuteData.splice(-1)[0]',cis.minuteData.splice(-1)[0]);
+    
+    if(cis.minuteData &&  cis.minuteData.splice(-1)[0]  && cis.minuteData.splice(-1)[0].high<cis.tick.ohlc.open && cis.tick.last_price>cis.tick.last_price){
+
+
+        console.log('crossing oepon from bottom',cis.tradingsymbol);
+        proceedToTrade=true;
+    }
     // Execute the trade if any of the conditions are met
     if (proceedToTrade) {
         cis.buyCriteria = '10-12 PM'; // Set the buy criteria flag

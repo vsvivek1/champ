@@ -98,7 +98,7 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
         breakoutOccurred,
     } = is15MinuteBreakout(cis.minuteData, cis.last_price);
 
-    if (breakoutOccurred  && (global.seconds ==59)) {
+    if (breakoutOccurred ) {
 
         cis.buyStrategy='15MinBreakout'
 
@@ -148,7 +148,7 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
 
  // proceedToTrade=false;
 
-  console.log('ivide',regressionBreakoutTrading(cis),'regressionBreakoutTrading(cis)',{proceedToTrade});
+  //console.log('ivide',regressionBreakoutTrading(cis),'regressionBreakoutTrading(cis)',{proceedToTrade});
   
 
  if(regressionBreakoutTrading(cis))  {
@@ -162,16 +162,39 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
  }
 
 
+ if(
+    
+    cis.minuteData.slice(-1)[0].low==cis.minuteData.slice(-1)[0].open 
+
+    && cis.minuteData.slice(-1)[0].high==cis.minuteData.slice(-1)[0].close
+
+    && Math.abs(cis.minuteData.slice(-1)[0].close-cis.minuteData.slice(-1)[0].open)>cis.minuteData.slice(-1)[0].open*.05
+){
+
+
+    cis.buyStrategy='Marubozoiur buying'
+    console.log('rMarubozoiur buying',cis.tradingsymbol);
+    
+
+ proceedToTrade=true;
+
+}
+
+
  /*  if(isLastCandleBodySmallAndLastPriceCrossedItsHigh ){
      cis.buyStrategy='lastCandleBodySmallAndPriceCrossedHigh'
     proceedToTrade=true;
   } */
     // Execute buy logic if any of the strategies meet the criteria
 
-    console.log(global.instrumentsForMining.map(i=>i.tradingsymbol,),'trading symbols');
+    //console.log(global.instrumentsForMining.map(i=>i.tradingsymbol,),'trading symbols');
     
 
-if(global.minutes%2==0 && global.seconds==1)console.log('12-4 health check sample',cis.tradingsymbol,{proceedToTrade});
+console.log('12-4 health check sample trading symbols',
+    global.instrumentsForMining.map(i=>i.tradingsymbol),
+    
+    
+    cis.tradingsymbol,{proceedToTrade});
 
     if (proceedToTrade) {
         cis.buyCriteria = '12-4 PM';

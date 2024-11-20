@@ -23,23 +23,31 @@ const socket = io('http://tradingsimham.in:4000');  // Using a domain
 
 // Get the instrument name from command line argument
 const instrumentName = process.argv[2];
-const instrumentData = instrumentsForMining.find(inst => inst.name === instrumentName);
 
-global.instrumentsForMining=instrumentsForMining
+global.instrumentName=instrumentName;
+const instrumentData = instrumentsForMining.filter(inst => inst.name === instrumentName);
+
+global.instrumentsForMining=instrumentsForMining.filter(inst => inst.name === instrumentName);
+
+global.instrumentName =instrumentName ;
 
 global.allInstruments=allInstruments//.find(inst => inst.name === instrumentName);
 
-console.log(global.allInstruments,instrumentName);
+console.log('THread',instrumentName);
+
+
 
 
 if (!instrumentData) {
     console.error(`Instrument ${instrumentName} not found in instrumentsForMining`);
+    
+    //return;
     process.exit(1);
 }
 
 // Set global variables for the specified instrument
-global.instrumentName = instrumentName;
-global.instrumentData = instrumentData;
+//global.instrumentName = instrumentName;
+//global.instrumentData = instrumentData;
 global.addOrIncrementRejection = addOrIncrementRejection;
 global.positions = [];
 global.orders = [];
@@ -49,7 +57,32 @@ let con = connectToDatabase();
 let kite, ticker;
 
 async function main() {
+
+
     try {
+
+        
+
+        if(global.hours>14|| global.hours<9 ||(global.hours==15 && global.minutes>30) ||(global.hours==9 && global.minutes<15)){
+
+            console.log('Exiting the code out of time');
+
+           // return 
+        }
+        
+     //  global.instrumentData = global.instrumentsForMining.find(inst => inst.name === instrumentName);   //use filter
+
+       // console.log(global.instrumentData.length,'ln',global.instrumentsForMining,'instrumentName',instrumentName);
+
+       // process.exit();
+
+       /*  if(!global.instrumentData || global.instrumentData.length==0){
+
+            console.log('global.instrumentData issue in main line 61');
+            
+            return;
+        } */
+       // console.log(instrumentData ,'instrumentData ')
         const accessTokenDoc = await getTodaysAccessToken();
         kite = await getKiteConnectInstance();
 
@@ -59,6 +92,8 @@ async function main() {
             global.hours = global.date.getHours();
             global.minutes = global.date.getMinutes();
             global.seconds = global.date.getSeconds();
+
+         global.clock=   `Time:${global.hours}: ${global.minutes}:${global.seconds}`
 
           /*   if (global.minutes % 15 === 0 && global.seconds === 10) {
                 await fetchHourlyData(kite);
@@ -72,7 +107,7 @@ async function main() {
             }
 
             if (global.seconds === 1) {
-                console.log(`@ seconds 1 for ${instrumentName}`);
+               // console.log(`@ seconds 1 for ${instrumentName}`);
                 
                      // Schedule fetches every minute
    
@@ -81,7 +116,7 @@ async function main() {
                 await fetchPositionsAndSetCis(kite);
                 await fetchMinuteData(kite);
                  
-                console.log(`@ seconds 1 end for ${instrumentName}`);
+             //   console.log(`@ seconds 1 end for ${instrumentName}`);
             }
 
 
@@ -203,10 +238,13 @@ async function orderUpdates(order) {
 }
 
 async function subscribe() {
+
+    console.log(global.instrumentsForMining.map(i=>parseInt(i.instrument_token)));
+    
     try {
-        const instrumentToken = parseInt(global.instrumentData.instrument_token);
+        const instrumentToken = global.instrumentsForMining.map(i=>parseInt(i.instrument_token));
         ticker.unsubscribe([]);
-        ticker.subscribe([instrumentToken]);
+        ticker.subscribe(instrumentToken);
         ticker.setMode(ticker.modeFull, [instrumentToken]);
     } catch (error) {
         console.error(`Error subscribing to ${global.instrumentData.name}:`, error);

@@ -145,7 +145,7 @@ export async function fetchMinuteData(kite) {
        // console.log('fetch all data start');
         
         await fetchAllData(kite, instrument_tokens, fromTime, toTime, dataType, minuteHistoricalData);
-        console.log('fetch all data stop','global.instrumentsForMining len',global.instrumentsForMining.length);
+      //  console.log('fetch all data stop','global.instrumentsForMining len',global.instrumentsForMining.length);
        
        var instrument;
         global.instrumentsForMining.forEach(instrument1 => {

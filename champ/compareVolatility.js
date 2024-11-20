@@ -19,7 +19,7 @@ export function calculateVolatility(candles) {
     const totalVolatility = volatilityValues.reduce((sum, vol) => sum + vol, 0);
     const averageVolatility = totalVolatility / candles.length;
 
-    return averageVolatility;
+    return averageVolatility/2;
 }
 
 // Function to compare the volatility of the last 5 candles with the previous 10 candles

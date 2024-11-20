@@ -35,9 +35,9 @@ export function canInitiateLongTrade(cis) {
         // Log the results
         if (activeBearishConditions.length > 0) {
             //console.log("The following bearish conditions exist:",cis.tradingsymbol);
-       if(global.seconds%20==0)     activeBearishConditions.forEach(condition => console.log(cis.tradingsymbol,`- ${condition.name}`));
+       if(global.seconds%20==0)     activeBearishConditions.forEach(condition => console.log(cis.tradingsymbol,`- ${condition.name}`,global.clock));
         } else {
-            if(global.seconds%20==0)    console.log("No bearish conditions exist.");
+            if(global.seconds%20==0)    console.log("No bearish conditions exist.",cis.tradingsymbol,global.clock);
         }
     // Return `true` if no bearish conditions are met, indicating it's safe to initiate a long trade
     return !bearishConditionsExist;

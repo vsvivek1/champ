@@ -15,10 +15,7 @@ import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
 export function handlePositionPresent(cis, kite) {
     // Update the highest seen prices
 
-    if(cis.tradingsymbol.includes('NXT')){
-
-        return;
-    }
+ 
     cis.lastSeenHighForPosition = Math.max(cis.tick.last_price, cis.lastSeenHighForPosition);
     cis.lastSeenHigh = Math.max(cis.tick.last_price, cis.lastSeenHigh);
 
@@ -82,6 +79,9 @@ if(cis.tick.last_price<cis.tick.open
     squareOff=true;
 } */
 ///temp on oct 30
+
+
+if(global.seconds%5==0)console.log('stop loss health cehck',cis.buyPrice);
 
   
 if(squareOff ){

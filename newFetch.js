@@ -163,8 +163,8 @@ var selectedOptions=[];
 
 let fullJson=[];
 
-var instruments=getUniqueInstruments(expToday)
-var symbols=getUniqueTradingSymbols(expToday)
+/* var instruments=getUniqueInstruments(expToday)
+var symbols=getUniqueTradingSymbols(expToday) */
 const kite =await  getKiteConnectInstance();
 
 let indexInstruments=allScriptJson.filter(i=> i.segment== 'INDICES' && i.exchange=='NSE');
@@ -266,7 +266,7 @@ console.log(indexInstrument,'indexInstrumentx',diff);
 
 
 
-let depth=1
+let depth=0
 var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
 var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
 

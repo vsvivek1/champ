@@ -5,7 +5,9 @@ export const setTargetForTrade = async (tradingSymbol, targetPrice, targetStrate
     try {
         const cis = await Cis.findOne({ tradingSymbol, haveLivePosition: true, hasTarget: false });
         if (!cis) {
-            throw new Error(`Active trade with trading symbol ${tradingSymbol} not found or already has a target.`);
+
+            return;
+            //throw new Error(`Active trade with trading symbol ${tradingSymbol} not found or already has a target.`);
         }
 
         cis.targetPrice = targetPrice;
@@ -16,7 +18,9 @@ export const setTargetForTrade = async (tradingSymbol, targetPrice, targetStrate
         console.log(`Target set for trade ${tradingSymbol}:`, cis);
         return cis;
     } catch (error) {
-        console.error('Error setting target for trade:', error);
-        throw error;
+       console.error('Error setting target for trade:', error);
+       
+      
+     // throw error;
     }
 };

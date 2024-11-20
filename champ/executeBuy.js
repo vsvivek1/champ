@@ -66,7 +66,7 @@ async function placeOrder(cis, kite,price) {
 
    let m=await getMargins(kite);
    let m2=m.equity.net;
-    multiplier=Math.floor(Math.min(m2*.8,40000)/(price*cis.lot_size));
+    multiplier=Math.floor(Math.min(m2*.7,70000)/(price*cis.lot_size));
                 
  /*        "NIFTY":36,//72,
         

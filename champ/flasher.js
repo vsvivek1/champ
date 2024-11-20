@@ -28,7 +28,7 @@ const messageBox = blessed.box({
 screen.append(messageBox);
 
 // Exported function to display the message and clear it after 2 seconds
-export const flashMessage = (message) => {
+/* export const flashMessage = (message) => {
     messageBox.setContent(`{center}${message}{/center}`);
     screen.render();
 
@@ -37,7 +37,7 @@ export const flashMessage = (message) => {
         messageBox.setContent('');
         screen.render();
     }, 2000); // 2 seconds to hide the message
-};
+}; */
 
 // Exit the program with 'q' or 'ESC'
-screen.key(['escape', 'q', 'C-c'], () => process.exit(0));
+//screen.key(['escape', 'q', 'C-c'], () => process.exit(0));

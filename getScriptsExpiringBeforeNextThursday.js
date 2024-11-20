@@ -1,6 +1,6 @@
 function getScriptsExpiringBeforeNextThursday(jsonArray) {
    const today = new Date();
-   const nextThursday = new Date(today.getTime() + (7 - today.getDay() + 4) % 7 * 24 * 60 * 60 * 1000); // Calculate next Thursday
+   const nextThursday = new Date(today.getTime() + (8 - today.getDay() + 4) % 7 * 24 * 60 * 60 * 1000); // Calculate next Thursday
 
    console.log('EXPITY',nextThursday)
    return jsonArray.filter(item => {
@@ -12,6 +12,9 @@ function getScriptsExpiringBeforeNextThursday(jsonArray) {
    });
 }
 function getDatesFromTodayToNextSameDay() {
+
+
+   
    const today = new Date();
    today.setHours(0, 0, 0, 0); // Normalize to midnight
 
@@ -25,6 +28,8 @@ function getDatesFromTodayToNextSameDay() {
        currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
    }
 
+
+   dates.push('2024-11-27');
    console.log(dates);
    
    return dates;
