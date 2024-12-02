@@ -12,7 +12,7 @@ import { regressionBreakoutTrading } from './regressionBreakOutTrading.js';
 
 export function handle10to12PM(cis, kite) {
 
-    regressionBreakoutTrading(cis);
+    //regressionBreakoutTrading(cis);
     
 
     cis.qualifiedForTrade=true;
@@ -48,7 +48,7 @@ export function handle10to12PM(cis, kite) {
         return false; // Exit condition
     }
 
-    let secondLastCandleHigh = cis.minuteData.slice(-2, -1)[0].high;
+   // let secondLastCandleHigh = cis.minuteData.slice(-2, -1)[0].high;
     let lastCandleHigh = cis.minuteData.slice(-1)[0].high;
 
     // Exit if last price is less than last candle's high
@@ -74,13 +74,34 @@ export function handle10to12PM(cis, kite) {
     // Breakout Strategy: 15-minute breakout condition
     let {
         breakoutOccurred,
+        lastPrice,
+        highestHigh,
+        lowestLow,
+        priceRange,
+        targetPrice,
+        stopLoss,
     } = is15MinuteBreakout(cis.minuteData, cis.tick.last_price);
 
     // Separate checks for different strategies
     if (breakoutOccurred) {
+
+      /*   const candleHeight = highOfLast3Candles - lowOfLast3Candles;
+        const target = highOfLast3Candles + (candleHeight * 0.2);
+        const stopLoss = lowOfLast3Candles + (candleHeight / 2);
+
+        //Set target and stop-loss in `cis`
+
+        */
+        //specialTrade=true;
+        cis.targetPrice = targetPrice,
+        cis.stopLossPrice = stopLoss;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
+
+
          cis.buyStrategy='15minBreakOut'
-        cis.timeDelayRequired=true;
-        cis.timer=1000*60;
+        //cis.timeDelayRequired=true;
+       // cis.timer=1000*60;
         proceedToTrade = true;
         if (global.seconds == 57) console.log('15-minute breakout occurred in 10-12 PM', cis.tradingsymbol);
     }
@@ -124,6 +145,12 @@ export function handle10to12PM(cis, kite) {
 
 
     if(cis.tick.last_price>cis.tick.ohlc.high){
+
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
         proceedToTrade = true;
         console.log('break day high', cis.tradingsymbol,'alst_price=',cis.tick.last_price,'day high','cis.tick.ohlc.high');
 
@@ -131,13 +158,50 @@ export function handle10to12PM(cis, kite) {
 
 
    // console.log('cis.minuteData.splice(-1)[0]',cis.minuteData.splice(-1)[0]);
+
+
+
+   if(
+        
+    cis.tick.last_price>   cis.pricePoints.d1.high  
+|| cis.tick.last_price>   cis.pricePoints.d2.high  
+|| cis.tick.last_price>   cis.pricePoints.d3.high  
+|| cis.tick.last_price>   cis.pricePoints.d4.high  
+
+
+
+){
+
+
+    cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
+
+
+    console.log('yday break strategy',cis.tradingsymbol);
     
+    proceedToTrade=true;
+
+}
+    
+
+//console.log(cis.minuteData.splice(-1)[0],'cis.minuteData.splice(-1)[0]');
+
     if(cis.minuteData &&  cis.minuteData.splice(-1)[0]  && cis.minuteData.splice(-1)[0].high<cis.tick.ohlc.open && cis.tick.last_price>cis.tick.last_price){
 
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
 
         console.log('crossing oepon from bottom',cis.tradingsymbol);
         proceedToTrade=true;
     }
+
+   if(global.minutes%2==0 && global.seconds==30) console.log('health check 10-12',cis.tradingsymbol,{proceedToTrade});
+    
     // Execute the trade if any of the conditions are met
     if (proceedToTrade) {
         cis.buyCriteria = '10-12 PM'; // Set the buy criteria flag

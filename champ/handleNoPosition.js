@@ -14,6 +14,10 @@ import {checkGapDown} from './gapDownChecker.js'
 import {findSupportPoints} from './findSupportPoints.js'
 import {checkLastCandleOverSupportPoint} from './checkLastCandleOverSupportPoints.js'
 import { canInitiateLongTrade } from './tradeCheckFunctions.js'; // Adjust the path based on file location
+import { analyzeTwoRedCandles } from './analyzeTwoRedCandles.js';
+import { reversalCheck } from './reversalCheck.js';
+
+
 //import { flashMessage } from './flasher.js';
 
 
@@ -80,6 +84,8 @@ async function getMargins(kite){
 }
 
 export async function handleNoPosition(cis, kite) {
+let proceedToTrade=false;
+    if(cis.tick.last_price<5) return;
     if(cis.noBuy){
 
         global.addOrIncrementRejection('cis no buy')
@@ -129,6 +135,44 @@ if(told) return;
 //let m=await getMargins(kite)
 //console.log(m.equity.net,'getMargins(kite)');
 
+let specialTrade=false;
+
+let twoCross=analyzeTwoRedCandles(cis) ;
+
+if(twoCross){
+
+
+    cis.buyStrategy='twoRedCandleCross';
+    specialTrade=true;
+
+    console.log('EXECUTING SPECIAL TRADE TWO CANDLE CROSS',cis.tradingsymbol);
+
+}
+
+const rversa = reversalCheck(cis.minuteData, cis);
+
+if(rversa && global.hours!=9){
+
+
+    cis.buyStrategy='rversa30';
+    specialTrade=true;
+
+    console.log('rversa30',cis.tradingsymbol);
+
+}
+
+
+if(specialTrade && cis.tick.last_price>1){
+
+
+    
+    let noLots = 2; // Adjust as needed
+    for (let i = 0; i < noLots; i++) {
+        executeBuy(cis, kite,cis.tick.last_price);
+    }
+
+
+}
 
 
 
@@ -136,7 +180,7 @@ if (!canInitiateLongTrade(cis)) {
 
 
 
-    global.addOrIncrementRejection('can InitiateLongTrade is false')
+  //  global.addOrIncrementRejection('can InitiateLongTrade is false')
  if(global.minutes%15==0 && global.seconds==0)   console.log("Conditions are not favorable for a long trade.",cis.tradingsymbol);
 
  if(global.seconds==59 && cis.liveMinute.color=='bullish'){
@@ -198,7 +242,9 @@ if (!canInitiateLongTrade(cis)) {
     // Output the results
   
 let lp1=cis.tick.last_price;
-  
+  //let m=await kite.getMargins()
+//console.log(m.equity.available.live_balance,',m.equity.available.live_balance'); */
+
 
 
 
@@ -224,6 +270,9 @@ let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
     //if(global.seconds%15==0 && global.minutes%5==0)console.log('cis.highBeforeThreeMinutes',"last high :",cis.highBeforeThreeMinutes,"LTP:",cis.tick.last_price,cis.tradingsymbol);
     
    if (cis && cis.tick.last_price > cis.highBeforeThreeMinutes && !cis.ordered) {
+
+
+    
     // Capture the entire cis object to preserve its state at this moment
     const capturedCis = JSON.parse(JSON.stringify(cis));
 
@@ -231,7 +280,13 @@ let sup=checkLastCandleOverSupportPoint(cis.minuteData.slice(-1)[0],result,lp1)
     console.log('Trade condition met, will execute trade after 1 minutes:', capturedCis.tradingsymbol, capturedCis.tick.last_price);
 
     // Set a timeout to delay the trade execution by 2 minutes (120,000 milliseconds)
+ cis.buyStrategy='DayHighBreakOut'
 
+ cis.targetPrice = cis.tick.last_price * global.targetPc
+ cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+ cis.inbuiltTarget = true;
+ cis.inbuiltStopLoss = true; 
+ proceedToTrade = true;
     // Adjust the number of lots as needed
     for (let i = 0; i < noLots; i++) {
       //  executeBuy(capturedCis, kite, cis.tick.last_price);

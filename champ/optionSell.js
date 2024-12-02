@@ -6,129 +6,55 @@ import readline from "readline";
 let con = connectToDatabase();
 let kc = await getKiteConnectInstance();
 
-const niftySymbol = "NSE:NIFTY 50"; // Symbol for NIFTY
-const lotSize = 50; // Lot size for NIFTY options
+const lotSizeMap = {
+  "NIFTY 50": 50,
+  "BANKNIFTY": 25,
+  "NIFTY MIDCAP 50": 75,
+  "FINNIFTY": 40,
+};
+
+// Map LTP symbol to options `name` field
+const optionNameMap = {
+  "NIFTY 50": "NIFTY",
+  "BANKNIFTY": "BANKNIFTY",
+  "NIFTY MIDCAP 50": "MIDCPNIFTY",
+  "FINNIFTY": "FINNIFTY",
+};
+
 const depth = 10; // Levels below for OTM options
-const expiry = "2024-11-21"; // Replace with actual expiry date
+const expiry = "2024-11-28"; // Replace with actual expiry date
 
 async function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function getLivePnL() {
+async function getLtpAndTradeOptions(indexLtpName, reverse = false) {
   try {
-    const positions = await kc.getPositions();
-    const netPositions = positions.net;
+    const indexOptionName = optionNameMap[indexLtpName];
+    const lotSize = lotSizeMap[indexLtpName] * 10;
 
-    if (netPositions.length === 0) {
-      console.log("No positions available.");
-      return { pnl: 0, positions: [] };
-    }
-
-    let totalPnL = 0;
-    const positionDetails = [];
-
-    netPositions.forEach((position) => {
-      const pnl = position.unrealized || 0;
-      totalPnL += pnl;
-      positionDetails.push({
-        symbol: position.tradingsymbol,
-        quantity: position.quantity,
-        pnl,
-      });
-    });
-
-    return { pnl: totalPnL, positions: positionDetails };
-  } catch (error) {
-    console.error("Error fetching live P&L:", error);
-    return { pnl: 0, positions: [] };
-  }
-}
-
-async function squareOffPositions() {
-  try {
-    const positions = await kc.getPositions();
-    const netPositions = positions.net;
-
-    if (netPositions.length === 0) {
-      console.log("No positions to square off.");
+    if (!indexOptionName || !lotSize) {
+      console.error("Invalid index choice.");
       return;
     }
 
-    console.log("Existing positions to square off:");
-    netPositions.forEach((position) => {
-      console.log(
-        `Symbol: ${position.tradingsymbol}, Quantity: ${position.quantity}, Type: ${
-          position.buy_or_sell
-        }`
-      );
-    });
-
-    for (const position of netPositions) {
-      const quantity = Math.abs(position.quantity);
-      const transactionType = position.quantity > 0 ? "SELL" : "BUY";
-
-      console.log(`Squaring off position: ${position.tradingsymbol}`);
-      await placeOrder(position.tradingsymbol, quantity, transactionType);
-    }
-
-    console.log("All positions squared off successfully.");
-  } catch (error) {
-    console.error("Error during square-off operation:", error);
-  }
-}
-
-async function confirmSquareOffLoop() {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
-  while (true) {
-    const { pnl, positions } = await getLivePnL();
-
-    console.log("\nLive P&L:");
-    console.log(`Total P&L: ${pnl.toFixed(2)}`);
-    positions.forEach((pos) => {
-      console.log(
-        `Symbol: ${pos.symbol}, Quantity: ${pos.quantity}, Unrealized P&L: ${pos.pnl.toFixed(2)}`
-      );
-    });
-
-    await new Promise((resolve) => {
-      rl.question("\nDo you want to square off all positions? (yes/no): ", async (answer) => {
-        if (answer.toLowerCase() === "yes") {
-          console.log("Square-off confirmed. Proceeding...");
-          await squareOffPositions();
-          rl.close();
-          resolve();
-          process.exit(0); // Exit the loop after square-off
-        } else {
-          console.log("Square-off canceled. Showing live P&L again...");
-          resolve();
-        }
-      });
-    });
-    await delay(5000); // Refresh P&L every 5 seconds
-  }
-}
-
-async function getLtpAndTradeOptions(reverse = false) {
-  try {
-    // Fetch the LTP for NIFTY
-    const ltpData = await kc.getLTP([niftySymbol]);
+    // Fetch the LTP for the selected index
+    const niftySymbol = `NSE:${indexLtpName}`;
+    const ltpData = await kc.getQuote([niftySymbol]);
     const niftyLtp = ltpData[niftySymbol]?.last_price;
 
     if (!niftyLtp) {
-      console.error("Unable to fetch LTP for NIFTY 50.");
+      console.error(`Unable to fetch LTP for ${indexLtpName}.`);
       return;
     }
 
-    console.log(`LTP of NIFTY 50: ${niftyLtp}`);
+    console.log(`LTP of ${indexLtpName}: ${niftyLtp}`);
 
     // Calculate ATM strike price
     const atmStrike = Math.round(niftyLtp / 50) * 50;
-    console.log("ATM Strike Price:", atmStrike);
+    console.log("ATM Strike Price:", atmStrike,indexOptionName,expiry);
+
+    //process.exit();
 
     // Find ATM CE and PE
     const atmCe = allInstruments.find(
@@ -136,7 +62,7 @@ async function getLtpAndTradeOptions(reverse = false) {
         instrument.strike == atmStrike &&
         instrument.instrument_type === "CE" &&
         instrument.expiry === expiry &&
-        instrument.name === "NIFTY"
+        instrument.name === indexOptionName
     );
 
     const atmPe = allInstruments.find(
@@ -144,24 +70,26 @@ async function getLtpAndTradeOptions(reverse = false) {
         instrument.strike == atmStrike &&
         instrument.instrument_type === "PE" &&
         instrument.expiry === expiry &&
-        instrument.name === "NIFTY"
+        instrument.name === indexOptionName
     );
 
     if (!atmCe || !atmPe) {
-      console.error("Unable to find ATM CE or PE.");
+      console.error(
+        `Unable to find ATM CE or PE for ${indexOptionName} with expiry ${expiry}. Check available instruments.`
+      );
       return;
     }
 
     console.log(`ATM CE: ${atmCe.tradingsymbol}`);
     console.log(`ATM PE: ${atmPe.tradingsymbol}`);
 
-    // Find 4 levels below OTM CE and PE
+    // Find 10 levels below OTM CE and PE
     const otmCe = allInstruments.find(
       (instrument) =>
         instrument.instrument_type === "CE" &&
         instrument.strike == atmStrike + 50 * depth &&
         instrument.expiry === expiry &&
-        instrument.name === "NIFTY"
+        instrument.name === indexOptionName
     );
 
     const otmPe = allInstruments.find(
@@ -169,7 +97,7 @@ async function getLtpAndTradeOptions(reverse = false) {
         instrument.instrument_type === "PE" &&
         instrument.strike == atmStrike - 50 * depth &&
         instrument.expiry === expiry &&
-        instrument.name === "NIFTY"
+        instrument.name === indexOptionName
     );
 
     if (!otmCe || !otmPe) {
@@ -181,28 +109,22 @@ async function getLtpAndTradeOptions(reverse = false) {
     console.log(`OTM PE (10 levels below): ${otmPe.tradingsymbol}`);
 
     if (reverse) {
-      // Reverse operation: Buy ATM and Sell OTM
       console.log("Executing reverse operation...");
       await placeOrder(atmCe.tradingsymbol, lotSize, "BUY");
       await placeOrder(atmPe.tradingsymbol, lotSize, "BUY");
       console.log("Buy orders placed for ATM CE and PE.");
 
-      // Wait for 10 seconds before selling OTM options
-      console.log("Waiting for 10 seconds before selling OTM options...");
       await delay(10000);
 
       await placeOrder(otmCe.tradingsymbol, lotSize, "SELL");
       await placeOrder(otmPe.tradingsymbol, lotSize, "SELL");
       console.log("Sell orders placed for OTM CE and PE.");
     } else {
-      // Standard operation: Buy OTM and Sell ATM
       console.log("Executing standard operation...");
       await placeOrder(otmCe.tradingsymbol, lotSize, "BUY");
       await placeOrder(otmPe.tradingsymbol, lotSize, "BUY");
       console.log("Buy orders placed for OTM CE and PE.");
 
-      // Wait for 10 seconds before selling ATM options
-      console.log("Waiting for 10 seconds before selling ATM options...");
       await delay(10000);
 
       await placeOrder(atmCe.tradingsymbol, lotSize, "SELL");
@@ -210,7 +132,6 @@ async function getLtpAndTradeOptions(reverse = false) {
       console.log("Sell orders placed for ATM CE and PE.");
     }
 
-    // Start square-off confirmation loop
     await confirmSquareOffLoop();
   } catch (error) {
     console.error("Error during trading:", error);
@@ -224,7 +145,7 @@ async function placeOrder(symbol, quantity, transactionType) {
     transaction_type: transactionType,
     order_type: "MARKET",
     quantity: quantity,
-    product: "NRML", // Use NRML for overnight or MIS for intraday
+    product: "MIS",
     validity: "DAY",
   };
 
@@ -236,14 +157,35 @@ async function placeOrder(symbol, quantity, transactionType) {
   }
 }
 
-// User prompt for reverse operation
+// User prompt for index and reverse operation
 const rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });
 
-rl.question("Do you want to execute the reverse operation? (yes/no): ", async (answer) => {
-  const reverse = answer.toLowerCase() === "yes";
-  console.log(`Reverse operation selected: ${reverse}`);
-  await getLtpAndTradeOptions(reverse);
-});
+rl.question(
+  "Select index: (1: NIFTY 50, 2: BANKNIFTY, 3: NIFTY MIDCAP 50, 4: FINNIFTY): ",
+  async (index) => {
+    const indexMap = {
+      1: "NIFTY 50",
+      2: "BANKNIFTY",
+      3: "NIFTY MIDCAP 50",
+      4: "FINNIFTY",
+    };
+
+    const indexLtpName = indexMap[parseInt(index, 10)];
+
+    if (!indexLtpName) {
+      console.error("Invalid choice. Please select a valid index.");
+      rl.close();
+      return;
+    }
+
+    rl.question("Do you want to execute the reverse operation? (y/n): ", async (answer) => {
+      const reverse = answer.toLowerCase() === "y";
+      console.log(`Index selected: ${indexLtpName}, Reverse operation: ${reverse}`);
+      await getLtpAndTradeOptions(indexLtpName, reverse);
+      rl.close();
+    });
+  }
+);

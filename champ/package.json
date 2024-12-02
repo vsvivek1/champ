@@ -5,8 +5,11 @@
   "license": "MIT",
   "type": "module",
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "express": "^4.21.0",
     "kiteconnect": "^5.0.0",
+    "pg": "^8.13.1",
+    "prisma": "^5.22.0",
     "regression": "^2.0.1",
     "socket.io": "^4.8.0",
     "terminal-link": "^3.0.0"

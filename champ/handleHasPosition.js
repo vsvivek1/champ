@@ -81,12 +81,23 @@ if(cis.tick.last_price<cis.tick.open
 ///temp on oct 30
 
 
-if(global.seconds%5==0)console.log('stop loss health cehck',cis.buyPrice);
+if(global.seconds%20==0 && global.minutes%5==0)console.log('stop loss health cehck',cis.buyPrice);
 
   
-if(squareOff ){
+if(squareOff && !cis.inbuiltStopLoss ){
 
+
+    console.log(cis.inbuiltStopLoss,'cis.inbuiltStopLoss');
+    
     executeSquareOff(squareOff, cis, kite);
+}
+
+if(cis.inbuiltStopLoss && cis.tick.last_price<=cis.stopLossPrice){
+
+
+    console.log('executing inbuild stop loss',cis.inbuiltStopLoss,'cis.inbuiltStopLoss');
+    executeSquareOff(squareOff, cis, kite);
+
 }
 
 }
@@ -148,7 +159,7 @@ async function executeSquareOff(squareOff, cis, kite) {
                     
                     cis.updated = false;   /// retrying of squareoff if order is still not [resend]
                 }
-            }, 5 * 1000);
+            }, 3 * 1000);
         }
     }
 }

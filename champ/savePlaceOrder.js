@@ -16,7 +16,7 @@ export const savePlaceOrder = async (tradingSymbol, buyStrategy, buyQty, buyPric
         });
 
         const savedOrder = await cis.save();
-        console.log('Order saved successfully:', savedOrder);
+        //console.log('Order saved successfully:', savedOrder);
         return savedOrder;
     } catch (error) {
         console.error('Error saving order:', error);

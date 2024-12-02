@@ -3,18 +3,22 @@ import { savePlaceOrder } from './savePlaceOrder.js';
 import { setTargetForTrade } from './setTargetForTrade.js';
 import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
 
+import { getFreezeLimit } from './getFreezeLimit.js';
+
 async function getMargins(kite){
 
     return await kite.getMargins();
 
 }
 
+
+
 export async function executeBuy(cis, kite,price) {
     // Check if the order has already been placed
     if (cis.ordered) {
 
 
-        console.log(cis.ordered,'cis.ordered');
+       // console.log(cis.ordered,'cis.ordered');
         
 
         return false;
@@ -66,7 +70,14 @@ async function placeOrder(cis, kite,price) {
 
    let m=await getMargins(kite);
    let m2=m.equity.net;
-    multiplier=Math.floor(Math.min(m2*.7,70000)/(price*cis.lot_size));
+
+   let liveCash=m.equity.available.live_balance
+
+   
+
+   console.log(liveCash,'margin');
+   
+    multiplier=Math.floor(Math.min(liveCash*.99,61000)/(price*cis.lot_size));
                 
  /*        "NIFTY":36,//72,
         
@@ -82,7 +93,9 @@ async function placeOrder(cis, kite,price) {
       cis.entryPrice=price;
 
 
-      let qty=cis.lot_size * multiplier;
+      let qty=Math.min(cis.lot_size * multiplier,getFreezeLimit(cis.tradingsymbol));
+
+
     const orderParams = {
         exchange: "NFO",
         tradingsymbol: cis.tradingsymbol,
@@ -99,7 +112,12 @@ async function placeOrder(cis, kite,price) {
 
     try {
         const orderId = await kite.placeOrder("regular", orderParams);
-        console.log("Order placed successfully. Order ID:", orderId);
+
+
+        console.log("Order placed successfully. Order ID:", orderId,
+
+            cis.buyStrategy, 'for',cis.tradingsymbol,'at',cis.entryPrice
+        );
 
 
        // const buyOrder = await savePlaceOrder('AAPL', 'breakout', 100, 150, 'fixed target');

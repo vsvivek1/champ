@@ -116,12 +116,22 @@ const { disconnect, set } = require('mongoose');
 
 
 async function main(params) {
+
+
     
    // exec('clear');
    console.clear();
  
    var accessTokenDoc= await getTodaysAccessToken(params)
   let allScriptJson=await  downLoadAllInstrumentsAndReturnJson()
+
+
+
+  //console.log(  allScriptJson.filter(a=>a.segment=="INDICES"  && a.exchange=="NSE" ));
+
+ 
+  
+;
 
   await writeJsonToFile(allScriptJson,'./appv3/public/instruments/instrumentsAll.json')
   await writeJsonToFile(allScriptJson,'./appv3/src/assets/instruments/instrumentsAll.json')
@@ -266,7 +276,7 @@ console.log(indexInstrument,'indexInstrumentx',diff);
 
 
 
-let depth=0
+let depth=3
 var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
 var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
 

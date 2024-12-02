@@ -14,6 +14,8 @@ import { handleOrderUpdates } from './orderUtils.js';
 import { updateOpenOrderPrice } from './orderUtils.js';
 import moment from 'moment';
 
+import { writeTickToDB } from './wrireToDb.js';
+
 import addOrIncrementRejection from './addOrIncrementRejection.js';
 import { Worker } from 'worker_threads';
 const fetchWorker = new Worker('./fetchWorker.js');
@@ -21,7 +23,7 @@ const fetchWorker = new Worker('./fetchWorker.js');
 
 const socket = io('http://tradingsimham.in:4000');  // Using a domain
 
-// Get the instrument name from command line argument
+// Get the instrument name from command line argument]]
 const instrumentName = process.argv[2];
 
 global.instrumentName=instrumentName;
@@ -35,6 +37,9 @@ global.allInstruments=allInstruments//.find(inst => inst.name === instrumentName
 
 console.log('THread',instrumentName);
 
+
+global.targetPc=1.1;
+global.stoplossPc=.95;
 
 
 
@@ -169,10 +174,14 @@ function onTicks(ticks) {
     ticks.forEach(tick => processTicks(tick));
 }
 
+
+
 function processTicks(tick) {
     var cis = global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
     
 
+
+   
    
     
     if (!cis) return;
@@ -211,6 +220,8 @@ function processTicks(tick) {
 
 
     let tempHigh = tick.ohlc.high;
+
+    writeTickToDB(cis);
 
     setTimeout(() => {
         // After 3 minutes, set the stored high value to cis.highBeforeThreeMinutes

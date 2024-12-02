@@ -8,6 +8,8 @@ import { compareVolatility } from './compareVolatility.js';
 import { hasManyUpperWicks } from './hasManyUpperWicks.js';
 import {isLastCandleBodySmallAndLastPriceCrossedItsHigh} from './isLastCandleBodySmall.js'
 import { regressionBreakoutTrading } from "./regressionBreakOutTrading.js";
+
+import { highAfter11AM } from './highAfter11.js';
 export function handle12to4PM(cis, kite) {
 
 
@@ -62,6 +64,11 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
     ){
 
 
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
        cis.buyStrategy='volatality cross'
             cis.buyCriteria = 'volatality cross';
             let noLots = 3; // Adjust as needed
@@ -90,6 +97,11 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
     if (previousCandleClose < h2 && lastCandleClose > h2  && (global.seconds ==59)) {
         cis.buyStrategy='Noon High BreakOut'
         proceedToTrade = true;
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
  console.log('h2 breakout occurred', cis.tradingsymbol);
     }
 
@@ -100,29 +112,49 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
 
     if (breakoutOccurred ) {
 
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
+
         cis.buyStrategy='15MinBreakout'
 
         cis.timeDelayRequired=true;
         cis.timer=1000*60;
-        proceedToTrade = true;
+       proceedToTrade = true;
        console.log('15-minute breakout occurred', cis.tradingsymbol);
     }
 
     // Strategy 3: Three Black Crows Bullish Reversal
     if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
         cis.buyStrategy='3Crows'
-        proceedToTrade = true;
+       // proceedToTrade = true;
        console.log('Three Black Crows pattern detected', cis.tradingsymbol);
     }
 
     // Strategy 4: Hammer Candle
     if (isHammerCandle(cis.minuteData.slice(-1)[0])) {
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
  cis.buyStrategy='isHammer'
-        proceedToTrade = true;
+ proceedToTrade = true;
      console.log('Hammer candle pattern detected', cis.tradingsymbol);
     }
 
     if ( hasManyUpperWicks(cis.minuteData)) {
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
          cis.buyStrategy='hasManyUpperWicks'
         proceedToTrade = true;
       console.log('has many upper wick', cis.tradingsymbol);
@@ -130,6 +162,11 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
 
 
     if(cis.tick.last_price>cis.tick.ohlc.high  && (global.seconds ==59)){
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
 
         cis.buyStrategy='lastPriceAboveOHLCHigh'
         proceedToTrade = true;
@@ -158,7 +195,9 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
        console.log('regression trading',cis.tradingsymbol);
        
 
-    proceedToTrade=true;
+
+       //need to corr3ct this
+    //proceedToTrade=true;
  }
 
 
@@ -168,9 +207,12 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
 
     && cis.minuteData.slice(-1)[0].high==cis.minuteData.slice(-1)[0].close
 
-    && Math.abs(cis.minuteData.slice(-1)[0].close-cis.minuteData.slice(-1)[0].open)>cis.minuteData.slice(-1)[0].open*.05
+    && Math.abs(cis.minuteData && cis.minuteData.length &&  cis.minuteData.slice(-1)[0].close-cis.minuteData.slice(-1)[0].open)>cis.minuteData.slice(-1)[0].open*.05
 ){
-
+    cis.targetPrice = cis.tick.last_price * global.targetPc
+    cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+    cis.inbuiltTarget = true;
+    cis.inbuiltStopLoss = true; 
 
     cis.buyStrategy='Marubozoiur buying'
     console.log('rMarubozoiur buying',cis.tradingsymbol);
@@ -190,11 +232,36 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
     //console.log(global.instrumentsForMining.map(i=>i.tradingsymbol,),'trading symbols');
     
 
-console.log('12-4 health check sample trading symbols',
-    global.instrumentsForMining.map(i=>i.tradingsymbol),
+
+    const resul = highAfter11AM(cis);
     
+//console.log("Highest Point:", resul.highest),cis.tradingsymbol;
+//console.log("Lowest Point:", resul.lowest,cis.tradingsymbol);
+
+if(cis.minuteData.slice(-1)[0].low<resul.highest && cis.tick.last_price>resul.highest){
+    cis.buyStrategy='HighCrossAfter11'
+    console.log('high cross after 11 am',cis.tradingsymbol);
     
-    cis.tradingsymbol,{proceedToTrade});
+
+    cis.targetPrice = cis.tick.last_price * global.targetPc
+    cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+    cis.inbuiltTarget = true;
+    cis.inbuiltStopLoss = true; 
+
+ proceedToTrade=true;
+
+}
+
+
+if(global.seconds%5==0 && global.minutes%5==0){
+    console.log('12-4 health check sample trading symbols',
+        global.instrumentsForMining.map(i=>i.tradingsymbol),
+        
+        
+        cis.tradingsymbol,{proceedToTrade});
+
+}
+
 
     if (proceedToTrade) {
         cis.buyCriteria = '12-4 PM';

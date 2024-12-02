@@ -71,6 +71,11 @@ export async function handle9to10AM(cis, kite) {
 
     if (breakoutOccurred  && (global.seconds ==59)) {
 
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
+
         cis.buyStrategy='15minBreakOut'
         proceedToTrade = true;
 
@@ -84,6 +89,11 @@ export async function handle9to10AM(cis, kite) {
     // Strategy 1: Check for Open=Low condition at specific seconds
     if (isOpenLowAtSpecificSeconds(cis)) {
 
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
+
           cis.buyStrategy='openLowAtSpeceficSecond'
        // proceedToTrade = true;
         if (global.seconds == 57) console.log('Open=Low condition detected at specific seconds', cis.tradingsymbol);
@@ -91,6 +101,11 @@ export async function handle9to10AM(cis, kite) {
 
     // Strategy 2: Check for Three Black Crows Bullish Reversal
     if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
 
           cis.buyStrategy='3blackCrows'
          cis.buyStrategy='3Crows'
@@ -101,12 +116,22 @@ export async function handle9to10AM(cis, kite) {
     // Strategy 3: Check for Hammer Candle
     if (isHammerCandle(cis.minuteData.slice(-1)[0])) {
 
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
+
           cis.buyStrategy='isHammer'
         proceedToTrade = true;
         if (global.seconds == 57) console.log('Hammer candle pattern detected', cis.tradingsymbol);
     } 
     
     if ( hasManyUpperWicks(cis.minuteData)) {
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
 
               cis.buyStrategy='hasManyUpperWicks'
         proceedToTrade = true;
@@ -143,6 +168,11 @@ export async function handle9to10AM(cis, kite) {
 
 
     if(cis.tick.last_price>cis.tick.ohlc.high){
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
         proceedToTrade = true;
         console.log('break day high', cis.tradingsymbol,'alst_price=',cis.tick.last_price,'day high','cis.tick.ohlc.high');
 
@@ -163,6 +193,11 @@ export async function handle9to10AM(cis, kite) {
     
     ){
 
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
         console.log('yday break strategy');
         
         proceedToTrade=true;
@@ -172,12 +207,29 @@ export async function handle9to10AM(cis, kite) {
     //proceedToTrade=true;
 
     if(cis.minuteData && cis.minuteData.splice(-1)[0].high<cis.tick.ohlc.open && cis.tick.last_price>cis.tick.last_price){
-
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
 
         console.log('crossing oepon from bottom',cis.tradingsymbol);
         proceedToTrade=true;
     }
 
+
+    //cis.buyStrategy='HighCrossAfter11'
+
+    if(cis.minuteData && cis.minuteData.length && cis.minuteData.slice(-1)[0].close-cis.minuteData.slice(-1)[0].open>0 && (global.hours==9 && global.minutes<30)){
+
+
+        cis.targetPrice = cis.tick.last_price * global.targetPc
+        cis.stopLossPrice = cis.tick.last_price * global.stoplossPc;
+        cis.inbuiltTarget = true;
+        cis.inbuiltStopLoss = true; 
+        console.log('greenCandleBefore_930',cis.tradingsymbol);
+        proceedToTrade=true;
+        cis.buyStrategy='greenCandleBefore_930';
+    }
 
     if (proceedToTrade) {
 

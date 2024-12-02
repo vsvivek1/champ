@@ -162,14 +162,30 @@ let tgtStrategy='';
 
     ////// temp change on oct 30
 
-    targetPrice = order.price +averageRange///2
+    targetPrice = order.price + Math.min(parseFloat(averageRange/2),2)  ///2
 
     
+
+    if(isNaN(targetPrice)){
+
+    console.log('isue in target price ',{targetPrice},{averageRange});
+        
+
+        targetPrice=order.price*1.05
+
+       
+    }
 
     targtStrategy='order+2*averageRange'
 
 
     ////// temp change on oct 30
+
+
+    if(cis.inbuiltTarget){
+
+        targetPrice=cis.targetPrice;
+    }
 
     cis.exitType='target';
     const orderParams = {

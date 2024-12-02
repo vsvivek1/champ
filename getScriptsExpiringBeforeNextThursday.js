@@ -13,14 +13,17 @@ function getScriptsExpiringBeforeNextThursday(jsonArray) {
 }
 function getDatesFromTodayToNextSameDay() {
 
+   //let mon=new Date().getMonth()+1;
+   //console.log('month is ',mon);
 
+ 
    
    const today = new Date();
    today.setHours(0, 0, 0, 0); // Normalize to midnight
 
    const dates = [];
    const sameDayNextWeek = new Date(today);
-   sameDayNextWeek.setDate(today.getDate() + 8); // Calculate the same day next week
+   sameDayNextWeek.setDate(today.getDate() + 45); // Calculate the same day next week
 
    let currentDate = new Date(today);
    while (currentDate < sameDayNextWeek) { // Include the day before next week's same day
@@ -52,6 +55,10 @@ function getScriptsExpiringBeforeSameDayNextWeek(jsonArray) {
    const dateRange = getDatesFromTodayToNextSameDay(); // Generate date range
 
    // Filter items whose expiry is included in the generated date range
+
+
+  
+
    const filtered = jsonArray.filter(item => {
 
       //console.log(item.name);
