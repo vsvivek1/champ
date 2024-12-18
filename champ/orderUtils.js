@@ -34,7 +34,7 @@ export async function handleOrderUpdates(order, kite) {
 
     let cis=-1 ;
  try {
-        cis = global.instrumentsForMining. filter(inst => inst.name === global.instrumentName).
+        cis = global.instrumentsForMining.    /// filter(inst => inst.name === global.instrumentName).
         
         find(i => i.instrument_token == order.instrument_token);
  } catch (error) {
@@ -45,9 +45,15 @@ export async function handleOrderUpdates(order, kite) {
     
  }
 
- if(cis==-1) return;
-   // global.instrumentsForMining
-    if (!cis) return;
+ if( !cis || cis==-1)
+ {
+
+console.log('order update issue @51')
+    process.exit()
+    return;
+ }
+  
+
 
     if (order.status == 'COMPLETE' && order.transaction_type == 'SELL') {
         cis.sellPrice = order.price;
@@ -79,6 +85,9 @@ export async function handleOrderUpdates(order, kite) {
 
 
 if(cis.shortTrading){
+
+
+    /// sell is complete check whther its short trading
 
     placeShortCovering(cis, order, kite) 
 }
@@ -133,6 +142,8 @@ let op=order.price;
     if(!cis){
 
 console.log('No CIS sell reverse');
+
+process.exit();
 
     }
 
@@ -238,10 +249,34 @@ let averageRange=cis.averageRange;
     console.log(order.average_price,cis.averageRange,'is.averageRange target calculatioon')
 
 
+let transaction_type='SELL';
+
 
     if(global.instrumentName=='STK' ){
 
-       if(global.hours==9){
+if(cis.shortTrading){
+
+
+    transaction_type='BUY'
+
+    if(global.hours==9){
+
+        targetPrice=
+        
+        order.average_price*.997
+       }else{
+
+        targetPrice=
+        
+        order.average_price*.999
+       }
+
+
+}else{
+
+     transaction_type='SELL';
+
+     if(global.hours==9){
 
         targetPrice=
         
@@ -253,6 +288,10 @@ let averageRange=cis.averageRange;
         order.average_price*1.01
        }
        
+}
+
+
+       
        
         
         
@@ -261,11 +300,17 @@ let averageRange=cis.averageRange;
     }
 
 
+    if(isNaN(targetPrice)){
+
+        console.log('target price issue',cis.tradingsymbol,cis.order,'order',order)
+        process.exit()
+    }
+
     //targetPrice=op+cis.averageRange/2
     const orderParams = {
         exchange: cis.exchange,
         tradingsymbol: order.tradingsymbol,
-        transaction_type: "SELL",
+        transaction_type: transaction_type,
         order_type: "LIMIT",
         quantity: order.quantity,
         price: Math.ceil(targetPrice),

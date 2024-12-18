@@ -10,6 +10,9 @@ import { isMakingLowerLows, hasLargeUpperWick, isBearishAt50Sec, isOpenHighAtSpe
 import {redCandleStartAfterGreenCandles} from './redCandleStartAfterGreenCandles.js'
 
 import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
+import handleShortCoveringOfStocks from './handleShortCoveringOfStocks.js';
+import handleLongCoveringOfStocks from './handleLongCoveringOfStocks.js';
+import executeSquareOff from './executeSquareOff.js';
 //import { colorPatternSquareOff} from './colorPatternSquareOff.js';
 
 
@@ -31,10 +34,17 @@ export function handlePositionPresent(cis, kite) {
     let prof = cis.lot_size * cis.tick.last_price;
     cis.highestProfit = Math.max(prof, cis.highestProfit);
 
+
+
+
     // Check for existing target order
     let target_order = global.orders.find(i => i.tradingsymbol === cis.tradingsymbol && i.status === 'OPEN' && i.transaction_type === 'SELL');
     if (!target_order) {
+
+
         cis.returns.push('NO target order');
+
+        process.exit();  /// stop must have a target for all entries and so should have a stop loss
         return;
     }
 
@@ -100,7 +110,25 @@ if(cis.tick.last_price<cis.tick.open
 
 if(global.instrumentName=='STK'){
 
-    console.log(cis)
+
+
+    if(cis.position.quantity<0){
+
+
+  handleShortCoveringOfStocks(cis)  //empty
+
+    }else if(cis.position.quantity>0){
+
+
+ handleLongCoveringOfStocks(cis) //empty
+
+    }
+
+    //console.log()
+
+
+
+    //return;
 }
 
 if(global.hours==9){
@@ -109,6 +137,8 @@ if(global.hours==9){
    if(cis.tick.last_price<cis.tick.ohlc.open) {
 
     console.log('executing squareoff below open in the morning',cis.inbuiltStopLoss,'9 hrs less than open sq off');
+   
+
     executeSquareOff(squareOff, cis, kite);
 
    }
@@ -124,6 +154,9 @@ if(global.seconds%20==0 && global.minutes%5==0)console.log('stop loss health ceh
 
 
 if(cis.inbuiltStopLoss && cis.tick.last_price<=cis.stopLossPrice){
+
+
+    ///squareoff inbuilty
 
 
     console.log('executing inbuild stop loss',cis.inbuiltStopLoss,'cis.inbuiltStopLoss');
@@ -145,6 +178,8 @@ if(cis.tick.last_price<cis.tick.ohlc.open){
 if(squareOff /* && !cis.inbuiltStopLoss */    ){
 
 
+
+    /// squareofffgeneral
     console.log(cis.inbuiltStopLoss,'cis.inbuiltStopLoss', 'executing normal stop loss');
     
     executeSquareOff(squareOff, cis, kite);
@@ -157,61 +192,4 @@ if(squareOff /* && !cis.inbuiltStopLoss */    ){
 
 
 
-async function executeSquareOff(squareOff, cis, kite) {
 
-   
-    if (squareOff && !cis.updated) {
-        let order = global.orders.find(o => o.tradingsymbol === cis.tradingsymbol && o.status === 'OPEN');
-        if (order) {
-            updateOpenOrderPrice(kite, order.order_id, cis.instrument_token, cis.tick.last_price);
-            cis.updated = true;
-
-            cis.sellType='stopLoss';
-            cis.sellStrategy='stoploss'
-            cis.sellPrice=cis.tick.last_price;
-
-            let conditionsMet = [];
-
-            if (checkLowerLowsAndLowerHighs(cis)) {
-                conditionsMet.push("lowerLowsAndLowerHighs");
-            }
-            if (checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis)) {
-                conditionsMet.push("penultimateGreenLastSmallBodyOrLowerHigh");
-            }
-            if (isMakingLowerLows(cis)) {
-                conditionsMet.push("makingLowerLows");
-            }
-            if (checkLastPriceAgainstPreviousCandles(cis)) {
-                conditionsMet.push("lastPriceAgainstPreviousCandles");
-            }
-            if (checkColorWithFlags(cis)) {
-                conditionsMet.push("colorWithFlags");
-            }
-            if (redCandleStartAfterGreenCandles(cis)) {
-                conditionsMet.push("redCandleAfterGreenCandles");
-            }
-        
-            // Set stopLossStrategy with the stringified conditionsMet
-            cis.stopLossStrategy = JSON.stringify({ conditionsMet: conditionsMet });
-
-            const sellOrder = await handleStopLossOrTarget(
-                cis.tradingsymbol,
-                cis.sellPrice , // Example sell price, fallback if not set in cis
-                cis.sellType ,
-                cis.sellStrategy ,
-                cis.stopLossStrategy 
-            );
-            console.log('Sell Order after Stop Loss:', sellOrder);
-
-            // Reset `cis.updated` after 1 minute
-            setTimeout(() => {
-                if (cis) {
-
-                    console.log('CIS UPdated Lock REleased for',cis.tradingsymbol);
-                    
-                    cis.updated = false;   /// retrying of squareoff if order is still not [resend]
-                }
-            }, 3 * 1000);
-        }
-    }
-}
