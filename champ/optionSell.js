@@ -1,9 +1,31 @@
-import { connectToDatabase } from "../connectToDatabase.js";
+//import { connectToDatabase } from "../connectToDatabase.js";
 import allInstruments from "../appv3/public/instruments/instrumentsAll.json" assert { type: "json" };
 import getKiteConnectInstance from "../getKiteConnectInstanceRequire.js";
 import readline from "readline";
+import mongoose from "mongoose";
 
-let con = connectToDatabase();
+async function connectToDatabase() {
+  try {
+      const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+    
+
+     // console.log(uri)
+      mongoose.set('strictQuery', true);
+      await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+      console.log("Connected to MongoDB");
+      return true; // Indicate successful connection
+  } catch (error) {
+      console.log('Error connecting to MongoDB:', error);
+      return false; // Indicate failure in connection
+  }
+}
+
+
+const isConnected = await connectToDatabase();
+if (!isConnected) {
+    console.error("Failed to connect to MongoDB. Exiting...");
+    process.exit()
+}
 let kc = await getKiteConnectInstance();
 
 const lotSizeMap = {
@@ -21,8 +43,8 @@ const optionNameMap = {
   "FINNIFTY": "FINNIFTY",
 };
 
-const depth = 10; // Levels below for OTM options
-const expiry = "2024-11-28"; // Replace with actual expiry date
+const depth = 20; // Levels below for OTM options
+const expiry = "2024-12-26"; // Replace with actual expiry date
 
 async function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -31,7 +53,7 @@ async function delay(ms) {
 async function getLtpAndTradeOptions(indexLtpName, reverse = false) {
   try {
     const indexOptionName = optionNameMap[indexLtpName];
-    const lotSize = lotSizeMap[indexLtpName] * 10;
+    const lotSize = lotSizeMap[indexLtpName] * 3;
 
     if (!indexOptionName || !lotSize) {
       console.error("Invalid index choice.");
@@ -42,6 +64,8 @@ async function getLtpAndTradeOptions(indexLtpName, reverse = false) {
     const niftySymbol = `NSE:${indexLtpName}`;
     const ltpData = await kc.getQuote([niftySymbol]);
     const niftyLtp = ltpData[niftySymbol]?.last_price;
+
+  
 
     if (!niftyLtp) {
       console.error(`Unable to fetch LTP for ${indexLtpName}.`);
@@ -55,11 +79,11 @@ async function getLtpAndTradeOptions(indexLtpName, reverse = false) {
     console.log("ATM Strike Price:", atmStrike,indexOptionName,expiry);
 
     //process.exit();
-
+let depth=2;
     // Find ATM CE and PE
     const atmCe = allInstruments.find(
       (instrument) =>
-        instrument.strike == atmStrike &&
+        instrument.strike == atmStrike+depth*50 &&
         instrument.instrument_type === "CE" &&
         instrument.expiry === expiry &&
         instrument.name === indexOptionName
@@ -67,7 +91,7 @@ async function getLtpAndTradeOptions(indexLtpName, reverse = false) {
 
     const atmPe = allInstruments.find(
       (instrument) =>
-        instrument.strike == atmStrike &&
+        instrument.strike == atmStrike-depth*50 &&
         instrument.instrument_type === "PE" &&
         instrument.expiry === expiry &&
         instrument.name === indexOptionName
@@ -132,7 +156,7 @@ async function getLtpAndTradeOptions(indexLtpName, reverse = false) {
       console.log("Sell orders placed for ATM CE and PE.");
     }
 
-    await confirmSquareOffLoop();
+    //await confirmSquareOffLoop();
   } catch (error) {
     console.error("Error during trading:", error);
   }

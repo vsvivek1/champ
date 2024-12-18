@@ -14,6 +14,9 @@ async function getMargins(kite){
 
 
 export async function executeBuy(cis, kite,price) {
+
+
+
     // Check if the order has already been placed
     if (cis.ordered) {
 
@@ -59,7 +62,10 @@ function getMultiplier(cis) {
 
     return multiplier;
 }
-async function placeOrder(cis, kite,price) {
+async function placeOrder(cis, kite,price1) {
+
+
+let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 
    
     ; // Use the last tick price or some other logic to determine the price
@@ -73,11 +79,11 @@ async function placeOrder(cis, kite,price) {
 
    let liveCash=m.equity.available.live_balance
 
-   
+
 
    console.log(liveCash,'margin');
    
-    multiplier=Math.floor(Math.min(liveCash*.99,61000)/(price*cis.lot_size));
+    multiplier=Math.floor(Math.min(liveCash,10000)/(price*cis.lot_size));
                 
  /*        "NIFTY":36,//72,
         
@@ -90,24 +96,49 @@ async function placeOrder(cis, kite,price) {
 
 
 
+
+
       cis.entryPrice=price;
+
+
 
 
       let qty=Math.min(cis.lot_size * multiplier,getFreezeLimit(cis.tradingsymbol));
 
 
+      if(global.instrumentName=='STK'){
+
+       // console.log(m.equity,'margin')
+
+        qty=Math.floor(200000/cis.tick.last_price);
+      }
+
+      //qty=cis.lot_size*5;
+
+   /*    if(global.speedSymbols.includes(cis.tradingsymbol)){
+
+        cis.buyStrategy='speedbuying'
+qty=250;
+      } */
+
     const orderParams = {
-        exchange: "NFO",
+        exchange: cis.exchange,
         tradingsymbol: cis.tradingsymbol,
         transaction_type: "BUY",
         order_type: "LIMIT",
         quantity: qty,
-        price: price,
-        product: "NRML",
+        price: price+4,
+        //product: "NRML",
+        product: "MIS",
         validity: "DAY"
     };
 
 
+
+if(global.instrumentName=='STK'){
+console.log(orderParams)
+
+}
 
 
     try {
@@ -116,17 +147,24 @@ async function placeOrder(cis, kite,price) {
 
         console.log("Order placed successfully. Order ID:", orderId,
 
-            cis.buyStrategy, 'for',cis.tradingsymbol,'at',cis.entryPrice
+            cis.buyStrategy, 'for',cis.tradingsymbol,'at',cis.entryPrice,' instrument.averageRange=', cis.averageRange
         );
 
-
+       
+    
        // const buyOrder = await savePlaceOrder('AAPL', 'breakout', 100, 150, 'fixed target');
         const buyOrder = await savePlaceOrder(cis.tradingsymbol, cis.buyStrategy, qty, price, 'fixed target');
 
 
 
+      
 
     } catch (error) {
         console.error("Error placing order:", error, cis.tradingsymbol);
     }
+
+    if(cis.stockTrade==true) {
+
+        //process.exit()
+       };
 }

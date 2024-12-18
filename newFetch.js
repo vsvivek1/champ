@@ -276,7 +276,7 @@ console.log(indexInstrument,'indexInstrumentx',diff);
 
 
 
-let depth=3
+let depth=6
 var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
 var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
 
@@ -386,7 +386,7 @@ selectedOptions = removeDuplicates(selectedOptions, 'instrument_token');
 
 await popOption(selectedOptions,fullJson,accessTokenDoc);
 
-console.log('here 158')
+//console.log('here 158')
 
 
 

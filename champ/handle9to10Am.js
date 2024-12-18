@@ -16,7 +16,7 @@ export async function handle9to10AM(cis, kite) {
         return false;
         
             }
-    console.log('HERE6',cis.tradingsymbol);
+    //console.log('HERE6',cis.tradingsymbol);
     
     // Check if there is a gap down or last price is less than open price
     if (
@@ -24,18 +24,18 @@ export async function handle9to10AM(cis, kite) {
         cis.tick.last_price < cis.tick.ohlc.open
     ) {
 
-        global.addOrIncrementRejection('GAP DOWN NO MORNING TRADE'+cis.tradingsymbol)
+        global.addOrIncrementRejection('GAP DOWN NO MORNING TRADE'+cis.tradingsymbol+' ',global.clock)
 
         if (global.minutes % 5 == 0 && global.seconds == 57) {
             console.log(cis.tradingsymbol, 'is gap down, no morning trades or less than open price');
         }
         return false; // Exit condition
     }
-    console.log('HERE5');
+    //console.log('HERE5');
     // Check for a no-buy time restriction
    
     
-            console.log('HERE4',cis.tradingsymbol);
+            //console.log('HERE4',cis.tradingsymbol);
 
     let proceedToTrade = false;
     cis.buyCriteria = null; // Reset the buy criteria flag
@@ -63,7 +63,7 @@ export async function handle9to10AM(cis, kite) {
 
 
 
-    console.log('HERE3',cis.tradingsymbol);
+   // console.log('HERE3',cis.tradingsymbol);
     // Breakout Strategy: 15-minute breakout condition
     let {
         breakoutOccurred,

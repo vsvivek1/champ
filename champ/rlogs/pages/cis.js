@@ -50,11 +50,11 @@ export default function CisPage({ data }) {
             drawCallback: function () {
                 // Calculate total profit dynamically
                 const api = this.api();
-                const totalProfit = api
+                /* const totalProfit = api
                     .column(13, { search: 'applied' })
                     .data()
-                    .reduce((sum, val) => sum + parseFloat(val || 0), 0);
-                $('#totalProfit').text(`Total Profit: ${totalProfit.toFixed(2)}`);
+                    .reduce((sum, val) => sum + parseFloat(val || 0), 0); */
+               /*  $('#totalProfit').text(`Total Profit: ${totalProfit.toFixed(2)}`); */
             },
         });
 
@@ -82,9 +82,9 @@ export default function CisPage({ data }) {
     }
 
     return (
-        <div className="container mt-5">
+        <div className="">
             <h1 className="text-center mb-4">CIS Collection Data</h1>
-            <div className="mb-3">
+            <div >
                 <label htmlFor="sellDateFilter" className="form-label">
                     Filter by Sell Time:
                 </label>
@@ -97,27 +97,27 @@ export default function CisPage({ data }) {
                     placeholderText="Select a date"
                 />
             </div>
-            <table id="cisTable" className="table table-striped table-bordered">
-                <thead>
+            <table id="cisTable" className="table table-striped table-bordered" style={{ width: '75%' }}>
+            <thead>
                     <tr>
                         <th>Trading Symbol</th>
                         <th>Buy Strategy</th>
-                        <th>Buy Qty</th>
+               {/*          <th>Buy Qty</th> */}
                         <th>Buy Price</th>
                         <th>Buy Time</th>
-                        <th>Sell Type</th>
-                        <th>Sell Strategy</th>
+                     {/*    <th>Sell Type</th> */}
+                       {/*  <th>Sell Strategy</th> */}
                         <th>Stop Loss Strategy</th>
-                        <th>Sell Qty</th>
+                       {/*  <th>Sell Qty</th> */}
                         <th>Sell Price</th>
-                        <th>Sell Time</th>
-                        <th>Have Live Position</th>
+                     {/*    <th>Sell Time</th> */}
+                      {/*   <th>Have Live Position</th> */}
                         <th>Holding Time (mins)</th>
                         <th>Profit</th>
                         <th>Target Strategy</th>
                         <th>Target Price</th>
-                        <th>Has Target</th>
-                        <th>Timestamp</th>
+                      {/*   <th>Has Target</th> */}
+                        {/* <th>Timestamp</th> */}
                     </tr>
                 </thead>
                 <tbody>
@@ -125,29 +125,29 @@ export default function CisPage({ data }) {
                         <tr key={item._id}>
                             <td>{item.tradingSymbol}</td>
                             <td>{item.buyStrategy}</td>
-                            <td>{item.buyQty}</td>
+                          {/*   <td>{item.buyQty}</td> */}
                             <td>{item.buyPrice}</td>
                             <td>{item.buyTime ? format(new Date(item.buyTime), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}</td>
-                            <td>{item.sellType}</td>
-                            <td>{item.sellStrategy}</td>
+                          {/*   <td>{item.sellType}</td> */}
+                           {/*  <td>{item.sellStrategy}</td> */}
                             <td>{item.stopLossStrategy}</td>
-                            <td>{item.sellQty}</td>
+                       {/*      <td>{item.sellQty}</td> */}
                             <td>{item.sellPrice}</td>
-                            <td>{item.sellTime ? format(new Date(item.sellTime), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}</td>
-                            <td>{item.haveLivePosition ? 'Yes' : 'No'}</td>
+                            {/* <td>{item.sellTime ? format(new Date(item.sellTime), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}</td> */}
+      {/*                       <td>{item.haveLivePosition ? 'Yes' : 'No'}</td> */}
                             <td>{item.holdingTime}</td>
                             <td>{item.profit}</td>
                             <td>{item.targetStrategy}</td>
                             <td>{item.targetPrice}</td>
-                            <td>{item.hasTarget ? 'Yes' : 'No'}</td>
-                            <td>{item.timestamp ? format(new Date(item.timestamp), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}</td>
+                            {/* <td>{item.hasTarget ? 'Yes' : 'No'}</td> */}
+                          {/*   <td>{item.timestamp ? format(new Date(item.timestamp), 'yyyy-MM-dd HH:mm:ss') : 'N/A'}</td> */}
                         </tr>
                     ))}
                 </tbody>
             </table>
-            <div className="mt-3">
+           {/*  <div className="mt-3">
                 <h4 id="totalProfit">Total Profit: 0.00</h4>
-            </div>
+            </div> */}
         </div>
     );
 }

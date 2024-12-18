@@ -59,7 +59,7 @@ export async function handleOrderUpdates(order, kite) {
 
 
             console.log('no buy locl released',cis.tradingsymbol,cis.noBuy)
-        }, 2 * 60*  1000);
+        }, 1 * 60*  1000);
 
         /* let dt = new Date();
         cis.noBuyTime = dt.getTime() + (1 * 60 * 1000); */
@@ -76,11 +76,29 @@ export async function handleOrderUpdates(order, kite) {
 
         await fetchOrdersAndSetCis(kite);
         await fetchPositionsAndSetCis(kite);
+
+
+if(cis.shortTrading){
+
+    placeShortCovering(cis, order, kite) 
+}
+
+
     }
 
     if (order.status == 'COMPLETE' && order.transaction_type == 'BUY') {
+
+
+       
+
         await fetchOrdersAndSetCis(kite);
         await fetchPositionsAndSetCis(kite);
+
+
+
+      
+
+
         placeTargetOrder(cis, order, kite);
     }
 
@@ -102,7 +120,14 @@ temp.ordered=false;
 
 async function placeTargetOrder(cis, order, kite) {
 
-    console.log(global.instrumentName,'placed order line 85');
+
+let op=order.price;
+
+ 
+
+
+
+    console.log(global.instrumentName,'placed order line 85',order,'order');
     
 
     if(!cis){
@@ -113,16 +138,12 @@ console.log('No CIS sell reverse');
 
 let tgtStrategy='';
     
-    const lastFiveCandles = cis.minuteData//.slice(-5);
-    const lastFiveVolatility = calculateVolatility(lastFiveCandles);
-
-    let averageRange=calculateVolatility(lastFiveCandles);
-    const targetPoints = 5; // Adjust target points as needed
+let averageRange=cis.averageRange;
    
   //  var targetPrice = order.price + targetPoints;
    // var targetPrice = order.price +averageRange/4  ///2//*2
     //var targetPrice = order.price *1.2  ///2//*2
-    var targetPrice = order.price *1.2  ///2//*2
+    var targetPrice = order.price *1.5  ///2//*2
     let targtStrategy='order*1.2'
    if(global.hours==9){
 
@@ -150,6 +171,8 @@ let tgtStrategy='';
 
     targtStrategy='order+averageRange/2'
    }
+
+
    
     if(cis.colorTrading==true){
 
@@ -162,7 +185,8 @@ let tgtStrategy='';
 
     ////// temp change on oct 30
 
-    targetPrice = order.price + Math.min(parseFloat(averageRange/2),2)  ///2
+    //targetPrice = order.price + Math.min(parseFloat(averageRange),2)  ///2
+    targetPrice =Math.ceil(order.price + cis.minuteCandleMeanRange*2) ///2
 
     
 
@@ -171,11 +195,15 @@ let tgtStrategy='';
     console.log('isue in target price ',{targetPrice},{averageRange});
         
 
-        targetPrice=order.price*1.05
+       // targetPrice=order.price*1.05
 
        
     }
 
+
+    targetPrice=order.price*1.2;
+    targetPrice=order.price*1.05;
+    targetPrice=order.price*2
     targtStrategy='order+2*averageRange'
 
 
@@ -184,33 +212,140 @@ let tgtStrategy='';
 
     if(cis.inbuiltTarget){
 
-        targetPrice=cis.targetPrice;
+       // targetPrice=cis.targetPrice;
     }
 
     cis.exitType='target';
+
+    if(global.speedSymbols.includes(cis.tradingsymbol)){
+
+        targetPrice=op+2
+    }
+    
+    targetPrice=order.average_price+cis.averageRange
+
+    if(isNaN(targetPrice)){
+
+        targetPrice=order.average_price+2
+
+    }
+
+    if(global.hours==9 || global.oneAndHalfTarget){
+
+        order.average_price*1.5
+
+    }
+    console.log(order.average_price,cis.averageRange,'is.averageRange target calculatioon')
+
+
+
+    if(global.instrumentName=='STK' ){
+
+       if(global.hours==9){
+
+        targetPrice=
+        
+        order.average_price*1.03
+       }else{
+
+        targetPrice=
+        
+        order.average_price*1.01
+       }
+       
+       
+        
+        
+        ;  
+
+    }
+
+
+    //targetPrice=op+cis.averageRange/2
     const orderParams = {
-        exchange: "NFO",
+        exchange: cis.exchange,
         tradingsymbol: order.tradingsymbol,
         transaction_type: "SELL",
         order_type: "LIMIT",
         quantity: order.quantity,
         price: Math.ceil(targetPrice),
-        product: "NRML",
+       // product: "NRML",
+        product: "MIS",
         validity: "DAY",
     };
 
 
 
-    console.log(order,'order');
+    //console.log(order,'order');
     try {
         const orderId = await kite.placeOrder("regular", orderParams);
         cis.hasPlacedTarget = true;
 
 
         const updatedOrderWithTarget = await setTargetForTrade(cis.tradingsymbol, Math.ceil(targetPrice), tgtStrategy);
-        console.log('Updated Order with Target:', updatedOrderWithTarget,global.clock);
+       // console.log('Updated Order with Target:', updatedOrderWithTarget,global.clock);
         console.log("Target order placed successfully. Order ID:", orderId);
     } catch (error) {
         console.error("Error placing target order:", error);
     }
 }
+
+
+
+async function placeShortCovering(cis, order, kite) {
+
+
+ 
+    
+        if(global.instrumentName=='STK' ){
+    
+           if(global.hours==9){
+    
+            targetPrice=
+            
+            order.average_price*.997
+           }else{
+    
+            targetPrice=
+            
+            order.average_price*99
+           }
+           
+           
+            
+            
+            ;  
+    
+        }
+    
+    
+        //targetPrice=op+cis.averageRange/2
+        const orderParams = {
+            exchange: cis.exchange,
+            tradingsymbol: order.tradingsymbol,
+            transaction_type: "BUY",
+            order_type: "LIMIT",
+            quantity: order.quantity,
+            price: Math.floor(targetPrice),
+           // product: "NRML",
+            product: "MIS",
+            validity: "DAY",
+        };
+    
+    
+    
+        //console.log(order,'order');
+        try {
+            const orderId = await kite.placeOrder("regular", orderParams);
+            cis.hasPlacedTarget = true;
+    
+    
+            cis.shortTrading=false;
+            const updatedOrderWithTarget = await setTargetForTrade(cis.tradingsymbol, Math.ceil(targetPrice), tgtStrategy);
+           // console.log('Updated Order with Target:', updatedOrderWithTarget,global.clock);
+            console.log("short covering placed order placed successfully. Order ID:", orderId);
+        } catch (error) {
+            console.error("Error placing target order:", error);
+        }
+    }
+    

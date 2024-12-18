@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { calculateVolatility } from './compareVolatility.js';
 
 // Initialize variables for historical data
 let hourlyHistoricalData = {};
@@ -107,6 +108,11 @@ export async function fetchPositionsAndSetCis(kite) {
 // Function to fetch hourly data and upglobal.date CIS
 export async function fetchHourlyData(kite) {
     try {
+
+        if(global.instrumentName=='STK'){
+
+    return
+        }
         const now = moment();
         let fromTime = moment().startOf('day').subtract(1, 'days').add(13, 'global.hours').format('YYYY-MM-DD HH:mm:ss');
         let toTime = now.format('YYYY-MM-DD HH:mm:ss');
@@ -136,6 +142,11 @@ export async function fetchHourlyData(kite) {
 // Function to fetch minute data and upglobal.date CIS
 export async function fetchMinuteData(kite) {
     try {
+
+        if(global.instrumentName=='STK'){
+
+            return
+                }
         const now = moment();
         const fromTime = moment().startOf('day').add(9, 'global.hours').add(15, 'global.minutes').format('YYYY-MM-DD HH:mm:ss');
         const toTime = now.startOf('minute').subtract(0, 'minute').format('YYYY-MM-DD HH:mm:ss');
@@ -160,6 +171,19 @@ export async function fetchMinuteData(kite) {
                 instrument.minuteCandleMedianRange = findMedianRange(instrument.minuteData);
                 instrument.minuteCandleMeanRange = findMeanRange(instrument.minuteData);
 
+
+                const lastFiveCandles = instrument.minuteData//.slice(-5);
+                const lastFiveVolatility = calculateVolatility(lastFiveCandles);
+            
+                let averageRange=calculateVolatility(lastFiveCandles);
+
+
+                instrument.averageRange=averageRange|| 3;
+;
+
+
+                const targetPoints = 5; // Adjust target points as neede
+
                 instrument.lastCandle = instrument.minuteData[instrument.minuteData.length - 1];
                 if (instrument.lastCandle) {
                     instrument.lastCandle.range = instrument.lastCandle.high - instrument.lastCandle.low;
@@ -175,6 +199,8 @@ export async function fetchMinuteData(kite) {
                 }
 
 
+
+              
                // console.log(instrument.minuteData,'instrument.minuteData @132 new fetch');
                 
                 instrument.lastMinuteTime = convertToIndianTime(instrument.minuteData[instrument.minuteData.length - 1].date);
@@ -193,6 +219,12 @@ export async function fetchMinuteData(kite) {
 
 // Helper function to fetch all data
 async function fetchAllData(kite, instruments, fromTime, toTime, dataType, historicalData) {
+
+
+    if(global.instrumentName=='STK'){
+
+        return
+            }
     let index = 0;
 
     const intervalId = setInterval(async () => {
@@ -204,8 +236,10 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType, histo
         let instrument = instruments[index];
 
         try {
-            const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
 
+
+            const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
+//console.log('fetched')
             if (!data) {
                 console.log('Issue in fetching historical data for', instrument);
             }

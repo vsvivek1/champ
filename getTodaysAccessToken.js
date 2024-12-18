@@ -1,9 +1,10 @@
 
 
 let AccesTocken = require('./models/AccessTokens');
+const { connectToDatabase } = require('./connectToDatabase.js');
 let today  =  new Date(  ).toISOString(  ).slice( 0,10 );
 
-async function getTodaysAccessToken(params) {
+async function getTodaysAccessToken(params={}) {
 
    //console.log(today)
 

@@ -6,6 +6,8 @@ async function connectToDatabase() {
     try {
         const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
       
+
+        console.log(uri)
         mongoose.set('strictQuery', true);
         await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
         console.log("Connected to MongoDB");

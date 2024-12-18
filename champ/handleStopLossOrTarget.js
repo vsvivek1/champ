@@ -24,7 +24,7 @@ export const handleStopLossOrTarget = async (tradingSymbol, sellPrice, sellType,
 
         // Save the updated CIS document
         await cis.save();
-        console.log('Stop loss or target achieved:', cis);
+       // console.log('Stop loss or target achieved:', cis);
         return cis;
     } catch (error) {
         console.error('Error handling stop loss or target:', error);

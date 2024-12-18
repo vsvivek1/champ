@@ -13,7 +13,7 @@ export function regressionBreakoutTrading(cis) {
 
     // Ensure we have at least one 15-minute block
     if (fullCandlesData.length < 15) {
-        console.log('Insufficient data for', cis.tradingsymbol);
+       // console.log('Insufficient data for', cis.tradingsymbol);
         return false; // Data is not sufficient for analysis
     }
 

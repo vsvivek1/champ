@@ -10,9 +10,17 @@ import { isMakingLowerLows, hasLargeUpperWick, isBearishAt50Sec, isOpenHighAtSpe
 import {redCandleStartAfterGreenCandles} from './redCandleStartAfterGreenCandles.js'
 
 import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
+//import { colorPatternSquareOff} from './colorPatternSquareOff.js';
 
 
 export function handlePositionPresent(cis, kite) {
+
+    //return;
+    let squareOff = false;
+
+   // colorPatternSquareOff()
+
+
     // Update the highest seen prices
 
  
@@ -30,14 +38,23 @@ export function handlePositionPresent(cis, kite) {
         return;
     }
 
+
+
     // Determine whether to square off the position based on the time of day
-    let squareOff = false;
-
-  
+    
 
 
-    squareOff = 
+ 
+    
+    //return; 
+
+
+
+
+
+    squareOff =   global.hours<13 &&
  (
+   
 checkLowerLowsAndLowerHighs(cis)
 || 
 
@@ -78,19 +95,33 @@ if(cis.tick.last_price<cis.tick.open
 
     squareOff=true;
 } */
-///temp on oct 30
+///temp on oct 30]
+
+
+if(global.instrumentName=='STK'){
+
+    console.log(cis)
+}
+
+if(global.hours==9){
+
+
+   if(cis.tick.last_price<cis.tick.ohlc.open) {
+
+    console.log('executing squareoff below open in the morning',cis.inbuiltStopLoss,'9 hrs less than open sq off');
+    executeSquareOff(squareOff, cis, kite);
+
+   }
+
+    return;
+}
+
+
 
 
 if(global.seconds%20==0 && global.minutes%5==0)console.log('stop loss health cehck',cis.buyPrice);
 
-  
-if(squareOff && !cis.inbuiltStopLoss ){
 
-
-    console.log(cis.inbuiltStopLoss,'cis.inbuiltStopLoss');
-    
-    executeSquareOff(squareOff, cis, kite);
-}
 
 if(cis.inbuiltStopLoss && cis.tick.last_price<=cis.stopLossPrice){
 
@@ -99,6 +130,27 @@ if(cis.inbuiltStopLoss && cis.tick.last_price<=cis.stopLossPrice){
     executeSquareOff(squareOff, cis, kite);
 
 }
+  
+if(cis.tick.last_price<cis.tick.ohlc.open){
+
+    console.log('squareoff below open for ',cis.tradingsymbol);
+    
+
+    squareOff=true;
+
+
+}
+
+
+if(squareOff /* && !cis.inbuiltStopLoss */    ){
+
+
+    console.log(cis.inbuiltStopLoss,'cis.inbuiltStopLoss', 'executing normal stop loss');
+    
+    executeSquareOff(squareOff, cis, kite);
+}
+
+
 
 }
 

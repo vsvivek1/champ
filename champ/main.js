@@ -12,7 +12,6 @@ import { handleNoPosition } from './handleNoPosition.js';
 import { fetchOrdersAndSetCis, fetchPositionsAndSetCis, fetchHourlyData, fetchMinuteData } from './fetchData.js';
 import { handleOrderUpdates } from './orderUtils.js';
 import { updateOpenOrderPrice } from './orderUtils.js';
-import moment from 'moment';
 
 import { writeTickToDB } from './wrireToDb.js';
 
@@ -21,28 +20,66 @@ import { Worker } from 'worker_threads';
 const fetchWorker = new Worker('./fetchWorker.js');
 
 
+
 const socket = io('http://tradingsimham.in:4000');  // Using a domain
 
+import niftyTrading from './intraday/niftyTrading.json' assert { type: "json" };
+import setAboveOpenScripts from './setAboveOpenScripts.js';
+
 // Get the instrument name from command line argument]]
-const instrumentName = process.argv[2];
+const instrumentName = process.argv[2];   // from start instrument script , type is catched here
+
 
 global.instrumentName=instrumentName;
-const instrumentData = instrumentsForMining.filter(inst => inst.name === instrumentName);
 
-global.instrumentsForMining=instrumentsForMining.filter(inst => inst.name === instrumentName);
 
-global.instrumentName =instrumentName ;
 
-global.allInstruments=allInstruments//.find(inst => inst.name === instrumentName);
 
-console.log('THread',instrumentName);
+const instrumentData =[];
+
+if(instrumentName=='STK'){
+
+   // instrumentData= instrumentsForMining
+
+   console.log({instrumentName},'stk')
+
+    global.instrumentsForMining=niftyTrading
+    global.instrumentName=instrumentName;
+    global.allInstruments=niftyTrading;
+    console.log('THread',instrumentName);
+
+}else{
+
+   
+    
+    const instrumentData = instrumentsForMining.filter(inst => inst.name === instrumentName);
+    
+    global.instrumentsForMining=instrumentsForMining.filter(inst => inst.name === instrumentName);
+    
+    global.instrumentName =instrumentName ;
+    
+    global.allInstruments=allInstruments//.find(inst => inst.name === instrumentName);
+    
+    console.log('THread',instrumentName);
+
+}
+
+
 
 
 global.targetPc=1.1;
 global.stoplossPc=.95;
 
+global.aboveOpens=[];
+
+global.isAbove=[];
 
 
+global.speedSymbols=['NIFTY24D1224550PE', 'NIFTY24D1224900CE'];
+global.speedSymbols= instrumentsForMining.map(a =>a.tradingsymbol)
+
+
+//
 if (!instrumentData) {
     console.error(`Instrument ${instrumentName} not found in instrumentsForMining`);
     
@@ -66,6 +103,14 @@ async function main() {
 
     try {
 
+
+        if(global.instrumentName!='STK'){
+
+
+
+            //// to prevent mis 
+           // return;
+        }
         
 
         if(global.hours>14|| global.hours<9 ||(global.hours==15 && global.minutes>30) ||(global.hours==9 && global.minutes<15)){
@@ -75,19 +120,7 @@ async function main() {
            // return 
         }
         
-     //  global.instrumentData = global.instrumentsForMining.find(inst => inst.name === instrumentName);   //use filter
-
-       // console.log(global.instrumentData.length,'ln',global.instrumentsForMining,'instrumentName',instrumentName);
-
-       // process.exit();
-
-       /*  if(!global.instrumentData || global.instrumentData.length==0){
-
-            console.log('global.instrumentData issue in main line 61');
-            
-            return;
-        } */
-       // console.log(instrumentData ,'instrumentData ')
+   
         const accessTokenDoc = await getTodaysAccessToken();
         kite = await getKiteConnectInstance();
 
@@ -98,13 +131,13 @@ async function main() {
             global.minutes = global.date.getMinutes();
             global.seconds = global.date.getSeconds();
 
-         global.clock=   `Time:${global.hours}: ${global.minutes}:${global.seconds}`
+         global.clock=   ` Time:${global.hours}:${global.minutes}:${global.seconds}`
 
           /*   if (global.minutes % 15 === 0 && global.seconds === 10) {
                 await fetchHourlyData(kite);
             } */
 
-            if (global.minutes=== 15 && global.seconds === 10) {
+            if (global.minutes=== 15 && global.seconds === 10 &&  instrumentName!='STK') {
                 
                // fetchWorker.postMessage({ type: 'fetchHourly', kite });
 
@@ -134,16 +167,20 @@ async function main() {
 
              // Send an immediate fetch request to the worker on startup
              //fetchWorker.postMessage({ type: 'fetchData', kite });
-             initTicker();
+            
+//////////////////////////////////////////////////////////////       
+            
+             initTicker();   ///main entry point for ticker
 
-             setTimeout(()=>{
+//////////////////////////////////////////
+           setTimeout(()=>{
                 //fetchWorker.postMessage({ type: 'fetchHourly', kite });
 
              },15*1000)
                     
 
          
-
+///first time
          await fetchOrdersAndSetCis(kite);
         await fetchPositionsAndSetCis(kite);
         await fetchHourlyData(kite);
@@ -177,6 +214,8 @@ function onTicks(ticks) {
 
 
 function processTicks(tick) {
+
+   
     var cis = global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
     
 
@@ -185,6 +224,14 @@ function processTicks(tick) {
    
     
     if (!cis) return;
+
+    cis.tick = tick; 
+
+    if(global.minutes==30 && global.seconds==1){
+
+        console.log('Tick Health',cis.tradingsymbol)
+    }
+    
     
 
 
@@ -200,34 +247,94 @@ function processTicks(tick) {
     if (!cis.liveMinute) cis.liveMinute = {};
 
     if (global.seconds == 1) {
+
+        cis.liveMinute.t1=tick.last_price;;
         cis.liveMinute.open = tick.last_price;
         cis.liveMinute.high = tick.last_price;
+        cis.liveMinute.low= tick.last_price;
+
+       
     }
 
+    //return;
+    cis.liveMinute.low= Math.min(cis.liveMinute.low, tick.last_price);
     cis.liveMinute.high = Math.max(cis.liveMinute.high, tick.last_price);
     cis.liveMinute.body = Math.abs(cis.liveMinute.open - tick.last_price);
     cis.liveMinute.upperShadow = cis.liveMinute.high - Math.max(cis.liveMinute.open, tick.last_price);
     cis.liveMinute.hasLongUpperShadow = cis.liveMinute.body < cis.liveMinute.upperShadow / 2;
+
+    cis.liveMinute.lowerShadow = cis.liveMinute.low - tick.last_price;
+
+    cis.liveMinute.range=cis.liveMinute.high-cis.liveMinute.low;
+
+
+
+    if(cis.liveMinute.lowerShadow>=3*cis.liveMinute.body){
+
+        cis.liveMinute.hasLongLowerShadow=true
+    }else{
+        cis.liveMinute.hasLongLowerShadow=false
+
+    }
     
     
-    cis.liveMinute.color =(tick.last_price-cis.liveMinute.open)<0?'bearish':'bullish'
+   // cis.liveMinute.color =(tick.last_price-cis.liveMinute.open)<0?'bearish':'bullish'
     
     
     cis.liveMinute.last_price = tick.last_price;
 
     cis.currentMinute=cis.liveMinute;
-    cis.tick = tick;
+   
+   
+    //very important  
 
+
+
+if(typeof cis.liveMinute.t1=='undefined' && global.seconds<10){
+
+    cis.liveMinute.t1=tick.last_price
+
+}
+
+
+    if(tick.last_price>cis.liveMinute.open){
+cis.liveMinute.color='bullish';
+
+    }else  if(tick.last_price<cis.liveMinute.open){
+cis.liveMinute.color='bearish'
+
+    }else{
+
+        cis.liveMinute.color='doji'
+    }
+    
+    if(cis.tradingsymbol=="MIDCPNIFTY24DEC13050CE"){
+
+
+        //// for any logs or chek 
+        console.log(cis.tradingsymbol,'is now',cis.liveMinute.color,'cis.liveMinute.t1',cis.liveMinute.t1,'tick.last_price=',tick.last_price,global.seconds)
+    }
+    
+
+
+
+  //  import {set}
+
+
+
+  setAboveOpenScripts()
 
     let tempHigh = tick.ohlc.high;
 
-    writeTickToDB(cis);
+
+
+   // writeTickToDB(cis);
 
     setTimeout(() => {
         // After 3 minutes, set the stored high value to cis.highBeforeThreeMinutes
         cis.highBeforeThreeMinutes = tempHigh;
 
-       // console.log(cis.highBeforeThreeMinutes,'cis.highBeforeThreeMinutes',cis.tradingsymbol);
+      //  console.log(cis.highBeforeThreeMinutes,'cis.highBeforeThreeMinutes',cis.tradingsymbol,'tick.ohlc.high',tick.ohlc.high,'tick lastprice',tick.last_price);
         
     }, 1 * 60 * 1000);
 
@@ -250,30 +357,31 @@ async function orderUpdates(order) {
 
 async function subscribe() {
 
-    console.log(global.instrumentsForMining.map(i=>parseInt(i.instrument_token)));
+    console.log(global.instrumentsForMining.map(i=>i.tradingsymbol));
     
     try {
         const instrumentToken = global.instrumentsForMining.map(i=>parseInt(i.instrument_token));
         ticker.unsubscribe([]);
+       
+       
+      //  ticker.setMode('full', [instrumentToken]);
+
+     let a= ticker.setMode('full', [instrumentToken]);
+
+
+      ticker.setMode(ticker.modeFull, [instrumentToken]);
+
+
+      
         ticker.subscribe(instrumentToken);
-        ticker.setMode(ticker.modeFull, [instrumentToken]);
+
+
+        
     } catch (error) {
         console.error(`Error subscribing to ${global.instrumentData.name}:`, error);
     }
 }
 
-/* function scheduleHourlyDataFetch() {
-    const now = moment();
-    const currentMinute = now.minute();
 
-    if (currentMinute < 15) {
-        const delaySeconds = (15 - currentMinute) * 60 - now.seconds();
-        setTimeout(() => fetchHourlyData(kite), delaySeconds * 1000);
-    } else {
-        const nextHour = now.startOf('hour').add(1, 'hour').add(15, 'minutes');
-        const delaySeconds = nextHour.diff(now, 'seconds');
-        setTimeout(() => fetchHourlyData(kite), delaySeconds * 1000);
-    }
-} */
 
 main();

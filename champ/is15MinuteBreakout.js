@@ -1,7 +1,7 @@
 function is15MinuteBreakout(ohlcData, lastPrice) {
 
 
-    var   breakoutOccurred,
+    var   breakoutOccurred=false,
     lastPrice,
     highestHigh,
     lowestLow,

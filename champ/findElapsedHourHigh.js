@@ -43,7 +43,7 @@ function findCurrentTimeSlot() {
     return candlesToSlice; // Return how many candles we should slice based on the current time
 }
 
-function findHighestPrice(cis) {
+export function findHighestPrice(cis) {
     // Find the current time slot in minutes and the corresponding candles to slice
     const candlesToSlice = findCurrentTimeSlot();
     
@@ -65,7 +65,7 @@ function findHighestPrice(cis) {
     return highestPrice; // Return the highest price
 }
 
-function findHourlyHighestPrice(cis) {
+export function findHourlyHighestPrice(cis) {
     const currentHour = global.hours;  // Get the current hour from global context
     const currentMinute = global.minutes;  // Get the current minute from global context
 

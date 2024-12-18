@@ -1,4 +1,4 @@
-function isOpenLowAtSpecificSeconds(cis) {
+export function isOpenLowAtSpecificSeconds(cis) {
     // Check if `cis.currentMinute` exists
     if (!cis.currentMinute) {
         console.log("currentMinute is undefined",cis.tradingsymbol);
@@ -29,4 +29,4 @@ function isOpenLowAtSpecificSeconds(cis) {
     return cis.openLowAt10 && cis.openLowAt15 && cis.openLowAt30;
 }
 
-export {isOpenLowAtSpecificSeconds};
+//export {isOpenLowAtSpecificSeconds};
