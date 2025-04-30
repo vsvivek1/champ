@@ -6,7 +6,11 @@ export const handleStopLossOrTarget = async (tradingSymbol, sellPrice, sellType,
         // Find the CIS document by tradingSymbol and haveLivePosition
         const cis = await Cis.findOne({ tradingSymbol, haveLivePosition: true });
         if (!cis) {
-            throw new Error(`CIS document with trading symbol ${tradingSymbol} not found or no live position.`);
+
+
+
+            return;
+            //throw new Error(`CIS document with trading symbol ${tradingSymbol} not found or no live position.`);
         }
 
         // Automatically set sellQty to the buyQty since the assumption is that they are the same

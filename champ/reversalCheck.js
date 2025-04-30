@@ -36,9 +36,12 @@ export function reversalCheck(candles, cis) {
         cis.inbuiltTarget = true;
         cis.inbuiltStopLoss = true;
 
-        console.log("Reversal detected. Target and stop-loss set:");
-        console.log(`Target: ${target}`);
-        console.log(`Stop Loss: ${stopLoss}`);
+
+        cis.signal=`Reversal detected. Target ${target} and stop-loss ${stopLoss} set:`
+
+        // console.log("Reversal detected. Target and stop-loss set:");
+        // console.log(`Target: ${target}`);
+        // console.log(`Stop Loss: ${stopLoss}`);
         return true;
     }
 

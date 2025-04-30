@@ -146,9 +146,9 @@ async function deleteStrategyLog(id) {
 // Usage examples
 // Assuming strategyData contains the strategy details for creating a new log
 var strategyData={}
-createStrategyLog(strategyData)
-  .then((newLog) => console.log('New log created:'))
-  .catch((error) => console.error('Error creating log:', error));
+// createStrategyLog(strategyData)
+//   .then((newLog) => console.log('New log created:'))
+//   .catch((error) => console.error('Error creating log:', error));
 
 // Similar usage for other CRUD functions...
 /* module.exports = {

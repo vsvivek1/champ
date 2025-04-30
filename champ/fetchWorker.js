@@ -19,6 +19,6 @@ parentPort.on('message', async (message) => {
     if (message.type === 'fetchData') {
         await fetchData(message.kite);
     } else if (message.type === 'fetchHourly') {
-        await fetchHourlyData(message.kite);
+       // await fetchHourlyData(message.kite);
     }
 });

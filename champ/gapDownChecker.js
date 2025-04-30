@@ -2,6 +2,11 @@
 
 // Function to check if there is a gap down of more than 30%
 export function checkGapDown(cis) {
+
+    if(!cis|| !cis.pricePoints || !cis.pricePoints.d1){
+
+        return;
+    }
     const openPrice = cis.tick.ohlc.open;
     const closePrice = cis.pricePoints.d1.close;
     
@@ -12,6 +17,8 @@ export function checkGapDown(cis) {
     //console.log(cis.tradingsymbol, closePrice, cis.tick.ohlc, 'returning', gapDownPercent, '%');
 
     // Return true if gap down is more than 30%, otherwise false
+
+    cis.isGapDown=gapDownPercent < -30;
     return gapDownPercent < -30;
 }
 

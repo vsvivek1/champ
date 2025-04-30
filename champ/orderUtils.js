@@ -4,6 +4,8 @@ import { fetchOrdersAndSetCis, fetchPositionsAndSetCis } from './fetchData.js';
 
 import { calculateVolatility } from './compareVolatility.js';
 import { setTargetForTrade } from './setTargetForTrade.js';
+import { placeGttOcoOrder } from './placeOCOGTTorder.js';
+import instrumentsForMining from '../appv3/public/instruments/instrumentsForMining.json' assert { type: "json" };
 
 
 export async function updateOpenOrderPrice(kite, order_id, instrument_token, last_price) {
@@ -25,8 +27,33 @@ export async function updateOpenOrderPrice(kite, order_id, instrument_token, las
 
 export async function handleOrderUpdates(order, kite) {
 
-    //console.log(order.tradingsymbol.includes(global.instrumentName));
 
+    let cis1= global.allInstruments.find(a=>a.instrument_token==order.instrument_token);
+
+
+    if(!cis1){
+
+
+        console.log('NO cis found in order part 37 order utils')
+        return ;
+    }
+
+    let name=cis1.name;
+
+
+
+    console.log(name,global.instrumentName,'here os the check');
+
+    if(
+        
+        ! name.includes(global.instrumentName) 
+    
+    
+    ){
+
+        return;
+    }
+    console.log(order.tradingsymbol.includes(global.instrumentName),'is the instriment');
    // process.exit();
     
 
@@ -34,7 +61,7 @@ export async function handleOrderUpdates(order, kite) {
 
     let cis=-1 ;
  try {
-        cis = global.instrumentsForMining.    /// filter(inst => inst.name === global.instrumentName).
+        cis = global.allInstruments.    /// filter(inst => inst.name === global.instrumentName).
         
         find(i => i.instrument_token == order.instrument_token);
  } catch (error) {
@@ -48,14 +75,16 @@ export async function handleOrderUpdates(order, kite) {
  if( !cis || cis==-1)
  {
 
-console.log('order update issue @51')
-    process.exit()
+console.log('order update issue @51 cis  is order utils 51 ',cis,'cis undefined some other script')
+   // process.exit()
     return;
  }
   
 
 
     if (order.status == 'COMPLETE' && order.transaction_type == 'SELL') {
+
+        //return;
         cis.sellPrice = order.price;
         cis.noBuy = true;  // Ensure noBuy is initially false
 
@@ -89,26 +118,63 @@ if(cis.shortTrading){
 
     /// sell is complete check whther its short trading
 
-    placeShortCovering(cis, order, kite) 
+   // placeShortCovering(cis, order, kite) 
 }
 
 
     }
 
-    if (order.status == 'COMPLETE' && order.transaction_type == 'BUY') {
+    if (
+        order.status == 'COMPLETE'   &&
+        
+        order.transaction_type == 'BUY' ) { 
 
 
-       
+    //   global.instrumentName=='STK'
 
         await fetchOrdersAndSetCis(kite);
         await fetchPositionsAndSetCis(kite);
 
 
 
-      
+   
+
+        // console.log(cis,order)
+
+        // process.exit();
 
 
-        placeTargetOrder(cis, order, kite);
+
+        let price=order.average_price;
+       cis.last_price=price;
+
+       cis.slTriggerPrice=price*.95;
+
+       cis.slPrice=price*.94;
+
+
+       cis.tgtTriggerPrice=price*1.06;
+       cis.tgtPrice=price*1.05;
+
+
+
+
+    //    placeGttOcoOrder(
+    //     kite, 
+    //     Number(price.toFixed(2)),   // Convert back to number
+    //     cis.tradingsymbol, 
+    //     cis.exchange,
+    //     Number(cis.slTriggerPrice.toFixed(1)),   // Convert back to number
+    //     Number(cis.slPrice.toFixed(1)), 
+    //     Number(cis.tgtTriggerPrice.toFixed(1)), 
+    //     Number(cis.tgtPrice.toFixed(1)), 
+    //     order.quantity, 
+    //     cis, 
+    //     order
+    // );
+
+
+       placeTargetOrder(cis, order, kite);
     }
 
     if (order.status == 'REJECTED' && order.transaction_type == 'BUY') {
@@ -135,13 +201,14 @@ let op=order.price;
  
 
 
+cis.order=order;
 
-    console.log(global.instrumentName,'placed order line 85',order,'order');
+    //console.log(global.instrumentName,'placed order line 85',order,'order');
     
 
     if(!cis){
 
-console.log('No CIS sell reverse');
+console.log('No CIS sell reverse orderutils 144');
 
 process.exit();
 
@@ -185,21 +252,21 @@ let averageRange=cis.averageRange;
 
 
    
-    if(cis.colorTrading==true){
+    // if(cis.colorTrading==true){
 
-       // targetPrice=order.sprice+ Math.ceil(order.price*.01);
-       // targetPrice=order.price   *1.2;//Math.ceil(order.price+1);
-       // targetPrice=order.price  + averageRange/2//*2;//Math.ceil(order.price+1);
-    }
+    //    // targetPrice=order.sprice+ Math.ceil(order.price*.01);
+    //    // targetPrice=order.price   *1.2;//Math.ceil(order.price+1);
+    //    // targetPrice=order.price  + averageRange/2//*2;//Math.ceil(order.price+1);
+    // }
     
 
 
     ////// temp change on oct 30
 
     //targetPrice = order.price + Math.min(parseFloat(averageRange),2)  ///2
-    targetPrice =Math.ceil(order.price + cis.minuteCandleMeanRange*2) ///2
+    targetPrice =Math.ceil(order.price + cis.minuteCandleMeanRange*2) ///2  /// some issue here check
 
-    
+    targetPrice =order.price*1.01;
 
     if(isNaN(targetPrice)){
 
@@ -223,7 +290,7 @@ let averageRange=cis.averageRange;
 
     if(cis.inbuiltTarget){
 
-       // targetPrice=cis.targetPrice;
+        targetPrice=cis.targetPrice;
     }
 
     cis.exitType='target';
@@ -246,7 +313,9 @@ let averageRange=cis.averageRange;
         order.average_price*1.5
 
     }
-    console.log(order.average_price,cis.averageRange,'is.averageRange target calculatioon')
+
+    //cis.averageRange==== now undefined pls check
+   // console.log(order.average_price,cis.averageRange,'is.averageRange target calculatioon')
 
 
 let transaction_type='SELL';
@@ -302,11 +371,43 @@ if(cis.shortTrading){
 
     if(isNaN(targetPrice)){
 
+
+
+        if(order.quantity<0){
+
+
+            targetPrice=order.sell_price*.99
+
+        }else if (order.quantity>0){
+
+            targetPrice=order.sell_price*1.2
+
+        }
+
+
         console.log('target price issue',cis.tradingsymbol,cis.order,'order',order)
-        process.exit()
+      
     }
 
+
+    targetPrice=order.sell_price*1.2
+
+   if(cis.inbuiltTarget ) targetPrice=cis.targetPrice;
+
+   if(isNaN(cis.targetPrice)){
+    targetPrice=cis.buyPrice*1.2
+
+
+    cis.error='inbuilt target order price issue '
+    //console.log('',cis.tradingsymbol,cis.order,'order',order)
+   }
     //targetPrice=op+cis.averageRange/2
+
+
+    cis.targetPrice=order.price+5;
+    cis.stopLossPrice=order.price-5;
+
+    
     const orderParams = {
         exchange: cis.exchange,
         tradingsymbol: order.tradingsymbol,
@@ -331,7 +432,13 @@ if(cis.shortTrading){
        // console.log('Updated Order with Target:', updatedOrderWithTarget,global.clock);
         console.log("Target order placed successfully. Order ID:", orderId);
     } catch (error) {
+
+       
+
+        console.log(cis)
         console.error("Error placing target order:", error);
+
+        process.exit()
     }
 }
 
@@ -340,7 +447,7 @@ if(cis.shortTrading){
 async function placeShortCovering(cis, order, kite) {
 
 
- 
+ let  targetPrice;
     
         if(global.instrumentName=='STK' ){
     

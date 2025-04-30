@@ -1,3 +1,5 @@
+
+const getCombinedDates=require('./getCombinedDates.js')
 function getScriptsExpiringBeforeNextThursday(jsonArray) {
    const today = new Date();
    const nextThursday = new Date(today.getTime() + (8 - today.getDay() + 4) % 7 * 24 * 60 * 60 * 1000); // Calculate next Thursday
@@ -21,22 +23,45 @@ function getDatesFromTodayToNextSameDay() {
    const today = new Date();
    today.setHours(0, 0, 0, 0); // Normalize to midnight
 
-   const dates = [];
+   var dates = [];
    const sameDayNextWeek = new Date(today);
-   sameDayNextWeek.setDate(today.getDate() + 45); // Calculate the same day next week
+   sameDayNextWeek.setDate(today.getDate() + 15); // Calculate the same day next week
 
-   let currentDate = new Date(today);
-   while (currentDate < sameDayNextWeek) { // Include the day before next week's same day
-       dates.push(currentDate.toISOString().split('T')[0]); // Format as 'YYYY-MM-DD'
-       currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
-   }
+   // let currentDate = new Date(today);
+   // while (currentDate < sameDayNextWeek) { // Include the day before next week's same day
+   //     dates.push(currentDate.toISOString().split('T')[0]); // Format as 'YYYY-MM-DD'
+   //     currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+   // }
 
 
-   dates.push('2024-11-27');
-   console.log(dates);
+//dates.push('2024-11-27');
+  // console.log(dates);
+
+   dates=getNext45Days();
    
    return dates;
 }
+
+
+function getNext45Days() {
+   var dates = [];
+   const today = new Date();
+ 
+   for (let i = 0; i < 10; i++) {
+     const currentDate = new Date();
+     currentDate.setDate(today.getDate() + i);
+     dates.push(formatDate(currentDate));
+   }
+ 
+   return dates;
+ }
+ 
+ function formatDate(date) {
+   const year = date.getFullYear();
+   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed
+   const day = String(date.getDate()).padStart(2, '0');
+   return `${year}-${month}-${day}`;
+ }
 
 function getScriptsExpiringBeforeSameDayNextWeek(jsonArray) {
 
@@ -52,8 +77,18 @@ function getScriptsExpiringBeforeSameDayNextWeek(jsonArray) {
 
 //console.log(uniqueNames )
     //process.exit();
-   const dateRange = getDatesFromTodayToNextSameDay(); // Generate date range
 
+
+
+   var dateRange = getDatesFromTodayToNextSameDay(); // Generate date range
+//
+ dateRange = getCombinedDates()
+
+   console.log(dateRange)
+
+
+   //process.exit()
+;   //return;
    // Filter items whose expiry is included in the generated date range
 
 
@@ -64,9 +99,12 @@ function getScriptsExpiringBeforeSameDayNextWeek(jsonArray) {
       //console.log(item.name);
       
 
-       return (dateRange.includes(item.expiry)|| item.expiry=='2024-08-8' || item.expiry=='2024-08-29');
+
+       return (dateRange.includes(item.expiry));
    });
 
+
+//console.log(filtered)
    return filtered;
 }
 

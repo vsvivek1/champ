@@ -15,7 +15,7 @@ export const setTargetForTrade = async (tradingSymbol, targetPrice, targetStrate
         cis.hasTarget = true;
 
         await cis.save();
-        console.log(`Target set for trade ${tradingSymbol}:`, cis);
+        //console.log(`Target set for trade ${tradingSymbol}:`, cis);
         return cis;
     } catch (error) {
        console.error('Error setting target for trade:', error);

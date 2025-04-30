@@ -148,7 +148,7 @@ if(minutes%2 == 0){
       ticker.on("connect", ()=>{
 
         ticker.subscribe(instrument_tokens);
-        ticker.setMode(ticker.modeLTP, instrument_tokens);
+        ticker.setMode(ticker.modeFull, instrument_tokens);
 
 
       ticker.on("order_update", async  (orderUpdates)=>{

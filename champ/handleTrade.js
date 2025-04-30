@@ -10,6 +10,13 @@ import { compareVolatility } from "./compareVolatility.js";
 import { regressionBreakoutTrading } from "./regressionBreakOutTrading.js";
 import { highAfter11AM } from "./highAfter11.js";
 
+export function handleGeneralTrades(cis, kite) {
+
+    return;
+    handleTrades(cis, kite);
+}
+
+
 export function handleTrades(cis, kite) {
     if (global.seconds < 50) return false;
 
@@ -18,33 +25,14 @@ export function handleTrades(cis, kite) {
     let targetMultiplier = global.targetPc || 1.05; // Default target percentage
     let stopLossMultiplier = global.stoplossPc || 0.95; // Default stop-loss percentage
 
-    // General Rejection Checks
-    if (cis.tick.last_price < 1) {
-        global.addOrIncrementRejection("LAST PRICE LESS THAN 1: " + cis.tradingsymbol);
-        return;
-    }
-
-    if (cis.liveMinute.color === "bearish") {
-        global.addOrIncrementRejection("LIVE CANDLE BEARISH: " + cis.tradingsymbol);
-        return;
-    }
-
-    if (checkGapDown(cis)) {
-        global.addOrIncrementRejection("GAP DOWN: " + cis.tradingsymbol);
-        return;
-    }
-
-    // Time-Specific Strategies
-    if (global.hours === 9 && global.minutes < 30) {
-        // Early morning specific strategies
-        if (cis.tick.last_price < cis.tick.ohlc.open) {
-            console.log(cis.tradingsymbol, "Price below open, skipping trade.");
-            return;
-        }
 
         if (isOpenLowAtSpecificSeconds(cis)) {
             buyCriteria = "OpenLowAtSpecificSeconds";
+            cis.signals.OpenLowAtSpecificSeconds=true
             proceedToTrade = true;
+        }else{
+
+            cis.signals.OpenLowAtSpecificSeconds=false;
         }
 
         if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
@@ -52,11 +40,16 @@ export function handleTrades(cis, kite) {
             proceedToTrade = true;
         }
 
-        if (cis.tick.last_price > cis.pricePoints?.d1?.high) {
+        if (cis.tick.last_price > cis.pricePoints?.d1?.high && cis.minuteData.slice(-1)[0].high< cis.pricePoints?.d1?.high ) {
             buyCriteria = "YesterdayHighCross";
+            cis.signals.YesterdayHighCross=true
             proceedToTrade = true;
+        }else{
+
+            cis.signals.YesterdayHighCross=false;
+
         }
-    }
+    
 
     if (global.hours >= 10 && global.hours < 12) {
         // Mid-morning strategies
@@ -126,11 +119,8 @@ export function handleTrades(cis, kite) {
           //  let p=Math.ceil(cis.tick.last_price-cis.minuteCandleMeanRange)
             executeBuy(cis, kite, cis.tick.last_price);
 
-            console.log("Trade executed for:", cis.tradingsymbol, {
-                buyCriteria,
-                targetPrice: cis.targetPrice,
-                stopLossPrice: cis.stopLossPrice,
-            });
+            cis.message = `Trade executed for: ${cis.tradingsymbol}, { buyCriteria: ${buyCriteria}, targetPrice: ${cis.targetPrice}, stopLossPrice: ${cis.stopLossPrice} }`;
+
        // }
 
      

@@ -23,7 +23,7 @@ async function connectToDatabase() {
 
 const isConnected = await connectToDatabase();
 if (!isConnected) {
-    console.error("Failed to connect to MongoDB. Exiting...");
+    console.error("Failed to connect to MongoDB. Exiting... option sell 26" );
     process.exit()
 }
 let kc = await getKiteConnectInstance();
@@ -44,7 +44,7 @@ const optionNameMap = {
 };
 
 const depth = 20; // Levels below for OTM options
-const expiry = "2024-12-26"; // Replace with actual expiry date
+const expiry = "2025-01-30"; // Replace with actual expiry date
 
 async function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));

@@ -201,7 +201,7 @@ async function socketConectionsForFutureMining(socket,access_token){
         // console.log(ticker,'ticker')
          
         ticker.subscribe(items);
-        ticker.setMode(ticker.modeLTP, items);
+        ticker.setMode(ticker.modeFull, items);
       
       });
         

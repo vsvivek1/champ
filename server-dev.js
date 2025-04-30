@@ -1315,7 +1315,7 @@ socket.on('subscribe-scripts-for-mint',r=>{
   // console.log(ticker,'ticker')
    
   ticker.subscribe(items);
-  ticker.setMode(ticker.modeLTP, items);
+  ticker.setMode(ticker.modeFull, items);
 
 });
   
@@ -1562,7 +1562,7 @@ socket.on('subscribe-orders-mining',r=>{
        console.log(items,'items1-subscribe-orders')
          
         ticker.subscribe(items);
-        ticker.setMode(ticker.modeLTP, items);
+        ticker.setMode(ticker.modeFull, items);
         
         
         ticker.on("ticks", (ticks)=>{

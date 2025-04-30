@@ -8,7 +8,7 @@ export function isHammerCandle(candle) {
     const upperWick = candle.high - Math.max(candle.open, candle.close);
 
     const isSmallBody = bodySize <= (candle.high - candle.low) * 0.3;
-    const isLongLowerWick = lowerWick >= 3 * bodySize;
+    const isLongLowerWick = lowerWick >= 4 * bodySize;
     const isSmallUpperWick = upperWick <= bodySize * 0.3;
 
 

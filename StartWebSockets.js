@@ -258,7 +258,7 @@ module.exports=function StartWebSockets(socket,io,access_token){
         //    return false;
     
             ticker.subscribe(items);
-            ticker.setMode(ticker.modeLTP, items);
+            ticker.setMode(ticker.modeFull, items);
          
             
             ticker.on("ticks", (ticks)=>{

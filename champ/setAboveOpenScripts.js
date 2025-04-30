@@ -1,4 +1,4 @@
-export default function setAboveOpenScripts(){
+export default function setAboveOpenScripts(cis){
 
 
     if(cis.tick.last_price>cis.tick.ohlc.open 

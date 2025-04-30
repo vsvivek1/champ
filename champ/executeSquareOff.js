@@ -53,13 +53,13 @@ export default async function executeSquareOff(squareOff, cis, kite) {
                 cis.sellStrategy ,
                 cis.stopLossStrategy 
             );  /// this is db writing   carefull
-            console.log('Sell Order after Stop Loss:', sellOrder);
+         //   console.log('Sell Order after Stop Loss:', sellOrder);
 
             // Reset `cis.updated` after 1 minute
             setTimeout(() => {
                 if (cis) {
 
-                    console.log('CIS UPdated Lock REleased for',cis.tradingsymbol);
+                    //console.log('CIS UPdated Lock REleased for',cis.tradingsymbol);
                     
                     cis.updated = false;   /// retrying of squareoff if order is still not [resend]
                 }

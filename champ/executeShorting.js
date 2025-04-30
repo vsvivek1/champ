@@ -17,6 +17,8 @@ export async function executeShorting(cis, kite,price) {
 
 
 
+    if(global.instrumentName!='STK') return;
+console.log('execute shorting',cis.tradingsymbol)
     // Check if the order has already been placed
     if (cis.ordered) {
 
@@ -74,14 +76,14 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 
    // multiplier=calculateLots(30000, cis.lot_size);
 
-   let m=await getMargins(kite);
+   let m=global.margins;
    let m2=m.equity.net;
 
    let liveCash=m.equity.available.live_balance
 
 
 
-   console.log(liveCash,'margin');
+  // console.log(liveCash,'margin');
    
     multiplier=Math.floor(Math.min(liveCash,10000)/(price*cis.lot_size));
                 

@@ -1,5 +1,6 @@
 export default function setLiveMinute(cis){
 
+    let tick=cis.tick;
 
   if (!cis.liveMinute) cis.liveMinute = {};
 

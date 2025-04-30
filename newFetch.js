@@ -19,13 +19,260 @@ const scriptDirectory  =  Path.dirname( process.argv[1] );
 const FILE_LOCATION  =  Path.join( scriptDirectory, 'appv3', 'public', 'instruments' );
 const io = require('socket.io-client');
 const socket = io('http://localhost:4000'); 
-let indexOptions={
-    "NIFTY": "NIFTY 50",
-    "NIFTYNXT50": "NIFTY NEXT 50",
-    "BANKNIFTY": "NIFTY BANK",
-    "FINNIFTY": "NIFTY FIN SERVICE",
-    "MIDCPNIFTY": "NIFTY MIDCAP SELECT (MIDCPNIFTY)"
-  }
+
+  // "SENSEX": "SENSEX",
+  // "SENSEX50": "SENSEX50",
+let indexOptions = {
+  "BANKEX": "BANKEX",
+
+  "NIFTY": "NIFTY 50",
+  "BANKNIFTY": "NIFTY BANK",
+  "MIDCPNIFTY": "NIFTY MID SELECT",
+  "FINNIFTY":"NIFTY FIN SERVICE",
+ "NIFTYNXT50" :"NIFTY NEXT 50",
+ "NIFTY":"NIFTY 50",
+"SENSEX":"SENSEX",
+"BANKEX":"BANKEX"
+
+  // "AARTIIND": "AARTI INDUSTRIES",
+  // "ABB": "ABB INDIA",
+  // "ABBOTINDIA": "ABBOTT INDIA",
+  // "ABCAPITAL": "ADITYA BIRLA CAPITAL",
+  // "ABFRL": "ADITYA BIRLA FASHION",
+  // "ACC": "ACC",
+  // "ADANIENSOL": "ADANI ENERGY SOLUTIONS",
+  // "ADANIENT": "ADANI ENTERPRISES",
+  // "ADANIGREEN": "ADANI GREEN ENERGY",
+  // "ADANIPORTS": "ADANI PORTS",
+  // "ALKEM": "ALKEM LABORATORIES",
+  // "AMBUJACEM": "AMBUJA CEMENTS",
+  // "ANGELONE": "ANGEL ONE",
+  // "APLAPOLLO": "APL APOLLO TUBES",
+  // "APOLLOHOSP": "APOLLO HOSPITALS",
+  // "APOLLOTYRE": "APOLLO TYRES",
+  // "ASHOKLEY": "ASHOK LEYLAND",
+  // "ASIANPAINT": "ASIAN PAINTS",
+  // "ASTRAL": "ASTRAL POLY TECHNIK",
+  // "ATGL": "ADANI TOTAL GAS",
+  // "ATUL": "ATUL LIMITED",
+  // "AUBANK": "AU SMALL FINANCE BANK",
+  // "AUROPHARMA": "AUROBINDO PHARMA",
+  // "AXISBANK": "AXIS BANK",
+  // "BAJAJ-AUTO": "BAJAJ AUTO",
+  // "BAJAJFINSV": "BAJAJ FINSERV",
+  // "BAJFINANCE": "BAJAJ FINANCE",
+  // "BALKRISIND": "BALKRISHNA INDUSTRIES",
+  // "BANDHANBNK": "BANDHAN BANK",
+  // "BANKBARODA": "BANK OF BARODA",
+  // "BANKINDIA": "BANK OF INDIA",
+  // "BATAINDIA": "BATA INDIA",
+  // "BEL": "BHARAT ELECTRONICS",
+  // "BERGEPAINT": "BERGER PAINTS",
+  // "BHARATFORG": "BHARAT FORGE",
+  // "BHARTIARTL": "BHARTI AIRTEL",
+  // "BHEL": "BHARAT HEAVY ELECTRICALS",
+  // "BIOCON": "BIOCON",
+  // "BOSCHLTD": "BOSCH",
+  // "BPCL": "BHARAT PETROLEUM",
+  // "BRITANNIA": "BRITANNIA INDUSTRIES",
+  // "BSE": "BSE LIMITED",
+  // "BSOFT": "BIRLASOFT",
+  // "CAMS": "CAMS",
+  // "CANBK": "CANARA BANK",
+  // "CANFINHOME": "CAN FIN HOMES",
+  // "CDSL": "CENTRAL DEPOSITORY SERVICES",
+  // "CESC": "CESC LIMITED",
+  // "CGPOWER": "CG POWER",
+  // "CHAMBLFERT": "CHAMBAL FERTILISERS",
+  // "CHOLAFIN": "CHOLAMANDALAM FINANCE",
+  // "CIPLA": "CIPLA",
+  // "COALINDIA": "COAL INDIA",
+  // "COFORGE": "COFORGE",
+  // "COLPAL": "COLGATE PALMOLIVE",
+  // "CONCOR": "CONTAINER CORPORATION",
+  // "COROMANDEL": "COROMANDEL INTERNATIONAL",
+  // "CROMPTON": "CROMPTON GREAVES",
+  // "CUB": "CITY UNION BANK",
+  // "CUMMINSIND": "CUMMINS INDIA",
+  // "CYIENT": "CYIENT",
+  // "DABUR": "DABUR INDIA",
+  // "DALBHARAT": "DALMIA BHARAT",
+  // "DEEPAKNTR": "DEEPAK NITRITE",
+  // "DELHIVERY": "DELHIVERY",
+  // "DIVISLAB": "DIVI'S LABORATORIES",
+  // "DIXON": "DIXON TECHNOLOGIES",
+  // "DLF": "DLF",
+  // "DMART": "AVENUE SUPERMARTS",
+  // "DRREDDY": "DR. REDDY'S LABORATORIES",
+  // "EICHERMOT": "EICHER MOTORS",
+  // "ESCORTS": "ESCORTS KUBOTA",
+  // "EXIDEIND": "EXIDE INDUSTRIES",
+  // "FEDERALBNK": "FEDERAL BANK",
+  // "FINNIFTY": "NIFTY FIN SERVICE",
+  // "GAIL": "GAIL",
+  // "GLENMARK": "GLENMARK PHARMA",
+  // "GMRAIRPORT": "GMR AIRPORTS",
+  // "GNFC": "GUJARAT NARMADA VALLEY",
+  // "GODREJCP": "GODREJ CONSUMER",
+  // "GODREJPROP": "GODREJ PROPERTIES",
+  // "GRANULES": "GRANULES INDIA",
+  // "GRASIM": "GRASIM INDUSTRIES",
+  // "GUJGASLTD": "GUJARAT GAS",
+  // "HAL": "HINDUSTAN AERONAUTICS",
+  // "HAVELLS": "HAVELLS INDIA",
+  // "HCLTECH": "HCL TECHNOLOGIES",
+  // "HDFCAMC": "HDFC AMC",
+  // "HDFCBANK": "HDFC BANK",
+  // "HDFCLIFE": "HDFC LIFE",
+  // "HEROMOTOCO": "HERO MOTOCORP",
+  // "HFCL": "HFCL",
+  // "HINDALCO": "HINDALCO INDUSTRIES",
+  // "HINDCOPPER": "HINDUSTAN COPPER",
+  // "HINDPETRO": "HINDUSTAN PETROLEUM",
+  // "HINDUNILVR": "HINDUSTAN UNILEVER",
+  // "HUDCO": "HUDCO",
+  // "ICICIBANK": "ICICI BANK",
+  // "ICICIGI": "ICICI GENERAL INSURANCE",
+  // "ICICIPRULI": "ICICI PRU LIFE",
+  // "IDEA": "VODAFONE IDEA",
+  // "IDFCFIRSTB": "IDFC FIRST BANK",
+  // "IEX": "INDIAN ENERGY EXCHANGE",
+  // "IGL": "INDRAPRASTHA GAS",
+  // "INDHOTEL": "INDIAN HOTELS",
+  // "INDIAMART": "INDIAMART INTERMESH",
+  // "INDIANB": "INDIAN BANK",
+  // "INDIGO": "INTERGLOBE AVIATION",
+  // "INDUSINDBK": "INDUSIND BANK",
+  // "INDUSTOWER": "INDUS TOWERS",
+  // "INFY": "INFOSYS",
+  // "IOC": "INDIAN OIL",
+  // "IPCALAB": "IPCA LABORATORIES",
+  // "IRB": "IRB INFRASTRUCTURE",
+  // "IRCTC": "IRCTC",
+  // "IRFC": "INDIAN RAILWAY FINANCE",
+  // "ITC": "ITC",
+  // "JINDALSTEL": "JINDAL STEEL",
+  // "JIOFIN": "JIO FINANCIAL SERVICES",
+  // "JKCEMENT": "JK CEMENT",
+  // "JSL": "JINDAL STAINLESS",
+  // "JSWENERGY": "JSW ENERGY",
+  // "JSWSTEEL": "JSW STEEL",
+  // "JUBLFOOD": "JUBILANT FOODWORKS",
+  // "KALYANKJIL": "KALYAN JEWELLERS",
+  // "KEI": "KEI INDUSTRIES",
+  // "KOTAKBANK": "KOTAK MAHINDRA BANK",
+  // "KPITTECH": "KPIT TECHNOLOGIES",
+  // "LALPATHLAB": "DR. LAL PATHLABS",
+  // "LAURUSLABS": "LAURUS LABS",
+  // "LICHSGFIN": "LIC HOUSING FINANCE",
+  // "LICI": "LIC INDIA",
+  // "LODHA": "LODHA DEVELOPERS",
+  // "LT": "LARSEN & TOUBRO",
+  // "LTIM": "LTIMINDTREE",
+  // "LTTS": "L&T TECHNOLOGY SERVICES",
+  // "LUPIN": "LUPIN LIMITED",
+  // "M&M": "MAHINDRA & MAHINDRA",
+  // "M&MFIN": "MAHINDRA FINANCE",
+  // "MANAPPURAM": "MANAPPURAM FINANCE",
+  // "MARICO": "MARICO",
+  // "MARUTI": "MARUTI SUZUKI",
+  // "MAXHEALTH": "MAX HEALTHCARE",
+  // "MCX": "MCX",
+  // "METROPOLIS": "METROPOLIS HEALTHCARE",
+  // "MFSL": "MAX FINANCIAL SERVICES",
+  // "MGL": "MGL",
+ 
+  // "MOTHERSON": "MOTHERSON SUMI",
+  // "MPHASIS": "MPHASIS",
+  // "MRF": "MRF",
+  // "MUTHOOTFIN": "MUTHOOT FINANCE",
+  // "NATIONALUM": "NATIONAL ALUMINIUM",
+  // "NAUKRI": "INFO EDGE (NAUKRI)",
+  // "NAVINFLUOR": "NAVIN FLUORINE",
+  // "NCC": "NCC LIMITED",
+  // "NESTLEIND": "NESTLE INDIA",
+  // "NHPC": "NHPC LIMITED",
+  // "NIFTYNEXT50": "NIFTY NEXT 50",
+  // "NMDC": "NMDC",
+  // "NTPC": "NTPC LIMITED",
+  // "NYKAA": "FSN E-COMMERCE (NYKAA)",
+  // "OBEROIRLTY": "OBEROI REALTY",
+  // "OFSS": "ORACLE FINANCIAL",
+  // "OIL": "OIL INDIA",
+  // "ONGC": "ONGC",
+  // "PAGEIND": "PAGE INDUSTRIES",
+  // "PAYTM": "PAYTM",
+  // "PEL": "PIRAMAL ENTERPRISES",
+  // "PERSISTENT": "PERSISTENT SYSTEMS",
+  // "PETRONET": "PETRONET LNG",
+  // "PFC": "POWER FINANCE CORP",
+  // "PIDILITIND": "PIDILITE INDUSTRIES",
+  // "PIIND": "PI INDUSTRIES",
+  // "PNB": "PUNJAB NATIONAL BANK",
+  // "POLICYBZR": "POLICYBAZAAR",
+  // "POLYCAB": "POLYCAB INDIA",
+  // "POONAWALLA": "POONAWALLA FINCORP",
+  // "POWERGRID": "POWER GRID CORP",
+  // "PRESTIGE": "PRESTIGE ESTATES",
+  // "PVRINOX": "PVR INOX",
+  // "RAMCOCEM": "RAMCO CEMENTS",
+  // "RBLBANK": "RBL BANK",
+  // "RECLTD": "REC LIMITED",
+  // "RELIANCE": "RELIANCE INDUSTRIES",
+  // "SAIL": "STEEL AUTHORITY",
+  // "SBICARD": "SBI CARDS",
+  // "SBILIFE": "SBI LIFE",
+  // "SBIN": "STATE BANK OF INDIA",
+  // "SHREECEM": "SHREE CEMENT",
+  // "SHRIRAMFIN": "SHRIRAM FINANCE",
+  // "SIEMENS": "SIEMENS INDIA",
+  // "SJVN": "SJVN LIMITED",
+  // "SONACOMS": "SONA COMSTAR",
+  // "SRF": "SRF LIMITED",
+  // "SUNPHARMA": "SUN PHARMA",
+  // "SUNTV": "SUN TV",
+  // "SUPREMEIND": "SUPREME INDUSTRIES",
+  // "SYNGENE": "SYNGENE INTERNATIONAL",
+  // "TATACHEM": "TATA CHEMICALS",
+  // "TATACOMM": "TATA COMMUNICATIONS",
+  // "TATACONSUM": "TATA CONSUMER",
+  // "TATAELXSI": "TATA ELXSI",
+  // "TATAMOTORS": "TATA MOTORS",
+  // "TATAPOWER": "TATA POWER",
+  // "TATASTEEL": "TATA STEEL",
+  // "TCS": "TATA CONSULTANCY SERVICES",
+  // "TECHM": "TECH MAHINDRA",
+  // "TIINDIA": "TUBE INVESTMENTS",
+  // "TITAN": "TITAN COMPANY",
+  // "TORNTPHARM": "TORRENT PHARMA",
+  // "TRENT": "TRENT LIMITED",
+  // "TVSMOTOR": "TVS MOTOR COMPANY",
+  // "UBL": "UNITED BREWERIES",
+  // "ULTRACEMCO": "ULTRATECH CEMENT",
+  // "UNIONBANK": "UNION BANK OF INDIA",
+  // "UNITDSPR": "UNITED SPIRITS",
+  // "UPL": "UPL LIMITED",
+  // "VBL": "VARUN BEVERAGES",
+  // "VEDL": "VEDANTA LIMITED",
+  // "VOLTAS": "VOLTAS",
+  // "WIPRO": "WIPRO",
+  // "YESBANK": "YES BANK",
+  // "ZOMATO": "ZOMATO",
+  // "ZYDUSLIFE": "ZYDUS LIFESCIENCES"
+};
+
+const strikePriceSteps = {
+  "BANKEX": 100,           // BANKEX has a strike price step of 100
+  "SENSEX": 50,            // SENSEX has a strike price step of 50
+  "SENSEX50": 50,          // SENSEX50 has a strike price step of 50
+  "NIFTY50": 50,           // NIFTY 50 has a strike price step of 50
+  "NIFTYBANK": 100,        // NIFTY BANK has a strike price step of 100
+  "MIDCPNIFTY": 50,
+  "FINNIFTY":50         // NIFTY MIDCAP SELECT has a strike price step of 50
+};
+
+
+
   function removeDuplicates(array, key) {
     const seen = new Set();
     return array.filter(item => {
@@ -63,7 +310,7 @@ async function writeJsonToFile(jsonData, fileName) {
 
 const pricePoints =require('./pricePoints');
 
-function filterByName(jsonArray, names = ['NIFTY', 'BANKNIFTY']) {
+function filterByName(jsonArray, names = ['NIFTY', 'BANKNIFTY',"MIDCPNIFTY","FINNIFTY","BANKEX"]) {
    return jsonArray.filter(item => names.includes(item.name));
 }
 
@@ -84,7 +331,11 @@ if('NIFTY'==name){
 }
   //let exp=instruments1[].expiry;
 
-    var instruments = instruments1.filter(i =>i.name == name && i.segment == 'NFO-OPT' && i.instrument_type == 'PE');
+    var instruments = instruments1.filter(i =>i.name == name && 
+      
+      //i.segment == 'NFO-OPT' &&
+      
+      i.instrument_type == 'PE');
 
 
 
@@ -120,10 +371,19 @@ async function main(params) {
 
     
    // exec('clear');
-   console.clear();
+   //console.clear();
+
+
  
    var accessTokenDoc= await getTodaysAccessToken(params)
   let allScriptJson=await  downLoadAllInstrumentsAndReturnJson()
+
+
+
+  let a= allScriptJson.filter(i => i.segment=== 'INDICES').map(y=>({[y.tradingsymbol]:y.name}));
+
+ 
+  const kite=await getKiteConnectInstance();
 
 
 
@@ -138,19 +398,18 @@ async function main(params) {
 
 
 
- 
- 
-
- 
-  
-
-
-
    
 var nfoScripts=getNFOScripts(allScriptJson)
 
+
+/// till now ok
+
 //var exp=getScriptsExpiringBeforeNextThursday(nfoScripts);
 //var expToday=getScriptsExpiringToday(nfoScripts);
+
+
+
+/// all nofo scripts is here 
 var expToday=getScriptsExpiringBeforeSameDayNextWeek(nfoScripts);
 
 
@@ -160,188 +419,140 @@ var expToday=getScriptsExpiringBeforeSameDayNextWeek(nfoScripts);
 
 
 
+///seems ok here
 
 
 
-//var tokens=
+//// indexs in this
 
-//var niftyBankNiftyBeforeNearestExpiry=filterByName(exp)
 
-//var names=getUniqueNames(niftyBankNiftyBeforeNearestExpiry)
-var names=getUniqueNames(expToday)
-var selectedOptions=[];
-
-let fullJson=[];
-
-/* var instruments=getUniqueInstruments(expToday)
-var symbols=getUniqueTradingSymbols(expToday) */
-const kite =await  getKiteConnectInstance();
-
-let indexInstruments=allScriptJson.filter(i=> i.segment== 'INDICES' && i.exchange=='NSE');
-//let indexInstrumentsAndStocks=allScriptJson.filter(i=>  i.exchange=='NSE' && i.segment== 'INDICES');
+let names = Array.from(new Set(expToday.map(i => i.name)));
 
 
 
 
-let all=new Set();
-let allNames=allScriptJson.filter(i=> i.segment=='NFO-OPT' && i.exchange=='NFO')
+names=['NIFTY','SENSEX']
+//names=['NIFTY', 'BANKNIFTY',"MIDCPNIFTY","FINNIFTY"]//'SENSEX','BANKEX'
+let selectedOptions = [];
+let index = 0;
 
-.map(m=>m.name)
-.forEach(e=>{
+//console.log('here', names);
 
-    //console.log(e);
+
+let names1 = [
+  'BANKEX', 'SENSEX', 'SENSEX50', 'NIFTY', 'AARTIIND', 'ABB',
+  'ABBOTINDIA', 'ABCAPITAL', 'ABFRL', 'ACC', 'ADANIENSOL', 
+  'ADANIENT', 'ADANIGREEN', 'ADANIPORTS', 'ALKEM'
+];
+
+
+
+// Debug names array
+console.log('Names:', names);
+
+
+
+
+
+
+// Set up interval
+const intervalId = await new Promise((resolve, reject) => {
+  const interval = setInterval(async () => {
+    if (index < names.length) {
+
     
 
-    all.add(e)
-}) 
+    
 
+      let indexInstrument = allScriptJson.find(i => i.tradingsymbol ===indexOptions[names[index]] );
 
-/* console.log(indexInstruments)
-process.exit() */
-let indexNames=indexInstruments.map(i=>i.tradingsymbol)
-/* console.log(indexNames)
-process.exit(); */
 
+      
+      let ins = indexInstrument;
 
-names.forEach(async (name)=>{
 
+     
 
 
+      if (!ins) {
+        ins = allScriptJson.find(i => i.tradingsymbol === indexOptions[names[index]]);
 
 
-let instruNameFeild=typeof indexOptions[name]=='undefined'?name:indexOptions[name];
-;
+        if (!ins){
 
+          index++;
+          return;
+        } 
+        if (!ins) {
+          console.error(`Instrument not found for: ${indexOptions[names[index]]}, ${names[index]}`);
+          clearInterval(interval); // Clear interval before exiting
+          process.exit();
+        }
+      }
 
-//console.log(instruNameFeild,'instrummebts  name feild');
+      try {
+        const quote1 = await kite.getLTP(ins.instrument_token); // Get the last traded price (LTP)
+        const ltp = quote1[ins.instrument_token]['last_price'];
+        const diff = strikePriceSteps[ins.tradingsymbol] || 50;
 
-//return;
-//var instruments=getUniqueInstruments(niftyBankNiftyBeforeNearestExpiry)
 
+        //ritu237608*
+        let depth = 1;
+        const strikeAbove = (Math.ceil(ltp / diff) * diff) + depth * diff;
+        const strikeBelow = (Math.floor(ltp / diff) * diff) - depth * diff;
 
+        const requiredAbove = strikeAbove;
+        const requiredBelow = strikeBelow;
 
-//var symbols=getUniqueTradingSymbols(niftyBankNiftyBeforeNearestExpiry)
+        console.log(requiredAbove,requiredAbove,'required strike above and below')
 
+        const callOptions = expToday.filter(option => {
+          return (
+            requiredAbove &&
+            option.name === names[index] &&
+            option.instrument_type === 'CE' &&
+            parseInt(option.strike) === requiredAbove
+          );
+        });
 
+        const putOptions = expToday.filter(option => {
+          return (
+            requiredBelow &&
+            option.name === names[index] &&
+            option.instrument_type === 'PE' &&
+            parseInt(option.strike) === requiredBelow
+          );
+        });
 
 
 
 
-
-//var diff =calculateStrikeDifferences(niftyBankNiftyBeforeNearestExpiry,name);
-
-
-
-
-
-
-
-
-
-
-
-
-let indexInstrument=indexInstruments.find(i=>i.name==instruNameFeild)
-
-
-
-
-if(typeof indexInstrument=='undefined'){
-
-  return;
-}
-
-//let indexInstrument=indexInstruments.find(i=>i.name==instruNameFeild)
-
-
-
-var quote=await kite.getLTP(indexInstrument.instrument_token)
-
-var ltp=quote[indexInstrument.instrument_token]['last_price']
-
-
-
-
-
-
-
-
-var diff =calculateStrikeDifferences(expToday,name,ltp);
-
-console.log(indexInstrument,'indexInstrumentx',diff);
-
-
-//console.log('THE NAME IS ',name,instruNameFeild,ltp,'diff',diff)
-
-
-
-
-let depth=6
-var strikeAbove=(Math.ceil(ltp/diff)*diff)+depth*diff
-var strikeBelow=(Math.floor(ltp/diff)*diff)-depth*diff
-
-
-
-var requiredAbove=strikeAbove//+diff;
-var requiredBelow=strikeBelow//-diff;
-
-/* let callOptions = niftyBankNiftyBeforeNearestExpiry.filter(option => {
-   return requiredAbove && option.instrument_type === 'CE' && parseInt(option.strike) > requiredAbove;
-}); */
-
-let callOptions = expToday.filter(option => {
-
-  //console.log(option,'option')
-   return requiredAbove && option.name === name &&
-   
-   
-   option.instrument_type === 'CE' && parseInt(option.strike) == requiredAbove;
+        selectedOptions.push(...callOptions, ...putOptions);
+        index++;
+      } catch (error) {
+        console.error(`Error processing instrument: ${error.message}`);
+        clearInterval(interval); // Stop interval on error
+        reject(error); // Reject the Promise
+      }
+    } else {
+      clearInterval(interval); // Stop the interval
+      console.log('All names processed');
+      resolve(interval); // Resolve the Promise when done
+    }
+  }, 333);
 });
 
-let putOptions = expToday.filter(option => {
-   return requiredBelow && option.name === name &&
-    option.instrument_type === 'PE' && parseInt(option.strike) == requiredBelow;
-});
-/* let putOptions = niftyBankNiftyBeforeNearestExpiry.filter(option => {
-   return requiredBelow && option.instrument_type === 'PE' && parseInt(option.strike) < requiredBelow;
-}); */
-
-// Sort options based on strike price
 
 
-callOptions.sort((a, b) => parseInt(a.strike) - parseInt(b.strike));
-putOptions.sort((a, b) => parseInt(b.strike) - parseInt(a.strike));
-
-// Select the nearest option in each category
-const callOptionAbove = callOptions.length > 0 ? callOptions[0] : null;
-const putOptionBelow = putOptions.length > 0 ? putOptions[0] : null;
-/* console.log(callOptions[callOptions.length-1]);
-process.exit(); */
-
-if (callOptionAbove) {
-    selectedOptions.push(callOptionAbove);
-}
-if (putOptionBelow) {
-    selectedOptions.push(putOptionBelow);
-}
-
-//console.log(selectedOptions,'sel options');
-
-//console.log(indexInstrument,'nameToken',name,ltp,strikeAbove,strikeBelow);
+//console.log(names);//
 
 
-})
-
-//console.log(selectedOptions);
-/* console.log("Call option above:", callOptionAbove);
-console.log("Put option below:", putOptionBelow); */
 
 
- // Your array of selected options
 
-///
 
-//getorders and oush to selected option
+
+
 
 let o=await kite.getOrders();
 let p=await kite.getPositions();
@@ -367,22 +578,24 @@ let p1=p.day.filter(px=>px.quantity>0).map(k=>{
 });
 
 
-console.log(o1, 'orders')
-console.log(p1,'positions')
+// console.log(o1, 'orders')
+// console.log(p1,'positions')
 
 
 
 selectedOptions.push(...o1)
 selectedOptions.push(...p1)
 selectedOptions = removeDuplicates(selectedOptions, 'instrument_token');
-//console.log(selectedOptions);
 
+
+console.log(selectedOptions,'number of options selected' );
+
+
+
+//return;
 //process.exit();
-//getposition and  and oush to selected option
 
-// Initial call to popOption() to start the process
-
-
+let fullJson=[]
 
 await popOption(selectedOptions,fullJson,accessTokenDoc);
 
@@ -392,22 +605,23 @@ await popOption(selectedOptions,fullJson,accessTokenDoc);
 
 
 
-const { exec } = require('child_process');
+//const { exec } = require('child_process');
 
-// Command to restart PM2 process
-
-//await closeDatabaseConnection();
+//
 return;
 
-//ltp(n/*  */ames[1])
 
-            //console.log(con,"AccesTocken",lp,strikeAbove,strikeBelow,'hi',diff)
 }
 
 
 
 
 async function popOption(selectedOptions,fullJson,accessTokenDoc) {
+
+
+
+
+  //console.log(selectedOptions,'hre')
 
    /*  return new Promise((res,rej)=>{
 
@@ -428,7 +642,7 @@ async function popOption(selectedOptions,fullJson,accessTokenDoc) {
             const option = selectedOptions.pop();
           
     
-       
+       console.log(option)
            
     
           
@@ -491,7 +705,7 @@ setTimeout(()=> {
     }); 
     
     
-    const command2 = 'pm2  save';
+    const command2 = './appv3/yarn build';
     exec(command2, (error, stdout, stderr) => {
         if (error) {
           console.error(`Error executing command: ${error.message}`);
@@ -547,7 +761,10 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
         try {
 
             let pp=new pricePoints(option.instrument_token,accessTokenDoc);
-    await  pp.initiateKiteConnect()
+
+
+            console.log(option.instrument_token,accessTokenDoc,'accessTokenDoc ')
+    await  pp.initiateKiteConnect();
     console.log(option.instrument_token,'instru token inside seting function');
             let c = await pp.getPricePoints(7, 'day');
             option.pricePoints = c;
@@ -565,6 +782,8 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             option.hasLiveTarget =false
             option.hasLivePosition =false
             option.hasLiveOrder=false;
+
+            option.signals={}
             
 
             console.log('pushing option', option.tradingsymbol,option.expiry);
@@ -578,7 +797,10 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
 
             resolve(fullJson);
         } catch (error) {
-            reject(error);
+
+console.log(error)
+resolve(fullJson);
+            //reject(error);
         }
     });
 }

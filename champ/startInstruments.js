@@ -2,8 +2,15 @@
 import { fork } from 'child_process';
 
 // Define your instrument names
-const instruments = ['BANKNIFTY', 'NIFTY', 'MIDCPNIFTY', 'FINNIFTY','STK' ];
+var instruments = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY', 'FINNIFTY',  ]; //'MIDCPNIFTY', 'FINNIFTY',
 
+instruments =['NIFTY','SENSEX'];
+//'SENSEX',,'BANKEX'
+
+//'STK' //'BANKEX'
+
+
+//const instruments = [ 'NIFTY'];
 // Function to start a new process for each instrument
 function startProcess(instrumentName) {
     const process = fork('./main.js', [instrumentName]);

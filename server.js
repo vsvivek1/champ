@@ -74,14 +74,14 @@ const  bodyParser = require("body-parser");
 
 const { Worker, isMainThread } = require('worker_threads');
 
-if (isMainThread) {
-  const worker = new Worker('./workerForFetchInstruments.js');
-  worker.on('message', (message) => {
-    console.log('Received message from secondary thread:', message);
-  });
-} else {
-  console.log('This is the secondary thread.');
-}
+// if (isMainThread) {
+//   const worker = new Worker('./workerForFetchInstruments.js');
+//   worker.on('message', (message) => {
+//     console.log('Received message from secondary thread:', message);
+//   });
+// } else {
+//   console.log('This is the secondary thread.');
+// }
 
 app.use(express.static(path.join(__dirname, './appv3/dist')));
 // app.use(express.static(path.join(__dirname, './appreact/build')));
@@ -900,6 +900,8 @@ app.get('/api/getStrategy/scanner/:href/accessToken/:accessToken', async (req,re
  console.log('href1',href)
 
 let a1=await CI.scrap(href,accessToken).then(a=>{
+
+  console.log(a)
   res.send(a)
 });
 
@@ -1417,6 +1419,8 @@ module.exports */
 io.on('connection',socket=>{
   StartWebSockets(socket,io);
 
+  
+
 initCisSending(socket,io);
  
 });
@@ -1424,8 +1428,11 @@ initCisSending(socket,io);
 
 function initCisSending(socket,io){
 
+
   socket.on('sendCis',(cis)=>{
 
+
+    //console.log('socket',cis)
     io.emit('sendCis',cis)
 
 //console.log(cis,'cis');

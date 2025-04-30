@@ -1,6 +1,11 @@
 import moment from 'moment';
 import { calculateVolatility } from './compareVolatility.js';
 
+import { Instrument } from './InstrumentClass.js';
+
+import calculateMovingAverage from './calculateMovingAverage.js';
+import { findDemandZones } from './findDemadZones.js';
+
 // Initialize variables for historical data
 let hourlyHistoricalData = {};
 let minuteHistoricalData = {};
@@ -51,10 +56,16 @@ export async function fetchOrdersAndSetCis(kite) {
             find(instrument => instrument.instrument_token === order.instrument_token);
             
             if (matchingInstrument) {
+
+                
                 matchingInstrument.orderStatus = order.status;
                 matchingInstrument.orderT = order.order_id;
                 matchingInstrument.hasLiveOrder = order.status === "OPEN";
             } else {
+
+
+
+
                 const instrument = global.allInstruments.find(instrument => instrument.instrument_token === order.instrument_token);
                 if (instrument) {
                     instrument.orderStatus = order.status;
@@ -63,9 +74,25 @@ export async function fetchOrdersAndSetCis(kite) {
         
                     // Push the instrument to global.instrumentsForMining
                     global.instrumentsForMining.push(instrument);
+                
+                
+                    if( matchingInstrument.hasLivePosition){
+
+
+                        console.log('order status','liveorder',matchingInstrument.hasLiveOrder,'live pos',matchingInstrument.hasLivePosition)
+
+                    }
+
+
+                
                 }
             }
         });
+
+
+
+
+
 
     } catch (error) {
         console.error("Error fetching orders:", error);
@@ -79,15 +106,23 @@ export async function fetchPositionsAndSetCis(kite) {
         global.positions = response.day; // Update global.positions with the fetched data
 
         global.positions.forEach(pos => {
-            if (pos.quantity > 0) {
+
+
+           if(pos.quantity==0) return;
+            if (pos.quantity != 0) {
+
                 let matchingInstrument = global.instrumentsForMining.find(instrument => instrument.tradingsymbol === pos.tradingsymbol);
 
                 if (matchingInstrument) {
+
+                   
                     matchingInstrument.position = pos;
                     matchingInstrument.hasLivePosition = true;
                     matchingInstrument.buyPrice = pos.average_price;
                 } else {
-                    const instrument = global.allInstruments.find(instrument => instrument.tradingsymbol === pos.tradingsymbol);
+                    const instrument = global.allInstruments.
+                    
+                    find(instrument => instrument.tradingsymbol === pos.tradingsymbol);
                     if (instrument) {
                         instrument.position = pos;
                         instrument.hasLivePosition = true;
@@ -111,17 +146,24 @@ export async function fetchHourlyData(kite) {
 
         if(global.instrumentName=='STK'){
 
-    return
+   // return
         }
         const now = moment();
         let fromTime = moment().startOf('day').subtract(1, 'days').add(13, 'global.hours').format('YYYY-MM-DD HH:mm:ss');
         let toTime = now.format('YYYY-MM-DD HH:mm:ss');
         const dataType = '60minute';
-        const instrument_tokens = global.instrumentsForMining.map(a => parseInt(a.instrument_token));
+        const instrument_tokens = [...new Set(global.instrumentsForMining.map(a => parseInt(a.instrument_token)))];
 
+
+
+       // console.log('total instruments ',instrument_tokens .length)
         await fetchAllData(kite, instrument_tokens, fromTime, toTime, dataType, hourlyHistoricalData);
+       // console.time('Execution Time');
 
+        
         global.instrumentsForMining.forEach(instrument => {
+
+           
             instrument.hourlyHistoricalData = hourlyHistoricalData[instrument.instrument_token];
             if (instrument.hourlyHistoricalData) {
                 const lastHourlyData = instrument.hourlyHistoricalData[instrument.hourlyHistoricalData.length - 1];
@@ -137,6 +179,8 @@ export async function fetchHourlyData(kite) {
     } catch (error) {
         console.error("Error fetching hourly data:", error);
     }
+
+  //  console.timeEnd('Execution Time');
 }
 
 // Function to fetch minute data and upglobal.date CIS
@@ -145,12 +189,21 @@ export async function fetchMinuteData(kite) {
 
         if(global.instrumentName=='STK'){
 
-            return
+        return
                 }
         const now = moment();
         const fromTime = moment().startOf('day').add(9, 'global.hours').add(15, 'global.minutes').format('YYYY-MM-DD HH:mm:ss');
         const toTime = now.startOf('minute').subtract(0, 'minute').format('YYYY-MM-DD HH:mm:ss');
-        const dataType = 'minute';
+       
+if(global.instrumentName=='STK'){
+
+    var dataType = '5minute';
+}else{
+
+    var dataType = 'minute';
+}
+       
+     
         const instrument_tokens = global.instrumentsForMining.map(a => parseInt(a.instrument_token));
 
        // console.log('fetch all data start');
@@ -163,13 +216,19 @@ export async function fetchMinuteData(kite) {
 
 
             instrument=instrument1;
-            //console.log('instrument token',instrument.tradingsymbol,typeof instrument.minuteData,'=mindata len');
+           /// console.log('instrument token',instrument.tradingsymbol,typeof instrument.minuteData,'=mindata len');   check later
             
             instrument.minuteData = minuteHistoricalData[instrument.instrument_token];
             if (instrument.minuteData && instrument.minuteData.length>0) {
+
+
                 instrument.highestPointAfter12PM = highestPointAfter12PM(instrument.minuteData);
                 instrument.minuteCandleMedianRange = findMedianRange(instrument.minuteData);
                 instrument.minuteCandleMeanRange = findMeanRange(instrument.minuteData);
+
+
+                instrument.ma5high=calculateMovingAverage(instrument.minuteData, 5, 'high')
+                instrument.ma5low=calculateMovingAverage(instrument.minuteData, 5, 'low')
 
 
                 const lastFiveCandles = instrument.minuteData//.slice(-5);
@@ -179,6 +238,9 @@ export async function fetchMinuteData(kite) {
 
 
                 instrument.averageRange=averageRange|| 3;
+
+
+            findDemandZones(instrument);
 ;
 
 
@@ -220,15 +282,24 @@ export async function fetchMinuteData(kite) {
 // Helper function to fetch all data
 async function fetchAllData(kite, instruments, fromTime, toTime, dataType, historicalData) {
 
-
+//console.time('start fetching stok minute data1')
     if(global.instrumentName=='STK'){
+
+        console.log(instruments,'instruments')
 
         return
             }
     let index = 0;
 
+
+    let pvsinstrument_token=''
+
     const intervalId = setInterval(async () => {
+
+
         if (index >= instruments.length) {
+
+          //  console.timeEnd('start fetching stok minute data1')
             clearInterval(intervalId); // Clear interval when all instruments are processed
             return;
         }
@@ -238,8 +309,22 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType, histo
         try {
 
 
+
+            if(pvsinstrument_token==instrument) return;
+
+      
+            pvsinstrument_token=instrument;
+
+            let i=new Instrument(instrument)
+
+            let ts=i.getTradingSymbol()
+//console.log('historic call',ts)
             const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
-//console.log('fetched')
+// console.log(index,'minute data fetched',instrument,
+//     global.instrumentName,global.instrumentsForMining.find(i=>i.instrument_token==instrument).tradingsymbol)
+
+
+
             if (!data) {
                 console.log('Issue in fetching historical data for', instrument);
             }
@@ -256,12 +341,24 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType, histo
             }
 
             historicalData[instrument] = data;
+
+        
         } catch (error) {
+            console.log(global.instrumentName)
             console.error(`Error fetching ${dataType} data for ${instrument}:`, error);
+            process.exit()
+           
         }
 
-        index++; // Move to the next instrument
-    }, 3*1000); // Adjust interval duration as needed
+
+        index++; 
+      // Move to the next instrument
+    }, 500
+    
+    
+    // (1/2)*1000
+
+); // Adjust interval duration as needed
 }
 
 
@@ -274,7 +371,7 @@ function convertToIndianTime(utcTimeString) {
 }
 
 // Function to calculate the highest point after 12 PM
-function highestPointAfter12PM(ohlcData) {
+function highestPointAfter12PM(ohlcData) { 
     if (!ohlcData || ohlcData.length < 225) {
         return -1;
     } else {

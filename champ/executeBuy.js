@@ -5,18 +5,14 @@ import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
 
 import { getFreezeLimit } from './getFreezeLimit.js';
 
-async function getMargins(kite){
 
-    return await kite.getMargins();
-
-}
 
 
 
 export async function executeBuy(cis, kite,price) {
 
 
-
+cis.entryHealth='inside execute buy'
     // Check if the order has already been placed
     if (cis.ordered) {
 
@@ -31,6 +27,7 @@ export async function executeBuy(cis, kite,price) {
     cis.ordered = true;
 
     // Execute the actual buy order placement
+    cis.entryHealth='near place order'
     await placeOrder(cis, kite,price);
 }
 
@@ -64,7 +61,7 @@ function getMultiplier(cis) {
 }
 async function placeOrder(cis, kite,price1) {
 
-
+cis.entryHealth='inside place order'
 let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 
    
@@ -74,16 +71,20 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 
    // multiplier=calculateLots(30000, cis.lot_size);
 
-   let m=await getMargins(kite);
+  
+
+
+
+   let m=global.margins;
    let m2=m.equity.net;
 
    let liveCash=m.equity.available.live_balance
 
 
 
-   console.log(liveCash,'margin');
+   //console.log(liveCash,'margin');
    
-    multiplier=Math.floor(Math.min(liveCash,10000)/(price*cis.lot_size));
+  
                 
  /*        "NIFTY":36,//72,
         
@@ -110,9 +111,24 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 
        // console.log(m.equity,'margin')
 
-        qty=Math.floor(200000/cis.tick.last_price);
+        qty=Math.floor(50000/cis.tick.last_price);
+        qty=Math.max(Math.floor(100000/cis.tick.last_price),2);
+      }else{
+
+        multiplier=Math.floor(Math.min(liveCash,50000)/(price*cis.lot_size));
+
+        qty=cis.lot_size*20;
+
+       qty =Math.min(cis.lot_size * multiplier,getFreezeLimit(cis.tradingsymbol));
       }
 
+
+      if(qty==0){
+
+        cis.entryHealth='quantity zero issue and margin is '+liveCash;
+
+        return;
+      }
       //qty=cis.lot_size*5;
 
    /*    if(global.speedSymbols.includes(cis.tradingsymbol)){
@@ -121,6 +137,9 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 qty=250;
       } */
 
+
+
+qty=2*cis.lot_size;
     const orderParams = {
         exchange: cis.exchange,
         tradingsymbol: cis.tradingsymbol,
@@ -143,13 +162,10 @@ console.log(orderParams)
 
     try {
         const orderId = await kite.placeOrder("regular", orderParams);
+cis.entryHealth='inside place order'
 
-
-        console.log("Order placed successfully. Order ID:", orderId,
-
-            cis.buyStrategy, 'for',cis.tradingsymbol,'at',cis.entryPrice,' instrument.averageRange=', cis.averageRange
-        );
-
+cis.message = `Order placed successfully. Order ID: ${orderId}, ${cis.buyStrategy} for ${cis.tradingsymbol} at ${cis.entryPrice}, instrument.averageRange=${cis.averageRange}`;
+console.log(cis.message);
        
     
        // const buyOrder = await savePlaceOrder('AAPL', 'breakout', 100, 150, 'fixed target');
@@ -160,7 +176,9 @@ console.log(orderParams)
       
 
     } catch (error) {
-        console.error("Error placing order:", error, cis.tradingsymbol);
+        console.error(multiplier,"Error placing order:", error, cis.tradingsymbol,orderParams);
+
+        process.exit();
     }
 
     if(cis.stockTrade==true) {
