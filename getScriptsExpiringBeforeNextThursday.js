@@ -112,7 +112,7 @@ function getScriptsExpiringBeforeSameDayNextWeek(jsonArray) {
 function generateDatesTillNextSameDay(today) {
    const dates = [];
    const sameDayNextWeek = new Date(today);
-   sameDayNextWeek.setDate(today.getDate() + 7); // Calculate the same day next week
+   sameDayNextWeek.setDate(today.getDate() + 9); // Calculate the same day next week
 
    let currentDate = new Date(today);
    while (currentDate < sameDayNextWeek) {

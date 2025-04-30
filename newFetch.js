@@ -268,7 +268,8 @@ const strikePriceSteps = {
   "NIFTY50": 50,           // NIFTY 50 has a strike price step of 50
   "NIFTYBANK": 100,        // NIFTY BANK has a strike price step of 100
   "MIDCPNIFTY": 50,
-  "FINNIFTY":50         // NIFTY MIDCAP SELECT has a strike price step of 50
+  "FINNIFTY":50 ,
+  "NIFTY":50        // NIFTY MIDCAP SELECT has a strike price step of 50
 };
 
 
@@ -316,49 +317,7 @@ function filterByName(jsonArray, names = ['NIFTY', 'BANKNIFTY',"MIDCPNIFTY","FIN
 
 var con=connectToDatabase();
 
-function calculateStrikeDifferences(instruments1, name,ltp) {
 
-  console.log(name,'name');
-  
-if('BANKNIFTY'==name){
-
-  return 100
-}
-
-if('NIFTY'==name){
-
-  return 50
-}
-  //let exp=instruments1[].expiry;
-
-    var instruments = instruments1.filter(i =>i.name == name && 
-      
-      //i.segment == 'NFO-OPT' &&
-      
-      i.instrument_type == 'PE');
-
-
-
-    // Sort instruments by strike price
-    let sortedInstruments = instruments.sort((a, b) => parseInt(a.strike) - parseInt(b.strike));
-
-
-    let b=sortedInstruments.map(i=>i.strike).filter(i=>i<ltp);
-    let ln=b.length;
-
-    return b[ln-1]-b[ln-2];
-   // console.log(b[ln-1]-b[ln-2])
-   // process.exit();
-
-    // Calculate the common difference between consecutive strike prices
-    let commonDifference = parseInt(sortedInstruments[1].strike) - parseInt(sortedInstruments[0].strike);
-
-
-   // console.log(commonDifference);
-
-  //  process.exit()
-    return commonDifference;
-}
 
 const { exec } = require('child_process');
 const { clearCustomQueryHandlers } = require('puppeteer');
@@ -471,6 +430,7 @@ const intervalId = await new Promise((resolve, reject) => {
       let ins = indexInstrument;
 
 
+    
      
 
 
@@ -490,7 +450,7 @@ const intervalId = await new Promise((resolve, reject) => {
         }
       }
 
-      try {
+      //try {
         const quote1 = await kite.getLTP(ins.instrument_token); // Get the last traded price (LTP)
         const ltp = quote1[ins.instrument_token]['last_price'];
         const diff = strikePriceSteps[ins.tradingsymbol] || 50;
@@ -504,36 +464,46 @@ const intervalId = await new Promise((resolve, reject) => {
         const requiredAbove = strikeAbove;
         const requiredBelow = strikeBelow;
 
-        console.log(requiredAbove,requiredAbove,'required strike above and below')
+        console.log('index instrument','name',names[index])
+
+        console.log(requiredAbove,requiredBelow,'required strike above and below')
+
+        //console.log(expToday,'exp today');
+
+        //process.exit();
 
         const callOptions = expToday.filter(option => {
+
+          //console.log(option.name)
           return (
             requiredAbove &&
             option.name === names[index] &&
             option.instrument_type === 'CE' &&
-            parseInt(option.strike) === requiredAbove
+            option.strike == requiredAbove
           );
         });
+
+        console.log('\n\n',callOptions,'CALL OPTIONS',names[index])
 
         const putOptions = expToday.filter(option => {
           return (
             requiredBelow &&
             option.name === names[index] &&
             option.instrument_type === 'PE' &&
-            parseInt(option.strike) === requiredBelow
+            option.strike === requiredBelow
           );
         });
 
-
+        console.log(putOptions,'required strike above and below')
 
 
         selectedOptions.push(...callOptions, ...putOptions);
         index++;
-      } catch (error) {
-        console.error(`Error processing instrument: ${error.message}`);
-        clearInterval(interval); // Stop interval on error
-        reject(error); // Reject the Promise
-      }
+      // } catch (error) {
+      //   console.error(`Error processing instrument: ${error.message}`);
+      //   clearInterval(interval); // Stop interval on error
+      //   reject(error); // Reject the Promise
+      // }
     } else {
       clearInterval(interval); // Stop the interval
       console.log('All names processed');
@@ -588,7 +558,7 @@ selectedOptions.push(...p1)
 selectedOptions = removeDuplicates(selectedOptions, 'instrument_token');
 
 
-console.log(selectedOptions,'number of options selected' );
+//console.log(selectedOptions,'number of options selected' );
 
 
 
@@ -642,7 +612,7 @@ async function popOption(selectedOptions,fullJson,accessTokenDoc) {
             const option = selectedOptions.pop();
           
     
-       console.log(option)
+      // console.log(option)
            
     
           
