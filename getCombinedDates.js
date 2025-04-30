@@ -8,7 +8,7 @@ function getNextSevenDays() {
     const days = [];
     const today = new Date();
 
-    for (let i = 1; i < 8; i++) {
+    for (let i = 1; i < 10; i++) {
         const nextDay = new Date(today);
         nextDay.setDate(today.getDate() + i);
 

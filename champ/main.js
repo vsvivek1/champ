@@ -20,7 +20,7 @@ import { analyzeOHLCWithSlopeAndDegree, isRangeGreaterThanFive } from './ohlcUti
 
 import addOrIncrementRejection from './addOrIncrementRejection.js';
 import { Worker } from 'worker_threads';
-const fetchWorker = new Worker('./fetchWorker.js');
+//const fetchWorker = new Worker('./fetchWorker.js');
 
 
 

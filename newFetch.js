@@ -20,6 +20,34 @@ const FILE_LOCATION  =  Path.join( scriptDirectory, 'appv3', 'public', 'instrume
 const io = require('socket.io-client');
 const socket = io('http://localhost:4000'); 
 
+function getNextSevenDays() {
+  const days = [];
+  const today = new Date();
+
+  for (let i = 1; i < 9; i++) {
+      const nextDay = new Date(today);
+      nextDay.setDate(today.getDate() + i);
+
+      // Format the date as yyyy-mm-dd
+      const year = nextDay.getFullYear();
+      const month = String(nextDay.getMonth() + 1).padStart(2, '0');
+      const day = String(nextDay.getDate()).padStart(2, '0');
+
+      days.push(`${year}-${month}-${day}`);
+  }
+
+  return days;
+}
+Array.prototype.removeDuplicates = function () {
+  const seen = new Set();
+  return this.filter(item => {
+    const serialized = JSON.stringify(item);
+    if (seen.has(serialized)) return false;
+    seen.add(serialized);
+    return true;
+  });
+};
+
   // "SENSEX": "SENSEX",
   // "SENSEX50": "SENSEX50",
 let indexOptions = {
@@ -328,7 +356,7 @@ const { disconnect, set } = require('mongoose');
 async function main(params) {
 
 
-    
+ let exchanges=['NFO','BFO']   
    // exec('clear');
    //console.clear();
 
@@ -356,20 +384,42 @@ async function main(params) {
   await writeJsonToFile(allScriptJson,'./appv3/src/assets/instruments/instrumentsAll.json')
 
 
-
+  var dateRange ;
+  
+   dateRange = getNextSevenDays();
+  
+     console.log(dateRange,' expiry dates here ')
    
-var nfoScripts=getNFOScripts(allScriptJson)
+var nfoScripts=allScriptJson.filter(a=>
+  
+  (['NIFTY','SENSEX'].includes(a.name)&& !['NIFTYNXT50'].includes(a.name)) && exchanges.includes(a.exchange)
+
+&&  dateRange.includes(a.expiry)
+
+
+
+);
+
+
+
+
+
+
+
+
 
 
 /// till now ok
 
-//var exp=getScriptsExpiringBeforeNextThursday(nfoScripts);
-//var expToday=getScriptsExpiringToday(nfoScripts);
 
 
 
 /// all nofo scripts is here 
-var expToday=getScriptsExpiringBeforeSameDayNextWeek(nfoScripts);
+var expToday=nfoScripts//getScriptsExpiringBeforeSameDayNextWeek(nfoScripts);
+
+//console.log(expToday,'exp')
+
+
 
 
 
@@ -385,12 +435,12 @@ var expToday=getScriptsExpiringBeforeSameDayNextWeek(nfoScripts);
 //// indexs in this
 
 
-let names = Array.from(new Set(expToday.map(i => i.name)));
+//let names = Array.from(new Set(expToday.map(i => i.name)));
 
 
 
 
-names=['NIFTY','SENSEX']
+let names=['NIFTY','SENSEX']
 //names=['NIFTY', 'BANKNIFTY',"MIDCPNIFTY","FINNIFTY"]//'SENSEX','BANKEX'
 let selectedOptions = [];
 let index = 0;
@@ -414,103 +464,87 @@ console.log('Names:', names);
 
 
 
-// Set up interval
 const intervalId = await new Promise((resolve, reject) => {
   const interval = setInterval(async () => {
-    if (index < names.length) {
+    if (index >= names.length) {
+      console.log('✅ All index names processed.');
+      clearInterval(interval);
+      return resolve(true);
+    }
 
-    
+    const currentName = names[index];
+    const tradingsymbol = indexOptions[currentName];
+    const ins = allScriptJson.find(i => i.tradingsymbol === tradingsymbol);
 
-    
+    if (!ins) {
+      console.warn(`❌ Instrument not found: ${tradingsymbol} (${currentName})`);
+      index++;
+      return;
+    }
 
-      let indexInstrument = allScriptJson.find(i => i.tradingsymbol ===indexOptions[names[index]] );
+    try {
+      const quote1 = await kite.getLTP(ins.instrument_token);
+      const ltp = quote1[ins.instrument_token]?.last_price;
 
-
-      
-      let ins = indexInstrument;
-
-
-    
-     
-
-
-      if (!ins) {
-        ins = allScriptJson.find(i => i.tradingsymbol === indexOptions[names[index]]);
-
-
-        if (!ins){
-
-          index++;
-          return;
-        } 
-        if (!ins) {
-          console.error(`Instrument not found for: ${indexOptions[names[index]]}, ${names[index]}`);
-          clearInterval(interval); // Clear interval before exiting
-          process.exit();
-        }
+      if (!ltp) {
+        console.warn(`⚠️ LTP not found for ${currentName}`);
+        index++;
+        return;
       }
 
-      //try {
-        const quote1 = await kite.getLTP(ins.instrument_token); // Get the last traded price (LTP)
-        const ltp = quote1[ins.instrument_token]['last_price'];
-        const diff = strikePriceSteps[ins.tradingsymbol] || 50;
+      const depth = 1;
 
+      // Filter all options for this index
+      const optionsForIndex = expToday.filter(o => o.name === currentName);
 
-        //ritu237608*
-        let depth = 1;
-        const strikeAbove = (Math.ceil(ltp / diff) * diff) + depth * diff;
-        const strikeBelow = (Math.floor(ltp / diff) * diff) - depth * diff;
+      // Pick nearest expiry
+      const expiries = [...new Set(optionsForIndex.map(o => o.expiry))].sort();
+      const nearestExpiry = expiries[0];
 
-        const requiredAbove = strikeAbove;
-        const requiredBelow = strikeBelow;
+      const ceOptions = optionsForIndex.filter(o => o.instrument_type === 'CE' && o.expiry === nearestExpiry);
+      const peOptions = optionsForIndex.filter(o => o.instrument_type === 'PE' && o.expiry === nearestExpiry);
 
-        console.log('index instrument','name',names[index])
+      const ceStrikes = ceOptions.map(o => o.strike).sort((a, b) => a - b);
+      const peStrikes = peOptions.map(o => o.strike).sort((a, b) => a - b);
 
-        console.log(requiredAbove,requiredBelow,'required strike above and below')
+      const findStrikeByDepth = (strikes, ltp, depth, direction) => {
+        if (direction === 'above') {
+          const baseIndex = strikes.findIndex(s => s >= ltp);
+          if (baseIndex === -1) return null;
+          const targetIndex = baseIndex + depth;
+          return strikes[targetIndex] || null;
+        } else {
+          const reversed = [...strikes].reverse();
+          const baseIndexReversed = reversed.findIndex(s => s <= ltp);
+          if (baseIndexReversed === -1) return null;
+          const baseIndex = strikes.length - 1 - baseIndexReversed;
+          const targetIndex = baseIndex - depth;
+          return strikes[targetIndex] || null;
+        }
+      };
 
-        //console.log(expToday,'exp today');
+      const ceStrike = findStrikeByDepth(ceStrikes, ltp, depth, 'above');
+      const peStrike = findStrikeByDepth(peStrikes, ltp, depth, 'below');
 
-        //process.exit();
+      const ceOption = ceOptions.find(o => o.strike === ceStrike);
+      const peOption = peOptions.find(o => o.strike === peStrike);
 
-        const callOptions = expToday.filter(option => {
+      console.log(`➡️ ${currentName} | LTP: ${ltp} | CE: ${ceStrike} | PE: ${peStrike} | Expiry: ${nearestExpiry}`);
 
-          //console.log(option.name)
-          return (
-            requiredAbove &&
-            option.name === names[index] &&
-            option.instrument_type === 'CE' &&
-            option.strike == requiredAbove
-          );
-        });
+      if (ceOption) selectedOptions.push(ceOption);
+      else console.warn(`⚠️ CE not found for ${currentName} @ ${ceStrike}`);
 
-        console.log('\n\n',callOptions,'CALL OPTIONS',names[index])
+      if (peOption) selectedOptions.push(peOption);
+      else console.warn(`⚠️ PE not found for ${currentName} @ ${peStrike}`);
 
-        const putOptions = expToday.filter(option => {
-          return (
-            requiredBelow &&
-            option.name === names[index] &&
-            option.instrument_type === 'PE' &&
-            option.strike === requiredBelow
-          );
-        });
-
-        console.log(putOptions,'required strike above and below')
-
-
-        selectedOptions.push(...callOptions, ...putOptions);
-        index++;
-      // } catch (error) {
-      //   console.error(`Error processing instrument: ${error.message}`);
-      //   clearInterval(interval); // Stop interval on error
-      //   reject(error); // Reject the Promise
-      // }
-    } else {
-      clearInterval(interval); // Stop the interval
-      console.log('All names processed');
-      resolve(interval); // Resolve the Promise when done
+    } catch (error) {
+      console.error(`⚠️ Error processing ${currentName}: ${error.message}`);
     }
+
+    index++;
   }, 333);
 });
+
 
 
 
@@ -555,6 +589,8 @@ let p1=p.day.filter(px=>px.quantity>0).map(k=>{
 
 selectedOptions.push(...o1)
 selectedOptions.push(...p1)
+
+console.warn('Pushing selected options')
 selectedOptions = removeDuplicates(selectedOptions, 'instrument_token');
 
 
@@ -586,138 +622,91 @@ return;
 
 
 
-async function popOption(selectedOptions,fullJson,accessTokenDoc) {
+
+
+function popOption(selectedOptions, fullJson, accessTokenDoc) {
 
 
 
+  let s=selectedOptions.map(a=>a.tradingsymbol) 
 
-  //console.log(selectedOptions,'hre')
+  console.log(s,'s')
+  //return;
+  return new Promise((resolve, reject) => {
+    if (typeof selectedOptions === 'undefined' || selectedOptions.length === 0) {
+      resolve(); // Resolve early if no work
+      return;
+    }
 
-   /*  return new Promise((res,rej)=>{
+    const timer = setInterval(async () => {
 
 
-        res(true)
 
-    }); */
+      if (selectedOptions.length > 0) {
+        const option = selectedOptions.pop();
+        console.log(`${option.tradingsymbol} - pop option attaching pp` , 'len',selectedOptions.length);
 
-    if(typeof selectedOptions=='undefined') return;
+        try {
+          await setPricePointsToInstrument(option, fullJson, accessTokenDoc);
+        } catch (error) {
+          console.error('Error setting price points:', error.message);
+          // You can choose to reject here if needed
+        }
 
+      } else {
+        clearInterval(timer);
+        console.log("Array is empty. Resetting timer.");
 
-    let timer=setInterval(async ()=>{
+        setTimeout(() => {
+          const command = 'node ./champ/main.js';
+          exec(command, async (error, stdout, stderr) => {
+           // try {
+              await writeJsonToFile(fullJson, './iday/instrumentsForMining.json');
 
-        if (selectedOptions.length > 0) {
+              if (error) {
+                console.error(`Error executing main.js: ${error.message}`);
+                reject(error);
+                return;
+              }
+              if (stderr) {
+                console.error(`stderr: ${stderr}`);
+                // optionally reject(stderr)
+              }
 
-       
-        
-            const option = selectedOptions.pop();
-          
-    
-      // console.log(option)
+              console.log(`stdout: ${stdout}`);
            
-    
-          
-            
            
-         // try {
-              await setPricePointsToInstrument( option, fullJson,accessTokenDoc);
-      //console.log(c,'c');
-       /*    } catch (error) {
-            
-    
-            console.log('185 error')
-          } */
-    
-           
-    
-          //console.log(pp);
-    
-            // Call popOption() recursively after 333 milliseconds
-           
-        } else {
-    
-            //fullJson 
+            // } catch (err) {
+            //   reject(err);
+            // }
+          });
 
-          
-            // Array is empty, reset the timer
-           
+          const buildCommand = './appv3/yarn build';
+          const command2 = 'yarn --cwd ./appv3 build';
+          exec(command2 , (error, stdout, stderr) => {
+            if (error) {
+              console.error(`Error executing yarn build: ${error.message}`);
+              reject(error);
+              return;
+            }
+            if (stderr) {
+              console.error(`stderr: ${stderr}`);
+              // optionally reject(stderr)
+            }
 
-            clearInterval(timer);
-            console.log("Array is empty. Resetting timer.");
+            console.log(`stdout: ${stdout}\n\nLAST TIME EXECUTED: ${Date()}`);
+            resolve(); // ✅ All done
+          });
 
-            //const command = 'pm2 restart ./iday/index2.js';
+        }, 10 * 1000);
 
-            //const command='pwd'
-            const command='./champ/main.js'
-
-
-
-// Execute the command
-setTimeout(()=> {
-
-  //socket.emit('json-updated');
-
-  console.log('jason updated');
-    exec(command, async (error, stdout, stderr)  => {
-
-          await   writeJsonToFile(fullJson,'./iday/instrumentsForMining.json')
-
-
-
-      if (error) {
-        console.error(`Error executing command: ${error.message}`);
-        return;
+        // Optional log
+        setTimeout(() => {
+          console.log(`LAST TIME EXECUTED: ${Date()}`);
+        }, 5 * 1000);
       }
-      if (stderr) {
-        console.error(`stderr: ${stderr}`);
-        return;
-      }
-      console.log(`stdout: ${stdout}`);
-    }); 
-    
-    
-    const command2 = './appv3/yarn build';
-    exec(command2, (error, stdout, stderr) => {
-        if (error) {
-          console.error(`Error executing command: ${error.message}`);
-          return;
-        }
-        if (stderr) {
-          console.error(`stderr: ${stderr}`);
-          return;
-        }
-        console.log(`stdout: ${stdout}
-        
-        \n
-  LAST TIME EXECUTED',${Date()})
-        
-        
-        `);
-      }); 
-
-      
-    
-},10*1000);
-
-setTimeout(()=>{
-
- // fs.appendFile('./iday/last_time.text',`\n${Date()}`)
-  console.log(`LAST TIME EXECUTED',${Date()}`)
-
-},5*1000)
-            //disconnect();
-
-            //return;
-           // return;
-           //clearTimeout(timer);
-        }
-
-
-    },500)
-
-
-    console.log('236')
-    return;
-    
+    }, 500);
+  });
 }
 
 
@@ -778,10 +767,12 @@ resolve(fullJson);
 //main();
 
 main();
- setInterval(()=>{
-console.time('start')
-   main();
-   console.timeEnd('start')
-//disconnect()
-},10*60*1000) 
+ 
+
+// setInterval(()=>{
+// console.time('start')
+//    main();
+//    console.timeEnd('start')
+// //disconnect()
+// },10*60*1000) 
 //disconnect();

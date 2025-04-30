@@ -65,6 +65,12 @@ function getNext45Days() {
 
 function getScriptsExpiringBeforeSameDayNextWeek(jsonArray) {
 
+
+//let x=jsonArray.map(a=>a.name).removeDuplicates()
+//console.log(x)
+
+   //return;
+
   // console.log(jsonArray)
    const uniqueNames = new Set();
 
@@ -80,11 +86,11 @@ function getScriptsExpiringBeforeSameDayNextWeek(jsonArray) {
 
 
 
-   var dateRange = getDatesFromTodayToNextSameDay(); // Generate date range
+   var dateRange ;
 //
  dateRange = getCombinedDates()
 
-   console.log(dateRange)
+   console.log(dateRange,' expiry dates ')
 
 
    //process.exit()
@@ -96,7 +102,7 @@ function getScriptsExpiringBeforeSameDayNextWeek(jsonArray) {
 
    const filtered = jsonArray.filter(item => {
 
-      //console.log(item.name);
+   console.log(item,'itemnae insode b4 xt weel   ',dateRange.includes(item.expiry));
       
 
 
@@ -104,7 +110,7 @@ function getScriptsExpiringBeforeSameDayNextWeek(jsonArray) {
    });
 
 
-//console.log(filtered)
+//console.log(filtered,'filtered')
    return filtered;
 }
 
