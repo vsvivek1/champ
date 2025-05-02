@@ -265,7 +265,7 @@ export async function handleNoPosition(cis, kite) {
     {
         cis.entryHealth='HanleNonStkTrades'
 
-   
+    
         handleNonSTKTrades(cis, kite);
     }
 }

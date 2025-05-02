@@ -119,6 +119,8 @@ export async function fetchPositionsAndSetCis(kite) {
                     matchingInstrument.position = pos;
                     matchingInstrument.hasLivePosition = true;
                     matchingInstrument.buyPrice = pos.average_price;
+                    matchingInstrument.stopLossPrice=matchingInstrument.buyPrice-5
+
                 } else {
                     const instrument = global.allInstruments.
                     

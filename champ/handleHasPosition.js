@@ -26,9 +26,14 @@ export async function handlePositionPresent(cis, kite) {
      cis.entryHealth='Inside Has Position'
 
 
-     console.log('jas posion',cis.tradingsymbol,cis.inbuiltStopLoss, cis.position,cis)
+     if(!cis.saidThat || cis.saidThat==false){
 
-     process.exit();
+        console.log('from handle has position',cis.tradingsymbol, cis.stopLossPrice,'stop loss price')
+        cis.saidThat=true
+     }
+    
+
+    // process.exit();
     
 if(cis.inbuiltStopLoss)
      cis.entryHealth='has inbuiltStopLoss:'+cis.inbuiltStopLoss+"@ price "+cis.stopLossPrice+'Now @'+cis.price

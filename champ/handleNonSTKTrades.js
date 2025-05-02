@@ -9,15 +9,18 @@ import { handleGeneralTrades } from "./handleTrade.js";
 
 
 export function handleNonSTKTrades(cis, kite) {
-
+   
     if (!validateCISTradeConditions(cis)) 
     {
 
+
         cis.entryHealth='CIST HEALTH CHECK FAILED'
+
+        
         return;
     }
         
-
+ 
 
 
 

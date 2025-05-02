@@ -492,11 +492,10 @@ const intervalId = await new Promise((resolve, reject) => {
         return;
       }
 
-      const depth = 1;
+      const depth = 2;
 
       // Filter all options for this index
       const optionsForIndex = expToday.filter(o => o.name === currentName);
-
       // Pick nearest expiry
       const expiries = [...new Set(optionsForIndex.map(o => o.expiry))].sort();
       const nearestExpiry = expiries[0];

@@ -3,7 +3,7 @@ import { executeBuy } from "./executeBuy.js";
 
 
 export function buyAboveOpenAtNineAm(cis,kite) {
-    if (global.hours == 9 && global.minutes > 17 && cis.tick.last_price > cis.tick.ohlc.open && !cis.isGapDown) {
+    if (global.hours == 9 && global.minutes > 17 && global.minutes <30 && cis.tick.last_price > cis.tick.ohlc.open && !cis.isGapDown) {
         cis.signals.openAboveAndGreenCandleBefore920=true
         cis.buyStrategy = 'openAboveAndGreenCandleBefore920';
         cis.targetPrice = cis.tick.last_price + cis.liveMinute.range;

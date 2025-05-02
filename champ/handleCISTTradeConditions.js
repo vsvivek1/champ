@@ -6,26 +6,28 @@ export function validateCISTradeConditions(cis) {
     // General Rejection Checks
 
 
-if(
-    !cis.operatorBuyCandles
+// if(
+//     !cis.operatorBuyCandles
 
-    || !cis.operatorBuyCandles.allCandles
+//     || !cis.operatorBuyCandles.allCandles
 
-){
+// ){
 
 
-    if(typeof cis.returnPoints=='undefined'){
+//     if(typeof cis.returnPoints=='undefined'){
 
-        cis.returnPoints=[];
+//         cis.returnPoints=[];
         
-    }
+//     }
 
-    cis.entryHealth='NO OPERATOR BUY CANDLES FOUND'
-    cis.returnPoints.push('NO OPERATOR BUY CANDLES FOUND')
+//     cis.entryHealth='NO OPERATOR BUY CANDLES FOUND'
+//     cis.returnPoints.push('NO OPERATOR BUY CANDLES FOUND')
 
-    return false;
 
-}
+//     console.log('no operator buy candles',cis.tradingsymbol)
+//     return false;
+
+// }
 
     if (cis.tick.last_price < 1) {
 
@@ -39,7 +41,7 @@ if(
         cis.returnPoints.push('less than one ')
 
         global.addOrIncrementRejection("LAST PRICE LESS THAN 1: " + cis.tradingsymbol);
-        return;
+        return false;
     }
 
     // if (cis.liveMinute.color === "bearish") {
@@ -58,17 +60,17 @@ if(
 
 
 
-    if (checkGapDown(cis)) {
+    // if (checkGapDown(cis)) {
 
-        if(typeof cis.returnPoints=='undefined'){
+    //     if(typeof cis.returnPoints=='undefined'){
 
-            cis.returnPoints=[];
-            cis.returnPoints.push('Gap down ')
-        }
-             cis.entryHealth='Gap down '
-        global.addOrIncrementRejection("GAP DOWN: " + cis.tradingsymbol);
-        return;
-    }
+    //         cis.returnPoints=[];
+    //         cis.returnPoints.push('Gap down ')
+    //     }
+    //          cis.entryHealth='Gap down '
+    //     global.addOrIncrementRejection("GAP DOWN: " + cis.tradingsymbol);
+    //     return;
+    // }
 
     // Time-Specific Strategies
     // if (global.hours === 9 && global.minutes < 30) {
@@ -94,26 +96,28 @@ if(
     // }
     ///
 
-    if(!cis.isAboveOpen){
 
-        if(typeof cis.returnPoints=='undefined'){
 
-            cis.returnPoints=[];}
-            cis.returnPoints.push('Below Open')
+    // if(!cis.isAboveOpen){
+
+    //     if(typeof cis.returnPoints=='undefined'){
+
+    //         cis.returnPoints=[];}
+    //         cis.returnPoints.push('Below Open')
         
-        return false;
-    }
-    if (cis.tick.last_price < 5) {
+    //     return false;
+    // }
+    // if (cis.tick.last_price < 5) {
 
-        if(typeof cis.returnPoints=='undefined'){
+    //     if(typeof cis.returnPoints=='undefined'){
 
-            cis.returnPoints=[];}
+    //         cis.returnPoints=[];}
           
         
-        global.addOrIncrementRejection('Price too low');
-        cis.returnPoints.push('Below 5 Rs')
-        return false;
-    }
+    //     global.addOrIncrementRejection('Price too low');
+    //     cis.returnPoints.push('Below 5 Rs')
+    //     return false;
+    // }
 
     if (cis.noBuy) {
 
@@ -152,6 +156,8 @@ if(
         return false;
     }
 
+
+    //console.log('no operator buy candles',cis.tradingsymbol)
     cis.returnPoints.push('no minute data')
 
 

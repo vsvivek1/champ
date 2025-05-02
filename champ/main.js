@@ -293,6 +293,8 @@ function initTicker() {
 
 function onTicks(ticks) {
 
+    
+
     var instrumentToken = global.instrumentsForMining.map(i=>parseInt(i.instrument_token));
 
   let b=  ticker.setMode(ticker.modeFull, [instrumentToken]);
@@ -307,6 +309,8 @@ let count=0;
 let tickCount=0
 function processTicks(tick) {
 
+
+  
    if(count>0){
 
     ticker.setMode('full', global.instrumentsForMining.map(i=>parseInt(i.instrument_token)))
@@ -322,6 +326,8 @@ function processTicks(tick) {
 
 
     var cis = global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
+
+    //console.log(cis.name,global.instrumentName,'cis.name,global.instrumentName')
     
 
 
@@ -465,7 +471,11 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
    //console.log(cis.hasLivePosition,cis.tradingsymbol,'has pos')
 
   // return;
+
+ 
     if (!cis.hasLivePosition) {
+
+       
 
         handleNoPosition(cis, kite)
        
@@ -544,7 +554,7 @@ async function orderUpdates(order) {
         ticker.setMode(ticker.modeFull, [instrumentToken]);
        }
 
-       
+       console.log(a,'tick wait  over')
 
 
         

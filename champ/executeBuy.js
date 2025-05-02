@@ -139,7 +139,7 @@ qty=250;
 
 
 
-qty=2*cis.lot_size;
+qty=1*cis.lot_size;
     const orderParams = {
         exchange: cis.exchange,
         tradingsymbol: cis.tradingsymbol,

@@ -9,6 +9,7 @@ import { findHourlyHighestPrice } from "./findElapsedHourHigh.js";
 import { compareVolatility } from "./compareVolatility.js";
 import { regressionBreakoutTrading } from "./regressionBreakOutTrading.js";
 import { highAfter11AM } from "./highAfter11.js";
+    import * as strategies from "./strategies/index.js";
 
 export function handleGeneralTrades(cis, kite) {
 
@@ -18,6 +19,30 @@ export function handleGeneralTrades(cis, kite) {
 
 
 export function handleTrades(cis, kite) {
+
+
+
+console.log('arrived hre')
+  
+        //if (global.seconds < 50) return false;
+    
+        for (let [name, strategy] of Object.entries(strategies)) {
+
+            console.log(strategy,'strategy')
+
+
+            if (strategy(cis, kite)) {
+                console.log(`[✔] Trade executed using: ${cis.buyCriteria}`);
+                return true;
+            }
+        }
+    
+        return false;
+    
+
+
+return;
+
     if (global.seconds < 50) return false;
 
     let proceedToTrade = false;
