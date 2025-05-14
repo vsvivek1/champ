@@ -13,6 +13,8 @@ const prisma = new PrismaClient();
  * @param {number} cis.tick.volume - The tick volume (e.g., 1000).
  */
 export async function writeTickToDB(cis) {
+
+  return;
   try {
 
     //console.log(cis.tick);

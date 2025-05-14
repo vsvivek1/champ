@@ -13,6 +13,8 @@ export async function executeBuy(cis, kite,price) {
 
 
 cis.entryHealth='inside execute buy'
+
+//console.log(cis.ordered,cis.tradingsymbol)
     // Check if the order has already been placed
     if (cis.ordered) {
 
@@ -139,7 +141,7 @@ qty=250;
 
 
 
-qty=1*cis.lot_size;
+qty=10*cis.lot_size;
     const orderParams = {
         exchange: cis.exchange,
         tradingsymbol: cis.tradingsymbol,
@@ -153,6 +155,7 @@ qty=1*cis.lot_size;
     };
 
 
+    return;
 
 if(global.instrumentName=='STK'){
 console.log(orderParams)

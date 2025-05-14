@@ -145,6 +145,8 @@ export function validateCISTradeConditions(cis) {
         return false;
     }
 
+
+   
     if (!cis.minuteData ) {
 
         if(typeof cis.returnPoints=='undefined'){
@@ -158,10 +160,11 @@ export function validateCISTradeConditions(cis) {
 
 
     //console.log('no operator buy candles',cis.tradingsymbol)
-    cis.returnPoints.push('no minute data')
+   // cis.returnPoints.push('no minute data')
 
 
 
       cis.entryHealth='NOTHING PICKED IN CIST'
+      
     return true;
 }

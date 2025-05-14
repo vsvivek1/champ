@@ -5,6 +5,7 @@ import { Instrument } from './InstrumentClass.js';
 
 import calculateMovingAverage from './calculateMovingAverage.js';
 import { findDemandZones } from './findDemadZones.js';
+import { calculate20MA } from './calculate20Ma.js';
 
 // Initialize variables for historical data
 let hourlyHistoricalData = {};
@@ -208,9 +209,13 @@ if(global.instrumentName=='STK'){
      
         const instrument_tokens = global.instrumentsForMining.map(a => parseInt(a.instrument_token));
 
+        
+
        // console.log('fetch all data start');
         
         await fetchAllData(kite, instrument_tokens, fromTime, toTime, dataType, minuteHistoricalData);
+
+
       //  console.log('fetch all data stop','global.instrumentsForMining len',global.instrumentsForMining.length);
        
        var instrument;
@@ -221,6 +226,10 @@ if(global.instrumentName=='STK'){
            /// console.log('instrument token',instrument.tradingsymbol,typeof instrument.minuteData,'=mindata len');   check later
             
             instrument.minuteData = minuteHistoricalData[instrument.instrument_token];
+
+
+
+           // console.log('from minute data',instrument.minuteData )
             if (instrument.minuteData && instrument.minuteData.length>0) {
 
 
@@ -231,6 +240,8 @@ if(global.instrumentName=='STK'){
 
                 instrument.ma5high=calculateMovingAverage(instrument.minuteData, 5, 'high')
                 instrument.ma5low=calculateMovingAverage(instrument.minuteData, 5, 'low')
+
+                instrument.ma20=calculate20MA(instrument.minuteData);
 
 
                 const lastFiveCandles = instrument.minuteData//.slice(-5);

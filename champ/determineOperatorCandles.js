@@ -52,6 +52,9 @@ export function determineOperatorCandleFlags(cis) {
 
         // Check for large red candles
         const hasLargeRedCandle = candlesToCheck.some(isLargeRedCandle);
+        
+
+        if(typeof cis.operatorSellCandles=='undefined') cis.operatorSellCandles={};
         cis.operatorSellCandles[key] = hasLargeRedCandle;
     }
 }

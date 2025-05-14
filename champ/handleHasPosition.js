@@ -28,10 +28,61 @@ export async function handlePositionPresent(cis, kite) {
 
      if(!cis.saidThat || cis.saidThat==false){
 
-        console.log('from handle has position',cis.tradingsymbol, cis.stopLossPrice,'stop loss price')
+      console.log('from handle has position',cis.tradingsymbol, cis.stopLossPrice,'stop loss price',cis)
         cis.saidThat=true
      }
+
+
+
+
+     if(global.seconds%19==0){
+        cis.saidThat=false;
+
+     }
+
+   if(  global.seconds%20==0 && cis.hasPosition && !cis.saidThat){
+
+
+   let a= global.orders.
+   filter(a=>a.instrument_token==cis.instrument_token && a.status=='COMPLETE'  && a.transaction_type=='BUY').sort((a, b) =>
+    new Date(b.exchange_update_timestamp) - new Date(a.exchange_update_timestamp)
+  );
+   
+   
+
+
+   //.sort((a,b)=>)
+
+
+    if(a[0]){
+
+        console.log(a[0].price,'is a0 buy price',cis.tradingsymbol);
+    }
+
+
+  
+
+        // console.log('from handle has position',cis.tradingsymbol,'stop loss price=', cis.stopLossPrice,cis.stopLossPrice=='nill',
+
+        //     cis.position,
+        //     `$ cis.quantity =${cis.position.quantity}`
     
+    
+        //  )
+
+         cis.saidThat=true;
+
+     }
+
+    
+
+    
+
+
+     if(cis.stopLossPrice=='nill'){
+
+        cis.stopLossPrice=cis.position//.average_price+3;
+     }
 
     // process.exit();
     
@@ -132,7 +183,7 @@ if(cis.tick.last_price<=cis.stopLossPrice){
 
 
 
-        cis.returnPoints.push('NO target order',cis.position);
+        cis.returnPoints='NO target order',cis.position;
 
        // console.log('NO target order',cis.position)
 

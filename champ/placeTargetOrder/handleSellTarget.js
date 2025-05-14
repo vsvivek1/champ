@@ -4,7 +4,7 @@ import { ceilPrice } from './utils.js';
 export async function handleSellTarget(cis, order, kite) {
     let targetPrice;
 
-    if (cis.inbuiltTarget) {
+    if (cis.inbuiltTarget && cis.inbuiltTarget==true ) {
         targetPrice = cis.targetPrice;
     } else {
         targetPrice = order.buy_price + 5;
@@ -12,9 +12,9 @@ export async function handleSellTarget(cis, order, kite) {
 
     if (isNaN(targetPrice)) targetPrice = order.buy_price + 2;
 
-    if (global.speedSymbols.includes(cis.tradingsymbol)) {
-        targetPrice = order.price + 2;
-    }
+    // if (global.speedSymbols.includes(cis.tradingsymbol)) {
+    //     targetPrice = order.price + 2;
+    // }
 
     if (global.instrumentName === 'STK') {
         targetPrice = global.hours === 9

@@ -3,7 +3,7 @@
       <h1>CIS Data</h1>
       <h1>KPV Legacy</h1>
       <h1>No Manual Trades</h1>
-      <h1>No Over Trades. Over trades usually result in loss; don’t do it</h1>
+      <h1>MY ALL LOSSES ARE DUE TO HANGING ON TO LOOSING POSITIONS</h1>
 
 
       <table>
@@ -28,12 +28,27 @@
             <thead>
                 <tr>
                     <th>Sl No</th>
-                    <th>Trading Symbol</th>
+                    <th>Trading Symbol
+                    
+                    
+                    
+                    </th>
                     <th v-for="key in selectedKeys" :key="key">{{ key }}</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="(item, index) in symbols" :key="index">
+                <tr v-for="(item, index) in symbols" :key="index"
+                
+                
+                v-if="item.ma20  && item.ma20!=-1 
+                
+                // &&
+                
+                // item.ma20<item.tick.last_price
+                
+                "
+                
+                >
                     <td>                   <span v-if="item['isAboveOpen'] " class="green"> 
 
 ^
@@ -43,12 +58,25 @@
 
 v
 </span>
+
+<span v-if=item.position></span>
                         
                         {{ index + 1 }}</td>
                     <td>
-                        
+                        cccc
                         <button @click="openLink(item.chart)" class="button-link">
                           {{ item.tradingsymbol || 'N/A' }}
+
+
+
+                      
+
+                           <b v-if ="item.ma20  && item.tick.last_price>item.ma20"> Above Moving Avg 20</b>
+
+                           <b v-if ="!item.ma20 || item.ma20>item.tick.last_price"> below  Moving Avg 20 no trade</b>
+
+
+                        
                      
 
  

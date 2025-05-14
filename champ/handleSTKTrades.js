@@ -1,4 +1,13 @@
 export function handleSTKTrades(cis, kite) {
+
+
+
+
+
+
+
+
+
     if (cis.tick.volume_traded * cis.tick.last_price > 100 * 10 * timeFactor * global.tradingMaxAmount) {
         // Trading conditions met
     } else {

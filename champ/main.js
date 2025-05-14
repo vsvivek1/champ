@@ -185,7 +185,10 @@ async function main() {
            
            else{
 
-            if (global.seconds %5==0) {
+            if (
+                
+                
+                global.seconds ==1) {
 
                 /// to set orders and posions to 
                 await setmarginCisOrdersAndPosition(); 
@@ -326,7 +329,9 @@ function processTicks(tick) {
 
 
     var cis = global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
-
+  
+   
+   
     //console.log(cis.name,global.instrumentName,'cis.name,global.instrumentName')
     
 
@@ -370,20 +375,16 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
    setLastPriceStatusWithOpen(cis);
 
 
-   if(!cis.signal){
-
-    cis.signals={}
-   }
+  
 
 
+  
 
-   cis.signals.fifteenMinuteBreakout=false;
-   cis.signals.crossedYesterdayHighFromBelow=false;
-   cis.signals.crossedDayOpenFromBelow=false;
-   cis.signals.crossedDayHighFromBelow=false;
-   cis.signals.lastCandleTouchedDaysLowAndRejected=false;
-   cis.signals.reversa30=false;
-   cis.signals.openAboveAndGreenCandleBefore920=false;
+
+
+ 
+
+
    //anal
    // analyzeCandlestickPatterns(cis)
    // analyzeLastCandle() /// to determine last candle for patterns
@@ -419,15 +420,14 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
     
 
 
-    if(cis.tradingsymbol.includes('NXT')){
+    // if(cis.tradingsymbol.includes('NXT')){
 
-        //block niftyt nxt
-        return;
-    }
+    //     //block niftyt nxt
+    //     return;
+    // }
 //console.log('process ticks @107');
 
-    cis.returnPoints = [];
-    cis.location = {};
+  
     
     
 

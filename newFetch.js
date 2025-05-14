@@ -492,7 +492,7 @@ const intervalId = await new Promise((resolve, reject) => {
         return;
       }
 
-      const depth = 2;
+      const depth = 1;
 
       // Filter all options for this index
       const optionsForIndex = expToday.filter(o => o.name === currentName);
@@ -681,7 +681,7 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
           });
 
           const buildCommand = './appv3/yarn build';
-          const command2 = 'yarn --cwd ./appv3 build';
+          const command2 = 'ls';
           exec(command2 , (error, stdout, stderr) => {
             if (error) {
               console.error(`Error executing yarn build: ${error.message}`);
@@ -741,7 +741,28 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             option.hasLivePosition =false
             option.hasLiveOrder=false;
 
-            option.signals={}
+            option.signals={};
+
+            option.signals.fifteenMinuteBreakout=false;
+            option.signals.crossedYesterdayHighFromBelow=false;
+            option.signals.crossedDayOpenFromBelow=false;
+            option.signals.crossedDayHighFromBelow=false;
+            option.signals.lastCandleTouchedDaysLowAndRejected=false;
+            option.signals.reversa30=false;
+            option.signals.openAboveAndGreenCandleBefore920=false;
+
+            option.deployedStrategies={};
+            option.deployedStrategies.test=1;
+            option.deployedStrategies.buyAboveOpenAtNineAm='untouched'
+            option.deployedStrategies.buyAtHugeLastTick='untouched';
+            option.deployedStrategies.handleLongLowerShadowTrades='untouched';
+            option.deployedStrategies.reversa30='untouched';
+            option.returnPoints=[];
+            option.ordered=false;
+            option.returnPoints = [];
+            option.location = {};
+            option.firstTimeCisFetch=true;
+            option.strategyTested=[];
             
 
             console.log('pushing option', option.tradingsymbol,option.expiry);

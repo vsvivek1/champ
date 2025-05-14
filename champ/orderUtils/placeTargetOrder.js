@@ -5,22 +5,26 @@ export async function placeTargetOrder(cis, order, kite) {
     cis.order = order;
 
     // Default target calculation
-    let targetPrice = order.average_price + cis.averageRange;
+    let targetPrice = order.buy_price + cis.averageRange;
 
     // Fallback if invalid range
     if (isNaN(targetPrice)) {
         targetPrice = order.average_price + 2;
+
+        console.log('target is nan14 ')
     }
 
     // If target was pre-set by strategy
     if (cis.inbuiltTarget) {
         targetPrice = cis.targetPrice;
+
+        console.log('target is built in ')
     }
 
     // Force overwrite for some conditions (e.g., STK)
-    if (global.speedSymbols.includes(cis.tradingsymbol)) {
-        targetPrice = op + 2;
-    }
+    // if (global.speedSymbols.includes(cis.tradingsymbol)) {
+    //     targetPrice = op + 2;
+    // }
 
     let transaction_type = 'SELL';
 
@@ -55,12 +59,14 @@ export async function placeTargetOrder(cis, order, kite) {
     cis.stopLossPrice = op - 3;
 
 
-    if(op==0 || isNaN(op)){
+    // if(op==0 || isNaN(op)){
 
-        cis.targetPrice=cis.tick.last_price+3
-        cis.stopLossPrice=cis.tick.last_price-3
+    //    // cis.targetPrice=cis.tick.last_price+3
+    //    // cis.stopLossPrice=cis.tick.last_price-3
 
-    }
+    //     //console.log('target is built in 67 line')
+
+    // }
 
     // Validate before order placement
     if (isNaN(cis.targetPrice)) {
@@ -72,6 +78,13 @@ export async function placeTargetOrder(cis, order, kite) {
        // process.exit();
         console.warn(`[❌] NaN targetPrice detected for ${cis.tradingsymbol}, using minute data for target order.`);
        // return;
+    }
+
+    if(!isNaN(cis.averageRange)){
+
+        cis.targetPrice=order.price+(cis.averageRange)
+
+        console.log('order placed from average range')
     }
 
     const orderParams = {

@@ -20,7 +20,7 @@ export function handleGeneralTrades(cis, kite) {
 
 export function handleTrades(cis, kite) {
 
-
+return;
 
 console.log('arrived hre')
   
@@ -51,39 +51,16 @@ return;
     let stopLossMultiplier = global.stoplossPc || 0.95; // Default stop-loss percentage
 
 
-        if (isOpenLowAtSpecificSeconds(cis)) {
-            buyCriteria = "OpenLowAtSpecificSeconds";
-            cis.signals.OpenLowAtSpecificSeconds=true
-            proceedToTrade = true;
-        }else{
+      
 
-            cis.signals.OpenLowAtSpecificSeconds=false;
-        }
+      
 
-        if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
-            buyCriteria = "ThreeBlackCrows";
-            proceedToTrade = true;
-        }
-
-        if (cis.tick.last_price > cis.pricePoints?.d1?.high && cis.minuteData.slice(-1)[0].high< cis.pricePoints?.d1?.high ) {
-            buyCriteria = "YesterdayHighCross";
-            cis.signals.YesterdayHighCross=true
-            proceedToTrade = true;
-        }else{
-
-            cis.signals.YesterdayHighCross=false;
-
-        }
+    
     
 
     if (global.hours >= 10 && global.hours < 12) {
         // Mid-morning strategies
-        let h = findHourlyHighestPrice(cis);
-
-        if (cis.tick.last_price > h && cis.minuteData.slice(-1)[0].high < h) {
-            buyCriteria = "HourlyHighBreakout";
-            proceedToTrade = true;
-        }
+     
 
         if (regressionBreakoutTrading(cis)) {
             buyCriteria = "RegressionBreakout";
@@ -91,40 +68,14 @@ return;
         }
     }
 
-    if (global.hours >= 12 && global.hours < 16) {
-        // Afternoon strategies
-        const volResult = compareVolatility(cis.minuteData);
-        if (
-            cis.minuteData.length > 15 &&
-            volResult.lastFiveVolatility > volResult.previousTenVolatility * 1.4 &&
-            cis.tick.last_price > cis.minuteData.slice(-1)[0].high
-        ) {
-            buyCriteria = "VolatilityBreakout";
-            proceedToTrade = true;
-        }
-
-        const highAfter11 = highAfter11AM(cis);
-        if (cis.minuteData.slice(-1)[0].low < highAfter11.highest && cis.tick.last_price > highAfter11.highest) {
-            buyCriteria = "HighCrossAfter11";
-            proceedToTrade = true;
-        }
-    }
+  
 
     // General Strategies
-    if (cis.minuteData && is15MinuteBreakout(cis.minuteData, cis.tick.last_price).breakoutOccurred) {
-        buyCriteria = "15MinBreakout";
-        proceedToTrade = true;
-    }
+  
 
-    if (isHammerCandle(cis.minuteData.slice(-1)[0])) {
-        buyCriteria = "HammerCandle";
-        proceedToTrade = true;
-    }
+   
 
-    if (hasManyUpperWicks(cis.minuteData)) {
-        buyCriteria = "ManyUpperWicks";
-        proceedToTrade = true;
-    }
+  
 
     // Final Trade Execution
 

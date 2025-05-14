@@ -179,7 +179,7 @@ export function processTicks(tick) {
     var cis = global.instrumentsForMining.find(i => i.instrument_token === tick.instrument_token);
 
     if (!cis) {
-        cis.returnPoints.push('NO CIS');
+        cis.returnPoints='NO CIS';
         return;
     }
 

@@ -2,7 +2,7 @@ import { setTargetForTrade } from '../setTargetForTrade.js';
 
 export async function placeShortCovering(cis, order, kite) {
 
-    return;
+    //return;
     let targetPrice = global.hours === 9
         ? order.average_price * 0.997
         : order.average_price * 0.99;
@@ -13,7 +13,7 @@ export async function placeShortCovering(cis, order, kite) {
         transaction_type: "BUY",
         order_type: "LIMIT",
         quantity: order.quantity,
-        price: Math.floor(targetPrice),
+        price: order.price-2,
         product: "MIS",
         validity: "DAY",
     };
