@@ -15,6 +15,8 @@ export function checkLastPriceAgainstPreviousCandles(cis) {
     // Check if the last price is less than all of the low prices of the previous 3 candles
     const isLastPriceLessThanAllLows = lowPrices.every((low) => lastPrice < low);
 
+
+    if(isLastPriceLessThanAllLows) console.log(`executing sl last price less than 3 consequtive lows for ${cis.tradingsymbol}`)
     // Return true if the condition is met, otherwise return false
     return isLastPriceLessThanAllLows;
 }

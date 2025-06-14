@@ -20,13 +20,15 @@ export function redCandleStartAfterGreenCandles(cis) {
     //const isLiveCandleRed = liveMinuteCandle.close < liveMinuteCandle.open;
    // if ()
     // Check the global.seconds and return true if all conditions are met
-   if(greenCandlesCount >= 2 && cis.liveMinute.color === 'bearish' && global.seconds >= 6){
+   if(greenCandlesCount >= 2 && cis.liveMinute.color === 'bearish' && global.seconds >= 10 &&   cis.hasPosition){
 
-    if(global.minutes%15==0 && global.seconds==0)     console.log('EXECUTING STOP LOSS greenCandlesCount >= 2 && cis.liveMinute.color === \'bearish && global.seconds >= 6')
+   // if(global.minutes%15==0 && global.seconds==0)    
+        
+        console.log('EXECUTING STOP LOSS greenCandlesCount >= 2 && cis.liveMinute.color === \'bearish && global.seconds >= 6',cis.tradingsymbol)
 }
 
 
-    if (greenCandlesCount >= 2 && cis.liveMinute.color === 'bearish' && global.seconds >= 6) {
+    if (greenCandlesCount >= 2 && cis.liveMinute.color === 'bearish' && global.seconds >= 6 ) {
         return true;
     }
 

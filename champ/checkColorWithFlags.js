@@ -29,7 +29,7 @@ function checkColorWithFlags(cis) {
 
     if(flagAfter30 && cis.hasPosition){
 
-        if(global.minutes%15==0 && global.seconds==0)        console.log('EXECUTING STOP LOSS flagAfter30')
+               console.log('EXECUTING STOP LOSS flagAfter30 for',cis.tradingsymbol)
     }
 
     return  flagAfter30;

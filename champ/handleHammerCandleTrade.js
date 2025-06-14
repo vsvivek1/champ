@@ -23,6 +23,6 @@ export function handleHammerCandleTrade(cis, kite) {
     cis.returnPoints = `❌ [${strategyName}] Last candle is not a hammer`;
     cis.strategyTested = cis.strategyTested || [];
     cis.strategyTested.push(strategyName);
-    cis.deployedStrategies[strategyName] = 'notActivated';
+    cis.deployedStrategies[strategyName] = 'touched';
     return false;
 }

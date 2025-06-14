@@ -7,6 +7,8 @@ export async function updateOpenOrderPrice(kite, order_id, instrument_token, las
             price: updatedPrice,
         };
 
+
+        
         await kite.modifyOrder("regular", orderParams);
         console.log(`Order ${order_id} updated successfully to price ${updatedPrice}`);
     } catch (error) {

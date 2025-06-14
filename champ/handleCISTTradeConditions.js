@@ -21,7 +21,7 @@ export function validateCISTradeConditions(cis) {
 //     }
 
 //     cis.entryHealth='NO OPERATOR BUY CANDLES FOUND'
-//     cis.returnPoints.push('NO OPERATOR BUY CANDLES FOUND')
+//       cis.returnPoints ='NO OPERATOR BUY CANDLES FOUND')
 
 
 //     console.log('no operator buy candles',cis.tradingsymbol)
@@ -38,7 +38,7 @@ export function validateCISTradeConditions(cis) {
         }
 
         cis.entryHealth='LAST PRICE LESS THAN 1'
-        cis.returnPoints.push('less than one ')
+          cis.returnPoints ='less than one ';
 
         global.addOrIncrementRejection("LAST PRICE LESS THAN 1: " + cis.tradingsymbol);
         return false;
@@ -51,7 +51,7 @@ export function validateCISTradeConditions(cis) {
     //         cis.returnPoints=[];
            
     //     }
-    //     cis.returnPoints.push('live candle bearish ') 
+    //       cis.returnPoints ='live candle bearish ') 
     //    cis.entryHealth='live candle bearish'
         
     //     global.addOrIncrementRejection("LIVE CANDLE BEARISH: " + cis.tradingsymbol);
@@ -65,7 +65,7 @@ export function validateCISTradeConditions(cis) {
     //     if(typeof cis.returnPoints=='undefined'){
 
     //         cis.returnPoints=[];
-    //         cis.returnPoints.push('Gap down ')
+    //           cis.returnPoints ='Gap down ')
     //     }
     //          cis.entryHealth='Gap down '
     //     global.addOrIncrementRejection("GAP DOWN: " + cis.tradingsymbol);
@@ -80,12 +80,12 @@ export function validateCISTradeConditions(cis) {
     //         if(typeof cis.returnPoints=='undefined'){
 
     //             cis.returnPoints=[];
-    //             cis.returnPoints.push('below open')
+    //               cis.returnPoints ='below open')
 
     //             cis.entryHealth='below open AT 9'
     //         }else{
 
-    //             cis.returnPoints.push('below open')
+    //               cis.returnPoints ='below open')
 
     //               cis.entryHealth='below open AT 9 RET POINTS'
     //         }
@@ -103,7 +103,7 @@ export function validateCISTradeConditions(cis) {
     //     if(typeof cis.returnPoints=='undefined'){
 
     //         cis.returnPoints=[];}
-    //         cis.returnPoints.push('Below Open')
+    //           cis.returnPoints ='Below Open')
         
     //     return false;
     // }
@@ -115,7 +115,7 @@ export function validateCISTradeConditions(cis) {
           
         
     //     global.addOrIncrementRejection('Price too low');
-    //     cis.returnPoints.push('Below 5 Rs')
+    //       cis.returnPoints ='Below 5 Rs')
     //     return false;
     // }
 
@@ -124,11 +124,11 @@ export function validateCISTradeConditions(cis) {
         if(typeof cis.returnPoints=='undefined'){
 
             cis.returnPoints=[];}
-            cis.returnPoints.push('cis no buy time')
+              cis.returnPoints ='cis no buy time';
         
         global.addOrIncrementRejection('cis no buy');
 
-        cis.returnPoints.push('cis no buy')
+          cis.returnPoints ='cis no buy';
         return false;
     }
 
@@ -137,11 +137,11 @@ export function validateCISTradeConditions(cis) {
         if(typeof cis.returnPoints=='undefined'){
 
             cis.returnPoints=[];}
-            cis.returnPoints.push('no tick')
+            cis.returnPoints='no tick'
         
         global.addOrIncrementRejection('cis no tick');
 
-        cis.returnPoints.push('cis no tick')
+          cis.returnPoints ='cis no tick';
         return false;
     }
 
@@ -152,7 +152,7 @@ export function validateCISTradeConditions(cis) {
         if(typeof cis.returnPoints=='undefined'){
 
             cis.returnPoints=[];}
-            cis.returnPoints.push('no minute data')
+              cis.returnPoints ='no minute data';
         
         global.addOrIncrementRejection('no minute data');
         return false;
@@ -160,7 +160,7 @@ export function validateCISTradeConditions(cis) {
 
 
     //console.log('no operator buy candles',cis.tradingsymbol)
-   // cis.returnPoints.push('no minute data')
+   //   cis.returnPoints ='no minute data')
 
 
 

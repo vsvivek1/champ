@@ -229,7 +229,7 @@ if(cis.minuteData && cis.minuteData.length>15 &&  result &&
   } */
     // Execute buy logic if any of the strategies meet the criteria
 
-    //console.log(global.instrumentsForMining.map(i=>i.tradingsymbol,),'trading symbols');
+    //console.log(global.allInstruments.map(i=>i.tradingsymbol,),'trading symbols');
     
 
 
@@ -255,7 +255,7 @@ if(cis.minuteData.slice(-1)[0].low<resul.highest && cis.tick.last_price>resul.hi
 
 if(global.seconds%5==0 && global.minutes%5==0){
     console.log('12-4 health check sample trading symbols',
-        global.instrumentsForMining.map(i=>i.tradingsymbol),
+       global.instrumentsForMining.map(i=>i.tradingsymbol),
         
         
         cis.tradingsymbol,{proceedToTrade});

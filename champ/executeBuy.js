@@ -19,7 +19,7 @@ cis.entryHealth='inside execute buy'
     if (cis.ordered) {
 
 
-       // console.log(cis.ordered,'cis.ordered');
+       // console.log(cis.ordered,'cis.ordered',cis.tradingsymbol);
         
 
         return false;
@@ -141,7 +141,7 @@ qty=250;
 
 
 
-qty=10*cis.lot_size;
+qty=20*cis.lot_size;
     const orderParams = {
         exchange: cis.exchange,
         tradingsymbol: cis.tradingsymbol,
@@ -155,7 +155,7 @@ qty=10*cis.lot_size;
     };
 
 
-    return;
+    //return;
 
 if(global.instrumentName=='STK'){
 console.log(orderParams)

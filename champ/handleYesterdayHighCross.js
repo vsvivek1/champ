@@ -34,7 +34,7 @@ export function handleYesterdayHighCross(cis, kite) {
     cis.returnPoints = `❌ [${strategyName}] LTP ≤ Yesterday's High or last candle already broke it`;
     cis.strategyTested = cis.strategyTested || [];
     cis.strategyTested.push(strategyName);
-    cis.deployedStrategies[strategyName] = 'notActivated';
+    cis.deployedStrategies[strategyName] = 'touched';
 
     return false;
 }

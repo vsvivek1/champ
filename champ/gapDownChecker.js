@@ -19,7 +19,7 @@ export function checkGapDown(cis) {
     // Return true if gap down is more than 30%, otherwise false
 
     cis.isGapDown=gapDownPercent < -30;
-    return gapDownPercent < -30;
+    return gapDownPercent < -20;
 }
 
 // Export the function for use in other files

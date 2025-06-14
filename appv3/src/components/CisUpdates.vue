@@ -1,9 +1,11 @@
 <template>
   <div>
       <h1>CIS Data</h1>
-      <h1>KPV Legacy</h1>
+   
       <h1>No Manual Trades</h1>
-      <h1>MY ALL LOSSES ARE DUE TO HANGING ON TO LOOSING POSITIONS</h1>
+      <h1>MY ALL LOSSES ARE DUE TO HANGING ON TO LOOSING POSITIONS without STOP LOSS</h1>
+
+         <h1>CHANGE IN SL STRATEGY . EITHER MA20 OR DAY OPEN. ENTRY ALSO FOR THE SAME </h1>
 
 
       <table>
@@ -24,6 +26,8 @@
             </tbody>
         </table>
 
+  
+
         <table v-if="symbols && symbols.length > 0">
             <thead>
                 <tr>
@@ -37,16 +41,11 @@
                 </tr>
             </thead>
             <tbody>
+             
                 <tr v-for="(item, index) in symbols" :key="index"
                 
                 
-                v-if="item.ma20  && item.ma20!=-1 
-                
-                // &&
-                
-                // item.ma20<item.tick.last_price
-                
-                "
+             
                 
                 >
                     <td>                   <span v-if="item['isAboveOpen'] " class="green"> 
@@ -73,7 +72,7 @@ v
 
                            <b v-if ="item.ma20  && item.tick.last_price>item.ma20"> Above Moving Avg 20</b>
 
-                           <b v-if ="!item.ma20 || item.ma20>item.tick.last_price"> below  Moving Avg 20 no trade</b>
+                           <b v-if ="!item.ma20 || item.ma20>item.tick.last_price"> ma20 is {{item.ma20}} below  Moving Avg 20 no trade</b>
 
 
                         
@@ -149,12 +148,15 @@ v-if="item.avoided">Include</v-btn>
     <div>
 
       
-    <div style="{border:1px solid}"
+    <div 
+    
+    style="{border:1px solid}"
     
     v-for="(value, key) in item.signals" :key="key" class="status-item">
       <span class="status-key">{{ formatKey(key) }}</span>:
       <span :class="value ? 'status-true' : 'status-false'">
         {{ value ? '✔️' : '❌' }}
+        <hr>
       </span>
     </div>
   </div>
@@ -246,7 +248,7 @@ export default {
       return {
           cisList: [],
           symbols: instruments,
-          selectedKeys: ['returnPoints','tick','entryHealth','operatorBuyCandles','signals','error','buyCriteria'],
+          selectedKeys: ['returnPoints','tick','entryHealth','operatorBuyCandles','signals','buyCriteria'],
       };
   },
   created() {

@@ -8,7 +8,7 @@
  * @param {number} instrumentToken - The token of the instrument being traded.
  * @param {number} newPrice - The new price to upglobal.date the order to.
  */
-export default async function updateOpenOrderPrice(kite, orderId, instrumentToken, newPrice) {
+export default async function updateOpenOrderPrice(kite, orderId, instrumentToken, newPrice,cis) {
     try {
         // Define the parameters for updating the order
 
@@ -25,13 +25,15 @@ export default async function updateOpenOrderPrice(kite, orderId, instrumentToke
        // kite.modifyOrder()
 
        //console.log(kite);
-       
+       //cis.updated = true;
         const response = await  kite.modifyOrder('regular',orderId, orderParams);
 
         console.log(`Order ${orderId} upglobal.dated successfully to new price ${newPrice}.`,global.clock);
         return response;
     } catch (error) {
         console.error(`Error updating order ${orderId}:`, error,global.clock);
-        throw error; // Re-throw the error for further handling if needed
+       
+       return;
+        //throw error; // Re-throw the error for further handling if needed
     }
 }

@@ -392,7 +392,7 @@ async function main(params) {
    
 var nfoScripts=allScriptJson.filter(a=>
   
-  (['NIFTY','SENSEX'].includes(a.name)&& !['NIFTYNXT50'].includes(a.name)) && exchanges.includes(a.exchange)
+  (['NIFTY','SENSEX','BANKNIFTY',"MIDCPNIFTY","FINNIFTY"].includes(a.name)&& !['NIFTYNXT50'].includes(a.name)) && exchanges.includes(a.exchange)
 
 &&  dateRange.includes(a.expiry)
 
@@ -440,7 +440,7 @@ var expToday=nfoScripts//getScriptsExpiringBeforeSameDayNextWeek(nfoScripts);
 
 
 
-let names=['NIFTY','SENSEX']
+let names=['NIFTY','SENSEX','BANKNIFTY',"MIDCPNIFTY","FINNIFTY"]
 //names=['NIFTY', 'BANKNIFTY',"MIDCPNIFTY","FINNIFTY"]//'SENSEX','BANKEX'
 let selectedOptions = [];
 let index = 0;
@@ -492,16 +492,35 @@ const intervalId = await new Promise((resolve, reject) => {
         return;
       }
 
-      const depth = 1;
+      const depth = 0;
+
+     // const expiries = [...new Set(optionsForIndex.map(o => o.expiry))].sort();
+
+      
+
+      const expiries  = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() + i +0);               // +1 for tomorrow, +i for the subsequent days
+        return d.toISOString().slice(0, 10);          // “YYYY-MM-DD”; adjust formatting as needed
+      });
+
+      console.log(expiries,'expiries');
+     // const nearestExpiry = expiries[0];
 
       // Filter all options for this index
-      const optionsForIndex = expToday.filter(o => o.name === currentName);
-      // Pick nearest expiry
-      const expiries = [...new Set(optionsForIndex.map(o => o.expiry))].sort();
-      const nearestExpiry = expiries[0];
 
-      const ceOptions = optionsForIndex.filter(o => o.instrument_type === 'CE' && o.expiry === nearestExpiry);
-      const peOptions = optionsForIndex.filter(o => o.instrument_type === 'PE' && o.expiry === nearestExpiry);
+
+      console.log(currentName);
+      var optionsForIndex = allScriptJson.filter(o => o.name === currentName  && expiries.includes(o.expiry) );
+
+
+      //console.log(optionsForIndex )
+     // process.exit()
+      // Pick nearest expiry
+      
+
+      const ceOptions = optionsForIndex.filter(o => o.instrument_type === 'CE' && expiries.includes(o.expiry) );
+      const peOptions = optionsForIndex.filter(o => o.instrument_type === 'PE' && expiries.includes(o.expiry));
 
       const ceStrikes = ceOptions.map(o => o.strike).sort((a, b) => a - b);
       const peStrikes = peOptions.map(o => o.strike).sort((a, b) => a - b);
@@ -528,7 +547,7 @@ const intervalId = await new Promise((resolve, reject) => {
       const ceOption = ceOptions.find(o => o.strike === ceStrike);
       const peOption = peOptions.find(o => o.strike === peStrike);
 
-      console.log(`➡️ ${currentName} | LTP: ${ltp} | CE: ${ceStrike} | PE: ${peStrike} | Expiry: ${nearestExpiry}`);
+      //console.log(`➡️ ${currentName} | LTP: ${ltp} | CE: ${ceStrike} | PE: ${peStrike} | Expiry: ${nearestExpiry}`);
 
       if (ceOption) selectedOptions.push(ceOption);
       else console.warn(`⚠️ CE not found for ${currentName} @ ${ceStrike}`);
@@ -743,13 +762,13 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
 
             option.signals={};
 
-            option.signals.fifteenMinuteBreakout=false;
-            option.signals.crossedYesterdayHighFromBelow=false;
-            option.signals.crossedDayOpenFromBelow=false;
-            option.signals.crossedDayHighFromBelow=false;
-            option.signals.lastCandleTouchedDaysLowAndRejected=false;
-            option.signals.reversa30=false;
-            option.signals.openAboveAndGreenCandleBefore920=false;
+            // option.signals.fifteenMinuteBreakout=false;
+            // option.signals.crossedYesterdayHighFromBelow=false;
+            // option.signals.crossedDayOpenFromBelow=false;
+            // option.signals.crossedDayHighFromBelow=false;
+            // option.signals.lastCandleTouchedDaysLowAndRejected=false;
+            // option.signals.reversa30=false;
+            // option.signals.openAboveAndGreenCandleBefore920=false;
 
             option.deployedStrategies={};
             option.deployedStrategies.test=1;

@@ -20,9 +20,11 @@ export function isMakingLowerLows(cis) {
 
     // If both conditions are met, return true
 
-    if(lowerLow && lowerHigh){
+    if(lowerLow && lowerHigh &&   cis.hasPosition){
 
-        if(global.minutes%15==0 && global.seconds==0)   console.log('EXECUTING STOP LOSS lowerLow && lowerHigh')
+       // if(global.minutes%15==0 && global.seconds==0)  
+            
+            console.log('EXECUTING STOP LOSS lowerLow && lowerHigh',cis.tradingsymbol)
     }
     return lowerLow && lowerHigh;
 }

@@ -12,7 +12,7 @@ import { executeBuy } from "./executeBuy.js";
 export function handleNminuteBreakout(cis, kite, n) {
   const strategyName = `rangeBreakout${n}m`;
 
-  cis.deployedStrategies[strategyName] = 'notActivated';
+  cis.deployedStrategies[strategyName] = 'touched';
 
   const breakout = checkNMinuteBreakout(cis.minuteData, cis, n, strategyName);
   if (breakout) {
@@ -30,7 +30,7 @@ export function handleNminuteBreakout(cis, kite, n) {
   }
 
   cis.signals[strategyName] = false;
-  cis.deployedStrategies[strategyName] = 'notActivated';
+  cis.deployedStrategies[strategyName] = 'touched';
 
   // Log strategy tested
   cis.strategyTested = cis.strategyTested || [];

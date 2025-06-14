@@ -2,12 +2,17 @@
 export function checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis) {
     // Ensure there are at least 2 candles
 
-    if(!cis) return false;
+    if(!cis){
+
+        throw 'No cis found in cis peanultimate candle check'
+
+        return true;
+    } 
 
     let minuteData=cis.minuteData
     if (!minuteData || minuteData.length < 2) {
        
-        return false;
+        return true;
        
        // throw new Error('Not enough data to perform the check. At least 2 candles are required.');
     }
@@ -30,10 +35,10 @@ export function checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis) {
     const isSmallBody = bodySize < 0.1 * totalRange;
 
 
-    if(isPenultimateGreen && (hasLowerHigh || isSmallBody)){
+    if(isPenultimateGreen && (hasLowerHigh || isSmallBody) && cis.hasLivePosition  && cis.tick.last_price<penultimateCandle.low){
 
-        if(global.minutes%15==0 && global.seconds==0)      console.log('EXECUTING STOP LOSS isPenultimateGreen && (hasLowerHigh || isSmallBody')
+            console.log('EXECUTING STOP LOSS isPenultimateGreen && (hasLowerHigh || isSmallBody for',cis.tradingsymbol)
     }
     // Return true if the penultimate candle is green and the last candle has either a lower high or a small body
-    return isPenultimateGreen && (hasLowerHigh || isSmallBody);
+    return isPenultimateGreen && (hasLowerHigh || isSmallBody && cis.tick.last_price<penultimateCandle.low);
 }

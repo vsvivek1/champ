@@ -20,6 +20,6 @@ export function buyAtHugeLastTick(cis, kite) {
         cis.strategyTested.push(strategyName);
     }
 
-    cis.deployedStrategies.buyAtHugeLastTick = 'notActivated';
+    cis.deployedStrategies.buyAtHugeLastTick = 'touched';
     return false;
 }

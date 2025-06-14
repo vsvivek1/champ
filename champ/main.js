@@ -20,6 +20,8 @@ import { analyzeOHLCWithSlopeAndDegree, isRangeGreaterThanFive } from './ohlcUti
 
 import addOrIncrementRejection from './addOrIncrementRejection.js';
 import { Worker } from 'worker_threads';
+
+import eventBus from './eventBus.js';
 //const fetchWorker = new Worker('./fetchWorker.js');
 
 
@@ -34,21 +36,39 @@ import setLiveMinute from './setLiveMinute.js';
 import updateClosePriceAt59thSecond from './updateClosePriceAt59thSecond.js';
 import { setLastPriceStatusWithOpen } from './cisHelpers.js';
 import { determineOperatorCandleFlags } from './determineOperatorCandles.js';
+import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
 
 // Get the instrument name from command line argument]]
 const instrumentName = process.argv[2];   // from start instrument script , type is catched here
 
 
 
-
+global.toOneDecimal = v => Math.trunc(v * 10) / 10;
 global.instrumentName=instrumentName;
+
+global.allInstruments=allInstruments;
 
 global.margins=false;
 
+global.stopLossPoints=20;
+global.targetPoints=50
 
+var cis;
 const instrumentData =[];
 
 let niftyTrading=[]
+
+
+eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
+
+
+    console.log('emit received @  hasLivePositionUpdated',value,token)
+    const cis =global.instrumentsForMining.find(i => i.instrument_token === token);
+    if (cis) {
+      cis.hasLivePosition = value;
+      console.log(`Updated hasLivePosition for ${token} to ${value}`);
+    }
+  });
 
 if(instrumentName=='STK'){
 
@@ -56,9 +76,9 @@ if(instrumentName=='STK'){
 
    console.log({instrumentName},'stk')
 
-    global.instrumentsForMining=niftyTrading
+   global.instrumentsForMining=niftyTrading
     global.instrumentName=instrumentName;
-    global.allInstruments=niftyTrading;
+   global.instrumentsForMining=niftyTrading;
     console.log('THread',instrumentName);
 
 }else{
@@ -71,7 +91,7 @@ if(instrumentName=='STK'){
     
     global.instrumentName =instrumentName ;
     
-    global.allInstruments=allInstruments//.find(inst => inst.name === instrumentName);
+   global.allInstruments=allInstruments//.find(inst => inst.name === instrumentName);
     
     console.log('THread',instrumentName);
 
@@ -147,6 +167,13 @@ async function main() {
         global.margins = await kite.getMargins();
 
         setInterval(async () => {
+
+
+            if(global.seconds%10==0){
+
+   
+                placeTargetIfNotTargetSet(kite)
+            }
            
            
             setClock() 
@@ -181,7 +208,7 @@ async function main() {
           
              }
 
-           }
+           }       
            
            else{
 
@@ -191,8 +218,21 @@ async function main() {
                 global.seconds ==1) {
 
                 /// to set orders and posions to 
-                await setmarginCisOrdersAndPosition(); 
-             }
+
+                if(!(global.hours<9 || global.hours>15 ||(global.hours==9 && global.minutes<15 ) || 
+                (global.hours==15 && global.minutes>30))){
+                    
+                    await setmarginCisOrdersAndPosition(); 
+                   // await placeTargetIfNotTargetSet(kite);
+
+                }
+                
+
+               
+            
+            
+            
+            }
            }
 
            
@@ -231,6 +271,9 @@ async function main() {
 
 
         await setmarginCisOrdersAndPosition(); 
+       // await placeTargetIfNotTargetSet(kite);
+
+ 
 
        // scheduleHourlyDataFetch();
     } catch (error) {
@@ -256,10 +299,16 @@ async function setmarginCisOrdersAndPosition() {
  * @returns {number} The sum of the two numbers.
  */
    // global.margins = await kite.getMargins();
+
+
+
+   if(!(global.hours<9 || global.hours>15 ||(global.hours==9 && global.minutes<15 ) || (global.hours==15 && global.minutes>30))){
     await fetchOrdersAndSetCis(kite);
     await fetchPositionsAndSetCis(kite);
     await fetchHourlyData(kite);
     await fetchMinuteData(kite);
+
+   }
 }
 
 function setClock() {
@@ -290,15 +339,24 @@ function initTicker() {
 
     ticker.connect();
     ticker.on("connect", subscribe);
-    ticker.on("ticks", onTicks);
-    ticker.on("order_update", orderUpdates);
+    
+    
+
+    if(!(global.hours<9 || global.hours>15 ||(global.hours==9 && global.minutes<15 ) || (global.hours==15 && global.minutes>30))){
+
+        ticker.on("ticks", onTicks);
+
+
+        ticker.on("order_update", orderUpdates);
+    }
+   
 }
 
 function onTicks(ticks) {
 
     
 
-    var instrumentToken = global.instrumentsForMining.map(i=>parseInt(i.instrument_token));
+    var instrumentToken =global.instrumentsForMining.map(i=>parseInt(i.instrument_token));
 
   let b=  ticker.setMode(ticker.modeFull, [instrumentToken]);
 
@@ -312,27 +370,28 @@ let count=0;
 let tickCount=0
 function processTicks(tick) {
 
-
+   // if(global.seconds%2==0)return;///suspected slowing solution
   
    if(count>0){
 
-    ticker.setMode('full', global.instrumentsForMining.map(i=>parseInt(i.instrument_token)))
+    ticker.setMode('full',global.instrumentsForMining.map(i=>parseInt(i.instrument_token)))
    }
 
     count=count+1;
 
 
 
+    
 
 
 
 
 
-    var cis = global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
+     cis =global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
   
    
    
-    //console.log(cis.name,global.instrumentName,'cis.name,global.instrumentName')
+    
     
 
 
@@ -346,6 +405,14 @@ function processTicks(tick) {
     if (!cis) return;
 
     cis.tick = tick; 
+
+
+
+
+        
+
+   // }
+       
 
 
    // Increment or reset tickCount
@@ -408,14 +475,14 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
    //if(cis.operatorBuyCandles.)
 
 
-
-   if(["NFO","BFO"].includes(cis.exchange))    socket.emit('sendCis', cis);
+   //if(["NFO","BFO"].includes(cis.exchange))    
  
+   
 
-    if(global.minutes==30 && global.seconds==1){
+    // if(global.minutes==30 && global.seconds==1){
 
-       // console.log('Tick Health',cis.tradingsymbol)
-    }
+    //    // console.log('Tick Health',cis.tradingsymbol)
+    // }
     
     
 
@@ -472,7 +539,9 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
 
   // return;
 
- 
+//console.log('is here', cis)
+  socket.emit('sendCis', cis);
+
     if (!cis.hasLivePosition) {
 
        
@@ -480,7 +549,11 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
         handleNoPosition(cis, kite)
        
         
-    } else {
+    } 
+    
+    if(cis.hasLivePosition==true) {
+
+        //console.log('terst 573 live position true why  for?',cis.tradingsymbol)
         handlePositionPresent(cis, kite);
        // console.log('cis has no position @130');
         ;
@@ -523,13 +596,13 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
 }
 
 
-async function orderUpdates(order) {
-    await handleOrderUpdates(order, kite);
+async function orderUpdates(order,cis) {
+    await handleOrderUpdates(order, kite,cis);
 }
 
  async function subscribe() {
 
-    //console.log(global.instrumentsForMining.map(i=>i.tradingsymbol));
+    //console.log(global.allInstruments.map(i=>i.tradingsymbol));
     
     try {
         const instrumentToken = global.instrumentsForMining.map(i=>parseInt(i.instrument_token));
@@ -543,7 +616,7 @@ async function orderUpdates(order) {
       
        let a=await  ticker.subscribe(instrumentToken);
 
-       console.log(a,'tick wait ')
+       //console.log(a,'tick wait ')
 
     
 
@@ -554,7 +627,7 @@ async function orderUpdates(order) {
         ticker.setMode(ticker.modeFull, [instrumentToken]);
        }
 
-       console.log(a,'tick wait  over')
+      // console.log(a,'tick wait  over')
 
 
         
@@ -565,4 +638,9 @@ async function orderUpdates(order) {
 
 
 
-main();
+
+
+    main();
+    
+
+

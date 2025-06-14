@@ -3,6 +3,8 @@ import Cis from './cisModel.js';
 
 export const savePlaceOrder = async (tradingSymbol, buyStrategy, buyQty, buyPrice, targetStrategy) => {
     try {
+
+        return;
         const buyTime = new Date();
         const cis = new Cis({
             tradingSymbol,

@@ -1,31 +1,60 @@
 import { handleBuyOrder } from './handleBuyOrder.js';
 import { handleSellOrder } from './handleSellOrder.js';
 import { handleRejectedBuyOrder } from './handleRejectedBuyOrder.js';
+import eventBus from '../../eventBus.js';
 
-export async function handleOrderUpdates(order, kite) {
+export async function handleOrderUpdates(order, kite,cis) {
+
+  //return;
   try {
-    const cis1 = global.allInstruments.find(a => a.instrument_token == order.instrument_token);
+  var cis=global.instrumentsForMining.find(a => a.instrument_token == order.instrument_token)||
+  global.allInstruments.find(a => a.instrument_token == order.instrument_token)
+  
+  ;
+//cis=cis1;
+    if(cis && cis.name!=global.instrumentName){
 
-    if(cis1.name!=global.instrumentName){
-
-        console.log('cis1.name!=global.instrumentName',cis1.name,global.instrumentName)
+        //console.log('cis1.name!=global.instrumentName',cis.name,global.instrumentName , 'from mismatch of order updates of threads')
 
         return;
     }
 
 
-    if (!cis1 || !cis1.name.includes(global.instrumentName)) {
+    if (order.status === 'COMPLETE' && order.transaction_type === 'SELL') {
 
-        return;
-      throw new Error(`[handleOrderUpdates] Instrument not tracked: ${order.instrument_token}`);
-    }
+    
+    cis.position={}
 
-    const cis = global.allInstruments.find(i => i.instrument_token == order.instrument_token);
+    cis. hasLivePosition=false;
+      //general clean up
+    
+  
+  }
+
+
+
+    // if (!cis1 || !cis1.name.includes(global.instrumentName)) {
+
+    //     return;
+    //   throw new Error(`[handleOrderUpdates] Instrument not tracked: ${order.instrument_token}`);
+    // }
+
+   // const cis =global.instrumentsForMining.find(i => i.instrument_token == order.instrument_token);
     if (!cis) {
-      throw new Error(`[handleOrderUpdates] CIS not found for token: ${order.instrument_token}`);
+
+      cis =global.allInstruments.find(i => i.instrument_token == order.instrument_token);
+    //  throw new Error(`[handleOrderUpdates] CIS not found for token: ${order.instrument_token}`);
     }
 
     if (order.status === 'COMPLETE' && order.transaction_type === 'SELL') {
+
+
+
+cis.hasLivePosition = false;
+console.log('emiting sell order update for',cis.tradingsymbol)
+eventBus.emit('hasLivePositionUpdated', { token: order.instrument_token, value: false });
+      cis.hasLivePosition=false;
+
       await handleSellOrder(order, kite, cis);
     } else if (order.status === 'COMPLETE' && order.transaction_type === 'BUY') {
       await handleBuyOrder(order, kite, cis);

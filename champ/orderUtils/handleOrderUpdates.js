@@ -4,7 +4,7 @@ import { handleRejectedBuyOrder } from './handleRejectedBuyOrder.js';
 
 export async function handleOrderUpdates(order, kite) {
   try {
-    const cis1 = global.allInstruments.find(a => a.instrument_token == order.instrument_token);
+    const cis1 =global.instrumentsForMining.find(a => a.instrument_token == order.instrument_token);
     if (typeof cis1 =='undefined'
         
         || !cis1.name.includes(global.instrumentName)
@@ -15,12 +15,17 @@ export async function handleOrderUpdates(order, kite) {
       throw new Error(`[handleOrderUpdates] Instrument not tracked: ${order.instrument_token}`);
     }
 
-    const cis = global.allInstruments.find(i => i.instrument_token === order.instrument_token);
+    var cis =global.instrumentsForMining.find(i => i.instrument_token === order.instrument_token);
     if (!cis) {
-      throw new Error(`[handleOrderUpdates] CIS not found for token: ${order.instrument_token}`);
+
+      cis=global.instrumentsAll.find(i => i.instrument_token === order.instrument_token);
+
+      //throw new Error(`[handleOrderUpdates] CIS not found for token: ${order.instrument_token}`);
     }
 
     if (order.status === 'COMPLETE' && order.transaction_type === 'SELL') {
+
+      cis.placeTargetIfNotTargetSet=false;
       await handleSellOrder(order, kite, cis);
     } else if (order.status === 'COMPLETE' && order.transaction_type === 'BUY') {
       await handleBuyOrder(order, kite, cis);

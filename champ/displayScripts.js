@@ -2,12 +2,12 @@ export async function displayScripts(kc) {
 
 
   // Create a mapping of instrument tokens to their respective trading symbols
-  const tokenToSymbolMap = global.instrumentsForMining.reduce((map, instrument) => {
+  const tokenToSymbolMap =global.instrumentsForMining.reduce((map, instrument) => {
     map[instrument.instrument_token] = instrument.tradingsymbol;
     return map;
   }, {});
 
-let it= global.instrumentsForMining
+let it=global.instrumentsForMining
 
 /* .filter(x=>x.qualifiedForTrade) */
 
@@ -18,7 +18,7 @@ console.log(it,'qualified scripts');
 return;
 
   // Map instruments to their instrument tokens
-  let tokens = global.instrumentsForMining.map(i => i.instrument_token);
+  let tokens =global.instrumentsForMining.map(i => i.instrument_token);
 
   // Fetch quotes for each instrument token using the kit4connect instance (kc)
   const quotes = await Promise.all(

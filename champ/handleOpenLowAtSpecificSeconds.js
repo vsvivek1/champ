@@ -43,7 +43,7 @@ export function handleOpenLowAtSpecificSeconds(cis, kite) {
         cis.returnPoints = `❌ [${strategyName}] Condition failed: Open != Low or not at 59s`;
         cis.strategyTested = cis.strategyTested || [];
         cis.strategyTested.push(strategyName);
-        cis.deployedStrategies[strategyName] = 'notActivated';
+        cis.deployedStrategies[strategyName] = 'touched';
         return false;
     }
 }

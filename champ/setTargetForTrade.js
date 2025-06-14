@@ -3,6 +3,8 @@ import Cis from './cisModel.js';
 
 export const setTargetForTrade = async (tradingSymbol, targetPrice, targetStrategy) => {
     try {
+
+        return;
         const cis = await Cis.findOne({ tradingSymbol, haveLivePosition: true, hasTarget: false });
         if (!cis) {
 

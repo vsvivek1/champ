@@ -1,11 +1,11 @@
 export function checkLowerLowsAndLowerHighs(cis) {
 
-    if(!cis) return false;
+    if(!cis) return true;
 
    let minuteData=cis.minuteData;
     // Ensure we have at least two candles to compare
     if (!minuteData || minuteData.length < 2) {
-        return false; // Not enough data
+        return true; // Not enough data
     }
 
     // Get the last two candles
@@ -21,15 +21,23 @@ export function checkLowerLowsAndLowerHighs(cis) {
     // Return true if both conditions are satisfied
 
 
-    if(isLowerLow && isLowerHigh){
+    if(isLowerLow && isLowerHigh && cis.tick.last_price< secondLastCandle.low ){
 
 
   cis.stopLossStrategy='lowerLow'
-        return true
+
+  if( cis.hasLivePosition){
+  console.log('EXECUTING STOP LOSS isLowerLow && isLowerHigh for',cis.tradingsymbol) 
+
+return true
+  }
+ 
+       
       
         //some issue will c later
 
-       // console.log('EXECUTING STOP LOSS isLowerLow && isLowerHigh') 
+        return false;
+      
     }
 
 

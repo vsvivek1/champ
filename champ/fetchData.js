@@ -6,6 +6,7 @@ import { Instrument } from './InstrumentClass.js';
 import calculateMovingAverage from './calculateMovingAverage.js';
 import { findDemandZones } from './findDemadZones.js';
 import { calculate20MA } from './calculate20Ma.js';
+import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
 
 // Initialize variables for historical data
 let hourlyHistoricalData = {};
@@ -46,13 +47,21 @@ export function aggregateOHLC(cis) {
 }
 
 
+
+
+function placeReverseOrderIfNotPresent(){
+
+
+}
+
+
 // Function to fetch orders and set CIS data
 export async function fetchOrdersAndSetCis(kite) {
     try {
         global.orders = await kite.getOrders(); // Upglobal.date global variable
 
         orders.forEach(order => {
-            const matchingInstrument = global.instrumentsForMining.
+            const matchingInstrument =global.instrumentsForMining.
             
             find(instrument => instrument.instrument_token === order.instrument_token);
             
@@ -67,14 +76,14 @@ export async function fetchOrdersAndSetCis(kite) {
 
 
 
-                const instrument = global.allInstruments.find(instrument => instrument.instrument_token === order.instrument_token);
+                const instrument =global.instrumentsForMining.find(instrument => instrument.instrument_token === order.instrument_token);
                 if (instrument) {
                     instrument.orderStatus = order.status;
                     instrument.orderT = order.order_id;
                     instrument.hasLiveOrder = order.status === "OPEN";
         
-                    // Push the instrument to global.instrumentsForMining
-                    global.instrumentsForMining.push(instrument);
+                    // Push the instrument toglobal.instrumentsForMining
+                   global.instrumentsForMining.push(instrument);
                 
                 
                     if( matchingInstrument.hasLivePosition){
@@ -109,10 +118,10 @@ export async function fetchPositionsAndSetCis(kite) {
         global.positions.forEach(pos => {
 
 
-           if(pos.quantity==0) return;
-            if (pos.quantity != 0) {
+           if(pos.quantity<0) return;
+            if (pos.quantity > 0) {
 
-                let matchingInstrument = global.instrumentsForMining.find(instrument => instrument.tradingsymbol === pos.tradingsymbol);
+                let matchingInstrument =global.instrumentsForMining.find(instrument => instrument.tradingsymbol === pos.tradingsymbol);
 
                 if (matchingInstrument) {
 
@@ -123,7 +132,7 @@ export async function fetchPositionsAndSetCis(kite) {
                     matchingInstrument.stopLossPrice=matchingInstrument.buyPrice-5
 
                 } else {
-                    const instrument = global.allInstruments.
+                    const instrument =global.instrumentsForMining.
                     
                     find(instrument => instrument.tradingsymbol === pos.tradingsymbol);
                     if (instrument) {
@@ -131,8 +140,8 @@ export async function fetchPositionsAndSetCis(kite) {
                         instrument.hasLivePosition = true;
                         instrument.buyPrice = pos.average_price;
 
-                        // Push the instrument to global.instrumentsForMining
-                        global.instrumentsForMining.push(instrument);
+                        // Push the instrument toglobal.instrumentsForMining
+                       global.instrumentsForMining.push(instrument);
                     }
                 }
             }
@@ -155,16 +164,20 @@ export async function fetchHourlyData(kite) {
         let fromTime = moment().startOf('day').subtract(1, 'days').add(13, 'global.hours').format('YYYY-MM-DD HH:mm:ss');
         let toTime = now.format('YYYY-MM-DD HH:mm:ss');
         const dataType = '60minute';
-        const instrument_tokens = [...new Set(global.instrumentsForMining.map(a => parseInt(a.instrument_token)))];
+        const instrument_tokens = [...new Set(global.allInstruments.map(a => parseInt(a.instrument_token)))];
 
 
 
        // console.log('total instruments ',instrument_tokens .length)
-        await fetchAllData(kite, instrument_tokens, fromTime, toTime, dataType, hourlyHistoricalData);
+       
+       
+       // await fetchAllData(kite, instrument_tokens, fromTime, toTime, dataType, hourlyHistoricalData);
+       
+       
        // console.time('Execution Time');
 
         
-        global.instrumentsForMining.forEach(instrument => {
+       global.instrumentsForMining.forEach(instrument => {
 
            
             instrument.hourlyHistoricalData = hourlyHistoricalData[instrument.instrument_token];
@@ -216,11 +229,25 @@ if(global.instrumentName=='STK'){
         await fetchAllData(kite, instrument_tokens, fromTime, toTime, dataType, minuteHistoricalData);
 
 
-      //  console.log('fetch all data stop','global.instrumentsForMining len',global.instrumentsForMining.length);
+      //  console.log('fetch all data stop','global.allInstruments len',global.allInstruments.length);
        
        var instrument;
         global.instrumentsForMining.forEach(instrument1 => {
 
+
+
+        //  let a=   global.instrumentsForMining.find(i=>i.instrument_token==instrument1.instrument_token);
+
+
+        //  if(typeof a=='undefined'){
+
+
+        //     return;
+        //  }
+        //  console.log(a.tradingsymbol,'from fetch minute data')
+
+
+        // process.exit();
 
             instrument=instrument1;
            /// console.log('instrument token',instrument.tradingsymbol,typeof instrument.minuteData,'=mindata len');   check later
@@ -232,7 +259,7 @@ if(global.instrumentName=='STK'){
            // console.log('from minute data',instrument.minuteData )
             if (instrument.minuteData && instrument.minuteData.length>0) {
 
-
+                //console.log('from here 2')
                 instrument.highestPointAfter12PM = highestPointAfter12PM(instrument.minuteData);
                 instrument.minuteCandleMedianRange = findMedianRange(instrument.minuteData);
                 instrument.minuteCandleMeanRange = findMeanRange(instrument.minuteData);
@@ -249,11 +276,15 @@ if(global.instrumentName=='STK'){
             
                 let averageRange=calculateVolatility(lastFiveCandles);
 
+                instrument.averageRange=
 
-                instrument.averageRange=averageRange|| 3;
+
+                instrument.averageRange=isNaN(averageRange)?100: averageRange;
 
 
             findDemandZones(instrument);
+
+           
 ;
 
 
@@ -287,6 +318,9 @@ if(global.instrumentName=='STK'){
         });
 
 
+     
+
+        
     } catch (error) {
         console.error("Error fetching minute datax:", error,instrument.tradingsymbol);
     }
@@ -334,7 +368,7 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType, histo
 //console.log('historic call',ts)
             const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
 // console.log(index,'minute data fetched',instrument,
-//     global.instrumentName,global.instrumentsForMining.find(i=>i.instrument_token==instrument).tradingsymbol)
+//     global.instrumentName,global.allInstruments.find(i=>i.instrument_token==instrument).tradingsymbol)
 
 
 
@@ -342,7 +376,7 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType, histo
                 console.log('Issue in fetching historical data for', instrument);
             }
 
-            let script = global.instrumentsForMining.find(i => i.instrument_token == instrument);
+            let script =global.instrumentsForMining.find(i => i.instrument_token == instrument);
             if (script) {
                 script.minuteData = data;
 
@@ -357,9 +391,13 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType, histo
 
         
         } catch (error) {
-            console.log(global.instrumentName)
+            console.log(global.instrumentName,{instrument},'global.instrumentName')
+
+            console.log(global.allInstruments.find(i=>i.instrument_token==instrument),'here')
+
+
             console.error(`Error fetching ${dataType} data for ${instrument}:`, error);
-            process.exit()
+           // process.exit()
            
         }
 

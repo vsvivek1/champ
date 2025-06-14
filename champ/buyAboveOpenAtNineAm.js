@@ -26,6 +26,6 @@ export function buyAboveOpenAtNineAm(cis, kite) {
         cis.strategyTested.push(strategyName);
     }
 
-    cis.deployedStrategies.buyAboveOpenAtNineAm = 'notActivated';
+    cis.deployedStrategies.buyAboveOpenAtNineAm = 'touched';
     return false;
 }

@@ -35,7 +35,7 @@ import { handleNonSTKTrades } from './handleNonSTKTrades.js';
 function handleReversalTrades(cis, kite) {
     const rversa = reversalCheck(cis.minuteData, cis);
     if (rversa) {
-        cis.signals.reversa30 = true;
+
         cis.buyStrategy = 'rversa30';
         cis.targetPrice = cis.tick.last_price + cis.liveMinute.range;
         cis.stopLossPrice = cis.tick.last_price - cis.liveMinute.range;
@@ -44,7 +44,7 @@ function handleReversalTrades(cis, kite) {
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
         return true;
     } else {
-        cis.signals.reversa30 = false;
+       
     }
     return false;
 }
@@ -138,6 +138,9 @@ function handleGeneralTrades(cis, kite) {
 }
 
 export async function handleNoPosition(cis, kite) {
+
+
+
     let { timeFactor, elapsedMinutes } = getTimeFactorAndElapsedMinutes();
 
     if (global.instrumentName == 'STK') {

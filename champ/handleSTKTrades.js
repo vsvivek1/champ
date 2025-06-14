@@ -19,7 +19,7 @@ export function handleSTKTrades(cis, kite) {
             
         }
 
-        cis.returnPoints.push('low volume')
+          cis.returnPoints ='low volume';
         return;
     }
 
@@ -62,7 +62,7 @@ export function handleSTKTrades(cis, kite) {
         if(typeof cis.returnPoints=='undefined'){
 
             cis.returnPoints=[];
-            cis.returnPoints.push('below Open')
+              cis.returnPoints ='below Open';
         }
         return;
     }

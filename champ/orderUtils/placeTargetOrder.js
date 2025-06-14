@@ -1,113 +1,143 @@
 import { setTargetForTrade } from '../setTargetForTrade.js';
 
-export async function placeTargetOrder(cis, order, kite) {
-    let op = order.price;
-    cis.order = order;
+export async function placeTargetOrder(cis, order, kite, _retried = false) {
+  const now = Date.now();
 
-    // Default target calculation
-    let targetPrice = order.buy_price + cis.averageRange;
+  // 🚫 Total lock to prevent parallel execution from rapid ticks
+  if (cis.orderPlacementInProgress) {
+    console.log(`🚫 Order placement already in progress for ${cis.tradingsymbol}, skipping.`);
+    return;
+  }
+  cis.orderPlacementInProgress = true;
 
-    // Fallback if invalid range
-    if (isNaN(targetPrice)) {
-        targetPrice = order.average_price + 2;
-
-        console.log('target is nan14 ')
+  try {
+    if (cis.hasPlacedTarget) {
+      console.log(`⚠️ Target already placed for ${cis.tradingsymbol}, skipping.`);
+      return;
     }
 
-    // If target was pre-set by strategy
-    if (cis.inbuiltTarget) {
-        targetPrice = cis.targetPrice;
+    // 🔄 Fallback: Get latest BUY order if order not passed
+    if (!order) {
+      if (!global.orders) global.orders = [];
+      if (!global.lastOrdersFetchTime) global.lastOrdersFetchTime = 0;
 
-        console.log('target is built in ')
+      let buyOrders = global.orders
+        .filter(o =>
+          o.instrument_token == cis.instrument_token &&
+          String(o.status).toLowerCase() == 'complete' &&
+          String(o.transaction_type).toLowerCase() == 'buy'
+        )
+        .sort((a, b) =>
+          new Date(b.exchange_update_timestamp) - new Date(a.exchange_update_timestamp)
+        );
+
+      if (buyOrders.length == 0) {
+        if (!_retried) {
+          const now = Date.now();
+          if (now - global.lastOrdersFetchTime > 3000) {
+            console.warn(`[⚠️] No BUY order found. Fetching fresh orders from exchange...`);
+            try {
+              global.orders = await kite.getOrders();
+              global.lastOrdersFetchTime = now;
+              global.hasFetchedOrdersOnce = true;
+            } catch (err) {
+              console.error(`❌ Failed to fetch orders from exchange:`, err.message || err);
+              return;
+            }
+            return await placeTargetOrder(cis, null, kite, true); // Retry once
+          } else {
+            console.warn(`⏳ Orders fetched recently. Skipping retry.`);
+          }
+        } else {
+          console.error(`[❌] Still no BUY orders found after fetch for ${cis.tradingsymbol}`);
+          return;
+        }
+      } else {
+        order = buyOrders[0];
+        console.log(`ℹ️ Using fallback BUY order:`, order);
+      }
     }
 
-    // Force overwrite for some conditions (e.g., STK)
-    // if (global.speedSymbols.includes(cis.tradingsymbol)) {
-    //     targetPrice = op + 2;
-    // }
-
-    let transaction_type = 'SELL';
-
-    // STK logic
-    // if (global.instrumentName === 'STK') {
-    //     if (cis.shortTrading) {
-    //         transaction_type = 'BUY';
-    //         targetPrice = global.hours === 9
-    //             ? order.average_price * 0.997
-    //             : order.average_price * 0.999;
-    //     } else {
-    //         transaction_type = 'SELL';
-    //         targetPrice = global.hours === 9
-    //             ? order.average_price * 1.03
-    //             : order.average_price * 1.01;
-    //     }
-    // }
-
-    // Overwrite if custom logic needed
-    targetPrice = op + 3; // This is safe since `op` is defined
-
-    // Set values for the current CIS
-    cis.order.inbuiltTarget = true;
-    cis.order.inbuiltStopLoss = true;
-
-    
-    
-    cis.order.stopLossPrice = op - 3;
-
-    // Set to cis object
-    cis.targetPrice = targetPrice;
-    cis.stopLossPrice = op - 3;
+    // 🧠 Determine buy price safely
+    let baseBuyPrice = cis.buy_price;
 
 
-    // if(op==0 || isNaN(op)){
-
-    //    // cis.targetPrice=cis.tick.last_price+3
-    //    // cis.stopLossPrice=cis.tick.last_price-3
-
-    //     //console.log('target is built in 67 line')
-
-    // }
-
-    // Validate before order placement
-    if (isNaN(cis.targetPrice)) {
-
-        cis.targetPrice=cis.minuteData.slice(-1).high+3
-
-        cis.stopLossPrice=cis.minuteData.slice(-1).low-3
-
-       // process.exit();
-        console.warn(`[❌] NaN targetPrice detected for ${cis.tradingsymbol}, using minute data for target order.`);
-       // return;
+    if (typeof baseBuyPrice != 'number' || isNaN(baseBuyPrice)) {
+      if (order && (typeof order.average_price == 'number' || typeof order.price == 'number')) {
+        baseBuyPrice = order.average_price || order.price;
+        cis.buy_price = baseBuyPrice;
+        console.log(`ℹ️ buy_price set from order: ${baseBuyPrice}`);
+      } else {
+        console.error(`❌ Cannot determine buy price from cis or order for ${cis.tradingsymbol}`);
+        return;
+      }
     }
 
-    if(!isNaN(cis.averageRange)){
+    // 🎯 Set targetPrice
+    if (typeof cis.targetPrice != 'number' || isNaN(cis.targetPrice)) {
+      if (!isNaN(cis.averageRange)) {
+        cis.targetPrice = baseBuyPrice + cis.averageRange;
+        console.log(`✅ Target set using averageRange: ${cis.targetPrice}`);
+      } else if (cis.minuteData?.length > 0) {
+        const last = cis.minuteData.at(-1);
+        cis.targetPrice = last.high + global.targetPoints;
 
-        cis.targetPrice=order.price+(cis.averageRange)
 
-        console.log('order placed from average range')
+        cis.stopLossPrice = last.low -cis.tick.ohlc.open
+
+
+        console.warn(`[⚠️] Target estimated from minuteData: ${cis.targetPrice}`);
+      } else {
+        const fallbackPoints = global.targetPoints || 5;
+        cis.targetPrice = baseBuyPrice + fallbackPoints;
+        cis.stopLossPrice = baseBuyPrice - fallbackPoints;
+        console.log(`✅ Fallback targetPrice: ${cis.targetPrice}, stopLossPrice: ${cis.stopLossPrice}`);
+      }
     }
 
+
+let tgt=5
+    if(global.insstrumentName=='SENSEX'){
+
+tgt=15
+    }
+      if(global.insstrumentName=='NIFTY'){
+
+tgt=5
+    }
+
+
+    cis.targetPrice=cis.buy_price+tgt;
+    // 📝 Prepare order params
     const orderParams = {
-        exchange: cis.exchange,
-        tradingsymbol: order.tradingsymbol,
-        transaction_type: transaction_type,
-        order_type: "LIMIT",
-        quantity: order.quantity,
-        price: Math.ceil(cis.targetPrice),
-        product: "MIS",
-        validity: "DAY",
+      exchange: cis.exchange,
+      tradingsymbol: cis.tradingsymbol,
+      transaction_type: 'SELL',
+      order_type: 'LIMIT',
+      quantity: order?.quantity || cis.position?.quantity || 1,
+      price: Math.ceil(cis.targetPrice),
+      product: 'MIS',
+      validity: 'DAY',
     };
 
-    try {
-        const orderId = await kite.placeOrder("regular", orderParams);
-        cis.hasPlacedTarget = true;
-
-        // Log to DB
-        await setTargetForTrade(cis.tradingsymbol, Math.ceil(targetPrice), 'custom');
-
-        console.log("✅ Target order placed successfully. Order ID:", orderId);
-    } catch (error) {
-        console.error("❌ Error placing target order for", cis.tradingsymbol, error);
-        process.exit(); // or handle more gracefully
+    // 🔐 Final lock before placing order
+    if (cis.hasPlacedTarget) {
+      console.log(`⚠️ Target already marked as placed just before order placement for ${cis.tradingsymbol}, skipping.`);
+      return;
     }
+
+    // 🚀 Place the order
+    const orderId = await kite.placeOrder('regular', orderParams);
+    cis.hasPlacedTarget = true;
+    cis.hasLivePosition = true;
+    cis.hasPosition = true;
+
+    await setTargetForTrade(cis.tradingsymbol, orderParams.price, 'custom');
+    console.log(`✅ Target order placed. Order ID: ${orderId}`);
+  } catch (err) {
+    console.error(`❌ Error placing target order for ${cis.tradingsymbol}:`, err.message || err);
+  } finally {
+    // 🔓 Always release lock
+    cis.orderPlacementInProgress = false;
+  }
 }

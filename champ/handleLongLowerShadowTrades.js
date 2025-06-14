@@ -22,6 +22,6 @@ export function handleLongLowerShadowTrades(cis, kite) {
     cis.returnPoints = `❌ [${strategyName}] No long lower shadow + close > open @59s`;
     cis.strategyTested = cis.strategyTested || [];
     cis.strategyTested.push(strategyName);
-    cis.deployedStrategies.handleLongLowerShadowTrades = 'notActivated';
+    cis.deployedStrategies.handleLongLowerShadowTrades = 'touched';
     return false;
 }

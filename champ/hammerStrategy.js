@@ -12,7 +12,7 @@ export function isHammerCandle(candle) {
     const isSmallUpperWick = upperWick <= bodySize * 0.3;
 
 
-   if(global.seconds==10) console.log('hammer health ok');
+   //if(global.seconds==10) console.log('hammer health ok');
     
     return isSmallBody && isLongLowerWick && isSmallUpperWick;
 }
