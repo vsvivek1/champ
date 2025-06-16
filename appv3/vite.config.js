@@ -5,6 +5,8 @@ import { createVuePlugin as vue } from "vite-plugin-vue2";
 import Components from 'unplugin-vue-components/vite';
 import { VuetifyResolver } from 'unplugin-vue-components/resolvers';
 
+import fs from 'fs'
+
 import dns from 'dns'
 
 dns.setDefaultResultOrder('verbatim')
@@ -34,6 +36,12 @@ export default defineConfig({
     },
   },
   server: {
+https: {
+      key: fs.readFileSync('./think-vivek-thinkpad-e14-gen-5.taild05309.ts.net.key'),
+      cert: fs.readFileSync('./think-vivek-thinkpad-e14-gen-5.taild05309.ts.net.crt'),
+    },
+
+
   proxy: {
     '^/api/': {
       target: tUrl,
