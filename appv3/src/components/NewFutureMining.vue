@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid>
+  <div fluid>
     <NetworkStatus />
     <v-alert
     v-if="flashMessage"
@@ -51,12 +51,12 @@
 
           <ForGoneProfitData :totalForgone="totalForgone" :totalForgoneFortarget="totalForgoneFortarget" :totalForgoneForStopLoss="totalForgoneForStopLoss" />
 
-  <v-icon icon="mdi-wifi-strength-4"></v-icon>
-  <v-icon icon="mdi-signal" class="ms-2">
+  <span icon="mdi-wifi-strength-4"></span>
+  <span icon="mdi-signal" class="ms-2">
 
     
-  </v-icon>
-  <v-icon icon="mdi-battery" class="ms-2"></v-icon>
+  </span>
+  <span icon="mdi-battery" class="ms-2"></span>
 
  
 
@@ -82,7 +82,7 @@
 <input type="checkbox" v-model="showLogs">
 Show logs
 </label>
-            <v-btn class="btn-primary">Toggle View Logs</v-btn>
+            <button class="btn-primary">Toggle View Logs</button>
           
             
           
@@ -138,17 +138,17 @@ Show logs
 
             
 
-                 <v-btn v-if="!AutoMode" @click="AutoMode = true" title="Switch to Auto" icon color="green">
-              <v-icon>mdi-send-clock-outline</v-icon>
-            </v-btn>
-            <v-btn v-if="AutoMode" @click="AutoMode = false" title=" Switch to Manual" icon color="red">
-              <v-icon>mdi-send-lock</v-icon>
-            </v-btn>
+                 <button v-if="!AutoMode" @click="AutoMode = true" title="Switch to Auto" icon color="green">
+              <span>mdi-send-clock-outline</span>
+            </button>
+            <button v-if="AutoMode" @click="AutoMode = false" title=" Switch to Manual" icon color="red">
+              <span>mdi-send-lock</span>
+            </button>
           </v-alert>
-          <v-btn color="red" prominent @click="exitPositions()">Exit all</v-btn>
+          <button color="red" prominent @click="exitPositions()">Exit all</button>
           <DialogForAlerts :dialog="dialog" :alerts="alerts" />
-          <v-btn color="green" @click="placeTargetsForLiveScripts('ho')">PLACE TARGETS FOR LIVE SCRIPTS</v-btn>
-          <v-btn @click="forceUpdateMissingScripts()">Force update Missing scripts</v-btn>
+          <button color="green" @click="placeTargetsForLiveScripts('ho')">PLACE TARGETS FOR LIVE SCRIPTS</button>
+          <button @click="forceUpdateMissingScripts()">Force update Missing scripts</button>
           <v-alert v-if="loadingHourlyTradingLows" type="info">Loaiding Hourly candles</v-alert>
           <v-row>
             <v-col>
@@ -157,10 +157,10 @@ Show logs
             </v-col>
           </v-row>
           <ViewHourlyPricePointsOfLiveDay :hourlyPricePointsofLiveDay="hourlyPricePointsofLiveDay" :convertIsoDateToIST="convertIsoDateToIST" />
-          <v-btn @click="showModalForSquareOff()">square off selected</v-btn>
+          <button @click="showModalForSquareOff()">square off selected</button>
           <button @click="review()">review</button>
-          <v-btn @click="getOrders()">Refresh orders</v-btn>
-          <v-btn @click="refreshTradeStatus()">Refresh trade status</v-btn>
+          <button @click="getOrders()">Refresh orders</button>
+          <button @click="refreshTradeStatus()">Refresh trade status</button>
           {{ instrumentsFiltered.length }} out of {{ instrumentTokens.length }}
         </div>
       </v-col>
@@ -178,7 +178,7 @@ Show logs
         </div>
       </v-col>
     </v-row>
-  </v-container>
+  </div>
 </template>
 
 <script>

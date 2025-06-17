@@ -196,30 +196,30 @@
               </td>
 
               <td>
-                <v-icon
+                <span
                   color = "blue"
                   v-if = "pos.hasLiveTarget"
                   title = "Live Target Exist"
-                  >mdi-star</v-icon
+                  >mdi-star</span
                 >
 
-                <v-btn @click = "enableForEditng(  )" v-if = "pos.hasLiveTarget">
-                  <v-icon class = "text-yellow">mdi-pencil</v-icon>
+                <button @click = "enableForEditng(  )" v-if = "pos.hasLiveTarget">
+                  <span class = "text-yellow">mdi-pencil</span>
                   {{  pos.targetPrice  }} 
-                </v-btn>
+                </button>
 
-                <v-btn @click = "CancelOrder(  )" v-if = "pos.hasLiveTarget">
-                  <v-icon>mdi-circle</v-icon>
-                </v-btn>
+                <button @click = "CancelOrder(  )" v-if = "pos.hasLiveTarget">
+                  <span>mdi-circle</span>
+                </button>
 
-                <v-btn
+                <button
                   color = "green"
                   title = "Set Target"
                   @click = "setTarget( pos )"
                   v-if = "!pos.hasLiveTarget"
                 >
-                  <v-icon>mdi-cube-send</v-icon>
-                </v-btn>
+                  <span>mdi-cube-send</span>
+                </button>
               </td>
             </tr>
           </tbody>

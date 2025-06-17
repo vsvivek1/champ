@@ -177,7 +177,7 @@ async function setPricePointsToInstrument( option, foutPut,accessTokenDoc) {
             console.log('new length', foutPut.length);
 
             //console.log(foutPut.length,'full json len',selectedOptions.length)
-           // writeJsonToFile(foutPut,'./appv3/public/instruments/instrumentsForMining.json')
+           // writeJsonToFile(foutPut,'./appv3/shared/instruments/instrumentsForMining.json')
             writeJsonToFile(foutPut,'./niftyTrading.json')
             
 

@@ -1,76 +1,55 @@
+// vite.config.js
 import { defineConfig } from 'vite'
-
-import { createVuePlugin as vue } from "vite-plugin-vue2";
-
-import Components from 'unplugin-vue-components/vite';
-import { VuetifyResolver } from 'unplugin-vue-components/resolvers';
-
-import fs from 'fs'
-
+import { createVuePlugin as vue } from 'vite-plugin-vue2'
+import Components from 'unplugin-vue-components/vite'
+import { VuetifyResolver } from 'unplugin-vue-components/resolvers'
 import dns from 'dns'
+import path from 'path'
 
 dns.setDefaultResultOrder('verbatim')
 
-//  import vuetify from './src/plugins/vuetify';
+const API_URL = 'http://127.0.0.1:9090'
 
-var tUrl="http://127.0.0.1:9090"
-
-import path from 'path'
-
-// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [vue(),
-
-    Components({
-      resolvers: [
-        // Vuetify
-        VuetifyResolver(),
-      ],
-    })
-
-   
-  ],
+  base: '/',               // serve assets from root
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+      '@': path.resolve(__dirname, './src')
+    }
   },
+  plugins: [
+    vue(),
+    Components({ resolvers: [VuetifyResolver()] })
+  ],
   server: {
-https: {
-      key: fs.readFileSync('./think-vivek-thinkpad-e14-gen-5.taild05309.ts.net.key'),
-      cert: fs.readFileSync('./think-vivek-thinkpad-e14-gen-5.taild05309.ts.net.crt'),
+    host: '0.0.0.0',       // listen on all interfaces
+    port: 3000,
+
+    // turn off HMR so you stop the auto-reload loops
+    hmr: false,
+
+    // dev performance hints
+    watch: {
+      ignored: ['**/node_modules/**', '**/.git/**']
+    },
+    optimizeDeps: {
+      include: ['vue', 'vue-router', 'vuetify']
     },
 
+    proxy: {
+      // Proxy /api/* → your backend on 9090
+      '^/api/': {
+        target:      API_URL,
+        changeOrigin: true,
+        secure:      false,
+        ws:          true,
+        rewrite:     (p) => p.replace(/^\/api/, '')
+      }
+    }
+  },
 
-  proxy: {
-    '^/api/': {
-      target: tUrl,
-      changeOrigin: true,
-      secure: true,
-      ws: true,
-      
-      // rewrite: (path) => path.replace(/^\/api/, ''),
-
-
-      // configure: (proxy, _options) => {
-      //   proxy.on('error', (err, _req, _res) => {
-      //     console.log('proxy error', err);
-      //   });
-      //   proxy.on('proxyReq', (proxyReq, req, _res) => {
-      //     console.log('Sending Request to the Target:', req.method, req.url);
-      //   });
-      //   proxy.on('proxyRes', (proxyRes, req, _res) => {
-      //     console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
-      //   });
-
-      // },
-      
-     
-    },
+  // tell esbuild (used by Vite internally) to target modern JS, avoiding ES5 transform errors
+  esbuild: {
+    target: 'es2020'
   }
-}
 })
-
-// vuetify({ autoImport: true })
-// rewrite: (path) => path.replace(/^\/api/, ""),
-// rewrite: (path) => path.replace(/^\/api/, '')

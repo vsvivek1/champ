@@ -258,7 +258,7 @@ app.post('/api/FetchInstruments', (req, res) => {
   // Read the JSON file from the specified path
 
   console.log('got it');
-  const filePath = path.join(__dirname, '/appv3/public/instruments/instrumentsForMining.json');
+  const filePath = path.join(__dirname, '/appv3/shared/instruments/instrumentsForMining.json');
   fs.readFile(filePath, 'utf8', (err, data) => {
     if (err) {
       console.error('Failed to read file:', err);

@@ -296,7 +296,7 @@ break;
          // shouldProceed = false;
           if (this.shouldProceed) {
 
-          //  this.updateInstrumentsFile(this.instruments,'./appv3/public/instruments/instrumentsForMining.json')
+          //  this.updateInstrumentsFile(this.instruments,'./appv3/shared/instruments/instrumentsForMining.json')
 
               var sellersLowestPrice = cis.last_price;
 

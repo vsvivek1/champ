@@ -4,21 +4,21 @@ import Home from '../views/Home.vue'
 import Validate from '@/components/Validate.vue'
 import LogOut from '@/components/LogOut.vue'
 import Login from '@/components/Login.vue'
-import NewFutureMining from '@/components/NewFutureMining.vue'
-import TimePriceHigh from '@/components/Tester/TimePriceHigh.vue'
-import WraperForInstruments from '@/components/Tester/WraperForInstruments.vue'
+//import NewFutureMining from '@/components/NewFutureMining.vue'
+//import TimePriceHigh from '@/components/Tester/TimePriceHigh.vue'
+//import WraperForInstruments from '@/components/Tester/WraperForInstruments.vue'
 
 //import ListHoldings from '@/components/ListHoldings.vue'
-import testWebSocket from '@/components/testWebSocket.vue'
+//import testWebSocket from '@/components/testWebSocket.vue'
 
 //appv3/src/components/CisUpdates.vue
 import CisUpdates from '@/components/CisUpdates.vue';
- import PlaceQuickOrderForHoldings from '@/components/PlaceQuickOrdersForHoldingsNew.vue'
+ //import PlaceQuickOrderForHoldings from '@/components/PlaceQuickOrdersForHoldingsNew.vue'
 // import GetInstruments from '@/components/GetInstruments.vue'
- import OrderBook from '@/components/OrderBook.vue'
+ //import OrderBook from '@/components/OrderBook.vue'
 // import NarrowRange from '@/components/NarrowRange.vue'
 // import LongBuildUp from '@/components/LongBuildUp.vue'
-import Strategies from '@/components/Strategies.vue'
+//import Strategies from '@/components/Strategies.vue'
 // import WebSockets from '@/components/WebSockets.vue'
 // import OptionChain from '@/components/OptionChain.vue'
 // import ManiKandanStrategy from '@/components/ManiKandanStrategy.vue'
@@ -26,12 +26,12 @@ import Strategies from '@/components/Strategies.vue'
 // // import Mint from '@/components/Mint.vue' -->
 // import Mining from '@/components/Mining.vue'
 // import MiningMis from '@/components/MiningMis.vue'
-import GTT from '@/components/GTT.vue'
-import GTTSELL from '@/components/GTTSell.vue'
-import Tester from '@/components/Tester/Tester.vue'
+//import GTT from '@/components/GTT.vue'
+//import GTTSELL from '@/components/GTTSell.vue'
+//import Tester from '@/components/Tester/Tester.vue'
 /* import FutureTrading from '@/components/FutureTrading.vue' */
 // import BTST from '@/components/Btst.vue'
-import dailyGainers from '@/components/dailyGainers.vue'
+//import dailyGainers from '@/components/dailyGainers.vue'
 
 // import MiningFuture from '@/components/MiningFuture.vue'
 // import FutureMining from '@/components/FutureMining.vue'
@@ -105,18 +105,18 @@ const routes  =  [
   //   name: 'REACT',
   //   component:rec
   //  } , 
-    { 
-    path: '/GTT',
-    name: 'GTT',
-    component: GTT
-   } , 
+  //   { 
+  //   path: '/GTT',
+  //   name: 'GTT',
+  //   component: GTT
+  //  } , 
    
    
-   { 
-    path: '/GTTSELL',
-    name: 'GTTSELL',
-    component: GTTSELL
-   } , 
+  //  { 
+  //   path: '/GTTSELL',
+  //   name: 'GTTSELL',
+  //   component: GTTSELL
+  //  } , 
 
    { 
     path: '/CisUpdates',
@@ -149,13 +149,13 @@ const routes  =  [
   
   // {  -->
 
-    { 
-    path: '/NewFutureMining/:itype',
-    name: 'NewFutureMining',
-    component: NewFutureMining,
+  //   { 
+  //   path: '/NewFutureMining/:itype',
+  //   name: 'NewFutureMining',
+  //   component: NewFutureMining,
  
-    props:{ 'itype:': 'NFO' } 
-   } , 
+  //   props:{ 'itype:': 'NFO' } 
+  //  } , 
   
   // { 
   //   path: '/StopLoss',
@@ -183,11 +183,11 @@ const routes  =  [
   //   name: 'LongBuildUp',
   //   component: LongBuildUp 
   //  } ,
-  { 
-    path: '/Strategies',
-    name: 'Strategies',
-    component: Strategies 
-   } ,
+  // { 
+  //   path: '/Strategies',
+  //   name: 'Strategies',
+  //   component: Strategies 
+  //  } ,
   // { 
   //   path: '/NarrowRange',
   //   name: 'NarrowRange',
@@ -198,11 +198,11 @@ const routes  =  [
     name: 'login',
     component: Login 
    } ,
-  { 
-    path: '/orders',
-    name: 'orders',
-    component: OrderBook
-   } ,
+  // { 
+  //   path: '/orders',
+  //   name: 'orders',
+  //   component: OrderBook
+  //  } ,
   // { 
   //   path: '/instruments',
   //   name: 'GetInstruments',
@@ -228,11 +228,11 @@ const routes  =  [
     name: 'Home',
     component: Home
    } ,
-  { 
-    path: '/quickTargets',
-    name: 'PlaceQuickOrderForHoldings',
-    component: PlaceQuickOrderForHoldings
-   } ,
+  // { 
+  //   path: '/quickTargets',
+  //   name: 'PlaceQuickOrderForHoldings',
+  //   component: PlaceQuickOrderForHoldings
+  //  } ,
 
   { 
     path: '/about',

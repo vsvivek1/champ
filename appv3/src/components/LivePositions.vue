@@ -135,29 +135,29 @@
 </td>
 
               <td>
-                <v-icon
+                <span
                   color = "blue"
                   v-if = "pos.hasLiveTarget"
                   title = "Live Target Exist"
-                  >mdi-star</v-icon
+                  >mdi-star</span
                 >
 
-                <v-btn @click = "enableForEditng(  )" v-if = "pos.hasLiveTarget">
-                  <v-icon>mdi-pencil</v-icon>
-                </v-btn>
+                <button @click = "enableForEditng(  )" v-if = "pos.hasLiveTarget">
+                  <span>mdi-pencil</span>
+                </button>
 
-                <v-btn @click = "CancelOrder(  )" v-if = "pos.hasLiveTarget">
-                  <v-icon>mdi-cancel</v-icon>
-                </v-btn>
+                <button @click = "CancelOrder(  )" v-if = "pos.hasLiveTarget">
+                  <span>mdi-cancel</span>
+                </button>
 
-                <v-btn
+                <button
                   color = "green"
                   title = "Set Target"
                   @click = "setTarget( pos )"
                   v-if = "!pos.hasLiveTarget"
                 >
-                  <v-icon>mdi-cube-send</v-icon>
-                </v-btn>
+                  <span>mdi-cube-send</span>
+                </button>
               </td>
             </tr>
           </tbody>

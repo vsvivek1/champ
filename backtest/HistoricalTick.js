@@ -12,7 +12,7 @@ const ZerodhaAPI=require('../ZerodhaAPI');
 let today = new Date().toISOString().slice(0, 10);
 const TIME_INT=200;
 
-const instrumentsForMining=require('../appv3/public/instruments/instrumentsForMining.json');
+const instrumentsForMining=require('../appv3/shared/instruments/instrumentsForMining.json');
 // const { setInterval } = require("timers/promises");
 
 module.exports=class HistoricalTick{

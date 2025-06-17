@@ -21,11 +21,11 @@ let __VLS_styleScopedClasses!: __VLS_StyleScopedClasses | keyof __VLS_StyleScope
 /* CSS variable injection */
 /* CSS variable injection end */
 let __VLS_resolvedLocalAndGlobalComponents!: {} &
-__VLS_WithComponent<'VBtn', typeof __VLS_localComponents, "VBtn", "vBtn", "v-btn"> &
+__VLS_WithComponent<'VBtn', typeof __VLS_localComponents, "VBtn", "vBtn", "button"> &
 __VLS_WithComponent<'VAlert', typeof __VLS_localComponents, "VAlert", "vAlert", "v-alert"> &
 __VLS_WithComponent<'VRow', typeof __VLS_localComponents, "VRow", "vRow", "v-row"> &
 __VLS_WithComponent<'VCol', typeof __VLS_localComponents, "VCol", "vCol", "v-col"> &
-__VLS_WithComponent<'VIcon', typeof __VLS_localComponents, "VIcon", "vIcon", "v-icon"> &
+__VLS_WithComponent<'VIcon', typeof __VLS_localComponents, "VIcon", "vIcon", "span"> &
 __VLS_WithComponent<'IndicesTable', typeof __VLS_localComponents, "IndicesTable", "IndicesTable", "IndicesTable"> &
 __VLS_WithComponent<'VChip', typeof __VLS_localComponents, "VChip", "vChip", "v-chip"> &
 __VLS_WithComponent<'ClosedTrades', typeof __VLS_localComponents, "ClosedTrades", "ClosedTrades", "ClosedTrades"> &
@@ -34,7 +34,7 @@ __VLS_WithComponent<'VDialog', typeof __VLS_localComponents, "VDialog", "vDialog
 __VLS_WithComponent<'LivePos', typeof __VLS_localComponents, "LivePos", "LivePos", "LivePos"> &
 __VLS_WithComponent<'LiveOrders', typeof __VLS_localComponents, "LiveOrders", "LiveOrders", "LiveOrders">;
 __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div; __VLS_intrinsicElements.div;
-__VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"]; __VLS_components["v-btn"];
+__VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.VBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components.vBtn; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"]; __VLS_components["button"];
 // @ts-ignore
 [VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn, VBtn,];
 __VLS_intrinsicElements.p; __VLS_intrinsicElements.p; __VLS_intrinsicElements.p; __VLS_intrinsicElements.p; __VLS_intrinsicElements.p; __VLS_intrinsicElements.p;
@@ -50,7 +50,7 @@ __VLS_components.VRow; __VLS_components.VRow; __VLS_components.VRow; __VLS_compo
 __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.VCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components.vCol; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"]; __VLS_components["v-col"];
 // @ts-ignore
 [VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol, VCol,];
-__VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"]; __VLS_components["v-icon"];
+__VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.VIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components.vIcon; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"]; __VLS_components["span"];
 // @ts-ignore
 [VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon, VIcon,];
 __VLS_components.IndicesTable; __VLS_components.IndicesTable;
@@ -97,7 +97,7 @@ const __VLS_2 = __VLS_1({ ...{}, }, ...__VLS_functionalComponentArgsRest(__VLS_1
 const __VLS_3 = __VLS_pickFunctionalComponentCtx(__VLS_0, __VLS_2)!;
 let __VLS_4!: __VLS_NormalizeEmits<typeof __VLS_3.emit>;
 {
-const __VLS_5 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_5 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_6 = __VLS_asFunctionalComponent(__VLS_5, new __VLS_5({ ...{ onClick: {} as any, }, color: ("red"), prominent: (true), }));
 ({} as { VBtn: typeof __VLS_5; }).VBtn;
 ({} as { VBtn: typeof __VLS_5; }).VBtn;
@@ -293,7 +293,7 @@ const __VLS_74 = __VLS_73({ ...{}, }, ...__VLS_functionalComponentArgsRest(__VLS
 const __VLS_75 = __VLS_pickFunctionalComponentCtx(__VLS_72, __VLS_74)!;
 let __VLS_76!: __VLS_NormalizeEmits<typeof __VLS_75.emit>;
 {
-const __VLS_77 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'v-icon' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["v-icon"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
+const __VLS_77 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'span' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["span"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
 const __VLS_78 = __VLS_asFunctionalComponent(__VLS_77, new __VLS_77({
 ...{}, class: (({
 'text-danger': __VLS_ctx.stopLossSwitchHealth,
@@ -323,7 +323,7 @@ __VLS_styleScopedClasses = ({
 (__VLS_80.slots!).default;
 }
 {
-const __VLS_82 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'v-icon' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["v-icon"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
+const __VLS_82 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'span' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["span"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
 const __VLS_83 = __VLS_asFunctionalComponent(__VLS_82, new __VLS_82({
 ...{}, class: (({
 'text-primary': __VLS_ctx.tradeEntrySwitchHealth,
@@ -353,7 +353,7 @@ __VLS_styleScopedClasses = ({
 (__VLS_85.slots!).default;
 }
 {
-const __VLS_87 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'v-icon' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["v-icon"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
+const __VLS_87 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'span' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["span"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
 const __VLS_88 = __VLS_asFunctionalComponent(__VLS_87, new __VLS_87({ ...{}, class: (({ 'text-success': __VLS_ctx.heartBeat })), title: ("if This symbol changes color switches between red and blue system is conencted to market"), }));
 ({} as { VIcon: typeof __VLS_87; }).VIcon;
 ({} as { VIcon: typeof __VLS_87; }).VIcon;
@@ -446,7 +446,7 @@ let __VLS_126!: __VLS_NormalizeEmits<typeof __VLS_125.emit>;
 [stopLossSwitchHealth, stopLossSwitchHealth, stopLossSwitchHealth, stopLossSwitchHealth, stopLossSwitchHealth, stopLossSwitchHealth, tradeEntrySwitchHealth, tradeEntrySwitchHealth, tradeEntrySwitchHealth, tradeEntrySwitchHealth, tradeEntrySwitchHealth, tradeEntrySwitchHealth, heartBeat, heartBeat, heartBeat, globalConsoleLogs, indices, indices, indices, showLogs, CurrentCheckDigit, laggingCheckDigit, webSocketNotActive,];
 }
 {
-const __VLS_127 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_127 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_128 = __VLS_asFunctionalComponent(__VLS_127, new __VLS_127({ ...{ onClick: {} as any, }, }));
 ({} as { VBtn: typeof __VLS_127; }).VBtn;
 ({} as { VBtn: typeof __VLS_127; }).VBtn;
@@ -530,7 +530,7 @@ const __VLS_160 = __VLS_159({ ...{}, }, ...__VLS_functionalComponentArgsRest(__V
 const __VLS_161 = __VLS_pickFunctionalComponentCtx(__VLS_158, __VLS_160)!;
 let __VLS_162!: __VLS_NormalizeEmits<typeof __VLS_161.emit>;
 {
-const __VLS_163 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'v-icon' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["v-icon"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
+const __VLS_163 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'span' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["span"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
 const __VLS_164 = __VLS_asFunctionalComponent(__VLS_163, new __VLS_163({ ...{}, }));
 ({} as { VIcon: typeof __VLS_163; }).VIcon;
 ({} as { VIcon: typeof __VLS_163; }).VIcon;
@@ -574,7 +574,7 @@ const __VLS_180 = __VLS_179({ ...{}, }, ...__VLS_functionalComponentArgsRest(__V
 const __VLS_181 = __VLS_pickFunctionalComponentCtx(__VLS_178, __VLS_180)!;
 let __VLS_182!: __VLS_NormalizeEmits<typeof __VLS_181.emit>;
 {
-const __VLS_183 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'v-icon' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["v-icon"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
+const __VLS_183 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'span' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["span"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
 const __VLS_184 = __VLS_asFunctionalComponent(__VLS_183, new __VLS_183({ ...{}, color: ("blue"), }));
 ({} as { VIcon: typeof __VLS_183; }).VIcon;
 ({} as { VIcon: typeof __VLS_183; }).VIcon;
@@ -599,7 +599,7 @@ const __VLS_190 = __VLS_189({ ...{}, }, ...__VLS_functionalComponentArgsRest(__V
 const __VLS_191 = __VLS_pickFunctionalComponentCtx(__VLS_188, __VLS_190)!;
 let __VLS_192!: __VLS_NormalizeEmits<typeof __VLS_191.emit>;
 {
-const __VLS_193 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_193 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_194 = __VLS_asFunctionalComponent(__VLS_193, new __VLS_193({ ...{ onClck: {} as any, }, small: (true), color: ("red"), title: ("reset user messages"), }));
 ({} as { VBtn: typeof __VLS_193; }).VBtn;
 ({} as { VBtn: typeof __VLS_193; }).VBtn;
@@ -616,7 +616,7 @@ __VLS_ctx.resetUserMessages();
 }
 };
 {
-const __VLS_199 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'v-icon' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["v-icon"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
+const __VLS_199 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'span' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["span"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
 const __VLS_200 = __VLS_asFunctionalComponent(__VLS_199, new __VLS_199({ ...{}, }));
 ({} as { VIcon: typeof __VLS_199; }).VIcon;
 ({} as { VIcon: typeof __VLS_199; }).VIcon;
@@ -660,7 +660,7 @@ const __VLS_217 = __VLS_pickFunctionalComponentCtx(__VLS_214, __VLS_216)!;
 let __VLS_218!: __VLS_NormalizeEmits<typeof __VLS_217.emit>;
 if (!__VLS_ctx.AutoMode) {
 {
-const __VLS_219 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_219 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_220 = __VLS_asFunctionalComponent(__VLS_219, new __VLS_219({ ...{ onClick: {} as any, }, title: ("Switch to Auto"), icon: (true), color: ("green"), }));
 ({} as { VBtn: typeof __VLS_219; }).VBtn;
 ({} as { VBtn: typeof __VLS_219; }).VBtn;
@@ -678,7 +678,7 @@ __VLS_ctx.AutoMode = true;
 }
 };
 {
-const __VLS_225 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'v-icon' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["v-icon"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
+const __VLS_225 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'span' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["span"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
 const __VLS_226 = __VLS_asFunctionalComponent(__VLS_225, new __VLS_225({ ...{}, }));
 ({} as { VIcon: typeof __VLS_225; }).VIcon;
 ({} as { VIcon: typeof __VLS_225; }).VIcon;
@@ -693,7 +693,7 @@ let __VLS_229!: __VLS_NormalizeEmits<typeof __VLS_228.emit>;
 }
 if (__VLS_ctx.AutoMode) {
 {
-const __VLS_230 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_230 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_231 = __VLS_asFunctionalComponent(__VLS_230, new __VLS_230({ ...{ onClick: {} as any, }, title: (" Switch to Manual"), icon: (true), color: ("red"), }));
 ({} as { VBtn: typeof __VLS_230; }).VBtn;
 ({} as { VBtn: typeof __VLS_230; }).VBtn;
@@ -711,7 +711,7 @@ __VLS_ctx.AutoMode = false;
 }
 };
 {
-const __VLS_236 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'v-icon' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["v-icon"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
+const __VLS_236 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'span' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["span"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
 const __VLS_237 = __VLS_asFunctionalComponent(__VLS_236, new __VLS_236({ ...{}, }));
 ({} as { VIcon: typeof __VLS_236; }).VIcon;
 ({} as { VIcon: typeof __VLS_236; }).VIcon;
@@ -736,7 +736,7 @@ const __VLS_243 = __VLS_242({ ...{}, class: ("col"), style: ({}), }, ...__VLS_fu
 const __VLS_244 = __VLS_pickFunctionalComponentCtx(__VLS_241, __VLS_243)!;
 let __VLS_245!: __VLS_NormalizeEmits<typeof __VLS_244.emit>;
 {
-const __VLS_246 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_246 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_247 = __VLS_asFunctionalComponent(__VLS_246, new __VLS_246({ ...{ onClick: {} as any, }, }));
 ({} as { VBtn: typeof __VLS_246; }).VBtn;
 ({} as { VBtn: typeof __VLS_246; }).VBtn;
@@ -847,7 +847,7 @@ let __VLS_292!: __VLS_NormalizeEmits<typeof __VLS_291.emit>;
 (__VLS_276.slots!).default;
 }
 {
-const __VLS_293 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_293 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_294 = __VLS_asFunctionalComponent(__VLS_293, new __VLS_293({ ...{ onClick: {} as any, }, color: ("green"), }));
 ({} as { VBtn: typeof __VLS_293; }).VBtn;
 ({} as { VBtn: typeof __VLS_293; }).VBtn;
@@ -866,7 +866,7 @@ __VLS_ctx.placeTargetsForLiveScripts();
 (__VLS_296.slots!).default;
 }
 {
-const __VLS_299 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_299 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_300 = __VLS_asFunctionalComponent(__VLS_299, new __VLS_299({ ...{ onClick: {} as any, }, }));
 ({} as { VBtn: typeof __VLS_299; }).VBtn;
 ({} as { VBtn: typeof __VLS_299; }).VBtn;
@@ -1046,7 +1046,7 @@ item.close
 (__VLS_339.slots!).default;
 }
 {
-const __VLS_366 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_366 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_367 = __VLS_asFunctionalComponent(__VLS_366, new __VLS_366({ ...{ onClick: {} as any, }, }));
 ({} as { VBtn: typeof __VLS_366; }).VBtn;
 ({} as { VBtn: typeof __VLS_366; }).VBtn;
@@ -1063,7 +1063,7 @@ __VLS_ctx.showModalForSquareOff();
 }
 };
 {
-const __VLS_372 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'v-icon' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["v-icon"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
+const __VLS_372 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'span' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["span"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
 const __VLS_373 = __VLS_asFunctionalComponent(__VLS_372, new __VLS_372({ ...{}, }));
 ({} as { VIcon: typeof __VLS_372; }).VIcon;
 ({} as { VIcon: typeof __VLS_372; }).VIcon;
@@ -1092,7 +1092,7 @@ __VLS_ctx.review();
 (__VLS_380.slots!).default;
 }
 {
-const __VLS_383 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_383 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_384 = __VLS_asFunctionalComponent(__VLS_383, new __VLS_383({ ...{ onClick: {} as any, }, }));
 ({} as { VBtn: typeof __VLS_383; }).VBtn;
 ({} as { VBtn: typeof __VLS_383; }).VBtn;
@@ -1111,7 +1111,7 @@ __VLS_ctx.getOrders();
 (__VLS_386.slots!).default;
 }
 {
-const __VLS_389 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_389 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_390 = __VLS_asFunctionalComponent(__VLS_389, new __VLS_389({ ...{ onClick: {} as any, }, }));
 ({} as { VBtn: typeof __VLS_389; }).VBtn;
 ({} as { VBtn: typeof __VLS_389; }).VBtn;
@@ -1557,7 +1557,7 @@ let __VLS_618!: __VLS_NormalizeEmits<typeof __VLS_617.emit>;
 }
 (i.pricePoints.d1.high);
 {
-const __VLS_619 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'v-btn' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["v-btn"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
+const __VLS_619 = ({} as 'VBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.VBtn; } : 'vBtn' extends keyof typeof __VLS_ctx ? { 'VBtn': typeof __VLS_ctx.vBtn; } : 'button' extends keyof typeof __VLS_ctx ? { 'VBtn': (typeof __VLS_ctx)["button"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VBtn;
 const __VLS_620 = __VLS_asFunctionalComponent(__VLS_619, new __VLS_619({
 ...{ onClick: {} as any, }, fab: (true), small: (true), title: ((`ENTER NOW TO TRADE for  Amt ${i.SevenDayMaxMin.Max * i.lot_size} `)),
 }));
@@ -1581,7 +1581,7 @@ __VLS_ctx.noTradingNow(i);
 }
 };
 {
-const __VLS_625 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'v-icon' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["v-icon"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
+const __VLS_625 = ({} as 'VIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.VIcon; } : 'vIcon' extends keyof typeof __VLS_ctx ? { 'VIcon': typeof __VLS_ctx.vIcon; } : 'span' extends keyof typeof __VLS_ctx ? { 'VIcon': (typeof __VLS_ctx)["span"]; } : typeof __VLS_resolvedLocalAndGlobalComponents).VIcon;
 const __VLS_626 = __VLS_asFunctionalComponent(__VLS_625, new __VLS_625({ ...{}, color: ("green"), }));
 ({} as { VIcon: typeof __VLS_625; }).VIcon;
 ({} as { VIcon: typeof __VLS_625; }).VIcon;

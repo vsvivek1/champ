@@ -107,7 +107,7 @@ async function fetchInstrumentsForMining(accessToken) {
         let targetDir = Path.join(__dirname, '/app/instrumentsForMining.json');
 
 
-        // return Fs.copyFile('./appv3/public/instruments/instrumentsForMining.json', targetDir,
+        // return Fs.copyFile('./appv3/shared/instruments/instrumentsForMining.json', targetDir,
 
         //   (err) => {
         //     if (err) throw err;
@@ -649,7 +649,7 @@ return;
 async function getSymbols() {
 
 
-  let instruments = require('./appv3/public/instruments/instrumentsForMining.json');
+  let instruments = require('./appv3/shared/instruments/instrumentsForMining.json');
 
   let st = instruments.filter(i => i.exchange  ==  'NSE')
     .map((i) => i.name)

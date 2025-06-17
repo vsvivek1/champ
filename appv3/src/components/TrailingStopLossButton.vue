@@ -1,5 +1,5 @@
 <template>
-	<v-btn @click="trailingStopLossWithLtp()">TRAILING STOP LOSS</v-btn>
+	<button @click="trailingStopLossWithLtp()">TRAILING STOP LOSS</button>
   </template>
   
   <script>

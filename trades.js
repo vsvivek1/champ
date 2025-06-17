@@ -2,7 +2,7 @@ const fs  =  require( 'fs' )
 
 // const ObjectsToCsv  =  require( 'objects-to-csv' )
 
-let instruments = require( './appv3/public/instruments/instrumentsForMining.json' );
+let instruments = require( './appv3/shared/instruments/instrumentsForMining.json' );
 
 const mongoose = require( 'mongoose' );
 const Path  =  require( 'path' )

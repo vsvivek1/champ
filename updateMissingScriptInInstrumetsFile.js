@@ -79,7 +79,7 @@ console.log( instrus,'instrus' );
 // return;
 
 
-let targetInstru = require( './appv3/public/instruments/instrumentsForMining.json' );
+let targetInstru = require( './appv3/shared/instruments/instrumentsForMining.json' );
 let sourceInstru = require( './appv3/public/instruments/instrumentsAll.json' );
 
 /// check if its already there
@@ -152,8 +152,8 @@ targetInstru.push( instrument );
 
 
 
-let fileOutputName = './appv3/public/instruments/instrumentsForMining.json'
-let targetDir = './appv3/public/instruments/instrumentsForMining.json'
+let fileOutputName = './appv3/shared/instruments/instrumentsForMining.json'
+let targetDir = './appv3/shared/instruments/instrumentsForMining.json'
 let t = await createAndMoveFileFromJson( fileOutputName,targetInstru,
     targetDir )
 

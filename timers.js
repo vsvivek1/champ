@@ -18,7 +18,7 @@ const ZerodhaAPI = require('./ZerodhaAPI');
 
 let today = new Date().toISOString().slice(0, 10);
 
-const instrumentsForMining = require('./appv3/public/instruments/instrumentsForMining.json');
+const instrumentsForMining = require('./appv3/shared/instruments/instrumentsForMining.json');
 const { ListIndexesCursor } = require("mongodb");
 // const { setInterval } = require("timers/promises");
 
@@ -248,7 +248,7 @@ async  getHoldingInstruments(access_token) {
 	
 	        let createAndMoveFileFromJson = require('./createAndMoveFileFromJson');
 	        console.log('timer for hourly lows')
-	         let instruments = require('./appv3/public/instruments/instrumentsForMining.json')
+	         let instruments = require('./appv3/shared/instruments/instrumentsForMining.json')
 	       
 	
 	        let symbols = instruments.

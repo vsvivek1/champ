@@ -33,7 +33,7 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             console.log('new length', fullJson.length);
 
             //console.log(fullJson.length,'full json len',selectedOptions.length)
-            writeJsonToFile(fullJson,'./appv3/public/instruments/instrumentsForMining.json')
+            writeJsonToFile(fullJson,'./appv3/shared/instruments/instrumentsForMining.json')
             writeJsonToFile(fullJson,'./appv3/src/assets/instruments/instrumentsForMining.json')
             
 

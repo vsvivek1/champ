@@ -60,7 +60,7 @@ function b(){
 
   const fs = require("fs");
   // const instruments = require("./appv3/public/instruments/instrumentsAll.json");
-  const instruments = require("./appv3/public/instruments/instrumentsForMining.json");
+  const instruments = require("./appv3/shared/instruments/instrumentsForMining.json");
 
 
   console.log(instruments.length);

@@ -486,7 +486,7 @@ out = res;
 	        let out = [];
 	
 	     var ln = [...symbols].length;   
-	     var instrumentsForMining1  =  require( "./appv3/public/instruments/instrumentsForMining.json" );
+	     var instrumentsForMining1  =  require( "./appv3/shared/instruments/instrumentsForMining.json" );
 	    //  var instrumentsForMining1  =  require( "./appv3/public/instruments/instrumentsForCommodity.json" );
 	   
 	    
@@ -645,7 +645,7 @@ let symbols = symbols1//.slice( 0,20 )
         let out = [];
 
      var ln = [...symbols].length;   
-    //  var instrumentsForMining1  =  require( "./appv3/public/instruments/instrumentsForMining.json" );
+    //  var instrumentsForMining1  =  require( "./appv3/shared/instruments/instrumentsForMining.json" );
     var instrumentsForMining1  =  require( "./appv3/public/instruments/instrumentsForCommodity.json" );
      
 let t = setInterval( async (  ) =>{ 

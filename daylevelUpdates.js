@@ -8,7 +8,7 @@ async function  dayLevelUpdates(  )
 
 
     const fs  =  require( "fs" );
-    const instruments  =  require( "./appv3/public/instruments/instrumentsForMining.json" );
+    const instruments  =  require( "./appv3/shared/instruments/instrumentsForMining.json" );
 
     // console.log( instruments.length );
 

@@ -77,6 +77,6 @@ class="table table-bordered table-compact">
      } 
 </script>
 
-<style lang="scss" scoped>
+<style  scoped>
 
 </style>

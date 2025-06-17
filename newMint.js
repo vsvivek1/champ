@@ -1,6 +1,6 @@
 //get nr4 instruments
 
-let instruments=require('./appv3/public/instruments/instrumentsForMining.json');
+let instruments=require('./appv3/shared/instruments/instrumentsForMining.json');
 const Axios = require('axios')
 require('dotenv').config()
 const mongoose=require('mongoose');

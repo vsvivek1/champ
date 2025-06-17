@@ -70,9 +70,33 @@ export function handleNonSTKTrades(cis, kite) {
         }
 
 
+
+/// no tick below open reach here
+
+ let gd=checkGapDown(cis);
+
+
+
+        if(gd&& global.hours<11){
+
+
+              cis.signals.safePassGapDownTill11=false
+            cis.returnPoints='gap down so no trade before 11' 
+            return;
+        }
+
+        //if morning gap down till 11 no trade
+
     if(global.hours==15 && global.minutes>15) return;
 
+
+    /// no trade after 15:15
+
+
     if(!cis || typeof cis.ma20=='undefined' )  return;
+
+/// cis not defined or ma20 not defined no tick pass
+
 
     //if()
     
@@ -83,13 +107,21 @@ if(cis.liveMinute.color === 'bearish'){
    cis.signals.safePasscheckcis_liveMinute_colorBearish=false;
         return false  
 }
+
+/// if current is bearish candle not going to buy
+
  cis.signals.safePasscheckcis_liveMinute_colorBearish=true
 
     if(checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis)){
 
         cis.signals.safePasscheckPenultimateGreenAndLastSmallBodyOrLowerHigh=false;
-        return false;
+       
+
+        // temporily bypassing
+       /// return false;
     }
+
+
 cis.signals.safePasscheckPenultimateGreenAndLastSmallBodyOrLowerHigh=true
 
  
@@ -103,19 +135,13 @@ cis.signals.safePasscheckPenultimateGreenAndLastSmallBodyOrLowerHigh=true
           //  console.log(cis.operatorBuyCandles,'op buy candles not present',cis.tradingsymbol)
             return false;
         }
+
+
 cis.signals.safepassOperatorCandleCheck=true
 cis.signals.operatorCandlesIn15Minutes=true;
-        let gd=checkGapDown(cis);
 
 
-
-        if(gd&& global.hours<11){
-
-
-              cis.signals.safePassGapDownTill11=false
-            cis.returnPoints='gap down so no trade before 11' 
-            return;
-        }
+       
          cis.signals.safePassGapDownTill11=true
 
 
@@ -125,10 +151,14 @@ cis.signals.operatorCandlesIn15Minutes=true;
     if(checkLowerLowsAndLowerHighs(cis)){
 
 cis.signals.safeproceedLowerLowsAndLowerHighs=false
-        return true;
+       
+//temporary byepassing
+///return true;
     }
-cis.signals.safeproceedLowerLowsAndLowerHighs=true;
+cis.signals.safeproceedLowerLowsAndLowerHighs='NA';
     
+
+
 if(typeof cis.ma20!='undefined' && typeof cis.displayedMa20!='undefined') {
 
         console.log('cis.ma20',cis.ma20,cis.tradingsymbol)
@@ -194,10 +224,10 @@ cis.signals.safePassLtpAboveMa20=false
         cis.returnPoints='CIST_HEALT-CHECK_FAILED';
         cis.entryHealth='CIST HEALTH CHECK FAILED'
 
-        
-        return;
+        //temporary bye passing
+        //return;
     }
-      cis.signals.safepassCISTCheck=true  
+      cis.signals.safepassCISTCheck='NA'  
 
 
 
@@ -231,12 +261,14 @@ cis.signals.buyAboveOpenAtNineAm=false
     ///buy if its a huge tick
 
 
-    if(buyAtHugeLastTick(cis,kite) ) return;
+    //  if(buyAtHugeLastTick(cis,kite) ) return; // not doing this
     cis.signals.buyAtHugeLastTick=false
     
   
     // Handle long lower shadow trades
    // handleLongLowerShadowTrades
+
+
     if (handleLongLowerShadowTrades(cis, kite)) return;
      cis.signals.handleLongLowerShadowTrades=false
 
@@ -258,19 +290,16 @@ cis.signals.buyAboveOpenAtNineAm=false
     if (handleHammerCandleTrade(cis, kite)) return;
     if (handleAfternoonBreakouts(cis, kite)) return;
     if (handleYesterdayHighCross(cis, kite)) return;
-    if (handleManyUpperWicks(cis, kite)) return;
-    if (handleThreeBlackCrowsReversal(cis, kite)) return;
-    if (handleOpenLowAtSpecificSeconds(cis, kite)) return;
+    //if (handleManyUpperWicks(cis, kite)) return;
+   // if (handleThreeBlackCrowsReversal(cis, kite)) return;
+   // if (handleOpenLowAtSpecificSeconds(cis, kite)) return;
 
 
 
 
     
 
-if(global.minutes%10==0 && global.seconds%31==0){
 
-    console.log('sensex health check affter all strategy checks',global.instrumentName,cis.tradingsymbol)
-}
 
    // handleNminuteBreakout
 
@@ -279,6 +308,8 @@ if(global.minutes%10==0 && global.seconds%31==0){
   //  handleGeneralTrades(cis, kite); //not working
 
     cis.entryHealth='exitAfterAllChecks'
+
+    cis.signals.exitAfterAllEntryStrategyChecks=true;
 return;
 
     //cis.hugeLastTick

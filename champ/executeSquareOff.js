@@ -34,15 +34,15 @@ export default async function executeSquareOff(squareOff, cis, kite) {
 
 
 
-  const conditionsMet = [];
-  if (checkLowerLowsAndLowerHighs(cis)) conditionsMet.push("lowerLowsAndLowerHighs");
-  if (checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis)) conditionsMet.push("penultimateGreenLastSmallBodyOrLowerHigh");
-  if (isMakingLowerLows(cis)) conditionsMet.push("makingLowerLows");
-  if (checkLastPriceAgainstPreviousCandles(cis)) conditionsMet.push("lastPriceAgainstPreviousCandles");
-  if (checkColorWithFlags(cis)) conditionsMet.push("colorWithFlags");
-  if (redCandleStartAfterGreenCandles(cis)) conditionsMet.push("redCandleAfterGreenCandles");
+  // const conditionsMet = [];
+  // if (checkLowerLowsAndLowerHighs(cis)) conditionsMet.push("lowerLowsAndLowerHighs");
+  // if (checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis)) conditionsMet.push("penultimateGreenLastSmallBodyOrLowerHigh");
+  // if (isMakingLowerLows(cis)) conditionsMet.push("makingLowerLows");
+  // if (checkLastPriceAgainstPreviousCandles(cis)) conditionsMet.push("lastPriceAgainstPreviousCandles");
+  // if (checkColorWithFlags(cis)) conditionsMet.push("colorWithFlags");
+  // if (redCandleStartAfterGreenCandles(cis)) conditionsMet.push("redCandleAfterGreenCandles");
 
-  cis.stopLossStrategy = JSON.stringify({ conditionsMet });
+  //cis.stopLossStrategy = JSON.stringify({ conditionsMet });
 
   try {
 

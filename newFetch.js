@@ -699,24 +699,20 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
             // }
           });
 
-          const buildCommand = './appv3/yarn build';
-          const command2 = 'ls';
-          exec(command2 , (error, stdout, stderr) => {
-            if (error) {
-              console.error(`Error executing yarn build: ${error.message}`);
-              reject(error);
-              return;
-            }
-            if (stderr) {
-              console.error(`stderr: ${stderr}`);
-              // optionally reject(stderr)
-            }
-
-            console.log(`stdout: ${stdout}\n\nLAST TIME EXECUTED: ${Date()}`);
-            resolve(); // ✅ All done
-          });
+  exec(
+  'cd appv3 && yarn build',
+  (error, stdout, stderr) => {
+    if (error) {
+      console.error(`❌ Build failed: ${error.message}`);
+      return;
+    }
+    console.log('✅ Build succeeded:\n', stdout);
+  }
+);
 
         }, 10 * 1000);
+
+
 
         // Optional log
         setTimeout(() => {
@@ -789,7 +785,7 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             console.log('new length', fullJson.length);
 
             //console.log(fullJson.length,'full json len',selectedOptions.length)
-            writeJsonToFile(fullJson,'./appv3/public/instruments/instrumentsForMining.json')
+            writeJsonToFile(fullJson,'./appv3/shared/instruments/instrumentsForMining.json')
             writeJsonToFile(fullJson,'./appv3/src/assets/instruments/instrumentsForMining.json')
             
 

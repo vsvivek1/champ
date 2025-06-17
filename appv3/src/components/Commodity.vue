@@ -23,8 +23,8 @@
    FORGONE SL :{{ totalForgoneForStopLoss.toFixed( 1 ) }} 
    </v-chip>
       <div class = "col" style = "height: 300px; overflow: auto">
-        <v-btn @click = "getLatestPricesOfClosedScripts(  )"
-          >get latest prices</v-btn
+        <button @click = "getLatestPricesOfClosedScripts(  )"
+          >get latest prices</button
         >
         Closed Trades
         <v-chip :color = "closedTradesScriptsPnl  > 0 ? 'green' : 'red'" class = "pb-2 mb-2">
@@ -51,15 +51,15 @@
 
 
 
-    <v-btn @click = "showModalForSquareOff(  )">
+    <button @click = "showModalForSquareOff(  )">
       square off selected
-      <v-icon></v-icon>
-    </v-btn>
+      <span></span>
+    </button>
 
     <button @click = "review(  )">review</button>
 
-    <v-btn @click = "getOrders(  )">Refresh orders</v-btn>
-    <v-btn @click = "refreshTradeStatus(  )">Refresh trade status</v-btn>
+    <button @click = "getOrders(  )">Refresh orders</button>
+    <button @click = "refreshTradeStatus(  )">Refresh trade status</button>
 
     <v-row class = "mt-1">
       <v-col>
@@ -74,21 +74,21 @@
         </v-row>
       </v-col>
       <v-col>
-        <v-icon
+        <span
           color = "red"
           v-if = "heartBeat"
           title = "if This symbol changes color switches between red and blue system is conencted to market"
         >
           mdi-heart
-        </v-icon>
+        </span>
 
-        <v-icon
+        <span
           color = "green"
           v-if = "!heartBeat"
           title = "if This symbol changes color switches between red and blue system is conencted to market"
         >
           mdi-heart
-        </v-icon>
+        </span>
       </v-col>
       <v-col>
         <img
@@ -98,19 +98,19 @@
       </v-col>
 
       <v-col>
-        <v-icon color = "blue">mdi-clock</v-icon> {{  hours  }} : {{  minutes  }}  :
+        <span color = "blue">mdi-clock</span> {{  hours  }} : {{  minutes  }}  :
         {{  seconds  }} 
       </v-col>
 
       <v-col>
-        <v-btn
+        <button
           @clck = "resetUserMessages(  )"
           small
           color = "red"
           title = "reset user messages"
         >
-          <v-icon>mdi-power-cycle</v-icon>
-        </v-btn></v-col
+          <span>mdi-power-cycle</span>
+        </button></v-col
       >
 
       <v-col>
@@ -124,23 +124,23 @@
       </v-col>
 
       <v-col>
-        <v-btn
+        <button
           v-if = "!AutoMode"
           @click = "AutoMode  =  true"
           title = "Switch to Auto"
           icon
           color = "green"
         >
-          <v-icon>mdi-send-clock-outline</v-icon> </v-btn
-        ><v-btn
+          <span>mdi-send-clock-outline</span> </button
+        ><button
           v-if = "AutoMode"
           @click = "AutoMode  =  false"
           title = " Switch to Manual"
           icon
           color = "red"
         >
-          <v-icon>mdi-send-lock</v-icon>
-        </v-btn>
+          <span>mdi-send-lock</span>
+        </button>
       </v-col>
     </v-row>
 
@@ -376,30 +376,30 @@
               </td>
 
               <td>
-                <v-icon
+                <span
                   color = "blue"
                   v-if = "pos.hasLiveTarget"
                   title = "Live Target Exist"
-                  >mdi-star</v-icon
+                  >mdi-star</span
                 >
 
-                <v-btn @click = "enableForEditng(  )" v-if = "pos.hasLiveTarget">
-                  <v-icon class = "text-yellow">mdi-pencil</v-icon>
+                <button @click = "enableForEditng(  )" v-if = "pos.hasLiveTarget">
+                  <span class = "text-yellow">mdi-pencil</span>
                   {{ pos.targetPrice }} 
-                </v-btn>
+                </button>
 
-                <v-btn @click = "CancelOrder(  )" v-if = "pos.hasLiveTarget">
-                  <v-icon>mdi-circle</v-icon>
-                </v-btn>
+                <button @click = "CancelOrder(  )" v-if = "pos.hasLiveTarget">
+                  <span>mdi-circle</span>
+                </button>
 
-                <v-btn
+                <button
                   color = "green"
                   title = "Set Target"
                   @click = "setTarget( pos )"
                   v-if = "!pos.hasLiveTarget"
                 >
-                  <v-icon>mdi-cube-send</v-icon>
-                </v-btn>
+                  <span>mdi-cube-send</span>
+                </button>
               </td>
             </tr>
           </tbody>
@@ -478,15 +478,15 @@
                   <small v-if = "i.SevenDayMaxMin"></small> &nbsp;
 
                   {{  i.pricePoints.d1.high  }} 
-                  <v-btn
+                  <button
                     fab
                     small
                     :title = "`Buy Now for  Amt ${ 
                       i.SevenDayMaxMin.Max * i.lot_size
                      } `"
                     @click = "BuyNow( i )"
-                    ><v-icon color = "green">mdi-cart</v-icon>
-                  </v-btn>
+                    ><span color = "green">mdi-cart</span>
+                  </button>
                 </td>
              
             </tr>
@@ -526,7 +526,7 @@
       </slot>
 
       <slot name = "footer">
-        <v-btn @click = "squareoffAll(  )">Proceed </v-btn>
+        <button @click = "squareoffAll(  )">Proceed </button>
       </slot>
     </b-modal>
   </div>

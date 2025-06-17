@@ -4,7 +4,7 @@ module.exports=function proxyTrade(io){
   
   
     const ticks=require('./appv3/public/instruments/ticks.json');
-    const instruments=require('./appv3/public/instruments/instrumentsForMining.json');
+    const instruments=require('./appv3/shared/instruments/instrumentsForMining.json');
     var makeTick=require('./backtest/tickGenerator');
     let outer=setInterval(() => {
   

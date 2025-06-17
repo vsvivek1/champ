@@ -1,7 +1,7 @@
 import { initialize } from './init.js';
 import { fetchHourlyData, fetchMinuteData } from './dataFetcher.js';
 import { initTicker } from './ticker.js';
-import instruAll from '../appv3/public/instruments/instrumentsForMining.json' assert { type: "json" };
+import instruAll from '../appv3/shared/instruments/instrumentsForMining.json' assert { type: "json" };
 import { fetchOrdersAndSetCis, fetchPositionsAndSetCis } from './orders.js';
 import io from 'socket.io-client';
 

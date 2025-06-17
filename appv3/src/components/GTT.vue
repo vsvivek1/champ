@@ -6,15 +6,15 @@
 
 Showing {{stocksPricePointsFiltered.length  }}
 
-<v-btn @click = "deleteGTT( 1 )">Delete GTT</v-btn>
+<button @click = "deleteGTT( 1 )">Delete GTT</button>
 
     <input type = "text" v-model ="gttAmountPerManualOrder" name = "" id = "" class = "form-control">
 
     <v-chip>Total {{ stocksPricePointsFiltered.length }} </v-chip>   
 
-     <v-btn :color="'green'" 
+     <button :color="'green'" 
      :loading = "getStockPricePointsLoader"
-     @click = "getStockPricePoints(  )">GET GTT </v-btn>
+     @click = "getStockPricePoints(  )">GET GTT </button>
      
     <table
     v-if = "stocksPricePointsFiltered.length"
@@ -43,7 +43,7 @@ Showing {{stocksPricePointsFiltered.length  }}
             v-if = "stockPpItem.gttData!= 'NO_GTT_PRESENT'">
 
             GTT @ {{ stockPpItem.gttData.condition.trigger_values[0] }} 
-            <v-btn @click = "deleteGTT( stockPpItem.gttData.id )"> <v-icon color = "red">mdi-cancel</v-icon></v-btn>
+            <button @click = "deleteGTT( stockPpItem.gttData.id )"> <span color = "red">mdi-cancel</span></button>
 
 
             </b>
@@ -73,7 +73,7 @@ Showing {{stocksPricePointsFiltered.length  }}
 
                     v-for = "( l,index ) in stockPpItem.supportLevels">
                   
-                    <v-btn class="my-btn"
+                    <button class="my-btn"
                    @click = "PlaceGttOrderForThisPrice( stockPpItem,l.level )"
                    >{{ l.level }} 
 
@@ -97,7 +97,7 @@ v-if="index>0  && (stockPpItem.supportLevels[index].level-stockPpItem.supportLev
                   
                   
                      </b>
-                   </v-btn>  ,
+                   </button>  ,
                     
                     </b>
                

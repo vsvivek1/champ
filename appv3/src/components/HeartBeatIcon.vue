@@ -2,12 +2,12 @@
 <div>
 
 
-	<v-icon
+	<span
     :class="['heart-icon', { 'text-danger': heartBeat, 'text-primary': !heartBeat }]"
     title="if This symbol changes color switches between red and blue system is connected to market"
   >
     mdi-heart
-  </v-icon>
+  </span>
 </div>
 	
   </template>

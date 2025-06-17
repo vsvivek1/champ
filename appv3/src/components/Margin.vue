@@ -4,7 +4,7 @@
 
 <div v-if = "marginLoaded">
 <v-alert>Margins</v-alert>
-<v-container>
+<div>
     <v-row>
         <v-col>
             Equity &nbsp;<v-chip>{{ margins.equity.net }} </v-chip>
@@ -15,7 +15,7 @@ Live balance&nbsp;<v-chip>{{ margins.equity.available.live_balance }} </v-chip>
         </v-col>
         <v-col></v-col>
     </v-row>
-</v-container>
+</div>
     </div>
 
     </div>

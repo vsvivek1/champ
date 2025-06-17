@@ -213,16 +213,16 @@ Order type
     </div>
 
     <div class = "col">
-        <v-btn color = "blue accent-4" @click = "CancelSlOrderIfAnyAndSetTarget(  )">
-            <v-icon></v-icon> Cancel SL orders if any and set target to LTP
-        </v-btn>
+        <button color = "blue accent-4" @click = "CancelSlOrderIfAnyAndSetTarget(  )">
+            <span></span> Cancel SL orders if any and set target to LTP
+        </button>
     </div>
     <div class = "col">
 
 
-<v-btn v-if = "selectedVariety!= ''" color = "blue accent-3" @click = "PlaceStopLoss(  )">
-    <v-icon>mdi-arrow-down</v-icon> Stop Loss  
-</v-btn>
+<button v-if = "selectedVariety!= ''" color = "blue accent-3" @click = "PlaceStopLoss(  )">
+    <span>mdi-arrow-down</span> Stop Loss  
+</button>
 </div>
 
 <div class = "col">
@@ -256,18 +256,18 @@ StopLossQuantty
     </option>
 </select>
 
-<v-btn v-if = "selectedVariety!= ''" color = "blue accent-2" @click = "PlaceStopLossYesterdayLow(  )">
-    <v-icon>mdi-arrow-down</v-icon> Stop Loss YESTERDAYLOW 
-</v-btn>
+<button v-if = "selectedVariety!= ''" color = "blue accent-2" @click = "PlaceStopLossYesterdayLow(  )">
+    <span>mdi-arrow-down</span> Stop Loss YESTERDAYLOW 
+</button>
 
     </div>
   
     <div class = "col">
 
 
-<v-btn v-if = "selectedVariety!= ''" color = "blue accent-1"  @click = "PlaceTarget(  )">
-    <v-icon>mdi-arrow-up</v-icon> Target
-</v-btn>
+<button v-if = "selectedVariety!= ''" color = "blue accent-1"  @click = "PlaceTarget(  )">
+    <span>mdi-arrow-up</span> Target
+</button>
 
 
     </div>
@@ -275,17 +275,17 @@ StopLossQuantty
     <div class = "col">
 
 
-<v-btn v-if = "selectedVariety!= ''" color = "blue accent-1"  @click = "PlaceTargetR2(  )">
-    <v-icon>mdi-arrow-up</v-icon> Target R2
-</v-btn>
+<button v-if = "selectedVariety!= ''" color = "blue accent-1"  @click = "PlaceTargetR2(  )">
+    <span>mdi-arrow-up</span> Target R2
+</button>
 
 
     </div>  <div class = "col">
 
 
-<v-btn v-if = "selectedVariety!= ''" color = "blue accent-1"  @click = "PlaceTargetPricePointNext(  )">
-    <v-icon>mdi-arrow-up</v-icon> Target Price Point Next
-</v-btn>
+<button v-if = "selectedVariety!= ''" color = "blue accent-1"  @click = "PlaceTargetPricePointNext(  )">
+    <span>mdi-arrow-up</span> Target Price Point Next
+</button>
 
 
     </div>
@@ -522,7 +522,7 @@ benefit if sold on yesterday low{{  ( holding.targetSlYestLow-holding.last_price
 
 <a  target = "_blank" :href = "`https://kite.zerodha.com/chart/ext/ciq/${ holding.exchange } /${ holding.tradingsymbol } /${ holding.instrument_token } /`"> 
 
-chart <v-icon>mdi-link</v-icon> </a>
+chart <span>mdi-link</span> </a>
 
 
 order status

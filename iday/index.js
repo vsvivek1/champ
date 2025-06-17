@@ -4,7 +4,7 @@ import { KiteTicker } from 'kiteconnect';
 import { getTodaysAccessToken } from '../getTodaysAccessToken.js';
 import getKiteConnectInstance from '../getKiteConnectInstanceRequire.js';
 import moment from 'moment';
-import instruAll from '../appv3/public/instruments/instrumentsForMining.json' assert { type: "json" };
+import instruAll from '../appv3/shared/instruments/instrumentsForMining.json' assert { type: "json" };
 import { detectBuySignal } from './candleStickSignals.js';
 import upglobal.dateOpenOrderPrice from "./upglobal.dateOrder.js";
 import terminalLink from 'terminal-link';

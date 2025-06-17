@@ -2,8 +2,8 @@
 import Vue from 'vue';
 import placeTargetsForLiveScripts    from './placeTargetsForLiveScripts';
 
-import VueGoodTable from "vue-good-table";
-import "vue-good-table/dist/vue-good-table.css";
+//import VueGoodTable from "vue-good-table";
+//import "vue-good-table/dist/vue-good-table.css";
 
 import instantiateHistoricalDataFetchMixin from './instantiateHistoricalDataFetchMixin';
 import getPositions from './getPositions';
@@ -236,7 +236,7 @@ var cl;
 
 
 
-// appv3/public/instruments/instrumentsForMining.json
+// appv3/shared/instruments/instrumentsForMining.json
 
 
 

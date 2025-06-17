@@ -100,18 +100,18 @@ v
     
     Day range: {{ item.tick.ohlc.high-item.tick.ohlc.low }}</span>
 
-<!-- <v-btn @click="toggleAvoid(true,item)"
+<!-- <button @click="toggleAvoid(true,item)"
 
-v-if="!item.avoided">Avoid</v-btn> -->
+v-if="!item.avoided">Avoid</button> -->
 
 
-<v-btn  @click="toggleAvoid(false,item)"
+<button  @click="toggleAvoid(false,item)"
 
-v-if="item.avoided">Include</v-btn>
+v-if="item.avoided">Include</button>
 
                         <span v-if="item['hasLivePosition'] " class="green"> 
 
-<v-icon>mdi-briefcase {{ item['position']['quantity'] }}</v-icon> x
+<span>mdi-briefcase {{ item['position']['quantity'] }}</span> x
 </span>
 
                     </td>
@@ -238,7 +238,7 @@ import sessionMixin from '../views/sessionMixin.js';
 
 
 import TickDisplay from './TickDisplay.vue'
-import instruments  from '/public/instruments/instrumentsForMining.json';// assert { type: "json" };
+import instruments  from '/shared/instruments/instrumentsForMining.json';// assert { type: "json" };
 
 export default {
   name: 'CisUpdates',
@@ -252,7 +252,7 @@ export default {
       };
   },
   created() {
-      const socket = io('http://localhost:4000');
+      const socket = io('https://think-vivek-thinkpad-e14-gen-5.taild05309.ts.net');
 
     //  console.log(socket)
       socket.on('sendCis', (cis) => {

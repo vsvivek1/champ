@@ -71,7 +71,7 @@ return {
      } 
 </script>
 
-<style lang="scss" scoped>
+<style  scoped>
 table { 
   max-width: 100px;
   overflow: hidden;

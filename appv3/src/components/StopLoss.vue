@@ -8,9 +8,9 @@
 
     {{ holdingLength }}  loading
 
-    <v-btn @click="filterStocksLessThanYesterdayLow">
-      <v-icon>mdi-circle</v-icon>
-    </v-btn>
+    <button @click="filterStocksLessThanYesterdayLow">
+      <span>mdi-circle</span>
+    </button>
 
     <table class="table table-bordered table-hover table-combact">
       <thead>
@@ -375,5 +375,5 @@ this.invokePricePoints(  );
  } ;
 </script>
 
-<style lang="scss" scoped>
+<style  scoped>
 </style>

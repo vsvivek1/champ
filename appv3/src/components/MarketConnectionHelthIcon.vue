@@ -1,5 +1,5 @@
 <template>
-	<v-icon
+	<span
 	  :class="{ 
 		'text-primary': tradeEntrySwitchHealth,
 		'text-secondary': !tradeEntrySwitchHealth
@@ -7,7 +7,7 @@
 	  title="if This symbol changes color switches between red and blue system is connected to market"
 	>
 	  mdi-circle
-	</v-icon>
+	</span>
   </template>
   
   <script>

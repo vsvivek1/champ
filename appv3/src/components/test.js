@@ -1,4 +1,4 @@
-let hourlyPricePointsofLiveDay1  = require( "../../../appv3/public/instruments/instrumentsForMining.json" );;
+let hourlyPricePointsofLiveDay1  = require( "../../../appv3/shared/instruments/instrumentsForMining.json" );;
 
 console.log( hourlyPricePointsofLiveDay1[0] )
 

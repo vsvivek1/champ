@@ -1,7 +1,7 @@
 // main.js
 
 import { connectToDatabase } from '../connectToDatabase.js';
-import instrumentsForMining from '../appv3/public/instruments/instrumentsForMining.json' assert { type: "json" };
+import instrumentsForMining from '../appv3/shared/instruments/instrumentsForMining.json' assert { type: "json" };
 import allInstruments from '../appv3/public/instruments/instrumentsAll.json' assert { type: "json" };
 import { KiteTicker } from 'kiteconnect';
 import { getTodaysAccessToken } from '../getTodaysAccessToken.js';
@@ -29,7 +29,19 @@ import eventBus from './eventBus.js';
 //const socket = io('http://tradingsimham.in:4000');  // Using a domain
 
 
+//const socket = io('https://think-vivek-thinkpad-e14-gen-5.taild05309.ts.net:4000'); 
+
 const socket = io('http://localhost:4000'); 
+
+
+
+//c//onst socket = io('http:localhost
+
+// const socket = io({
+//   path: '/socket.io',
+//   transports: ['websocket']
+// });
+
 //import niftyTrading from './intraday/niftyTrading.json' assert { type: "json" };
 import setAboveOpenScripts from './setAboveOpenScripts.js';
 import setLiveMinute from './setLiveMinute.js';

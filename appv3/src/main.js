@@ -9,9 +9,9 @@ import axios from 'axios'
 //import 'bootstrap'
 //import 'bootstrap/dist/css/bootstrap.min.css'
 
-import Vddl from 'vddl';
+//import Vddl from 'vddl';
 
-import vuetify from './plugins/vuetify';
+//import vuetify from './plugins/vuetify';
 
 import sessionMixin from "@/views/sessionMixin";
  
@@ -53,7 +53,7 @@ import sessionMixin from "@/views/sessionMixin";
 //    } ,
 //  }  );
  
-Vue.use( Vddl );
+//Vue.use( Vddl );
 
 import VueCookie from 'vue-cookie';
 // Tell Vue to use the plugin
@@ -135,21 +135,21 @@ Vue.mixin( {
 // vuetify,
 
 
-import InstrumentsStatusView from './components/InstrumentsStatusView.vue'; // Adjust the path as needed
+//import InstrumentsStatusView from './components/InstrumentsStatusView.vue'; // Adjust the path as needed
 
 // const app = createApp(App);
 
 // app.component('InstrumentsStatusView', InstrumentsStatusView);
 
 
-Vue.component('InstrumentsStatusView', InstrumentsStatusView);
+//Vue.component('InstrumentsStatusView', InstrumentsStatusView);
 
 // Create a new Vue instance
 new Vue({
   el: '#app', // Mount point in the DOM
   router, // Inject router
   store, // Inject store
-  vuetify, // Inject vuetify
+// Inject vuetify
   render: h => h(App) // Render the App component
 });
 

@@ -4,7 +4,7 @@ import { fetchHourlyData, fetchMinuteData } from './historicalData.js';
 import { initTicker } from './ticker.js';
 import { fetchOrdersAndSetCis, fetchPositionsAndSetCis } from './orders.js';
 import { convertToIndianTime, scheduleHourlyDataFetch } from './utils.js';
-import instruAll from '../appv3/public/instruments/instrumentsForMining.json' assert { type: 'json' };
+import instruAll from '../appv3/shared/instruments/instrumentsForMining.json' assert { type: 'json' };
 
 let kite;
 let orders = [];

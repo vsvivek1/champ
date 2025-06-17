@@ -1,6 +1,6 @@
 <template>
 	<v-col>
-	        <v-icon color = "blue">mdi-clock</v-icon> {{  hours  }} : {{  minutes  }}  :
+	        <span color = "blue">mdi-clock</span> {{  hours  }} : {{  minutes  }}  :
 	        {{  seconds  }} 
 	      </v-col>
 </template>
@@ -17,7 +17,7 @@
 	}
 </script>
 
-<style lang="scss" scoped>
+<style  scoped>
 
 </style>
 

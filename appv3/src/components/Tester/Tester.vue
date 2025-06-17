@@ -120,8 +120,8 @@
 
 <script>
 import sessionMixin from "@/views/sessionMixin";
-import {  VueGoodTable  }  from 'vue-good-table';
-import 'vue-good-table/dist/vue-good-table.css';
+//import {  VueGoodTable  }  from 'vue-good-table';
+//import 'vue-good-table/dist/vue-good-table.css';
 
 import {  io  }  from "socket.io-client";
 const socket  =  io( "http://127.0.0.1:4000"

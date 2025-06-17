@@ -31,6 +31,32 @@ export async function handlePositionPresent(cis, kite) {
     setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis);
 
 
+    if(global.seconds%30==0)
+    console.log(`position presnet ${cis.tradingsymbol} sl ${cis.stopLossPrice} ma20 ${cis.ma20} `)
+
+
+    if(cis.tick.last_price<cis.ma20 || cis.tick.last_price<cis.tick.ohlc.open){
+
+      const openOrder = global.orders.find(o => o.tradingsymbol === cis.tradingsymbol && o.status === 'OPEN');
+  if (!openOrder) {
+    console.warn(`No open order found to update for ${cis.tradingsymbol}. Cannot proceed with stop-loss update.`);
+    return;
+  }
+
+
+console.log('executting stop loss below ma20')
+
+        await updateOpenOrderPrice(kite, openOrder.order_id, cis.instrument_token, cis.tick.last_price, cis);
+
+        return;
+    }
+     
+
+return;
+
+
+
+
   cis.entryHealth = 'Inside Has Position';
   if (global.seconds % 19 === 0) cis.saidThat = false;
 
@@ -99,27 +125,27 @@ if(!tgtOrder){
 
   return;
 
-  if (!cis.inbuiltStopLoss && cis.tick.last_price < cis.stopLossPrice) {
-    executeSquareOff(true, cis, kite);
-    return;
-  }
+  // if (!cis.inbuiltStopLoss && cis.tick.last_price < cis.stopLossPrice) {
+  //   executeSquareOff(true, cis, kite);
+  //   return;
+  // }
 
-  if (global.instrumentName === 'STK') {
-    if (cis.position.quantity < 0) {
-      handleShortCoveringOfStocks(cis, kite);
-    } else if (cis.position.quantity > 0) {
-      handleLongCoveringOfStocks(cis, kite);
-    }
-    return;
-  }
+  // if (global.instrumentName === 'STK') {
+  //   if (cis.position.quantity < 0) {
+  //     handleShortCoveringOfStocks(cis, kite);
+  //   } else if (cis.position.quantity > 0) {
+  //     handleLongCoveringOfStocks(cis, kite);
+  //   }
+  //   return;
+  // }
 
-  const squareOff = shouldSquareOff(cis);
-  if (squareOff && global.hours<10) {
-    executeSquareOff(true, cis, kite);
-    return;
-  }
+  // const squareOff = shouldSquareOff(cis);
+  // if (squareOff && global.hours<10) {
+  //   executeSquareOff(true, cis, kite);
+  //   return;
+  // }
 
-  cis.entryHealth = 'Stop-loss health check: ' + cis.buy_price;
+  // cis.entryHealth = 'Stop-loss health check: ' + cis.buy_price;
 
-  return;
+  // return;
 }

@@ -1,7 +1,7 @@
 const fs  =  require( "fs" );
 
 var moment = require( 'moment' )
-  const instruments  =  require( "./appv3/public/instruments/instrumentsForMining.json" );
+  const instruments  =  require( "./appv3/shared/instruments/instrumentsForMining.json" );
 
 
 

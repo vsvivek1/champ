@@ -9,7 +9,7 @@ import axios from 'axios'
 import 'bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 // import vuetify from './plugins/vuetify';
-import Vddl from 'vddl';
+//import Vddl from 'vddl';
 
 // import ripple from 'vuetify/lib/directives/ripple';
 
@@ -54,7 +54,7 @@ Vue.use( vuetify, {
 //    } ,
 //  } );
  
-Vue.use(Vddl);
+//Vue.use(Vddl);
 
 import * as VueCookie from 'vue-cookie';
 // Tell Vue to use the plugin

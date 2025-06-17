@@ -2,7 +2,7 @@
     <div id="app">
   
   <!-- {{ session }}  -->
-      <v-app>
+      <!-- <v-app> -->
       <div id="nav">
         <router-link  v-if="session == null" to="/login">Login</router-link> |
         <router-link v-if="session!=null" to="/">Home</router-link> |
@@ -10,13 +10,13 @@
         <!-- <router-link to="/Validate">validate</router-link> | -->
        
        
-        <router-link v-if="session!=null" to="/quickTargets">One Click Targets</router-link> |
-        <router-link  v-if="session!=null" to="/holdings">Holdings</router-link> |
+        <!-- <router-link v-if="session!=null" to="/quickTargets">One Click Targets</router-link> | -->
+        <!-- <router-link  v-if="session!=null" to="/holdings">Holdings</router-link> | -->
        <!--  <router-link  v-if="session!=null" to="/instruments">Instruments</router-link> | -->
-        <router-link  v-if="session!=null" to="/orders">Order Book</router-link> |
+        <!-- <router-link  v-if="session!=null" to="/orders">Order Book</router-link> | -->
       <!--   <router-link  v-if="session!=null" to="/NarrowRange">NarrowRange</router-link> | -->
     <!--     <router-link  v-if="session!=null" to="/LongBuildUps">Long Build Ups</router-link> | -->
-        <router-link  v-if="session!=null" to="/Strategies">Strategies</router-link> |
+        <!-- <router-link  v-if="session!=null" to="/Strategies">Strategies</router-link> | -->
        <!--  <router-link  v-if="session!=null" to="/FutureTrading">Future Trading</router-link> |
  -->
         <!-- <router-link  v-if="session!=null" to="/timePriceHigh">Time Price High</router-link> | -->
@@ -33,8 +33,8 @@
   <!-- 
         <router-link  v-if="session!=null" to="/Mining">Mining</router-link> | -->
        
-        <router-link   to="/Tester" >Tester</router-link> |
-       <router-link  v-if="session!=null" to="/NewFutureMining/NFO" >New Future Mining</router-link> |
+        <!-- <router-link   to="/Tester" >Tester</router-link> | -->
+       <!-- <router-link  v-if="session!=null" to="/NewFutureMining/NFO" >New Future Mining</router-link> | -->
       
   
    <!-- {  name: 'NewFutureMining', params: {  ITYPE: "NFO"  }   }  -->
@@ -48,8 +48,8 @@
   
   
         <!-- <router-link  v-if="session!=null" to="/MiningMis">Mining-MIS</router-link> | -->
-       <router-link  v-if="session!=null" to="/GTT">GTT</router-link> |
-       <router-link  v-if="session!=null" to="/GTTSELL">GTT -SELL</router-link> |
+       <!-- <router-link  v-if="session!=null" to="/GTT">GTT</router-link> | -->
+       <!-- <router-link  v-if="session!=null" to="/GTTSELL">GTT -SELL</router-link> | -->
        <router-link  v-if="session!=null" to="/CisUpdates">CisUpdates</router-link> |
 
 
@@ -81,10 +81,10 @@
       <div class="row">
         <div class="col">
 
-          <!-- <v-btn @click="fetchInstruments( )">
+          <!-- <button @click="fetchInstruments( )">
             Fetch Instruments
-            <v-icon></v-icon>
-          </v-btn> -->
+            <span></span>
+          </button> -->
 
         </div>
         <div class="col"></div>
@@ -95,12 +95,12 @@
 
       
   
-      </v-app>
+    <!-- </v-app> -->
         </div>
   </template>
   
   <script>
-  // import LogWindow from './components/LogWindow.vue';
+   import LogWindow from './components/LogWindow.vue';
     import store from '@/store';
     import axios from 'axios'
   
@@ -157,7 +157,7 @@
   
   </script>
   
-  <style lang="scss">
+  <style >
   #app { 
     font-family: Avenir, Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -169,13 +169,9 @@
   #nav { 
     padding: 30px;
   
-   &.router-link-exact-active { 
-        color: #42b983;
-       } 
+
      } 
    
   
-  // @import './assets/styles/app.17a510a7.css';
-  // @import './assets/styles/css.css';
-  // @import './assets/styles/outer.d505d719.css';
+  
   </style>

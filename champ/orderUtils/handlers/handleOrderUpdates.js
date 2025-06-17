@@ -20,6 +20,19 @@ export async function handleOrderUpdates(order, kite,cis) {
     }
 
 
+    if (order.status === 'OPEN'
+      
+      // && order.transaction_type === 'SELL'
+    
+    ) {
+
+          global.orders = await kite.getOrders(); //trying once agin 
+
+
+console.log('ORDER UPDATE OPEN',cis.tradingsymbol)
+    }
+
+
     if (order.status === 'COMPLETE' && order.transaction_type === 'SELL') {
 
     

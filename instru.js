@@ -1,8 +1,8 @@
 const mongoose=require('mongoose');
 let AccesTocken=require('./models/AccessTokens');
 
-// let instru=require('./appv3/public/instruments/instrumentsForMining.json');
-let instru=require('./appv3/public/instruments/instrumentsForMining.json');
+// let instru=require('./appv3/shared/instruments/instrumentsForMining.json');
+let instru=require('./appv3/shared/instruments/instrumentsForMining.json');
 
 let zero=require('./ZerodhaAPI');
 

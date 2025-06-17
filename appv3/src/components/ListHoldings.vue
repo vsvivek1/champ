@@ -4,11 +4,11 @@
 
     <!-- {{ this.instrumentSlTargetlevels }} this.instrumentSlTargetlevels -->
 
-    <!-- <v-btn @click = "getHoldings(  )" class = "btn-primary">holdings
+    <!-- <button @click = "getHoldings(  )" class = "btn-primary">holdings
 
-      <v-icon>mdi-briefcase-download-outline</v-icon>
+      <span>mdi-briefcase-download-outline</span>
 
-    </v-btn> -->
+    </button> -->
 
 
     <div class = "row">
