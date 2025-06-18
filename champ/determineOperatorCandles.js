@@ -20,11 +20,11 @@ export function determineOperatorCandleFlags(cis) {
 
     // Helper functions
     const isLargeGreenCandle = (candle) => {
-        return candle.close > candle.open && (candle.close - candle.open) > 0.1 * lastPrice;
+        return candle.close > candle.open && (candle.close - candle.open) > 0.03 * lastPrice;
     };
 
     const isLargeRedCandle = (candle) => {
-        return candle.open > candle.close && (candle.open - candle.close) > 0.1 * lastPrice;
+        return candle.open > candle.close && (candle.open - candle.close) > 0.03 * lastPrice;
     };
 
     // Define time intervals in minutes
