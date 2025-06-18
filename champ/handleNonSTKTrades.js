@@ -284,9 +284,12 @@ cis.signals.buyAboveOpenAtNineAm=false
     if (handleNminuteBreakout(cis, kite, 15)) return;
 
      cis.signals.handleNminuteBreakout15=false;
+
     if (handleLastCandleHighBelowMA20(cis, kite)) return;
 
        cis.signals.handleLastCandleHighBelowMA20=false;
+
+       
     if (handleHammerCandleTrade(cis, kite)) return;
     if (handleAfternoonBreakouts(cis, kite)) return;
     if (handleYesterdayHighCross(cis, kite)) return;
