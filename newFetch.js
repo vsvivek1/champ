@@ -723,7 +723,7 @@ exec('cd appv3 && yarn build', (error, stdout, stderr) => {
 
 
 
-);
+
 
         }, 10 * 1000);
 
