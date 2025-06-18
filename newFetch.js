@@ -699,15 +699,30 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
             // }
           });
 
-  exec(
-  'cd appv3 && yarn build',
-  (error, stdout, stderr) => {
-    if (error) {
-      console.error(`❌ Build failed: ${error.message}`);
+
+
+// Step 1: Build the app
+exec('cd appv3 && yarn build', (error, stdout, stderr) => {
+  if (error) {
+    console.error(`❌ Build failed: ${error.message}`);
+    return;
+  }
+
+  console.log('✅ Build succeeded:\n', stdout);
+
+  // Step 2: Restart PM2 processes
+  exec('pm2 restart server && pm2 restart startInstruments && pm2 status && pm2 logs --lines 20', (err, out, errOut) => {
+    if (err) {
+      console.error(`❌ PM2 operation failed: ${err.message}`);
       return;
     }
-    console.log('✅ Build succeeded:\n', stdout);
-  }
+
+    console.log('✅ PM2 operations complete:\n', out);
+  });
+});
+
+
+
 );
 
         }, 10 * 1000);
