@@ -702,7 +702,6 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
 
 
 // Step 1: Build the app
-onst { exec, execSync } = require('child_process');
 
 exec('cd appv3 && yarn build', (error, stdout, stderr) => {
   if (error) {
