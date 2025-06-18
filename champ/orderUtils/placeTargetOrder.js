@@ -107,7 +107,7 @@ tgt=5
     }
 
 
-    cis.targetPrice=cis.buy_price*2;
+    cis.targetPrice=cis.buy_price*1.2;
     // 📝 Prepare order params
     const orderParams = {
       exchange: cis.exchange,
