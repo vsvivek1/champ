@@ -702,6 +702,8 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
 
 
 // Step 1: Build the app
+onst { exec, execSync } = require('child_process');
+
 exec('cd appv3 && yarn build', (error, stdout, stderr) => {
   if (error) {
     console.error(`❌ Build failed: ${error.message}`);
@@ -710,17 +712,25 @@ exec('cd appv3 && yarn build', (error, stdout, stderr) => {
 
   console.log('✅ Build succeeded:\n', stdout);
 
-  // Step 2: Restart PM2 processes
-  exec('pm2 restart server && pm2 restart startInstruments && pm2 status && pm2 logs --lines 20', (err, out, errOut) => {
-    if (err) {
-      console.error(`❌ PM2 operation failed: ${err.message}`);
-      return;
-    }
+  try {
+    // Restart processes one-by-one synchronously
+    console.log('🔁 Restarting PM2 processes...');
+    console.log(execSync('pm2 restart server').toString());
+    console.log(execSync('pm2 restart startInstruments').toString());
 
-    console.log('✅ PM2 operations complete:\n', out);
-  });
+    // PM2 status
+    console.log('📊 PM2 Status:');
+    console.log(execSync('pm2 status').toString());
+
+    // PM2 logs
+    console.log('📜 PM2 Logs (last 20 lines):');
+    console.log(execSync('pm2 logs --lines 20').toString());
+
+    console.log('✅ PM2 operations complete.');
+  } catch (err) {
+    console.error(`❌ PM2 operation failed: ${err.message}`);
+  }
 });
-
 
 
 
