@@ -108,9 +108,17 @@ tgt=5
 
 
 
+    let lm=cis.minuteData.slice(-1);
+    let high=lm.high;
+    cis.buy_price=Math.max(high,cis.tick.last_price)
+
+
+    //console.log(cis,cis.buy_price,cis.buy_price=cis.minuteData.slice(-1).high,cis.buy_price)
+
     if(global.hours==9)  cis.targetPrice=cis.buy_price*2;
      else if(global.hours==10)  cis.targetPrice=cis.buy_price*1.4;
       else if(global.hours==11)  cis.targetPrice=cis.buy_price*1.15;
+      
        else cis.targetPrice=cis.buy_price*1.1;
    
     // 📝 Prepare order params
