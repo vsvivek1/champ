@@ -96,21 +96,13 @@ export async function placeTargetOrder(cis, order, kite, _retried = false) {
     }
 
 
-let tgt=5
-    if(global.insstrumentName=='SENSEX'){
 
-tgt=15
-    }
-      if(global.insstrumentName=='NIFTY'){
-
-tgt=5
-    }
 
 
 
     let lm=cis.minuteData.slice(-1);
     let high=lm.high;
-    cis.buy_price=Math.max(high,cis.tick.last_price)
+    cis.buy_price=Math.max(high,cis.tick.last_price,cis.buy_price)
 
 
     //console.log(cis,cis.buy_price,cis.buy_price=cis.minuteData.slice(-1).high,cis.buy_price)
