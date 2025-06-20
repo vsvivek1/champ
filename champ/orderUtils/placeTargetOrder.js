@@ -107,7 +107,12 @@ tgt=5
     }
 
 
-    cis.targetPrice=cis.buy_price*1.2;
+
+    if(global.hours==9)  cis.targetPrice=cis.buy_price*2;
+     else if(global.hours==10)  cis.targetPrice=cis.buy_price*1.4;
+      else if(global.hours==11)  cis.targetPrice=cis.buy_price*1.15;
+       else cis.targetPrice=cis.buy_price*1.1;
+   
     // 📝 Prepare order params
     const orderParams = {
       exchange: cis.exchange,
