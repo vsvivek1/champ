@@ -216,13 +216,13 @@ cis.signals.safePassLtpAboveMa20=false
     //return
 
 
-    if(cis.tick.last_price>cis.ma20*1.3){
+    // if(cis.tick.last_price>cis.ma20 * 1.3){
 
 
-        cis.signals.safePassHugeDiffOFLTPwithMA20=false
-        return false
-    }
-        cis.signals.safePassHugeDiffOFLTPwithMA20=true
+    //     cis.signals.safePassHugeDiffOFLTPwithMA20=false
+    //     return false
+    // }
+    //     cis.signals.safePassHugeDiffOFLTPwithMA20=true
 
    
     if (!validateCISTradeConditions(cis)) 
