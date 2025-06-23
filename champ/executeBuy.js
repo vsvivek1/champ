@@ -140,7 +140,7 @@ qty=250;
       } */
 
 
-let qu=Math.floor(30000/price)
+let qu=Math.floor(30000/cis.lot_size)
 
 qty=20*cis.lot_size;
 qty=qu;
