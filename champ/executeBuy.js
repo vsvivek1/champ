@@ -140,15 +140,18 @@ qty=250;
       } */
 
 
+let qu=Math.floor(30000/price)
 
 qty=20*cis.lot_size;
+qty=qu;
+
     const orderParams = {
         exchange: cis.exchange,
         tradingsymbol: cis.tradingsymbol,
         transaction_type: "BUY",
         order_type: "LIMIT",
         quantity: qty,
-        price: price+4,
+        price: price,
         //product: "NRML",
         product: "MIS",
         validity: "DAY"

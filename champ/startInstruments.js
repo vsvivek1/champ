@@ -4,7 +4,7 @@ import { fork } from 'child_process';
 // Define your instrument names
 var instruments = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY', 'FINNIFTY',  ]; //'MIDCPNIFTY', 'FINNIFTY',
 
-instruments =['SENSEX','NIFTY'];
+//instruments =['SENSEX','NIFTY'];
 //'SENSEX',,'BANKEX'
 
 //'STK' //'BANKEX'
