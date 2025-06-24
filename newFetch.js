@@ -17,8 +17,8 @@ const fs = require('fs').promises;
 //const restartPM2Process = require('./restartPM2Process');
 const scriptDirectory  =  Path.dirname( process.argv[1] );
 const FILE_LOCATION  =  Path.join( scriptDirectory, 'appv3', 'public', 'instruments' );
-const io = require('socket.io-client');
-const socket = io('http://localhost:4000'); 
+// const io = require('socket.io-client');
+// const socket = io('http://localhost:4000'); 
 
 function getNextSevenDays() {
   const days = [];
@@ -472,6 +472,8 @@ const intervalId = await new Promise((resolve, reject) => {
     if (index >= names.length) {
       console.log('✅ All index names processed.');
       clearInterval(interval);
+
+      resolve(true);
       return resolve(true);
     }
 
@@ -569,7 +571,7 @@ const intervalId = await new Promise((resolve, reject) => {
 
 
 
-//console.log(names);//
+console.log(names);//
 
 
 
@@ -624,11 +626,11 @@ selectedOptions = removeDuplicates(selectedOptions, 'instrument_token');
 
 let fullJson=[]
 
-await popOption(selectedOptions,fullJson,accessTokenDoc);
+let a1=await popOption(selectedOptions,fullJson,accessTokenDoc);
 
-//console.log('here 158')
+console.log('here 158',a1)
 
-
+disconnect();
 
 
 
@@ -675,75 +677,20 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
         }
 
       } else {
-        clearInterval(timer);
+        
+  clearInterval(timer);
         console.log("Array is empty. Resetting timer.");
-
-        setTimeout(() => {
-          const command = 'node ./champ/main.js';
-          exec(command, async (error, stdout, stderr) => {
-           // try {
-              await writeJsonToFile(fullJson, './iday/instrumentsForMining.json');
-
-              if (error) {
-                console.error(`Error executing main.js: ${error.message}`);
-                reject(error);
-                return;
-              }
-              if (stderr) {
-                console.error(`stderr: ${stderr}`);
-                // optionally reject(stderr)
-              }
-
-              console.log(`stdout: ${stdout}`);
-           
-           
-            // } catch (err) {
-            //   reject(err);
-            // }
-          });
-
-
-
-// Step 1: Build the app
-
-exec('cd appv3 && yarn build', (error, stdout, stderr) => {
-  if (error) {
-    console.error(`❌ Build failed: ${error.message}`);
-    return;
-  }
-
-  console.log('✅ Build succeeded:\n', stdout);
-
-  try {
-    // Restart processes one-by-one synchronously
-    // console.log('🔁 Restarting PM2 processes...');
-    // console.log(execSync('pm2 restart server').toString());
-    // console.log(execSync('pm2 restart startInstruments').toString());
-
-    // PM2 status
-   // console.log('📊 PM2 Status:');
-    //console.log(execSync('pm2 status').toString());
-
-    // PM2 logs
-    //console.log('📜 PM2 Logs (last 20 lines):');
-    //console.log(execSync('pm2 logs --lines 20').toString());
-
-    //console.log('✅ PM2 operations complete.');
-  } catch (err) {
-    console.error(`❌ PM2 operation failed: ${err.message}`);
-  }
-});
-
-
-
-
-        }, 10 * 1000);
-
+       
 
 
         // Optional log
-        setTimeout(() => {
+        setTimeout(async () => {
+
+        
           console.log(`LAST TIME EXECUTED: ${Date()}`);
+
+resolve(true)
+          return;
         }, 5 * 1000);
       }
     }, 500);
