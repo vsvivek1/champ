@@ -4,7 +4,7 @@ import { highAfter11AM } from "./highAfter11.js";
 
 
 export function handleAfternoonBreakouts(cis, kite) {
-    if (!(global.hours >= 12 && global.hours < 16)) return false;
+    if (!(global.hours <=12 && global.hours < 16)) return false;
 
 
     //highAfter11AM

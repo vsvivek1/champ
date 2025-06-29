@@ -13,7 +13,7 @@ var instruments = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY', 'FINNIFTY',  ]; //'MIDCPNI
 //const instruments = [ 'NIFTY'];
 // Function to start a new process for each instrument
 function startProcess(instrumentName) {
-    const process = fork('champ/main.mjs', [instrumentName]);
+    const process = fork('./main.mjs', [instrumentName]);
     
     process.on('message', (message) => {
         console.log(`Message from ${instrumentName} process:`, message);

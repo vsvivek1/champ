@@ -23,6 +23,14 @@ export function handleLastCandleHighBelowMA20(cis, kite) {
 
   const lastCandle = candles[candles.length - 1];
 
+  let lastTenCandles=candles.slice(-10);
+
+  let lastTenCandlesHighs=lastTenCandles.map(c=>c.high);
+
+    if (lastTenCandlesHighs.some(high => high > ma20)) return false; /// checking atleast 10 candles are below ma20  if any are abvove 20 or at 20 return false
+
+ 
+
   if (lastCandle.high < ma20 && ltp > ma20) {
     cis.buyStrategy = strategyName;
     cis.entryHealth = `✅ Buy: High < MA20 && LTP > MA20`;

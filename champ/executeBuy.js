@@ -139,11 +139,12 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 qty=250;
       } */
 
-
 let qu=Math.floor(30000/cis.lot_size)
 
-qty=20*cis.lot_size;
-qty=qu;
+qty=1*cis.lot_size;
+//qty=qu;
+
+console.log(qu,'qu')
 
     const orderParams = {
         exchange: cis.exchange,

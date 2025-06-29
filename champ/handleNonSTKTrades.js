@@ -284,23 +284,23 @@ cis.signals.buyAboveOpenAtNineAm=false
     // Handle general trades
 
 
-    if (handleNminuteBreakout(cis, kite, 60)) return;
+    if (handleNminuteBreakout(cis, kite, 60) && global.hours<13) return;
    cis.signals.handleNminuteBreakout60=false;
 
-    if (handleNminuteBreakout(cis, kite, 30)) return;
+    if (handleNminuteBreakout(cis, kite, 30) && global.hours<13) return;
 
      cis.signals.handleNminuteBreakout30=false;
-    if (handleNminuteBreakout(cis, kite, 15)) return;
+    if (handleNminuteBreakout(cis, kite, 15)  && global.hours<13) return;
 
      cis.signals.handleNminuteBreakout15=false;
 
-    if (handleLastCandleHighBelowMA20(cis, kite)) return;
+    if (handleLastCandleHighBelowMA20(cis, kite) ) return;
 
        cis.signals.handleLastCandleHighBelowMA20=false;
 
        
     if (handleHammerCandleTrade(cis, kite)) return;
-    if (handleAfternoonBreakouts(cis, kite)) return;
+  //  if (handleAfternoonBreakouts(cis, kite)) return;
     if (handleYesterdayHighCross(cis, kite)) return;
     //if (handleManyUpperWicks(cis, kite)) return;
    // if (handleThreeBlackCrowsReversal(cis, kite)) return;
