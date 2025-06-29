@@ -15,6 +15,9 @@ export function handleLongLowerShadowTrades(cis, kite) {
         cis.buyStrategy = strategyName;
 
         cis.deployedStrategies.handleLongLowerShadowTrades = 'Activated';
+
+        cis.entryHealth=strategyName
+         console.log('Executing',cis.entryHealth);
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
         return true;
     }

@@ -18,6 +18,9 @@ export function buyAboveOpenAtNineAm(cis, kite) {
         cis.inbuiltStopLoss = true;
 
         cis.deployedStrategies.buyAboveOpenAtNineAm = 'Activated';
+
+        cis.entryHealth='BuyOpenAboveNineBefore930';
+         console.log('Executing',cis.entryHealth);
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
         return true;
     } else {

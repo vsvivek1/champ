@@ -14,6 +14,9 @@ export function handleYesterdayHighCross(cis, kite) {
         cis.buyStrategy = strategyName;
         cis.signals[strategyName] = true;
         cis.entryHealth = `✅ Crossed yesterday's high (${yHigh})`;
+
+         
+        
         cis.returnPoints = `✅ [${strategyName}] LTP > Yesterday's High, but last candle high < it`;
 
         cis.targetPrice = cis.tick.last_price + cis.liveMinute.range;
@@ -24,7 +27,7 @@ export function handleYesterdayHighCross(cis, kite) {
         cis.deployedStrategies[strategyName] = 'Activated';
         cis.strategyTested = cis.strategyTested || [];
         cis.strategyTested.push(strategyName);
-
+ console.log('Executing',cis.entryHealth);
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
         return true;
     }

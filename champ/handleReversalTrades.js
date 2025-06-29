@@ -19,6 +19,8 @@ export function handleReversalTrades(cis, kite) {
 
         cis.deployedStrategies.reversa30 = 'Activated';
         cis.signals.handleReversalTrades=true;
+cis.entryHealth='Reversa 30 triggered';
+         console.log('Executing',cis.entryHealth);
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
 
         return true; // Indicates a trade was executed

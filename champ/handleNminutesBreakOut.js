@@ -10,7 +10,7 @@ import { executeBuy } from "./executeBuy.js";
  * @returns {boolean} - Returns true if a trade is executed, false otherwise.
  */
 export function handleNminuteBreakout(cis, kite, n) {
-  const strategyName = `rangeBreakout${n}m`;
+  const strategyName = `rangeBreakout${n}minute`;
 
   cis.deployedStrategies[strategyName] = 'touched';
 
@@ -24,6 +24,9 @@ export function handleNminuteBreakout(cis, kite, n) {
     cis.inbuiltStopLoss = true;
 
     cis.deployedStrategies[strategyName] = 'Activated';
+
+     cis.entryHealth=strategyName;
+         console.log('Executing',cis.entryHealth);
     executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
 
     return true;
