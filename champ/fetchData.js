@@ -122,10 +122,10 @@ export async function fetchPositionsAndSetCis(kite) {
 
 
 
-            if (pos.quantity == 0) {
+            if (pos.quantity != 0) {
 
                 let matchingInstrument =global.instrumentsForMining.find(instrument => instrument.tradingsymbol === pos.tradingsymbol);
-
+matchingInstrument.positionStatus=true
                 if (matchingInstrument) {
 
                    
