@@ -13,6 +13,38 @@ import { placeTargetOrder } from './orderUtils.js';
 
 import { setBuyPriceAndTargetPriceFromCompletedBuyOrder } from './setBuPriceAndTargetFromCompletedBuyOrder.js';
 
+
+async function shortCoverOrder(kite, cis) {
+  try {
+    const quantity = cis.position?.quantity;
+    if (!quantity || quantity <= 0) {
+      console.log("No short position to cover.");
+      return null;
+    }
+
+    const orderParams = {
+      exchange: cis.exchange,               // "NFO"
+      tradingsymbol: cis.tradingsymbol,     // e.g., "NIFTY24JUL20000PE"
+      transaction_type: kite.TRANSACTION_TYPE_BUY,
+      quantity: quantity,
+      order_type: cis.order_type || kite.ORDER_TYPE_MARKET,
+      product: cis.product || kite.PRODUCT_MIS,
+      variety: kite.VARIETY_REGULAR,
+      validity: kite.VALIDITY_DAY,
+    };
+
+    if (orderParams.order_type === kite.ORDER_TYPE_LIMIT && cis.price) {
+      orderParams.price = cis.price;
+    }
+
+    const orderId = await kite.placeOrder(orderParams.variety, orderParams);
+    console.log("Short position covered. Order ID:", orderId);
+    return orderId;
+  } catch (error) {
+    console.error("Failed to cover short position:", error);
+  }
+}
+
 export async function handlePositionPresent(cis, kite) {
 
 
