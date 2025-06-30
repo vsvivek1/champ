@@ -37,10 +37,14 @@ export function handleNonSTKTrades(cis, kite) {
 
     // 
 
-    if(cis.tick.ohlc.open>cis.tick.last_price && cis.ma20>cis.tick.last_price){
+    if(cis.tick.ohlc.open>cis.tick.last_price && cis.ma20>cis.tick.last_price && !cis.shorted){
 
 
         console.log('short ',cis.tradingsymbol)
+
+        cis.shorted=true;
+
+
     }
 
   
