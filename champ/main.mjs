@@ -65,7 +65,7 @@ global.margins=false;
 global.stopLossPoints=20;
 global.targetPoints=50
 
-global.enableShortTrading=true;
+global.enableShortTrading=false;
 
 var cis;
 const instrumentData =[];

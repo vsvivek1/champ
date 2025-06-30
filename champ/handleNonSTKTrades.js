@@ -80,6 +80,9 @@ export function handleNonSTKTrades(cis, kite) {
         cis.shorted=true;
 shortOptionOrder(kite, cis)
 
+
+return;
+
     }
 
   
