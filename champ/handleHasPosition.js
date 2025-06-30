@@ -82,8 +82,8 @@ export async function handlePositionPresent(cis, kite) {
 
 
 
-  if(cis.positionStatus && cis.position.quantity<0 && !cis.shortCoverd && 
-    (cis.tick.last_price>cis.tick.ohlc.open || cis.tick.last_price>cis.tick.open) ){
+  if(cis.ma20 && cis.positionStatus && cis.position.quantity<0 && !cis.shortCoverd && 
+    (cis.tick.last_price>cis.tick.ohlc.open || cis.tick.last_price>cis.ma20) ){
 
 
 ///// short covering stop loss function
@@ -101,6 +101,9 @@ export async function handlePositionPresent(cis, kite) {
 
 
     console.log('have ashort position for short covering',cis.tradingsymbol)
+    
+
+    return;
   }
 
 

@@ -113,6 +113,12 @@ export async function placeTargetOrder(cis, order, kite, _retried = false) {
       
        else cis.targetPrice=cis.buy_price*1.1;
    
+
+
+       if(cis.position.quantity<0){
+cis.targetPrice=cis.buy_price*.9
+
+       }
     // 📝 Prepare order params
     const orderParams = {
       exchange: cis.exchange,
