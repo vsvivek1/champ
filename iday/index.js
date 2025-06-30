@@ -167,7 +167,7 @@ async function fetchPositionsAndSetCis(){
         const matchingPosition = positionsDay.find(pos => pos.tradingsymbol === instrument.tradingsymbol 
 
 
-            && pos.quantity>0
+            && pos.quantity!=0
         );
 
         if (matchingPosition) {

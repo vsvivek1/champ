@@ -65,7 +65,13 @@ export function handleNonSTKTrades(cis, kite) {
 
     // 
 
-    if(cis.tick.ohlc.open>cis.tick.last_price && cis.ma20>cis.tick.last_price && !cis.shorted){
+    if(
+        global.enableShortTrading && 
+
+
+     (!cis.position || cis.position.quantity==0) &&
+
+        cis.tick.ohlc.open>cis.tick.last_price && cis.ma20>cis.tick.last_price && !cis.shorted){
 
 
         

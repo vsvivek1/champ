@@ -118,8 +118,11 @@ export async function fetchPositionsAndSetCis(kite) {
         global.positions.forEach(pos => {
 
 
-           if(pos.quantity<0) return;
-            if (pos.quantity > 0) {
+          // if(pos.quantity<0) re
+
+
+
+            if (pos.quantity == 0) {
 
                 let matchingInstrument =global.instrumentsForMining.find(instrument => instrument.tradingsymbol === pos.tradingsymbol);
 
