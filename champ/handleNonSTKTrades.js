@@ -32,7 +32,16 @@ export function handleNonSTKTrades(cis, kite) {
 //console.log('terst')
 
     /// no trading below open . profit athu mathi decided
+
+
+
     // 
+
+    if(cis.tick.ohlc.open>cis.tick.last_price && cis.ma20>cis.tick.last_price){
+
+
+        console.log('short ',cis.tradingsymbol)
+    }
 
   
         if(cis.tick.ohlc.open>cis.tick.last_price){
