@@ -16,6 +16,15 @@ import { setBuyPriceAndTargetPriceFromCompletedBuyOrder } from './setBuPriceAndT
 export async function handlePositionPresent(cis, kite) {
 
 
+
+  if(cis.position && cis.position.quantity<0 && !cis.shortCoverd){
+
+cis.shortCoverd=true;
+    console.log('have ashort position for short covering',cis.tradingsymbol)
+  }
+
+
+
   if (true) {
     // console.log('Position status for', 
       
