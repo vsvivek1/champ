@@ -27,6 +27,34 @@ import { checkGapDown } from "./gapDownChecker.js";
 
 
 //checkGapDown
+async function shortOptionOrder(kite, cis) {
+  try {
+    const orderParams = {
+      exchange: cis.exchange,              // "NFO"
+      tradingsymbol: cis.tradingsymbol,    // "NIFTY24JUL20000PE"
+      transaction_type: kite.TRANSACTION_TYPE_SELL,
+      quantity: cis.lot_size,              // e.g. 50
+      order_type: cis.order_type || kite.ORDER_TYPE_MARKET,
+      product: cis.product || kite.PRODUCT_MIS,
+      variety: kite.VARIETY_REGULAR,       // for normal intraday order
+      validity: kite.VALIDITY_DAY,
+    };
+
+    // Optional price for LIMIT order
+    if (orderParams.order_type === kite.ORDER_TYPE_LIMIT && cis.tick.last_price) {
+      orderParams.price = cis.tick.last_price;
+    }
+
+    const orderId = await kite.placeOrder(orderParams.variety, orderParams);
+    console.log("Short order placed. Order ID:", orderId);
+    return orderId;
+  } catch (error) {
+    console.error("Failed to place short order:", error);
+  }
+}
+
+
+
 export function handleNonSTKTrades(cis, kite) {
 
 //console.log('terst')
@@ -40,10 +68,11 @@ export function handleNonSTKTrades(cis, kite) {
     if(cis.tick.ohlc.open>cis.tick.last_price && cis.ma20>cis.tick.last_price && !cis.shorted){
 
 
+        
         console.log('short ',cis.tradingsymbol)
 
         cis.shorted=true;
-
+shortOptionOrder(kite, cis)
 
     }
 
