@@ -15,7 +15,7 @@ export function calculate20MA(minuteData) {
 
     const last20Closes = minuteData
     .slice(-count)
-    .map(candle => candle.close);
+    .map(candle => candle.high);
       //  console.log(last20Closes)
 
     const sum = last20Closes.reduce((acc, val) => acc + val, 0);
