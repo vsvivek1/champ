@@ -81,8 +81,12 @@ async function shortCoveringStoploss(kite, cis) {
 export async function handlePositionPresent(cis, kite) {
 
 
+  if(cis.position.quantity<0){
 
-  if(cis.ma20 && cis.positionStatus && cis.position.quantity<0 && !cis.shortCoverd && 
+  if( global.seconds==30)  console.log('stop loss of',cis.tradingsymbol ,'@',cis.ma20);
+  }
+
+  if(cis.position.quantity<0&& cis.ma20 && cis.positionStatus && cis.position.quantity<0 && !cis.shortCoverd && 
     (cis.tick.last_price>cis.tick.ohlc.open || cis.tick.last_price>cis.ma20) ){
 
 
@@ -106,7 +110,7 @@ export async function handlePositionPresent(cis, kite) {
     return;
   }
 
-
+console.log('long postion present for',cis.tradingsymbol);
 
   if (true) {
     // console.log('Position status for', 
@@ -121,24 +125,39 @@ export async function handlePositionPresent(cis, kite) {
    //setBuyPriceAndTargetPriceFromCompletedBuyOrder
   
     setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis);
+       if(global.seconds%30==0)
+    console.log(`position present ${cis.tradingsymbol} sl ${cis.stopLossPrice} ma20 ${cis.ma20} `);
 
 
-    if(global.seconds%30==0)
-    console.log(`position presnet ${cis.tradingsymbol} sl ${cis.stopLossPrice} ma20 ${cis.ma20} `)
+ 
+if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
+
+  // If it's after 1 PM on the expiry day and the last price is above the 20-period moving average,
+  // we don't do stop loss for below open, so we return early.
+  return;
+
+}
+       
 
 
-    if(cis.tick.last_price<cis.ma20 || cis.tick.last_price<cis.tick.ohlc.open){
+    if(cis.tick.last_price<cis.ma20
+      
+      || (cis.tick.last_price<cis.tick.ohlc.open ))
+    
+    
+    {
 
       const openOrder = global.orders.find(o => o.tradingsymbol === cis.tradingsymbol && o.status === 'OPEN');
   if (!openOrder) {
 
-    cis.signals.NoReverseOrderFoundForPosition=true;
+  cis.signals?  cis.signals.NoReverseOrderFoundForPosition=true : cis.signals={NoReverseOrderFoundForPosition:true};
     console.warn(`No open order found to update for ${cis.tradingsymbol}. Cannot proceed with stop-loss update.`);
     return;
   }
 
 
-console.log('executting stop loss below ma20')
+console.log('executting stop loss below ma20 or below open price',cis.tradingsymbol,
+   'last price',cis.tick.last_price,'ma20',cis.ma20,'open',cis.tick.ohlc.open);
 
         await updateOpenOrderPrice(kite, openOrder.order_id, cis.instrument_token, cis.tick.last_price, cis);
 

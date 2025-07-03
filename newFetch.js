@@ -497,12 +497,12 @@ const intervalId = await new Promise((resolve, reject) => {
         return;
       }
 
-      const depth = 0;
+      const depth = 1;
 
      // const expiries = [...new Set(optionsForIndex.map(o => o.expiry))].sort();
 
       
-
+console.log('Depth',depth);
       const expiries  = Array.from({ length: 7 }, (_, i) => {
         const d = new Date();
         d.setDate(d.getDate() + i +0);               // +1 for tomorrow, +i for the subsequent days

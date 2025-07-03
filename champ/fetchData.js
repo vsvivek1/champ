@@ -49,9 +49,34 @@ export function aggregateOHLC(cis) {
 
 
 
-function placeReverseOrderIfNotPresent(){
+async function placeReverseOrderWithTarget(pos,kite) {
+  if (!pos || !pos.quantity || !pos.average_price) {
+    console.error("Invalid position object");
+    return;
+  }
+
+  const isShort = pos.quantity < 0;
+  const reverseQuantity = Math.abs(pos.quantity) * 2;
+  const transaction_type = isShort ? "BUY" : "SELL";
+
+const targetPrice = isShort
+    ? pos.average_price * 0.75
+    : pos.average_price * 1.25;
+
+  const order = {
+    tradingsymbol: pos.tradingsymbol,
+    exchange: pos.exchange,
+    quantity: reverseQuantity,
+    price: parseFloat(targetPrice.toFixed(2)),
+    order_type: "LIMIT", // Or "MARKET" if desired
+    product: "MIS",       // or "NRML", etc.
+    transaction_type,
+    validity: "DAY"
+  };
 
 
+ return await kite.placeOrder("regular",order)
+ // placeOrder(order); // This function must be defined elsewhere
 }
 
 
@@ -113,18 +138,45 @@ export async function fetchOrdersAndSetCis(kite) {
 export async function fetchPositionsAndSetCis(kite) {
     try {
         const response = await kite.getPositions();
+
+        const orders=await kite.getOrders();
+       
+
         global.positions = response.day; // Update global.positions with the fetched data
 
-        global.positions.forEach(pos => {
+        global.orders=orders;
+
+        global.positions.forEach(async pos => {
 
 
+            let revorder=orders.filter(o=>o.status=='OPEN' && o.instrument_token==pos.instrument_token);
+ console.log(revorder.length==0);
+
+ if(revorder.length==0){
+
+
+//await placeReverseOrderWithTarget(pos,kite);
+
+    //place reverse order
+ }
           // if(pos.quantity<0) re
 
 
+          console.log('fetch position',pos.tradingsymbol,'qty',pos.quantity)
 
             if (pos.quantity != 0) {
 
-                let matchingInstrument =global.instrumentsForMining.find(instrument => instrument.tradingsymbol === pos.tradingsymbol);
+                /// check has reverse order
+
+                let matchingInstrument =global.instrumentsForMining.find(instrument => instrument.tradingsymbol === pos.tradingsymbol)
+                ;
+
+                if(!matchingInstrument){
+
+                global.instrumentsForMining.push(    global.allInstruments.find(i=>i.tradingsymbol==pos.tradingsymbol))
+
+                matchingInstrument =global.instrumentsForMining.find(instrument => instrument.tradingsymbol === pos.tradingsymbol)
+                }
 
                 if (matchingInstrument) {
                     matchingInstrument.positionStatus=true

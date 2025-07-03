@@ -55,6 +55,8 @@ async function shortOptionOrder(kite, cis) {
 
 
 
+
+
 export function handleNonSTKTrades(cis, kite) {
 
 //console.log('terst')
@@ -86,7 +88,9 @@ return;
     }
 
   
-        if(cis.tick.ohlc.open>cis.tick.last_price){
+        if (cis.tick.last_price < cis.tick.ohlc.open && !(cis.expiryDay && global.hours > 13))
+        /// if last price is less than open and not expiry day and not after 1pm then return
+    {
 
             cis.signals.aboveDayOpen=false
         
@@ -106,8 +110,8 @@ return;
             return;
         }
         else {
- cis.signals.aboveDayOpen=true
-    
+            cis.signals.aboveDayOpen=true;
+
             if(global.seconds%1==0 && !cis.saidItsAbove)  {console.warn('ltp abobe open', `for ${cis.tradingsymbol} so proceeding`);
             
             

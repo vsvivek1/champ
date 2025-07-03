@@ -69,7 +69,7 @@ if(global.instrumentName!=cis.name) continue;
         // Step 2: Check if reverse order at target already placed
 
         
-        const reverseOrderExists = orders.some(order =>{
+        const reverseOrderExists = global.orders.some(order =>{
 //console.log('pos.tradingsymbol',pos.tradingsymbol,order.tradingsymbol )
 
           return order.tradingsymbol === pos.tradingsymbol &&
@@ -87,8 +87,15 @@ if(global.instrumentName!=cis.name) continue;
 
   
         if (reverseOrderExists) {
-         console.log(`[SKIPPED] Target order already exists for ${pos.tradingsymbol} at ${targetPrice}`);
+         console.log(`[SKIPPED] Target order already exists for ${pos.tradingsymbol} at ${targetPrice}`,orders.tradingsymbol === pos.tradingsymbol &&
+          orders.product === pos.product &&
+          orders.exchange === pos.exchange &&
+          orders.transaction_type === exitTxn &&
+          orders.quantity === absQty &&
+          orders.status == 'OPEN');
+
           continue;
+       
         }
   
         // Step 3: Place LIMIT order at target price

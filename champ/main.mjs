@@ -183,7 +183,7 @@ async function main() {
         setInterval(async () => {
 
 
-            if(global.seconds%10==0){
+            if(global.seconds%30==0){
 
    
                 placeTargetIfNotTargetSet(kite)
@@ -556,9 +556,34 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
 //console.log('is here', cis)
   socket.emit('sendCis', cis);
 
+
+  //console.log(global.margins.equity.available.live_balance,'live balance @ 130')
+ // console.log('cis.hasLivePos',cis.hasLivePosition)
+
+
+ const checkAndSetExpiryDay = (cis) => {
+  if (!cis?.expiry) {
+    console.warn("No expiry field in cis.");
+    cis.expiryDay = false;
+    return;
+  }
+
+  const todayStr = new Date().toISOString().split("T")[0]; // e.g., "2025-07-03"
+  const expiryStr = new Date(cis.expiry).toISOString().split("T")[0];
+
+  cis.expiryDay = (expiryStr === todayStr);
+
+  return;
+};
+
+
+ checkAndSetExpiryDay(cis);
+
+ 
     if (!cis.hasLivePosition) {
 
-       
+      
+      // console.log('expiry day',cis.tradingsymbol,cis.expiryDay);
 
         handleNoPosition(cis, kite)
        

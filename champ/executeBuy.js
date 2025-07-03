@@ -139,9 +139,12 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 qty=250;
       } */
 
-let qu=Math.floor(30000/cis.lot_size)
 
-qty=1*cis.lot_size;
+
+let tot=Math.max(global.margins.equity.available.live_balance,30000)||30000
+let qu=Math.floor(tot/cis.lot_size/cis.tick.last_price);
+
+qty=qu*cis.lot_size;
 //qty=qu;
 
 console.log(qu,'qu')
