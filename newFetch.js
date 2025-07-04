@@ -630,7 +630,7 @@ let a1=await popOption(selectedOptions,fullJson,accessTokenDoc);
 
 console.log('here 158',a1)
 
-disconnect();
+//disconnect();
 
 
 
@@ -690,7 +690,16 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
           console.log(`LAST TIME EXECUTED: ${Date()}`);
 
 
-          exec("cd ./appv3 && yarn run build && pm2 restart server && pm2 restart startInstruments" );
+    exec("cd ./appv3 && yarn run build && pm2 restart server && pm2 restart startInstruments --watch", (err, stdout, stderr) => {
+  if (err) {
+    console.error(`Exec error: ${err}`);
+    return;
+  }
+  console.log(`STDOUT:\n${stdout}`);
+  if (stderr) {
+    console.error(`STDERR:\n${stderr}`);
+  }
+});
 
 
 resolve(true)
@@ -779,13 +788,13 @@ resolve(fullJson);
 
 //main();
 
-main();
+//main();
  
 
-// setInterval(()=>{
-// console.time('start')
-//    main();
-//    console.timeEnd('start')
-// //disconnect()
-// },10*60*1000) 
-//disconnect();
+setInterval(()=>{
+console.time('start')
+   main();
+   console.timeEnd('start')
+//disconnect()
+},15*60*1000) 
+//disconnect();//
