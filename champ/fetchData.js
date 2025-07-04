@@ -162,7 +162,7 @@ export async function fetchPositionsAndSetCis(kite) {
           // if(pos.quantity<0) re
 
 
-          console.log('fetch position',pos.tradingsymbol,'qty',pos.quantity)
+          //console.log('fetch position',pos.tradingsymbol,'qty',pos.quantity)
 
             if (pos.quantity != 0) {
 
