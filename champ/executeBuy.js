@@ -141,7 +141,7 @@ qty=250;
 
 
 
-let tot=Math.max(global.margins.equity.available.live_balance,30000)||30000
+let tot=Math.min(global.margins.equity.available.live_balance,30000)||30000
 let qu=Math.floor(tot/cis.lot_size/cis.tick.last_price);
 
 qty=qu*cis.lot_size;

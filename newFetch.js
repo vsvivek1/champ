@@ -689,6 +689,10 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
         
           console.log(`LAST TIME EXECUTED: ${Date()}`);
 
+
+          exec("cd ./appv3 && yarn run build && pm2 restart server && pm2 restart startInstruments" );
+
+
 resolve(true)
           return;
         }, 5 * 1000);
