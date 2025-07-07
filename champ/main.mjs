@@ -50,6 +50,8 @@ import { setLastPriceStatusWithOpen } from './cisHelpers.js';
 import { determineOperatorCandleFlags } from './determineOperatorCandles.js';
 import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
 
+global.instrumentsCat = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY', 'FINNIFTY',  ];
+
 // Get the instrument name from command line argument]]
 const instrumentName = process.argv[2];   // from start instrument script , type is catched here
 
@@ -65,7 +67,7 @@ global.margins=false;
 global.stopLossPoints=20;
 global.targetPoints=50
 
-global.enableShortTrading=false;
+global.enableShortTrading=true;
 
 var cis;
 const instrumentData =[];
@@ -186,7 +188,7 @@ async function main() {
             if(global.seconds%30==0){
 
    
-                placeTargetIfNotTargetSet(kite)
+               // placeTargetIfNotTargetSet(kite)
             }
            
            

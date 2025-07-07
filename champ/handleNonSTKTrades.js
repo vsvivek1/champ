@@ -55,7 +55,80 @@ async function shortOptionOrder(kite, cis) {
 
 
 
+function check20MAcrossFromAbove(cis) {
 
+    if (typeof cis.ma20 === 'undefined' || typeof cis.tick === 'undefined' || typeof cis.tick.ohlc === 'undefined') {
+        //console.error("Required properties are not defined in cis object.");
+        return false;
+    }
+
+    const len = cis.minuteData.length;
+
+if (len >= 4) {
+  const last = cis.minuteData[len - 1];
+  const prev1 = cis.minuteData[len - 2];
+  const prev2 = cis.minuteData[len - 3];
+  const prev3 = cis.minuteData[len - 4];
+
+  const ema = last.ema20;
+
+  const condition =
+    last.low < ema &&
+    prev1.low > ema &&
+    prev2.low > ema &&
+    prev3.low > ema;
+
+  console.log('Condition met: 20 ma cross over from above', condition);
+
+  return condition ? true : false;
+} else {
+
+    return false;
+  //console.log('Not enough data');
+}
+
+}
+
+checkShootingStar = (cis) => {  
+    if (typeof cis.tick === 'undefined' || typeof cis.tick.ohlc === 'undefined') {
+        //console.error("Required properties are not defined in cis object.");
+        return false;
+    }
+
+    const last = cis.tick.ohlc;
+
+    // Check if the last candle is a shooting star
+    const isShootingStar = last.close < last.open && 
+                          (last.high - last.close) > 2 * (last.open - last.close) &&
+                          (last.high - last.open) > 2 * (last.open - last.close);
+
+    console.log('Shooting star condition:', isShootingStar);
+
+   return isShootingStar;
+}
+
+redCandleAfterThreeGreen = (cis) => {
+    if (typeof cis.minuteData === 'undefined' || cis.minuteData.length < 4) {
+        //console.error("Not enough data to check for red candle after three green candles.");
+        return false;
+    }
+
+    const len = cis.minuteData.length;
+    const last = cis.minuteData[len - 1];
+    const prev1 = cis.minuteData[len - 2];
+    const prev2 = cis.minuteData[len - 3];
+    const prev3 = cis.minuteData[len - 4];
+
+    // Check if the last candle is red and the previous three candles are green
+    const isRedCandleAfterThreeGreen = last.close < last.open &&
+                                       prev1.close > prev1.open &&
+                                       prev2.close > prev2.open &&
+                                       prev3.close > prev3.open;
+
+    console.log('Red candle after three green condition:', isRedCandleAfterThreeGreen);
+
+   return isRedCandleAfterThreeGreen;
+}
 
 export function handleNonSTKTrades(cis, kite) {
 
@@ -76,19 +149,57 @@ export function handleNonSTKTrades(cis, kite) {
         cis.tick.ohlc.open>cis.tick.last_price && cis.ma20>cis.tick.last_price && !cis.shorted){
 
 
-        
-        console.log('short ',cis.tradingsymbol)
+/// and what ???
+
+///1
+
+if(check20MAcrossFromAbove(cis)){
+
+    cis.signals.safePass20MAcrossFromAbove=true;
+    console.log('20 ma cross from above',cis.tradingsymbol)
+     console.log('short ',cis.tradingsymbol)
 
         cis.shorted=true;
 shortOptionOrder(kite, cis)
 
 
 return;
+}
 
-    }
+
+//2
+if(checkShootingStar(cis)){
+
+    cis.signals.safePassShootingStar=true;
+    console.log('shooting star',cis.tradingsymbol)
+     console.log('short ',cis.tradingsymbol)
+    
+        cis.shorted=true;
+shortOptionOrder(kite, cis)
+return;
+}
+
+///3
+
+if(redCandleAfterThreeGreen(cis)){
+
+    cis.signals.safePassRedCandleAfterThreeGreen=true;
+    console.log('red candle after three green',cis.tradingsymbol)
+     console.log('short ',cis.tradingsymbol)
+    
+        cis.shorted=true;
+shortOptionOrder(kite, cis)
+return;
+}
+
 
   
-        if (cis.tick.last_price < cis.tick.ohlc.open && !(cis.expiryDay && global.hours > 13))
+       
+    
+    
+    
+    
+    if (cis.tick.last_price < cis.tick.ohlc.open && !(cis.expiryDay && global.hours > 13))
         /// if last price is less than open and not expiry day and not after 1pm then return
     {
 
@@ -382,4 +493,4 @@ return;
     //cis.hugeLastTick
 }
 
-
+}

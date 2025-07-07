@@ -7,6 +7,36 @@ import calculateMovingAverage from './calculateMovingAverage.js';
 import { findDemandZones } from './findDemadZones.js';
 import { calculate20MA } from './calculate20Ma.js';
 import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
+const { RSI } = require('technicalindicators');
+
+function setRSI(cis){
+
+const closePrices = cis.minuteData.map(candle => candle.close);
+
+// Step 2: Define RSI input
+const rsiInput = {
+  values: closePrices,
+  period: 14,  // You can adjust this
+};
+
+// Step 3: Calculate RSI
+const rsiValues = RSI.calculate(rsiInput);
+
+// Step 4: Attach RSI values back to cis.minuteData
+// The first (period - 1) entries won’t have RSI, so we align it properly
+
+const offset = rsiInput.period - 1;
+
+cis.minuteData.forEach((candle, index) => {
+  if (index >= offset) {
+    candle.rsi = rsiValues[index - offset];
+  } else {
+    candle.rsi = null; // Or leave undefined
+  }
+});
+
+
+}
 
 // Initialize variables for historical data
 let hourlyHistoricalData = {};
@@ -137,6 +167,23 @@ export async function fetchOrdersAndSetCis(kite) {
 // Function to fetch positions and set CIS data
 export async function fetchPositionsAndSetCis(kite) {
     try {
+
+
+      
+    
+    
+        let i=  global.instrumentsCat.indexOf(process.argv[2]);
+          const delayMs = (global.seconds) * 1000*i;
+ await new Promise(resolve => setTimeout(resolve, delayMs));
+
+   console.log('fetch positions',global.instrumentName,process.argv[2],global.instrumentsCat,global.seconds);
+
+// if(global.seconds%i==0){
+
+//     console.log('fetch positions not in time',global.seconds,i,global.instrumentName,global.seconds)
+//     return;
+// }
+
         const response = await kite.getPositions();
 
         const orders=await kite.getOrders();
@@ -179,6 +226,8 @@ export async function fetchPositionsAndSetCis(kite) {
                 }
 
                 if (matchingInstrument) {
+
+                    setRSI(matchingInstrument);
                     matchingInstrument.positionStatus=true
 
                    
@@ -203,7 +252,7 @@ export async function fetchPositionsAndSetCis(kite) {
             }
         });
     } catch (error) {
-        console.error("Error fetching positions:", error);
+        console.error("Error fetching positions:", error,global.date,global.seconds);
     }
 }
 

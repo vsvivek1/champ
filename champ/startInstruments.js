@@ -1,8 +1,14 @@
 // startInstruments.js
 import { fork } from 'child_process';
 
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('UNHANDLED REJECTION at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
+
 // Define your instrument names
-var instruments = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY', 'FINNIFTY',  ]; //'MIDCPNIFTY', 'FINNIFTY',
+let instrumentsCat = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY', 'FINNIFTY',"SENSEX"  ]; //'MIDCPNIFTY', 'FINNIFTY',
 
 //instruments =['SENSEX','NIFTY'];
 //'SENSEX',,'BANKEX'
@@ -12,6 +18,8 @@ var instruments = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY', 'FINNIFTY',  ]; //'MIDCPNI
 
 //const instruments = [ 'NIFTY'];
 // Function to start a new process for each instrument
+
+
 function startProcess(instrumentName) {
     const process = fork('./main.mjs', [instrumentName]);
     
@@ -29,4 +37,4 @@ function startProcess(instrumentName) {
 }
 
 // Start a process for each instrument
-instruments.forEach((instrument) => startProcess(instrument));
+instrumentsCat.forEach((instrument) => startProcess(instrument));
