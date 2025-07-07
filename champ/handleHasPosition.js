@@ -110,7 +110,8 @@ export async function handlePositionPresent(cis, kite) {
     return;
   }
 
-console.log('long postion present for',cis.tradingsymbol);
+  
+if(global.seconds==30)console.log('long postion present for',cis.tradingsymbol);
 
   if (true) {
     // console.log('Position status for', 

@@ -150,7 +150,7 @@ export async function fetchPositionsAndSetCis(kite) {
 
 
             let revorder=orders.filter(o=>o.status=='OPEN' && o.instrument_token==pos.instrument_token);
- console.log(revorder.length==0);
+ //console.log(revorder.length==0);
 
  if(revorder.length==0){
 

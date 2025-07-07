@@ -788,7 +788,7 @@ resolve(fullJson);
 
 //main();
 
-//main();
+main();
  
 
 setInterval(()=>{
