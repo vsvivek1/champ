@@ -7,7 +7,7 @@ import calculateMovingAverage from './calculateMovingAverage.js';
 import { findDemandZones } from './findDemadZones.js';
 import { calculate20MA } from './calculate20Ma.js';
 import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
-const { RSI } = require('technicalindicators');
+import {RSI} from 'technicalindicators';
 
 function setRSI(cis){
 
@@ -227,7 +227,7 @@ export async function fetchPositionsAndSetCis(kite) {
 
                 if (matchingInstrument) {
 
-                    setRSI(matchingInstrument);
+                
                     matchingInstrument.positionStatus=true
 
                    
@@ -358,6 +358,8 @@ if(global.instrumentName=='STK'){
            /// console.log('instrument token',instrument.tradingsymbol,typeof instrument.minuteData,'=mindata len');   check later
             
             instrument.minuteData = minuteHistoricalData[instrument.instrument_token];
+
+                setRSI(instrument);
 
 
 

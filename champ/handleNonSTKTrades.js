@@ -89,7 +89,7 @@ if (len >= 4) {
 
 }
 
-checkShootingStar = (cis) => {  
+var checkShootingStar = (cis) => {  
     if (typeof cis.tick === 'undefined' || typeof cis.tick.ohlc === 'undefined') {
         //console.error("Required properties are not defined in cis object.");
         return false;
@@ -107,7 +107,7 @@ checkShootingStar = (cis) => {
    return isShootingStar;
 }
 
-redCandleAfterThreeGreen = (cis) => {
+var redCandleAfterThreeGreen = (cis) => {
     if (typeof cis.minuteData === 'undefined' || cis.minuteData.length < 4) {
         //console.error("Not enough data to check for red candle after three green candles.");
         return false;
