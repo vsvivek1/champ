@@ -1,8 +1,8 @@
-export async function placeTargetIfNotTargetSet(kite) {
+export async function placeTargetIfNotTargetSet(cis1,kite) {
     try {
 
      // console.warn('placeTargetIfNotTargetSet')
-      const positionsResponse = await kite.getPositions();
+      const positionsResponse = await kite.getPositions()
       const orders = await kite.getOrders();
       const positions = positionsResponse.net;
   
@@ -59,7 +59,7 @@ if(global.instrumentName!=cis.name) continue;
         }
   
         const rawTarget = isLong ? entryPrice + targetDelta : entryPrice - targetDelta;
-        const targetPrice = parseFloat(rawTarget.toFixed(2));
+     var targetPrice = parseFloat(rawTarget.toFixed(2));
   
         if (isNaN(targetPrice) || targetPrice <= 0) {
           console.warn(`⚠️ Skipping ${pos.tradingsymbol} due to invalid calculated target price`);
@@ -98,6 +98,10 @@ if(global.instrumentName!=cis.name) continue;
        
         }
   
+
+        if(qty <0) targetPrice=entryPrice-5
+        if(qty >0) targetPrice=entryPrice+5
+    
         // Step 3: Place LIMIT order at target price
         console.log(`[PLACING TARGET] ${exitTxn} ${absQty} of ${pos.tradingsymbol} at ${targetPrice}`);
 

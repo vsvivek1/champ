@@ -1,4 +1,14 @@
- export function setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis){
+ export async function  setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis,kite){
+
+
+let res= await kite.getPositions();
+let orderResponse= await kite.getOrders();
+global.orders=orderResponse;
+//global.positions=res;
+//console.log('setBuyPriceAndTargetPriceFromCompletedBuyOrder',global.orders.length,global.positions.length);
+global.positions=res.day; 
+//
+if(global.instrumentName!=cis.name) return;
 
 
         if (!cis.buy_price || isNaN(cis.buy_price)) {
@@ -11,7 +21,7 @@
             if (a[0]) {
               cis.buy_price = a[0].average_price;
             } else {
-              console.warn(`No completed buy order found for ${cis.tradingsymbol}`,cis);
+              console.warn(`No completed buy order found for ${cis.tradingsymbol}`);
 
               process.exit();
               return;

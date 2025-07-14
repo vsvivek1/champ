@@ -38,11 +38,13 @@ export async function handleSellOrder(order, kite, cis) {
 
     // Reset CIS state explicitly
   
-
+ 
     await fetchOrdersAndSetCis(kite);
     await fetchPositionsAndSetCis(kite);
 
-    if (cis.shortTrading) {
+    if (global.enableShortTrading 
+
+    ) {
       await placeShortCovering(cis, order, kite);
     }
 

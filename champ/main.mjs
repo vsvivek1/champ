@@ -78,6 +78,8 @@ let niftyTrading=[]
 eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
 
 
+    setmarginCisOrdersAndPosition();
+
     console.log('emit received @  hasLivePositionUpdated',value,token)
     const cis =global.instrumentsForMining.find(i => i.instrument_token === token);
     if (cis) {
@@ -406,8 +408,13 @@ function processTicks(tick) {
      cis =global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
   
    
-   
+   if(!cis.minuteData) return;
     
+   if(!cis.ma20){
+
+    cis.ma20=cis.minuteData.map(m => m.close).slice(-20).reduce((a, b) => a + b, 0) / 20;
+   }
+   
     
 
 

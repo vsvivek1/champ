@@ -176,7 +176,7 @@ export async function fetchPositionsAndSetCis(kite) {
           const delayMs = (global.seconds) * 1000*i;
  await new Promise(resolve => setTimeout(resolve, delayMs));
 
-   console.log('fetch positions',global.instrumentName,process.argv[2],global.instrumentsCat,global.seconds);
+  // console.log('fetch positions',global.instrumentName,process.argv[2],global.instrumentsCat,global.seconds);
 
 // if(global.seconds%i==0){
 
@@ -193,64 +193,36 @@ export async function fetchPositionsAndSetCis(kite) {
 
         global.orders=orders;
 
-        global.positions.forEach(async pos => {
+     global.instrumentsForMining.forEach(async instrument => {
+    const pos = global.positions.find(p => p.tradingsymbol === instrument.tradingsymbol);
+
+    const finalPos = pos || {
+        tradingsymbol: instrument.tradingsymbol,
+        quantity: 0,
+        average_price: 0,
+        instrument_token: instrument.instrument_token,
+    };
+
+    instrument.position = finalPos;
+    instrument.hasLivePosition = finalPos.quantity !== 0;
+    instrument.positionStatus = finalPos.quantity !== 0;
+
+    if (finalPos.quantity !== 0) {
+        instrument.buyPrice = finalPos.average_price;
+        instrument.stopLossPrice = instrument.buyPrice - 5;
+
+        const revorder = orders.filter(o =>
+            o.status === 'OPEN' && o.instrument_token === finalPos.instrument_token
+        );
+
+        if (revorder.length === 0) {
+            // Awaiting reverse order logic
+            // await placeReverseOrderWithTarget(finalPos, kite);
+        }
+    }
+});
 
 
-            let revorder=orders.filter(o=>o.status=='OPEN' && o.instrument_token==pos.instrument_token);
- //console.log(revorder.length==0);
-
- if(revorder.length==0){
-
-
-//await placeReverseOrderWithTarget(pos,kite);
-
-    //place reverse order
- }
-          // if(pos.quantity<0) re
-
-
-          //console.log('fetch position',pos.tradingsymbol,'qty',pos.quantity)
-
-            if (pos.quantity != 0) {
-
-                /// check has reverse order
-
-                let matchingInstrument =global.instrumentsForMining.find(instrument => instrument.tradingsymbol === pos.tradingsymbol)
-                ;
-
-                if(!matchingInstrument){
-
-                global.instrumentsForMining.push(    global.allInstruments.find(i=>i.tradingsymbol==pos.tradingsymbol))
-
-                matchingInstrument =global.instrumentsForMining.find(instrument => instrument.tradingsymbol === pos.tradingsymbol)
-                }
-
-                if (matchingInstrument) {
-
-                
-                    matchingInstrument.positionStatus=true
-
-                   
-                    matchingInstrument.position = pos;
-                    matchingInstrument.hasLivePosition = true;
-                    matchingInstrument.buyPrice = pos.average_price;
-                    matchingInstrument.stopLossPrice=matchingInstrument.buyPrice-5
-
-                } else {
-                    const instrument =global.instrumentsForMining.
-                    
-                    find(instrument => instrument.tradingsymbol === pos.tradingsymbol);
-                    if (instrument) {
-                        instrument.position = pos;
-                        instrument.hasLivePosition = true;
-                        instrument.buyPrice = pos.average_price;
-
-                        // Push the instrument toglobal.instrumentsForMining
-                       global.instrumentsForMining.push(instrument);
-                    }
-                }
-            }
-        });
     } catch (error) {
         console.error("Error fetching positions:", error,global.date,global.seconds);
     }
@@ -359,8 +331,11 @@ if(global.instrumentName=='STK'){
             
             instrument.minuteData = minuteHistoricalData[instrument.instrument_token];
 
+
+            if(instrument && instrument.minuteData && instrument.minuteData.length>0){
                 setRSI(instrument);
 
+            }
 
 
            // console.log('from minute data',instrument.minuteData )

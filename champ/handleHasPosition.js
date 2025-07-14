@@ -12,6 +12,8 @@ import { shouldSquareOff } from './squareOffLogic.js';
 import { placeTargetOrder } from './orderUtils.js';
 
 import { setBuyPriceAndTargetPriceFromCompletedBuyOrder } from './setBuPriceAndTargetFromCompletedBuyOrder.js';
+import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
+import { consoleOrigin } from 'firebase-tools/lib/api.js';
 
 
 async function shortCoverOrder(kite, cis) {
@@ -81,18 +83,27 @@ async function shortCoveringStoploss(kite, cis) {
 export async function handlePositionPresent(cis, kite) {
 
 
+  if(!cis.position) return
+
+
   if(cis.position.quantity<0){
 
   if( global.seconds==30)  console.log('stop loss of',cis.tradingsymbol ,'@',cis.ma20);
   }
 
-  if(cis.position.quantity<0&& cis.ma20 && cis.positionStatus && cis.position.quantity<0 && !cis.shortCoverd && 
-    (cis.tick.last_price>cis.tick.ohlc.open || cis.tick.last_price>cis.ma20) ){
+  if(cis.position.quantity<0 && cis.ma20 && cis.position.quantity<0 && !cis.shortCoverd && 
+    (
+      //cis.tick.last_price>cis.tick.ohlc.open ||
+      
+      cis.tick.last_price>cis.ma20) ){
 
 
 ///// short covering stop loss function
 
     cis.shortCoverd=true;
+    console.log('have a short position for short covering',cis.tradingsymbol);
+    console.log('short covering stop loss for',cis.tradingsymbol,'@',cis.ma20);
+    //console.table(cis);
     shortCoveringStoploss(kite, cis);
 
     setTimeout(()=>{
@@ -104,7 +115,7 @@ export async function handlePositionPresent(cis, kite) {
     },5*1000)
 
 
-    console.log('have ashort position for short covering',cis.tradingsymbol)
+   
     
 
     return;
@@ -125,9 +136,12 @@ if(global.seconds==30)console.log('long postion present for',cis.tradingsymbol);
 
    //setBuyPriceAndTargetPriceFromCompletedBuyOrder
   
-    setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis);
-       if(global.seconds%30==0)
+       if(global.seconds%30==0){
+    setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis,kite);
+
     console.log(`position present ${cis.tradingsymbol} sl ${cis.stopLossPrice} ma20 ${cis.ma20} `);
+
+       }
 
 
  
@@ -143,7 +157,10 @@ if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
 
     if(cis.tick.last_price<cis.ma20
       
-      || (cis.tick.last_price<cis.tick.ohlc.open ))
+      || (cis.tick.last_price<cis.tick.ohlc.open )
+    
+    
+    )
     
     
     {
@@ -152,17 +169,33 @@ if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
   if (!openOrder) {
 
   cis.signals?  cis.signals.NoReverseOrderFoundForPosition=true : cis.signals={NoReverseOrderFoundForPosition:true};
-    console.warn(`No open order found to update for ${cis.tradingsymbol}. Cannot proceed with stop-loss update.`);
+    //console.warn(`xNo open order found to update for ${cis.tradingsymbol}. Cannot proceed with stop-loss update.`);
+
+
+   if(!cis.hasReverseOrder){
+    console.log('has reverse order',cis.tradingsymbol);
+
+     placeTargetIfNotTargetSet(cis, kite);
+   cis.hasReverseOrder=true
     return;
+   }
+  
   }
 
 
-console.log('executting stop loss below ma20 or below open price',cis.tradingsymbol,
+
+  if(openOrder && openOrder.status === 'OPEN' && openOrder.order_id &&cis.position.quantity>0) {
+    console.log('executting stop loss below ma20 or below open price',cis.tradingsymbol,
    'last price',cis.tick.last_price,'ma20',cis.ma20,'open',cis.tick.ohlc.open);
 
         await updateOpenOrderPrice(kite, openOrder.order_id, cis.instrument_token, cis.tick.last_price, cis);
 
         return;
+
+  }
+
+
+
     }
      
 
@@ -208,7 +241,7 @@ if(!tgtOrder){
         //setBuyPriceAndTargetPriceFromCompletedBuyOrder
 
        // console.log('settint target from setBuyPriceAndTargetPriceFromCompletedBuyOrder ')
-       setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis);
+       setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis,kite);
 
 
         cis.hasTargetOrder = true;

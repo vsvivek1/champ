@@ -114,10 +114,13 @@ export async function placeTargetOrder(cis, order, kite, _retried = false) {
        else cis.targetPrice=cis.buy_price*1.1;
    
 
-
+    let range=    Math.ceil(cis.minuteCandleMeanRange)
        if(cis.position.quantity<0){
-cis.targetPrice=cis.buy_price*.9
+cis.targetPrice=cis.buy_price-range;
 
+       }else{
+
+cis.targetPrice=cis.buy_price+range;
        }
     // 📝 Prepare order params
     const orderParams = {

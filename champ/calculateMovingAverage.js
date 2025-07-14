@@ -2,8 +2,11 @@ export default function calculateMovingAverage(data, period, field) {
     // Validate inputs
     if (!Array.isArray(data) || data.length < period) {
         
-        console.error("Insufficient data for the given period for calculating movieng averate.");
-        return null;
+       
+       
+        period=data.length
+       // console.error("Insufficient data for the given period for calculating movieng averate.");
+        //return null;
     }
 
     const validFields = ['open', 'high', 'low', 'close'];

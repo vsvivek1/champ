@@ -28,7 +28,7 @@ export default async function executeSquareOff(squareOff, cis, kite) {
 
   const openOrder = global.orders.find(o => o.tradingsymbol === cis.tradingsymbol && o.status === 'OPEN');
   if (!openOrder) {
-    console.warn(`No open order found to update for ${cis.tradingsymbol}. Cannot proceed with stop-loss update.`);
+    console.warn(`yNo open order found to update for ${cis.tradingsymbol}. Cannot proceed with stop-loss update.`);
     return;
   }
 

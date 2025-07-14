@@ -78,7 +78,7 @@ if (len >= 4) {
     prev2.low > ema &&
     prev3.low > ema;
 
-  console.log('Condition met: 20 ma cross over from above', condition);
+//  console.log('Condition met: 20 ma cross over from above', condition);
 
   return condition ? true : false;
 } else {
@@ -102,7 +102,7 @@ var checkShootingStar = (cis) => {
                           (last.high - last.close) > 2 * (last.open - last.close) &&
                           (last.high - last.open) > 2 * (last.open - last.close);
 
-    console.log('Shooting star condition:', isShootingStar);
+   // console.log('Shooting star condition:', isShootingStar);
 
    return isShootingStar;
 }
@@ -125,7 +125,7 @@ var redCandleAfterThreeGreen = (cis) => {
                                        prev2.close > prev2.open &&
                                        prev3.close > prev3.open;
 
-    console.log('Red candle after three green condition:', isRedCandleAfterThreeGreen);
+   // console.log('Red candle after three green condition:', isRedCandleAfterThreeGreen);
 
    return isRedCandleAfterThreeGreen;
 }
@@ -140,14 +140,23 @@ export function handleNonSTKTrades(cis, kite) {
 
     // 
 
+
+//!cis.position || if
+
+ //if(cis.position)  console.log(cis.tradingsymbol, 'handleNonSTKTrades called',cis.position.quantity,'ma20',cis.ma20,'last price',cis.tick.last_price,'open',cis.tick.ohlc.open);
     if(
-        global.enableShortTrading && 
+        global.enableShortTrading && cis.position &&
 
 
-     (!cis.position || cis.position.quantity==0) &&
+     (cis.position.quantity==0) &&
 
-        cis.tick.ohlc.open>cis.tick.last_price && cis.ma20>cis.tick.last_price && !cis.shorted){
+       // cis.tick.ohlc.open>cis.tick.last_price &&
+         cis.ma20>cis.tick.last_price && !cis.shorted){
 
+
+
+
+             
 
 /// and what ???
 
