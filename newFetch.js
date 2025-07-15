@@ -497,7 +497,7 @@ const intervalId = await new Promise((resolve, reject) => {
         return;
       }
 
-      const depth = 1;
+      const depth = -1;
 
      // const expiries = [...new Set(optionsForIndex.map(o => o.expiry))].sort();
 

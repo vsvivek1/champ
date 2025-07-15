@@ -144,7 +144,11 @@ export function handleNonSTKTrades(cis, kite) {
 //!cis.position || if
 
  //if(cis.position)  console.log(cis.tradingsymbol, 'handleNonSTKTrades called',cis.position.quantity,'ma20',cis.ma20,'last price',cis.tick.last_price,'open',cis.tick.ohlc.open);
-    if(
+   
+
+ 
+ 
+ if(
         global.enableShortTrading && cis.position &&
 
 
@@ -155,6 +159,8 @@ export function handleNonSTKTrades(cis, kite) {
 
 
 
+
+            if(global.seconds%30==0) console.log('handleNonSTKTrades called',cis.tradingsymbol, 'position', cis.position.quantity, 'ma20', cis.ma20, 'last price', cis.tick.last_price, 'open', cis.tick.ohlc.open);
 
              
 
