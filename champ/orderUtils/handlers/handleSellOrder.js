@@ -25,7 +25,7 @@ export async function handleSellOrder(order, kite, cis) {
     cis.sellPrice = order.price;
     cis.noBuy = true;
 
-    console.log('[handleSellOrder] Sell order completed');
+    //console.log('[handleSellOrder] Sell order completed');
 
     cis.hasLivePosition=false;
 

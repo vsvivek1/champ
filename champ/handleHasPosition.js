@@ -122,7 +122,7 @@ export async function handlePositionPresent(cis, kite) {
   }
 
   
-if(global.seconds==30)console.log('long postion present for',cis.tradingsymbol);
+//if(global.seconds==30)console.log('long postion present for',cis.tradingsymbol);
 
   if (true) {
     // console.log('Position status for', 
@@ -139,7 +139,7 @@ if(global.seconds==30)console.log('long postion present for',cis.tradingsymbol);
        if(global.seconds%30==0){
     setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis,kite);
 
-    console.log(`position present ${cis.tradingsymbol} sl ${cis.stopLossPrice} ma20 ${cis.ma20} `);
+    //console.log(`position present ${cis.tradingsymbol} sl ${cis.stopLossPrice} ma20 ${cis.ma20} `);
 
        }
 

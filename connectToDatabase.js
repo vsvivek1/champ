@@ -7,10 +7,10 @@ async function connectToDatabase() {
         const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
       
 
-        console.log(uri)
+       // console.log(uri)
         mongoose.set('strictQuery', true);
         await mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-        console.log("Connected to MongoDB");
+     //   console.log("Connected to MongoDB");
         return true; // Indicate successful connection
     } catch (error) {
         console.log('Error connecting to MongoDB:', error);

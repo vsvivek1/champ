@@ -80,7 +80,7 @@ eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
 
     setmarginCisOrdersAndPosition();
 
-    console.log('emit received @  hasLivePositionUpdated',value,token)
+   // console.log('emit received @  hasLivePositionUpdated',value,token)
     const cis =global.instrumentsForMining.find(i => i.instrument_token === token);
     if (cis) {
       cis.hasLivePosition = value;

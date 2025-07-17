@@ -53,6 +53,27 @@ async function shortOptionOrder(kite, cis) {
   }
 }
 
+function shouldShortBasedOnMA20(cis) {
+  const data = cis.minuteData;
+  const ltp = cis.tick.last_price;
+
+  // Ensure we have at least 6 candles (5 for checking highs, 1 for current MA20)
+  if (!data || data.length < 6 || ltp === undefined) return false;
+
+  const lastIndex = data.length - 1;
+
+  // Extract past 5 candles
+  const recentCandles = data.slice(lastIndex - 5, lastIndex);
+  const currentMA20 = data[lastIndex].ma20;
+
+  // Check if all past 5 highs are above their respective MA20
+  const allHighsAboveMA20 = recentCandles.every(candle => candle.high > candle.ma20);
+
+  // Check if current LTP is below current MA20
+  const isLtpBelowMA20 = ltp < currentMA20;
+
+  return allHighsAboveMA20 && isLtpBelowMA20;
+}
 
 
 function check20MAcrossFromAbove(cis) {
@@ -127,6 +148,8 @@ var redCandleAfterThreeGreen = (cis) => {
 
    // console.log('Red candle after three green condition:', isRedCandleAfterThreeGreen);
 
+
+   return false;
    return isRedCandleAfterThreeGreen;
 }
 
@@ -146,7 +169,7 @@ export function handleNonSTKTrades(cis, kite) {
  //if(cis.position)  console.log(cis.tradingsymbol, 'handleNonSTKTrades called',cis.position.quantity,'ma20',cis.ma20,'last price',cis.tick.last_price,'open',cis.tick.ohlc.open);
    
 
- 
+
  
  if(
         global.enableShortTrading && cis.position &&
@@ -160,7 +183,13 @@ export function handleNonSTKTrades(cis, kite) {
 
 
 
-            if(global.seconds%30==0) console.log('handleNonSTKTrades called',cis.tradingsymbol, 'position', cis.position.quantity, 'ma20', cis.ma20, 'last price', cis.tick.last_price, 'open', cis.tick.ohlc.open);
+            if(global.seconds%30==0 &&  cis.lastLogggedHandleStk!=global.seconds){
+
+               cis.lastLogggedHandleStk=global.seconds;
+                           console.log('handleNonSTKTrades called',cis.tradingsymbol, 'position', cis.position.quantity, 'ma20', cis.ma20, 'last price', cis.tick.last_price, 'open', cis.tick.ohlc.open,global.clock,'\n\n');
+
+
+            } 
 
              
 
@@ -168,6 +197,19 @@ export function handleNonSTKTrades(cis, kite) {
 
 ///1
 
+
+
+
+if(shouldShortBasedOnMA20(cis)){
+
+    cis.signals.safePassShortBasedOnMA20=true;
+    console.log('short based on ma20',cis.tradingsymbol)
+     console.log('short ',cis.tradingsymbol)
+
+        cis.shorted=true;
+shortOptionOrder(kite, cis)
+
+}
 if(check20MAcrossFromAbove(cis)){
 
     cis.signals.safePass20MAcrossFromAbove=true;
@@ -183,7 +225,7 @@ return;
 
 
 //2
-if(checkShootingStar(cis)){
+if(checkShootingStar(cis) && false){
 
     cis.signals.safePassShootingStar=true;
     console.log('shooting star',cis.tradingsymbol)
@@ -208,7 +250,7 @@ return;
 }
 
 
-  
+}
        
     
     
@@ -508,4 +550,4 @@ return;
     //cis.hugeLastTick
 }
 
-}
+
