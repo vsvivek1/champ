@@ -33,7 +33,9 @@ import eventBus from './eventBus.js';
 
 const socket = io('http://localhost:4000'); 
 
-
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection:', reason);
+});
 
 //c//onst socket = io('http:localhost
 
