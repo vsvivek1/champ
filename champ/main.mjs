@@ -52,6 +52,17 @@ import { setLastPriceStatusWithOpen } from './cisHelpers.js';
 import { determineOperatorCandleFlags } from './determineOperatorCandles.js';
 import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
 
+import fs from "fs";
+
+// Load skip list from skip.json and assign to global
+try {
+  global.skip = JSON.parse(fs.readFileSync("skip.json", "utf-8")).skip || [];
+  console.log("✅ Global skip list loaded:", global.skip);
+} catch (e) {
+  global.skip = [];
+  console.warn("⚠️ Could not load skip.json, using empty skip list.");
+}
+
 global.instrumentsCat = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY', 'FINNIFTY',  ];
 
 // Get the instrument name from command line argument]]
@@ -69,7 +80,7 @@ global.margins=false;
 global.stopLossPoints=20;
 global.targetPoints=50
 
-global.enableShortTrading=true;
+global.enableShortTrading=false;
 
 var cis;
 const instrumentData =[];
@@ -408,6 +419,12 @@ function processTicks(tick) {
 
 
      cis =global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
+
+  if (global.skip.includes(cis.tradingsymbol)) {
+  console.log(`⛔ Skipping ${cis.tradingsymbol}`);
+  return;
+}
+
   
    
    if(!cis.minuteData) return;

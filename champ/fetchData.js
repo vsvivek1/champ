@@ -85,6 +85,14 @@ async function placeReverseOrderWithTarget(pos,kite) {
     return;
   }
 
+
+ if (global.skip.includes(cis.tradingsymbol)) {
+  console.log(`⛔ Skipping ${cis.tradingsymbol}`);
+  return;
+}
+
+
+
   const isShort = pos.quantity < 0;
   const reverseQuantity = Math.abs(pos.quantity) * 2;
   const transaction_type = isShort ? "BUY" : "SELL";
@@ -203,6 +211,19 @@ export async function fetchPositionsAndSetCis(kite) {
         instrument_token: instrument.instrument_token,
     };
 
+    const order = global.orders.filter(o => o.tradingsymbol === instrument.tradingsymbol && o.status === 'OPEN');
+
+    if (order.length > 0) { 
+        instrument.hasLiveOrder = true;
+        instrument.orderStatus = order[0].status;
+        instrument.orderT = order[0].order_id;  
+    } else {    
+        instrument.hasLiveOrder = false;
+        instrument.orderStatus = 'nil   ';
+        instrument.orderT = null;   
+        instrument.ordered=false;
+
+    }
     instrument.position = finalPos;
     instrument.hasLivePosition = finalPos.quantity !== 0;
     instrument.positionStatus = finalPos.quantity !== 0;

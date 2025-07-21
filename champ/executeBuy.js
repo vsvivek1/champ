@@ -14,9 +14,9 @@ export async function executeBuy(cis, kite,price) {
 
 cis.entryHealth='inside execute buy'
 
-//console.log(cis.ordered,cis.tradingsymbol)
+console.log(cis.ordered,cis.tradingsymbol,'inside execute buy')
     // Check if the order has already been placed
-    if (cis.ordered) {
+    if (cis.ordered==true) {
 
 
        // console.log(cis.ordered,'cis.ordered',cis.tradingsymbol);
@@ -64,6 +64,7 @@ function getMultiplier(cis) {
 async function placeOrder(cis, kite,price1) {
 
 cis.entryHealth='inside place order'
+console.log(cis.tradingsymbol,'place order',price1)
 let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 
    
@@ -129,6 +130,8 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 
         cis.entryHealth='quantity zero issue and margin is '+liveCash;
 
+      console.log('Quantity is zero, not placing order',cis.tradingsymbol,qty,liveCash,price);
+
         return;
       }
       //qty=cis.lot_size*5;
@@ -171,6 +174,7 @@ console.log(orderParams)
 
 
     try {
+        console.log('Placing order:', orderParams, cis.tradingsymbol,qty,price);
         const orderId = await kite.placeOrder("regular", orderParams);
 cis.entryHealth='inside place order'
 
