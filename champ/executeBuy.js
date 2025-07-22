@@ -14,7 +14,7 @@ export async function executeBuy(cis, kite,price) {
 
 cis.entryHealth='inside execute buy'
 
-console.log(cis.ordered,cis.tradingsymbol,'inside execute buy')
+//console.log(cis.ordered,cis.tradingsymbol,'inside execute buy')
     // Check if the order has already been placed
     if (cis.ordered==true) {
 
@@ -144,10 +144,12 @@ qty=250;
 
 
 
-let tot=Math.min(global.margins.equity.available.live_balance,30000)||30000
+let tot=90000//Math.min(global.margins.equity.available.live_balance,90000)||30000
 let qu=Math.floor(tot/cis.lot_size/cis.tick.last_price);
 
-qty=Math.abs(qu)*cis.lot_size;
+qty=Math.abs(qu)//*cis.lot_size;
+
+qty=cis.lot_size*20
 //qty=qu;
 
 //c//onsole.log(qu,'qu')

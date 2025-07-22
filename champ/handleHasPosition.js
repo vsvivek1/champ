@@ -157,7 +157,11 @@ if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
 
     if(cis.tick.last_price<cis.ma20
       
-      || (cis.tick.last_price<cis.tick.ohlc.open )
+      // || (cis.tick.last_price<cis.tick.ohlc.open 
+
+
+        
+      // )
     
     
     )
@@ -185,6 +189,8 @@ if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
 
 
   if(openOrder && openOrder.status === 'OPEN' && openOrder.order_id &&cis.position.quantity>0) {
+
+
     console.log('executting stop loss below ma20 or below open price',cis.tradingsymbol,
    'last price',cis.tick.last_price,'ma20',cis.ma20,'open',cis.tick.ohlc.open);
 
