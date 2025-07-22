@@ -77,18 +77,18 @@ async function sellDeepITMOptions(indexLtpName) {
 
     const deepItmCe = allInstruments.find(
       (instrument) =>
-        instrument.instrument_type === "CE" &&
-        instrument.strike === (atmStrike - 50 * depth) &&
-        instrument.expiry === expiry &&
-        instrument.name === indexOptionName
+        instrument.instrument_type == "CE" &&
+        instrument.strike == (atmStrike - 50 * depth) &&
+        instrument.expiry == expiry &&
+        instrument.name == indexOptionName
     );
 
     const deepItmPe = allInstruments.find(
       (instrument) =>
-        instrument.instrument_type === "PE" &&
-        instrument.strike === (atmStrike + 50 * depth) &&
-        instrument.expiry === expiry &&
-        instrument.name === indexOptionName
+        instrument.instrument_type == "PE" &&
+        instrument.strike == (atmStrike + 50 * depth) &&
+        instrument.expiry == expiry &&
+        instrument.name == indexOptionName
     );
 
     if (!deepItmCe || !deepItmPe) {
