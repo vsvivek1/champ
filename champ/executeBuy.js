@@ -147,10 +147,10 @@ qty=250;
 let tot=Math.min(global.margins.equity.available.live_balance,30000)||30000
 let qu=Math.floor(tot/cis.lot_size/cis.tick.last_price);
 
-qty=qu*cis.lot_size;
+qty=Math.abs(qu)*cis.lot_size;
 //qty=qu;
 
-console.log(qu,'qu')
+//c//onsole.log(qu,'qu')
 
     const orderParams = {
         exchange: cis.exchange,

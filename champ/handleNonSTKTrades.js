@@ -35,7 +35,12 @@ export async function handleNonSTKTrades(cis, kite) {
     if (shorted) return;
 }
 
-    if (cis.tick.last_price < cis.tick.ohlc.open && !(cis.expiryDay && global.hours > 13)) {
+    if (
+        
+        // cis.tick.last_price < cis.tick.ohlc.open &&
+        
+        
+        !(cis.expiryDay && global.hours > 11)) {
         cis.signals.aboveDayOpen = false;
         cis.returnPoints = `LTP ${cis.tick.last_price}  is less than, Open Price ${cis.tick.ohlc.open}`;
         cis.saidItsAbove = false;
