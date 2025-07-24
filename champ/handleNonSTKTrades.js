@@ -18,10 +18,12 @@ import { checkLowerLowsAndLowerHighs } from "./checkLowerLowsAndLowerHighs.js";
 import { cross20MaWith10CandlesBelow } from "./cross20MaWith10CandlesBelow.js";
 import { checkGapDown } from "./gapDownChecker.js";
 import { handleShortNonSTKTrades } from "./handleShortNonSTKTrades.js";
+import e from "cors";
 
 
 // ====== MAIN FUNCTION ======
 export async function handleNonSTKTrades(cis, kite) {
+     
 
     if (global.enableShortTrading) {
     const shorted = await handleShortNonSTKTrades(
@@ -35,25 +37,33 @@ export async function handleNonSTKTrades(cis, kite) {
     if (shorted) return;
 }
 
-    if (
+    // if (
         
-        // cis.tick.last_price < cis.tick.ohlc.open &&
+    //     // cis.tick.last_price < cis.tick.ohlc.open &&
         
         
-        !(cis.expiryDay && global.hours > 11)) {
-        cis.signals.aboveDayOpen = false;
-        cis.returnPoints = `LTP ${cis.tick.last_price}  is less than, Open Price ${cis.tick.ohlc.open}`;
-        cis.saidItsAbove = false;
-        cis.saidItBelow = true;
-        return;
-    } else {
-        cis.signals.aboveDayOpen = true;
-        if (global.seconds % 1 == 0 && !cis.saidItsAbove) {
-            console.warn('ltp above open', `for ${cis.tradingsymbol} so proceeding`);
-            cis.saidItsAbove = true;
-            cis.saidItBelow = false;
-        }
-    }
+    //     !(cis.expiryDay && global.hours > 11)) {
+    //     cis.signals.aboveDayOpen = false;
+    //     cis.returnPoints = `LTP ${cis.tick.last_price}  is less than, Open Price ${cis.tick.ohlc.open}`;
+    //     cis.saidItsAbove = false;
+    //     cis.saidItBelow = true;
+    //     return;
+    // } else {
+    //     cis.signals.aboveDayOpen = true;
+    //     if (global.seconds % 1 == 0 && !cis.saidItsAbove) {
+    //         console.warn('ltp above open', `for ${cis.tradingsymbol} so proceeding`);
+    //         cis.saidItsAbove = true;
+    //         cis.saidItBelow = false;
+    //     }
+    // }
+
+
+if(cis.tick.last_price<cis.ma20){
+
+    cis.signals.aboveDayOpen = false
+    return;
+}
+    cis.signals.aboveDayOpen = true;
 
     let gd = checkGapDown(cis);
     if (gd && global.hours < 11) {
@@ -140,6 +150,17 @@ export async function handleNonSTKTrades(cis, kite) {
 
     cis.entryHealth = 'exitAfterAllChecks';
     cis.signals.exitAfterAllEntryStrategyChecks = true;
+
+
+    var cisx=cis;
+    setTimeout(() => {
+ cisx.signals.exitAfterAllEntryStrategyChecks=false
+
+    },300)
+
+
+    
+    
     return;
 }
 

@@ -5,6 +5,12 @@ import eventBus from '../../eventBus.js';
 
 export async function handleOrderUpdates(order, kite,cis) {
 
+
+
+
+
+
+
   //return;
   try {
   var cis=global.instrumentsForMining.find(a => a.instrument_token == order.instrument_token)||
@@ -19,6 +25,15 @@ export async function handleOrderUpdates(order, kite,cis) {
         return;
     }
 
+
+
+
+    if(global.mockTrading==true && order.status=== 'REJECTED' && order.transaction_type === 'BUY') {
+
+cis.mockPosition=true;
+
+
+    }
 
     if (order.status === 'OPEN'
       

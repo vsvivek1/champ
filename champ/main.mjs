@@ -3,7 +3,7 @@
 import { connectToDatabase } from '../connectToDatabase.js';
 import instrumentsForMining from '../appv3/shared/instruments/instrumentsForMining.json' assert { type: "json" };
 import allInstruments from '../appv3/public/instruments/instrumentsAll.json' assert { type: "json" };
-import { KiteTicker } from 'kiteconnect';
+import { KiteConnect, KiteTicker } from 'kiteconnect';
 import { getTodaysAccessToken } from '../getTodaysAccessToken.js';
 import getKiteConnectInstance from '../getKiteConnectInstanceRequire.js';
 import io from 'socket.io-client';
@@ -81,6 +81,9 @@ global.stopLossPoints=20;
 global.targetPoints=50
 
 global.enableShortTrading=false;
+
+
+global.mockTrading=true;
 
 var cis;
 const instrumentData =[];
@@ -399,7 +402,7 @@ function onTicks(ticks) {
 
 let count=0;
 let tickCount=0
-function processTicks(tick) {
+async function processTicks(tick) {
 
    // if(global.seconds%2==0)return;///suspected slowing solution
   
@@ -606,6 +609,75 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
 
 
  checkAndSetExpiryDay(cis);
+
+
+
+ if(global.mockTrading==true && cis.mockPosition==true) 
+    
+    {
+
+//// watch for target or stop loss fire and set cis.mockPosition=false;
+
+/// check reached target
+
+cis.mockPosition=false;
+
+if(cis.tick.last_price >= cis.targetPrice || cis.tick.last_price <= cis.stopLossPrice) {
+
+    console.log(`Mock position target reached for ${cis.tradingsymbol} at price ${cis.tick.last_price}`);
+
+    // fire terget order
+
+
+
+    const orderParams = {
+            exchange: cis.exchange,
+            tradingsymbol: cis.tradingsymbol,
+            transaction_type: "SELL",
+            order_type: "LIMIT",
+            quantity: cis.buyQuantity,
+            price: cis.tick.last_price,
+            //product: "NRML",
+            product: "MIS",
+            validity: "DAY"
+        };
+    
+    
+    
+   
+    
+    
+        try {
+            const orderId = await kite.placeOrder("regular", orderParams);
+    
+    
+            // console.log("Order placed successfully. Order ID:", orderId,
+    
+            //     cis.buyStrategy, 'for',cis.tradingsymbol,'at',cis.entryPrice,' instrument.averageRange=', cis.averageRange
+            // );
+    
+           
+        
+           // const buyOrder = await savePlaceOrder('AAPL', 'breakout', 100, 150, 'fixed target');
+          //  const buyOrder = await savePlaceOrder(cis.tradingsymbol, cis.buyStrategy, qty, price, 'fixed target');
+    
+    
+    
+          
+    
+        } catch (error) {
+            console.error("Error placing order:", error, cis.tradingsymbol);
+        }
+
+
+    cis.mockPosition = false;
+    eventBus.emit('hasLivePositionUpdated', { token: cis.instrument_token, value: false });
+    return;
+  }
+
+
+return;
+    }
 
  
     if (!cis.hasLivePosition) {

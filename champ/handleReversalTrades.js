@@ -8,7 +8,7 @@ export function handleReversalTrades(cis, kite) {
     cis.deployedStrategies.reversa30 = 'touched';
 
     const rversa = reversalCheck(cis.minuteData, cis);
-    if (rversa) {
+    if (rversa && cis.tick.last_price > cis.ma20) {
 
   
         cis.buyStrategy = 'reversa30';
