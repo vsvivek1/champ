@@ -5,7 +5,7 @@ export function handleLongLowerShadowTrades(cis, kite) {
 
     if (
         cis.liveMinute.hasLongLowerShadow &&
-        global.seconds === 59 &&
+        global.seconds == 59 &&
         cis.tick.last_price > cis.tick.ohlc.open
     ) {
         cis.targetPrice = cis.tick.last_price + cis.liveMinute.range;
@@ -22,9 +22,9 @@ export function handleLongLowerShadowTrades(cis, kite) {
         return true;
     }
 
-    cis.returnPoints = `❌ [${strategyName}] No long lower shadow + close > open @59s`;
-    cis.strategyTested = cis.strategyTested || [];
-    cis.strategyTested.push(strategyName);
-    cis.deployedStrategies.handleLongLowerShadowTrades = 'touched';
+    // cis.returnPoints = `❌ [${strategyName}] No long lower shadow + close > open @59s`;
+    // cis.strategyTested = cis.strategyTested || [];
+    // cis.strategyTested.push(strategyName);
+    // cis.deployedStrategies.handleLongLowerShadowTrades = 'touched';
     return false;
 }

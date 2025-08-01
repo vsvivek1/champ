@@ -156,7 +156,7 @@ let out=data.reduce((max, obj) => obj.high > max ? obj.high : max, -Infinity);
         
         try {
             resultPromise = await axios.get(url);
-            if (typeof resultPromise === 'undefined') {
+            if (typeof resultPromise == 'undefined') {
                 throw new Error('axios error');
             }
         } catch (error) {
@@ -187,7 +187,7 @@ let out=data.reduce((max, obj) => obj.high > max ? obj.high : max, -Infinity);
         minuteCandle.signal = this.getCandlestickSignal(data, obj.tradingsymbol);
     
 
-        if((typeof obj.minuteCandle==='undefined') || !obj.minuteCandle.lastHigh || (this.minutes==0 && this.seconds==1)){
+        if((typeof obj.minuteCandle=='undefined') || !obj.minuteCandle.lastHigh || (this.minutes==0 && this.seconds==1)){
 //console.log('FETCHING HOURL CANDLE FOR ',obj.tradingsymbol,'at', Date(),obj.minuteCandle)
           let h1 = this.calculateHighestPrice(data);
           let h2 = await this.getHourlyData(symbol);
@@ -235,7 +235,7 @@ if(!symbol){
 }
 
 
-if(pvsSymbol===symbol){
+if(pvsSymbol==symbol){
 
   return false;
 

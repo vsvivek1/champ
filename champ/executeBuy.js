@@ -11,19 +11,17 @@ import { getFreezeLimit } from './getFreezeLimit.js';
 
 export async function executeBuy(cis, kite,price) {
 
+    if(cis.name!== global.instrumentName) {
+        console.log('executeBuy: Instrument name mismatch:', cis.name, '!=', global.instrumentName);
+        return;
+    }
+
 
 cis.entryHealth='inside execute buy'
 
 //console.log(cis.ordered,cis.tradingsymbol,'inside execute buy')
     // Check if the order has already been placed
-    if (cis.ordered==true) {
-
-
-       // console.log(cis.ordered,'cis.ordered',cis.tradingsymbol);
-        
-
-        return false;
-    }
+    
 
     // Upglobal.date the status to indicate that an order has been placed
     cis.ordered = true;
@@ -126,14 +124,14 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
       }
 
 
-      if(qty==0){
+    //   if(qty==0){
 
-        cis.entryHealth='quantity zero issue and margin is '+liveCash;
+    //     cis.entryHealth='quantity zero issue and margin is '+liveCash;
 
-      console.log('Quantity is zero, not placing order',cis.tradingsymbol,qty,liveCash,price);
+    //   console.log('Quantity is zero, not placing order',cis.tradingsymbol,qty,liveCash,price);
 
-        return;
-      }
+    //     return;
+    //   }
       //qty=cis.lot_size*5;
 
    /*    if(global.speedSymbols.includes(cis.tradingsymbol)){
@@ -145,14 +143,16 @@ qty=250;
 
 
 let tot=90000//Math.min(global.margins.equity.available.live_balance,90000)||30000
+
+//tot
 let qu=Math.floor(tot/cis.lot_size/cis.tick.last_price);
 
 qty=Math.abs(qu)//*cis.lot_size;
 
-qty=cis.lot_size*20
+qty=cis.lot_size*1
 //qty=qu;
 
-//c//onsole.log(qu,'qu')
+console.log(qu,'quantity')
 
     const orderParams = {
         exchange: cis.exchange,
@@ -162,7 +162,7 @@ qty=cis.lot_size*20
         quantity: qty,
         price: price,
         //product: "NRML",
-        product: "MIS",
+        product: "NRML",
         validity: "DAY"
     };
 
@@ -176,12 +176,30 @@ console.log(orderParams)
 
 
     try {
-        console.log('Placing order:', orderParams, cis.tradingsymbol,qty,price);
+
+        if(cis.placedOrder==true){
+
+            cis.returnPoints=`Order already placed for ${cis.tradingsymbol}, not placing again. Order ID: ${cis.orderId}, Price: ${price}, Quantity: ${qty}`;
+           // console.log(cis.returnPoints);
+
+           // console.log('Order already placed for',cis.tradingsymbol,'not placing again');
+
+            return;
+        }
+
+        console.log ('\n\n\nPlacing order for: cis ordered ',cis.ordered,  cis.tradingsymbol,"quantity",qty,"price",price,"thread=",global.instrumentName ,"\n\n'")
         const orderId = await kite.placeOrder("regular", orderParams);
 cis.entryHealth='inside place order'
 
-cis.message = `Order placed successfully. Order ID: ${orderId}, ${cis.buyStrategy} for ${cis.tradingsymbol} at ${cis.entryPrice}, instrument.averageRange=${cis.averageRange}`;
+cis.message = `Order placed successfully. Order ID: ${orderId}, ${cis.buyStrategy} for ${cis.tradingsymbol} at ${cis.entryPrice}, instrument.averageRange=${cis.averageRange},ordered=${cis.ordered},qty=${qty},price=${price}
+
+thread is ${global.instrumentName}`;
+
+
 console.log(cis.message);
+
+cis.ordered=true;
+cis.placedOrder=true;
        
     
        // const buyOrder = await savePlaceOrder('AAPL', 'breakout', 100, 150, 'fixed target');

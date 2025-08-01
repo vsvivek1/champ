@@ -6,7 +6,7 @@ methods:{
  findHighestAndLowest (ohlcArray){
 
 
-    if (!ohlcArray || ohlcArray.length === 0|| !Array.isArray(ohlcArray)) {
+    if (!ohlcArray || ohlcArray.length == 0|| !Array.isArray(ohlcArray)) {
       return { highest: null, lowest: null };
     }
   
@@ -138,7 +138,7 @@ calculateHighestPrice(ohlcData) {
     // Find the highest price from the filtered data
     let highestPrice = null;
     filteredData.forEach((candle) => {
-        if (highestPrice === null || candle.close > highestPrice) {
+        if (highestPrice == null || candle.close > highestPrice) {
             highestPrice = candle.close;
         }
     });
@@ -164,14 +164,14 @@ calculateHighestPrice(ohlcData) {
   },
   
  getCandlestickSignal(obj, ts = '') {
-    if (typeof obj === 'undefined') {
+    if (typeof obj == 'undefined') {
         console.log(obj, 'data inside getCandleSignal Undefined');
         return 'EntryCheckForSignalFailed';
     }
 
     const ohlcData = obj;
 
-    if (typeof ohlcData[ohlcData.length - 1] === 'undefined') {
+    if (typeof ohlcData[ohlcData.length - 1] == 'undefined') {
         return 'ohlcDataNotSufficient';
     }
 
@@ -193,7 +193,7 @@ calculateHighestPrice(ohlcData) {
 
     const signalData = { candleColor, target: null, stoploss: null };
 
-    if (close === high) {
+    if (close == high) {
         signalData.signal = 'marbuzuo';
         signalData.target = low - (high - low);
         signalData.stoploss = high + (high - low);

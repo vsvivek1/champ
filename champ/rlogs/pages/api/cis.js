@@ -4,7 +4,7 @@ import Cis from '../../models/Cis';
 export default async function handler(req, res) {
     await dbConnect();
 
-    if (req.method === 'GET') {
+    if (req.method == 'GET') {
         try {
             // Filter documents where holdingTime > 0
            // const data = await Cis.find({ holdingTime: { $gt: 0 } }).lean();

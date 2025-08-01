@@ -82,7 +82,7 @@ module.exports=class CustomGTT {
     const t = setInterval(async () => {
       const stock = filtredStocks.pop();
 
-      if (typeof stock === 'undefined') {
+      if (typeof stock == 'undefined') {
         clearInterval(t);
         console.log("Processing finished.");
         // console.log(this.holdings);
@@ -102,7 +102,7 @@ module.exports=class CustomGTT {
       console.log(count, ' of ', ln);
       count++;
 
-      var holding = this.holdings.filter(i => i.instrument_token === stock.instrument_token)[0];
+      var holding = this.holdings.filter(i => i.instrument_token == stock.instrument_token)[0];
 
       
     //   const instrument = stock;
@@ -280,7 +280,7 @@ this.targets.push(target)
 }
     
 
-    // console.log(this.holdings.find(i => i.instrument_token === stock.instrument_token));
+    // console.log(this.holdings.find(i => i.instrument_token == stock.instrument_token));
     // process.exit();
 
     // pp.filter(pp=>pp.)

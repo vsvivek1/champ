@@ -102,7 +102,7 @@ const analyzeTradingScenarios = (candlesticks) => {
 // Main function to process CSV files and analyze scenarios
 const processCSVFiles = async (directory) => {
   try {
-    const files = fs.readdirSync(directory).filter(file => path.extname(file) === '.csv');
+    const files = fs.readdirSync(directory).filter(file => path.extname(file) == '.csv');
     const selectedFile = await promptFileSelection(files);
     const filePath = path.join(directory, selectedFile);
     console.log(`Processing file: ${filePath}`);

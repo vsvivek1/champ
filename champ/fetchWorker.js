@@ -16,9 +16,9 @@ async function fetchData(kite) {
 
 // Listen for messages from main process
 parentPort.on('message', async (message) => {
-    if (message.type === 'fetchData') {
+    if (message.type == 'fetchData') {
         await fetchData(message.kite);
-    } else if (message.type === 'fetchHourly') {
+    } else if (message.type == 'fetchHourly') {
        // await fetchHourlyData(message.kite);
     }
 });

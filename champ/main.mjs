@@ -83,12 +83,28 @@ global.targetPoints=50
 global.enableShortTrading=false;
 
 
-global.mockTrading=true;
+global.mockTrading=false;
 
 var cis;
 const instrumentData =[];
 
 let niftyTrading=[]
+
+ const checkAndSetExpiryDay = (cis) => {
+  if (!cis?.expiry) {
+    console.warn("No expiry field in cis.");
+    cis.expiryDay = false;
+    return;
+  }
+
+  const todayStr = new Date().toISOString().split("T")[0]; // e.g., "2025-07-03"
+  const expiryStr = new Date(cis.expiry).toISOString().split("T")[0];
+
+  cis.expiryDay = (expiryStr == todayStr);
+
+  return;
+};
+
 
 
 eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
@@ -97,12 +113,23 @@ eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
     setmarginCisOrdersAndPosition();
 
    // console.log('emit received @  hasLivePositionUpdated',value,token)
-    const cis =global.instrumentsForMining.find(i => i.instrument_token === token);
+    const cis =global.instrumentsForMining.find(i => i.instrument_token == token);
     if (cis) {
       cis.hasLivePosition = value;
       console.log(`Updated hasLivePosition for ${token} to ${value}`);
     }
   });
+
+  eventBus.on('cisUpdated', ({ token, cis }) => {
+  const index = global.instrumentsForMining.findIndex(item => item.instrument_token == token);
+  if (index != -1) {
+    instrumentsForMining[index] = { ...instrumentsForMining[index], ...cis };
+    console.log(`cis updated for token ${token}`);
+  } else {
+    console.warn(`No cis found with token ${token} from tocken update`);
+  }
+});
+
 
 if(instrumentName=='STK'){
 
@@ -119,13 +146,13 @@ if(instrumentName=='STK'){
 
 
 
-    const instrumentData = instrumentsForMining.filter(inst => inst.name === instrumentName);
+    const instrumentData = instrumentsForMining.filter(inst => inst.name == instrumentName);
     
-    global.instrumentsForMining=instrumentsForMining.filter(inst => inst.name === instrumentName);
+    global.instrumentsForMining=instrumentsForMining.filter(inst => inst.name == instrumentName);
     
     global.instrumentName =instrumentName ;
     
-   global.allInstruments=allInstruments//.find(inst => inst.name === instrumentName);
+   global.allInstruments=allInstruments//.find(inst => inst.name == instrumentName);
     
     console.log('THread',instrumentName);
 
@@ -212,7 +239,7 @@ async function main() {
            
             setClock() 
 
-          /*   if (global.minutes % 15 === 0 && global.seconds === 10) {
+          /*   if (global.minutes % 15 == 0 && global.seconds == 10) {
                 await fetchHourlyData(kite);
             } */
 
@@ -220,7 +247,7 @@ async function main() {
 
 
                 //// not used chek why its here
-            // if (global.minutes=== 15 && global.seconds === 10 &&  instrumentName!='STK') {
+            // if (global.minutes== 15 && global.seconds == 10 &&  instrumentName!='STK') {
                 
             //    // fetchWorker.postMessage({ type: 'fetchHourly', kite });
 
@@ -233,7 +260,7 @@ async function main() {
 
             /// for intraday scripts non index
 
-            if (global.seconds === 1 && global.minutes%5==0) {
+            if (global.seconds == 1 && global.minutes%5==0) {
             
                      global.margins = await kite.getMargins();
                      await setmarginCisOrdersAndPosition(); 
@@ -461,7 +488,7 @@ async function processTicks(tick) {
 
 
    // Increment or reset tickCount
-tickCount = (tickCount === 10) ? 0 : tickCount + 1;
+tickCount = (tickCount == 10) ? 0 : tickCount + 1;
 
 // Store the current tick in cis
     findHugeTick(cis,tickCount);
@@ -576,7 +603,7 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
 
 
 
-    cis.entryHealth='health near hanldle NO posistion'
+    cis.entryHealth='health near hanldle emit cis'
    //if(global.seconds%20==0) console.log('health near hanldle posistion',cis.tradingsymbol,'cis.hasLivePosition',cis.hasLivePosition)
 
 
@@ -592,35 +619,34 @@ tickCount = (tickCount === 10) ? 0 : tickCount + 1;
  // console.log('cis.hasLivePos',cis.hasLivePosition)
 
 
- const checkAndSetExpiryDay = (cis) => {
-  if (!cis?.expiry) {
-    console.warn("No expiry field in cis.");
-    cis.expiryDay = false;
-    return;
-  }
-
-  const todayStr = new Date().toISOString().split("T")[0]; // e.g., "2025-07-03"
-  const expiryStr = new Date(cis.expiry).toISOString().split("T")[0];
-
-  cis.expiryDay = (expiryStr === todayStr);
-
-  return;
-};
 
 
  checkAndSetExpiryDay(cis);
 
 
 
- if(global.mockTrading==true && cis.mockPosition==true) 
+ if(global.mockTrading==true && cis.placeOrder==true && cis.name==global.instrumentName) 
     
     {
 
+            cis.entryHealth='health mock trading with mock position true'
 //// watch for target or stop loss fire and set cis.mockPosition=false;
 
 /// check reached target
 
 cis.mockPosition=false;
+
+
+//if(global.seconds==30 && cis.updatedSecond!=global.seconds)
+    
+    if(true){    
+
+    cis.updatedSecond=global.seconds;
+console.log('for',cis.tradingsymbol,'at mock possition presentis true @ 120',cis.mockPosition,'is mock position ',
+    
+    cis.stopLossPrice,'is stop loss price',cis.targetPrice,'is target price',cis.tick.last_price,'is last price'  );
+
+}
 
 if(cis.tick.last_price >= cis.targetPrice || cis.tick.last_price <= cis.stopLossPrice) {
 
@@ -680,17 +706,17 @@ return;
     }
 
  
+    cis.entryHealth='health has live positio'+cis.hasLivePosition
     if (!cis.hasLivePosition) {
 
       
       // console.log('expiry day',cis.tradingsymbol,cis.expiryDay);
 
         handleNoPosition(cis, kite)
-       
-        
-    } 
-    
-    if(cis.hasLivePosition==true) {
+
+    }
+
+    if(cis.hasLivePosition==true || (cis.mockTrading==true && cis.placeOrder==true)) {
 
         //console.log('terst 573 live position true why  for?',cis.tradingsymbol)
         handlePositionPresent(cis, kite);
@@ -735,8 +761,10 @@ return;
 }
 
 
-async function orderUpdates(order,cis) {
-    await handleOrderUpdates(order, kite,cis);
+async function orderUpdates(order) {
+
+   let cisx= global.instrumentsForMining.find(cis => cis.instrument_token == order.instrument_token);
+    await handleOrderUpdates(order, kite,cisx,global.instrumentsForMining);
 }
 
  async function subscribe() {

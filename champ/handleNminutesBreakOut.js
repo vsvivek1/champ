@@ -11,8 +11,9 @@ import { executeBuy } from "./executeBuy.js";
  */
 export function handleNminuteBreakout(cis, kite, n) {
   const strategyName = `rangeBreakout${n}minute`;
+  cis.deployedStrategies[strategyName] = 'checking';
 
-  cis.deployedStrategies[strategyName] = 'touched';
+ 
 
   const breakout = checkNMinuteBreakout(cis.minuteData, cis, n, strategyName);
   if (breakout) {
@@ -23,7 +24,7 @@ export function handleNminuteBreakout(cis, kite, n) {
     cis.inbuiltTarget = true;
     cis.inbuiltStopLoss = true;
 
-    cis.deployedStrategies[strategyName] = 'Activated';
+   cis.deployedStrategies[strategyName] = 'Activated';
 
      cis.entryHealth=strategyName;
          console.log('Executing',cis.entryHealth);
@@ -32,14 +33,16 @@ export function handleNminuteBreakout(cis, kite, n) {
     return true;
   }
 
-  cis.signals[strategyName] = false;
-  cis.deployedStrategies[strategyName] = 'touched';
+  // cis.signals[strategyName] = false;
+  // cis.deployedStrategies[strategyName] = 'touched';
 
-  // Log strategy tested
-  cis.strategyTested = cis.strategyTested || [];
-  cis.strategyTested.push(strategyName);
+  cis.deployedStrategies[strategyName] = 'unFulfilled';
 
-  cis.returnPoints = `❌ [${strategyName}] No breakout above high`;
+  // // Log strategy tested
+  // cis.strategyTested = cis.strategyTested || [];
+  // cis.strategyTested.push(strategyName);
+
+  // cis.returnPoints = `❌ [${strategyName}] No breakout above high`;
   return false;
 }
 

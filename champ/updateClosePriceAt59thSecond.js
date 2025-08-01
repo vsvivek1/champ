@@ -10,7 +10,7 @@ export default function updateClosePriceAt59thSecond(cis) {
         let elapsedMinutes = 0;
 
         // Calculate elapsed minutes from 9:15 AM
-        if (currentHour === marketOpenHour && currentMinute >= marketOpenMinute) {
+        if (currentHour == marketOpenHour && currentMinute >= marketOpenMinute) {
             elapsedMinutes = currentMinute - marketOpenMinute;
         } else if (currentHour > marketOpenHour) {
             elapsedMinutes = (currentHour - marketOpenHour - 1) * 60 + (60 - marketOpenMinute) + currentMinute;
@@ -18,7 +18,7 @@ export default function updateClosePriceAt59thSecond(cis) {
 
         const nthMinute = elapsedMinutes + 1; // n is 1-based index
 
-        if (currentSecond === 59) { // Check if it's the 59th second
+        if (currentSecond == 59) { // Check if it's the 59th second
             cis.mx = { n: nthMinute, price: cis.tick.last_price }; // Set the nth minute and price in cis.mx
             //console.log(`Set close price for minute ${nthMinute}: ${cis.tick.last_price}`);
         }

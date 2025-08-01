@@ -25,7 +25,7 @@ export default {
 
             if ( order.transaction_type=='BUY' &&
                 
-                order.status === "COMPLETE" && order.exchange == "NFO" && order.pending_quantity === 0) {
+                order.status == "COMPLETE" && order.exchange == "NFO" && order.pending_quantity == 0) {
                     //console.clear()
 
                     
@@ -127,7 +127,7 @@ export default {
 
             if ( order.transaction_type=='SELL' &&
                 
-                order.status === "COMPLETE" && order.exchange === "NFO" ) {
+                order.status == "COMPLETE" && order.exchange == "NFO" ) {
                     //console.clear()
 let cis=this.instruments.find(i=>i.instrument_token==order.instrument_token);
 if(cis){

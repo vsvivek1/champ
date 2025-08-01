@@ -1,5 +1,5 @@
 export function determineOperatorCandleFlags(cis) {
-    if (!cis || !Array.isArray(cis.minuteData) || cis.minuteData.length === 0 || !cis.tick || !cis.tick.last_price) {
+    if (!cis || !Array.isArray(cis.minuteData) || cis.minuteData.length == 0 || !cis.tick || !cis.tick.last_price) {
         cis.operatorBuyCandles = {
             fifteenMinutes: false,
             thirtyMinutes: false,

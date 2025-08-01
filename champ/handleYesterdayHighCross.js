@@ -6,6 +6,8 @@ export function handleYesterdayHighCross(cis, kite) {
     const lastCandle = cis.minuteData.slice(-1)[0];
     const yHigh = cis.pricePoints?.d1?.high;
 
+
+     cis.deployedStrategies[strategyName] = 'checking';
     if (
         yHigh &&
         cis.tick.last_price > yHigh &&
@@ -33,11 +35,11 @@ export function handleYesterdayHighCross(cis, kite) {
     }
 
     // ❌ Condition not met
-    cis.signals[strategyName] = false;
-    cis.returnPoints = `❌ [${strategyName}] LTP ≤ Yesterday's High or last candle already broke it`;
-    cis.strategyTested = cis.strategyTested || [];
-    cis.strategyTested.push(strategyName);
-    cis.deployedStrategies[strategyName] = 'touched';
+    // cis.signals[strategyName] = false;
+    // cis.returnPoints = `❌ [${strategyName}] LTP ≤ Yesterday's High or last candle already broke it`;
+    // cis.strategyTested = cis.strategyTested || [];
+    // cis.strategyTested.push(strategyName);
+     cis.deployedStrategies[strategyName] = 'unFulfilled';
 
     return false;
 }

@@ -14,10 +14,10 @@ async function getHistoricalData(kite, instrument, fromTime, toTime, dataType) {
         console.log( instrument, fromTime, toTime, dataType,'connected');
        // console.log(data,'d')
         // Store data in the appropriate object
-        if (dataType === 'hourly') {
+        if (dataType == 'hourly') {
             hourlyHistoricalData[instrument] = data;
            // console.log(`Hourly data for ${instrument} from ${fromTime} to ${toTime}:`, data);
-        } else if (dataType === 'minute') {
+        } else if (dataType == 'minute') {
             minuteHistoricalData[instrument] = data;
            // console.log(`Minute data for ${instrument} from ${fromTime} to ${toTime}:`, data);
         }
@@ -40,9 +40,9 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType) {
     }
 
     // Log the final historicalData object
-    if (dataType === 'hourly') {
+    if (dataType == 'hourly') {
         console.log('Final hourly historical data:', hourlyHistoricalData);
-    } else if (dataType === 'minute') {
+    } else if (dataType == 'minute') {
         console.log('Final minute historical data:', minuteHistoricalData);
     }
 }
@@ -50,7 +50,7 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType) {
 function scheduleHourlyDataFetch(kite, instruments) {
     const now = moment();
 
-    if (now.minute() === 16) {
+    if (now.minute() == 16) {
         const fromTime = moment().startOf('day').add(9, 'hours').add(15, 'minutes').format('YYYY-MM-DD HH:mm:ss');
         const toTime = now.startOf('hour').format('YYYY-MM-DD HH:mm:ss');
 
@@ -78,7 +78,7 @@ export function startInitialHourlyFetch(kite, instruments) {
 function scheduleMinuteDataFetch(kite, instruments) {
     const now = moment();
 
-    if (now.second() === 1) {
+    if (now.second() == 1) {
         const fromTime = moment().startOf('day').add(9, 'hours').add(15, 'minutes').format('YYYY-MM-DD HH:mm:ss');
         const toTime = now.startOf('minute').subtract(1, 'minute').format('YYYY-MM-DD HH:mm:ss');
 

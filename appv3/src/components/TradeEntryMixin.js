@@ -44,7 +44,7 @@ belowDaysHighEntry:false,
         }
           let shouldProceed = false;
   
-          if (typeof cis.previous_last === 'undefined') {
+          if (typeof cis.previous_last == 'undefined') {
             console.log(cis.previous_last,'pvs last error') 
             
             shouldProceed = false;

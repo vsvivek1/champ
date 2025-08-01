@@ -20,7 +20,7 @@ let minuteData=cis.minuteData
 
         // Ensure the low is not within the body of any other candle
         const isLowUnique = array.every((otherCandle, otherIndex) => {
-            if (otherIndex === index) return true; // Skip the current candle
+            if (otherIndex == index) return true; // Skip the current candle
             const otherBodyLow = Math.min(otherCandle.open, otherCandle.close);
             const otherBodyHigh = Math.max(otherCandle.open, otherCandle.close);
 

@@ -22,7 +22,7 @@ ar.push(...instruments.filter(i=>
 			
 				
 				... instruments
-  .filter(i => i.strike < last_price && i.instrument_type === 'PE')
+  .filter(i => i.strike < last_price && i.instrument_type == 'PE')
   .sort((a, b) => b.strike - a.strike)
   .slice(0,1)
 				

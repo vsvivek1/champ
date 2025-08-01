@@ -4,8 +4,8 @@ export function buyAboveOpenAtNineAm(cis, kite) {
     const strategyName = 'openAboveAndGreenCandleBefore920';
 
     if (
-        global.hours === 9 &&
-        global.minutes > 17 &&
+        global.hours == 9 &&
+        global.minutes > 16 &&
         global.minutes < 30 &&
         cis.tick.last_price > cis.tick.ohlc.open &&
         !cis.isGapDown
@@ -22,11 +22,14 @@ export function buyAboveOpenAtNineAm(cis, kite) {
         cis.entryHealth='BuyOpenAboveNineBefore930';
          console.log('Executing',cis.entryHealth);
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
+        
         return true;
     } else {
-        cis.returnPoints = `❌ [${strategyName}] Conditions not met (time: ${global.hours}:${global.minutes})`;
-        cis.strategyTested = cis.strategyTested || [];
-        cis.strategyTested.push(strategyName);
+        // cis.returnPoints = `❌ [${strategyName}] Conditions not met (time: ${global.hours}:${global.minutes})`;
+        // cis.strategyTested = cis.strategyTested || [];
+        // cis.strategyTested.push(strategyName);
+
+        return false;
     }
 
     cis.deployedStrategies.buyAboveOpenAtNineAm = 'touched';

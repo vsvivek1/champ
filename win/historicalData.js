@@ -8,9 +8,9 @@ export async function fetchAllData(kite, instruments, fromTime, toTime, dataType
         for (let i = 0; i < instruments.length; i++) {
             const instrument = instruments[i];
             const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
-            if (dataType === '60minute') {
+            if (dataType == '60minute') {
                 hourlyHistoricalData[instrument] = data;
-            } else if (dataType === 'minute') {
+            } else if (dataType == 'minute') {
                 minuteHistoricalData[instrument] = data;
             }
             await new Promise(resolve => setTimeout(resolve, 333));
@@ -25,7 +25,7 @@ export async function fetchHourlyData(kite, instruAll) {
         const now = moment();
         let fromTime = moment().startOf('day').add(9, 'hours').add(15, 'minutes').format('YYYY-MM-DD HH:mm:ss');
         let toTime;
-        if (now.hour() === 9) {
+        if (now.hour() == 9) {
             toTime = now.startOf('hour').add(1, 'hour').format('YYYY-MM-DD HH:mm:ss');
         } else {
             toTime = now.startOf('hour').add(15, 'minute').format('YYYY-MM-DD HH:mm:ss');

@@ -4,6 +4,8 @@ import { placeShortCovering } from '../placeShortCovering.js';
 export async function handleSellOrder(order, kite, cis) {
   try {
 
+
+    console.log('[handleSellOrder] Starting to handle sell order for: and resetting ordered', cis.tradingsymbol);
     cis.hasLivePosition=false;
     let a=cis.hasLivePosition;
     a;

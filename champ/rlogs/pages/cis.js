@@ -77,7 +77,7 @@ export default function CisPage({ data }) {
         }
     }, [filterDate]);
 
-    if (!data || data.length === 0) {
+    if (!data || data.length == 0) {
         return <p>No records available.</p>;
     }
 

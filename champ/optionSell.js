@@ -84,17 +84,17 @@ let depth=2;
     const atmCe = allInstruments.find(
       (instrument) =>
         instrument.strike == atmStrike+depth*50 &&
-        instrument.instrument_type === "CE" &&
-        instrument.expiry === expiry &&
-        instrument.name === indexOptionName
+        instrument.instrument_type == "CE" &&
+        instrument.expiry == expiry &&
+        instrument.name == indexOptionName
     );
 
     const atmPe = allInstruments.find(
       (instrument) =>
         instrument.strike == atmStrike-depth*50 &&
-        instrument.instrument_type === "PE" &&
-        instrument.expiry === expiry &&
-        instrument.name === indexOptionName
+        instrument.instrument_type == "PE" &&
+        instrument.expiry == expiry &&
+        instrument.name == indexOptionName
     );
 
     if (!atmCe || !atmPe) {
@@ -110,18 +110,18 @@ let depth=2;
     // Find 10 levels below OTM CE and PE
     const otmCe = allInstruments.find(
       (instrument) =>
-        instrument.instrument_type === "CE" &&
+        instrument.instrument_type == "CE" &&
         instrument.strike == atmStrike + 50 * depth &&
-        instrument.expiry === expiry &&
-        instrument.name === indexOptionName
+        instrument.expiry == expiry &&
+        instrument.name == indexOptionName
     );
 
     const otmPe = allInstruments.find(
       (instrument) =>
-        instrument.instrument_type === "PE" &&
+        instrument.instrument_type == "PE" &&
         instrument.strike == atmStrike - 50 * depth &&
-        instrument.expiry === expiry &&
-        instrument.name === indexOptionName
+        instrument.expiry == expiry &&
+        instrument.name == indexOptionName
     );
 
     if (!otmCe || !otmPe) {
@@ -206,7 +206,7 @@ rl.question(
     }
 
     rl.question("Do you want to execute the reverse operation? (y/n): ", async (answer) => {
-      const reverse = answer.toLowerCase() === "y";
+      const reverse = answer.toLowerCase() == "y";
       console.log(`Index selected: ${indexLtpName}, Reverse operation: ${reverse}`);
       await getLtpAndTradeOptions(indexLtpName, reverse);
       rl.close();

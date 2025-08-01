@@ -74,7 +74,7 @@ export default class PricePoint {
       }
 
       const maxHigh = Math.max(...relevantData.map((item) => item.high));
-      const maxData = relevantData.find((item) => item.high === maxHigh);
+      const maxData = relevantData.find((item) => item.high == maxHigh);
 
       this.previousMaxIndex = monthIndex;
       return maxData || {};
@@ -94,7 +94,7 @@ export default class PricePoint {
       }
 
       const minLow = Math.min(...relevantData.map((item) => item.low));
-      const minData = relevantData.find((item) => item.low === minLow);
+      const minData = relevantData.find((item) => item.low == minLow);
 
       this.previousMinIndex = monthIndex;
       return minData || {};
@@ -108,7 +108,7 @@ export default class PricePoint {
   async fetchHistoricalData(durationType, duration) {
     try {
       const startDay =
-        durationType === "month"
+        durationType == "month"
           ? this.calculateDateBeforeXDays(duration * 30)
           : this.calculateDateBeforeXDays(duration);
 
@@ -159,7 +159,7 @@ export default class PricePoint {
 
   // Refactored function with descriptive naming
   getRecentDaysData(data, currentDate) {
-    if (!Array.isArray(data) || data.length === 0) {
+    if (!Array.isArray(data) || data.length == 0) {
       throw new Error("Data array is invalid or empty.");
     }
 

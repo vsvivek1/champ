@@ -13,7 +13,7 @@ import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
 export default async function executeSquareOff(squareOff, cis, kite) {
   if (!squareOff) return;
 
-  if (!cis.position || cis.position.quantity === 0) {
+  if (!cis.position || cis.position.quantity == 0) {
     console.warn(`No active position for ${cis.tradingsymbol}, skipping square-off.`);
     return;
   }
@@ -26,7 +26,7 @@ export default async function executeSquareOff(squareOff, cis, kite) {
   }
   cis.lastSquareOffTime = now;
 
-  const openOrder = global.orders.find(o => o.tradingsymbol === cis.tradingsymbol && o.status === 'OPEN');
+  const openOrder = global.orders.find(o => o.tradingsymbol == cis.tradingsymbol && o.status == 'OPEN');
   if (!openOrder) {
     console.warn(`yNo open order found to update for ${cis.tradingsymbol}. Cannot proceed with stop-loss update.`);
     return;

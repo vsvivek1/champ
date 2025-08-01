@@ -26,7 +26,7 @@ const optionNameMap = {
   "FINNIFTY": "FINNIFTY",
 };
 
-const expiry = "2025-07-31"; // Replace with your expiry date
+const expiry = "2025-08-28"; // Replace with your expiry date
 
 // Place LIMIT order at LTP
 async function placeOrder(symbol, quantity, transactionType, price) {
@@ -71,7 +71,7 @@ async function sellDeepITMOptions(indexLtpName) {
     }
 
     const atmStrike = Math.round(ltp / 50) * 50;
-    const depth = 3;
+    const depth = 4;
 
     console.log(`\n🔍 LTP of ${indexLtpName}: ₹${ltp}, ATM Strike: ₹${atmStrike}`);
 

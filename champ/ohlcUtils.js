@@ -1,5 +1,5 @@
 export function analyzeOHLCWithSlopeAndDegree(cis) {
-    if (!cis || !Array.isArray(cis.minuteData) || cis.minuteData.length === 0) {
+    if (!cis || !Array.isArray(cis.minuteData) || cis.minuteData.length == 0) {
         cis.highSlopes = { message: "No Data Available" };
         cis.lowSlopes = { message: "No Data Available" };
         return;

@@ -370,7 +370,7 @@ async function main(params) {
 
 
 
-  let a= allScriptJson.filter(i => i.segment=== 'INDICES').map(y=>({[y.tradingsymbol]:y.name}));
+  let a= allScriptJson.filter(i => i.segment== 'INDICES').map(y=>({[y.tradingsymbol]:y.name}));
 
  
   const kite=await getKiteConnectInstance();
@@ -465,7 +465,7 @@ console.log('Names:', names);
 
 
 
-
+names=['NIFTY','SENSEX']
 
 const intervalId = await new Promise((resolve, reject) => {
   const interval = setInterval(async () => {
@@ -479,7 +479,7 @@ const intervalId = await new Promise((resolve, reject) => {
 
     const currentName = names[index];
     const tradingsymbol = indexOptions[currentName];
-    const ins = allScriptJson.find(i => i.tradingsymbol === tradingsymbol);
+    const ins = allScriptJson.find(i => i.tradingsymbol == tradingsymbol);
 
     if (!ins) {
       console.warn(`❌ Instrument not found: ${tradingsymbol} (${currentName})`);
@@ -497,7 +497,7 @@ const intervalId = await new Promise((resolve, reject) => {
         return;
       }
 
-      const depth = -1;
+      const depth = 2;
 
      // const expiries = [...new Set(optionsForIndex.map(o => o.expiry))].sort();
 
@@ -516,7 +516,7 @@ console.log('Depth',depth);
 
 
       console.log(currentName);
-      var optionsForIndex = allScriptJson.filter(o => o.name === currentName  && expiries.includes(o.expiry) );
+      var optionsForIndex = allScriptJson.filter(o => o.name == currentName  && expiries.includes(o.expiry) );
 
 
       //console.log(optionsForIndex )
@@ -524,22 +524,22 @@ console.log('Depth',depth);
       // Pick nearest expiry
       
 
-      const ceOptions = optionsForIndex.filter(o => o.instrument_type === 'CE' && expiries.includes(o.expiry) );
-      const peOptions = optionsForIndex.filter(o => o.instrument_type === 'PE' && expiries.includes(o.expiry));
+      const ceOptions = optionsForIndex.filter(o => o.instrument_type == 'CE' && expiries.includes(o.expiry) );
+      const peOptions = optionsForIndex.filter(o => o.instrument_type == 'PE' && expiries.includes(o.expiry));
 
       const ceStrikes = ceOptions.map(o => o.strike).sort((a, b) => a - b);
       const peStrikes = peOptions.map(o => o.strike).sort((a, b) => a - b);
 
       const findStrikeByDepth = (strikes, ltp, depth, direction) => {
-        if (direction === 'above') {
+        if (direction == 'above') {
           const baseIndex = strikes.findIndex(s => s >= ltp);
-          if (baseIndex === -1) return null;
+          if (baseIndex == -1) return null;
           const targetIndex = baseIndex + depth;
           return strikes[targetIndex] || null;
         } else {
           const reversed = [...strikes].reverse();
           const baseIndexReversed = reversed.findIndex(s => s <= ltp);
-          if (baseIndexReversed === -1) return null;
+          if (baseIndexReversed == -1) return null;
           const baseIndex = strikes.length - 1 - baseIndexReversed;
           const targetIndex = baseIndex - depth;
           return strikes[targetIndex] || null;
@@ -549,8 +549,8 @@ console.log('Depth',depth);
       const ceStrike = findStrikeByDepth(ceStrikes, ltp, depth, 'above');
       const peStrike = findStrikeByDepth(peStrikes, ltp, depth, 'below');
 
-      const ceOption = ceOptions.find(o => o.strike === ceStrike);
-      const peOption = peOptions.find(o => o.strike === peStrike);
+      const ceOption = ceOptions.find(o => o.strike == ceStrike);
+      const peOption = peOptions.find(o => o.strike == peStrike);
 
       //console.log(`➡️ ${currentName} | LTP: ${ltp} | CE: ${ceStrike} | PE: ${peStrike} | Expiry: ${nearestExpiry}`);
 
@@ -656,7 +656,7 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
   console.log(s,'s')
   //return;
   return new Promise((resolve, reject) => {
-    if (typeof selectedOptions === 'undefined' || selectedOptions.length === 0) {
+    if (typeof selectedOptions == 'undefined' || selectedOptions.length == 0) {
       resolve(); // Resolve early if no work
       return;
     }

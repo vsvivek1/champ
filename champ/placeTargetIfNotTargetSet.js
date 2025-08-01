@@ -21,7 +21,7 @@ if(global.instrumentName!=cis.name) continue;
         // return;
 
         const qty = pos.quantity;
-        if (qty === 0) continue; // Skip closed positions
+        if (qty == 0) continue; // Skip closed positions
   
         const isLong = qty > 0;
         const absQty = Math.abs(qty);
@@ -30,14 +30,14 @@ if(global.instrumentName!=cis.name) continue;
   
         // Step 1: Find the last completed entry order
         const entryOrders = orders.filter(order =>
-          order.tradingsymbol === pos.tradingsymbol &&
-          order.product === pos.product &&
-          order.exchange === pos.exchange &&
-          order.transaction_type === entryTxn &&
-          order.status === 'COMPLETE'
+          order.tradingsymbol == pos.tradingsymbol &&
+          order.product == pos.product &&
+          order.exchange == pos.exchange &&
+          order.transaction_type == entryTxn &&
+          order.status == 'COMPLETE'
         );
   
-        if (entryOrders.length === 0) {
+        if (entryOrders.length == 0) {
           console.warn(`⚠️ No completed ${entryTxn} order found for ${pos.tradingsymbol}`);
           continue;
         }
@@ -72,11 +72,11 @@ if(global.instrumentName!=cis.name) continue;
         const reverseOrderExists = global.orders.some(order =>{
 //console.log('pos.tradingsymbol',pos.tradingsymbol,order.tradingsymbol )
 
-          return order.tradingsymbol === pos.tradingsymbol &&
-          order.product === pos.product &&
-          order.exchange === pos.exchange &&
-          order.transaction_type === exitTxn &&
-          order.quantity === absQty &&
+          return order.tradingsymbol == pos.tradingsymbol &&
+          order.product == pos.product &&
+          order.exchange == pos.exchange &&
+          order.transaction_type == exitTxn &&
+          order.quantity == absQty &&
           order.status == 'OPEN'
         }
           
@@ -87,23 +87,22 @@ if(global.instrumentName!=cis.name) continue;
 
   
         if (reverseOrderExists) {
-         console.log(`[SKIPPED] Target order already exists for ${pos.tradingsymbol} at ${targetPrice}`,orders.tradingsymbol === pos.tradingsymbol &&
-          orders.product === pos.product &&
-          orders.exchange === pos.exchange &&
-          orders.transaction_type === exitTxn &&
-          orders.quantity === absQty &&
+         console.log(`[SKIPPED] Target order already exists for ${pos.tradingsymbol} at ${targetPrice}`,orders.tradingsymbol == pos.tradingsymbol &&
+          orders.product == pos.product &&
+          orders.exchange == pos.exchange &&
+          orders.transaction_type == exitTxn &&
+          orders.quantity == absQty &&
           orders.status == 'OPEN');
 
           continue;
        
         }
-  
 
-        if(qty <0) targetPrice=entryPrice-5
-        if(qty >0) targetPrice=entryPrice+5
-    
+        if(qty <0) targetPrice=entryPrice*0.95
+        if(qty >0) targetPrice=Math.min(entryPrice*2,cis.tick.upper_circuit_limit);
+
         // Step 3: Place LIMIT order at target price
-        console.log(`[PLACING TARGET] ${exitTxn} ${absQty} of ${pos.tradingsymbol} at ${targetPrice}`);
+      console.log(`[PLACING TARGET] ${exitTxn} ${absQty} of ${pos.tradingsymbol} at ${targetPrice} cis.tick.upper_circuit_limit) ${cis.tick.upper_circuit_limit}`);
 
         //cis.placeTargetIfNotTargetSet=true;
   

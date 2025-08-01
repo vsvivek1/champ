@@ -411,7 +411,7 @@ let ar = stockPpItem.pricePoints.pricePoints;
 if (
     !stockPpItem.pricePoints ||
     !stockPpItem.pricePoints.d1 ||
-    typeof stockPpItem.pricePoints.d1.close === 'undefined'
+    typeof stockPpItem.pricePoints.d1.close == 'undefined'
   ) {
     return false;
   }

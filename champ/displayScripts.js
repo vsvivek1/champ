@@ -28,7 +28,7 @@ return;
         const quoteResponse = await kc.getQuote(token);
 
         // Check if the response is successful and contains data for the token
-        if (quoteResponse.status === "success" && quoteResponse.data[token]) {
+        if (quoteResponse.status == "success" && quoteResponse.data[token]) {
           const quoteData = quoteResponse.data[token];
           return {
             token,

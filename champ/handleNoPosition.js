@@ -75,7 +75,7 @@ function validateCISTradeConditions(cis) {
         return false;
     }
 
-    if (cis.liveMinute.color === "bearish") {
+    if (cis.liveMinute.color == "bearish") {
         cis.returnPoints = 'live candle bearish';
         cis.entryHealth = 'live candle bearish';
         global.addOrIncrementRejection("LIVE CANDLE BEARISH: " + cis.tradingsymbol);
@@ -147,6 +147,10 @@ export async function handleNoPosition(cis, kite) {
         handleSTKTrades(cis, kite);
     } else {
         cis.entryHealth = 'HanleNonStkTrades';
+
+        
+
+
         handleNonSTKTrades(cis, kite);
     }
 }

@@ -10,7 +10,7 @@
 			</div>
 			<div
 			  :class="{
-				'text-success': script.prices[index2].open === item.open
+				'text-success': script.prices[index2].open == item.open
 			  }"
 			>
 			  O:{{ item.open }} ll

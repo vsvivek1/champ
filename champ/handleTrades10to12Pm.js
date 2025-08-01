@@ -18,7 +18,7 @@ export function handle10to12PM(cis, kite) {
     cis.qualifiedForTrade=true;
 
    
-    if (global.seconds === 30) {
+    if (global.seconds == 30) {
         displayScripts(kite);
      }
    
@@ -26,7 +26,7 @@ export function handle10to12PM(cis, kite) {
 
    
 
-            if (cis.liveMinute.color === 'bearish') {
+            if (cis.liveMinute.color == 'bearish') {
                 cis.message = 'Live minute Color bearish, no entry ' + cis.tradingsymbol;
                 if (global.seconds == 57) {
                    // console.log(cis.message, cis.liveMinute.color, 'live color red rejection');

@@ -1,6 +1,6 @@
 const mar = function checkMarubozo(element) {
-  element.ohlc === element.ohlc.low &&
-    (element.last_price * 1.1 <= element.ohlc.high || element.last_price === element.ohlc.high) &&
+  element.ohlc == element.ohlc.low &&
+    (element.last_price * 1.1 <= element.ohlc.high || element.last_price == element.ohlc.high) &&
     this.hours >= 14;
 
   if (mar) {

@@ -206,7 +206,7 @@ let result=[]
     let n = new Gtt();
 
     // Check if the method exists before calling it
-    if (typeof n.getGttStocks === 'function') {
+    if (typeof n.getGttStocks == 'function') {
         let n2 = n.getGttStocks();
         console.log(n2);
 

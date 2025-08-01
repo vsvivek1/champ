@@ -16,8 +16,8 @@ export async function handleSellTarget(cis, order, kite) {
     //     targetPrice = order.price + 2;
     // }
 
-    if (global.instrumentName === 'STK') {
-        targetPrice = global.hours === 9
+    if (global.instrumentName == 'STK') {
+        targetPrice = global.hours == 9
             ? order.buy_price * 1.03
             : order.buy_price * 1.01;
     }

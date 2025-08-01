@@ -86,6 +86,6 @@ chat_id=r.data.result[0].channel_post.chat.id;
 
 //     console.log(msg)
 // var Hi = "hi";
-// if (msg.text.toString().toLowerCase().indexOf(Hi)  === 0) {
+// if (msg.text.toString().toLowerCase().indexOf(Hi)  == 0) {
 //     bot.sendMessage(msg.chat.id, "Hello  " + msg.from.first_name);
 // }});

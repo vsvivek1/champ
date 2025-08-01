@@ -9,7 +9,7 @@ const originalConsoleLog = console.log;
 function overrideConsoleLog() {
   console.log = function (...args) {
     // Format the message
-    const message = args.map(arg => (typeof arg === 'object' ? JSON.stringify(arg) : arg)).join(' ');
+    const message = args.map(arg => (typeof arg == 'object' ? JSON.stringify(arg) : arg)).join(' ');
 
     // Check if the message has already been logged
     if (!loggedMessages.has(message)) {

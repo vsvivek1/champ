@@ -147,19 +147,22 @@ v-if="item.avoided">Include</button>
 
     <div>
 
-      
-    <div 
+        <StrategyStatus :strategyStatuses="item.signals />
+
+//     <div 
     
-    style="{border:1px solid}"
+//     style="{border:1px solid}"
     
-    v-for="(value, key) in item.signals" :key="key" class="status-item">
-      <span class="status-key">{{ formatKey(key) }}</span>:
-      <span :class="value ? 'status-true' : 'status-false'">
-        {{ value ? '✔️' : '❌' }}
-        <hr>
-      </span>
-    </div>
-  </div>
+//     v-for="(value, key) in item.signals" :key="key" class="status-item">
+//       <span class="status-key">{{ formatKey(key) }}</span>:
+//       <span :class="value ? 'status-true' : 'status-false'">
+//         {{ value ? '✔️' : '❌' }}
+//         <hr>
+//       </span>
+//     </div>
+//   </div>
+
+
 </span>
 
                         <span v-else="item[key]">
@@ -172,6 +175,8 @@ v-if="item.avoided">Include</button>
                         
                         </span>
                         <span v-else>N/A</span>
+
+                        
                     </td>
                 </tr>
             </tbody>
@@ -239,16 +244,16 @@ import sessionMixin from '../views/sessionMixin.js';
 
 import TickDisplay from './TickDisplay.vue'
 import instruments  from '/shared/instruments/instrumentsForMining.json';// assert { type: "json" };
-
+import StrategyStatus from "./StrategyStatus.vue";
 export default {
   name: 'CisUpdates',
-  components:[TickDisplay],
+  components:[TickDisplay,StrategyStatus],
   mixins: [sessionMixin],
   data() {
       return {
           cisList: [],
           symbols: instruments,
-          selectedKeys: ['returnPoints','tick','entryHealth','operatorBuyCandles','signals','buyCriteria'],
+          selectedKeys: ['returnPoints','tick','entryHealth','deployedStrategies','signals'],
       };
   },
   created() {
@@ -317,7 +322,7 @@ export default {
       },
       recursiveMerge(target, source) {
           for (const key in source) {
-              if (source[key] && typeof source[key] === 'object') {
+              if (source[key] && typeof source[key] == 'object') {
                   if (!target[key]) {
                       this.$set(target, key, {});
                   }
@@ -330,7 +335,7 @@ export default {
       updateSymbol(cis) {
           if (!cis || !cis.tradingsymbol) return;
 
-          const index = this.symbols.findIndex(item => item?.tradingsymbol === cis.tradingsymbol);
+          const index = this.symbols.findIndex(item => item?.tradingsymbol == cis.tradingsymbol);
 
           if (index !== -1) {
               this.recursiveMerge(this.symbols[index], cis);

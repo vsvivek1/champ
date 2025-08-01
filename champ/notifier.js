@@ -20,7 +20,7 @@ export default function notifyWithSound(isSuccess, cis = {}) {
         }
 
         // Play sound using the appropriate command based on OS
-        const playSoundCommand = process.platform === 'win32' ? 
+        const playSoundCommand = process.platform == 'win32' ? 
             `powershell -c (New-Object Media.SoundPlayer "${soundFile}").PlaySync();` :
             `afplay "${soundFile}"`; // For macOS, use `aplay` for Linux
 

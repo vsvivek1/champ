@@ -65,7 +65,7 @@ export function isOpenHighAtSpecificSeconds(cis) {
     }
 
     // Determine if the candle is Open=High
-    return cis.currentMinute.open === cis.currentMinute.high;
+    return cis.currentMinute.open == cis.currentMinute.high;
 }
 
 // You can add more criteria functions here as needed

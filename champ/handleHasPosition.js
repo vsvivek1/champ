@@ -35,7 +35,7 @@ async function shortCoverOrder(kite, cis) {
       validity: kite.VALIDITY_DAY,
     };
 
-    if (orderParams.order_type === kite.ORDER_TYPE_LIMIT && cis.price) {
+    if (orderParams.order_type == kite.ORDER_TYPE_LIMIT && cis.price) {
       orderParams.price = cis.price;
     }
 
@@ -51,10 +51,10 @@ async function shortCoverOrder(kite, cis) {
 async function shortCoveringStoploss(kite, cis) {
   try {
     const matchingOrder = global.orders.find(order =>
-      order.status === "OPEN" &&
-      order.transaction_type === kite.TRANSACTION_TYPE_BUY &&
-      order.tradingsymbol === cis.tradingsymbol &&
-      order.exchange === cis.exchange
+      order.status == "OPEN" &&
+      order.transaction_type == kite.TRANSACTION_TYPE_BUY &&
+      order.tradingsymbol == cis.tradingsymbol &&
+      order.exchange == cis.exchange
     );
 
     if (!matchingOrder) {
@@ -169,7 +169,7 @@ if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
     
     {
 
-      const openOrder = global.orders.find(o => o.tradingsymbol === cis.tradingsymbol && o.status === 'OPEN');
+      const openOrder = global.orders.find(o => o.tradingsymbol == cis.tradingsymbol && o.status == 'OPEN');
   if (!openOrder) {
 
   cis.signals?  cis.signals.NoReverseOrderFoundForPosition=true : cis.signals={NoReverseOrderFoundForPosition:true};
@@ -188,7 +188,7 @@ if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
 
 
 
-  if(openOrder && openOrder.status === 'OPEN' && openOrder.order_id &&cis.position.quantity>0) {
+  if(openOrder && openOrder.status == 'OPEN' && openOrder.order_id &&cis.position.quantity>0) {
 
 
     console.log('executting stop loss below ma20 or below open price',cis.tradingsymbol,
@@ -211,7 +211,7 @@ return;
 
 
   cis.entryHealth = 'Inside Has Position';
-  if (global.seconds % 19 === 0) cis.saidThat = false;
+  if (global.seconds % 19 == 0) cis.saidThat = false;
 
   if (!cis.stopLossPrice || isNaN(cis.stopLossPrice)) {
     cis.stopLossPrice = cis.tick.ohlc.open;
@@ -227,7 +227,7 @@ return;
 
   let transactiontype = cis.position.quantity > 0 ? 'SELL' : 'BUY';
 
-  var tgtOrder = global.orders.find(o => o.tradingsymbol === cis.tradingsymbol && o.status === 'OPEN' && o.transaction_type === transactiontype);
+  var tgtOrder = global.orders.find(o => o.tradingsymbol == cis.tradingsymbol && o.status == 'OPEN' && o.transaction_type == transactiontype);
 
 if(!tgtOrder){
 
@@ -283,7 +283,7 @@ if(!tgtOrder){
   //   return;
   // }
 
-  // if (global.instrumentName === 'STK') {
+  // if (global.instrumentName == 'STK') {
   //   if (cis.position.quantity < 0) {
   //     handleShortCoveringOfStocks(cis, kite);
   //   } else if (cis.position.quantity > 0) {

@@ -181,7 +181,7 @@ async function fetchPositionsAndSetCis(){
    
    
     instruAll.forEach(instrument => {
-        const matchingPosition = positionsDay.find(pos => pos.tradingsymbol === instrument.tradingsymbol 
+        const matchingPosition = positionsDay.find(pos => pos.tradingsymbol == instrument.tradingsymbol 
 
 
             && pos.quantity>0
@@ -207,11 +207,11 @@ async function fetchOrdersAndSetCis() {
 
         // Iterate over instruAll and set orderStatus, orderT, and hasLiveOrder
         instruAll.forEach(instrument => {
-            const matchingOrder = orders.find(order => order.instrument_token === instrument.instrument_token);
+            const matchingOrder = orders.find(order => order.instrument_token == instrument.instrument_token);
             if (matchingOrder) {
                 instrument.orderStatus = matchingOrder.status;
                 instrument.orderT = matchingOrder.order_id;
-                instrument.hasLiveOrder = matchingOrder.status === "OPEN";
+                instrument.hasLiveOrder = matchingOrder.status == "OPEN";
             } else {
                 instrument.orderStatus = null;
                 instrument.orderT = null;
@@ -598,13 +598,13 @@ function getCurrentHourlyCandleFromMinuteCandle(candles) {
     // Filter candles within the time range
     const relevantCandles = candles.filter(candle => candle.date >= startTime && candle.date <= currentTime);
 
-    if (relevantCandles.length === 0) {
+    if (relevantCandles.length == 0) {
         throw new Error('No relevant candles found within the specified time range.');
     }
 
     // Aggregate OHLC values
     const aggregatedCandle = relevantCandles.reduce((acc, candle) => {
-        acc.open = acc.open === null ? candle.open : acc.open; // Use the first open price
+        acc.open = acc.open == null ? candle.open : acc.open; // Use the first open price
         acc.close = candle.close; // Use the last close price
         acc.high = Math.max(acc.high, candle.high);
         acc.low = Math.min(acc.low, candle.low);
@@ -722,7 +722,7 @@ async function fetchHourlyData() {
         let fromTime = moment().startOf('day').add(9, 'hours').add(15, 'minutes').format('YYYY-MM-DD HH:mm:ss');
         let toTime;
 
-        if (now.hour() === 9) {
+        if (now.hour() == 9) {
             toTime = now.subtract(5,'minute').
             
          format('YYYY-MM-DD HH:mm:ss');
@@ -843,9 +843,9 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType) {
             const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
            // console.log(data,'datatype');
             // Store data in respective historical data object
-            if (dataType === '60minute') {
+            if (dataType == '60minute') {
                 hourlyHistoricalData[instrument] = data;
-            } else if (dataType === 'minute') {
+            } else if (dataType == 'minute') {
                 minuteHistoricalData[instrument] = data;
             }
 

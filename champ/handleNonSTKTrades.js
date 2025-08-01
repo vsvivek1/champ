@@ -1,4 +1,4 @@
-// ====== IMPORTS ======
+// ==== IMPORTS ====
 import { buyAboveOpenAtNineAm } from "./buyAboveOpenAtNineAm.js";
 import { buyAtHugeLastTick } from "./buyAtHugeTick.js";
 import { validateCISTradeConditions } from "./handleCISTTradeConditions.js";
@@ -19,10 +19,31 @@ import { cross20MaWith10CandlesBelow } from "./cross20MaWith10CandlesBelow.js";
 import { checkGapDown } from "./gapDownChecker.js";
 import { handleShortNonSTKTrades } from "./handleShortNonSTKTrades.js";
 import e from "cors";
+import { handleMA20Reclaim } from './handleMa20Reclaim.js';
 
 
-// ====== MAIN FUNCTION ======
+// ==== MAIN FUNCTION ====
 export async function handleNonSTKTrades(cis, kite) {
+
+      if (typeof cis.tick == 'undefined' || typeof cis.tick.ohlc == 'undefined' || typeof cis.ma20 == 'undefined') {
+
+cis.returnPoints = `cis.tick or cis.tick.ohlc or cis.ma20 is undefined for ${cis.tradingsymbol}`;
+cis.signals.safePassTickHealth=false
+        return
+      }
+     cis.signals.safePassTickHealth=true; 
+
+
+//     if (cis.placedOrder==true) {
+
+
+// //order status for  SENSEX25JUL81900PE buyPrice undefined orderId targetSet undefined stopLossSet undefined entryPrice 478 averageRange 12.301234567901236 ordered true targetPrice nil stopLossPrice nill
+
+   
+        
+
+//         return false;
+//     }
      
 
     if (global.enableShortTrading) {
@@ -58,54 +79,106 @@ export async function handleNonSTKTrades(cis, kite) {
     // }
 
 
+// if(cis.ordered==true){
+// //console.log('cis.ordered is true, so returning',cis.tradingsymbol);
+//         return;
+
+//     }
+
+
+
+
+ if (!cis || typeof cis.ma20 == 'undefined') {
+
+    //console.error(`MA20 is undefined for ${cis.tradingsymbol}, cannot proceed.`);
+    cis.signals.aboveMA20 = false;
+    cis.returnPoints = `MA20 is undefined for ${cis.tradingsymbol}`;
+    return;
+ }
+ 
+
+    
 if(cis.tick.last_price<cis.ma20){
 
-    cis.signals.aboveDayOpen = false
+    cis.signals.aboveMA20 = false;
+
+    cis.returnPoints = `LTP ${cis.tick.last_price} is less than MA20 ${cis.ma20}`;
+   // cis.signals.aboveDayOpen = false
     return;
 }
-    cis.signals.aboveDayOpen = true;
+
+
+cis.signals.aboveMA20 = true;
+   // cis.signals.aboveDayOpen = true;
+
+if(cis.tick.last_price < cis.vwap){
+
+cis.signals.lastPriceGreaterThanVWAP= false
+cis.returnPoints = `LTP ${cis.tick.last_price} is less than VWAP ${cis.vwap}`;
+    return;
+} ;
+cis.signals.lastPriceGreaterThanVWAP= true;
+
 
     let gd = checkGapDown(cis);
     if (gd && global.hours < 11) {
         cis.signals.safePassGapDownTill11 = false;
-        cis.returnPoints = 'gap down so no trade before 11';
+        cis.returnPoints= `Gap Down detected:  Open Price ${cis.tick.ohlc.open} is less than Previous Close ${gd}  `;
         return;
     }
+    cis.signals.safePassGapDownTill11 = true;
 
-    if (global.hours == 15 && global.minutes > 15) return;
+   
+   
+    if (global.hours == 15 && global.minutes > 15){
 
-    if (!cis || typeof cis.ma20 == 'undefined') return;
+cis.returnPoints = `Market closing soon, so not placing any orders`;
+   cis.signals.safePassClosingTime=false;
 
-    if (cis.liveMinute.color === 'bearish') {
+        return;
+
+    } 
+    cis.signals.safePassClosingTime=true
+
+   
+
+    if (cis.liveMinute.color == 'bearish') {
         cis.signals.safePasscheckcis_liveMinute_colorBearish = false;
+        cis.returnPoints
         return false;
     }
     cis.signals.safePasscheckcis_liveMinute_colorBearish = true;
 
-    if (checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis)) {
-        cis.signals.safePasscheckPenultimateGreenAndLastSmallBodyOrLowerHigh = false;
-    }
-    cis.signals.safePasscheckPenultimateGreenAndLastSmallBodyOrLowerHigh = true;
+   
+    // if (checkPenultimateGreenAndLastSmallBodyOrLowerHigh(cis)) {
+    //     cis.signals.safePasscheckPenultimateGreenAndLastSmallBodyOrLowerHigh = false;
+    // }
+
+   // cis.signals.safePasscheckPenultimateGreenAndLastSmallBodyOrLowerHigh = true;
 
     if (cis.operatorBuyCandles.fifteenMinutes == false) {
         cis.signals.safepassOperatorCandleCheck = false;
+
+        cis.returnPoints = `Operator candles in 15 minutes not found for ${cis.tradingsymbol}`;
+       // console.warn(`⚠️ Operator candles in 15 minutes not found for ${cis.tr
         return false;
     }
+
     cis.signals.safepassOperatorCandleCheck = true;
     cis.signals.operatorCandlesIn15Minutes = true;
     cis.signals.safePassGapDownTill11 = true;
 
-    if (checkLowerLowsAndLowerHighs(cis)) {
-        cis.signals.safeproceedLowerLowsAndLowerHighs = false;
-    }
-    cis.signals.safeproceedLowerLowsAndLowerHighs = 'NA';
+    // if (checkLowerLowsAndLowerHighs(cis)) {
+    //     cis.signals.safeproceedLowerLowsAndLowerHighs = false;
+    // }
+   // cis.signals.safeproceedLowerLowsAndLowerHighs = 'NA';
 
-    if (typeof cis.ma20 !== 'undefined' && typeof cis.displayedMa20 !== 'undefined') {
-        console.log('cis.ma20', cis.ma20, cis.tradingsymbol);
-        cis.displayedMa20 = true;
-    }
+    // if (typeof cis.ma20 !== 'undefined' && typeof cis.displayedMa20 !== 'undefined') {
+    //     console.log('cis.ma20', cis.ma20, cis.tradingsymbol);
+    //     cis.displayedMa20 = true;
+    // }
 
-    if (typeof cis.tick === 'undefined' || typeof cis.tick.ohlc === 'undefined' || typeof cis.ma20 === 'undefined') return;
+  
 
     if (cis.tick.last_price < cis.ma20) {
         cis.signals.safePassLtpAboveMa20 = false;
@@ -121,6 +194,14 @@ if(cis.tick.last_price<cis.ma20){
     }
     cis.signals.safepassCISTCheck = 'NA';
     cis.entryHealth = 'validatedCISTradeConditions';
+    
+
+
+
+ //console.log(cis.ordered,'cis.ordered',cis.tradingsymbol);
+
+
+///// trade entries
 
     if (handleReversalTrades(cis, kite)) return;
     cis.signals.handleReversalTrades = false;
@@ -128,7 +209,7 @@ if(cis.tick.last_price<cis.ma20){
     if (buyAboveOpenAtNineAm(cis, kite)) return;
     cis.signals.buyAboveOpenAtNineAm = false;
 
-    cis.signals.buyAtHugeLastTick = false;
+   // cis.signals.buyAtHugeLastTick = false;
 
     if (handleLongLowerShadowTrades(cis, kite)) return;
     cis.signals.handleLongLowerShadowTrades = false;
@@ -146,8 +227,14 @@ if(cis.tick.last_price<cis.ma20){
     cis.signals.handleLastCandleHighBelowMA20 = false;
 
     if (handleHammerCandleTrade(cis, kite)) return;
-    if (handleYesterdayHighCross(cis, kite)) return;
+   
 
+
+
+     if (handleMA20Reclaim(cis, kite)) return;
+     cis.signals.handleMA20Reclaim = false;
+
+    
     cis.entryHealth = 'exitAfterAllChecks';
     cis.signals.exitAfterAllEntryStrategyChecks = true;
 
@@ -164,7 +251,7 @@ if(cis.tick.last_price<cis.ma20){
     return;
 }
 
-// ====== UTILITY FUNCTIONS ======
+// ==== UTILITY FUNCTIONS ====
 
 async function shortOptionOrder(kite, cis) {
     let shortMultiplier = 4;
@@ -181,7 +268,7 @@ async function shortOptionOrder(kite, cis) {
                 validity: kite.VALIDITY_DAY,
             };
 
-            if (orderParams.order_type === kite.ORDER_TYPE_LIMIT && cis.tick.last_price) {
+            if (orderParams.order_type == kite.ORDER_TYPE_LIMIT && cis.tick.last_price) {
                 orderParams.price = cis.tick.last_price;
             }
 
@@ -197,7 +284,7 @@ async function shortOptionOrder(kite, cis) {
 function shouldShortBasedOnMA20(cis) {
     const data = cis.minuteData;
     const ltp = cis.tick.last_price;
-    if (!data || data.length < 6 || ltp === undefined) return false;
+    if (!data || data.length < 6 || ltp == undefined) return false;
 
     const lastIndex = data.length - 1;
     const recentCandles = data.slice(lastIndex - 5, lastIndex);
@@ -239,3 +326,23 @@ function redCandleAfterThreeGreen(cis) {
 
     // return false; // hardcoded override previously present
 }
+
+
+// function checkMA20ReclaimFollowThrough(cis) {
+//     const candles = cis.minuteData;
+//     if (!candles || candles.length == 0) return { buyOption: false };
+
+//     const last = candles.at(-1);
+//     const ma20 = cis.ma20;
+//     const ltp = cis.last_price;
+
+//     const isReclaim = last.low < ma20 && last.close > ma20 && ltp > ma20;
+
+
+//     return isReclaim;
+
+//     return {
+//         buyOption: isReclaim,
+//         strategyName: isReclaim ? "MA20 Reclaim with Follow-Through" : null
+//     };
+// }

@@ -6,6 +6,7 @@ export function handleThreeBlackCrowsReversal(cis, kite) {
 
     if (checkThreeBlackCrowsBullishReversal(cis.minuteData)) {
         cis.buyStrategy = strategyName;
+        cis.deployedStrategies[strategyName] = 'checking';
         cis.entryHealth = '✅ Three Black Crows detected, possible bullish reversal';
         cis.returnPoints = `✅ [${strategyName}] 3 red candles, reversal expected`;
 
@@ -22,10 +23,12 @@ export function handleThreeBlackCrowsReversal(cis, kite) {
         return true;
     }
 
-    cis.returnPoints = `❌ [${strategyName}] Three Black Crows not detected`;
-    cis.strategyTested = cis.strategyTested || [];
-    cis.strategyTested.push(strategyName);
-    cis.deployedStrategies[strategyName] = 'touched';
+
+    cis.deployedStrategies[strategyName] = 'unFulfilled';
+    // cis.returnPoints = `❌ [${strategyName}] Three Black Crows not detected`;
+    // cis.strategyTested = cis.strategyTested || [];
+    // cis.strategyTested.push(strategyName);
+    // cis.deployedStrategies[strategyName] = 'touched';
 
     return false;
 }

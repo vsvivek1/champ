@@ -12,13 +12,13 @@ const data = [
     const date = new Date(data[i].date);
     const day = date.getDay();
   
-    if (day  === 0 || day  === 6) {
+    if (day  == 0 || day  == 6) {
       continue;
     }
   
-    if (date.getTime()  === today.getTime()) {
+    if (date.getTime()  == today.getTime()) {
       console.log(`d${i} is today`);
-    } else if (date.getTime()  === yesterday.getTime()) {
+    } else if (date.getTime()  == yesterday.getTime()) {
       console.log(`d${i} is yesterday`);
     } else {
       console.log(`d${i} is not today or yesterday`);

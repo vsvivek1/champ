@@ -17,7 +17,7 @@ export async function placeTargetOrder(cis, order, kite) {
 
     switch (true) {
       // ✅ CASE 1: Use in-built target
-      case cis.hasInBuiltTarget === true: {
+      case cis.hasInBuiltTarget == true: {
         finalTargetPrice = Math.ceil(cis.targetPrice);
         break;
       }
@@ -29,15 +29,15 @@ export async function placeTargetOrder(cis, order, kite) {
 
           const buyOrders = global.orders
             .filter(o =>
-              o.instrument_token === cis.instrument_token &&
-              String(o.status).toLowerCase() === 'complete' &&
-              String(o.transaction_type).toLowerCase() === 'buy'
+              o.instrument_token == cis.instrument_token &&
+              String(o.status).toLowerCase() == 'complete' &&
+              String(o.transaction_type).toLowerCase() == 'buy'
             )
             .sort((a, b) =>
               new Date(b.exchange_update_timestamp) - new Date(a.exchange_update_timestamp)
             );
 
-          if (buyOrders.length === 0) {
+          if (buyOrders.length == 0) {
             console.warn(`⚠️ No BUY order found for ${cis.tradingsymbol}. Skipping target.`);
             return;
           }
@@ -53,7 +53,7 @@ export async function placeTargetOrder(cis, order, kite) {
         }
 
         cis.buy_price = buyPrice;
-        finalTargetPrice = Math.ceil(buyPrice + 5);
+        finalTargetPrice = Math.ceil(buyPrice * 5);
         cis.targetPrice = finalTargetPrice;
         console.log(`🎯 Target set as buy_price + 5 = ${finalTargetPrice}`);
         break;
@@ -65,9 +65,9 @@ export async function placeTargetOrder(cis, order, kite) {
       tradingsymbol: cis.tradingsymbol,
       transaction_type: 'SELL',
       order_type: 'LIMIT',
-      quantity: order?.quantity || cis.position?.quantity || 1,
+      quantity: order.quantity, //|| cis.position?.quantity || 1,
       price: finalTargetPrice,
-      product: 'MIS',
+      product: 'NRML',
       validity: 'DAY',
     };
 

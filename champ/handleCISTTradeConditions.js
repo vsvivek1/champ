@@ -44,7 +44,7 @@ export function validateCISTradeConditions(cis) {
         return false;
     }
 
-    // if (cis.liveMinute.color === "bearish") {
+    // if (cis.liveMinute.color == "bearish") {
 
     //     if(typeof cis.returnPoints=='undefined'){
 
@@ -73,7 +73,7 @@ export function validateCISTradeConditions(cis) {
     // }
 
     // Time-Specific Strategies
-    // if (global.hours === 9 && global.minutes < 30) {
+    // if (global.hours == 9 && global.minutes < 30) {
     //     // Early morning specific strategies
     //     if (cis.tick.last_price < cis.tick.ohlc.open) {
 

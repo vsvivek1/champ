@@ -9,9 +9,9 @@ export async function fetchAllData(kite, instruments, fromTime, toTime, dataType
             const instrument = instruments[i];
             const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
 
-            if (dataType === '60minute') {
+            if (dataType == '60minute') {
                 hourlyHistoricalData[instrument] = data;
-            } else if (dataType === 'minute') {
+            } else if (dataType == 'minute') {
                 minuteHistoricalData[instrument] = data;
             }
 

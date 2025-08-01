@@ -9,7 +9,7 @@ methods:{
 
         //debugger;
     
-        if (transaction_type === "SELL" && entryPrice > 0 && overnight_quantity == 0) {
+        if (transaction_type == "SELL" && entryPrice > 0 && overnight_quantity == 0) {
            // debugger;
             console.log('return ainside target point sell')
             switch (true) {
@@ -34,7 +34,7 @@ methods:{
         }
         
         
-    /*     else if (transaction_type === "BUY" && entryPrice > 0 && overnight_quantity == 0) {
+    /*     else if (transaction_type == "BUY" && entryPrice > 0 && overnight_quantity == 0) {
 
 debuger;
             console.log('return ainside target point buy')

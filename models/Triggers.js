@@ -13,7 +13,7 @@ const triggerSchema = new mongoose.Schema({
 
 // Calculate pnl based on entryPrice and exitPrice
 triggerSchema.virtual('pnl').get(function() {
-  const pnlMultiplier = this.entryType  === 'short' ? -1 : 1;
+  const pnlMultiplier = this.entryType  == 'short' ? -1 : 1;
   return pnlMultiplier * (this.exitPrice - this.entryPrice);
 });
 

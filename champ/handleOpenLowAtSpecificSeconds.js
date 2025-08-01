@@ -9,9 +9,9 @@ function isOpenLowAtSpecificSeconds(cis) {
     const ohlc = cis.tick.ohlc;
 
     return (
-        sec === 59 &&
-        cis.tick.last_price === ohlc.open &&
-        ohlc.open === ohlc.low
+        sec == 59 &&
+        cis.tick.last_price == ohlc.open &&
+        ohlc.open == ohlc.low
     );
 }
 
@@ -39,11 +39,13 @@ export function handleOpenLowAtSpecificSeconds(cis, kite) {
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
         return true;
     } else {
-        cis.signals[strategyName] = false;
-        cis.returnPoints = `❌ [${strategyName}] Condition failed: Open != Low or not at 59s`;
-        cis.strategyTested = cis.strategyTested || [];
-        cis.strategyTested.push(strategyName);
-        cis.deployedStrategies[strategyName] = 'touched';
+        // cis.signals[strategyName] = false;
+        // cis.returnPoints = `❌ [${strategyName}] Condition failed: Open != Low or not at 59s`;
+        // cis.strategyTested = cis.strategyTested || [];
+        // cis.strategyTested.push(strategyName);
+
+        cis.deployedStrategies[strategyName] = 'unFulfilled';
+        // cis.deployedStrategies[strategyName] = 'touched';
         return false;
     }
 }

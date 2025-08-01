@@ -15,11 +15,13 @@ export function buyAtHugeLastTick(cis, kite) {
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
         return true;
     } else {
-        cis.returnPoints = `❌ [${strategyName}] hugeLastTick condition not met`;
-        cis.strategyTested = cis.strategyTested || [];
-        cis.strategyTested.push(strategyName);
+        // cis.returnPoints = `❌ [${strategyName}] hugeLastTick condition not met`;
+        // cis.strategyTested = cis.strategyTested || [];
+        // cis.strategyTested.push(strategyName);
+
+        return false;
     }
 
-    cis.deployedStrategies.buyAtHugeLastTick = 'touched';
+   // cis.deployedStrategies.buyAtHugeLastTick = 'touched';
     return false;
 }

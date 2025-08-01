@@ -11,17 +11,17 @@ function checkColorWithFlags(cis) {
     let flagAfter30 = false;
 
     // Check if the color is red at the 15th second
-    if (currentColor === 'red' && currentSeconds === 15) {
+    if (currentColor == 'red' && currentSeconds == 15) {
         flag15 = true;
     }
 
     // Check if the color is red at the 30th second
-    if (currentColor === 'red' && currentSeconds === 30) {
+    if (currentColor == 'red' && currentSeconds == 30) {
         flag30 = true;
     }
 
     // Check if the color is red after the 30th second
-    if (currentColor === 'red' && currentSeconds > 30) {
+    if (currentColor == 'red' && currentSeconds > 30) {
         flagAfter30 = true;
     }
 

@@ -9,14 +9,14 @@ export default function getMinutePrice(offset, cis) {
     let elapsedMinutes = 0;
 
     if (currentHour >= marketOpenHour) {
-        if (currentHour === marketOpenHour && currentMinute >= marketOpenMinute) {
+        if (currentHour == marketOpenHour && currentMinute >= marketOpenMinute) {
             elapsedMinutes = currentMinute - marketOpenMinute;
         } else if (currentHour > marketOpenHour) {
             elapsedMinutes = (currentHour - marketOpenHour - 1) * 60 + (60 - marketOpenMinute) + currentMinute;
         }
 
         const targetMinute = elapsedMinutes + offset + 1; // Calculate the target nth minute
-        if (cis.mx && cis.mx.n === targetMinute) {
+        if (cis.mx && cis.mx.n == targetMinute) {
             return cis.mx.price; // Return the stored price
         } else {
             console.log(`No price data found for minute offset ${offset}.`);

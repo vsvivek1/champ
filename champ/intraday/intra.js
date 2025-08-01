@@ -24,7 +24,7 @@ function processTicks(ticks) {
 
   ticks.forEach((tick) => {
     const { instrument_token, last_price, average_traded_price, ohlc } = tick;
-    const tradingsymbol = nifty500.find((n) => n.instrument_token === instrument_token)?.tradingsymbol;
+    const tradingsymbol = nifty500.find((n) => n.instrument_token == instrument_token)?.tradingsymbol;
 
     if (!tradingsymbol) return; // Skip if the symbol isn't in nifty500
 

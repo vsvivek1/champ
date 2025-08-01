@@ -1621,7 +1621,7 @@ let __VLS_634!: __VLS_NormalizeEmits<typeof __VLS_633.emit>;
 }
 (__VLS_3.slots!).default;
 }
-if (typeof __VLS_styleScopedClasses === 'object' && !Array.isArray(__VLS_styleScopedClasses)) {
+if (typeof __VLS_styleScopedClasses == 'object' && !Array.isArray(__VLS_styleScopedClasses)) {
 __VLS_styleScopedClasses["btn-primary"];
 __VLS_styleScopedClasses["mt-1"];
 __VLS_styleScopedClasses["form-control"];

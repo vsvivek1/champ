@@ -2,7 +2,9 @@ import { executeBuy } from "./executeBuy.js";
 import { isHammerCandle } from "./hammerStrategy.js";
 
 export function handleHammerCandleTrade(cis, kite) {
+         
     const strategyName = 'HammerCandle';
+    cis.deployedStrategies[strategyName] = 'checking';
 
     const lastCandle = cis.minuteData.slice(-1)[0];
     if (isHammerCandle(lastCandle)) {
@@ -27,6 +29,6 @@ export function handleHammerCandleTrade(cis, kite) {
     cis.returnPoints = `❌ [${strategyName}] Last candle is not a hammer`;
     cis.strategyTested = cis.strategyTested || [];
     cis.strategyTested.push(strategyName);
-    cis.deployedStrategies[strategyName] = 'touched';
+  cis.deployedStrategies[strategyName] = 'unFulfilled';
     return false;
 }

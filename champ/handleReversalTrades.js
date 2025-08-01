@@ -25,16 +25,18 @@ cis.entryHealth='Reversa 30 triggered';
 
         return true; // Indicates a trade was executed
     } else {
-        cis.signals=cis.signals||{}
+       // cis.signals=cis.signals||{}
   
-        cis.returnPoints = '❌ [reversa30] reversalCheck returned false';
-        cis.strategyTested = cis.strategyTested || [];
-        cis.strategyTested.push('reversa30');
+       // cis.returnPoints = '❌ [reversa30] reversalCheck returned false';
+       // cis.strategyTested = cis.strategyTested || [];
+       // cis.strategyTested.push('reversa30');
         
+
+       return false; // Indicates no trade was executed
     }
 
 
-    if(cis.deployedStrategies)cis.deployedStrategies={}
-    cis.deployedStrategies.reversa30 = 'touched';
+    // if(cis.deployedStrategies)cis.deployedStrategies={}
+    // cis.deployedStrategies.reversa30 = 'touched';
     return false;
 }

@@ -27,7 +27,7 @@ class CI {
   }
 
   static async scrap(href, accessToken) {
-    let url = href === "LongBuildUp" ? 
+    let url = href == "LongBuildUp" ? 
       'https://www.moneycontrol.com/stocks/fno/marketstats/futures/openint_inc/homebody.php?opttopic=openint_inc&optinst=allfut&sel_mth=1&sort_order=0' : 
       `https://chartink.com/screener/${href}`;
 
@@ -43,7 +43,7 @@ class CI {
       let $ = cheerio.load(html);
       let ois = [];
 
-      if (href === 'LongBuildUp') {
+      if (href == 'LongBuildUp') {
         $('.tblList tr').each((index, element) => {
           let symbol = $(element).children("td").eq(0).text().trim();
           let instrument_token = Instruments.getInstrumentToken(symbol) || "UNKNOWN_TOKEN";

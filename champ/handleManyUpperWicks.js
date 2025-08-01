@@ -2,7 +2,9 @@ import { executeBuy } from "./executeBuy.js";
 import { hasManyUpperWicks } from "./hasManyUpperWicks.js";
 
 export function handleManyUpperWicks(cis, kite) {
+    
     const strategyName = 'ManyUpperWicks';
+         cis.deployedStrategies[strategyName] = 'checking';
 
     if (hasManyUpperWicks(cis.minuteData)) {
         cis.buyStrategy = strategyName;
@@ -26,7 +28,7 @@ export function handleManyUpperWicks(cis, kite) {
     cis.returnPoints = `❌ [${strategyName}] Not enough upper wicks`;
     cis.strategyTested = cis.strategyTested || [];
     cis.strategyTested.push(strategyName);
-    cis.deployedStrategies[strategyName] = 'touched';
+    cis.deployedStrategies[strategyName] = 'unFulfilled';
 
     return false;
 }

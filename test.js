@@ -77,7 +77,7 @@ if(month<10){
 }
 // console.log(month);
 
-return arr.indexOf(i) ===index && i.includes("-"+month+"-")
+return arr.indexOf(i) ==index && i.includes("-"+month+"-")
 
   })
   

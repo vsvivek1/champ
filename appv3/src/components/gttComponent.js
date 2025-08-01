@@ -43,7 +43,7 @@ export const deleteGTT = async (trigger_id, accessToken) => {
 export const mutateWithLtp = (s, stocksPricePoints) => {
   s.forEach(s1 => {
     const instrument_token = s1.instrument_token;
-    const stock = stocksPricePoints.find(sp => sp.instrument_token === instrument_token);
+    const stock = stocksPricePoints.find(sp => sp.instrument_token == instrument_token);
     if (stock) {
       stock.last_price = s1.last_price;
     }
@@ -65,7 +65,7 @@ export const getLevels = (stockPpItem) => {
   if (
     !stockPpItem.pricePoints ||
     !stockPpItem.pricePoints.d1 ||
-    typeof stockPpItem.pricePoints.d1.close === 'undefined'
+    typeof stockPpItem.pricePoints.d1.close == 'undefined'
   ) {
     return false;
   }
@@ -75,7 +75,7 @@ export const getLevels = (stockPpItem) => {
   return ar.map(r => r.high || r.level)
     .sort((a, b) => a - b)
     .map((r, index, ar) => {
-      if (typeof ar[index + 1] === 'undefined') {
+      if (typeof ar[index + 1] == 'undefined') {
         const ob = { level: r, support: false };
         return ob;
       } else {
@@ -140,7 +140,7 @@ export const getUpperShadowGreaterThanBody = (stocksPricePoints) => {
 export const getReds = (stocksPricePoints) => {
   return stocksPricePoints.filter(r => {
     try {
-      return r.otherCriteria.candleColor === 'red';
+      return r.otherCriteria.candleColor == 'red';
     } catch (error) {
       return false;
     }
@@ -150,7 +150,7 @@ export const getReds = (stocksPricePoints) => {
 export const getGreens = (stocksPricePoints) => {
   return stocksPricePoints.filter(r => {
     try {
-      return r.otherCriteria.candleColor === 'green';
+      return r.otherCriteria.candleColor == 'green';
     } catch (error) {
       return false;
     }

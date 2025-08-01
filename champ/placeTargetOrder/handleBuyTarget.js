@@ -2,7 +2,7 @@ import { setTargetForTrade } from '../setTargetForTrade.js';
 import { ceilPrice } from './utils.js';
 
 export async function handleBuyTarget(cis, order, kite) {
-    let targetPrice = global.hours === 9
+    let targetPrice = global.hours == 9
         ? order.buy_price * 0.997
         : order.buy_price * 0.999;
 

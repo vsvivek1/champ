@@ -7,9 +7,22 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 
-// Define your instrument names
-let instrumentsCat = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY', 'FINNIFTY',"SENSEX"  ]; //'MIDCPNIFTY', 'FINNIFTY',
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection:', reason);
 
+  if (reason && reason.message && reason.message.includes('ECONNABORTED')) {
+    console.log('ECONNABORTED detected, exiting to restart...');
+    process.exit(1); // PM2 will auto-restart
+  }
+});
+
+// Define your instrument names\\
+
+//'//FINNIFTY'
+let instrumentsCat = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY',"SENSEX"  ]; //'MIDCPNIFTY', 'FINNIFTY',
+
+
+instrumentsCat =['NIFTY'];
 //instruments =['SENSEX','NIFTY'];
 //'SENSEX',,'BANKEX'
 

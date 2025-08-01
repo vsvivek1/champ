@@ -81,7 +81,7 @@
 		</td>
 
 		  </tr>
-		  <tr v-if="instruments.length === 0">
+		  <tr v-if="instruments.length == 0">
 			<td colspan="8" class="text-center">No data available</td>
 		  </tr>
 		</tbody>

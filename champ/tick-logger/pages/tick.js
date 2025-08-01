@@ -35,7 +35,7 @@ export default function TicksPage() {
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
-      {!loading && !error && ticks.length === 0 && <p>No tick data found.</p>}
+      {!loading && !error && ticks.length == 0 && <p>No tick data found.</p>}
 
       {!loading && ticks.length > 0 && (
         <table

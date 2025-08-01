@@ -18,7 +18,7 @@ export function isHammerCandle(candle) {
 }
 
 export function checkLastCandleIsHammer(candles) {
-    if (candles.length === 0) {
+    if (candles.length == 0) {
         return false;
     }
 

@@ -48,7 +48,7 @@ export function findHighestPrice(cis) {
     const candlesToSlice = findCurrentTimeSlot();
     
     // If candlesToSlice is null or non-positive, there's no valid time slot data
-    if (candlesToSlice === null || candlesToSlice <= 0) {
+    if (candlesToSlice == null || candlesToSlice <= 0) {
         console.log("Current time is before 9:15 AM or no valid data available.");
         return null;
     }

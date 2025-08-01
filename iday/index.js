@@ -136,7 +136,7 @@ let lastPrice = null; // To store the last price of the previous tick
 let lowerLowsCount = 0; // Counter for consecutive lower lows
 
 function isMakingLowerLows(tick, cis) {
-    if (lastPrice === null) {
+    if (lastPrice == null) {
         // Initialize the last price on the first tick
         lastPrice = tick.last_price;
         return false; // Not enough data to determine lower lows
@@ -164,7 +164,7 @@ async function fetchPositionsAndSetCis(){
     instruAll.forEach(instrument => {
 
 
-        const matchingPosition = positionsDay.find(pos => pos.tradingsymbol === instrument.tradingsymbol 
+        const matchingPosition = positionsDay.find(pos => pos.tradingsymbol == instrument.tradingsymbol 
 
 
             && pos.quantity!=0
@@ -195,11 +195,11 @@ async function fetchOrdersAndSetCis() {
 
         // Iterate over instruAll and set orderStatus, orderT, and hasLiveOrder
         instruAll.forEach(instrument => {
-            const matchingOrder = orders.find(order => order.instrument_token === instrument.instrument_token);
+            const matchingOrder = orders.find(order => order.instrument_token == instrument.instrument_token);
             if (matchingOrder) {
                 instrument.orderStatus = matchingOrder.status;
                 instrument.orderT = matchingOrder.order_id;
-                instrument.hasLiveOrder = matchingOrder.status === "OPEN";
+                instrument.hasLiveOrder = matchingOrder.status == "OPEN";
 
                 ///instrument.buyPrice=
             } else {
@@ -1026,7 +1026,7 @@ function findMedianRange(ohlcData) {
     // Step 3: Find the median of the ranges
     const midIndex = Math.floor(ranges.length / 2);
 
-    if (ranges.length % 2 === 0) {
+    if (ranges.length % 2 == 0) {
         // If even, median is the average of the two middle values
         return (ranges[midIndex - 1] + ranges[midIndex]) / 2;
     } else {
@@ -1296,7 +1296,7 @@ function getCurrentHourlyCandleFromMinuteCandle(candles) {
    
     
 
-    if (relevantCandles.length === 0) {
+    if (relevantCandles.length == 0) {
 
         console.log(candles.length,'No relevant candles found within the specified time range ',startTime,currentTime)
         //msgx(candles.length,'No relevant candles found within the specified time range ',startTime,currentTime)
@@ -1305,7 +1305,7 @@ function getCurrentHourlyCandleFromMinuteCandle(candles) {
 
     // Aggregate OHLC values
     const aggregatedCandle = relevantCandles.reduce((acc, candle) => {
-        acc.open = acc.open === null ? candle.open : acc.open; // Use the first open price
+        acc.open = acc.open == null ? candle.open : acc.open; // Use the first open price
         acc.close = candle.close; // Use the last close price
         acc.high = Math.max(acc.high, candle.high);
         acc.low = Math.min(acc.low, candle.low);
@@ -1540,7 +1540,7 @@ async function fetchHourlyData() {
         
         let toTime;
 
-        if (now.hour() === 9) {
+        if (now.hour() == 9) {
             toTime = now.subtract(0,'minute').
             
          format('YYYY-MM-DD HH:mm:ss');
@@ -1808,9 +1808,9 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType) {
             const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
            // console.log(data,'datatype');
             // Store data in respective historical data object
-            if (dataType === '60minute') {
+            if (dataType == '60minute') {
                 hourlyHistoricalData[instrument] = data;
-            } else if (dataType === 'minute') {
+            } else if (dataType == 'minute') {
                 minuteHistoricalData[instrument] = data;
             }
 

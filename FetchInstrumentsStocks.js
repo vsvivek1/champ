@@ -653,11 +653,11 @@ async function getSymbols() {
 
   let st = instruments.filter(i => i.exchange  ==  'NSE')
     .map((i) => i.name)
-    .filter((x, i, a) => a.indexOf(x)  === i);
+    .filter((x, i, a) => a.indexOf(x)  == i);
 
   let st2 = instruments
     .map((i) => i.instrument_token)
-    .filter((x, i, a) => a.indexOf(x)  === i);
+    .filter((x, i, a) => a.indexOf(x)  == i);
 
   let instTockens = st.map((s) => {
     // console.log(s,'s')
@@ -694,7 +694,7 @@ async function getSymbols() {
 
     }
     return "NSE:" + s;
-  }).filter((x, i, a) => a.indexOf(x)  === i);;
+  }).filter((x, i, a) => a.indexOf(x)  == i);;
 
 
 

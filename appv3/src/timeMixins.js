@@ -7,7 +7,7 @@ export default{
             const currentDay = now.getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
             const currentTime = now.getHours() * 100 + now.getMinutes(); // Convert current time to a comparable number (HHMM format)
           
-            const isWeekend = currentDay === 0 || currentDay === 6; // Sunday or Saturday
+            const isWeekend = currentDay == 0 || currentDay == 6; // Sunday or Saturday
             const isSpecialTime = currentTime > 330 || currentTime < 915; // After 3:30 PM or before 9:15 AM
           
             // List of holidays in "YYYY-MM-DD" format

@@ -51,7 +51,7 @@ export async function handle9to10AM(cis, kite) {
     }
 
     // Check if the current candle color is bearish
-    if (cis.liveMinute.color === 'bearish') {
+    if (cis.liveMinute.color == 'bearish') {
         cis.message = 'Live minute Color bearish, no entry ' + cis.tradingsymbol;
         if (global.seconds == 57) {
             console.log(cis.message, cis.liveMinute.color, 'live color red rejection');

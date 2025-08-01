@@ -15,7 +15,7 @@ export function handle12to4PM(cis, kite) {
 
     
     
-    if (global.seconds === 30) {
+    if (global.seconds == 30) {
         displayScripts(kite);
      }
    
@@ -37,7 +37,7 @@ return false;
         return;
     }
    // Exit if live minute is bearish
-   if (cis.liveMinute.color === 'bearish') {
+   if (cis.liveMinute.color == 'bearish') {
     cis.message = 'Live minute Color bearish, no entry ' + cis.tradingsymbol;
     if (global.seconds == 57 && global.minutes%5==0)  //console.log(cis.message, cis.liveMinute.color, 'live color red rejection');
     return;

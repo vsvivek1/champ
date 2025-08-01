@@ -5,7 +5,7 @@ import terminalLink from 'terminal-link';
 import { executeRangeStrategy } from './rangeStrategy.js';
 
 export function isMakingLowerLows(tick, cis, lastPrice, lowerLowsCount) {
-    if (lastPrice === null) {
+    if (lastPrice == null) {
         lastPrice = tick.last_price;
         return false;
     }

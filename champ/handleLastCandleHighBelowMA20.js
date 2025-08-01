@@ -14,7 +14,7 @@ export function handleLastCandleHighBelowMA20(cis, kite) {
   const ma20 = cis.ma20;
   const ltp = cis.tick.last_price;
 
-  if (!candles || candles.length === 0 || !ma20 || !ltp) {
+  if (!candles || candles.length == 0 || !ma20 || !ltp) {
     cis.returnPoints = `❌ [${strategyName}] Missing data for MA20 strategy`;
     cis.strategyTested = cis.strategyTested || [];
     cis.strategyTested.push(strategyName);

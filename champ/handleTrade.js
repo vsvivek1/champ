@@ -89,7 +89,7 @@ return;
         cis.inbuiltStopLoss = true;
         cis.buyCriteria = buyCriteria;
 
-       /*  let noLots = global.hours === 12 ? 2 : 2; // Adjust lots for time of day
+       /*  let noLots = global.hours == 12 ? 2 : 2; // Adjust lots for time of day
         for (let i = 0; i < noLots; i++) {
  */
           //  let p=Math.ceil(cis.tick.last_price-cis.minuteCandleMeanRange)

@@ -4,7 +4,7 @@ import { setTargetForTrade } from '../setTargetForTrade.js';
 export async function placeShortCovering(cis, order, kite) {
 
     //return;
-    let targetPrice = global.hours === 9
+    let targetPrice = global.hours == 9
         ? order.average_price * 0.997
         : order.average_price * 0.99;
 

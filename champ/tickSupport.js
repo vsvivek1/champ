@@ -178,7 +178,7 @@ let cl=lastCandle.close;
 export function processTicks(tick) {
 
     return;
-    var cis =global.instrumentsForMining.find(i => i.instrument_token === tick.instrument_token);
+    var cis =global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
 
     if (!cis) {
         cis.returnPoints='NO CIS';

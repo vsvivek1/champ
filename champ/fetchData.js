@@ -8,6 +8,7 @@ import { findDemandZones } from './findDemadZones.js';
 import { calculate20MA } from './calculate20Ma.js';
 import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
 import {RSI} from 'technicalindicators';
+import { setVWAP } from './setvWAP.js';
 
 function setRSI(cis){
 
@@ -63,7 +64,7 @@ export function aggregateOHLC(cis) {
         const grouped = [];
         for (let i = 0; i < data.length; i += frameSize) {
             const frameData = data.slice(i, i + frameSize);
-            if (frameData.length === frameSize) { // Only complete frames
+            if (frameData.length == frameSize) { // Only complete frames
                 grouped.push(aggregateCandles(frameData));
             }
         }
@@ -126,24 +127,24 @@ export async function fetchOrdersAndSetCis(kite) {
         orders.forEach(order => {
             const matchingInstrument =global.instrumentsForMining.
             
-            find(instrument => instrument.instrument_token === order.instrument_token);
+            find(instrument => instrument.instrument_token == order.instrument_token);
             
             if (matchingInstrument) {
 
                 
                 matchingInstrument.orderStatus = order.status;
                 matchingInstrument.orderT = order.order_id;
-                matchingInstrument.hasLiveOrder = order.status === "OPEN";
+                matchingInstrument.hasLiveOrder = order.status == "OPEN";
             } else {
 
 
 
 
-                const instrument =global.instrumentsForMining.find(instrument => instrument.instrument_token === order.instrument_token);
+                const instrument =global.instrumentsForMining.find(instrument => instrument.instrument_token == order.instrument_token);
                 if (instrument) {
                     instrument.orderStatus = order.status;
                     instrument.orderT = order.order_id;
-                    instrument.hasLiveOrder = order.status === "OPEN";
+                    instrument.hasLiveOrder = order.status == "OPEN";
         
                     // Push the instrument toglobal.instrumentsForMining
                    global.instrumentsForMining.push(instrument);
@@ -202,7 +203,7 @@ export async function fetchPositionsAndSetCis(kite) {
         global.orders=orders;
 
      global.instrumentsForMining.forEach(async instrument => {
-    const pos = global.positions.find(p => p.tradingsymbol === instrument.tradingsymbol);
+    const pos = global.positions.find(p => p.tradingsymbol == instrument.tradingsymbol);
 
     const finalPos = pos || {
         tradingsymbol: instrument.tradingsymbol,
@@ -211,7 +212,7 @@ export async function fetchPositionsAndSetCis(kite) {
         instrument_token: instrument.instrument_token,
     };
 
-    const order = global.orders.filter(o => o.tradingsymbol === instrument.tradingsymbol && o.status === 'OPEN');
+    const order = global.orders.filter(o => o.tradingsymbol == instrument.tradingsymbol && o.status == 'OPEN');
 
     if (order.length > 0) { 
         instrument.hasLiveOrder = true;
@@ -233,10 +234,10 @@ export async function fetchPositionsAndSetCis(kite) {
         instrument.stopLossPrice = instrument.buyPrice - 5;
 
         const revorder = orders.filter(o =>
-            o.status === 'OPEN' && o.instrument_token === finalPos.instrument_token
+            o.status == 'OPEN' && o.instrument_token == finalPos.instrument_token
         );
 
-        if (revorder.length === 0) {
+        if (revorder.length == 0) {
             // Awaiting reverse order logic
             // await placeReverseOrderWithTarget(finalPos, kite);
         }
@@ -372,6 +373,10 @@ if(global.instrumentName=='STK'){
                 instrument.ma5low=calculateMovingAverage(instrument.minuteData, 5, 'low')
 
                 instrument.ma20=calculate20MA(instrument.minuteData);
+
+
+               // setVWAP
+              instrument.VWAP=  setVWAP(instrument)
 
 
                 const lastFiveCandles = instrument.minuteData//.slice(-5);
@@ -540,7 +545,7 @@ function findMedianRange(ohlcData) {
     const ranges = ohlcData.map(data => data.high - data.low);
     ranges.sort((a, b) => a - b);
     const midIndex = Math.floor(ranges.length / 2);
-    if (ranges.length % 2 === 0) {
+    if (ranges.length % 2 == 0) {
         return (ranges[midIndex - 1] + ranges[midIndex]) / 2;
     } else {
         return ranges[midIndex];
@@ -572,12 +577,12 @@ function getCurrentHourlyCandleFromMinuteCandle(candles) {
 
     const relevantCandles = candles.filter(candle => candle.date >= startTime && candle.date <= currentTime);
 
-    if (relevantCandles.length === 0) {
+    if (relevantCandles.length == 0) {
         return null;
     }
 
     const aggregatedCandle = relevantCandles.reduce((acc, candle) => {
-        acc.open = acc.open === null ? candle.open : acc.open;
+        acc.open = acc.open == null ? candle.open : acc.open;
         acc.close = candle.close;
         acc.high = Math.max(acc.high, candle.high);
         acc.low = Math.min(acc.low, candle.low);

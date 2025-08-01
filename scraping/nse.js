@@ -58,7 +58,7 @@ res(StockFind1.stocks);
 
   })
 
-}else if(StockFind1 ===null)
+}else if(StockFind1 ==null)
 
 
 //  if(JSON.stringify(StockFind1.stocks) == chk)

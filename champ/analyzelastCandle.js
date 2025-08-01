@@ -15,7 +15,7 @@ function analyzeCandlestickPatterns(cis) {
     // Helper function to determine the body midpoint
     const getMidpoint = (candle) => (candle.open + candle.close) / 2;
 
-    if (latestCandles.length === 3) {
+    if (latestCandles.length == 3) {
         const [candle1, candle2, candle3] = latestCandles;
         const isBullish1 = candle1.close > candle1.open;
         const isBullish2 = candle2.close > candle2.open;

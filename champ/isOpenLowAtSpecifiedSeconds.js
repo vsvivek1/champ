@@ -6,22 +6,22 @@ export function isOpenLowAtSpecificSeconds(cis) {
     }
 
     // Initialize tracking if it's the start of a new minute
-    if (global.seconds === 0) {
+    if (global.seconds == 0) {
         cis.openLowAt10 = false;
         cis.openLowAt15 = false;
         cis.openLowAt30 = false;
     }
 
     // Check the condition at specific seconds
-    if (global.seconds === 10 && cis.currentMinute.open === cis.currentMinute.low) {
+    if (global.seconds == 10 && cis.currentMinute.open == cis.currentMinute.low) {
         cis.openLowAt10 = true;
     }
 
-    if (global.seconds === 15 && cis.currentMinute.open === cis.currentMinute.low) {
+    if (global.seconds == 15 && cis.currentMinute.open == cis.currentMinute.low) {
         cis.openLowAt15 = true;
     }
 
-    if (global.seconds === 30 && cis.currentMinute.open === cis.currentMinute.low) {
+    if (global.seconds == 30 && cis.currentMinute.open == cis.currentMinute.low) {
         cis.openLowAt30 = true;
     }
 
