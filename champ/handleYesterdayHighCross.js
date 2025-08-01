@@ -29,7 +29,7 @@ export function handleYesterdayHighCross(cis, kite) {
         cis.deployedStrategies[strategyName] = 'Activated';
         cis.strategyTested = cis.strategyTested || [];
         cis.strategyTested.push(strategyName);
- console.log(global.clock,'Executing',cis.entryHealth);
+ console.log(global.clock,'Executing',cis.tradingsymbol,cis.entryHealth);
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
         return true;
     }

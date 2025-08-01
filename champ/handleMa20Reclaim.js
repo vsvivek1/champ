@@ -29,7 +29,7 @@ export function handleMA20Reclaim(cis, kite) {
         cis.signals.handleMA20Reclaim = true;
         cis.entryHealth = '✅ MA20 Reclaim with Follow-Through triggered';
 
-        console.log(global.clock,'Executing', cis.entryHealth);
+        console.log(global.clock,'Executing',cis.tradingsymbol, cis.entryHealth);
         executeBuy(cis, kite, Math.ceil(ltp));
 
         return true;
