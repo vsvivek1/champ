@@ -20,7 +20,7 @@ export function buyAboveOpenAtNineAm(cis, kite) {
         cis.deployedStrategies.buyAboveOpenAtNineAm = 'Activated';
 
         cis.entryHealth='BuyOpenAboveNineBefore930';
-         console.log('Executing',cis.entryHealth);
+         console.log(global.clock,'Executing',cis.entryHealth);
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
         
         return true;

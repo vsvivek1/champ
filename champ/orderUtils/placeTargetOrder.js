@@ -17,10 +17,10 @@ export async function placeTargetOrder(cis, order, kite) {
 
     switch (true) {
       // ✅ CASE 1: Use in-built target
-      case cis.hasInBuiltTarget == true: {
-        finalTargetPrice = Math.ceil(cis.targetPrice);
-        break;
-      }
+      // case cis.hasInBuiltTarget == true: {
+      //   finalTargetPrice = Math.ceil(cis.targetPrice);
+      //   break;
+      // }
 
       // 🟢 CASE 2: Fallback to last buy order + 5 points
       default: {
@@ -53,9 +53,9 @@ export async function placeTargetOrder(cis, order, kite) {
         }
 
         cis.buy_price = buyPrice;
-        finalTargetPrice = Math.ceil(buyPrice * 5);
+        finalTargetPrice = Math.ceil(buyPrice * 2);
         cis.targetPrice = finalTargetPrice;
-        console.log(`🎯 Target set as buy_price + 5 = ${finalTargetPrice}`);
+        console.log(`🎯 Target set as buy_price * 2 = ${finalTargetPrice}`);
         break;
       }
     }

@@ -12,7 +12,7 @@ export function handleHammerCandleTrade(cis, kite) {
         cis.entryHealth = '✅ Hammer candle detected';
         cis.returnPoints = `✅ [${strategyName}] Hammer candle formed`;
 
-        console.log('Executing',cis.entryHealth);
+        console.log(global.clock,'Executing',cis.entryHealth);
 
         cis.targetPrice = cis.tick.last_price + cis.liveMinute.range;
         cis.stopLossPrice = cis.tick.last_price - cis.liveMinute.range;
@@ -21,7 +21,7 @@ export function handleHammerCandleTrade(cis, kite) {
 
         cis.deployedStrategies[strategyName] = 'Activated';
               cis.entryHealth=strategyName;
-         console.log('Executing',cis.entryHealth);
+         console.log(global.clock,'Executing',cis.entryHealth);
         executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
         return true;
     }

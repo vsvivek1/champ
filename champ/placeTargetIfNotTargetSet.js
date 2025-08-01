@@ -99,10 +99,10 @@ if(global.instrumentName!=cis.name) continue;
         }
 
         if(qty <0) targetPrice=entryPrice*0.95
-        if(qty >0) targetPrice=Math.min(entryPrice*2,cis.tick.upper_circuit_limit);
+        if(qty >0) targetPrice=entryPrice*2
 
         // Step 3: Place LIMIT order at target price
-      console.log(`[PLACING TARGET] ${exitTxn} ${absQty} of ${pos.tradingsymbol} at ${targetPrice} cis.tick.upper_circuit_limit) ${cis.tick.upper_circuit_limit}`);
+      console.log(`[PLACING TARGET] ${exitTxn} ${absQty} of ${pos.tradingsymbol} at ${targetPrice} `);
 
         //cis.placeTargetIfNotTargetSet=true;
   
