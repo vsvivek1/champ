@@ -33,7 +33,7 @@ cis.signals.safePassTickHealth=false
       }
      cis.signals.safePassTickHealth=true; 
 
-    if (cis.placedOrder==true) {
+    if (cis.placedOrder==true || cis.ordered )  {
 
 
 
