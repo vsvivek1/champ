@@ -36194,3 +36194,5109 @@ Depth 2
   '2025-08-07'
 ] expiries
 SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215017221 instru token inside seting function
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10194690 instru token inside seting function
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10202626 instru token inside seting function
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+Array is empty. Resetting timer.
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+LAST TIME EXECUTED: Fri Aug 01 2025 21:15:15 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.718ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215017221 instru token inside seting function
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10194690 instru token inside seting function
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10202626 instru token inside seting function
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+Array is empty. Resetting timer.
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+LAST TIME EXECUTED: Fri Aug 01 2025 21:30:15 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 1.345ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215017221 instru token inside seting function
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10194690 instru token inside seting function
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+10202626 instru token inside seting function
+Array is empty. Resetting timer.
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+LAST TIME EXECUTED: Fri Aug 01 2025 21:45:15 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.669ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+215017221 instru token inside seting function
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+10194690 instru token inside seting function
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+10202626 instru token inside seting function
+Array is empty. Resetting timer.
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+LAST TIME EXECUTED: Fri Aug 01 2025 22:00:15 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.582ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+215017221 instru token inside seting function
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10194690 instru token inside seting function
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10202626 instru token inside seting function
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Fri Aug 01 2025 22:15:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.971ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+215017221 instru token inside seting function
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10194690 instru token inside seting function
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+10202626 instru token inside seting function
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Array is empty. Resetting timer.
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+LAST TIME EXECUTED: Fri Aug 01 2025 22:30:15 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.731ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215017221 instru token inside seting function
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10194690 instru token inside seting function
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+10202626 instru token inside seting function
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Fri Aug 01 2025 22:45:15 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.863ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+215017221 instru token inside seting function
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10194690 instru token inside seting function
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+10202626 instru token inside seting function
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Array is empty. Resetting timer.
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+LAST TIME EXECUTED: Fri Aug 01 2025 23:00:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.656ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+215017221 instru token inside seting function
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10194690 instru token inside seting function
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10202626 instru token inside seting function
+Array is empty. Resetting timer.
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+LAST TIME EXECUTED: Fri Aug 01 2025 23:15:16 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.759ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215017221 instru token inside seting function
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10194690 instru token inside seting function
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10202626 instru token inside seting function
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Fri Aug 01 2025 23:30:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.512ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215069189 instru token inside seting function
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+215017221 instru token inside seting function
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10194690 instru token inside seting function
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+10202626 instru token inside seting function
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Fri Aug 01 2025 23:45:16 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.534ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 00:00:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.841ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 00:15:15 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 1.569ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 00:30:15 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.736ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 00:45:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.558ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 01:00:15 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 1.789ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 01:15:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.805ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 01:30:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.564ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 01:45:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 1.43ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 02:00:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.841ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 02:15:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.606ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 02:30:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.648ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 02:45:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 1.442ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 03:00:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.683ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 03:15:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.808ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 03:30:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.616ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 03:45:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.564ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 04:00:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.814ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+BANKNIFTY
+⚠️ CE not found for BANKNIFTY @ null
+⚠️ PE not found for BANKNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+MIDCPNIFTY
+⚠️ CE not found for MIDCPNIFTY @ null
+⚠️ PE not found for MIDCPNIFTY @ null
+Depth 2
+[
+  '2025-08-01',
+  '2025-08-02',
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07'
+] expiries
+FINNIFTY
+⚠️ CE not found for FINNIFTY @ null
+⚠️ PE not found for FINNIFTY @ null
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessTokenDoc 
+err 49
+Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async /home/think-vivek/champ/newFetch.js:727:5
+err 49
+ 28 Error setting up Kite Connect: Error: Error initializing Kite Connect:
+    at pricePoint.initiateKiteConnect (/home/think-vivek/champ/pricePoints.js:52:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at async pricePoint.setKiteConnect (/home/think-vivek/champ/pricePoints.js:26:20)
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Sat Aug 02 2025 04:15:14 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.67ms
+SHmyFqCkJ21pV7nNRu0f0bo4kdvhUFgz accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-03',
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+⚠️ Error processing NIFTY: Incorrect `api_key` or `access_token`.
+⚠️ Error processing SENSEX: Incorrect `api_key` or `access_token`.
+⚠️ Error processing BANKNIFTY: Incorrect `api_key` or `access_token`.
+⚠️ Error processing MIDCPNIFTY: Incorrect `api_key` or `access_token`.
+⚠️ Error processing FINNIFTY: Incorrect `api_key` or `access_token`.
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+node:internal/process/promises:288
+            triggerUncaughtException(err, true /* fromPromise */);
+            ^
+
+[UnhandledPromiseRejection: This error originated either by throwing inside of an async function without a catch block, or by rejecting a promise which was not handled with .catch(). The promise rejected with the reason "#<Object>".] {
+  code: 'ERR_UNHANDLED_REJECTION'
+}
+
+Node.js v18.19.1
+bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10',
+  '2025-08-11',
+  '2025-08-12'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+SENSEX
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX' ]
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580900CE',
+  'SENSEX2580580400PE'
+] s
+SENSEX2580580400PE - pop option attaching pp len 3
+215032325 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+215032325 instru token inside seting function
+SENSEX2580580900CE - pop option attaching pp len 2
+215130629 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+215130629 instru token inside seting function
+pushing option SENSEX2580580400PE 2025-08-05
+new length 1
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+10194690 instru token inside seting function
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+10202626 instru token inside seting function
+pushing option SENSEX2580580900CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+Array is empty. Resetting timer.
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+LAST TIME EXECUTED: Mon Aug 04 2025 09:15:16 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+start: 0.955ms
+bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10',
+  '2025-08-11',
+  '2025-08-12'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+NIFTY
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX' ]
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+SENSEX
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+SENSEX
+Pushing selected options
+[
+  'NIFTY2580724800CE',
+  'NIFTY2580724550PE',
+  'SENSEX2580581100CE',
+  'SENSEX2580580600PE',
+  'NIFTY2580724750CE'
+] s
+NIFTY2580724750CE - pop option attaching pp len 4
+10203138 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+SENSEX
+10203138 instru token inside seting function
+SENSEX2580580600PE - pop option attaching pp len 5
+215043333 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+SENSEX2580581100CE - pop option attaching pp len 4
+215113221 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+SENSEX2580580600PE - pop option attaching pp len 3
+215043333 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+215043333 instru token inside seting function
+SENSEX2580581100CE - pop option attaching pp len 2
+215113221 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+NIFTY2580724550PE - pop option attaching pp len 1
+10199554 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+NIFTY2580724800CE - pop option attaching pp len 0
+10203650 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+Array is empty. Resetting timer.
+215113221 instru token inside seting function
+10199554 instru token inside seting function
+10203650 instru token inside seting function
+pushing option NIFTY2580724750CE 2025-08-07
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+215113221 instru token inside seting function
+215043333 instru token inside seting function
+LAST TIME EXECUTED: Mon Aug 04 2025 09:31:30 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+pushing option SENSEX2580580600PE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+pushing option NIFTY2580724800CE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+pushing option SENSEX2580581100CE 2025-08-05
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+pushing option SENSEX2580581100CE 2025-08-05
+new length 5
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+pushing option SENSEX2580580600PE 2025-08-05
+new length 6
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+pushing option NIFTY2580724550PE 2025-08-07
+new length 7
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+start: 0.652ms
+bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessToken 
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/public/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/public/instruments/instrumentsAll.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsAll.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsAll.json'
+}
+[
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10',
+  '2025-08-11',
+  '2025-08-12'
+]  expiry dates here 
+Names: [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+NIFTY
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+SENSEX
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX' ]
+Depth 2
+[
+  '2025-08-04',
+  '2025-08-05',
+  '2025-08-06',
+  '2025-08-07',
+  '2025-08-08',
+  '2025-08-09',
+  '2025-08-10'
+] expiries
+SENSEX
+Pushing selected options
+[
+  'NIFTY2580724700CE',
+  'NIFTY2580724450PE',
+  'SENSEX2580580800CE',
+  'SENSEX2580580300PE'
+] s
+SENSEX2580580300PE - pop option attaching pp len 3
+215069189 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+215069189 instru token inside seting function
+SENSEX2580580800CE - pop option attaching pp len 2
+215017221 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+215017221 instru token inside seting function
+NIFTY2580724450PE - pop option attaching pp len 1
+10194690 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+10194690 instru token inside seting function
+NIFTY2580724700CE - pop option attaching pp len 0
+10202626 bgGBu17pQ2OzchniLJXyN2hAJXlNbOas accessTokenDoc 
+10202626 instru token inside seting function
+pushing option SENSEX2580580300PE 2025-08-05
+new length 1
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+Array is empty. Resetting timer.
+pushing option SENSEX2580580800CE 2025-08-05
+new length 2
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+LAST TIME EXECUTED: Mon Aug 04 2025 09:47:11 GMT+0530 (India Standard Time)
+here 158 true
+Exec error: Error: Command failed: cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch
+/bin/sh: 1: cd: can't cd to ./appv3
+error Couldn't find a package.json file in "/home/think-vivek"
+[PM2][ERROR] Process or Namespace startInstruments not found
+
+pushing option NIFTY2580724450PE 2025-08-07
+new length 3
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}
+pushing option NIFTY2580724700CE 2025-08-07
+new length 4
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/shared/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/shared/instruments/instrumentsForMining.json'
+}
+Error writing JSON to file: [Error: ENOENT: no such file or directory, open './appv3/src/assets/instruments/instrumentsForMining.json'] {
+  errno: -2,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: './appv3/src/assets/instruments/instrumentsForMining.json'
+}

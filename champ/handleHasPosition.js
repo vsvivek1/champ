@@ -71,6 +71,7 @@ async function shortCoveringStoploss(kite, cis) {
       validity: kite.VALIDITY_DAY,
     };
 
+    cis.stopLossExecuted=true;
     const modifiedOrderId = await kite.modifyOrder(kite.VARIETY_REGULAR, matchingOrder.order_id, updatedParams);
     console.log(`Short covering SL updated to ₹${updatedParams.price}. Order ID: ${modifiedOrderId}`);
     return modifiedOrderId;
@@ -82,6 +83,13 @@ async function shortCoveringStoploss(kite, cis) {
 
 export async function handlePositionPresent(cis, kite) {
 
+
+  if(cis.stopLossExecuted){
+
+    cis.returnPoints = `❌ [handlePositionPresent] Stop-loss already executed for ${cis.tradingsymbol}.`;
+
+    return false;
+  }
 
   if(!cis.position) return
 

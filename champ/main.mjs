@@ -116,6 +116,7 @@ eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
     const cis =global.instrumentsForMining.find(i => i.instrument_token == token);
     if (cis) {
       cis.hasLivePosition = value;
+       cis.stopLossExecuted=value
       console.log(`Updated hasLivePosition for ${token} to ${value}`);
     }
   });

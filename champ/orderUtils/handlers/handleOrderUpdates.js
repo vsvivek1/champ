@@ -95,6 +95,7 @@ console.log('ORDER UPDATE OPEN',cis.tradingsymbol)
     cis.position={}
 
     cis. hasLivePosition=false;
+    cis.stopLossExecuted=false;
       //general clean up
     
   

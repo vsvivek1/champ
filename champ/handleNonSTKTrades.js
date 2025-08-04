@@ -33,17 +33,17 @@ cis.signals.safePassTickHealth=false
       }
      cis.signals.safePassTickHealth=true; 
 
+    if (cis.placedOrder==true) {
 
-//     if (cis.placedOrder==true) {
 
 
+        cis.returnPoints='order Already placed for '+cis.tradingsymbol;
 // //order status for  SENSEX25JUL81900PE buyPrice undefined orderId targetSet undefined stopLossSet undefined entryPrice 478 averageRange 12.301234567901236 ordered true targetPrice nil stopLossPrice nill
 
    
         
-
-//         return false;
-//     }
+        return false;
+    }
      
 
     if (global.enableShortTrading) {
