@@ -134,7 +134,7 @@ console.log('ORDER UPDATE OPEN',cis.tradingsymbol)
       cis.averageRange = null;
       cis.stockTrade = false;
       cis.message = `Order completed for ${cis.tradingsymbol}. Status: ${order.status}, thread is ${global.instrumentName}`;
-
+console.log(cis.message,global.clock)
 
 cis.hasLivePosition = false;
 cis.placedOrder = false

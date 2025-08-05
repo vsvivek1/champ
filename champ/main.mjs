@@ -118,6 +118,16 @@ eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
     if (cis) {
       cis.hasLivePosition = value;
        cis.stopLossExecuted=value
+       cis.ordered = false;
+      cis.entryPrice = null;
+      cis.buyPrice = null;
+      cis.targetSet = false;
+      cis.stopLossSet = false;
+      cis.targetPrice = null;
+      cis.stopLossPrice = null;
+      cis.buyStrategy = null;
+      cis.averageRange = null;
+      cis.stockTrade = false;
       console.log(`Updated hasLivePosition for ${token} to ${value}, ${global.clock}`);
     }
   });
