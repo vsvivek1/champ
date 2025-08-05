@@ -60,7 +60,7 @@ export async function orderUpdates(order, kite, instruAll) {
 
         try {
             const orderId = await kite.placeOrder("regular", orderParams);
-            console.log("Order placed successfully. Order ID:", orderId);
+            console.log(global.clock+ " Order placed successfully. Order ID:", orderId);
         } catch (error) {
             console.error("Error placing order:", error);
         }

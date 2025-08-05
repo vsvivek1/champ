@@ -18,7 +18,7 @@ import CisUpdates from '@/components/CisUpdates.vue';
  //import OrderBook from '@/components/OrderBook.vue'
 // import NarrowRange from '@/components/NarrowRange.vue'
 // import LongBuildUp from '@/components/LongBuildUp.vue'
-//import Strategies from '@/components/Strategies.vue'
+import Strategies from '@/components/Strategies.vue'
 // import WebSockets from '@/components/WebSockets.vue'
 // import OptionChain from '@/components/OptionChain.vue'
 // import ManiKandanStrategy from '@/components/ManiKandanStrategy.vue'
@@ -183,11 +183,11 @@ const routes  =  [
   //   name: 'LongBuildUp',
   //   component: LongBuildUp 
   //  } ,
-  // { 
-  //   path: '/Strategies',
-  //   name: 'Strategies',
-  //   component: Strategies 
-  //  } ,
+  { 
+    path: '/Strategies',
+    name: 'Strategies',
+    component: Strategies 
+   } ,
   // { 
   //   path: '/NarrowRange',
   //   name: 'NarrowRange',

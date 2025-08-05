@@ -661,8 +661,8 @@ return;
         
 
         const orderId = await kite.placeOrder("regular", orderParams);
-        console.log("Order placed successfully. Order ID:", orderId);
-        //msgx("Order placed successfully. Order ID:", orderId);
+        console.log(global.clock+ " Order placed successfully. Order ID:", orderId);
+        //msgx(global.clock+ " Order placed successfully. Order ID:", orderId);
         //cis.ordered=false;
       //  cis.hasLivePosition=false;
     } catch (error) {
@@ -1230,7 +1230,7 @@ for(let i=0;i<noLots;i++)
                 const orderId = await kite.placeOrder("regular", orderParams);
 
 
-                console.log("Order placed successfully. Order ID:", orderId);
+                console.log(global.clock+ " Order placed successfully. Order ID:", orderId);
             } catch (error) {
                 console.error("Error placing order:", error,cis.tradingsymbol);
             }
@@ -1985,7 +1985,7 @@ process.exit(); */
 try {
     const orderId = await kite.placeOrder("regular", orderParams);
     cis.hasPlacedTarget=true;
-    console.log("Order placed successfully. Order ID:", orderId);
+    console.log(global.clock+ " Order placed successfully. Order ID:", orderId);
     //cis.ordered=false;
   //  cis.hasLivePosition=false;
 } catch (error) {

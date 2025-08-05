@@ -53,11 +53,12 @@ import { determineOperatorCandleFlags } from './determineOperatorCandles.js';
 import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
 
 import fs from "fs";
+import { globalAgent } from 'http';
 
 // Load skip list from skip.json and assign to global
 try {
   global.skip = JSON.parse(fs.readFileSync("skip.json", "utf-8")).skip || [];
-  console.log("✅ Global skip list loaded:", global.skip);
+  console.log("✅ Global skip list loaded:", global.skip,global.clock);
 } catch (e) {
   global.skip = [];
   console.warn("⚠️ Could not load skip.json, using empty skip list.");
@@ -117,7 +118,7 @@ eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
     if (cis) {
       cis.hasLivePosition = value;
        cis.stopLossExecuted=value
-      console.log(`Updated hasLivePosition for ${token} to ${value}`);
+      console.log(`Updated hasLivePosition for ${token} to ${value}, ${global.clock}`);
     }
   });
 
@@ -125,9 +126,9 @@ eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
   const index = global.instrumentsForMining.findIndex(item => item.instrument_token == token);
   if (index != -1) {
     instrumentsForMining[index] = { ...instrumentsForMining[index], ...cis };
-    console.log(`cis updated for token ${token}`);
+    console.log(`cis updated for token ${token} , ${global.clock}`);
   } else {
-    console.warn(`No cis found with token ${token} from tocken update`);
+    console.warn(`No cis found with token ${token} from tocken update ${global.clock}`);
   }
 });
 
@@ -141,7 +142,7 @@ if(instrumentName=='STK'){
    global.instrumentsForMining=niftyTrading
     global.instrumentName=instrumentName;
    global.instrumentsForMining=niftyTrading;
-    console.log('THread',instrumentName);
+    console.log('THread',instrumentName,global.clock);
 
 }else{
 
@@ -155,7 +156,7 @@ if(instrumentName=='STK'){
     
    global.allInstruments=allInstruments//.find(inst => inst.name == instrumentName);
     
-    console.log('THread',instrumentName);
+    console.log('THread',instrumentName),global.clock;
 
 }
 
@@ -391,7 +392,7 @@ function setClock() {
 
 
 
-    global.clock = ` Time:${global.hours}:${global.minutes}:${global.seconds}`;
+    global.clock = ` Time:${global.hours}:${global.minutes}:${global.seconds} date :${global.date.toISOString().split('T')[0]} msFlag:${global.msFlag} `;
 }
 function initTicker() {
     ticker = new KiteTicker({
@@ -678,7 +679,7 @@ if(cis.tick.last_price >= cis.targetPrice || cis.tick.last_price <= cis.stopLoss
             const orderId = await kite.placeOrder("regular", orderParams);
     
     
-            // console.log("Order placed successfully. Order ID:", orderId,
+            // console.log(global.clock+ " Order placed successfully. Order ID:", orderId,
     
             //     cis.buyStrategy, 'for',cis.tradingsymbol,'at',cis.entryPrice,' instrument.averageRange=', cis.averageRange
             // );
@@ -693,7 +694,7 @@ if(cis.tick.last_price >= cis.targetPrice || cis.tick.last_price <= cis.stopLoss
           
     
         } catch (error) {
-            console.error("Error placing order:", error, cis.tradingsymbol);
+            console.error("Error placing order:", error, cis.tradingsymbol,global.clock);
         }
 
 

@@ -214,7 +214,7 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
     if (handleLongLowerShadowTrades(cis, kite)) return;
     cis.signals.handleLongLowerShadowTrades = false;
 
-    if (handleNminuteBreakout(cis, kite, 60) && global.hours) return;
+    if (handleNminuteBreakout(cis, kite, 90) && global.hours) return;
     cis.signals.handleNminuteBreakout60 = false;
 
     // if (handleNminuteBreakout(cis, kite, 30) && global.hours < 13) return;
@@ -223,16 +223,16 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
     // if (handleNminuteBreakout(cis, kite, 15) && global.hours < 13) return;
     // cis.signals.handleNminuteBreakout15 = false;
 
-    if (handleLastCandleHighBelowMA20(cis, kite)) return;
-    cis.signals.handleLastCandleHighBelowMA20 = false;
+    // if (handleLastCandleHighBelowMA20(cis, kite)) return;
+    // cis.signals.handleLastCandleHighBelowMA20 = false;
 
     if (handleHammerCandleTrade(cis, kite)) return;
    
 
 
 
-     if (handleMA20Reclaim(cis, kite)) return;
-     cis.signals.handleMA20Reclaim = false;
+    //  if (handleMA20Reclaim(cis, kite)) return;
+    //  cis.signals.handleMA20Reclaim = false;
 
     
     cis.entryHealth = 'exitAfterAllChecks';

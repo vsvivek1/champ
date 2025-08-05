@@ -187,11 +187,11 @@ console.log(orderParams)
             return;
         }
 
-        console.log ('\n\n\nPlacing order for: cis ordered ',cis.ordered,  cis.tradingsymbol,"quantity",qty,"price",price,"thread=",global.instrumentName ,"\n\n'")
+        console.log ('\n\n\nPlacing order for: cis ordered ',cis.ordered,  cis.tradingsymbol,"quantity",qty,"price",price,"thread=",global.instrumentName,global.clock ,"\n\n'")
         const orderId = await kite.placeOrder("regular", orderParams);
 cis.entryHealth='inside place order'
 
-cis.message = `Order placed successfully. Order ID: ${orderId}, ${cis.buyStrategy} for ${cis.tradingsymbol} at ${cis.entryPrice}, instrument.averageRange=${cis.averageRange},ordered=${cis.ordered},qty=${qty},price=${price}
+cis.message = `${global.clock} Order placed successfully. Order ID: ${orderId}, ${cis.buyStrategy} for ${cis.tradingsymbol} at ${cis.entryPrice}, instrument.averageRange=${cis.averageRange},ordered=${cis.ordered},qty=${qty},price=${price}
 
 thread is ${global.instrumentName}`;
 

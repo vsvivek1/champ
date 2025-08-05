@@ -200,7 +200,7 @@ if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
 
 
     console.log('executting stop loss below ma20 or below open price',cis.tradingsymbol,
-   'last price',cis.tick.last_price,'ma20',cis.ma20,'open',cis.tick.ohlc.open);
+   'last price',cis.tick.last_price,'ma20',cis.ma20,'open',cis.tick.ohlc.open, global.clock);
 
         await updateOpenOrderPrice(kite, openOrder.order_id, cis.instrument_token, cis.tick.last_price, cis);
 

@@ -147,7 +147,7 @@ console.log(orderParams)
         const orderId = await kite.placeOrder("regular", orderParams);
 
 
-        console.log("Order placed successfully. Order ID:", orderId,
+        console.log(global.clock+ " Order placed successfully. Order ID:", orderId,
 
             cis.buyStrategy, 'for',cis.tradingsymbol,'at',cis.entryPrice,' instrument.averageRange=', cis.averageRange
         );

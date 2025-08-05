@@ -40,7 +40,7 @@ export async function executeRangeStrategy(cis, kite) {
 
     try {
         const orderId = await kite.placeOrder("regular", orderParams);
-        console.log("Order placed successfully. Order ID:", orderId);
+        console.log(global.clock+ " Order placed successfully. Order ID:", orderId);
         cis.ordered = true;
 
         // Place a sell order at the high of the range

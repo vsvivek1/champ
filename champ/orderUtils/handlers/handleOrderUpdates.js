@@ -43,7 +43,7 @@ if( cis.name!=global.instrumentName){
 
 //order status for  SENSEX25JUL81900PE buyPrice undefined orderId targetSet undefined stopLossSet undefined entryPrice 478 averageRange 12.301234567901236 ordered true targetPrice nil stopLossPrice nill
 
-console.log(cis.instrument_token,'from cis instrument token in handel order updates')
+console.log(global.clock,cis.instrument_token,'from cis instrument token in handel order updates')
 
     if(global.mockTrading==true && order.status== 'REJECTED' && order.transaction_type == 'BUY') {
 
@@ -138,7 +138,7 @@ console.log('ORDER UPDATE OPEN',cis.tradingsymbol)
 
 cis.hasLivePosition = false;
 cis.placedOrder = false
-console.log('emiting sell order update for',cis.tradingsymbol)
+console.log('emiting sell order update for',cis.tradingsymbol,global.clock)
 eventBus.emit('hasLivePositionUpdated', { token: order.instrument_token, value: false });
       cis.hasLivePosition=false;
 

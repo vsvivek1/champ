@@ -23,6 +23,15 @@ export async function placeTargetOrder(cis, order, kite) {
       // }
 
       // 🟢 CASE 2: Fallback to last buy order + 5 points
+
+case (cis.hasInbuiltTarget == true): 
+     {
+        finalTargetPrice = Math.ceil(cis.targetPrice);
+        console.log(`🎯 Using provided target price: ${finalTargetPrice}`);
+        break;
+      } 
+
+
       default: {
         if (!order) {
           if (!global.orders) global.orders = [];

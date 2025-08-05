@@ -16,7 +16,8 @@
         <!-- <router-link  v-if="session!=null" to="/orders">Order Book</router-link> | -->
       <!--   <router-link  v-if="session!=null" to="/NarrowRange">NarrowRange</router-link> | -->
     <!--     <router-link  v-if="session!=null" to="/LongBuildUps">Long Build Ups</router-link> | -->
-        <!-- <router-link  v-if="session!=null" to="/Strategies">Strategies</router-link> | -->
+         <router-link  v-if="session!=null" to="/Strategies">Strategies</router-link>
+         <!-- .  | --> -->
        <!--  <router-link  v-if="session!=null" to="/FutureTrading">Future Trading</router-link> |
  -->
         <!-- <router-link  v-if="session!=null" to="/timePriceHigh">Time Price High</router-link> | -->

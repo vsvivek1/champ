@@ -20,7 +20,7 @@ export function handleMA20Reclaim(cis, kite) {
         return false;
     }
 
-    const condition = last.low < ma20 && last.close > ma20 && ltp > ma20;
+    const condition = last.low < ma20 && last.close > ma20 && ltp > ma20 && global.seconds>57;
 
     if (condition) {
         cis.buyStrategy = 'ma20Reclaim';
