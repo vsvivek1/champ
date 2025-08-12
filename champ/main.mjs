@@ -22,6 +22,10 @@ import addOrIncrementRejection from './addOrIncrementRejection.js';
 import { Worker } from 'worker_threads';
 
 import eventBus from './eventBus.js';
+import { appendTPS } from './tps_logger.js';
+
+//import  getAccessToken  from "../login.js";
+
 //const fetchWorker = new Worker('./fetchWorker.js');
 
 
@@ -91,6 +95,10 @@ const instrumentData =[];
 
 let niftyTrading=[]
 
+// const token = await getAccessToken();
+// console.log("Token for API calls:", token);
+// process.exit();
+
  const checkAndSetExpiryDay = (cis) => {
   if (!cis?.expiry) {
     console.warn("No expiry field in cis.");
@@ -105,6 +113,20 @@ let niftyTrading=[]
 
   return;
 };
+
+function updateTickCount(cis) {
+  cis.count = (cis.count || 0) + 1;
+
+  if (global.seconds === 59) {
+    cis.tps = cis.count;
+    appendTPS(cis);
+
+    console.log(`${cis.tradingsymbol} at ${global.clock} -> TPS: ${cis.tps}, Final Count: ${cis.count}, Price: ${cis.ticklast_price}`);
+    
+    cis.count = 0;
+  }
+}
+
 
 
 
@@ -462,6 +484,13 @@ async function processTicks(tick) {
 
      cis =global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
 
+
+     updateTickCount(cis);
+
+  
+
+
+
   if (global.skip.includes(cis.tradingsymbol)) {
   console.log(`⛔ Skipping ${cis.tradingsymbol}`);
   return;
@@ -477,6 +506,7 @@ async function processTicks(tick) {
    }
    
     
+
 
 
   
@@ -503,6 +533,9 @@ async function processTicks(tick) {
 tickCount = (tickCount == 10) ? 0 : tickCount + 1;
 
 // Store the current tick in cis
+
+
+
     findHugeTick(cis,tickCount);
 
 

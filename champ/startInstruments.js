@@ -22,7 +22,7 @@ process.on('unhandledRejection', (reason, promise) => {
 let instrumentsCat = ['BANKNIFTY', 'NIFTY','MIDCPNIFTY',"SENSEX"  ]; //'MIDCPNIFTY', 'FINNIFTY',
 
 
-instrumentsCat =['NIFTY'];
+//instrumentsCat =['NIFTY'];
 //instruments =['SENSEX','NIFTY'];
 //'SENSEX',,'BANKEX'
 
@@ -45,7 +45,7 @@ function startProcess(instrumentName) {
     });
 
     process.on('exit', (code) => {
-        console.log(`${instrumentName} process exited with code ${code}`);
+        console.log(global.clock,`${instrumentName} process exited with code ${code}`);
     });
 }
 

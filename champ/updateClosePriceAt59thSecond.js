@@ -23,6 +23,6 @@ export default function updateClosePriceAt59thSecond(cis) {
             //console.log(`Set close price for minute ${nthMinute}: ${cis.tick.last_price}`);
         }
     } else {
-        console.log("Market not open yet!");
+        console.log("Market not open yet!-from updtade close price at 59th second",global.clock);
     }
 }

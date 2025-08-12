@@ -118,7 +118,7 @@ export default {
   mixins: [sessionMixin],
   data() {
     return {
-      product: ['CNC', 'NRML', 'MIS'],
+      product: ['CNC', 'NRML', 'MIS','MTF'],
       selectedProduct: '',
       BuyingMethods: [
         { id: -1, text: "Select" },

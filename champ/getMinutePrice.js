@@ -23,7 +23,7 @@ export default function getMinutePrice(offset, cis) {
             return null;
         }
     } else {
-        console.log("Market not open yet!");
+        console.log("Market not open yet!",global.clock);
         return null;
     }
 }

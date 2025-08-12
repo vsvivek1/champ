@@ -97,7 +97,13 @@ cis.signals.safePassTickHealth=false
  }
  
 
-    
+    if(cis.tick.last_price<cis.tick.ohlc.open){
+
+    cis.signals.lastPriceGreaterThanOpen= false
+    return;
+}
+cis.signals.lastPriceGreaterThanOpen= true
+
 if(cis.tick.last_price<cis.ma20){
 
     cis.signals.aboveMA20 = false;
@@ -110,6 +116,22 @@ if(cis.tick.last_price<cis.ma20){
 
 cis.signals.aboveMA20 = true;
    // cis.signals.aboveDayOpen = true;
+
+
+   if(cis.tps<120){
+
+    console.log(cis.tradingsymbol,'cis.tps is less than 120, so returning curr tps=',cis.tps,global.clock);
+    return
+   }
+
+   if(cis.tps>2000){
+
+    console.log(cis.tradingsymbol,'cis.tps is VERY HIGH 2000, SO CHECK tps=',cis.tps,global.clock);
+
+   }
+
+
+
 
 if(cis.tick.last_price < cis.vwap){
 
