@@ -149,7 +149,7 @@ let qu=Math.floor(tot/cis.lot_size/cis.tick.last_price);
 
 qty=Math.abs(qu)//*cis.lot_size;
 
-qty=cis.lot_size*1
+qty=cis.lot_size*10
 //qty=qu;
 
 console.log(qu,'quantity')
