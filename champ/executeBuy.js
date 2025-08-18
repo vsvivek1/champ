@@ -142,17 +142,22 @@ qty=250;
 
 
 
-let tot=90000//Math.min(global.margins.equity.available.live_balance,90000)||30000
+let tot=Math.min(global.margins.equity.available.live_balance,50000)||30000
 
 //tot
-let qu=Math.floor(tot/cis.lot_size/cis.tick.last_price);
 
-qty=Math.abs(qu)//*cis.lot_size;
+//qu*lot*p=mon
+let qu=Math.floor(tot/(cis.lot_size*cis.tick.last_price));
 
-qty=cis.lot_size*10
+let q2=Math.abs(qu)//*cis.lot_size;
+
+let qty1=cis.lot_size*q2
+
+      qty=Math.min(qty1,getFreezeLimit(cis.tradingsymbol));
+
 //qty=qu;
 
-console.log(qu,'quantity')
+console.log(q2,'quantity',qty)
 
     const orderParams = {
         exchange: cis.exchange,
