@@ -7,7 +7,7 @@ export async function handleOrderUpdates(order, kite,cis,globalInstrumentsForMin
 
 
 
-
+console.log(global.clock,'order update received at handle order updates',order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
 
 
 
@@ -24,7 +24,22 @@ if( cis.name!=global.instrumentName){
   console.log('cis.name!=global.instrumentName',cis.name,global.instrumentName , 'from mismatch of order updates of threads')
   return
 }
-  
+
+
+console.log(global.clock,'order update received at handle order updates before complete clause' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
+
+   if (order.status == 'COMPLETE' && order.transaction_type == 'BUY') {
+     
+     console.log(global.clock,'order update received at handle orderinside complete' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
+
+     
+      await handleBuyOrder(order, kite, cis);
+   
+   
+   
+    }
+
+
 //     if(typeof cis == 'undefined' || !cis) {
 //   var cis=globalInstrumentsForMining.find(a => a.instrument_token == order.instrument_token)
   
@@ -82,7 +97,7 @@ cis.entryPrice = order.average_price;
     
     ) {
 
-          global.orders = await kite.getOrders(); //trying once agin 
+        //  global.orders = await kite.getOrders(); //trying once agin 
 
 
 console.log('ORDER UPDATE OPEN',cis.tradingsymbol)
@@ -143,15 +158,9 @@ eventBus.emit('hasLivePositionUpdated', { token: order.instrument_token, value: 
       cis.hasLivePosition=false;
 
       await handleSellOrder(order, kite, cis);
-    } else if (order.status == 'COMPLETE' && order.transaction_type == 'BUY') {
-     
-     
-     
-      await handleBuyOrder(order, kite, cis);
-   
-   
-   
-    } else if (order.status == 'REJECTED' && order.transaction_type == 'BUY') {
+    } 
+    
+   if (order.status == 'REJECTED' && order.transaction_type == 'BUY') {
       handleRejectedBuyOrder(cis);
     }
 

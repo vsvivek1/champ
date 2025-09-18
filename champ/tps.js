@@ -74,7 +74,7 @@ export function startTPSLogger(kite, tradingsymbol, instrumentToken) {
       const minute = getMarketTimeInMinutes();
       const tps = Math.round(tickCounter / 50);
       if (minute >= 0) {
-        console.log(`[${minute} min] TPS for ${tradingsymbol}: ${tps}`);
+       // console.log(`[${minute} min] TPS for ${tradingsymbol}: ${tps}`);
         updateJsonFile(tradingsymbol, minute, tps);
       }
       tickCounter = 0;

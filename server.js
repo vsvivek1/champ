@@ -901,7 +901,7 @@ app.get('/api/getStrategy/scanner/:href/accessToken/:accessToken', async (req,re
 
 let a1=await CI.scrap(href,accessToken).then(a=>{
 
-  console.log(a)
+  console.log(a,'result of scrap')
   res.send(a)
 });
 
@@ -966,7 +966,7 @@ app.post('/api/PlaceTarget',async (req,res)=>{
   let accessToken=req.body.accessToken;
   let ZerodhaParams=req.body.ZerodhaParams;
   let sessionString=req.body.sessionString;
-  // console.log('zerodhaparamas',ZerodhaParams)
+   console.log('zerodhaparamas',ZerodhaParams)
 
  let z=await  ZerodhaAPI.PlaceTarget(accessToken,ZerodhaParams,sessionString).then(r=>{
 

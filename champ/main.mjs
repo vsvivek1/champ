@@ -117,11 +117,11 @@ let niftyTrading=[]
 function updateTickCount(cis) {
   cis.count = (cis.count || 0) + 1;
 
-  if (global.seconds === 59) {
+  if (global.seconds == 59) {
     cis.tps = cis.count;
-    appendTPS(cis);
+    //appendTPS(cis);
 
-    console.log(`${cis.tradingsymbol} at ${global.clock} -> TPS: ${cis.tps}, Final Count: ${cis.count}, Price: ${cis.ticklast_price}`);
+   // console.log(`${cis.tradingsymbol} at ${global.clock} -> TPS: ${cis.tps}, Final Count: ${cis.count}, Price: ${cis.ticklast_price}`);
     
     cis.count = 0;
   }
@@ -442,8 +442,9 @@ function initTicker() {
         ticker.on("ticks", onTicks);
 
 
-        ticker.on("order_update", orderUpdates);
+      
     }
+      ticker.on("order_update", orderUpdates);
    
 }
 
@@ -808,7 +809,17 @@ return;
 
 async function orderUpdates(order) {
 
-   let cisx= global.instrumentsForMining.find(cis => cis.instrument_token == order.instrument_token);
+    if(order.status!='COMPLETE') return;
+  console.log('order update received for',order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  );
+
+
+
+
+console.log('order update received for',order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  );
+
+   let cisx= global.allInstruments.find(cis => cis.tradingsymbol == order.tradingsymbol);
+
+   console.log('cisx found for order update',cisx?cisx.tradingsymbol:'not found',order.tradingsymbol)
     await handleOrderUpdates(order, kite,cisx,global.instrumentsForMining);
 }
 

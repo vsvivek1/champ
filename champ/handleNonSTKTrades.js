@@ -120,13 +120,13 @@ cis.signals.aboveMA20 = true;
 
    if(cis.tps<120){
 
-    console.log(cis.tradingsymbol,'cis.tps is less than 120, so returning curr tps=',cis.tps,global.clock);
-    return
+   // console.log(cis.tradingsymbol,'cis.tps is less than 120, so returning curr tps=',cis.tps,global.clock);
+   // return
    }
 
    if(cis.tps>2000){
 
-    console.log(cis.tradingsymbol,'cis.tps is VERY HIGH 2000, SO CHECK tps=',cis.tps,global.clock);
+   // console.log(cis.tradingsymbol,'cis.tps is VERY HIGH 2000, SO CHECK tps=',cis.tps,global.clock);
 
    }
 

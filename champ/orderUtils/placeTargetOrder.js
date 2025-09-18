@@ -1,6 +1,8 @@
 import { setTargetForTrade } from '../setTargetForTrade.js';
 
 export async function placeTargetOrder(cis, order, kite) {
+  
+  
   if (cis.orderPlacementInProgress) {
     console.log(`🚫 Order already in progress for ${cis.tradingsymbol}, skipping.`);
     return;
@@ -34,6 +36,9 @@ case (cis.hasInbuiltTarget == true):
 
       default: {
         if (!order) {
+
+                   console.log(global.clock,'inside default of place targer' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
+
           if (!global.orders) global.orders = [];
 
           const buyOrders = global.orders
@@ -62,7 +67,15 @@ case (cis.hasInbuiltTarget == true):
         }
 
         cis.buy_price = buyPrice;
-        finalTargetPrice = Math.ceil(buyPrice * 2);
+
+        if(global.hours==9){
+
+ finalTargetPrice = Math.ceil(buyPrice * 2);
+        }else{
+
+           finalTargetPrice = Math.ceil(buyPrice + 4);
+        }
+       
         cis.targetPrice = finalTargetPrice;
         console.log(`🎯 Target set as buy_price * 2 = ${finalTargetPrice}`);
         break;
@@ -79,6 +92,9 @@ case (cis.hasInbuiltTarget == true):
       product: 'NRML',
       validity: 'DAY',
     };
+
+
+             console.log(global.clock,'order update received at before place order' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
 
     const orderId = await kite.placeOrder('regular', orderParams);
     cis.hasPlacedTarget = true;
