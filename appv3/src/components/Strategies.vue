@@ -213,7 +213,7 @@ export default {
               tradingsymbol: stock.symbol,
               transaction_type: "BUY",
               quantity: Math.round(this.amountPerShare / (price * 5)),
-              product: "CNC",
+              product: "MTF",
               order_type: "LIMIT",
               validity: "DAY",
               price: Math.round(price * 10) / 10
@@ -244,7 +244,7 @@ export default {
             tradingsymbol: stock.symbol,
             transaction_type: "BUY",
             quantity: Math.round(this.amountPerShare / price),
-            product: "CNC",
+            product: "MTF",
             order_type: "LIMIT",
             validity: "DAY",
             price: Math.round(price * 10) / 10
