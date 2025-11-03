@@ -7,7 +7,9 @@ export async function handleOrderUpdates(order, kite) {
     const cis1 =global.instrumentsForMining.find(a => a.instrument_token == order.instrument_token);
     if (typeof cis1 =='undefined'
         
-        || !cis1.name.includes(global.instrumentName)
+       // || 
+        
+        //!cis1.name.includes(global.instrumentName)
     
     ) {
 

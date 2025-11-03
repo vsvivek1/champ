@@ -70,14 +70,14 @@ case (cis.hasInbuiltTarget == true):
 
         if(global.hours==9){
 
- finalTargetPrice = Math.ceil(buyPrice * 2);
+ finalTargetPrice = Math.ceil(buyPrice * 1.005);
         }else{
 
-           finalTargetPrice = Math.ceil(buyPrice + 2);
+           finalTargetPrice = Math.round(buyPrice *1.005,1);
         }
        
         cis.targetPrice = finalTargetPrice;
-        console.log(`🎯 Target set as buy_price * 2 = ${finalTargetPrice}`);
+        console.log(`🎯 Target set as buy_price * 1.005 = ${finalTargetPrice}`);
         break;
       }
     }

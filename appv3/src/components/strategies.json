@@ -4,7 +4,8 @@
     { "id":116,"text":"Monthly rsi above 50","href":"/scanner/monthly-rsi-above-50" } ,
     
     
-    { "id":1000,"text":"Long BuildUp","href":"/scanner/LongBuildUp" } 
+    { "id":1000,"text":"Long BuildUp","href":"/scanner/LongBuildUp" } ,
+      { "id":1001,"text":"Short covering","href":"/scanner/ShortCovering" } 
 
 
 

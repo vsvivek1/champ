@@ -13,7 +13,7 @@ let cis=global.allInstruments.find(i=>i.tradingsymbol==pos.tradingsymbol);
 
 //console.log(cis,cis.name,global.instrumentName!=cis.name,'ceheck now');
 
-if(global.instrumentName!=cis.name) continue;
+//if(global.instrumentName!=cis.name) continue;
 
    
         

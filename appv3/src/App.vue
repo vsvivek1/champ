@@ -13,7 +13,7 @@
         <!-- <router-link v-if="session!=null" to="/quickTargets">One Click Targets</router-link> | -->
         <!-- <router-link  v-if="session!=null" to="/holdings">Holdings</router-link> | -->
        <!--  <router-link  v-if="session!=null" to="/instruments">Instruments</router-link> | -->
-        <!-- <router-link  v-if="session!=null" to="/orders">Order Book</router-link> | -->
+         <router-link  v-if="session!=null" to="/orders">Order Book</router-link> 
       <!--   <router-link  v-if="session!=null" to="/NarrowRange">NarrowRange</router-link> | -->
     <!--     <router-link  v-if="session!=null" to="/LongBuildUps">Long Build Ups</router-link> | -->
          <router-link  v-if="session!=null" to="/Strategies">Strategies</router-link>

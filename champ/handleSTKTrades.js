@@ -25,20 +25,25 @@ export function handleSTKTrades(cis, kite) {
 
     let m = global.margins;
 
-    if (cis.tick.last_price < cis.tick.ohlc.open && global.hours == 9 && global.minutes < 30 && global.instrumentName == 'STK') {
-        console.log('Shorting due to price drop', cis.tradingsymbol);
-        if (global.seconds % 15 == 0) {
-            console.log(m.equity.net, 'm.equity.net', cis.tradingsymbol, 'short');
-        }
+    // if (cis.tick.last_price < cis.tick.ohlc.open && global.hours == 9 && global.minutes < 30 && global.instrumentName == 'STK') {
+    //     console.log('Shorting due to price drop', cis.tradingsymbol);
+    //     if (global.seconds % 15 == 0) {
+    //         console.log(m.equity.net, 'm.equity.net', cis.tradingsymbol, 'short');
+    //     }
 
-        cis.shortTrading = true;
-        executeShorting(cis, kite, cis.tick.last_price);
-        return;
-    }
+    //     cis.shortTrading = true;
+    //     executeShorting(cis, kite, cis.tick.last_price);
+    //     return;
+    // }
 
     const pivotValues = Object.values(cis.pricePoints.pivotPointObject);
 
-    if (cis.tick.last_price > cis.tick.ohlc.open && global.hours == 9 && global.minutes < 30 && global.instrumentName == 'STK') {
+    if (cis.tick.last_price > cis.tick.ohlc.open && global.hours == 9 && global.minutes < 30 
+        
+        //&& global.instrumentName == 'STK'
+
+
+    ) {
         if (
             cis &&
             !cis.ordered &&

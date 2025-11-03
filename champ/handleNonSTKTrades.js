@@ -31,6 +31,7 @@ cis.returnPoints = `cis.tick or cis.tick.ohlc or cis.ma20 is undefined for ${cis
 cis.signals.safePassTickHealth=false
         return
       }
+
      cis.signals.safePassTickHealth=true; 
 
     if (cis.placedOrder==true || cis.ordered )  {
@@ -100,7 +101,7 @@ cis.signals.safePassTickHealth=false
     if(cis.tick.last_price<cis.tick.ohlc.open){
 
     cis.signals.lastPriceGreaterThanOpen= false
-    return;
+   // return;
 }
 cis.signals.lastPriceGreaterThanOpen= true
 
@@ -119,35 +120,39 @@ cis.signals.aboveMA20 = true;
 
 
    if(cis.tps<120){
-
-   // console.log(cis.tradingsymbol,'cis.tps is less than 120, so returning curr tps=',cis.tps,global.clock);
+  //if(global.seconds%15==0)
+   //console.log(cis.tradingsymbol,'cis.tps is less than 120, so returning curr tps=',cis.tps,global.clock);
    // return
    }
 
    if(cis.tps>2000){
 
-   // console.log(cis.tradingsymbol,'cis.tps is VERY HIGH 2000, SO CHECK tps=',cis.tps,global.clock);
+    if(global.seconds%10==0)
+   console.log(cis.tradingsymbol,'cis.tps is VERY HIGH 2000, SO CHECK tps=',cis.tps,global.clock);
 
    }
 
 
 
 
-if(cis.tick.last_price < cis.vwap){
+// if(cis.tick.last_price < cis.vwap){
 
-cis.signals.lastPriceGreaterThanVWAP= false
-cis.returnPoints = `LTP ${cis.tick.last_price} is less than VWAP ${cis.vwap}`;
-    return;
-} ;
-cis.signals.lastPriceGreaterThanVWAP= true;
+// cis.signals.lastPriceGreaterThanVWAP= false
+// cis.returnPoints = `LTP ${cis.tick.last_price} is less than VWAP ${cis.vwap}`;
+//     return;
+// } ;
+
+cis.signals.lastPriceGreaterThanVWAP= false;
 
 
     let gd = checkGapDown(cis);
-    if (gd && global.hours < 11) {
+    if (gd && global.hours < 11 && false) {
         cis.signals.safePassGapDownTill11 = false;
         cis.returnPoints= `Gap Down detected:  Open Price ${cis.tick.ohlc.open} is less than Previous Close ${gd}  `;
         return;
     }
+
+    
     cis.signals.safePassGapDownTill11 = true;
 
    
@@ -213,6 +218,7 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
         cis.signals.safepassCISTCheck = false;
         cis.returnPoints = 'CIST_HEALT-CHECK_FAILED';
         cis.entryHealth = 'CIST HEALTH CHECK FAILED';
+       // return
     }
     cis.signals.safepassCISTCheck = 'NA';
     cis.entryHealth = 'validatedCISTradeConditions';
@@ -225,7 +231,7 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
 
 ///// trade entries
 
-    if (handleReversalTrades(cis, kite)) return;
+    if (handleReversalTrades(cis, kite) && global.hours  <11) return;
     cis.signals.handleReversalTrades = false;
 
     if (buyAboveOpenAtNineAm(cis, kite)) return;
@@ -233,10 +239,10 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
 
    // cis.signals.buyAtHugeLastTick = false;
 
-    if (handleLongLowerShadowTrades(cis, kite)) return;
+    if (handleLongLowerShadowTrades(cis, kite) && global.hours < 11) return;
     cis.signals.handleLongLowerShadowTrades = false;
 
-    if (handleNminuteBreakout(cis, kite, 90) && global.hours) return;
+    if (handleNminuteBreakout(cis, kite, 90) && global.hours < 11) return;
     cis.signals.handleNminuteBreakout60 = false;
 
     // if (handleNminuteBreakout(cis, kite, 30) && global.hours < 13) return;
@@ -248,7 +254,7 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
     // if (handleLastCandleHighBelowMA20(cis, kite)) return;
     // cis.signals.handleLastCandleHighBelowMA20 = false;
 
-    if (handleHammerCandleTrade(cis, kite)) return;
+    if (handleHammerCandleTrade(cis, kite) && global.hours < 11) return;
    
 
 

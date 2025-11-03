@@ -143,14 +143,16 @@ export async function handleNoPosition(cis, kite) {
 
     let { timeFactor, elapsedMinutes } = getTimeFactorAndElapsedMinutes();
 
-    if (global.instrumentName == 'STK') {
-        handleSTKTrades(cis, kite);
-    } else {
-        cis.entryHealth = 'HanleNonStkTrades';
+    // if (global.instrumentName == 'STK') {
+    //     handleSTKTrades(cis, kite);
+    // } else {
+    //     cis.entryHealth = 'HanleNonStkTrades';
 
         
 
 
-        handleNonSTKTrades(cis, kite);
-    }
+    //     handleNonSTKTrades(cis, kite);
+    // }
+
+     handleNonSTKTrades(cis, kite);
 }

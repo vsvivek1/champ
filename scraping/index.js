@@ -1,5 +1,5 @@
 const puppeteer = require('puppeteer');
-const url = 'https://www.moneycontrol.com/stocks/fno/marketstats/futures/openint_inc/homebody.php?opttopic=openint_inc&optinst=allfut&sel_mth=1&sort_order=0';
+var url = 'https://www.moneycontrol.com/stocks/fno/marketstats/futures/openint_inc/homebody.php?opttopic=openint_inc&optinst=allfut&sel_mth=1&sort_order=0';
 const cheerio = require('cheerio');
 let Instruments=require('../getInstruments.js');
 
@@ -9,8 +9,15 @@ class Scraping {
  console.log('from scraping');
 
 }
-static async scrap(){
+static async scrap(sc=""){
+console.log('sc',sc)
+  if(sc=='sc'){
+
+url="https://www.moneycontrol.com/stocks/fno/marketstats/futures/oi_dec_p_inc/homebody.php?opttopic=allfut"
+
+  }
  
+  console.log('url',url)
  return puppeteer
   .launch()
   .then(function(browser) {

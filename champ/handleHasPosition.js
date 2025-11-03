@@ -84,6 +84,20 @@ async function shortCoveringStoploss(kite, cis) {
 export async function handlePositionPresent(cis, kite) {
 
 
+
+
+
+let ml3=Math.min(...cis.minuteData.slice(-3).map(m=>m.low))
+const openOrder = global.orders.find(o => o.tradingsymbol == cis.tradingsymbol && o.status == 'OPEN');
+
+console.log(cis.buyPrice,'buy price in has position for',cis.tradingsymbol,ml3,'3 min low' );
+if(cis.tick.last_price<ml3) {
+  console.log('stop loss ml3 min last price below last 3 min low for',cis.tradingsymbol,'last price',cis.tick.last_price,'3min low',ml3);
+
+
+        await updateOpenOrderPrice(kite, openOrder.order_id, cis.instrument_token, cis.tick.last_price, cis);
+}
+
   if(cis.stopLossExecuted){
 
     cis.returnPoints = `❌ [handlePositionPresent] Stop-loss already executed for ${cis.tradingsymbol}.`;
@@ -177,7 +191,7 @@ if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
     
     {
 
-      const openOrder = global.orders.find(o => o.tradingsymbol == cis.tradingsymbol && o.status == 'OPEN');
+      
   if (!openOrder) {
 
   cis.signals?  cis.signals.NoReverseOrderFoundForPosition=true : cis.signals={NoReverseOrderFoundForPosition:true};

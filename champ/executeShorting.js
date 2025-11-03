@@ -17,7 +17,7 @@ export async function executeShorting(cis, kite,price) {
 
 
 
-    if(global.instrumentName!='STK') return;
+   // if(global.instrumentName!='STK') return;
 console.log('execute shorting',cis.tradingsymbol)
     // Check if the order has already been placed
     if (cis.ordered) {
@@ -108,12 +108,12 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
       let qty=Math.min(cis.lot_size * multiplier,getFreezeLimit(cis.tradingsymbol));
 
 
-      if(global.instrumentName=='STK'){
+    //   if(global.instrumentName=='STK'){
 
-       // console.log(m.equity,'margin')
+    //    // console.log(m.equity,'margin')
 
-        qty=Math.floor(200000/cis.tick.last_price);
-      }
+    //     qty=Math.floor(200000/cis.tick.last_price);
+    //   }
 
       //qty=cis.lot_size*5;
 
@@ -137,10 +137,10 @@ qty=250;
 
 
 
-if(global.instrumentName=='STK'){
-console.log(orderParams)
+// if(global.instrumentName=='STK'){
+// console.log(orderParams)
 
-}
+// }
 
 
     try {

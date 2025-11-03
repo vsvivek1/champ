@@ -461,6 +461,14 @@ async function execute (res){
  
 }
 
+async function executeSC (res){
+
+  console.log('executeSC')
+  let s= Scraping.scrap('sc');
+  return s; 
+ 
+}
+
 
 app.get('/api/longBuildUp', (req,res) => {  
   let s2=execute().then(
@@ -473,6 +481,21 @@ app.get('/api/longBuildUp', (req,res) => {
   ).catch(e=>console.log('it happens inside',e));;
 
 });
+
+app.get('/api/ShortCovering', (req,res) => {  
+
+  console.log('ShortCovering here')
+  let s2=executeSC().then(
+  s=>{
+
+    res.send(s)
+   
+  }
+  
+  ).catch(e=>console.log('it happens inside',e));;
+
+});
+
 
 
 

@@ -5,8 +5,10 @@ export function handleLongLowerShadowTrades(cis, kite) {
 
     if (
         cis.liveMinute.hasLongLowerShadow &&
-        global.seconds == 59 &&
-        cis.tick.last_price > cis.tick.ohlc.open
+        global.seconds == 59 
+        
+        // &&
+        // cis.tick.last_price > cis.tick.ohlc.open
     ) {
         cis.targetPrice = cis.tick.last_price + cis.liveMinute.range;
         cis.stopLossPrice = cis.tick.last_price - cis.liveMinute.range;

@@ -19,11 +19,11 @@ return
 }
 
 
-if( cis.name!=global.instrumentName){
+// if( cis.name!=global.instrumentName){
 
-  console.log('cis.name!=global.instrumentName',cis.name,global.instrumentName , 'from mismatch of order updates of threads')
-  return
-}
+//   console.log('cis.name!=global.instrumentName',cis.name,global.instrumentName , 'from mismatch of order updates of threads')
+//   return
+// }
 
 
 console.log(global.clock,'order update received at handle order updates before complete clause' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )

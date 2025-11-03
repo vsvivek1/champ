@@ -3,7 +3,8 @@ const freezeLimits = [
     { symbol: "NIFTY", lot_size: 75, quantity_freeze_limit: 1800 },
     { symbol: "BANKNIFTY", lot_size: 25, quantity_freeze_limit: 900 },
     { symbol: "FINNIFTY", lot_size: 40, quantity_freeze_limit: 1800 },
-    { symbol: "MIDCPNIFTY", lot_size: 75, quantity_freeze_limit: 2800 }
+    { symbol: "MIDCPNIFTY", lot_size: 75, quantity_freeze_limit: 2800 },
+     { symbol: "SENSEX", lot_size: 75, quantity_freeze_limit: 1000 }
   ];
 export function getFreezeLimit(tradingSymbol) {
 

@@ -4,7 +4,7 @@ import { handleBuyTarget } from './handleBuyTarget.js';
 export async function placeTargetOrder(cis, order, kite) {
     const isSTK = global.instrumentName == 'STK';
 
-    if (isSTK && cis.shortTrading) {
+    if (isSTK && cis.shortTrading && false) {
         await handleBuyTarget(cis, order, kite);
     } else {
         await handleSellTarget(cis, order, kite);

@@ -22,7 +22,7 @@ if(qty==0){
 }
 
 
-if(global.instrumentName!=cis.name) return;
+//if(global.instrumentName!=cis.name) return;
 
 
         if (!cis.buy_price || isNaN(cis.buy_price)) {

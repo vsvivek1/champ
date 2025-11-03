@@ -465,7 +465,7 @@ console.log('Names:', names);
 
 
 
-names=['NIFTY','SENSEX']
+names=['NIFTY','SENSEX','BANKNIFTY',"MIDCPNIFTY","FINNIFTY"]
 
 const intervalId = await new Promise((resolve, reject) => {
   const interval = setInterval(async () => {

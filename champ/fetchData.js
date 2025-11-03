@@ -255,10 +255,7 @@ export async function fetchPositionsAndSetCis(kite) {
 export async function fetchHourlyData(kite) {
     try {
 
-        if(global.instrumentName=='STK'){
-
-   // return
-        }
+      
         const now = moment();
         let fromTime = moment().startOf('day').subtract(1, 'days').add(13, 'global.hours').format('YYYY-MM-DD HH:mm:ss');
         let toTime = now.format('YYYY-MM-DD HH:mm:ss');
@@ -302,15 +299,16 @@ export async function fetchHourlyData(kite) {
 export async function fetchMinuteData(kite) {
     try {
 
-        if(global.instrumentName=='STK'){
+        // if(global.instrumentName=='STK'){
 
-        return
-                }
+        // return
+        //         }
+
         const now = moment();
         const fromTime = moment().startOf('day').add(9, 'global.hours').add(15, 'global.minutes').format('YYYY-MM-DD HH:mm:ss');
         const toTime = now.startOf('minute').subtract(0, 'minute').format('YYYY-MM-DD HH:mm:ss');
        
-if(global.instrumentName=='STK'){
+if(global.instrumentName=='STK' && false){
 
     var dataType = '5minute';
 }else{
@@ -373,6 +371,7 @@ if(global.instrumentName=='STK'){
                 instrument.ma5low=calculateMovingAverage(instrument.minuteData, 5, 'low')
 
                 instrument.ma20=calculate20MA(instrument.minuteData);
+                instrument.dayHigh= Math.max(...instrument.minuteData.map(candle=>candle.high))
 
 
                // setVWAP
@@ -438,12 +437,12 @@ if(global.instrumentName=='STK'){
 async function fetchAllData(kite, instruments, fromTime, toTime, dataType, historicalData) {
 
 //console.time('start fetching stok minute data1')
-    if(global.instrumentName=='STK'){
+    // if(global.instrumentName=='STK'){
 
-        console.log(instruments,'instruments')
+    //     console.log(instruments,'instruments')
 
-        return
-            }
+    //     return
+    //         }
     let index = 0;
 
 

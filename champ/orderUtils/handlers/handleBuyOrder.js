@@ -18,7 +18,7 @@ export async function handleBuyOrder(order, kite, cis) {
     cis.tgtTriggerPrice = order.average_price * 1.06;
     
     
-    cis.tgtPrice = order.average_price * 1.05;
+    cis.tgtPrice = order.average_price+1
 
          console.log(global.clock,'order update received at handle before place target order' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
 

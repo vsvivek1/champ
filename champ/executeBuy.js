@@ -11,10 +11,10 @@ import { getFreezeLimit } from './getFreezeLimit.js';
 
 export async function executeBuy(cis, kite,price) {
 
-    if(cis.name!== global.instrumentName) {
-        console.log('executeBuy: Instrument name mismatch:', cis.name, '!=', global.instrumentName);
-        return;
-    }
+    // if(cis.name!== global.instrumentName) {
+    //     console.log('executeBuy: Instrument name mismatch:', cis.name, '!=', global.instrumentName);
+    //     return;
+    // }
 
 
 cis.entryHealth='inside execute buy'
@@ -108,17 +108,18 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
       let qty=Math.min(cis.lot_size * multiplier,getFreezeLimit(cis.tradingsymbol));
 
 
-      if(global.instrumentName=='STK'){
+    //   if(global.instrumentName=='STK'){
 
-       // console.log(m.equity,'margin')
+    //    // console.log(m.equity,'margin')
 
-        qty=Math.floor(50000/cis.tick.last_price);
-        qty=Math.max(Math.floor(100000/cis.tick.last_price),2);
-      }else{
+    //     qty=Math.floor(50000/cis.tick.last_price);
+    //     qty=Math.max(Math.floor(100000/cis.tick.last_price),2);
+    //   }
+      if(true){
 
         multiplier=Math.floor(Math.min(liveCash,50000)/(price*cis.lot_size));
 
-        qty=cis.lot_size*20;
+      //  qty=cis.lot_size*20;
 
        qty =Math.min(cis.lot_size * multiplier,getFreezeLimit(cis.tradingsymbol));
       }
@@ -159,13 +160,20 @@ let qty1=cis.lot_size*q2
 
 console.log(q2,'quantity',qty)
 
+//pm2 qty=cis.lot_size*2;
+
+if(qty==0){
+    qty=cis.lot_size;
+}
+
+
     const orderParams = {
         exchange: cis.exchange,
         tradingsymbol: cis.tradingsymbol,
         transaction_type: "BUY",
         order_type: "LIMIT",
         quantity: qty,
-        price: price,
+        price: cis.tick.last_price,
         //product: "NRML",
         product: "NRML",
         validity: "DAY"
@@ -174,10 +182,10 @@ console.log(q2,'quantity',qty)
 
     //return;
 
-if(global.instrumentName=='STK'){
-console.log(orderParams)
+// if(global.instrumentName=='STK'){
+// console.log(orderParams)
 
-}
+// }
 
 
     try {
@@ -198,7 +206,10 @@ cis.entryHealth='inside place order'
 
 cis.message = `${global.clock} Order placed successfully. Order ID: ${orderId}, ${cis.buyStrategy} for ${cis.tradingsymbol} at ${cis.entryPrice}, instrument.averageRange=${cis.averageRange},ordered=${cis.ordered},qty=${qty},price=${price}
 
-thread is ${global.instrumentName}`;
+thread is
+ ${global.instrumentName}
+
+`;
 
 
 console.log(cis.message);

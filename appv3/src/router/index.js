@@ -15,7 +15,7 @@ import Login from '@/components/Login.vue'
 import CisUpdates from '@/components/CisUpdates.vue';
  //import PlaceQuickOrderForHoldings from '@/components/PlaceQuickOrdersForHoldingsNew.vue'
 // import GetInstruments from '@/components/GetInstruments.vue'
- //import OrderBook from '@/components/OrderBook.vue'
+ import OrderBook from '@/components/OrderBook.vue'
 // import NarrowRange from '@/components/NarrowRange.vue'
 // import LongBuildUp from '@/components/LongBuildUp.vue'
 import Strategies from '@/components/Strategies.vue'
@@ -198,11 +198,11 @@ const routes  =  [
     name: 'login',
     component: Login 
    } ,
-  // { 
-  //   path: '/orders',
-  //   name: 'orders',
-  //   component: OrderBook
-  //  } ,
+  { 
+    path: '/orders',
+    name: 'orders',
+    component: OrderBook
+   } ,
   // { 
   //   path: '/instruments',
   //   name: 'GetInstruments',
