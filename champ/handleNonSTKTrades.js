@@ -20,10 +20,13 @@ import { checkGapDown } from "./gapDownChecker.js";
 import { handleShortNonSTKTrades } from "./handleShortNonSTKTrades.js";
 import e from "cors";
 import { handleMA20Reclaim } from './handleMa20Reclaim.js';
+import { handleDayHighBreak } from "./handleDayHighBreak.js";
 
 
 // ==== MAIN FUNCTION ====
 export async function handleNonSTKTrades(cis, kite) {
+
+   
 
       if (typeof cis.tick == 'undefined' || typeof cis.tick.ohlc == 'undefined' || typeof cis.ma20 == 'undefined') {
 
@@ -31,6 +34,8 @@ cis.returnPoints = `cis.tick or cis.tick.ohlc or cis.ma20 is undefined for ${cis
 cis.signals.safePassTickHealth=false
         return
       }
+
+     //  console.log(cis.ma20,'cis.ma20',cis.tradingsymbol);
 
      cis.signals.safePassTickHealth=true; 
 
@@ -231,19 +236,27 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
 
 ///// trade entries
 
-    if (handleReversalTrades(cis, kite) && global.hours  <11) return;
-    cis.signals.handleReversalTrades = false;
+if(global.houurs<10){
 
-    if (buyAboveOpenAtNineAm(cis, kite)) return;
+ if (handleReversalTrades(cis, kite)) return;
+    cis.signals.handleReversalTrades = false;
+ if (buyAboveOpenAtNineAm(cis, kite)) return;
     cis.signals.buyAboveOpenAtNineAm = false;
+}
+
+
+//handleDayHighBreak
+   if(handleDayHighBreak(cis, kite)) return
+
+   
 
    // cis.signals.buyAtHugeLastTick = false;
 
-    if (handleLongLowerShadowTrades(cis, kite) && global.hours < 11) return;
+    if (handleLongLowerShadowTrades(cis, kite) ) return;
     cis.signals.handleLongLowerShadowTrades = false;
 
-    if (handleNminuteBreakout(cis, kite, 90) && global.hours < 11) return;
-    cis.signals.handleNminuteBreakout60 = false;
+    //if (handleNminuteBreakout(cis, kite, 90)) return;
+   // cis.signals.handleNminuteBreakout60 = false;
 
     // if (handleNminuteBreakout(cis, kite, 30) && global.hours < 13) return;
     // cis.signals.handleNminuteBreakout30 = false;
@@ -254,7 +267,7 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
     // if (handleLastCandleHighBelowMA20(cis, kite)) return;
     // cis.signals.handleLastCandleHighBelowMA20 = false;
 
-    if (handleHammerCandleTrade(cis, kite) && global.hours < 11) return;
+    if (handleHammerCandleTrade(cis, kite) ) return;
    
 
 

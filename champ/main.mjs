@@ -138,7 +138,7 @@ eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
    // console.log('emit received @  hasLivePositionUpdated',value,token)
     const cis =global.instrumentsForMining.find(i => i.instrument_token == token);
     if (cis) {
-      cis.hasLivePosition = value;
+      cis.hasLivePosition = false;
        cis.stopLossExecuted=value
        cis.ordered = false;
       cis.entryPrice = null;
@@ -815,7 +815,7 @@ async function orderUpdates(order) {
 
 
 
-console.log('order update received for',order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  );
+//console.log('order update received for',order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  );
 
    let cisx= global.allInstruments.find(cis => cis.tradingsymbol == order.tradingsymbol);
 

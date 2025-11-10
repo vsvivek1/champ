@@ -70,10 +70,10 @@ case (cis.hasInbuiltTarget == true):
 
         if(global.hours==9){
 
- finalTargetPrice = Math.ceil(buyPrice * 1.005);
+ finalTargetPrice = Math.ceil(buyPrice * 1.05);
         }else{
 
-           finalTargetPrice = Math.round(buyPrice *1.005,1);
+           finalTargetPrice = Math.round(buyPrice *1.2,1);
         }
        
         cis.targetPrice = finalTargetPrice;

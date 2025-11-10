@@ -147,20 +147,20 @@ v-if="item.avoided">Include</button>
 
     <div>
 
-        <StrategyStatus :strategyStatuses="item.signals />
+        <!-- <StrategyStatus :strategyStatuses="item.signals" /> -->
 
-//     <div 
+    <div 
     
-//     style="{border:1px solid}"
+    style="{border:1px solid}"
     
-//     v-for="(value, key) in item.signals" :key="key" class="status-item">
-//       <span class="status-key">{{ formatKey(key) }}</span>:
-//       <span :class="value ? 'status-true' : 'status-false'">
-//         {{ value ? '✔️' : '❌' }}
-//         <hr>
-//       </span>
-//     </div>
-//   </div>
+    v-for="(value, key) in item.signals" :key="key" class="status-item">
+      <span class="status-key">{{ formatKey(key) }}</span>:
+      <span :class="value ? 'status-true' : 'status-false'">
+        {{ value ? '✔️' : '❌' }}
+        <hr>
+      </span>
+    </div>
+  </div>
 
 
 </span>
@@ -253,7 +253,7 @@ export default {
       return {
           cisList: [],
           symbols: instruments,
-          selectedKeys: ['returnPoints','tick','entryHealth','deployedStrategies','signals'],
+          selectedKeys: ['returnPoints','tick','signals'],
       };
   },
   created() {

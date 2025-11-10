@@ -503,7 +503,8 @@ const intervalId = await new Promise((resolve, reject) => {
 
       
 console.log('Depth',depth);
-      const expiries  = Array.from({ length: 7 }, (_, i) => {
+      
+const expiries  = Array.from({ length: 7 }, (_, i) => {
         const d = new Date();
         d.setDate(d.getDate() + i +0);               // +1 for tomorrow, +i for the subsequent days
         return d.toISOString().slice(0, 10);          // “YYYY-MM-DD”; adjust formatting as needed
@@ -516,6 +517,9 @@ console.log('Depth',depth);
 
 
       console.log(currentName);
+
+
+    //  [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
       var optionsForIndex = allScriptJson.filter(o => o.name == currentName  && expiries.includes(o.expiry) );
 
 

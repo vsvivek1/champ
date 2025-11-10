@@ -764,7 +764,7 @@ return;
 
     if(cis.hasLivePosition==true || (cis.mockTrading==true && cis.placeOrder==true)) {
 
-        //console.log('terst 573 live position true why  for?',cis.tradingsymbol)
+        console.log('terst 573 live position true why  for?',cis.tradingsymbol,cis.hasLivePosition)
         handlePositionPresent(cis, kite);
        // console.log('cis has no position @130');
         ;
