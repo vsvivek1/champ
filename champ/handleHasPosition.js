@@ -16,69 +16,6 @@ import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
 import { consoleOrigin } from 'firebase-tools/lib/api.js';
 
 
-async function shortCoverOrder(kite, cis) {
-  try {
-    const quantity = cis.position?.quantity;
-    if (!quantity || quantity <= 0) {
-      console.log("No short position to cover.");
-      return null;
-    }
-
-    const orderParams = {
-      exchange: cis.exchange,               // "NFO"
-      tradingsymbol: cis.tradingsymbol,     // e.g., "NIFTY24JUL20000PE"
-      transaction_type: kite.TRANSACTION_TYPE_BUY,
-      quantity: quantity,
-      order_type: cis.order_type || kite.ORDER_TYPE_MARKET,
-      product: cis.product || kite.PRODUCT_MIS,
-      variety: kite.VARIETY_REGULAR,
-      validity: kite.VALIDITY_DAY,
-    };
-
-    if (orderParams.order_type == kite.ORDER_TYPE_LIMIT && cis.price) {
-      orderParams.price = cis.price;
-    }
-
-    const orderId = await kite.placeOrder(orderParams.variety, orderParams);
-    console.log("Short position covered. Order ID:", orderId);
-    return orderId;
-  } catch (error) {
-    console.error("Failed to cover short position:", error);
-  }
-}
-
-
-async function shortCoveringStoploss(kite, cis) {
-  try {
-    const matchingOrder = global.orders.find(order =>
-      order.status == "OPEN" &&
-      order.transaction_type == kite.TRANSACTION_TYPE_BUY &&
-      order.tradingsymbol == cis.tradingsymbol &&
-      order.exchange == cis.exchange
-    );
-
-    if (!matchingOrder) {
-      console.log("No open BUY order found for short covering.");
-      return;
-    }
-
-    const updatedParams = {
-      order_id: matchingOrder.order_id,
-      quantity: matchingOrder.quantity,
-      price: parseFloat(cis.tick.last_price.toFixed(1)),
-      order_type: kite.ORDER_TYPE_LIMIT,
-      product: matchingOrder.product,
-      validity: kite.VALIDITY_DAY,
-    };
-
-    cis.stopLossExecuted=true;
-    const modifiedOrderId = await kite.modifyOrder(kite.VARIETY_REGULAR, matchingOrder.order_id, updatedParams);
-    console.log(`Short covering SL updated to ₹${updatedParams.price}. Order ID: ${modifiedOrderId}`);
-    return modifiedOrderId;
-  } catch (error) {
-    console.error("Error updating short covering SL:", error);
-  }
-}
 
 
 export async function handlePositionPresent(cis, kite) {
@@ -109,40 +46,8 @@ if(cis.tick.last_price<ml3) {
   if(!cis.position) return
 
 
-  if(cis.position.quantity<0){
-
-  if( global.seconds==30)  console.log('stop loss of',cis.tradingsymbol ,'@',cis.ma20);
-  }
-
-  if(cis.position.quantity<0 && cis.ma20 && cis.position.quantity<0 && !cis.shortCoverd && 
-    (
-      //cis.tick.last_price>cis.tick.ohlc.open ||
-      
-      cis.tick.last_price>cis.ma20) ){
 
 
-///// short covering stop loss function
-
-    cis.shortCoverd=true;
-    console.log('have a short position for short covering',cis.tradingsymbol);
-    console.log('short covering stop loss for',cis.tradingsymbol,'@',cis.ma20);
-    //console.table(cis);
-    shortCoveringStoploss(kite, cis);
-
-    setTimeout(()=>{
-
-
-      /// in case its not executed for trying it again
- cis.shortCoverd=false
-
-    },5*1000)
-
-
-   
-    
-
-    return;
-  }
 
   
 //if(global.seconds==30)console.log('long postion present for',cis.tradingsymbol);
@@ -214,7 +119,7 @@ if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
   if(openOrder && openOrder.status == 'OPEN' && openOrder.order_id &&cis.position.quantity>0) {
 
 
-    console.log('executting stop loss below ma20 or below open price',cis.tradingsymbol,
+    console.log('executting stop loss below ma20 ',cis.tradingsymbol,
    'last price',cis.tick.last_price,'ma20',cis.ma20,'open',cis.tick.ohlc.open, global.clock);
 
         await updateOpenOrderPrice(kite, openOrder.order_id, cis.instrument_token, cis.tick.last_price, cis);

@@ -46,14 +46,7 @@ export async function handleSellOrder(order, kite, cis) {
 
 
     
-    if (global.enableShortTrading 
 
-    ) {
-
-      if(cis && cis.minuteData && cis.minuteData.length > 0) {
-      await placeShortCovering(cis, order, kite);
-    }
-    } // <-- Add this closing brace for the 'if (global.enableShortTrading)' block
 
   } catch (error) {
     console.log('❌ [handleSellOrder] Error:', error);

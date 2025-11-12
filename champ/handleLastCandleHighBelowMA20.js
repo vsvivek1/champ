@@ -42,7 +42,7 @@ export function handleLastCandleHighBelowMA20(cis, kite) {
     cis.inbuiltStopLoss = true;
 
       cis.entryHealth=strategyName;
-         console.log(global.clock,'Executing',cis.tradingsymbol,cis.entryHealth);
+         //console.log("\n\n***************\n NEW ENTRY",global.clock,cis.tradingsymbol,cis.entryHealth);
 
     executeBuy(cis, kite, Math.ceil(ltp));
     return true;

@@ -62,7 +62,7 @@ function getMultiplier(cis) {
 async function placeOrder(cis, kite,price1) {
 
 cis.entryHealth='inside place order'
-console.log(cis.tradingsymbol,'place order',price1)
+//console.log(cis.tradingsymbol,'place order',price1)
 let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 
    
@@ -200,8 +200,11 @@ if(qty==0){
             return;
         }
 
-        console.log ('\n\n\nPlacing order for: cis ordered ',cis.ordered,  cis.tradingsymbol,"quantity",qty,"price",price,"thread=",global.instrumentName,global.clock ,"\n\n'")
-        const orderId = await kite.placeOrder("regular", orderParams);
+ console.log ('\n NEW ENTRY ********************\n\nTHread',  cis.tradingsymbol,"quantity",qty,"price",price,"thread=",global.instrumentName,global.clock ,"\n\n'",`
+           Strategy= ${cis.buyStrategy} ,Entry health= ${cis.entryHealth} , return points= ${cis.returnPoints}, ibuiltTarget= ${cis.inbuiltTarget}, inbuiltStopLoss= ${cis.inbuiltStopLoss} 
+            
+            `,) 
+                   const orderId = await kite.placeOrder("regular", orderParams);
 cis.entryHealth='inside place order'
 
 cis.message = `${global.clock} Order placed successfully. Order ID: ${orderId}, ${cis.buyStrategy} for ${cis.tradingsymbol} at ${cis.entryPrice}, instrument.averageRange=${cis.averageRange},ordered=${cis.ordered},qty=${qty},price=${price}
@@ -212,7 +215,7 @@ thread is
 `;
 
 
-console.log(cis.message);
+//console.log(cis.message);
 
 cis.ordered=true;
 cis.placedOrder=true;

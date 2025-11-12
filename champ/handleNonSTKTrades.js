@@ -170,6 +170,8 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
         return;
 
     } 
+
+    //console.log('passed closing time check for',cis.tradingsymbol)
     cis.signals.safePassClosingTime=true
 
    
@@ -188,7 +190,7 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
 
    // cis.signals.safePasscheckPenultimateGreenAndLastSmallBodyOrLowerHigh = true;
 
-    if (cis.operatorBuyCandles.fifteenMinutes == false) {
+    if (cis.operatorBuyCandles.fifteenMinutes == false && global.hours>9) {
         cis.signals.safepassOperatorCandleCheck = false;
 
         cis.returnPoints = `Operator candles in 15 minutes not found for ${cis.tradingsymbol}`;

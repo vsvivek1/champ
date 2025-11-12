@@ -7,7 +7,8 @@ export async function handleOrderUpdates(order, kite,cis,globalInstrumentsForMin
 
 
 
-console.log(global.clock,'order update received at handle order updates',order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
+// console.log(
+//   'order update received at handle order updates',order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type ,global.clock )
 
 
 
@@ -26,11 +27,11 @@ return
 // }
 
 
-console.log(global.clock,'order update received at handle order updates before complete clause' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
+//console.log(global.clock,'order update received at handle order updates before complete clause' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
 
    if (order.status == 'COMPLETE' && order.transaction_type == 'BUY') {
      
-     console.log(global.clock,'order update received at handle orderinside complete' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
+     console.log('order update received at handle orderinside complete' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type ,global.clock, )
 
      
       await handleBuyOrder(order, kite, cis);
@@ -135,7 +136,7 @@ console.log('ORDER UPDATE OPEN',cis.tradingsymbol)
     }
 
     if (order.status == 'COMPLETE' && order.transaction_type == 'SELL') {
-      console.log('Order completed for', cis.tradingsymbol, 'status:', order.status);
+      console.log('\n\nSELL Order completed for', cis.tradingsymbol, 'status:', order.status,'\n\n');
 
       // Resetting the order state
       cis.ordered = false;
@@ -149,11 +150,11 @@ console.log('ORDER UPDATE OPEN',cis.tradingsymbol)
       cis.averageRange = null;
       cis.stockTrade = false;
       cis.message = `Order completed for ${cis.tradingsymbol}. Status: ${order.status}, thread is ${global.instrumentName}`;
-console.log(cis.message,global.clock)
+
 
 cis.hasLivePosition = false;
 cis.placedOrder = false
-console.log('emiting sell order update for',cis.tradingsymbol,global.clock)
+console.log('\n\nemiting sell order update for',cis.tradingsymbol,global.clock)
 eventBus.emit('hasLivePositionUpdated', { token: order.instrument_token, value: false });
       cis.hasLivePosition=false;
 

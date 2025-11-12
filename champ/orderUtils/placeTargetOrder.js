@@ -73,7 +73,7 @@ case (cis.hasInbuiltTarget == true):
  finalTargetPrice = Math.ceil(buyPrice * 1.05);
         }else{
 
-           finalTargetPrice = Math.round(buyPrice *1.2,1);
+           finalTargetPrice = Math.round(buyPrice *1.02,1);
         }
        
         cis.targetPrice = finalTargetPrice;

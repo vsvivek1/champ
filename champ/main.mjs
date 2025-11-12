@@ -62,7 +62,7 @@ import { globalAgent } from 'http';
 // Load skip list from skip.json and assign to global
 try {
   global.skip = JSON.parse(fs.readFileSync("skip.json", "utf-8")).skip || [];
-  console.log("✅ Global skip list loaded:", global.skip,global.clock);
+ // console.log("✅ Global skip list loaded:", global.skip,global.clock);
 } catch (e) {
   global.skip = [];
   console.warn("⚠️ Could not load skip.json, using empty skip list.");
@@ -91,7 +91,7 @@ global.enableShortTrading=false;
 global.mockTrading=false;
 
 var cis;
-const instrumentData =[];
+//const instrumentData =[];
 
 let niftyTrading=[]
 
@@ -138,7 +138,7 @@ eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
    // console.log('emit received @  hasLivePositionUpdated',value,token)
     const cis =global.instrumentsForMining.find(i => i.instrument_token == token);
     if (cis) {
-      cis.hasLivePosition = false;
+      cis.hasLivePosition = value;
        cis.stopLossExecuted=value
        cis.ordered = false;
       cis.entryPrice = null;
@@ -165,18 +165,7 @@ eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
 });
 
 
-if(instrumentName=='STK'){
 
-   // instrumentData= instrumentsForMining
-
-   console.log({instrumentName},'stk')
-
-   global.instrumentsForMining=niftyTrading
-    global.instrumentName=instrumentName;
-   global.instrumentsForMining=niftyTrading;
-    console.log('THread',instrumentName,global.clock);
-
-}else{
 
 
 
@@ -188,9 +177,9 @@ if(instrumentName=='STK'){
     
    global.allInstruments=allInstruments//.find(inst => inst.name == instrumentName);
     
-    console.log('THread',instrumentName),global.clock;
+   // console.log('THread',instrumentName),global.clock;
 
-}
+
 
 
 
@@ -236,22 +225,7 @@ async function main() {
     try {
         setClock();
 
-        // if(global.hours>14|| global.hours<9 ||(global.hours==15 && global.minutes>30) ||(global.hours==9 && global.minutes<15)){
-
-        //     console.log('Exiting the code out of time');
-
-        //    //return 
-        // }
-
-      
-        // if(global.instrumentName!='STK'){
-
-
-
-        //     //// to prevent mis 
-        //    // return;
-        // }
-        
+       
 
        
         
@@ -289,23 +263,7 @@ async function main() {
             // }
 
 
-           if(global.instrumentName=='STK'){
-
-
-            /// for intraday scripts non index
-
-            if (global.seconds == 1 && global.minutes%5==0) {
-            
-                     global.margins = await kite.getMargins();
-                     await setmarginCisOrdersAndPosition(); 
- 
-              
-          
-             }
-
-           }       
-           
-           else{
+         
 
             if (
                 
@@ -328,11 +286,11 @@ async function main() {
             
             
             }
-           }
+           
 
            
 
-            if(global.seconds%2==0){
+            if(global.seconds%10==0){
 
 
   
@@ -513,9 +471,7 @@ async function processTicks(tick) {
   
 
    
-    // cis.entryHealth=''
-    // cis.returnPoints=[]
-    // cis.buyCriteria=''
+  
     
     if (!cis) return;
 
@@ -526,7 +482,7 @@ async function processTicks(tick) {
 
         
 
-   // }
+
        
 
 
@@ -819,7 +775,7 @@ async function orderUpdates(order) {
 
    let cisx= global.allInstruments.find(cis => cis.tradingsymbol == order.tradingsymbol);
 
-   console.log('cisx found for order update',cisx?cisx.tradingsymbol:'not found',order.tradingsymbol)
+ //  console.log('cisx found for order update',cisx?cisx.tradingsymbol:'not found',order.tradingsymbol)
     await handleOrderUpdates(order, kite,cisx,global.instrumentsForMining);
 }
 

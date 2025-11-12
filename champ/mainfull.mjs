@@ -762,9 +762,9 @@ return;
 
     }
 
-    if(cis.hasLivePosition==true || (cis.mockTrading==true && cis.placeOrder==true)) {
+    if(cis.hasLivePosition==true) {
 
-        console.log('terst 573 live position true why  for?',cis.tradingsymbol,cis.hasLivePosition)
+       // console.log('terst 573 live position true why  for?',cis.tradingsymbol,cis.hasLivePosition)
         handlePositionPresent(cis, kite);
        // console.log('cis has no position @130');
         ;
@@ -815,7 +815,6 @@ async function orderUpdates(order) {
 
 
 
-console.log('order update received for',order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  );
 
    let cisx= global.allInstruments.find(cis => cis.tradingsymbol == order.tradingsymbol);
 
