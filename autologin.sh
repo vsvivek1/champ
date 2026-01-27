@@ -1,0 +1,1 @@
+/usr/bin/node /home/think-vivek/champ/autologin.js

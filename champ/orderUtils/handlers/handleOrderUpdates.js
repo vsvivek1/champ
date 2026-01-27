@@ -31,8 +31,9 @@ return
 
    if (order.status == 'COMPLETE' && order.transaction_type == 'BUY') {
      
-     console.log('order update received at handle orderinside complete' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type ,global.clock, )
+   //  console.log('order update received at handle orderinside complete' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type ,global.clock, )
 
+   //so this is working
      
       await handleBuyOrder(order, kite, cis);
    
@@ -59,7 +60,7 @@ return
 
 //order status for  SENSEX25JUL81900PE buyPrice undefined orderId targetSet undefined stopLossSet undefined entryPrice 478 averageRange 12.301234567901236 ordered true targetPrice nil stopLossPrice nill
 
-console.log(global.clock,cis.instrument_token,'from cis instrument token in handel order updates')
+//console.log(global.clock,cis.instrument_token,'from cis instrument token in handel order updates')
 
     if(global.mockTrading==true && order.status== 'REJECTED' && order.transaction_type == 'BUY') {
 
@@ -136,7 +137,7 @@ console.log('ORDER UPDATE OPEN',cis.tradingsymbol)
     }
 
     if (order.status == 'COMPLETE' && order.transaction_type == 'SELL') {
-      console.log('\n\nSELL Order completed for', cis.tradingsymbol, 'status:', order.status,'\n\n');
+     // console.log('\n\nSELL Order completed for', cis.tradingsymbol, 'status:', order.status,'\n\n');
 
       // Resetting the order state
       cis.ordered = false;
@@ -154,7 +155,7 @@ console.log('ORDER UPDATE OPEN',cis.tradingsymbol)
 
 cis.hasLivePosition = false;
 cis.placedOrder = false
-console.log('\n\nemiting sell order update for',cis.tradingsymbol,global.clock)
+//console.log('\n\nemiting sell order update for',cis.tradingsymbol,global.clock)
 eventBus.emit('hasLivePositionUpdated', { token: order.instrument_token, value: false });
       cis.hasLivePosition=false;
 

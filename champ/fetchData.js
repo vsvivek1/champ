@@ -373,6 +373,9 @@ if(global.instrumentName=='STK' && false){
                 instrument.ma20=calculate20MA(instrument.minuteData);
                 instrument.dayHigh= Math.max(...instrument.minuteData.map(candle=>candle.high))
 
+                instrument.last3CandleLow= Math.min(...instrument.minuteData.slice(-3).map(candle=>candle.low))
+                
+
 
                // setVWAP
               instrument.VWAP=  setVWAP(instrument)

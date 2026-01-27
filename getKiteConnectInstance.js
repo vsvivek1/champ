@@ -1,5 +1,24 @@
 const { getTodaysAccessToken } = require('./getTodaysAccessToken.js');
 const KiteConnect = require("kiteconnect").KiteConnect;
+const KiteTicker = require("kiteconnect").KiteTicker;
+
+  require('dotenv').config();
+   const api_secret = process.env.api_secret;
+   //const api_key = process.env.api_key;
+   const api_key = 'wkcurst2vu5obug7';
+
+
+
+async function getTickerInstance(accessToken) {
+  const ticker = new KiteTicker({
+    api_key: api_key,
+    access_token: accessToken
+  });
+
+  return ticker;
+}
+
+exports.getTickerInstance = getTickerInstance;
 
 async function getKiteConnectInstance(accessToken ) {
 
@@ -105,11 +124,7 @@ async function getKiteConnectInstance(accessToken ) {
 
 
   
-   require('dotenv').config();
-   const api_secret = process.env.api_secret;
-   //const api_key = process.env.api_key;
-   const api_key = 'wkcurst2vu5obug7';
-
+ 
 if(!accessToken ){
 
    accessToken = await getTodaysAccessToken();
@@ -132,3 +147,5 @@ if(!accessToken ){
 }
 //module.exports=getKiteConnectInstance;
 exports.getKiteConnectInstance = getKiteConnectInstance;
+
+exports.kiteTicker = KiteConnect.KiteTicker;

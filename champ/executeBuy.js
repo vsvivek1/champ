@@ -5,7 +5,7 @@ import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
 
 import { getFreezeLimit } from './getFreezeLimit.js';
 
-
+import { logNewEntry } from './logNewEntry.js';
 
 
 
@@ -117,7 +117,7 @@ let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
     //   }
       if(true){
 
-        multiplier=Math.floor(Math.min(liveCash,50000)/(price*cis.lot_size));
+        multiplier=Math.floor(Math.min(liveCash,100000)/(price*cis.lot_size));
 
       //  qty=cis.lot_size*20;
 
@@ -143,7 +143,7 @@ qty=250;
 
 
 
-let tot=Math.min(global.margins.equity.available.live_balance,50000)||30000
+let tot=Math.min(global.margins.equity.available.live_balance,100000)||50000
 
 //tot
 
@@ -158,7 +158,7 @@ let qty1=cis.lot_size*q2
 
 //qty=qu;
 
-console.log(q2,'quantity',qty)
+console.log(q2,'quantity for buying',qty)
 
 //pm2 qty=cis.lot_size*2;
 
@@ -200,17 +200,20 @@ if(qty==0){
             return;
         }
 
- console.log ('\n NEW ENTRY ********************\n\nTHread',  cis.tradingsymbol,"quantity",qty,"price",price,"thread=",global.instrumentName,global.clock ,"\n\n'",`
-           Strategy= ${cis.buyStrategy} ,Entry health= ${cis.entryHealth} , return points= ${cis.returnPoints}, ibuiltTarget= ${cis.inbuiltTarget}, inbuiltStopLoss= ${cis.inbuiltStopLoss} 
-            
-            `,) 
+
+
+logNewEntry({
+  cis,
+  qty,
+  price,
+  global
+});
                    const orderId = await kite.placeOrder("regular", orderParams);
 cis.entryHealth='inside place order'
 
 cis.message = `${global.clock} Order placed successfully. Order ID: ${orderId}, ${cis.buyStrategy} for ${cis.tradingsymbol} at ${cis.entryPrice}, instrument.averageRange=${cis.averageRange},ordered=${cis.ordered},qty=${qty},price=${price}
 
-thread is
- ${global.instrumentName}
+
 
 `;
 

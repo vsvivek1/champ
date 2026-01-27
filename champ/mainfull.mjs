@@ -62,7 +62,7 @@ import { globalAgent } from 'http';
 // Load skip list from skip.json and assign to global
 try {
   global.skip = JSON.parse(fs.readFileSync("skip.json", "utf-8")).skip || [];
-  console.log("✅ Global skip list loaded:", global.skip,global.clock);
+ // console.log("✅ Global skip list loaded:", global.skip,global.clock);
 } catch (e) {
   global.skip = [];
   console.warn("⚠️ Could not load skip.json, using empty skip list.");
@@ -91,7 +91,7 @@ global.enableShortTrading=false;
 global.mockTrading=false;
 
 var cis;
-const instrumentData =[];
+var instrumentData =[];
 
 let niftyTrading=[]
 
@@ -165,22 +165,10 @@ eventBus.on('hasLivePositionUpdated', ({ token, value }) => {
 });
 
 
-if(instrumentName=='STK'){
-
-   // instrumentData= instrumentsForMining
-
-   console.log({instrumentName},'stk')
-
-   global.instrumentsForMining=niftyTrading
-    global.instrumentName=instrumentName;
-   global.instrumentsForMining=niftyTrading;
-    console.log('THread',instrumentName,global.clock);
-
-}else{
 
 
 
-    const instrumentData = instrumentsForMining//.filter(inst => inst.name == instrumentName);
+     instrumentData = instrumentsForMining//.filter(inst => inst.name == instrumentName);
     
     global.instrumentsForMining=instrumentsForMining//.filter(inst => inst.name == instrumentName);
     
@@ -188,9 +176,9 @@ if(instrumentName=='STK'){
     
    global.allInstruments=allInstruments//.find(inst => inst.name == instrumentName);
     
-    console.log('THread',instrumentName,global.clock);
+  //  console.log('THread',instrumentName,global.clock);
 
-}
+
 
 
 
@@ -436,10 +424,10 @@ function initTicker() {
     ticker.on("connect", subscribe);
     
     
-
+ ticker.on("ticks", onTicks);
     if(!(global.hours<9 || global.hours>15 ||(global.hours==9 && global.minutes<15 ) || (global.hours==15 && global.minutes>30))){
 
-        ticker.on("ticks", onTicks);
+       
 
 
       
@@ -461,6 +449,115 @@ function onTicks(ticks) {
     ticks.forEach(tick => processTicks(tick));
 }
 
+function updateAvgPriceChangePerTick(cis) {
+  
+  const currentPrice = cis.last_price;
+
+  
+  // first tick becomes baseline
+  
+
+  // calculate change from previous tick
+  const diff = currentPrice - cis.prevTickPrice;
+
+  // accumulate
+  cis.totalTickChange += diff;
+  cis.tickCount++;
+
+  // update avg change per tick
+  cis.avgChangePerTick = cis.totalTickChange / cis.tickCount;
+
+  // update prev price
+  cis.prevTickPrice = currentPrice;
+}
+
+
+function updateTPM(cis, globalMinutes, globalSeconds) {
+
+  if(cis.lp!=cis.tick.last_price){
+
+    cis.tps=(cis.tps ||0)+1
+  }
+
+
+  if(cis.lp<cis.tick.last_price){
+cis.up=cis.up+1 ||1
+  }else if(cis.lp>cis.tick.last_price){
+cis.down=cis.down+1 ||1
+
+  }
+  cis.lp=cis.tick.last_price
+
+
+
+  if(global.seconds==0){
+    cis.tps=0;
+
+   cis.strength= cis.up/cis.down*100
+    cis.up=1;
+    cis.down=1;
+
+  }
+  // Initialize once per cis
+  if (typeof cis.startMinute === 'undefined') {
+    cis.startMinute    = globalMinutes;
+    cis.startSecond    = globalSeconds;
+    cis.ticksInWindow  = 0;
+    cis.tpm            = 0;   // ticks per minute for last completed window
+  }
+
+
+  if(typeof cis.strength=='undefined') cis.strength=0;
+
+  if(global.seconds>58){
+
+  //        console.log(
+  //   cis.tps.toFixed(2),
+  //   'tps', 'strength',cis.up,cis.down,
+  //   cis.tradingsymbol,global.hours,":",global.minutes,
+  // );
+ 
+
+}
+
+
+if(global.seconds%30){
+  if(cis.up>cis.down*2){
+
+  //  console.log('strong up trend detected for',cis.tradingsymbol,cis.up,cis.down,'cis.tick.last_price',cis.tick.last_price);
+  }else if ((cis.down>cis.up*2)){
+
+    // console.log('strong down trend detected for',cis.tradingsymbol,cis.up,cis.down,'cis.tick.last_price',cis.tick.last_price);
+  }
+}
+
+
+// if(global.seconds%55==0){
+
+//  // console.log('last price is now',cis.tick.last_price,'for',cis.tradingsymbol,'at',global.clock);
+
+// }
+  // Count this tick
+  cis.ticksInWindow++;
+
+  // How many seconds passed since start
+  const elapsedSeconds =
+    (globalMinutes - cis.startMinute) * 60 +
+    (globalSeconds - cis.startSecond);
+
+  // If 2 minutes or more have passed
+  if (elapsedSeconds >= 60) {
+    const elapsedMinutes = elapsedSeconds / 60;    // usually ~2.0
+    cis.tpm = cis.ticksInWindow / elapsedMinutes;  // update TPM
+
+    // Reset for new 2-min window
+
+ 
+    cis.startMinute   = globalMinutes;
+    cis.startSecond   = globalSeconds;
+    cis.ticksInWindow = 0;
+  }
+}
 
 let count=0;
 let tickCount=0
@@ -480,13 +577,35 @@ async function processTicks(tick) {
     
 
 
+  //const currentMinute = global.minutes; 
 
 
+    const cis = global.instrumentsForMining.find(
+      (i) => i.instrument_token == tick.instrument_token
+    );
+    if (!cis){
 
-     cis =global.instrumentsForMining.find(i => i.instrument_token == tick.instrument_token);
+console.warn('CIS not found for tick instrument_token',tick.instrument_token);
+      return
+    } /// /safety
+  cis.tick = tick; 
+//console.log(global.clock,'tick received for',cis.tradingsymbol,cis.js)
 
+updateTPM(cis, global.minutes, global.seconds);
+updateAvgPriceChangePerTick(cis);
+ 
 
-     updateTickCount(cis);
+//console.log(cis.avgChangePerTick,'avg price change per tick for',cis.tradingsymbol);
+    // count this tick in the ongoing minute
+  
+
+   // console.log(cis.tradingsymbol)
+
+ // console.log(cis.tpm,'ticks per minute for',cis.tradingsymbol,'cis.ticksInThisMinute',cis.ticksInThisMinute);
+
+  //nreturn;
+
+     //updateTickCount(cis);
 
   
 
@@ -499,7 +618,11 @@ async function processTicks(tick) {
 
   
    
-   if(!cis.minuteData) return;
+   if(!cis.minuteData){
+    cis.returnPoints="minute data not found"
+   // console.log('minute data not found for',cis.tradingsymbol)
+   
+   return}
     
    if(!cis.ma20){
 
@@ -519,7 +642,7 @@ async function processTicks(tick) {
     
     if (!cis) return;
 
-    cis.tick = tick; 
+  
 
 
 
@@ -657,7 +780,7 @@ tickCount = (tickCount == 10) ? 0 : tickCount + 1;
 
   // return;
 
-//console.log('is here', cis)
+//console.log('is here', cis.tradingsymbol);
   socket.emit('sendCis', cis);
 
 
@@ -671,85 +794,6 @@ tickCount = (tickCount == 10) ? 0 : tickCount + 1;
 
 
 
- if(global.mockTrading==true && cis.placeOrder==true && cis.name==global.instrumentName) 
-    
-    {
-
-            cis.entryHealth='health mock trading with mock position true'
-//// watch for target or stop loss fire and set cis.mockPosition=false;
-
-/// check reached target
-
-cis.mockPosition=false;
-
-
-//if(global.seconds==30 && cis.updatedSecond!=global.seconds)
-    
-    if(true){    
-
-    cis.updatedSecond=global.seconds;
-console.log('for',cis.tradingsymbol,'at mock possition presentis true @ 120',cis.mockPosition,'is mock position ',
-    
-    cis.stopLossPrice,'is stop loss price',cis.targetPrice,'is target price',cis.tick.last_price,'is last price'  );
-
-}
-
-if(cis.tick.last_price >= cis.targetPrice || cis.tick.last_price <= cis.stopLossPrice) {
-
-    console.log(`Mock position target reached for ${cis.tradingsymbol} at price ${cis.tick.last_price}`);
-
-    // fire terget order
-
-
-
-    const orderParams = {
-            exchange: cis.exchange,
-            tradingsymbol: cis.tradingsymbol,
-            transaction_type: "SELL",
-            order_type: "LIMIT",
-            quantity: cis.buyQuantity,
-            price: cis.tick.last_price,
-            //product: "NRML",
-            product: "MIS",
-            validity: "DAY"
-        };
-    
-    
-    
-   
-    
-    
-        try {
-            const orderId = await kite.placeOrder("regular", orderParams);
-    
-    
-            // console.log(global.clock+ " Order placed successfully. Order ID:", orderId,
-    
-            //     cis.buyStrategy, 'for',cis.tradingsymbol,'at',cis.entryPrice,' instrument.averageRange=', cis.averageRange
-            // );
-    
-           
-        
-           // const buyOrder = await savePlaceOrder('AAPL', 'breakout', 100, 150, 'fixed target');
-          //  const buyOrder = await savePlaceOrder(cis.tradingsymbol, cis.buyStrategy, qty, price, 'fixed target');
-    
-    
-    
-          
-    
-        } catch (error) {
-            console.error("Error placing order:", error, cis.tradingsymbol,global.clock);
-        }
-
-
-    cis.mockPosition = false;
-    eventBus.emit('hasLivePositionUpdated', { token: cis.instrument_token, value: false });
-    return;
-  }
-
-
-return;
-    }
 
  
     cis.entryHealth='health has live positio'+cis.hasLivePosition
@@ -810,7 +854,7 @@ return;
 async function orderUpdates(order) {
 
     if(order.status!='COMPLETE') return;
-  console.log('order update received for',order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  );
+  //console.log('order update received for',order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  );
 
 
 
@@ -818,7 +862,7 @@ async function orderUpdates(order) {
 
    let cisx= global.allInstruments.find(cis => cis.tradingsymbol == order.tradingsymbol);
 
-   console.log('cisx found for order update',cisx?cisx.tradingsymbol:'not found',order.tradingsymbol)
+  // console.log('cisx found for order update',cisx?cisx.tradingsymbol:'not found',order.tradingsymbol)
     await handleOrderUpdates(order, kite,cisx,global.instrumentsForMining);
 }
 

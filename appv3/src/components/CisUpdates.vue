@@ -42,12 +42,12 @@
             </thead>
             <tbody>
              
-                <tr v-for="(item, index) in symbols" :key="index"
-                
-                
-             
-                
-                >
+              <tr
+  v-for="(item, index) in symbols"
+  :key="index"
+  
+ 
+>
                     <td>                   <span v-if="item['isAboveOpen'] " class="green"> 
 
 ^
@@ -384,5 +384,13 @@ th {
 }
 tr:nth-child(even) {
   background-color: #f9f9f9;
+}
+
+.row-green {
+  background-color: rgba(28, 129, 28, 0.12); /* light green tint */
+}
+
+.row-red {
+  background-color: rgba(255, 0, 0, 0.12); /* light red tint */
 }
 </style>

@@ -18,215 +18,163 @@ import { consoleOrigin } from 'firebase-tools/lib/api.js';
 
 
 
+// handleHasPosition.js (Freeze-quantity aware repair)
+
+
+
+import {
+  shouldTriggerStopLoss,
+
+} from './stopLossEngine.js';
+
+const FREEZE_QTY = {
+  NIFTY: 1800,
+  SENSEX: 900
+};
+
+function getFreezeQty(tradingsymbol) {
+  if (tradingsymbol.includes('NIFTY')) return FREEZE_QTY.NIFTY;
+  if (tradingsymbol.includes('SENSEX')) return FREEZE_QTY.SENSEX;
+  return Infinity; // stocks / others
+}
+
 export async function handlePositionPresent(cis, kite) {
 
 
+  cis.returnPoints="handlePositionPresent start health check"
+  /* --------------------------------------------------
+   * 1. PREPARE DATA
+   * -------------------------------------------------- */
 
+  const lastPrice = cis.tick.last_price;
 
+  const openOrders = global.orders.filter(
+    o => o.tradingsymbol === cis.tradingsymbol && o.status === 'OPEN'
+  );
 
-let ml3=Math.min(...cis.minuteData.slice(-3).map(m=>m.low))
-const openOrder = global.orders.find(o => o.tradingsymbol == cis.tradingsymbol && o.status == 'OPEN');
+  const openOrderQty = openOrders.reduce((s, o) => s + o.quantity, 0);
+  const positionQty = Math.abs(cis.position?.quantity ?? 0);
 
+  /* --------------------------------------------------
+   * 2. DELTA CHECK
+   * -------------------------------------------------- */
 
-//console.log(cis.buyPrice,'buy price in has position for',cis.tradingsymbol,ml3,'3 min low' );
-if(cis.tick.last_price<ml3) {
-  console.log('stop loss ml3 min last price below last 3 min low for',cis.tradingsymbol,'last price',cis.tick.last_price,'3min low',ml3);
+  const missingQty = positionQty - openOrderQty;
 
+  cis.returnPoints="handlePositionPresent Missing qty check "+missingQty
+  if (missingQty > 0) {
 
-        await updateOpenOrderPrice(kite, openOrder.order_id, cis.instrument_token, cis.tick.last_price, cis);
-}
+    console.log(
+      'Repairing reverse orders for',
+      cis.tradingsymbol,
+      'missingQty:',
+      missingQty
+    );
 
-  if(cis.stopLossExecuted){
+    // Refresh position (safety)
+    const positions = await kite.getPositions();
+    const refreshedPosition = positions.net.find(
+      p => p.tradingsymbol === cis.tradingsymbol
+    );
 
-    cis.returnPoints = `❌ [handlePositionPresent] Stop-loss already executed for ${cis.tradingsymbol}.`;
+    if (!refreshedPosition) return;
+    cis.position = refreshedPosition;
 
-    return false;
-  }
+    /* --------------------------------------------------
+     * 3. FREEZE-QTY AWARE SPLITTING
+     * -------------------------------------------------- */
 
-  if(!cis.position) return
+    const freezeQty = getFreezeQty(cis.tradingsymbol);
+    let qtyRemaining = missingQty;
 
+    while (qtyRemaining > 0) {
 
+      let orderQty = Math.min(qtyRemaining, freezeQty);
 
-
-
-  
-//if(global.seconds==30)console.log('long postion present for',cis.tradingsymbol);
-
-  if (true) {
-    // console.log('Position status for', 
-      
-    //   cis.tradingsymbol, 'SL:', cis.stopLossPrice, 'Last:', cis.tick.last_price, 'Target:', cis.targetPrice,
-    
-    //   `hasLivePosition is  ${cis.hasLivePosition}`
-    // );
-    cis.saidThat = true;
-  }
-
-   //setBuyPriceAndTargetPriceFromCompletedBuyOrder
-  
-       if(global.seconds%30==0){
-    setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis,kite);
-
-    //console.log(`position present ${cis.tradingsymbol} sl ${cis.stopLossPrice} ma20 ${cis.ma20} `);
-
-       }
-
-
- 
-if(cis.expiryDay && global.hours>13 &&  cis.tick.last_price>cis.ma20){
-
-  // If it's after 1 PM on the expiry day and the last price is above the 20-period moving average,
-  // we don't do stop loss for below open, so we return early.
-  return;
-
-}
-       
-
-
-    if(cis.tick.last_price<cis.ma20
-      
-      // || (cis.tick.last_price<cis.tick.ohlc.open 
-
-
-        
-      // )
-    
-    
-    )
-    
-    
-    {
-
-      
-  if (!openOrder) {
-
-  cis.signals?  cis.signals.NoReverseOrderFoundForPosition=true : cis.signals={NoReverseOrderFoundForPosition:true};
-    //console.warn(`xNo open order found to update for ${cis.tradingsymbol}. Cannot proceed with stop-loss update.`);
-
-
-   if(!cis.hasReverseOrder){
-    console.log('has reverse order',cis.tradingsymbol);
-
-     placeTargetIfNotTargetSet(cis, kite);
-   cis.hasReverseOrder=true
-    return;
-   }
-  
-  }
-
-
-
-  if(openOrder && openOrder.status == 'OPEN' && openOrder.order_id &&cis.position.quantity>0) {
-
-
-    console.log('executting stop loss below ma20 ',cis.tradingsymbol,
-   'last price',cis.tick.last_price,'ma20',cis.ma20,'open',cis.tick.ohlc.open, global.clock);
-
-        await updateOpenOrderPrice(kite, openOrder.order_id, cis.instrument_token, cis.tick.last_price, cis);
-
-        return;
-
-  }
-
-
-
-    }
-     
-
-return;
-
-
-
-
-  cis.entryHealth = 'Inside Has Position';
-  if (global.seconds % 19 == 0) cis.saidThat = false;
-
-  if (!cis.stopLossPrice || isNaN(cis.stopLossPrice)) {
-    cis.stopLossPrice = cis.tick.ohlc.open;
-  }
-
-  if (!cis.updated && cis.tick.last_price <= cis.stopLossPrice) {
-    cis.updated = true;
-    console.log('Executing inbuilt stop-loss for ie',`ie ${cis.tick.last_price} less than  open price ${cis.stopLossPrice} for`, cis.tradingsymbol);
-    executeSquareOff(true, cis, kite);
-    return;
-  }
-
-
-  let transactiontype = cis.position.quantity > 0 ? 'SELL' : 'BUY';
-
-  var tgtOrder = global.orders.find(o => o.tradingsymbol == cis.tradingsymbol && o.status == 'OPEN' && o.transaction_type == transactiontype);
-
-if(!tgtOrder){
-
-    global.orders = await kite.getOrders(); //trying once agin 
-}
-
-  if (!tgtOrder && !cis.hasTargetOrder) {
-    if (!cis.targetOrderCheckStartTime) {
-      cis.targetOrderCheckStartTime = Date.now();
-    } else {
-      const now = Date.now();
-      const elapsed = now - cis.targetOrderCheckStartTime;
-      global.orders = await kite.getOrders(); 
-
-      if (elapsed >= 3000) {
-
-        //setBuyPriceAndTargetPriceFromCompletedBuyOrder
-
-       // console.log('settint target from setBuyPriceAndTargetPriceFromCompletedBuyOrder ')
-       setBuyPriceAndTargetPriceFromCompletedBuyOrder(cis,kite);
-
-
-        cis.hasTargetOrder = true;
-      //  await placeTargetOrder(cis, tgtOrder, kite); no raksha
-       // console.log(`Target order placed for ${cis.tradingsymbol} after 30 seconds of confirmation.`);
+      // Lot-size alignment (important for options)
+      if (cis.lot_size && orderQty % cis.lot_size !== 0) {
+        orderQty = Math.floor(orderQty / cis.lot_size) * cis.lot_size;
       }
+
+      if (orderQty <= 0) break;
+
+      await kite.placeOrder("regular", {
+        exchange: refreshedPosition.exchange,
+        tradingsymbol: refreshedPosition.tradingsymbol,
+        transaction_type: refreshedPosition.quantity > 0 ? "SELL" : "BUY",
+        quantity: orderQty,
+        order_type: "LIMIT",
+        price: Math.ceil(cis.minuteData.at(-1).close * 1.1),
+        product: "NRML",
+        validity: "DAY"
+      });
+
+      qtyRemaining -= orderQty;
     }
-  }
 
-  if (cis.inbuiltStopLoss) {
-    cis.entryHealth = 'has inbuiltStopLoss:' + cis.inbuiltStopLoss + ' @ ' + cis.stopLossPrice + ' Now @' + cis.price;
+    global.orders = await kite.getOrders();
     return;
   }
 
+  /* --------------------------------------------------
+   * 4. STOP-LOSS TRAILING
+   * -------------------------------------------------- */
 
 
-  if(cis.tick.last_price<cis.tick.ohlc.open  || (  cis.ma20 && cis.ma20!=-1 && cis.tick.last_price<cis.ma20 )){
+ cis.returnPoints="Near should trigger stop loss "
 
 
-    /////very important . give up those . give up those . give up those
 
-    executeSquareOff(true, cis, kite);
 
-    return;
+if (
+  
+  shouldTriggerStopLoss(cis, global)
+|| cis.last3CandleLow<=cis.tick.last_price
 
-  }
+|| cis.ma20>cis.tick.last_price
 
+|| cis.tick.last_price<=cis.tick.ohlc.low
+
+
+) {
+
+
+
+
+  console.log(
+    'STOP LOSS TRIGGERED',
+    cis.tradingsymbol,
+    cis.slReason,
+    cis.tick.last_price
+  );
+  for (const order of openOrders) {
+      await updateOpenOrderPrice(
+        kite,
+        order.order_id,
+        cis.instrument_token,
+        lastPrice,
+        cis
+      );
+    }
+}
+
+
+ cis.returnPoints="After should trigger stop loss checks"
+
+  // if (!cis.stopLossUpdating) {
+
+  //   cis.stopLossUpdating = true;
+
+  //   for (const order of openOrders) {
+  //     await updateOpenOrderPrice(
+  //       kite,
+  //       order.order_id,
+  //       cis.instrument_token,
+  //       lastPrice,
+  //       cis
+  //     );
+  //   }
+  // }
 
   return;
-
-  // if (!cis.inbuiltStopLoss && cis.tick.last_price < cis.stopLossPrice) {
-  //   executeSquareOff(true, cis, kite);
-  //   return;
-  // }
-
-  // if (global.instrumentName == 'STK') {
-  //   if (cis.position.quantity < 0) {
-  //     handleShortCoveringOfStocks(cis, kite);
-  //   } else if (cis.position.quantity > 0) {
-  //     handleLongCoveringOfStocks(cis, kite);
-  //   }
-  //   return;
-  // }
-
-  // const squareOff = shouldSquareOff(cis);
-  // if (squareOff && global.hours<10) {
-  //   executeSquareOff(true, cis, kite);
-  //   return;
-  // }
-
-  // cis.entryHealth = 'Stop-loss health check: ' + cis.buy_price;
-
-  // return;
 }

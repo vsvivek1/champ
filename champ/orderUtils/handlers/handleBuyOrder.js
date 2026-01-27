@@ -20,9 +20,9 @@ export async function handleBuyOrder(order, kite, cis) {
     
     cis.tgtPrice = order.average_price+1
 
-         console.log('\norder update received at handle before place target order' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type ,global.clock )
+   ///      console.log('\norder update received at handle before place target order' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type ,global.clock )
 
-
+/// so this is working
     await placeTargetOrder(cis, order, kite);
   } catch (error) {
     console.log('❌ [handleBuyOrder] Error:', error);

@@ -1,0 +1,18 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://vivekvs:123456@localhost:5432/tick_logger"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model TickLog {
+  id         Int      @id @default(autoincrement())
+  scriptName String
+  price      Float
+  volume     Int
+  tickTime   DateTime @default(now())
+  cis        Json
+}
+

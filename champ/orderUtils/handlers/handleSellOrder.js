@@ -33,7 +33,7 @@ export async function handleSellOrder(order, kite, cis) {
 
     setTimeout(() => {
       cis.noBuy = false;
-      console.log('[handleSellOrder] NoBuy lock released:', cis.tradingsymbol);
+    //  console.log('[handleSellOrder] NoBuy lock released:', cis.tradingsymbol);
     }, 10 * 1000);
 
     

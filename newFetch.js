@@ -12,6 +12,7 @@ const { getUniqueNames } = require('./getUniqueNames.js');
 const { getUniqueInstruments } = require('./getUniqueNames.js');
 const { getUniqueTradingSymbols } = require('./getUniqueNames.js');
 const { getKiteConnectInstance } = require('./getKiteConnectInstance.js');
+const path = require('path');
 
 const fs = require('fs').promises;
 //const restartPM2Process = require('./restartPM2Process');
@@ -383,15 +384,22 @@ async function main(params) {
   
 ;
 
-  await writeJsonToFile(allScriptJson,'./appv3/public/instruments/instrumentsAll.json')
-  await writeJsonToFile(allScriptJson,'./appv3/src/assets/instruments/instrumentsAll.json')
+  writeJsonToFile(
+  allScriptJson,
+  path.join(__dirname, 'appv3', 'shared', 'instruments', 'instrumentsForMining.json')
+);
+
+writeJsonToFile(
+  allScriptJson,
+  path.join(__dirname, 'appv3', 'src', 'assets', 'instruments', 'instrumentsForMining.json')
+);
 
 
   var dateRange ;
   
    dateRange = getNextSevenDays();
   
-     console.log(dateRange,' expiry dates here ')
+   //  console.log(dateRange,' expiry dates here ')
    
 var nfoScripts=allScriptJson.filter(a=>
   
@@ -460,7 +468,7 @@ let names1 = [
 
 
 // Debug names array
-console.log('Names:', names);
+//console.log('Names:', names);
 
 
 
@@ -468,6 +476,8 @@ console.log('Names:', names);
 names=['NIFTY','SENSEX','BANKNIFTY',"MIDCPNIFTY","FINNIFTY"]
 
 const intervalId = await new Promise((resolve, reject) => {
+  
+  
   const interval = setInterval(async () => {
     if (index >= names.length) {
       console.log('✅ All index names processed.');
@@ -478,6 +488,7 @@ const intervalId = await new Promise((resolve, reject) => {
     }
 
     const currentName = names[index];
+    console.log('Current Name:', currentName);
     const tradingsymbol = indexOptions[currentName];
     const ins = allScriptJson.find(i => i.tradingsymbol == tradingsymbol);
 
@@ -497,12 +508,12 @@ const intervalId = await new Promise((resolve, reject) => {
         return;
       }
 
-      const depth = 1;
+    
 
      // const expiries = [...new Set(optionsForIndex.map(o => o.expiry))].sort();
 
       
-console.log('Depth',depth);
+//console.log('Depth',depth);
       
 const expiries  = Array.from({ length: 7 }, (_, i) => {
         const d = new Date();
@@ -510,17 +521,39 @@ const expiries  = Array.from({ length: 7 }, (_, i) => {
         return d.toISOString().slice(0, 10);          // “YYYY-MM-DD”; adjust formatting as needed
       });
 
-      console.log(expiries,'expiries');
+    //  console.log(expiries,'expiries');
      // const nearestExpiry = expiries[0];
 
       // Filter all options for this index
 
 
-      console.log(currentName);
+      
+var optionsForIndex;
+let month = new Date().getMonth() + 1; // Months are zero-based, so add 1
+month = month < 10 ? '0' + month : '' + month; // Ensure two-digit format 
+
+  const depth = 0;
+
+//
+
+//index++;
+//console.log('Current Month:', month);
+////return;
 
 
-    //  [ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
-      var optionsForIndex = allScriptJson.filter(o => o.name == currentName  && expiries.includes(o.expiry) );
+//return
+
+if(['BANKNIFTY',"MIDCPNIFTY","FINNIFTY"].includes(currentName)){
+console.log(currentName,'included');
+// optionsForIndex = allScriptJson.filter(o => o.name == currentName  && month==o.expiry.split('-')[1]) ;
+// console.log(optionsForIndex)
+}else{
+  //weekly expiry for nifty and sensex
+optionsForIndex = allScriptJson.filter(o => o.name == currentName  && expiries.includes(o.expiry) );
+
+
+    //  [ 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+    //   optionsForIndex = allScriptJson.filter(o => o.name == currentName  && expiries.includes(o.expiry) );
 
 
       //console.log(optionsForIndex )
@@ -528,8 +561,14 @@ const expiries  = Array.from({ length: 7 }, (_, i) => {
       // Pick nearest expiry
       
 
-      const ceOptions = optionsForIndex.filter(o => o.instrument_type == 'CE' && expiries.includes(o.expiry) );
-      const peOptions = optionsForIndex.filter(o => o.instrument_type == 'PE' && expiries.includes(o.expiry));
+      const ceOptions = optionsForIndex.filter(o => o.instrument_type == 'CE' 
+       // && expiries.includes(o.expiry)
+      
+      );
+      const peOptions = optionsForIndex.filter(o => o.instrument_type == 'PE' 
+       // && expiries.includes(o.expiry)
+      
+      );
 
       const ceStrikes = ceOptions.map(o => o.strike).sort((a, b) => a - b);
       const peStrikes = peOptions.map(o => o.strike).sort((a, b) => a - b);
@@ -563,13 +602,13 @@ const expiries  = Array.from({ length: 7 }, (_, i) => {
 
       if (peOption) selectedOptions.push(peOption);
       else console.warn(`⚠️ PE not found for ${currentName} @ ${peStrike}`);
-
+    }
     } catch (error) {
       console.error(`⚠️ Error processing ${currentName}: ${error.message}`);
     }
 
     index++;
-  }, 333);
+  }, 333)
 });
 
 
@@ -634,7 +673,7 @@ let a1=await popOption(selectedOptions,fullJson,accessTokenDoc);
 
 console.log('here 158',a1)
 
-//disconnect();
+//
 
 
 
@@ -693,17 +732,29 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
         
           console.log(`LAST TIME EXECUTED: ${Date()}`);
 
+const appDir = path.join(__dirname, 'appv3');
+exec(
+  'yarn run build && pm2 restart all',
+  { cwd: appDir },
+  (err, stdout, stderr) => {
+    try {
+      if (err) {
+        console.error('EXEC ERROR:', err.message);
+      }
 
-exec("cd ./appv3; yarn run build; pm2 restart server; pm2 restart startInstruments --watch", (err, stdout, stderr) => {
-  if (err) {
-    console.error(`Exec error: ${err}`);
-    return;
+      if (stdout) {
+        console.log('STDOUT:\n', stdout);
+      }
+
+      if (stderr) {
+        console.error('STDERR:\n', stderr);
+      }
+    } finally {
+      disconnect();
+    }
   }
-  console.log(`STDOUT:\n${stdout}`);
-  if (stderr) {
-    console.error(`STDERR:\n${stderr}`);
-  }
-});
+);
+
 
 
 resolve(true)
@@ -734,7 +785,7 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             option.pricePoints = c;
             option.SevenDayMaxMin = c.SevenDayMaxMin;
 
-            option.chart = `https://kite.zerodha.com/chart/ext/ciq/NFO-OPT/${option.tradingsymbol}/${option.instrument_token}`;
+            option.chart = `https://kite.zerodha.com/chart/ext/ciq/${option.exchange}/${option.tradingsymbol}/${option.instrument_token}`;
             option.selectedBuyingMethod = 'MAX';
             option.buyNow = false;
 
@@ -776,8 +827,15 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             console.log('new length', fullJson.length);
 
             //console.log(fullJson.length,'full json len',selectedOptions.length)
-            writeJsonToFile(fullJson,'./appv3/shared/instruments/instrumentsForMining.json')
-            writeJsonToFile(fullJson,'./appv3/src/assets/instruments/instrumentsForMining.json')
+           writeJsonToFile(
+  fullJson,
+  path.join(__dirname, 'appv3', 'shared', 'instruments', 'instrumentsForMining.json')
+);
+
+writeJsonToFile(
+  fullJson,
+  path.join(__dirname, 'appv3', 'src', 'assets', 'instruments', 'instrumentsForMining.json')
+);
             
 
             resolve(fullJson);

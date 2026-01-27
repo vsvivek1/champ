@@ -28,7 +28,7 @@ export default async function updateOpenOrderPrice(kite, orderId, instrumentToke
        //cis.updated = true;
         const response = await  kite.modifyOrder('regular',orderId, orderParams);
 
-        console.log(`Order ${orderId} upglobal.dated successfully to new price ${newPrice}.`,global.clock);
+      //  console.log(`Order ${orderId} upglobal.dated successfully to new price ${newPrice}.`,global.clock);
         return response;
     } catch (error) {
         console.error(`Error updating order ${orderId}:`, error,global.clock);

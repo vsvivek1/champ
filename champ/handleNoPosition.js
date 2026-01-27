@@ -30,6 +30,19 @@ import getTimeFactorAndElapsedMinutes from './getTimeFactorAndElapsedTime.js';
 import { handleSTKTrades } from './handleSTKTrades.js';
 import { handleNonSTKTrades } from './handleNonSTKTrades.js';
 
+import {
+  hasBidSide,
+  hasTightSpread,
+  isAggressiveBuyer,
+  hasPositiveImbalance,
+  hasMeaningfulLastQty,
+  isPriceMovingUp
+} from "./tickLogic.js";
+import { canBuyBasedOnSpread } from './canBuyBasedOnSpread.js';
+import { canBuyBasedOnDepth } from './canBuyBasedOnDepth.js';
+import { hasExecutionConfirmation } from './hasExecutionConfirmation.js';
+import { executionGateLong } from './executionGateLong.js';
+
 
 
 function handleReversalTrades(cis, kite) {
@@ -140,6 +153,35 @@ function handleGeneralTrades(cis, kite) {
 export async function handleNoPosition(cis, kite) {
 
 
+   // canBuyBasedOnSpread
+//     if (!canBuyBasedOnSpread(cis.tick)) {
+//         cis.returnPoints = 'spread too high';
+//   // do nothing, skip symbol
+//   return;
+// }
+
+
+//     if (!canBuyBasedOnDepth(cis.tick)) {
+//         cis.returnPoints = 'depth not favourable';
+//   // do nothing, skip symbol
+//   return;
+// }
+
+
+
+//executionGateLong
+// if (!executionGateLong(cis)) {  
+//     cis.returnPoints = 'execution gate failed';
+//   // do nothing, skip symbol
+//   return;   
+
+// }
+
+
+
+// executeBuy(cis, kite, null, 'noPositionHandler');
+
+// return
 
     let { timeFactor, elapsedMinutes } = getTimeFactorAndElapsedMinutes();
 

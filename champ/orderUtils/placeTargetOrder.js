@@ -37,7 +37,7 @@ case (cis.hasInbuiltTarget == true):
       default: {
         if (!order) {
 
-                   console.log(global.clock,'inside default of place targer' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
+                   console.log('inside default of place targer' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
 
           if (!global.orders) global.orders = [];
 
@@ -73,7 +73,7 @@ case (cis.hasInbuiltTarget == true):
  finalTargetPrice = Math.ceil(buyPrice * 1.05);
         }else{
 
-           finalTargetPrice = Math.round(buyPrice *1.02,1);
+           finalTargetPrice = Math.ceil(buyPrice*1.05,1);
         }
        
         cis.targetPrice = finalTargetPrice;
@@ -82,6 +82,8 @@ case (cis.hasInbuiltTarget == true):
       }
     }
 
+
+    //finalTargetPrice = Math.round(buyPrice *1.05,1);
     const orderParams = {
       exchange: cis.exchange,
       tradingsymbol: cis.tradingsymbol,
@@ -94,7 +96,7 @@ case (cis.hasInbuiltTarget == true):
     };
 
 
-             console.log(global.clock,'order update received at before place order' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
+         //    console.log('order update received at before place order' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
 
     const orderId = await kite.placeOrder('regular', orderParams);
     cis.hasPlacedTarget = true;
@@ -102,7 +104,7 @@ case (cis.hasInbuiltTarget == true):
     cis.hasPosition = true;
 
     await setTargetForTrade(cis.tradingsymbol, orderParams.price, 'final');
-    console.log(`✅ Target order placed. Order ID: ${orderId}`);
+    console.log(`✅ Target order placed. Order ID: ${orderId}`,orderId,"\n");
   } catch (err) {
     console.error(`❌ Error placing target order for ${cis.tradingsymbol}:`, err.message || err);
   } finally {

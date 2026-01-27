@@ -115,7 +115,7 @@ let niftyTrading=[]
 };
 
 function updateTickCount(cis) {
-  cis.count = (cis.count || 0) + 1;
+  cis.count = (cis.count || 0);
 
   if (global.seconds == 59) {
     cis.tps = cis.count;
@@ -451,13 +451,19 @@ async function processTicks(tick) {
 
 
   if (global.skip.includes(cis.tradingsymbol)) {
+    cis.returnPoints = 'ignore scripts as per skip.json';
   console.log(`⛔ Skipping ${cis.tradingsymbol}`);
   return;
 }
 
   
    
-   if(!cis.minuteData) return;
+   if(!cis.minuteData){
+
+cis.returnPoints = 'No minute data';
+ return;
+
+   }
     
    if(!cis.ma20){
 
@@ -473,7 +479,11 @@ async function processTicks(tick) {
    
   
     
-    if (!cis) return;
+    if (!cis){
+
+      cis.returnPoints = 'cis undefined return';
+      return;
+    } 
 
     cis.tick = tick; 
 

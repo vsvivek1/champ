@@ -1,0 +1,12 @@
+2026/01/25-20:23:24.462 4e6f Creating DB /home/think-vivek/champ/whatsapp/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb since it was missing.
+2026/01/25-20:23:24.464 4e6f Reusing MANIFEST /home/think-vivek/champ/whatsapp/.wwebjs_auth/session/Default/IndexedDB/https_web.whatsapp.com_0.indexeddb.leveldb/MANIFEST-000001
+2026/01/25-20:23:53.704 4e73 Level-0 table #5: started
+2026/01/25-20:23:53.716 4e73 Level-0 table #5: 1042946 bytes OK
+2026/01/25-20:23:53.718 4e73 Delete type=0 #3
+2026/01/25-20:23:54.388 4e6f Level-0 table #7: started
+2026/01/25-20:23:54.404 4e6f Level-0 table #7: 1341497 bytes OK
+2026/01/25-20:23:54.405 4e6f Delete type=0 #4
+2026/01/25-20:23:54.414 4e76 Compacting 1@1 + 1@2 files
+2026/01/25-20:23:54.434 4e76 Generated table #8@1: 29337 keys, 1543587 bytes
+2026/01/25-20:23:54.434 4e76 Compacted 1@1 + 1@2 files => 1543587 bytes
+2026/01/25-20:23:54.434 4e76 compacted to: files[ 0 0 1 0 0 0 0 ]

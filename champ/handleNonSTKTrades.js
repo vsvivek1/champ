@@ -21,12 +21,13 @@ import { handleShortNonSTKTrades } from "./handleShortNonSTKTrades.js";
 import e from "cors";
 import { handleMA20Reclaim } from './handleMa20Reclaim.js';
 import { handleDayHighBreak } from "./handleDayHighBreak.js";
+import { exec } from "child_process";
 
 
 // ==== MAIN FUNCTION ====
 export async function handleNonSTKTrades(cis, kite) {
 
-   
+   //return;
 
       if (typeof cis.tick == 'undefined' || typeof cis.tick.ohlc == 'undefined' || typeof cis.ma20 == 'undefined') {
 
@@ -52,18 +53,7 @@ cis.signals.safePassTickHealth=false
     }
      
 
-    if (global.enableShortTrading) {
-    const shorted = await handleShortNonSTKTrades(
-        cis,
-        kite,
-        shortOptionOrder,
-        shouldShortBasedOnMA20,
-        check20MAcrossFromAbove,
-        redCandleAfterThreeGreen
-    );
-    if (shorted) return;
-}
-
+   
     // if (
         
     //     // cis.tick.last_price < cis.tick.ohlc.open &&
@@ -105,6 +95,8 @@ cis.signals.safePassTickHealth=false
 
     if(cis.tick.last_price<cis.tick.ohlc.open){
 
+        cis.returnPoints = `LTP ${cis.tick.last_price} is less than Open ${cis.tick.ohlc.open}`;
+
     cis.signals.lastPriceGreaterThanOpen= false
    // return;
 }
@@ -123,6 +115,10 @@ if(cis.tick.last_price<cis.ma20){
 cis.signals.aboveMA20 = true;
    // cis.signals.aboveDayOpen = true;
 
+   
+   //console.log(cis.tradingsymbol,'cis.tps is less than 120, so returning curr tps=',cis.tps,global.clock);
+
+  // return
 
    if(cis.tps<120){
   //if(global.seconds%15==0)
@@ -130,12 +126,12 @@ cis.signals.aboveMA20 = true;
    // return
    }
 
-   if(cis.tps>2000){
+//    if(cis.tps>2000){
 
-    if(global.seconds%10==0)
-   console.log(cis.tradingsymbol,'cis.tps is VERY HIGH 2000, SO CHECK tps=',cis.tps,global.clock);
+//     if(global.seconds%10==0)
+//    console.log(cis.tradingsymbol,'cis.tps is VERY HIGH 2000, SO CHECK tps=',cis.tps,global.clock);
 
-   }
+//    }
 
 
 
@@ -151,7 +147,8 @@ cis.signals.lastPriceGreaterThanVWAP= false;
 
 
     let gd = checkGapDown(cis);
-    if (gd && global.hours < 11 && false) {
+
+    if (gd && global.hours < 11) {
         cis.signals.safePassGapDownTill11 = false;
         cis.returnPoints= `Gap Down detected:  Open Price ${cis.tick.ohlc.open} is less than Previous Close ${gd}  `;
         return;
@@ -178,8 +175,8 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
 
     if (cis.liveMinute.color == 'bearish') {
         cis.signals.safePasscheckcis_liveMinute_colorBearish = false;
-        cis.returnPoints
-        return false;
+    //    cis.returnPoints = 'Live candle is bearish';
+    //     return false;
     }
     cis.signals.safePasscheckcis_liveMinute_colorBearish = true;
 
@@ -190,12 +187,12 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
 
    // cis.signals.safePasscheckPenultimateGreenAndLastSmallBodyOrLowerHigh = true;
 
-    if (cis.operatorBuyCandles.fifteenMinutes == false && global.hours>9) {
+    if (cis.operatorBuyCandles.fifteenMinutes == false ) {
         cis.signals.safepassOperatorCandleCheck = false;
 
         cis.returnPoints = `Operator candles in 15 minutes not found for ${cis.tradingsymbol}`;
        // console.warn(`⚠️ Operator candles in 15 minutes not found for ${cis.tr
-        return false;
+      //  return false;
     }
 
     cis.signals.safepassOperatorCandleCheck = true;
@@ -213,6 +210,12 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
     // }
 
   
+ if (cis.tick.last_price < cis.tick.ohlc.open)   {
+        cis.signals.safePassLtpAboveMa20 = false;
+        cis.returnPoints = `ltp less than open ${cis.tick.ohlc.open}, LTP ${cis.tick.last_price}`;
+        return;
+    }
+
 
     if (cis.tick.last_price < cis.ma20) {
         cis.signals.safePassLtpAboveMa20 = false;
@@ -225,7 +228,7 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
         cis.signals.safepassCISTCheck = false;
         cis.returnPoints = 'CIST_HEALT-CHECK_FAILED';
         cis.entryHealth = 'CIST HEALTH CHECK FAILED';
-       // return
+        return
     }
     cis.signals.safepassCISTCheck = 'NA';
     cis.entryHealth = 'validatedCISTradeConditions';
@@ -238,23 +241,51 @@ cis.returnPoints = `Market closing soon, so not placing any orders`;
 
 ///// trade entries
 
+//console.log('passed all non-STK trade checks for',cis.tradingsymbol,global.clock);
+//console.log(cis.tick.last_price,'LTP',cis.ma20,'MA20',cis.tradingsymbol,'proceeding to trade checks at',global.clock);
+if(global.hours==9 &&  global.minutes<=50 && cis.fastAbove9Traded!=true && cis.tick.open<cis.tick.last_price){
+   // exec
+   cis.fastAbove9Traded=true
+
+   console.log('\n\n***************\n NEW ENTRY FAST ABOVE 9AM',global.clock,cis.tradingsymbol,cis.entryHealth);
+    executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
+
+}
+
 if(global.houurs<10){
 
- if (handleReversalTrades(cis, kite)) return;
+ 
     cis.signals.handleReversalTrades = false;
  if (buyAboveOpenAtNineAm(cis, kite)) return;
     cis.signals.buyAboveOpenAtNineAm = false;
+     if (handleLongLowerShadowTrades(cis, kite) ) return;
+
+    if (handleHammerCandleTrade(cis, kite) ) return;
+
+    if(handleDayHighBreak(cis, kite)) return
+
+    
+
+  if(handleDayHighBreak(cis, kite)) return
+
+  if (handleReversalTrades(cis, kite)) return;
+     if(handleDayHighBreak(cis, kite)) return
 }
 
+if(global.hours<15){
 
+    
+}
+
+ 
 //handleDayHighBreak
-   if(handleDayHighBreak(cis, kite)) return
+   
 
    
 
    // cis.signals.buyAtHugeLastTick = false;
 
-    if (handleLongLowerShadowTrades(cis, kite) ) return;
+   
     cis.signals.handleLongLowerShadowTrades = false;
 
     //if (handleNminuteBreakout(cis, kite, 90)) return;
@@ -269,7 +300,6 @@ if(global.houurs<10){
     // if (handleLastCandleHighBelowMA20(cis, kite)) return;
     // cis.signals.handleLastCandleHighBelowMA20 = false;
 
-    if (handleHammerCandleTrade(cis, kite) ) return;
    
 
 
@@ -280,7 +310,7 @@ if(global.houurs<10){
     
     cis.entryHealth = 'exitAfterAllChecks';
     cis.signals.exitAfterAllEntryStrategyChecks = true;
-
+cis.returnPoints = `failed all entries for ${cis.tradingsymbol}`;
 
     var cisx=cis;
     setTimeout(() => {
@@ -289,8 +319,11 @@ if(global.houurs<10){
     },300)
 
 
-    
-    
+//     if(global.seconds%30==0  ){
+
+//  console.log('passed all non-STK trade checks for',cis.tradingsymbol,global.clock);
+//     }
+   
     return;
 }
 

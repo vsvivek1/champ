@@ -1,0 +1,19 @@
+{
+  "name": "champ",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^5.22.0",
+    "express": "^4.21.0",
+    "kiteconnect": "^5.0.1",
+    "pg": "^8.13.1",
+    "prisma": "^5.22.0",
+    "regression": "^2.0.1",
+    "socket.io": "^4.8.0",
+    "technicalindicators": "^3.1.0",
+    "terminal-link": "^3.0.0",
+    "yarn": "^1.22.22"
+  }
+}

@@ -38,7 +38,7 @@ export function validateCISTradeConditions(cis) {
         }
 
         cis.entryHealth='LAST PRICE LESS THAN 1'
-          cis.returnPoints ='less than one ';
+          cis.returnPoints ='less than one rs ';
 
         global.addOrIncrementRejection("LAST PRICE LESS THAN 1: " + cis.tradingsymbol);
         return false;

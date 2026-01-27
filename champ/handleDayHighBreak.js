@@ -7,7 +7,13 @@ export function handleDayHighBreak(cis, kite) {
 
     cis.deployedStrategies.reversa30 = 'touched';
 
-    if (cis.tick.last_price > cis.dayHigh) {
+
+    let dayHighBeforeFinalCandle =Math.max(...cis.minuteData.slice(0, cis.minuteData.length - 2).map(d => d.high));
+    let finalCandle = cis.minuteData[cis.minuteData.length - 1];
+
+
+
+    if (cis.tick.last_price > finalCandle.high  && finalCandle.high < dayHighBeforeFinalCandle) {
 
   
         cis.buyStrategy = 'dayhigh break';
@@ -19,8 +25,8 @@ export function handleDayHighBreak(cis, kite) {
         cis.deployedStrategies.dayHighBreak = 'Activated';
         cis.signals.handleDayHighBreak = true;
         cis.entryHealth = 'Day High Break triggered';
-        console.log(global.clock, 'Executing', cis.tradingsymbol, cis.entryHealth);
-        executeBuy(cis, kite, Math.ceil(cis.tick.last_price));
+        console.log(global.clock, 'Executing Day High Break triggered', cis.tradingsymbol, cis.entryHealth);
+        executeBuy(cis, kite, Math.ceil(cis.tick.last_price- cis.liveMinute.range));
 
         return true; // Indicates a trade was executed
     } else {
