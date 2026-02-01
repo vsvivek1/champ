@@ -58,6 +58,7 @@ import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
 
 import fs from "fs";
 import { globalAgent } from 'http';
+import { executeBuy } from './executeBuy.js';
 
 // Load skip list from skip.json and assign to global
 try {
@@ -425,13 +426,7 @@ function initTicker() {
     
     
  ticker.on("ticks", onTicks);
-    if(!(global.hours<9 || global.hours>15 ||(global.hours==9 && global.minutes<15 ) || (global.hours==15 && global.minutes>30))){
-
-       
-
-
-      
-    }
+    
       ticker.on("order_update", orderUpdates);
    
 }
@@ -589,6 +584,32 @@ console.warn('CIS not found for tick instrument_token',tick.instrument_token);
       return
     } /// /safety
   cis.tick = tick; 
+
+setLiveMinute(cis);
+  
+    updateClosePriceAt59thSecond(cis)
+
+
+    if (cis.tick.last_price > cis.tick.ohlc.open && cis.liveMinute.color=='green' && global.hours==9 &&
+      (global.minutes<20 )  ) {
+  
+    
+          cis.buyStrategy = 'day start open  break';
+          cis.targetPrice = cis.tick.last_price + cis.liveMinute.range;
+          cis.stopLossPrice = cis.tick.last_price - cis.liveMinute.range;
+          cis.inbuiltTarget = true;
+          cis.inbuiltStopLoss = true;
+  
+          cis.deployedStrategies.dayHighBreak = 'Activated';
+          cis.signals.handleDayHighBreak = true;
+          cis.entryHealth = 'Day High Break triggered';
+          console.log(global.clock, 'Executing Open green candle ', cis.tradingsymbol, cis.entryHealth);
+
+         // executeBuy
+          executeBuy(cis, kite, Math.ceil(cis.tick.last_price- cis.liveMinute.range));
+  
+          return true; // Indicates a trade was executed
+      }
 //console.log(global.clock,'tick received for',cis.tradingsymbol,cis.js)
 
 updateTPM(cis, global.minutes, global.seconds);
@@ -739,9 +760,7 @@ tickCount = (tickCount == 10) ? 0 : tickCount + 1;
     
     
 
-    setLiveMinute(cis);
-  
-    updateClosePriceAt59thSecond(cis)
+    
     
 
 

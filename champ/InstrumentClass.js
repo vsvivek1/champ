@@ -11,6 +11,8 @@ export class Instrument {
     if (!instrument) {
 console.log(instrumentsData.length,'instrumentsDatalength')
 
+return;
+
       throw new Error(`Instrument with identifier ${identifier} not found.`);
     }
 

@@ -83,18 +83,61 @@ case (cis.hasInbuiltTarget == true):
     }
 
 
-    //finalTargetPrice = Math.round(buyPrice *1.05,1);
-    const orderParams = {
-      exchange: cis.exchange,
-      tradingsymbol: cis.tradingsymbol,
-      transaction_type: 'SELL',
-      order_type: 'LIMIT',
-      quantity: order.quantity, //|| cis.position?.quantity || 1,
-      price: finalTargetPrice,
-      product: 'NRML',
-      validity: 'DAY',
-    };
+    finalTargetPrice = Math.round(buyPrice *1.5,1);
+    
+    // const orderParams = {
+    //   exchange: cis.exchange,
+    //   tradingsymbol: cis.tradingsymbol,
+    //   transaction_type: 'SELL',
+    //   order_type: 'LIMIT',
+    //   quantity: order.quantity, //|| cis.position?.quantity || 1,
+    //   price: finalTargetPrice,
+    //   product: 'NRML',
+    //   validity: 'DAY',
+    // };
 
+
+   // 1️⃣ Get lowest LOW of last 15 minutes
+let fifteenMinutesLow = null;
+
+if (cis.minuteData && cis.minuteData.length >= 15) {
+  fifteenMinutesLow = cis.minuteData
+    .slice(-15)
+    .reduce((min, candle) => {
+      const low = candle[3]; // LOW index
+      return low < min ? low : min;
+    }, Infinity);
+}
+
+// 2️⃣ Decide trigger price (1% below 15-min low)
+let triggerPrice;
+
+if (fifteenMinutesLow === null || !isFinite(fifteenMinutesLow)) {
+  console.log(
+    '⚠️ fifteenMinutesLow invalid, setting SL to 5% below buy price'
+  );
+  triggerPrice = Math.round(buyPrice * 0.95 * 10) / 10;
+} else {
+  triggerPrice = Math.round(fifteenMinutesLow * 0.99 * 10) / 10;
+}
+
+// 3️⃣ SL limit price (slightly below trigger)
+let slPrice = Math.round(triggerPrice * 0.997 * 10) / 10;
+
+// 4️⃣ Final order params
+const orderParams = {
+  exchange: cis.exchange,
+  tradingsymbol: cis.tradingsymbol,
+  transaction_type: 'SELL',
+  order_type: 'SL',
+
+  trigger_price: triggerPrice, // ✅ NUMBER
+  price: slPrice,              // ✅ NUMBER
+
+  quantity: order.quantity,
+  product: 'NRML',
+  validity: 'DAY',
+};
 
          //    console.log('order update received at before place order' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
 

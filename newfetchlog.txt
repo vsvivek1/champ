@@ -1031862,3 +1031862,267 @@ MongoNotConnectedError: Client must be connected before running operations
 }
 
 Node.js v18.19.1
+----- Wed Jan 28 09:14:01 AM IST 2026 -----
+whoami: think-vivek
+pwd: /home/think-vivek/champ
+PATH: /usr/local/bin:/usr/bin:/bin:/snap/bin
+/usr/bin/node
+v18.19.1
+4GutA2R2jdheN7xtVdP6nEDXoVVkpnnn accessToken 
+Current Name: NIFTY
+Current Name: SENSEX
+Current Name: BANKNIFTY
+BANKNIFTY included
+Current Name: MIDCPNIFTY
+MIDCPNIFTY included
+Current Name: FINNIFTY
+FINNIFTY included
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2620325300CE',
+  'NIFTY2620325250PE',
+  'SENSEX26JAN81900CE',
+  'SENSEX26JAN81800PE'
+] s
+SENSEX26JAN81800PE - pop option attaching pp len 3
+292695557 4GutA2R2jdheN7xtVdP6nEDXoVVkpnnn accessTokenDoc 
+292695557 instru token inside seting function
+pushing option SENSEX26JAN81800PE 2026-01-29
+new length 1
+SENSEX26JAN81900CE - pop option attaching pp len 2
+294665221 4GutA2R2jdheN7xtVdP6nEDXoVVkpnnn accessTokenDoc 
+294665221 instru token inside seting function
+pushing option SENSEX26JAN81900CE 2026-01-29
+new length 2
+NIFTY2620325250PE - pop option attaching pp len 1
+12747266 4GutA2R2jdheN7xtVdP6nEDXoVVkpnnn accessTokenDoc 
+12747266 instru token inside seting function
+NIFTY2620325300CE - pop option attaching pp len 0
+12747522 4GutA2R2jdheN7xtVdP6nEDXoVVkpnnn accessTokenDoc 
+12747522 instru token inside seting function
+pushing option NIFTY2620325300CE 2026-02-03
+new length 3
+Array is empty. Resetting timer.
+pushing option NIFTY2620325250PE 2026-02-03
+new length 4
+LAST TIME EXECUTED: Wed Jan 28 2026 09:14:14 GMT+0530 (India Standard Time)
+here 158 true
+STDOUT:
+ yarn run v1.22.22
+$ vite build
+vite v2.9.18 building for production...
+transforming...
+✓ 148 modules transformed.
+rendering chunks...
+dist/index.html                  1.19 KiB
+dist/assets/About.fd8dca9b.js    0.65 KiB / gzip: 0.38 KiB
+dist/assets/index.d154f01a.css   2.07 KiB / gzip: 0.81 KiB
+dist/assets/index.4e67bc2b.js    369.14 KiB / gzip: 107.75 KiB
+Done in 1.55s.
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [all](ids: [ 0 ])
+[PM2] [server](0) ✓
+┌────┬───────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name      │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ server    │ default     │ 1.0.0   │ fork    │ 66748    │ 0s     │ 12   │ online    │ 0%       │ 11.2mb   │ think-v… │ disabled │
+└────┴───────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+start: 1.016ms
+/home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:24
+            throw new error_1.MongoNotConnectedError('Client must be connected before running operations');
+                  ^
+
+MongoNotConnectedError: Client must be connected before running operations
+    at executeOperationAsync (/home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:24:19)
+    at /home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:12:45
+    at maybeCallback (/home/think-vivek/champ/node_modules/mongodb/lib/utils.js:337:21)
+    at executeOperation (/home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:12:38)
+    at FindCursor._initialize (/home/think-vivek/champ/node_modules/mongodb/lib/cursor/find_cursor.js:54:50)
+    at [kInit] (/home/think-vivek/champ/node_modules/mongodb/lib/cursor/abstract_cursor.js:444:14)
+    at next (/home/think-vivek/champ/node_modules/mongodb/lib/cursor/abstract_cursor.js:512:22)
+    at node:internal/util:441:7
+    at new Promise (<anonymous>)
+    at next (node:internal/util:427:12) {
+  [Symbol(errorLabels)]: Set(0) {}
+}
+
+Node.js v18.19.1
+----- Thu Jan 29 09:14:01 AM IST 2026 -----
+whoami: think-vivek
+pwd: /home/think-vivek/champ
+PATH: /usr/local/bin:/usr/bin:/bin:/snap/bin
+/usr/bin/node
+v18.19.1
+iQl2bMwLUbJe3cOnYD0cknGwBeCCAcSW accessToken 
+Current Name: NIFTY
+Current Name: SENSEX
+Current Name: BANKNIFTY
+BANKNIFTY included
+Current Name: MIDCPNIFTY
+MIDCPNIFTY included
+Current Name: FINNIFTY
+FINNIFTY included
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2620325350CE',
+  'NIFTY2620325300PE',
+  'SENSEX26JAN82400CE',
+  'SENSEX26JAN82300PE'
+] s
+SENSEX26JAN82300PE - pop option attaching pp len 3
+291441669 iQl2bMwLUbJe3cOnYD0cknGwBeCCAcSW accessTokenDoc 
+291441669 instru token inside seting function
+pushing option SENSEX26JAN82300PE 2026-01-29
+new length 1
+SENSEX26JAN82400CE - pop option attaching pp len 2
+293617669 iQl2bMwLUbJe3cOnYD0cknGwBeCCAcSW accessTokenDoc 
+293617669 instru token inside seting function
+pushing option SENSEX26JAN82400CE 2026-01-29
+new length 2
+NIFTY2620325300PE - pop option attaching pp len 1
+12747778 iQl2bMwLUbJe3cOnYD0cknGwBeCCAcSW accessTokenDoc 
+12747778 instru token inside seting function
+pushing option NIFTY2620325300PE 2026-02-03
+new length 3
+NIFTY2620325350CE - pop option attaching pp len 0
+12748546 iQl2bMwLUbJe3cOnYD0cknGwBeCCAcSW accessTokenDoc 
+12748546 instru token inside seting function
+pushing option NIFTY2620325350CE 2026-02-03
+new length 4
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Thu Jan 29 2026 09:14:15 GMT+0530 (India Standard Time)
+here 158 true
+STDOUT:
+ yarn run v1.22.22
+$ vite build
+vite v2.9.18 building for production...
+transforming...
+✓ 148 modules transformed.
+rendering chunks...
+dist/index.html                  1.19 KiB
+dist/assets/About.7dc6dcd6.js    0.65 KiB / gzip: 0.37 KiB
+dist/assets/index.d154f01a.css   2.07 KiB / gzip: 0.81 KiB
+dist/assets/index.a6a19e67.js    370.27 KiB / gzip: 108.45 KiB
+Done in 1.63s.
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [all](ids: [ 0 ])
+[PM2] [server](0) ✓
+┌────┬───────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name      │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ server    │ default     │ 1.0.0   │ fork    │ 92239    │ 0s     │ 22   │ online    │ 0%       │ 9.6mb    │ think-v… │ disabled │
+└────┴───────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+start: 1.763ms
+/home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:24
+            throw new error_1.MongoNotConnectedError('Client must be connected before running operations');
+                  ^
+
+MongoNotConnectedError: Client must be connected before running operations
+    at executeOperationAsync (/home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:24:19)
+    at /home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:12:45
+    at maybeCallback (/home/think-vivek/champ/node_modules/mongodb/lib/utils.js:337:21)
+    at executeOperation (/home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:12:38)
+    at FindCursor._initialize (/home/think-vivek/champ/node_modules/mongodb/lib/cursor/find_cursor.js:54:50)
+    at [kInit] (/home/think-vivek/champ/node_modules/mongodb/lib/cursor/abstract_cursor.js:444:14)
+    at next (/home/think-vivek/champ/node_modules/mongodb/lib/cursor/abstract_cursor.js:512:22)
+    at node:internal/util:441:7
+    at new Promise (<anonymous>)
+    at next (node:internal/util:427:12) {
+  [Symbol(errorLabels)]: Set(0) {}
+}
+
+Node.js v18.19.1
+----- Fri Jan 30 09:14:01 AM IST 2026 -----
+whoami: think-vivek
+pwd: /home/think-vivek/champ
+PATH: /usr/local/bin:/usr/bin:/bin:/snap/bin
+/usr/bin/node
+v18.19.1
+MF2ygTB4NCW2SBsWLasSIYI2Ljno9aub accessToken 
+Current Name: NIFTY
+Current Name: SENSEX
+Current Name: BANKNIFTY
+BANKNIFTY included
+Current Name: MIDCPNIFTY
+MIDCPNIFTY included
+Current Name: FINNIFTY
+FINNIFTY included
+✅ All index names processed.
+[ 'NIFTY', 'SENSEX', 'BANKNIFTY', 'MIDCPNIFTY', 'FINNIFTY' ]
+Pushing selected options
+[
+  'NIFTY2620325250CE',
+  'NIFTY2620325200PE',
+  'SENSEX2620582000CE',
+  'SENSEX2620581900PE'
+] s
+SENSEX2620581900PE - pop option attaching pp len 3
+210789893 MF2ygTB4NCW2SBsWLasSIYI2Ljno9aub accessTokenDoc 
+210789893 instru token inside seting function
+SENSEX2620582000CE - pop option attaching pp len 2
+210703109 MF2ygTB4NCW2SBsWLasSIYI2Ljno9aub accessTokenDoc 
+210703109 instru token inside seting function
+pushing option SENSEX2620581900PE 2026-02-05
+new length 1
+NIFTY2620325200PE - pop option attaching pp len 1
+12746754 MF2ygTB4NCW2SBsWLasSIYI2Ljno9aub accessTokenDoc 
+12746754 instru token inside seting function
+pushing option SENSEX2620582000CE 2026-02-05
+new length 2
+NIFTY2620325250CE - pop option attaching pp len 0
+12747010 MF2ygTB4NCW2SBsWLasSIYI2Ljno9aub accessTokenDoc 
+pushing option NIFTY2620325200PE 2026-02-03
+new length 3
+12747010 instru token inside seting function
+pushing option NIFTY2620325250CE 2026-02-03
+new length 4
+Array is empty. Resetting timer.
+LAST TIME EXECUTED: Fri Jan 30 2026 09:14:15 GMT+0530 (India Standard Time)
+here 158 true
+STDOUT:
+ yarn run v1.22.22
+$ vite build
+vite v2.9.18 building for production...
+transforming...
+✓ 148 modules transformed.
+rendering chunks...
+dist/index.html                  1.19 KiB
+dist/assets/About.add33982.js    0.65 KiB / gzip: 0.38 KiB
+dist/assets/index.d154f01a.css   2.07 KiB / gzip: 0.81 KiB
+dist/assets/index.9432285b.js    369.51 KiB / gzip: 107.25 KiB
+Done in 1.61s.
+Use --update-env to update environment variables
+[PM2] Applying action restartProcessId on app [all](ids: [ 0 ])
+[PM2] [server](0) ✓
+┌────┬───────────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+│ id │ name      │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+├────┼───────────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+│ 0  │ server    │ default     │ 1.0.0   │ fork    │ 108926   │ 0s     │ 32   │ online    │ 0%       │ 11.3mb   │ think-v… │ disabled │
+└────┴───────────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
+
+start: 1.975ms
+/home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:24
+            throw new error_1.MongoNotConnectedError('Client must be connected before running operations');
+                  ^
+
+MongoNotConnectedError: Client must be connected before running operations
+    at executeOperationAsync (/home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:24:19)
+    at /home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:12:45
+    at maybeCallback (/home/think-vivek/champ/node_modules/mongodb/lib/utils.js:337:21)
+    at executeOperation (/home/think-vivek/champ/node_modules/mongodb/lib/operations/execute_operation.js:12:38)
+    at FindCursor._initialize (/home/think-vivek/champ/node_modules/mongodb/lib/cursor/find_cursor.js:54:50)
+    at [kInit] (/home/think-vivek/champ/node_modules/mongodb/lib/cursor/abstract_cursor.js:444:14)
+    at next (/home/think-vivek/champ/node_modules/mongodb/lib/cursor/abstract_cursor.js:512:22)
+    at node:internal/util:441:7
+    at new Promise (<anonymous>)
+    at next (node:internal/util:427:12) {
+  [Symbol(errorLabels)]: Set(0) {}
+}
+
+Node.js v18.19.1

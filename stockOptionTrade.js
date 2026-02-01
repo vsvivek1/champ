@@ -54,7 +54,7 @@ var margin;
 
 let scripts1=[];
 
-let targetPc=1.2; // target at 150% of opening range
+let targetPc=1.5; // target at 150% of opening range
 
 let targetType="pc"
 
@@ -94,6 +94,8 @@ netPositions.forEach(pos => {
   const script = scripts1.find(
     s => s.tradingsymbol === pos.tradingsymbol
   );
+
+  if(!script) return;
 
 script.alreadyTraded=true;
   if (pos.quantity === 0) return;
@@ -227,7 +229,7 @@ async function startTimer(kite) {
     console.log("Timer tick - checking positions");
  margin=await kite.getMargins();
   
-  }, 5 * 60 * 1000); // every 5 minutes 
+  }, 3 * 60 * 1000); // every 5 minutes 
 }
 
 async function writeJsonToFile(jsonData, fileName) {
@@ -356,12 +358,14 @@ kite.placeOrder("regular", {
   ticker.on("connect", () => {
     console.log("🟢 Kite Ticker connected");
 
+    
+
     const tokens = scripts
       .map(s => parseInt(s.instrument_token))
       .filter(Boolean);
 
       
-
+console.log("subscribing to tokens:",tokens)
     ticker.subscribe(tokens);
     ticker.setMode(ticker.modeFull, tokens);
 
@@ -617,7 +621,7 @@ async function main(){
 clock();
   if(new Date().getHours()>=15){
     console.log("Market closed, exiting.");
-    return;
+   // return;
   }
 
   //  if(new Date().getHours()==9 && new Date().getMinutes()<30){
@@ -667,9 +671,14 @@ let kiteTicker=await getTickerInstance (accesstoken);
 
 let j=await downLoadAllInstrumentsAndReturnJson(accesstoken);
 
+console.log("Total scripts downloaded:",j.length);
+
 let month=new Date().getMonth()+1;
-month=1;
+console.log("Current month:",month)
+//month=1;
 let scripts=j.filter(item=>item.expiry.includes(`-0${month}-`)&&item.exchange=="NFO" && item.segment.includes("OPT"    ))    ;
+
+console.log("Total option scripts for month ",month,":",scripts.length);
 
 let stocks=scripts.map(item=>item.name).filter(i=>i!=   "NIFTY" && i!="BANKNIFTY"  ).
 filter((value, index, self) => self.indexOf(value) === index).map(item=>"NSE:"+item);  ;

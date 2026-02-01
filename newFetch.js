@@ -532,7 +532,7 @@ var optionsForIndex;
 let month = new Date().getMonth() + 1; // Months are zero-based, so add 1
 month = month < 10 ? '0' + month : '' + month; // Ensure two-digit format 
 
-  const depth = 0;
+  const depth = 2;
 
 //
 
