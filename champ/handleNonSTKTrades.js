@@ -75,6 +75,11 @@ cis.signals.safePassTickHealth=false
         return false;
     }
 
+    if (cis.sidewaysMarket) {
+        cis.returnPoints = 'Sideways/choppy market detected - no new entries';
+        return false;
+    }
+
     if (hasCorrelatedPositionOpen(cis)) {
         cis.returnPoints = 'Correlated index already has an open position';
         return false;
