@@ -70,6 +70,11 @@ cis.signals.safePassTickHealth=false
         return false;
     }
 
+    if (global.profitLockTriggered) {
+        cis.returnPoints = 'Daily profit lock triggered - no new entries today';
+        return false;
+    }
+
     if (hasCorrelatedPositionOpen(cis)) {
         cis.returnPoints = 'Correlated index already has an open position';
         return false;

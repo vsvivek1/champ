@@ -101,6 +101,9 @@ global.riskPerTradePct = 0.01;     // 1% of available capital risked per trade
 global.maxDailyLossPct = 0.03;     // stop new entries once the day's loss hits 3%
 global.dayStartEquity = null;
 global.dailyLossLimitHit = false;
+global.minProfitCushionPct = 0.01;  // peak profit must reach this % of capital before profit-lock arms
+global.dayPeakPnL = 0;
+global.profitLockTriggered = false;
 
 var cis;
 var instrumentData =[];
@@ -375,6 +378,18 @@ async function main(ws=null) {
                  console.warn(`Daily loss limit hit: PnL ${dailyPnL.toFixed(0)}, dayStartEquity ${global.dayStartEquity.toFixed(0)}`);
                }
                global.dailyLossLimitHit = true;
+             }
+
+             if (dailyPnL > global.dayPeakPnL) {
+               global.dayPeakPnL = dailyPnL;
+             }
+
+             const profitCushionArmed = global.dayPeakPnL >= global.minProfitCushionPct * global.dayStartEquity;
+             if (profitCushionArmed && dailyPnL <= global.dayPeakPnL * 0.90) {
+               if (!global.profitLockTriggered) {
+                 console.warn(`Profit lock triggered: peak PnL ${global.dayPeakPnL.toFixed(0)}, current PnL ${dailyPnL.toFixed(0)}`);
+               }
+               global.profitLockTriggered = true;
              }
            }
             }
