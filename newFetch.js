@@ -13,6 +13,13 @@ const { getUniqueInstruments } = require('./getUniqueNames.js');
 const { getUniqueTradingSymbols } = require('./getUniqueNames.js');
 const { getKiteConnectInstance } = require('./getKiteConnectInstance.js');
 const path = require('path');
+const {
+  attachMovingAverages,
+  hasConfirmedRecentCross
+} = require("./macrossUtils.js");
+
+
+
 
 const fs = require('fs').promises;
 //const restartPM2Process = require('./restartPM2Process');
@@ -532,16 +539,12 @@ var optionsForIndex;
 let month = new Date().getMonth() + 1; // Months are zero-based, so add 1
 month = month < 10 ? '0' + month : '' + month; // Ensure two-digit format 
 
-  const depth = 2;
-
-//
-
-//index++;
-//console.log('Current Month:', month);
-////return;
-
-
-//return
+  // Premium-band strike selection: pick the strike whose live premium falls
+  // inside [MIN_PREMIUM, MAX_PREMIUM] rather than a fixed strike-count offset,
+  // since strike spacing/IV moves the premium for a fixed depth all over the place.
+  const MIN_PREMIUM = 20;
+  const MAX_PREMIUM = 30;
+  const STRIKE_SCAN_WINDOW = 20; // how many strikes OTM to scan looking for a band match
 
 if(['BANKNIFTY',"MIDCPNIFTY","FINNIFTY"].includes(currentName)){
 console.log(currentName,'included');
@@ -559,49 +562,70 @@ optionsForIndex = allScriptJson.filter(o => o.name == currentName  && expiries.i
       //console.log(optionsForIndex )
      // process.exit()
       // Pick nearest expiry
-      
 
-      const ceOptions = optionsForIndex.filter(o => o.instrument_type == 'CE' 
-       // && expiries.includes(o.expiry)
-      
-      );
-      const peOptions = optionsForIndex.filter(o => o.instrument_type == 'PE' 
-       // && expiries.includes(o.expiry)
-      
-      );
+
+      const ceOptions = optionsForIndex.filter(o => o.instrument_type == 'CE');
+      const peOptions = optionsForIndex.filter(o => o.instrument_type == 'PE');
 
       const ceStrikes = ceOptions.map(o => o.strike).sort((a, b) => a - b);
       const peStrikes = peOptions.map(o => o.strike).sort((a, b) => a - b);
 
-      const findStrikeByDepth = (strikes, ltp, depth, direction) => {
-        if (direction == 'above') {
-          const baseIndex = strikes.findIndex(s => s >= ltp);
-          if (baseIndex == -1) return null;
-          const targetIndex = baseIndex + depth;
-          return strikes[targetIndex] || null;
-        } else {
-          const reversed = [...strikes].reverse();
-          const baseIndexReversed = reversed.findIndex(s => s <= ltp);
-          if (baseIndexReversed == -1) return null;
-          const baseIndex = strikes.length - 1 - baseIndexReversed;
-          const targetIndex = baseIndex - depth;
-          return strikes[targetIndex] || null;
+      // OTM-direction candidate windows around spot (CE: strikes above spot, PE: strikes below spot)
+      const ceBaseIndex = ceStrikes.findIndex(s => s >= ltp);
+      const ceCandidateStrikes = ceBaseIndex == -1
+        ? []
+        : ceStrikes.slice(ceBaseIndex, ceBaseIndex + STRIKE_SCAN_WINDOW);
+
+      const peReversed = [...peStrikes].reverse();
+      const peBaseIndexReversed = peReversed.findIndex(s => s <= ltp);
+      const peCandidateStrikes = peBaseIndexReversed == -1
+        ? []
+        : (() => {
+            const peBaseIndex = peStrikes.length - 1 - peBaseIndexReversed;
+            const start = Math.max(0, peBaseIndex - STRIKE_SCAN_WINDOW + 1);
+            return peStrikes.slice(start, peBaseIndex + 1).reverse(); // nearest-to-spot first
+          })();
+
+      const ceCandidates = ceCandidateStrikes.map(s => ceOptions.find(o => o.strike == s)).filter(Boolean);
+      const peCandidates = peCandidateStrikes.map(s => peOptions.find(o => o.strike == s)).filter(Boolean);
+
+      const allCandidates = [...ceCandidates, ...peCandidates];
+
+      let quotes = {};
+      if (allCandidates.length) {
+        quotes = await kite.getLTP(allCandidates.map(o => o.instrument_token));
+      }
+
+      const pickByPremiumBand = (candidates, legName) => {
+        if (!candidates.length) return null;
+
+        const withPremium = candidates
+          .map(o => ({ option: o, premium: quotes[o.instrument_token]?.last_price }))
+          .filter(c => typeof c.premium == 'number' && c.premium > 0);
+
+        if (!withPremium.length) return null;
+
+        const midBand = (MIN_PREMIUM + MAX_PREMIUM) / 2;
+        const inBand = withPremium.filter(c => c.premium >= MIN_PREMIUM && c.premium <= MAX_PREMIUM);
+        const pool = inBand.length ? inBand : withPremium;
+
+        pool.sort((a, b) => Math.abs(a.premium - midBand) - Math.abs(b.premium - midBand));
+
+        if (!inBand.length) {
+          console.warn(`No ${legName} strike in band ${MIN_PREMIUM}-${MAX_PREMIUM} for ${currentName}, falling back to closest premium ${pool[0].premium}`);
         }
+
+        return pool[0].option;
       };
 
-      const ceStrike = findStrikeByDepth(ceStrikes, ltp, depth, 'above');
-      const peStrike = findStrikeByDepth(peStrikes, ltp, depth, 'below');
-
-      const ceOption = ceOptions.find(o => o.strike == ceStrike);
-      const peOption = peOptions.find(o => o.strike == peStrike);
-
-      //console.log(`➡️ ${currentName} | LTP: ${ltp} | CE: ${ceStrike} | PE: ${peStrike} | Expiry: ${nearestExpiry}`);
+      const ceOption = pickByPremiumBand(ceCandidates, 'CE');
+      const peOption = pickByPremiumBand(peCandidates, 'PE');
 
       if (ceOption) selectedOptions.push(ceOption);
-      else console.warn(`⚠️ CE not found for ${currentName} @ ${ceStrike}`);
+      else console.warn(`CE not found in premium band for ${currentName}`);
 
       if (peOption) selectedOptions.push(peOption);
-      else console.warn(`⚠️ PE not found for ${currentName} @ ${peStrike}`);
+      else console.warn(`PE not found in premium band for ${currentName}`);
     }
     } catch (error) {
       console.error(`⚠️ Error processing ${currentName}: ${error.message}`);
@@ -785,7 +809,9 @@ async function setPricePointsToInstrument( option, fullJson,accessTokenDoc) {
             option.pricePoints = c;
             option.SevenDayMaxMin = c.SevenDayMaxMin;
 
-            option.chart = `https://kite.zerodha.com/chart/ext/ciq/${option.exchange}/${option.tradingsymbol}/${option.instrument_token}`;
+
+           // /markets/ext/chart/web/tvc/NFO-OPT/NIFTY2660223500PE/14599938
+            option.chart = `https://kite.zerodha.com/markets/ext/chart/web/tvc/${option.exchange}/${option.tradingsymbol}/${option.instrument_token}`;
             option.selectedBuyingMethod = 'MAX';
             option.buyNow = false;
 
@@ -852,11 +878,14 @@ resolve(fullJson);
 
 main();
  
+module.exports = { main };
 
-setInterval(()=>{
-console.time('start')
-   main();
-   console.timeEnd('start')
-//disconnect()
-},15*60*1000) 
+
+
+// setInterval(()=>{
+// console.time('start')
+//    main();
+//    console.timeEnd('start')
+// //disconnect()
+// },15*60*1000) 
 //disconnect();//

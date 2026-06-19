@@ -123,7 +123,7 @@ if (fifteenMinutesLow === null || !isFinite(fifteenMinutesLow)) {
 }
 
 // 3️⃣ SL limit price (slightly below trigger)
-let slPrice = Math.round(triggerPrice * 0.997 * 10) / 10;
+let slPrice = Math.round(triggerPrice * 0.985 * 10) / 10;
 
 // 4️⃣ Final order params
 const orderParams = {
