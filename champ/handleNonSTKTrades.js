@@ -75,7 +75,7 @@ cis.signals.safePassTickHealth=false
         return false;
     }
 
-    if (cis.sidewaysMarket) {
+    if (cis.sidewaysMarket && !cis.decisiveBreakout) {
         cis.returnPoints = 'Sideways/choppy market detected - no new entries';
         return false;
     }

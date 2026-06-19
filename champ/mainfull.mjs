@@ -58,6 +58,7 @@ process.on('unhandledRejection', (reason, promise) => {
 import setAboveOpenScripts from './setAboveOpenScripts.js';
 import setLiveMinute from './setLiveMinute.js';
 import { isSidewaysMarket } from './isSidewaysMarket.js';
+import { isDecisiveBreakout } from './isDecisiveBreakout.js';
 import updateClosePriceAt59thSecond from './updateClosePriceAt59thSecond.js';
 import { setLastPriceStatusWithOpen } from './cisHelpers.js';
 import { determineOperatorCandleFlags } from './determineOperatorCandles.js';
@@ -675,6 +676,7 @@ cis.seconds=global.seconds;
 setLiveMinute(cis);
 
 cis.sidewaysMarket = isSidewaysMarket(cis);
+cis.decisiveBreakout = isDecisiveBreakout(cis);
 
 //sendNotification(`Tick received for ${cis.tradingsymbol} at ${global.clock}`, `Last Price: ${cis.tick.last_price}, Open: ${cis.tick.ohlc.open}, Live Minute Color: ${cis.liveMinute.color}`);
   

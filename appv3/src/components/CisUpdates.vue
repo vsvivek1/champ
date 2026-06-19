@@ -2,12 +2,41 @@
   <div>
       <h1>CIS Data</h1>
    
+     <h1>ip {{ ip }}    </h1>
+      <h1 :style="{ color: engineLive ? '#16a34a' : '#dc2626' }">
+        Engine: {{ engineLive ? 'Live' : 'OFFLINE' }}
+      </h1>
       <h1>No Manual Trades</h1>
       <h1>MY ALL LOSSES ARE DUE TO HANGING ON TO LOOSING POSITIONS without STOP LOSS</h1>
 
          <h1>CHANGE IN SL STRATEGY . EITHER MA20 OR DAY OPEN. ENTRY ALSO FOR THE SAME </h1>
 
+         {{  belowOpenSymbols.length }} symbols below open <br>
+         {{  below20MaSymbols.length }} symbols below 20 MA <br>  
 
+
+          <button @click="fetchInstruments">
+            Fetch Instruments
+            </button>
+
+
+             <button @click="startMainfullJs">
+            startMainfullJs
+            </button>
+
+
+
+ <table>
+
+  <tbody>
+                <tr v-for="(chunk, rowIndex) in belowOpenSymbols" :key="rowIndex">
+                   
+                    <td v-for="(item, index) in chunk" :key="index">
+                        {{ item.tradingsymbol }} - LTP: {{ item.tick.last_price }} - Open: {{ item.tick.ohlc.open }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
       <table>
             <thead>
                 <tr>
@@ -43,28 +72,37 @@
             <tbody>
              
               <tr
-  v-for="(item, index) in symbols"
+  v-for="(item, index) in symbols1"
   :key="index"
   
  
 >
                     <td>                   <span v-if="item['isAboveOpen'] " class="green"> 
 
-^
+^ try trades
 </span>
 
 <span v-else class="red"> 
-
+ Dont try trades
 v
 </span>
 
-<span v-if=item.position></span>
+<span v-if=item.position && item.tick></span>
                         
-                        {{ index + 1 }}</td>
+                        {{ index + 1 }}
+                        
+                        
+                      
+                        
+                        </td>
                     <td>
-                        cccc
+                      Lot MAX= {{ Math.max(0, Math.floor(item.margin/(item.tick.last_price* item.lot_size)   ) || 1) }} &nbsp;
+                      QTY max= {{ Math.max(0, Math.floor(item.margin/(item.tick.last_price* item.lot_size)   )*item.lot_size || 1) }} &nbsp;
+Margin={{ item.margin }} &nbsp;
                         <button @click="openLink(item.chart)" class="button-link">
                           {{ item.tradingsymbol || 'N/A' }}
+
+                          <!-- full margin{{ item.fullMargin}}  -->
 
 
 
@@ -73,6 +111,7 @@ v
                            <b v-if ="item.ma20  && item.tick.last_price>item.ma20"> Above Moving Avg 20</b>
 
                            <b v-if ="!item.ma20 || item.ma20>item.tick.last_price"> ma20 is {{item.ma20}} below  Moving Avg 20 no trade</b>
+
 
 
                         
@@ -85,6 +124,10 @@ v
 
      
 </button> <br>
+
+<span v-if="item.oiDropPercent>1 && item.ma20<item.tick.last_price && item.liveMinute.color =='bullish'">✅ OI Drop </span>
+
+<b>item.OiDROp% {{ item.oiDropPercent }}</b> &nbsp;
  LTP {{ item.price }} &nbsp; 
 
  ma5h{{ item.ma5high }}
@@ -174,7 +217,7 @@ v-if="item.avoided">Include</button>
                         
                         
                         </span>
-                        <span v-else>N/A</span>
+                        <!-- <span v-else>N/A</span> -->
 
                         
                     </td>
@@ -237,6 +280,38 @@ v-if="item.avoided">Include</button>
 </template>
 
 <script>
+
+</script>
+<script>
+
+document.addEventListener("click", () => {
+   audioCtx.resume();
+
+ //  beep();
+}, { once: true });
+
+const audioCtx = new AudioContext();
+
+function beep() {
+
+  const oscillator = audioCtx.createOscillator();
+  const gainNode = audioCtx.createGain();
+
+  oscillator.connect(gainNode);
+  gainNode.connect(audioCtx.destination);
+
+  oscillator.frequency.value = 200; // sound pitch
+  oscillator.type = "sine";
+
+  gainNode.gain.value = 0.1;
+
+  oscillator.start();
+
+  setTimeout(() => {
+    oscillator.stop();
+  }, 150);
+}
+
 import io from 'socket.io-client';
 import sessionMixin from '../views/sessionMixin.js';
 //import instruments from '../assets/instruments/instrumentsForMining';
@@ -245,27 +320,99 @@ import sessionMixin from '../views/sessionMixin.js';
 import TickDisplay from './TickDisplay.vue'
 import instruments  from '/shared/instruments/instrumentsForMining.json';// assert { type: "json" };
 import StrategyStatus from "./StrategyStatus.vue";
+import axios from 'axios';
 export default {
   name: 'CisUpdates',
   components:[TickDisplay,StrategyStatus],
   mixins: [sessionMixin],
+
+
+
+  computed: {
+  averagehandleSize: function() {
+    const sizes = this.symbols.map(item => item?.minuteData.map() || 0).filter(size => size > 0);
+   
+  },
+symbols1: function() {
+    return this.symbols.filter(item => 
+    // item.tick.ohlc.open < item.tick.last_price 
+    // ||
+
+    
+ item.tick?item.ma20<item.tick.last_price:false
+    // true
+
+
+
+    );
+  }, 
+   },   // You can add computed properties here if needed
   data() {
       return {
+        ip:'',
+        soundEnabled: false,
           cisList: [],
           symbols: instruments,
           selectedKeys: ['returnPoints','tick','signals'],
+          lastTickReceivedAt: null,
+          engineLive: false,
       };
   },
   created() {
       const socket = io('https://think-vivek-thinkpad-e14-gen-5.taild05309.ts.net');
+      socket.connect();
 
-    //  console.log(socket)
+this.getServerIp();
+
+   //  console.log(socket)
       socket.on('sendCis', (cis) => {
-     // console.log(cis,'cias')
+    //  console.log(cis,'cias')
+          this.lastTickReceivedAt = Date.now();
           this.updateSymbol(cis);
       });
+
+      setInterval(() => {
+          this.engineLive = !!this.lastTickReceivedAt && (Date.now() - this.lastTickReceivedAt) < 10000;
+      }, 2000);
   },
   methods: {
+
+    getServerIp(){  
+        axios.get('https://think-vivek-thinkpad-e14-gen-5.taild05309.ts.net/api/public-ip')
+            .then(response => {
+
+                this.ip=response.data;
+            console.log('Server IP:', response.data);
+            })
+            .catch(error => {
+            console.error('Error fetching server IP:', error);
+            });     
+
+
+    },
+
+    fetchInstruments() {
+        console.log('Fetching instruments for mining...');
+      axios.post('https://think-vivek-thinkpad-e14-gen-5.taild05309.ts.net/api/fetchInstrumentsForMining')
+        .then(response => {
+          console.log('Instruments fetched:', response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching instruments:', error);
+        });
+    },
+
+
+     startMainfullJs() {
+        console.log('Fetching instruments for mining...');
+      axios.post('https://think-vivek-thinkpad-e14-gen-5.taild05309.ts.net/api/startMainfullJs')
+        .then(response => {
+          console.log('Instruments fetched:', response.data);
+        })
+        .catch(error => {
+          console.error('Error fetching instruments:', error);
+        });
+    },
 
     formatKey(key) {
       return key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
@@ -332,16 +479,120 @@ export default {
               }
           }
       },
-      updateSymbol(cis) {
-          if (!cis || !cis.tradingsymbol) return;
+  updateSymbol(cis) {
 
-          const index = this.symbols.findIndex(item => item?.tradingsymbol == cis.tradingsymbol);
+    // Basic validation
+    if (!cis) {
+      //  console.log("CASE 0: cis is null");
+        return;
+    }
 
-          if (index !== -1) {
-              this.recursiveMerge(this.symbols[index], cis);
-          } else {
-              this.symbols.push(cis);
-          }
+    if (!cis.tradingsymbol) {
+      //  console.log("CASE 0: tradingsymbol missing");
+        return;
+    }
+
+    if (!cis.minuteData || cis.minuteData.length < 2) {
+      //  console.log("CASE 0: minuteData missing");
+        return;
+    }
+
+    // 9 AM filter
+    if (
+        cis.hours == 9 &&
+        cis.tick?.last_price < cis.tick?.ohlc?.open
+    ) {
+        // console.log(
+        //     "CASE 0: Not showing",
+        //     cis.tradingsymbol,
+        //     "Hour:", cis.hours,
+        //     "Last:", cis.tick.last_price,
+        //     "Open:", cis.tick.ohlc.open
+        // );
+        // return;
+    }
+
+    let shouldBeep = false;
+
+    // ==========================
+    // CASE 1 : OI Drop + Above MA20 + Bullish
+    // ==========================
+    if (
+        cis.oiDropPercent > 1 &&
+        cis.ma20 < cis.tick.last_price &&
+        cis.liveMinute?.color === "bullish"
+    ) {
+        // console.log(
+        //     "CASE 1 TRIGGERED",
+        //     cis.tradingsymbol,
+        //     "OI Drop:", cis.oiDropPercent,
+        //     "MA20:", cis.ma20,
+        //     "LTP:", cis.tick.last_price
+        // );
+
+        shouldBeep = true;
+    }
+
+    // ==========================
+    // CASE 2 : Inside Bar Break Bullish
+    // ==========================
+    const current = cis.minuteData.at(-1);
+    const previous = cis.minuteData.at(-2);
+
+    if (
+        current.low > previous.low &&
+        previous.high > current.high &&
+        cis.liveMinute?.color === "bullish"
+    ) {
+        // console.log(
+        //     "CASE 2 TRIGGERED",
+        //     cis.tradingsymbol,
+        //     "Current Low:", current.low,
+        //     "Previous Low:", previous.low,
+        //     "Current High:", current.high,
+        //     "Previous High:", previous.high
+        // );
+
+        shouldBeep = true;
+    }
+
+    // ==========================
+    // CASE 3
+    // ==========================
+    if (
+        false // your condition here
+    ) {
+        console.log(
+            "CASE 3 TRIGGERED",
+            cis.tradingsymbol
+        );
+
+        shouldBeep = true;
+    }
+
+     if (shouldBeep) {
+    //     console.log(
+    //         "ALERT >>>",
+    //         cis.tradingsymbol
+    //     );
+        beep();
+    }
+
+    const index = this.symbols.findIndex(
+        item => item?.tradingsymbol === cis.tradingsymbol
+    );
+
+    if (index !== -1) {
+        this.recursiveMerge(this.symbols[index], cis);
+    } else {
+        this.symbols.push(cis);
+    }
+},
+      belowOpenSymbols() {
+          return this.symbols.filter(item => item.tick && item.tick.ohlc && item.tick.last_price < item.tick.ohlc.open);
+      },
+      below20MaSymbols() {
+          return this.symbols.filter(item => item.tick && item.ma20 && item.tick.last_price < item.ma20);
       },
   },
 };
