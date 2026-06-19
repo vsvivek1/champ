@@ -101,7 +101,7 @@ global.riskPerTradePct = 0.01;     // 1% of available capital risked per trade
 global.maxDailyLossPct = 0.03;     // stop new entries once the day's loss hits 3%
 global.dayStartEquity = null;
 global.dailyLossLimitHit = false;
-global.minProfitCushionPct = 0.01;  // peak profit must reach this % of capital before profit-lock arms
+global.minProfitCushionPct = 0.10;  // peak profit must reach this % of capital before profit-lock arms
 global.dayPeakPnL = 0;
 global.profitLockTriggered = false;
 
