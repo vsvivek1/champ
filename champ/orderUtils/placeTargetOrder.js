@@ -16,6 +16,7 @@ export async function placeTargetOrder(cis, order, kite) {
     }
 
     let finalTargetPrice;
+    let buyPrice;
 
     switch (true) {
       // ✅ CASE 1: Use in-built target
@@ -60,7 +61,7 @@ case (cis.hasInbuiltTarget == true):
           console.log(`ℹ️ Using last buy order:`, order);
         }
 
-        const buyPrice = order.average_price || order.price;
+        buyPrice = order.average_price || order.price;
         if (!buyPrice || isNaN(buyPrice)) {
           console.error(`❌ Invalid buy price from order.`);
           return;

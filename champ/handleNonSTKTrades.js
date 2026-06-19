@@ -22,6 +22,7 @@ import e from "cors";
 import { handleMA20Reclaim } from './handleMa20Reclaim.js';
 import { handleDayHighBreak } from "./handleDayHighBreak.js";
 import { exec } from "child_process";
+import { executeBuy } from "./executeBuy.js";
 
 
 // ==== MAIN FUNCTION ====
@@ -252,7 +253,7 @@ if(global.hours==9 &&  global.minutes<=50 && cis.fastAbove9Traded!=true && cis.t
 
 }
 
-if(global.houurs<10){
+if(global.hours<10){
 
  
     cis.signals.handleReversalTrades = false;
