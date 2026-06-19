@@ -25,6 +25,18 @@ import { exec } from "child_process";
 import { executeBuy } from "./executeBuy.js";
 
 
+// One open position at a time across correlated indices -- NIFTY/BANKNIFTY/
+// MIDCPNIFTY/FINNIFTY all move on the same broad market view, so running them
+// concurrently multiplies exposure to one view rather than diversifying it.
+function hasCorrelatedPositionOpen(cis) {
+    if (!global.instrumentsCat?.includes(cis.name)) return false;
+    return global.instrumentsForMining.some(i =>
+        global.instrumentsCat.includes(i.name) &&
+        i.instrument_token != cis.instrument_token &&
+        (i.hasLivePosition == true || i.ordered == true)
+    );
+}
+
 // ==== MAIN FUNCTION ====
 export async function handleNonSTKTrades(cis, kite) {
 
@@ -50,6 +62,16 @@ cis.signals.safePassTickHealth=false
 
    
         
+        return false;
+    }
+
+    if (global.dailyLossLimitHit) {
+        cis.returnPoints = 'Daily loss limit hit - no new entries today';
+        return false;
+    }
+
+    if (hasCorrelatedPositionOpen(cis)) {
+        cis.returnPoints = 'Correlated index already has an open position';
         return false;
     }
      

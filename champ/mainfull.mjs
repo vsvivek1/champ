@@ -1,8 +1,8 @@
 // main.js
 
 import { connectToDatabase } from '../connectToDatabase.js';
-import instrumentsForMining from '../appv3/shared/instruments/instrumentsForMining.json' assert { type: "json" };
-import allInstruments from '../appv3/public/instruments/instrumentsAll.json' assert { type: "json" };
+import instrumentsForMining from '../appv3/shared/instruments/instrumentsForMining.json' with { type: "json" };
+import allInstruments from '../appv3/public/instruments/instrumentsAll.json' with { type: "json" };
 import { KiteConnect, KiteTicker } from 'kiteconnect';
 import { getTodaysAccessToken } from '../getTodaysAccessToken.js';
 import getKiteConnectInstance from '../getKiteConnectInstanceRequire.js';
@@ -35,7 +35,13 @@ import { appendTPS } from './tps_logger.js';
 
 //const socket = io('https://think-vivek-thinkpad-e14-gen-5.taild05309.ts.net:4000'); 
 
-const socket = io('http://localhost:4000'); 
+const socket = io('http://localhost'); 
+
+//const WebSocket = require("ws");
+
+
+
+
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection:', reason);
@@ -90,6 +96,11 @@ global.enableShortTrading=false;
 
 
 global.mockTrading=false;
+
+global.riskPerTradePct = 0.01;     // 1% of available capital risked per trade
+global.maxDailyLossPct = 0.03;     // stop new entries once the day's loss hits 3%
+global.dayStartEquity = null;
+global.dailyLossLimitHit = false;
 
 var cis;
 var instrumentData =[];
@@ -219,11 +230,35 @@ global.orders = [];
 let con = connectToDatabase();
 let kite, ticker;
 
-async function main() {
+import WebSocket  from "ws";
+
+import { sendNotification } from './mobileAlerts.js';
+
+const wss  = new WebSocket.Server({ port: 5000 });
+
+main();
+
+// wss.on("connection", (ws) => {
+//   console.log("Mac connected");
+//    main(ws);
+
+//   ws.send("Scale monitoring active");
+
+//   // Example alert
+//   // setTimeout(() => {
+//   //   ws.send("Weight exceeded limit!");
+//   // }, 5000);
+// });
+
+async function main(ws=null) {
 
 
     try {
+
+       socket.emit('sendCis', cis);
         setClock();
+
+      
 
         // if(global.hours>14|| global.hours<9 ||(global.hours==15 && global.minutes>30) ||(global.hours==9 && global.minutes<15)){
 
@@ -248,7 +283,12 @@ async function main() {
         const accessTokenDoc = await getTodaysAccessToken();
         kite = await getKiteConnectInstance();
 
+         await fetchOrdersAndSetCis(kite);
+    await fetchPositionsAndSetCis(kite);
+    await fetchMinuteData(kite);
+
         global.margins = await kite.getMargins();
+        global.dayStartEquity = global.margins?.equity?.net ?? null;
 
         setInterval(async () => {
 
@@ -326,6 +366,17 @@ async function main() {
 
   
            global.margins=await kite.getMargins();
+
+           const currentEquity = global.margins?.equity?.net;
+           if (typeof currentEquity == 'number' && typeof global.dayStartEquity == 'number') {
+             const dailyPnL = currentEquity - global.dayStartEquity;
+             if (dailyPnL <= -global.maxDailyLossPct * global.dayStartEquity) {
+               if (!global.dailyLossLimitHit) {
+                 console.warn(`Daily loss limit hit: PnL ${dailyPnL.toFixed(0)}, dayStartEquity ${global.dayStartEquity.toFixed(0)}`);
+               }
+               global.dailyLossLimitHit = true;
+             }
+           }
             }
 
 
@@ -340,8 +391,8 @@ async function main() {
              //fetchWorker.postMessage({ type: 'fetchData', kite });
             
 //////////////////////////////////////////////////////////////       
-            
-             initTicker();   ///main entry point for ticker
+            console.log('initializing ticker');
+             initTicker(ws);   ///main entry point for ticker
 
 //////////////////////////////////////////
            setTimeout(()=>{
@@ -386,13 +437,13 @@ async function setmarginCisOrdersAndPosition() {
 
 
 
-   if(!(global.hours<9 || global.hours>15 ||(global.hours==9 && global.minutes<15 ) || (global.hours==15 && global.minutes>30))){
+   //if(!(global.hours<9 || global.hours>15 ||(global.hours==9 && global.minutes<15 ) || (global.hours==15 && global.minutes>30))){
     await fetchOrdersAndSetCis(kite);
     await fetchPositionsAndSetCis(kite);
     await fetchHourlyData(kite);
     await fetchMinuteData(kite);
 
-   }
+  // }
 }
 
 function setClock() {
@@ -415,7 +466,7 @@ function setClock() {
 
     global.clock = ` Time:${global.hours}:${global.minutes}:${global.seconds} date :${global.date.toISOString().split('T')[0]} msFlag:${global.msFlag} `;
 }
-function initTicker() {
+function initTicker(ws) {
     ticker = new KiteTicker({
         api_key: kite.api_key,
         access_token: kite.access_token
@@ -424,30 +475,34 @@ function initTicker() {
     ticker.connect();
     ticker.on("connect", subscribe);
     
-    
- ticker.on("ticks", onTicks);
+  //  ws.send(`Kite Ticker connected for ${global.instrumentName} at ${global.clock}`);
+ ticker.on("ticks", (ticks) => onTicks(ticks, ws));
     
       ticker.on("order_update", orderUpdates);
    
 }
 
-function onTicks(ticks) {
+function onTicks(ticks,ws) {
 
     
 
     var instrumentToken =global.instrumentsForMining.map(i=>parseInt(i.instrument_token));
 
   let b=  ticker.setMode(ticker.modeFull, [instrumentToken]);
+  //ws.send(`Subscribed to ticks for ${global.instrumentName} at ${global.clock}`);
 
   //console.log(ticker.modeFull,'ticker mode')
     
-    ticks.forEach(tick => processTicks(tick));
+    ticks.forEach(tick => processTicks(tick,ws));
 }
 
 function updateAvgPriceChangePerTick(cis) {
   
   const currentPrice = cis.last_price;
 
+  cis.margin=global.margins?.equity?.available?.live_balance+global.margins?.equity?.available?.collateral || 0;
+
+  cis.fullMargin=global.margins;
   
   // first tick becomes baseline
   
@@ -556,7 +611,10 @@ if(global.seconds%30){
 
 let count=0;
 let tickCount=0
-async function processTicks(tick) {
+async function processTicks(tick,ws) {
+
+
+
 
    // if(global.seconds%2==0)return;///suspected slowing solution
   
@@ -583,13 +641,28 @@ async function processTicks(tick) {
 console.warn('CIS not found for tick instrument_token',tick.instrument_token);
       return
     } /// /safety
+
+
+     // console.log(global.clock,'tick received for',cis.tradingsymbol,'last price',tick.last_price,'open',tick.ohlc.open)
+
+    // console.log(cis.margins)
+
+    cis.hours=global.hours;
+cis.minutes=global.minutes;
+cis.seconds=global.seconds;
+ socket.emit('sendCis', cis);
+
   cis.tick = tick; 
 
+
+
 setLiveMinute(cis);
+
+//sendNotification(`Tick received for ${cis.tradingsymbol} at ${global.clock}`, `Last Price: ${cis.tick.last_price}, Open: ${cis.tick.ohlc.open}, Live Minute Color: ${cis.liveMinute.color}`);
   
     updateClosePriceAt59thSecond(cis)
 
-
+//console.log(global.clock,'tick received for',cis.tradingsymbol,'last price',cis.tick.last_price,'open',cis.tick.ohlc.open,'live minute color',cis.liveMinute.color)
     if (cis.tick.last_price > cis.tick.ohlc.open && cis.liveMinute.color=='green' && global.hours==9 &&
       (global.minutes<20 )  ) {
   
@@ -614,6 +687,15 @@ setLiveMinute(cis);
 
 updateTPM(cis, global.minutes, global.seconds);
 updateAvgPriceChangePerTick(cis);
+
+//ws.send(`TPS for ${cis.tradingsymbol}: ${cis.tps.toFixed(2)} at ${global.clock}`);
+
+
+if(ws&& cis.tps>100 && !cis.highTPSAlert){
+
+  cis.highTPSAlert=true;
+  ws.send(`High TPS alert for ${cis.tradingsymbol}: ${cis.tps.toFixed(2)} TPS at ${global.clock}`);
+}
  
 
 //console.log(cis.avgChangePerTick,'avg price change per tick for',cis.tradingsymbol);
@@ -706,10 +788,11 @@ tickCount = (tickCount == 10) ? 0 : tickCount + 1;
 
   
 
-
-  
-
-
+if(ws&& cis.oiDropStrength != "NONE"&& !cis.oiDropAlerted){
+   cis.oiDropAlerted=true;
+   ws.send(`OI Drop Alert for ${cis.tradingsymbol}: ${cis.oiDropStrength} at ${global.clock}`);
+}
+ 
 
  
 
@@ -799,7 +882,8 @@ tickCount = (tickCount == 10) ? 0 : tickCount + 1;
 
   // return;
 
-//console.log('is here', cis.tradingsymbol);
+//console.log('is here', cis.tradingsymbol,'has live position',cis.hasLivePosition,'entry health',cis.entryHealth,'at',global.clock);
+//console.log(socket)
   socket.emit('sendCis', cis);
 
 
@@ -925,7 +1009,7 @@ async function orderUpdates(order) {
 
 
 
-    main();
+   
     
 
 

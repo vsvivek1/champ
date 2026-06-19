@@ -21,7 +21,7 @@ cis.entryHealth='inside execute buy'
 
 //console.log(cis.ordered,cis.tradingsymbol,'inside execute buy')
     // Check if the order has already been placed
-    
+
 
     // Upglobal.date the status to indicate that an order has been placed
     cis.ordered = true;
@@ -32,138 +32,41 @@ cis.entryHealth='inside execute buy'
 }
 
 
-function calculateLots(amount, lotSize) {
-    if (lotSize <= 0) {
-        throw new Error("Invalid lot size");
-    }
-
-    const numberOfLots = Math.floor(amount / lotSize);
-    return numberOfLots;
-}
-
-function getMultiplier(cis) {
-    let multiplier = 10; // Default multiplier
-
-    let obj = {
-        "NIFTY": 36, //72,
-        "BANKNIFTY": 30, //60,
-        "MIDCPNIFTY": 20, //,
-        "FINNIFTY": 20 //40
-    };
-
-    if (obj.hasOwnProperty(cis.name)) {
-        multiplier = obj[cis.name]; // Use the value from the object if it exists
-    }
-
-//return 
-
-    return multiplier;
-}
 async function placeOrder(cis, kite,price1) {
 
 cis.entryHealth='inside place order'
 //console.log(cis.tradingsymbol,'place order',price1)
 let price=  price1;// Math.floor(price1-cis.minuteCandleMeanRange/4);
 
-   
-    ; // Use the last tick price or some other logic to determine the price
-    let multiplier = getMultiplier(cis)  // Default multiplier, adjust based on your needs
+   let liveCash=global.margins.equity.available.live_balance
 
+   // Risk-based sizing: qty is derived from how far the protective stop is,
+   // not from how much capital is available. Two trades with different stop
+   // distances should never end up with the same position size.
+   const riskPct = global.riskPerTradePct || 0.01;
+   const riskAmount = riskPct * liveCash;
 
-   // multiplier=calculateLots(30000, cis.lot_size);
+   const stopDistance = (cis.liveMinute && cis.liveMinute.range > 0)
+     ? cis.liveMinute.range
+     : price * 0.05; // fallback if the live candle range isn't available yet
 
-  
+   const numberOfLots = Math.floor(riskAmount / (stopDistance * cis.lot_size));
 
-
-
-   let m=global.margins;
-   let m2=m.equity.net;
-
-   let liveCash=m.equity.available.live_balance
-
-
-
-   //console.log(liveCash,'margin');
-   
-  
-                
- /*        "NIFTY":36,//72,
-        
-       // "BANKNIFTY":60,
-        "BANKNIFTY":30,//,
-        'MIDCPNIFTY':20,//,
-        "FINNIFTY":20,//40
-      }
- */ 
-
-
-
-
+   let qty = Math.min(numberOfLots * cis.lot_size, getFreezeLimit(cis.tradingsymbol));
 
       cis.entryPrice=price;
+      cis.riskAmount = riskAmount;
+      cis.stopDistanceUsedForSizing = stopDistance;
 
+console.log(`Risk-based sizing for ${cis.tradingsymbol}: risk=${riskAmount.toFixed(0)}, stopDistance=${stopDistance}, lots=${numberOfLots}, qty=${qty}`);
 
-
-
-      let qty=Math.min(cis.lot_size * multiplier,getFreezeLimit(cis.tradingsymbol));
-
-
-    //   if(global.instrumentName=='STK'){
-
-    //    // console.log(m.equity,'margin')
-
-    //     qty=Math.floor(50000/cis.tick.last_price);
-    //     qty=Math.max(Math.floor(100000/cis.tick.last_price),2);
-    //   }
-      if(true){
-
-        multiplier=Math.floor(Math.min(liveCash,100000)/(price*cis.lot_size));
-
-      //  qty=cis.lot_size*20;
-
-       qty =Math.min(cis.lot_size * multiplier,getFreezeLimit(cis.tradingsymbol));
-      }
-
-
-    //   if(qty==0){
-
-    //     cis.entryHealth='quantity zero issue and margin is '+liveCash;
-
-    //   console.log('Quantity is zero, not placing order',cis.tradingsymbol,qty,liveCash,price);
-
-    //     return;
-    //   }
-      //qty=cis.lot_size*5;
-
-   /*    if(global.speedSymbols.includes(cis.tradingsymbol)){
-
-        cis.buyStrategy='speedbuying'
-qty=250;
-      } */
-
-
-
-let tot=Math.min(global.margins.equity.available.live_balance,100000)||50000
-
-//tot
-
-//qu*lot*p=mon
-let qu=Math.floor(tot/(cis.lot_size*cis.tick.last_price));
-
-let q2=Math.abs(qu)//*cis.lot_size;
-
-let qty1=cis.lot_size*q2
-
-      qty=Math.min(qty1,getFreezeLimit(cis.tradingsymbol));
-
-//qty=qu;
-
-console.log(q2,'quantity for buying',qty)
-
-//pm2 qty=cis.lot_size*2;
-
-if(qty==0){
-    qty=cis.lot_size;
+if(qty<=0){
+    // Risking less than one lot at this stop distance would mean trading
+    // beyond the risk budget -- skip rather than force a minimum-lot trade.
+    cis.entryHealth=`Risk-sized qty is 0 (risk=${riskAmount.toFixed(0)}, stopDistance=${stopDistance}, lot_size=${cis.lot_size}) - skipping trade`;
+    cis.ordered = false;
+    console.log(cis.entryHealth, cis.tradingsymbol);
+    return;
 }
 
 
@@ -222,17 +125,17 @@ cis.message = `${global.clock} Order placed successfully. Order ID: ${orderId}, 
 
 cis.ordered=true;
 cis.placedOrder=true;
-       
-    
+
+
        // const buyOrder = await savePlaceOrder('AAPL', 'breakout', 100, 150, 'fixed target');
         const buyOrder = await savePlaceOrder(cis.tradingsymbol, cis.buyStrategy, qty, price, 'fixed target');
 
 
 
-      
+
 
     } catch (error) {
-        console.error(multiplier,"Error placing order:", error, cis.tradingsymbol,orderParams);
+        console.error("Error placing order:", error, cis.tradingsymbol,orderParams);
 
         process.exit();
     }

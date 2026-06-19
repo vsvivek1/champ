@@ -27,6 +27,8 @@ import {
 
 } from './stopLossEngine.js';
 
+import { checkReversalExit } from './checkReversalExit.js';
+
 const FREEZE_QTY = {
   NIFTY: 1800,
   SENSEX: 900
@@ -41,6 +43,7 @@ function getFreezeQty(tradingsymbol) {
 export async function handlePositionPresent(cis, kite) {
 
 
+  //return;  //tempory
   cis.returnPoints="handlePositionPresent start health check"
   /* --------------------------------------------------
    * 1. PREPARE DATA
@@ -54,6 +57,10 @@ export async function handlePositionPresent(cis, kite) {
 
   const openOrderQty = openOrders.reduce((s, o) => s + o.quantity, 0);
   const positionQty = Math.abs(cis.position?.quantity ?? 0);
+
+  console.log('openOrderQty:', openOrderQty, 'positionQty:', positionQty);
+
+  //return;
 
   /* --------------------------------------------------
    * 2. DELTA CHECK
@@ -123,6 +130,8 @@ export async function handlePositionPresent(cis, kite) {
 
  cis.returnPoints="Near should trigger stop loss "
 
+  await checkReversalExit(cis, kite);
+
 
 
 
@@ -137,7 +146,6 @@ if (
 
 
 ) {
-
 
 
 

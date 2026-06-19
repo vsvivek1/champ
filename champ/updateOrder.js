@@ -1,38 +1,37 @@
 // upglobal.dateOrder.js
 
 /**
- * updates the price of an open order.
- * 
+ * Trails the resting SL order's trigger_price (and limit price) as price
+ * action turns bearish, instead of only nudging the limit price while the
+ * trigger stays put.
+ *
  * @param {Object} kite - The Kite Connect instance used to interact with the API.
- * @param {string} orderId - The ID of the order to be upglobal.dated.
+ * @param {string} orderId - The ID of the order to be updated.
  * @param {number} instrumentToken - The token of the instrument being traded.
- * @param {number} newPrice - The new price to upglobal.date the order to.
+ * @param {number} newPrice - The last traded price (fallback reference if cis.last3CandleLow is unavailable).
+ * @param {Object} cis - The instrument's tracked state, used for last3CandleLow.
  */
-export default async function updateOpenOrderPrice(kite, orderId, instrumentToken, newPrice,cis) {
+export default async function updateOpenOrderPrice(kite, orderId, instrumentToken, newPrice, cis) {
     try {
-        // Define the parameters for updating the order
+        const referenceLow = cis?.last3CandleLow ?? newPrice;
 
+        const triggerPrice = Math.round(referenceLow * 0.99 * 10) / 10;
+        const updatedPrice = Math.round(triggerPrice * 0.985 * 10) / 10;
 
-       // console.log(orderId,'order id');
-        
         const orderParams = {
             order_id: orderId,
-            price: newPrice,
+            order_type: "SL",
+            trigger_price: triggerPrice,
+            price: updatedPrice,
         };
 
-        // Send the request to modify the order
+        const response = await kite.modifyOrder('regular', orderId, orderParams);
 
-       // kite.modifyOrder()
-
-       //console.log(kite);
-       //cis.updated = true;
-        const response = await  kite.modifyOrder('regular',orderId, orderParams);
-
-      //  console.log(`Order ${orderId} upglobal.dated successfully to new price ${newPrice}.`,global.clock);
+        console.log(`Order ${orderId} trailed - trigger ${triggerPrice}, price ${updatedPrice}`, global.clock);
         return response;
     } catch (error) {
-        console.error(`Error updating order ${orderId}:`, error,global.clock);
-       
+        console.error(`Error updating order ${orderId}:`, error, global.clock);
+
        return;
         //throw error; // Re-throw the error for further handling if needed
     }
