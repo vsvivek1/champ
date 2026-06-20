@@ -60,6 +60,16 @@ export async function handlePositionPresent(cis, kite) {
 
   console.log('openOrderQty:', openOrderQty, 'positionQty:', positionQty);
 
+  // Nothing to repair or trail on a flat position. Also covers the case
+  // where the position closed through some path other than our own SELL
+  // order flow (e.g. expiry, manual square-off) and hasLivePosition was
+  // never reset.
+  if (positionQty <= 0) {
+    cis.hasLivePosition = false;
+    cis.returnPoints = 'handlePositionPresent: flat position, nothing to do';
+    return;
+  }
+
   //return;
 
   /* --------------------------------------------------
