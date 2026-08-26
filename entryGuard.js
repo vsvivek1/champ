@@ -265,6 +265,14 @@ async function findBullishOptionInBand(kite, band, chain) {
 
     for (const { inst, ltp } of inBand) {
 
+        // Kite's account-wide rate limit is shared with stopLossGuard.js
+        // running against the same session -- bursting one historical-data
+        // call per in-band candidate back-to-back contributed to real
+        // ETIMEDOUTs on both processes today, including stopLossGuard's
+        // trailing cache, which briefly went unprotected as a result.
+        // Spacing calls out costs nothing against a 60s cycle.
+        await new Promise(r => setTimeout(r, 300));
+
         const signal = await computeOptionSignal(kite, inst);
         if (!signal) continue;
 
@@ -297,10 +305,30 @@ async function findBullishOptionInBand(kite, band, chain) {
     };
 }
 
-// symbols that have already been entered today -- one shot per underlying
-// per process run (this script is expected to be restarted daily, same as
-// the rest of this codebase's trading scripts, so no date-rollover handling).
-const alreadyEnteredToday = new Set();
+/*
+Checks whether any instrument in this symbol's own option chain (the exact
+set loaded at startup for that underlying's name -- not a tradingsymbol
+prefix match, which could collide, e.g. NIFTY vs NIFTYNXT50) currently has a
+non-zero net position. Re-entry is allowed once a prior position on this
+symbol has actually closed -- this isn't a one-shot-per-day gate.
+*/
+async function hasOpenPosition(kite, symbol) {
+
+    const chain = optionChainByUnderlying.get(symbol);
+    if (!chain) return false;
+
+    const chainTokens = new Set(chain.map(inst => inst.instrument_token));
+
+    try {
+        const positions = await kite.getPositions();
+        return (positions.net || []).some(p =>
+            p.quantity !== 0 && chainTokens.has(Number(p.instrument_token))
+        );
+    } catch (err) {
+        console.log(err, `⚠️ failed to check open positions for ${symbol}, assuming still in position`);
+        return true; // fail safe -- skip this cycle rather than risk stacking a second entry
+    }
+}
 
 // symbol -> currently-watched candidate's instrument_token
 const watchedTokenBySymbol = new Map();
@@ -354,10 +382,13 @@ async function checkEntrySignals(kite, ticker, bands) {
 
     for (const [symbol, band] of bands) {
 
-        if (alreadyEnteredToday.has(symbol)) continue;
-
         const chain = optionChainByUnderlying.get(symbol);
         if (!chain) continue;
+
+        if (await hasOpenPosition(kite, symbol)) {
+            clearWatchedCandidate(ticker, symbol);
+            continue;
+        }
 
         const candidate = await findBullishOptionInBand(kite, band, chain);
 
@@ -463,7 +494,7 @@ async function computeEntryQuantity(kite, candidate, costPerUnit) {
     return lots * candidate.lot_size;
 }
 
-async function enterPosition(kite, candidate, ltp) {
+async function enterPosition(kite, ticker, candidate, ltp) {
 
     const price = roundToTick(ltp * 1.05); // marketable limit; also the worst-case cost basis used to size the entry
 
@@ -486,7 +517,7 @@ async function enterPosition(kite, candidate, ltp) {
             `🧪 DRY-RUN: would BUY ${candidate.tradingsymbol} qty ${quantity} (${quantity / candidate.lot_size} lot(s)) @ ~${ltp} -- ` +
             `OI drop ${candidate.oiDropPct.toFixed(2)}%, price up, volume confirmed, sized at ${sizingNote}`
         );
-        alreadyEnteredToday.add(candidate.symbol);
+        clearWatchedCandidate(ticker, candidate.symbol);
         return;
     }
 
@@ -507,7 +538,7 @@ async function enterPosition(kite, candidate, ltp) {
             `🚀 Entered ${candidate.tradingsymbol} qty ${quantity} (${quantity / candidate.lot_size} lot(s)) @ ${price} -- sized at ${sizingNote}. Order ID(s): ${orderIds.join(', ')}`
         );
 
-        alreadyEnteredToday.add(candidate.symbol);
+        clearWatchedCandidate(ticker, candidate.symbol);
 
     } catch (err) {
 
@@ -531,11 +562,6 @@ async function evaluateCandidateTickForEntry(kite, ticker, tick) {
     const candidate = watchedCandidates.get(tick.instrument_token);
     if (!candidate) return;
 
-    if (alreadyEnteredToday.has(candidate.symbol)) {
-        clearWatchedCandidate(ticker, candidate.symbol);
-        return;
-    }
-
     if (entryInProgress.has(tick.instrument_token)) return;
 
     const ltp = tick.last_price;
@@ -553,7 +579,7 @@ async function evaluateCandidateTickForEntry(kite, ticker, tick) {
     entryInProgress.add(tick.instrument_token);
 
     try {
-        await enterPosition(kite, candidate, ltp);
+        await enterPosition(kite, ticker, candidate, ltp);
     } finally {
         entryInProgress.delete(tick.instrument_token);
     }

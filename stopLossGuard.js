@@ -66,6 +66,23 @@ const RESTING_ORDER_STATUSES = ["TRIGGER PENDING", "OPEN"];
 // trade on the same Kite session never gets an options-style SL/exit order.
 const OPTION_EXCHANGES = ['NFO', 'BFO'];
 
+// Kite's HTTP client has no built-in retry, and a single transient timeout
+// (network blip, or contention with entryGuard.js hitting the same account)
+// used to blank out an entire refreshTrailingCache cycle -- silently
+// dropping trailing/give-back protection for every open position until the
+// next 15s cycle. One quick retry catches the common transient case instead
+// of leaving a live position unprotected for a full cycle.
+async function withRetry(fn, label, retries = 1, delayMs = 1000) {
+    try {
+        return await fn();
+    } catch (err) {
+        if (retries <= 0) throw err;
+        console.log(err, `⚠️ ${label} failed, retrying once`);
+        await new Promise(r => setTimeout(r, delayMs));
+        return withRetry(fn, label, retries - 1, delayMs);
+    }
+}
+
 function roundToTick(value, tick = TICK) {
     return Math.round(value / tick) * tick;
 }
@@ -289,7 +306,7 @@ async function refreshTrailingCache(kite, ticker) {
 
     try {
 
-        let positions = await kite.getPositions();
+        let positions = await withRetry(() => kite.getPositions(), 'refreshTrailingCache getPositions');
 
         let netPositions = (positions.net || []).filter(
             p => p.quantity > 0 && OPTION_EXCHANGES.includes(p.exchange)
@@ -626,7 +643,7 @@ async function ensureStopLossForOpenPositions(kite, ticker) {
 
     try {
 
-        let positions = await kite.getPositions();
+        let positions = await withRetry(() => kite.getPositions(), 'ensureStopLossForOpenPositions getPositions');
 
         /*
         option buyer only: only long positions need an SL
@@ -639,7 +656,7 @@ async function ensureStopLossForOpenPositions(kite, ticker) {
             return;
         }
 
-        let orders = await kite.getOrders();
+        let orders = await withRetry(() => kite.getOrders(), 'ensureStopLossForOpenPositions getOrders');
 
         // Any resting SELL order -- our protective SL, or the aggressive
         // marketable LIMIT sell the trailing check places on an immediate
