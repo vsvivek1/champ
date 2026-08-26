@@ -721,8 +721,13 @@ async function main(){
     try {
         const allInstruments = await kite.getInstruments();
         for (const inst of allInstruments) {
-            instrumentExpiryByToken.set(inst.instrument_token, inst.expiry);
-            instrumentLotSizeByToken.set(inst.instrument_token, inst.lot_size);
+            // kite.getInstruments() returns instrument_token as a string, but
+            // ticks/positions/orders all carry it as a number -- keying these
+            // maps by the raw string would make every lookup against a live
+            // token silently miss.
+            const token = Number(inst.instrument_token);
+            instrumentExpiryByToken.set(token, inst.expiry);
+            instrumentLotSizeByToken.set(token, inst.lot_size);
         }
         console.log(`Loaded expiry/lot-size data for ${instrumentExpiryByToken.size} instruments`);
     } catch (err) {
