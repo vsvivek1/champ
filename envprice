@@ -2,10 +2,14 @@
 # no restart needed (adding a brand-new symbol does need a restart, since the
 # option chain for a new underlying is only loaded once at startup).
 #
-# One line per underlying: SYMBOL LOW,HIGH
+# One line per underlying: SYMBOL LOW,HIGH[,PCT]
 # entryGuard.js only buys a CE whose current premium (LTP) falls inside
 # [LOW, HIGH] for that underlying, and only once the OI-drop + price-up
 # signal has also fired for it.
+#
+# PCT is optional: what percentage of available equity-segment margin to
+# deploy into that entry (e.g. "NIFTY 10,20,10" = 10% of available funds).
+# Omit it to deploy the maximum quantity available margin allows.
 
 NIFTY 10,20
 SENSEX 20,30
