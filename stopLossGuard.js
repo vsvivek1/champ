@@ -426,6 +426,29 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
 
         const openSlOrder = openSlOrders[0];
         const currentTrigger = Number(openSlOrder.trigger_price);
+        const currentSlLimitPrice = Number(openSlOrder.price);
+
+        // The resting order is a SELL LIMIT: it can only fill at or above
+        // its own limit price. A fast/gappy crash in the option premium can
+        // blow straight through the trigger *and* the limit price (set 5%
+        // below trigger) in one move, leaving the order stuck open and
+        // unfillable while price keeps falling -- and once locked, nothing
+        // else here is watching for that, so the locked-in profit would
+        // otherwise bleed away untouched. Cancel it and exit at market now
+        // instead of trusting it to eventually fill.
+        if (ltp <= currentSlLimitPrice) {
+
+            await exitAndInvalidateCache(
+                kite,
+                ticker,
+                instrument_token,
+                position,
+                openSlOrders,
+                ltp,
+                `price ${ltp} fell through locked SL limit ${currentSlLimitPrice} (order stuck, won't fill)`
+            );
+            return;
+        }
 
         const { triggerPrice: newTrigger, price: newPrice } =
             await getSafeSlTriggerAndPrice(kite, instrument_token, desiredTrigger, ltp);
@@ -444,6 +467,7 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
                 });
 
                 openSlOrder.trigger_price = newTrigger;
+                openSlOrder.price = newPrice;
 
                 console.log(
                     `🎯🔒 Target-locked trail for ${tradingsymbol}: ${currentTrigger} -> ${newTrigger} (locking ${((1 - GIVE_BACK_FRACTION) * 100).toFixed(0)}% of peak gain ${(peak.peakPrice - average_price).toFixed(2)})`
