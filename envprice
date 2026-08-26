@@ -1,0 +1,11 @@
+# Read by entryGuard.js on every check cycle -- edits here take effect live,
+# no restart needed (adding a brand-new symbol does need a restart, since the
+# option chain for a new underlying is only loaded once at startup).
+#
+# One line per underlying: SYMBOL LOW,HIGH
+# entryGuard.js only buys a CE whose current premium (LTP) falls inside
+# [LOW, HIGH] for that underlying, and only once the OI-drop + price-up
+# signal has also fired for it.
+
+NIFTY 10,20
+SENSEX 20,30
