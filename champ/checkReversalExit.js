@@ -4,6 +4,7 @@
 // lower-low) shows up. The protective SL order (placeTargetOrder.js) still
 // guards the downside independently of this.
 import { hasLowerHighLowerLow } from './stopLossEngine.js';
+import { placeOrderInFreezeChunks } from './orderUtils/placeOrderInFreezeChunks.js';
 
 export async function checkReversalExit(cis, kite) {
   if (!cis.hasLivePosition || !cis.tick || !cis.buyPrice) return;
@@ -35,7 +36,7 @@ export async function checkReversalExit(cis, kite) {
     // A couple of ticks below LTP so the LIMIT sell is marketable and fills now.
     const exitPrice = Math.round(cis.tick.last_price * 0.99 * 10) / 10;
 
-    await kite.placeOrder('regular', {
+    await placeOrderInFreezeChunks(kite, {
       exchange: cis.exchange,
       tradingsymbol: cis.tradingsymbol,
       transaction_type: 'SELL',
@@ -44,7 +45,7 @@ export async function checkReversalExit(cis, kite) {
       price: exitPrice,
       product: 'NRML',
       validity: 'DAY'
-    });
+    }, cis.lot_size);
 
     cis.sellType = 'reversal';
     cis.sellStrategy = 'lowerHighLowerLow';

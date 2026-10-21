@@ -24,7 +24,7 @@ import {
 export async function handlePositionPresent(cis, kite) {
 
 
-
+return;
 
 let daylow=Math.min(...cis.minuteData.map(m=>m.low))
 var openOrders = global.orders.find(o => o.tradingsymbol == cis.tradingsymbol && o.status == 'OPEN');

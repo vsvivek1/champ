@@ -6,6 +6,7 @@ import { handleStopLossOrTarget } from './handleStopLossOrTarget.js';
 import { getFreezeLimit } from './getFreezeLimit.js';
 
 import { logNewEntry } from './logNewEntry.js';
+import { sendBuySignalEmail } from './emailAlerts.js';
 
 
 
@@ -112,6 +113,7 @@ logNewEntry({
   global
 });
                    const orderId = await kite.placeOrder("regular", orderParams);
+sendBuySignalEmail(cis, qty, price);
 cis.entryHealth='inside place order'
 
 cis.message = `${global.clock} Order placed successfully. Order ID: ${orderId}, ${cis.buyStrategy} for ${cis.tradingsymbol} at ${cis.entryPrice}, instrument.averageRange=${cis.averageRange},ordered=${cis.ordered},qty=${qty},price=${price}

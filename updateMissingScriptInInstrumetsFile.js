@@ -79,8 +79,13 @@ console.log( instrus,'instrus' );
 // return;
 
 
-let targetInstru = require( './appv3/shared/instruments/instrumentsForMining.json' );
-let sourceInstru = require( './appv3/public/instruments/instrumentsAll.json' );
+const targetInstruPath = require.resolve( './appv3/shared/instruments/instrumentsForMining.json' );
+const sourceInstruPath = require.resolve( './appv3/public/instruments/instrumentsAll.json' );
+
+delete require.cache[ targetInstruPath ];
+
+let targetInstru = require( targetInstruPath );
+let sourceInstru = require( sourceInstruPath );
 
 /// check if its already there
 

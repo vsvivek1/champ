@@ -9,6 +9,10 @@ import { calculate20MA } from './calculate20Ma.js';
 import { placeTargetIfNotTargetSet } from './placeTargetIfNotTargetSet.js';
 import {RSI} from 'technicalindicators';
 import { setVWAP } from './setvWAP.js';
+import analyzeCandleTrend from './analyzeCandleTrend.js';
+
+import updateOIDropStrength from './updateOIDropStrength.js';
+import { isLowerLow } from './isLowerLow.js';
 
 function setRSI(cis){
 
@@ -213,6 +217,8 @@ export async function fetchPositionsAndSetCis(kite) {
     };
 
     const order = global.orders.filter(o => o.tradingsymbol == instrument.tradingsymbol && o.status == 'OPEN');
+    instrument.orders = order;  // ← attach full array to instrument/cis
+
 
     if (order.length > 0) { 
         instrument.hasLiveOrder = true;
@@ -296,6 +302,51 @@ export async function fetchHourlyData(kite) {
 }
 
 // Function to fetch minute data and upglobal.date CIS
+
+
+function isLowerHigh(cis) {
+    const candles = cis.minuteData;
+
+    if (!candles || candles.length < 2) {
+        return false;
+    }
+
+    const current = candles[candles.length - 1];
+    const previous = candles[candles.length - 2];
+
+
+    if(current.high < previous.high){
+
+ cis.hasDanger = true;
+    cis.dangerMessages = 'Last minute highs are making lower highs';    
+    cis.hasLowerHigh = current.high < previous.high;
+
+    return current.high < previous.high;
+    }else{
+
+ cis.hasDanger = false;
+    cis.dangerMessages = '';    
+    cis.hasLowerHigh = current.high < previous.high;
+
+    return current.high < previous.high;
+
+    }
+   
+}
+
+function getPriceRangeOfLastNCandles(candles, n = 10) {
+const result = candles
+    .slice(-n)
+    .map(candle => {
+      const high = Number(candle.high);
+      const low = Number(candle.low);
+      const close = Number(candle.close);
+
+      return Number((((high - low) / close) * 100).toFixed(2));
+    });
+
+  return result;
+}
 export async function fetchMinuteData(kite) {
     try {
 
@@ -373,7 +424,20 @@ if(global.instrumentName=='STK' && false){
                 instrument.ma20=calculate20MA(instrument.minuteData);
                 instrument.dayHigh= Math.max(...instrument.minuteData.map(candle=>candle.high))
 
+
                 instrument.last3CandleLow= Math.min(...instrument.minuteData.slice(-3).map(candle=>candle.low))
+            instrument=    analyzeCandleTrend (instrument);
+
+            instrument.CandleRanges=getPriceRangeOfLastNCandles(instrument.minuteData, 10);
+
+          //  console.log(instrument.tradingsymbol,'candle ranges',instrument.CandleRanges)
+
+       updateOIDropStrength(instrument);
+
+       instrument.isLowerLow= isLowerLow(instrument, 3);    
+
+       instrument.isLowerHigh= isLowerHigh(instrument);
+            
                 
 
 
@@ -390,6 +454,8 @@ if(global.instrumentName=='STK' && false){
 
 
                 instrument.averageRange=isNaN(averageRange)?100: averageRange;
+
+                instrument.averageRangePercentage= (instrument.averageRange/instrument.minuteData.at(-1).close)*100;
 
 
             findDemandZones(instrument);
@@ -476,7 +542,7 @@ async function fetchAllData(kite, instruments, fromTime, toTime, dataType, histo
 
             let ts=i.getTradingSymbol()
 //console.log('historic call',ts)
-            const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime);
+            const data = await kite.getHistoricalData(instrument, dataType, fromTime, toTime,false,true);
 // console.log(index,'minute data fetched',instrument,
 //     global.instrumentName,global.allInstruments.find(i=>i.instrument_token==instrument).tradingsymbol)
 

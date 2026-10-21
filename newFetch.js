@@ -758,7 +758,7 @@ function popOption(selectedOptions, fullJson, accessTokenDoc) {
 
 const appDir = path.join(__dirname, 'appv3');
 exec(
-  'yarn run build && pm2 restart all',
+  'yarn run build && pm2 restart server',
   { cwd: appDir },
   (err, stdout, stderr) => {
     try {

@@ -12,6 +12,10 @@
  * @param {Object} cis - The instrument's tracked state, used for last3CandleLow.
  */
 export default async function updateOpenOrderPrice(kite, orderId, instrumentToken, newPrice, cis) {
+    // Stop-loss trailing is now handled by the separate stopLossGuard.js
+    // pm2 process; disabled here to avoid conflicting SL modifications.
+    return;
+
     try {
         const referenceLow = cis?.last3CandleLow ?? newPrice;
 

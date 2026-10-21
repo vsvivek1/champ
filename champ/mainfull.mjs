@@ -236,11 +236,14 @@ global.orders = [];
 let con = connectToDatabase();
 let kite, ticker;
 
-import WebSocket  from "ws";
+//import WebSocket  from "ws";
 
 import { sendNotification } from './mobileAlerts.js';
 
-const wss  = new WebSocket.Server({ port: 5000 });
+// Disabled: this server just bound port 5000 waiting for a "Mac" client
+// to connect before running main(); that connection gate is already
+// removed below (main() runs unconditionally), so the server was dead weight.
+// const wss  = new WebSocket.Server({ port: 5000 });
 
 main();
 

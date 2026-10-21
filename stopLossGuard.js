@@ -1,17 +1,25 @@
 
 /*
 
-tods:
+Single-resting-order guard for long option positions.
 
-1. pick posistion and set the flag hasPosition=true or fase;
-2. corect the strike selection logic
-3. check the spread before placing order
-4. place target if not placed
+Kite margin-checks every pending SELL order independently -- two resting
+SELLs against one long position makes the second look like a naked short
+and demands full short-option margin (seen live: ~14L demanded, rejected).
+So this script keeps exactly ONE resting SELL order per position and
+modifies it in place as conditions change, never placing a second one:
 
-5. once traded dont trade again
-6. below 1 rs no trade
-7. no trade below open
-8.
+  1. On a BUY fill, a 2% profit-target SELL LIMIT is placed immediately
+     (buy_price * 1.02), tagged TARGET_ORDER_TAG.
+  2. While that target rests, the stop-loss conditions are enforced per
+     live tick. When one fires, the SAME order is MODIFIED:
+       - price broke the rolling 3-candle low, or gave back too much of
+         the peak gain -> modified into a marketable LIMIT exit (ltp*0.9)
+       - price stalled below its peak           -> modified into an SL
+         with trigger at the 3-candle low
+  3. The conversion is one-way: once the order is an SL it never goes
+     back to being a target. From there the existing trailing logic
+     tightens (never loosens) the trigger.
 
 */
 
@@ -35,30 +43,33 @@ process.on('uncaughtException', (err) => {
   console.error(err.stack || err);
 });
 
-const { get } = require('mongoose');
 const { connectToDatabase } = require('./connectToDatabase.js');
 const { closeDatabaseConnection } = require('./connectToDatabase.js');
 const { getTodaysAccessToken } = require('./getTodaysAccessToken.js');
-const { downLoadAllInstrumentsAndReturnJson } = require('./downLoadAllInstrumentsAndReturnJson.js');
-const { getKiteConnectInstance,getTickerInstance } = require('./getKiteConnectInstance.js');
+const { getKiteConnectInstance, getTickerInstance } = require('./getKiteConnectInstance.js');
 const dayjs = require("dayjs");
-//var {sendNotification}=require('./MobileAlerts/mobileAlerts.js');
 
 const path = require('path');
-const { KiteConnect } = require('kiteconnect');
 const { placeOrderInFreezeChunks } = require('./placeOrderInFreezeChunks.js');
 const { target, targetPct } = require('./targetLock.js');
-const scriptDirectory  = __dirname
-const FILE_LOCATION  =  path.join( scriptDirectory);
+const scriptDirectory = __dirname;
+const FILE_LOCATION = path.join(scriptDirectory);
 const fs = require('fs').promises;
 var margin;
 
 const TICK = 0.05;
 
+// EDIT ME: profit % locked in by the target order placed right after a buy.
+const TARGET_PCT = 2;
+
+// Tag on the resting order while it is still the 2% target (it keeps the
+// tag after being modified into an SL/exit -- mode is detected from the
+// live order's order_type/price, not the tag).
+const TARGET_ORDER_TAG = 'TGT2PCT';
+
 // Kite parks a resting SL/SL-M order in "TRIGGER PENDING" -- not "OPEN" --
 // until its trigger price is hit, at which point it briefly shows "OPEN"
-// before filling. Matching only "OPEN" means every untriggered protective
-// SL is invisible to both the trailing check and the coverage check.
+// before filling. A resting LIMIT (the target) shows "OPEN" from the start.
 const RESTING_ORDER_STATUSES = ["TRIGGER PENDING", "OPEN"];
 
 // This script is options-only -- NSE F&O and BSE F&O. Every place positions
@@ -136,52 +147,57 @@ async function computeStopLossTriggerFromCandles(kite, instrumentToken) {
         true
     );
 
-    let lastThreeCandles = historicalData.slice(-3);
+    // The breach level is the min low of the last 3 COMPLETED candles; the
+    // live (4th, still-forming) candle is what gets checked against it per
+    // tick -- the moment a live tick prints at/below the level, exit
+    // immediately. The live candle's own low must NOT be part of the level
+    // itself: that would be self-referential (any retest of a low the live
+    // candle just made would read as a breach).
+    const currentMinuteStart = dayjs().startOf('minute');
+    const completedCandles = historicalData.filter(
+        c => dayjs(c.date).isBefore(currentMinuteStart)
+    );
 
-    return Math.min(...lastThreeCandles.map(c => c.low));
+    let referenceCandles = completedCandles.slice(-3);
+
+    // First minutes of the session there may be no completed candles yet --
+    // fall back to whatever is available rather than Math.min() of an empty
+    // list (which is +Infinity and would exit instantly).
+    if (referenceCandles.length == 0) {
+        referenceCandles = historicalData.slice(-3);
+    }
+
+    return Math.min(...referenceCandles.map(c => c.low));
 }
 
 /*
-Places a single SL order for a position. Called once when the
-entry order completes, and again by the periodic check if a
-position is ever found without an open SL order.
+Places the single resting order for a freshly bought position: a SELL
+LIMIT at buy_price * (1 + TARGET_PCT/100), locking the profit target on
+the exchange immediately. Called once when the entry order completes, and
+again by the periodic safety net if a position is ever found without any
+resting SELL order.
 */
-async function placeStopLossOrder(kite, { instrument_token, tradingsymbol, exchange, quantity, positionTransactionType }) {
+async function placeTargetOrder(kite, { instrument_token, tradingsymbol, exchange, quantity, buyPrice }) {
 
-    const slTransactionType =
-        positionTransactionType === "BUY" ? "SELL" : "BUY";
+    const targetPrice = roundToTick(buyPrice * (1 + TARGET_PCT / 100));
 
-    let stopLossTriggerPrice =
-        await computeStopLossTriggerFromCandles(kite, instrument_token);
-
-    let stopLossPrice = roundToTick(stopLossTriggerPrice * 0.95);
-
-    if (slTransactionType === "SELL") {
-        ({ triggerPrice: stopLossTriggerPrice, price: stopLossPrice } =
-            await getSafeSlTriggerAndPrice(
-                kite,
-                instrument_token,
-                stopLossTriggerPrice
-            ));
-    }
-
-    let slOrderIds = await placeOrderInFreezeChunks(kite, {
+    let targetOrderIds = await placeOrderInFreezeChunks(kite, {
         exchange: exchange || "NFO",
         tradingsymbol: tradingsymbol,
-        transaction_type: slTransactionType,
+        transaction_type: "SELL",
         quantity: quantity,
-        order_type: "SL",
-        price: stopLossPrice,
-        trigger_price: stopLossTriggerPrice,
+        order_type: "LIMIT",
+        price: targetPrice,
         product: "NRML",
-        validity: "DAY"
+        validity: "DAY",
+        tag: TARGET_ORDER_TAG
     }, instrumentLotSizeByToken.get(instrument_token));
 
     console.log(
-        `Stop-loss order(s) placed for ${tradingsymbol}. Order ID(s): ${slOrderIds.join(', ')}`
+        `🎯 Target order(s) placed for ${tradingsymbol} at ${targetPrice} (buy ${buyPrice} + ${TARGET_PCT}%). Order ID(s): ${targetOrderIds.join(', ')}`
     );
 
-    return slOrderIds;
+    return targetOrderIds;
 }
 
 const TRAIL_STALL_MS_DEFAULT = 2 * 60 * 1000;    // 2 minutes
@@ -234,65 +250,135 @@ function subscribeForLiveTicks(ticker, instrument_token) {
 }
 
 /*
-Cancels every open SL order for a position (there can be more than one if
-the SL was split across the exchange freeze-quantity limit) and exits with
-an aggressive LIMIT sell 10% below LTP instead. Options don't reliably
-support MARKET orders (thin/wide spreads can give a terrible fill), so
-this marketable LIMIT is used as the immediate-exit path.
+Immediate exit by MODIFYING the resting order(s) in place into an
+aggressive marketable LIMIT 10% below LTP. Options don't reliably support
+MARKET orders (thin/wide spreads can give a terrible fill), so this
+marketable LIMIT is the immediate-exit path. Modify (not cancel+place) so
+there is never a second SELL order in flight for Kite to margin-check as
+a naked short, and never a window where the position has no resting order.
+Falls back to cancel+place only if the modify itself fails.
 */
-async function exitPositionImmediately(kite, position, openSlOrders, ltp, reason) {
+async function exitPositionImmediately(kite, position, openSellOrders, ltp, reason) {
 
     const { tradingsymbol } = position;
-
-    for (const order of openSlOrders) {
-        try {
-            await kite.cancelOrder("regular", order.order_id);
-        } catch (cancelErr) {
-            console.log(
-                cancelErr,
-                `❌ Failed cancelling SL order ${order.order_id} for ${tradingsymbol} before exit`
-            );
-        }
-    }
-
     const exitPrice = roundToTick(ltp * 0.9);
 
-    try {
+    for (const order of openSellOrders) {
 
-        const orderIds = await placeOrderInFreezeChunks(kite, {
-            exchange: position.exchange,
-            tradingsymbol,
-            transaction_type: "SELL",
-            order_type: "LIMIT",
-            quantity: Math.abs(position.quantity),
-            price: exitPrice,
-            product: "NRML",
-            validity: "DAY",
-        }, instrumentLotSizeByToken.get(position.instrument_token));
+        try {
 
-        console.log(
-            `🚨 Exit placed for ${tradingsymbol} at ${exitPrice} (${reason}). Order ID(s): ${orderIds.join(', ')}`
-        );
+            await kite.modifyOrder("regular", order.order_id, {
+                order_type: "LIMIT",
+                price: exitPrice,
+            });
 
-    } catch (err) {
+            order.order_type = "LIMIT";
+            order.price = exitPrice;
 
-        console.log(
-            err,
-            `❌ Exit failed for ${tradingsymbol} (${reason})`
-        );
+            console.log(
+                `🚨 Exit: modified order ${order.order_id} for ${tradingsymbol} into marketable LIMIT at ${exitPrice} (${reason})`
+            );
+
+        } catch (err) {
+
+            console.log(
+                err,
+                `❌ Modify-to-exit failed for order ${order.order_id} (${tradingsymbol}), falling back to cancel+place`
+            );
+
+            try {
+
+                await kite.cancelOrder("regular", order.order_id);
+
+                const orderIds = await placeOrderInFreezeChunks(kite, {
+                    exchange: position.exchange,
+                    tradingsymbol,
+                    transaction_type: "SELL",
+                    order_type: "LIMIT",
+                    quantity: order.quantity - (order.filled_quantity || 0),
+                    price: exitPrice,
+                    product: "NRML",
+                    validity: "DAY",
+                }, instrumentLotSizeByToken.get(position.instrument_token));
+
+                console.log(
+                    `🚨 Exit placed (fallback) for ${tradingsymbol} at ${exitPrice} (${reason}). Order ID(s): ${orderIds.join(', ')}`
+                );
+
+            } catch (fallbackErr) {
+
+                console.log(
+                    fallbackErr,
+                    `❌ Fallback exit failed for ${tradingsymbol} (${reason})`
+                );
+            }
+        }
     }
 }
 
-// instrument_token -> position / open SL orders / last-3-candle-low, kept
-// current by refreshTrailingCache on a REST timer. evaluateTrailingExitOnTick
-// reads these on every live tick instead of hitting REST per tick.
+/*
+One-way conversion of the resting 2% target LIMIT into a protective SL
+(trigger at the rolling 3-candle low). Modify in place, same order id(s),
+so Kite never sees a second SELL. Once converted, the order never goes
+back to being a target -- the trailing logic below only ever tightens it.
+*/
+async function convertTargetToStopLoss(kite, position, openSellOrders, desiredTrigger, ltp, reason) {
+
+    const { tradingsymbol, instrument_token } = position;
+
+    const { triggerPrice, price } =
+        await getSafeSlTriggerAndPrice(kite, instrument_token, desiredTrigger, ltp);
+
+    for (const order of openSellOrders) {
+
+        try {
+
+            await kite.modifyOrder("regular", order.order_id, {
+                order_type: "SL",
+                trigger_price: triggerPrice,
+                price: price,
+            });
+
+            order.order_type = "SL";
+            order.trigger_price = triggerPrice;
+            order.price = price;
+
+            console.log(
+                `🔄 Converted target -> SL for ${tradingsymbol} (order ${order.order_id}): trigger ${triggerPrice}, limit ${price} (${reason})`
+            );
+
+        } catch (err) {
+
+            console.log(
+                err,
+                `❌ Target->SL conversion failed for order ${order.order_id} (${tradingsymbol}), exiting instead`
+            );
+
+            await exitPositionImmediately(kite, position, [order], ltp, `conversion to SL failed (${reason})`);
+        }
+    }
+}
+
+// instrument_token -> position / resting SELL orders / last-3-candle-low,
+// kept current by refreshTrailingCache on a REST timer.
+// evaluateTrailingExitOnTick reads these on every live tick instead of
+// hitting REST per tick.
 const cachedPositionByToken = new Map();
-const cachedOpenSlOrdersByToken = new Map();
+const cachedOpenSellOrdersByToken = new Map();
 const last3CandleLowByToken = new Map();
 
+// instrument_token -> actual entry fill price of the CURRENT lot, recorded
+// from the BUY order_update. Kite's position.average_price blends every
+// buy of the day (earlier closed round-trips included), so it is NOT the
+// cost of the live lot and must never be used for mode detection or
+// profit math. If the entry fill wasn't observed (process restart), the
+// entry is recovered from the resting target order's own price
+// (price / (1 + TARGET_PCT/100)).
+const actualBuyPriceByToken = new Map();
+
 // Guards against a burst of ticks (several per second) re-triggering the
-// same cancel+exit or modify while a previous attempt for that token is
-// still in flight.
+// same modify/exit while a previous attempt for that token is still in
+// flight.
 const exitInProgressByToken = new Set();
 
 /*
@@ -335,7 +421,7 @@ async function refreshTrailingCache(kite, ticker) {
         for (const token of cachedPositionByToken.keys()) {
             if (!activeTokens.has(token)) {
                 cachedPositionByToken.delete(token);
-                cachedOpenSlOrdersByToken.delete(token);
+                cachedOpenSellOrdersByToken.delete(token);
                 last3CandleLowByToken.delete(token);
                 exitInProgressByToken.delete(token);
             }
@@ -357,12 +443,14 @@ async function refreshTrailingCache(kite, ticker) {
 
             cachedPositionByToken.set(instrument_token, position);
 
-            const openSlOrders = orders.filter(
+            // The single resting SELL order for this position -- whether it
+            // is still the 2% target LIMIT or has been converted to an SL.
+            const openSellOrders = orders.filter(
                 o => o.tradingsymbol == tradingsymbol &&
-                    o.order_type == "SL" &&
+                    o.transaction_type == "SELL" &&
                     RESTING_ORDER_STATUSES.includes(o.status)
             );
-            cachedOpenSlOrdersByToken.set(instrument_token, openSlOrders);
+            cachedOpenSellOrdersByToken.set(instrument_token, openSellOrders);
 
             try {
                 const low = await computeStopLossTriggerFromCandles(kite, instrument_token);
@@ -382,15 +470,22 @@ async function refreshTrailingCache(kite, ticker) {
 }
 
 /*
-Trailing stop-loss, evaluated on every live tick (not just once per REST
-poll) so a fast intra-cycle move isn't missed: tightens (never loosens)
-the resting SL order's trigger for a long position that's in profit, when
-either:
-  1. price breaks back below the last-3-candle low, or
-  2. price hasn't made a new high above its peak for 2 minutes (stalled,
-     1 minute on expiry day)
-and exits immediately (rather than trying to tighten) if the position has
-given back too much of its peak gain, regardless of current profit/loss.
+Per-tick guard logic. The position's single resting SELL order is either:
+
+TARGET MODE (order_type LIMIT, price above entry) -- the 2% target is
+resting. The target never fills on the way down, so every SL condition is
+enforced here per tick by MODIFYING that same order:
+  - price broke the rolling 3-candle low (winners AND losers)
+      -> modified into a marketable LIMIT exit
+  - gave back >= 35% of the peak gain (winners)
+      -> modified into a marketable LIMIT exit
+  - stalled below its peak for 2 min / 1 min on expiry day (winners)
+      -> converted (one-way) into an SL with trigger at the 3-candle low
+
+SL MODE (order_type SL) -- the order has been converted. From here the
+original trailing behaviour applies: the trigger only ever tightens, the
+give-back/breakdown checks still force an immediate exit (again via
+modify), and the targetPct locked-trailing logic manages runaway winners.
 */
 async function evaluateTrailingExitOnTick(kite, ticker, tick) {
 
@@ -401,9 +496,9 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
         return; // not one of our tracked long positions
     }
 
-    const openSlOrders = cachedOpenSlOrdersByToken.get(instrument_token);
-    if (!openSlOrders || openSlOrders.length == 0) {
-        return; // ensureStopLossForOpenPositions will place one
+    const openSellOrders = cachedOpenSellOrdersByToken.get(instrument_token);
+    if (!openSellOrders || openSellOrders.length == 0) {
+        return; // ensureTargetForOpenPositions will place the target order
     }
 
     if (exitInProgressByToken.has(instrument_token)) {
@@ -422,12 +517,98 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
         positionPeaks.set(tradingsymbol, peak);
     }
 
+    const restingOrder = openSellOrders[0];
+    const last3CandleLow = last3CandleLowByToken.get(instrument_token);
+
+    // Entry price of the CURRENT lot -- never Kite's blended day average.
+    let entryPrice = actualBuyPriceByToken.get(instrument_token);
+    if (entryPrice == null) {
+        if (restingOrder.tag == TARGET_ORDER_TAG && restingOrder.order_type == "LIMIT") {
+            entryPrice = Number(restingOrder.price) / (1 + TARGET_PCT / 100);
+            actualBuyPriceByToken.set(instrument_token, entryPrice);
+        } else {
+            entryPrice = average_price;
+        }
+    }
+
+    const isSlMode = restingOrder.order_type == "SL";
+
+    // A LIMIT order priced below entry is a marketable exit already in
+    // flight (placed by an earlier condition) -- leave it to fill.
+    const isTargetMode =
+        restingOrder.order_type == "LIMIT" &&
+        Number(restingOrder.price) > entryPrice;
+
+    if (!isSlMode && !isTargetMode) {
+        return;
+    }
+
+    const maxGain = peak.peakPrice - entryPrice;
+    const giveBackAmount = peak.peakPrice - ltp;
+    const gaveBackTooMuch =
+        ltp > entryPrice &&
+        maxGain > 0 && giveBackAmount >= maxGain * GIVE_BACK_FRACTION;
+
+    if (isTargetMode) {
+
+        // Hard stop: the resting target can't protect the downside, so the
+        // 3-candle-low breach is enforced here for winners and losers alike.
+        if (last3CandleLow != null && ltp <= last3CandleLow) {
+            await exitAndInvalidateCache(
+                kite, ticker, instrument_token, position, openSellOrders, ltp,
+                `price ${ltp} broke 3-candle low ${last3CandleLow}`
+            );
+            return;
+        }
+
+        if (gaveBackTooMuch) {
+            await exitAndInvalidateCache(
+                kite, ticker, instrument_token, position, openSellOrders, ltp,
+                `gave back ${giveBackAmount.toFixed(2)} of peak gain ${maxGain.toFixed(2)} (>= ${GIVE_BACK_FRACTION * 100}%)`
+            );
+            return;
+        }
+
+        const inProfit = ltp > entryPrice;
+        if (!inProfit || last3CandleLow == null) {
+            return;
+        }
+
+        const stallThresholdMs = isExpiryDay(instrumentExpiryByToken.get(instrument_token))
+            ? TRAIL_STALL_MS_EXPIRY_DAY
+            : TRAIL_STALL_MS_DEFAULT;
+
+        const stalled = (Date.now() - peak.peakTime) >= stallThresholdMs;
+
+        if (!stalled) {
+            return;
+        }
+
+        exitInProgressByToken.add(instrument_token);
+
+        try {
+
+            await convertTargetToStopLoss(
+                kite, position, openSellOrders, last3CandleLow, ltp,
+                `price stalled below peak ${peak.peakPrice} for ${stallThresholdMs / 1000}+ seconds`
+            );
+
+        } finally {
+
+            exitInProgressByToken.delete(instrument_token);
+        }
+
+        return;
+    }
+
+    // ---- SL mode below: the order has been converted, trail it ----
+
     // Target lock: once profit has ever reached targetPct, stop trying to
     // exit and instead continuously tighten the real SL trigger to lock in
     // (1 - GIVE_BACK_FRACTION) of the peak gain. The market's own SL fill
     // closes the position from here, not our own market order -- so this
     // replaces the give-back/breakdown/stall checks below for this symbol.
-    const currentProfitPct = ((ltp - average_price) / average_price) * 100;
+    const currentProfitPct = ((ltp - entryPrice) / entryPrice) * 100;
 
     if (target && currentProfitPct >= targetPct && !targetLockedSymbols.has(tradingsymbol)) {
         targetLockedSymbols.add(tradingsymbol);
@@ -438,21 +619,18 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
 
     if (target && targetLockedSymbols.has(tradingsymbol)) {
 
-        const lockedGain = (peak.peakPrice - average_price) * (1 - GIVE_BACK_FRACTION);
-        const desiredTrigger = average_price + lockedGain;
+        const lockedGain = (peak.peakPrice - entryPrice) * (1 - GIVE_BACK_FRACTION);
+        const desiredTrigger = entryPrice + lockedGain;
 
-        const openSlOrder = openSlOrders[0];
-        const currentTrigger = Number(openSlOrder.trigger_price);
-        const currentSlLimitPrice = Number(openSlOrder.price);
+        const currentTrigger = Number(restingOrder.trigger_price);
+        const currentSlLimitPrice = Number(restingOrder.price);
 
-        // The resting order is a SELL LIMIT: it can only fill at or above
-        // its own limit price. A fast/gappy crash in the option premium can
-        // blow straight through the trigger *and* the limit price (set 5%
-        // below trigger) in one move, leaving the order stuck open and
-        // unfillable while price keeps falling -- and once locked, nothing
-        // else here is watching for that, so the locked-in profit would
-        // otherwise bleed away untouched. Cancel it and exit at market now
-        // instead of trusting it to eventually fill.
+        // The resting order is a SELL LIMIT once triggered: it can only fill
+        // at or above its own limit price. A fast/gappy crash in the option
+        // premium can blow straight through the trigger *and* the limit
+        // price (set 5% below trigger) in one move, leaving the order stuck
+        // open and unfillable while price keeps falling. Modify it into a
+        // marketable exit now instead of trusting it to eventually fill.
         if (ltp <= currentSlLimitPrice) {
 
             await exitAndInvalidateCache(
@@ -460,7 +638,7 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
                 ticker,
                 instrument_token,
                 position,
-                openSlOrders,
+                openSellOrders,
                 ltp,
                 `price ${ltp} fell through locked SL limit ${currentSlLimitPrice} (order stuck, won't fill)`
             );
@@ -477,17 +655,17 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
 
             try {
 
-                await kite.modifyOrder("regular", openSlOrder.order_id, {
+                await kite.modifyOrder("regular", restingOrder.order_id, {
                     order_type: "SL",
                     trigger_price: newTrigger,
                     price: newPrice,
                 });
 
-                openSlOrder.trigger_price = newTrigger;
-                openSlOrder.price = newPrice;
+                restingOrder.trigger_price = newTrigger;
+                restingOrder.price = newPrice;
 
                 console.log(
-                    `🎯🔒 Target-locked trail for ${tradingsymbol}: ${currentTrigger} -> ${newTrigger} (locking ${((1 - GIVE_BACK_FRACTION) * 100).toFixed(0)}% of peak gain ${(peak.peakPrice - average_price).toFixed(2)})`
+                    `🎯🔒 Target-locked trail for ${tradingsymbol}: ${currentTrigger} -> ${newTrigger} (locking ${((1 - GIVE_BACK_FRACTION) * 100).toFixed(0)}% of peak gain ${(peak.peakPrice - entryPrice).toFixed(2)})`
                 );
 
             } catch (err) {
@@ -497,8 +675,8 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
                     `❌ Failed target-locked trail for ${tradingsymbol}, falling back to a marketable exit`
                 );
 
-                await exitPositionImmediately(kite, position, openSlOrders, ltp, `SL modify failed while target-locked trailing`);
-                cachedOpenSlOrdersByToken.delete(instrument_token);
+                await exitPositionImmediately(kite, position, openSellOrders, ltp, `SL modify failed while target-locked trailing`);
+                cachedOpenSellOrdersByToken.delete(instrument_token);
 
             } finally {
 
@@ -509,33 +687,24 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
         return; // target-locked: skip give-back/breakdown/stall below, the real SL now manages the exit
     }
 
-    // Give-back check runs regardless of current profit/loss -- the whole
-    // point is to catch a winner round-tripping back down, including all
-    // the way through breakeven into a loss.
-    const maxGain = peak.peakPrice - average_price;
-    const giveBackAmount = peak.peakPrice - ltp;
-    const gaveBackTooMuch =
-        maxGain > 0 && giveBackAmount >= maxGain * GIVE_BACK_FRACTION;
-
     if (gaveBackTooMuch) {
         await exitAndInvalidateCache(
             kite,
             ticker,
             instrument_token,
             position,
-            openSlOrders,
+            openSellOrders,
             ltp,
             `gave back ${giveBackAmount.toFixed(2)} of peak gain ${maxGain.toFixed(2)} (>= ${GIVE_BACK_FRACTION * 100}%)`
         );
         return;
     }
 
-    const inProfit = ltp > average_price;
+    const inProfit = ltp > entryPrice;
     if (!inProfit) {
-        return; // only trail winners below
+        return; // only trail winners below; the resting SL is the exit for losers
     }
 
-    const last3CandleLow = last3CandleLowByToken.get(instrument_token);
     if (last3CandleLow == null) {
         return; // not refreshed yet -- wait for the next cache refresh
     }
@@ -552,7 +721,7 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
             ticker,
             instrument_token,
             position,
-            openSlOrders,
+            openSellOrders,
             ltp,
             `price ${ltp} broke 3-candle low ${last3CandleLow}`
         );
@@ -573,8 +742,7 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
         return;
     }
 
-    const openSlOrder = openSlOrders[0];
-    const currentTrigger = Number(openSlOrder.trigger_price);
+    const currentTrigger = Number(restingOrder.trigger_price);
 
     const { triggerPrice: newTrigger, price: newPrice } =
         await getSafeSlTriggerAndPrice(kite, instrument_token, last3CandleLow, ltp);
@@ -588,7 +756,7 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
 
     try {
 
-        await kite.modifyOrder("regular", openSlOrder.order_id, {
+        await kite.modifyOrder("regular", restingOrder.order_id, {
             order_type: "SL",
             trigger_price: newTrigger,
             price: newPrice,
@@ -597,7 +765,7 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
         // Reflect the new trigger in the cache immediately so a tick
         // arriving before the next REST refresh doesn't re-attempt the
         // same modify.
-        openSlOrder.trigger_price = newTrigger;
+        restingOrder.trigger_price = newTrigger;
 
         console.log(
             `🔒 Trailed SL for ${tradingsymbol}: ${currentTrigger} -> ${newTrigger} (price stalled below peak ${peak.peakPrice} for ${stallThresholdMs / 1000}+ seconds, OI ${tick.oi})`
@@ -610,8 +778,8 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
             `❌ Failed trailing SL for ${tradingsymbol}, falling back to a marketable exit`
         );
 
-        await exitPositionImmediately(kite, position, openSlOrders, ltp, `SL modify failed while trailing`);
-        cachedOpenSlOrdersByToken.delete(instrument_token);
+        await exitPositionImmediately(kite, position, openSellOrders, ltp, `SL modify failed while trailing`);
+        cachedOpenSellOrdersByToken.delete(instrument_token);
 
     } finally {
 
@@ -619,34 +787,36 @@ async function evaluateTrailingExitOnTick(kite, ticker, tick) {
     }
 }
 
-async function exitAndInvalidateCache(kite, ticker, instrument_token, position, openSlOrders, ltp, reason) {
+async function exitAndInvalidateCache(kite, ticker, instrument_token, position, openSellOrders, ltp, reason) {
 
     exitInProgressByToken.add(instrument_token);
 
     try {
-        await exitPositionImmediately(kite, position, openSlOrders, ltp, reason);
+        await exitPositionImmediately(kite, position, openSellOrders, ltp, reason);
     } finally {
-        // Drop the cached SL orders so a tick arriving before the next
-        // refresh sees "no open SL order" and does nothing, instead of
-        // re-triggering this same exit (and re-selling the full quantity)
-        // on every tick until the cache catches up.
-        cachedOpenSlOrdersByToken.delete(instrument_token);
+        // Drop the cached resting orders so a tick arriving before the next
+        // refresh sees "no resting order" and does nothing, instead of
+        // re-triggering this same exit on every tick until the cache
+        // catches up.
+        cachedOpenSellOrdersByToken.delete(instrument_token);
         exitInProgressByToken.delete(instrument_token);
     }
 }
 
 /*
-Periodic safety net: any open position that doesn't have a
-matching open SL order gets one placed.
+Periodic safety net: any open long option position that doesn't have a
+resting SELL order (target or SL) gets the 2% target placed, based on its
+current average_price. Also the reconciliation path for positions that
+existed before this process (re)started.
 */
-async function ensureStopLossForOpenPositions(kite, ticker) {
+async function ensureTargetForOpenPositions(kite, ticker) {
 
     try {
 
-        let positions = await withRetry(() => kite.getPositions(), 'ensureStopLossForOpenPositions getPositions');
+        let positions = await withRetry(() => kite.getPositions(), 'ensureTargetForOpenPositions getPositions');
 
         /*
-        option buyer only: only long positions need an SL
+        option buyer only: only long positions need the resting order
         */
         let netPositions = (positions.net || []).filter(
             p => p.quantity > 0 && OPTION_EXCHANGES.includes(p.exchange)
@@ -656,15 +826,13 @@ async function ensureStopLossForOpenPositions(kite, ticker) {
             return;
         }
 
-        let orders = await withRetry(() => kite.getOrders(), 'ensureStopLossForOpenPositions getOrders');
+        let orders = await withRetry(() => kite.getOrders(), 'ensureTargetForOpenPositions getOrders');
 
-        // Any resting SELL order -- our protective SL, or the aggressive
-        // marketable LIMIT sell the trailing check places on an immediate
-        // exit -- already covers/is closing the position. Checking by
-        // transaction_type rather than order_type == "SL" specifically
-        // avoids racing the tick-driven exit path: right after it cancels
-        // the SL and places its own exit order, this still sees the
-        // position as covered instead of stacking a second SL on top.
+        // Any resting SELL order -- the target, the converted SL, or a
+        // marketable exit in flight -- is THE single order for that
+        // position. Placing anything else alongside it would get
+        // margin-checked by Kite as a naked short and rejected (or worse,
+        // accepted and double-sold).
         let symbolsAlreadyCovered = new Set(
             orders
                 .filter(o => o.transaction_type == "SELL" && RESTING_ORDER_STATUSES.includes(o.status))
@@ -681,36 +849,50 @@ async function ensureStopLossForOpenPositions(kite, ticker) {
                 continue;
             }
 
-            // A tick-driven exit for this token is actively cancelling its
-            // SL and placing a replacement order right now -- the REST
-            // snapshot above may have been taken mid-transition (SL already
-            // cancelled, exit order not yet visible). Skip this cycle
-            // rather than race it; the next cycle will see the resolved
-            // state via the check above.
+            // A tick-driven modify/exit for this token is in flight right
+            // now -- the REST snapshot above may have been taken
+            // mid-transition. Skip this cycle rather than race it.
             if (exitInProgressByToken.has(position.instrument_token)) {
                 continue;
             }
 
             console.log(
-                `⚠️ No open SL order for ${position.tradingsymbol}, placing one`
+                `⚠️ No resting SELL order for ${position.tradingsymbol}, placing the ${TARGET_PCT}% target`
             );
+
+            // Entry price of the current lot: the observed fill if we saw
+            // it, else the latest completed BUY in today's order book.
+            // position.average_price (blended across the day's buys) is the
+            // last resort only.
+            let buyPrice = actualBuyPriceByToken.get(Number(position.instrument_token));
+            if (buyPrice == null) {
+                const lastBuy = orders
+                    .filter(o =>
+                        o.tradingsymbol == position.tradingsymbol &&
+                        o.transaction_type == "BUY" &&
+                        o.status == "COMPLETE" &&
+                        o.average_price > 0
+                    )
+                    .pop();
+                buyPrice = lastBuy ? lastBuy.average_price : position.average_price;
+                actualBuyPriceByToken.set(Number(position.instrument_token), buyPrice);
+            }
 
             try {
 
-                await placeStopLossOrder(kite, {
+                await placeTargetOrder(kite, {
                     instrument_token: position.instrument_token,
                     tradingsymbol: position.tradingsymbol,
                     exchange: position.exchange,
                     quantity: Math.abs(position.quantity),
-                    positionTransactionType:
-                        position.quantity > 0 ? "BUY" : "SELL"
+                    buyPrice: buyPrice
                 });
 
             } catch (err) {
 
                 console.log(
                     err,
-                    `❌ Failed placing SL for ${position.tradingsymbol}`
+                    `❌ Failed placing target for ${position.tradingsymbol}`
                 );
             }
         }
@@ -719,7 +901,7 @@ async function ensureStopLossForOpenPositions(kite, ticker) {
 
         console.log(
             err,
-            "❌ ensureStopLossForOpenPositions error"
+            "❌ ensureTargetForOpenPositions error"
         );
     }
 }
@@ -730,7 +912,7 @@ async function main(){
 
       await connectToDatabase()
     let accesstoken=await getTodaysAccessToken();
-    
+
     let kite=await getKiteConnectInstance(accesstoken);
     let ticker=await getTickerInstance (accesstoken);
      margin=await kite.getMargins();
@@ -752,7 +934,6 @@ async function main(){
     }
 
 
-    // console.log("Margin data ",ticker)
     ticker.connect();
  ticker.on("connect", () => {
     console.log("🟢 Kite Ticker connected");})
@@ -761,8 +942,8 @@ async function main(){
       });
 
     // Live price (and OI, since we subscribe in full mode) feed for the
-    // trailing check. evaluateTrailingExitOnTick runs on every tick instead
-    // of waiting for the next REST poll, so a fast intra-cycle move (a
+    // guard. evaluateTrailingExitOnTick runs on every tick instead of
+    // waiting for the next REST poll, so a fast intra-cycle move (a
     // spike that peaks and reverses within one refresh window) isn't missed.
     ticker.on("ticks", ticks => {
         for (const tick of ticks) {
@@ -775,8 +956,6 @@ async function main(){
     });
 
     ticker.on("order_update", async orderUpdate => {
-
-      //  console.log("🔔 Order Update:", orderUpdate)    ;
 
     let { instrument_token, status, transaction_type, tradingsymbol, quantity, exchange } = orderUpdate;
 
@@ -791,30 +970,80 @@ async function main(){
     }
 
     /*
-    option buyer only: an SL is only needed against an entry
-    BUY. a completed SELL is an exit (target or SL fill), not
-    a new position to protect.
+    option buyer only: the single resting order (2% target) is only needed
+    against an entry BUY. a completed SELL is an exit (target or SL fill),
+    not a new position to protect.
     */
-    if (transaction_type != "BUY") {
+    if (transaction_type == "BUY") {
+
+        subscribeForLiveTicks(ticker, instrument_token);
+
+        // The real cost of this lot -- position.average_price blends every
+        // buy of the day and must not be trusted for profit math.
+        actualBuyPriceByToken.set(Number(instrument_token), orderUpdate.average_price);
+
+        try {
+
+            await placeTargetOrder(kite, {
+                instrument_token,
+                tradingsymbol,
+                exchange,
+                quantity,
+                buyPrice: orderUpdate.average_price
+            });
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
         return;
     }
 
-    subscribeForLiveTicks(ticker, instrument_token);
+    if (transaction_type == "SELL") {
 
-    try {
+        // A SELL completed. If the position is now flat, cancel any of our
+        // orders still resting for this symbol so a stale one can't fire
+        // later and open an unintended short. If the position still has
+        // quantity (a freeze-chunk partially closing), leave the remaining
+        // chunk orders alone -- they're still protecting the remainder.
+        try {
 
-        await placeStopLossOrder(kite, {
-            instrument_token,
-            tradingsymbol,
-            exchange,
-            quantity,
-            positionTransactionType: transaction_type
-        });
+            let positions = await kite.getPositions();
+            const stillOpen = (positions.net || []).some(
+                p => p.tradingsymbol == tradingsymbol && p.quantity > 0
+            );
 
-    } catch (error) {
+            if (stillOpen) {
+                return;
+            }
 
-        console.log(error);
+            // Flat now: the recorded entry price belongs to the closed lot,
+            // a future buy must not inherit it.
+            actualBuyPriceByToken.delete(Number(instrument_token));
 
+            let orders = await kite.getOrders();
+
+            let leftoverOrders = orders.filter(
+                o => o.tradingsymbol == tradingsymbol &&
+                    o.transaction_type == "SELL" &&
+                    RESTING_ORDER_STATUSES.includes(o.status)
+            );
+
+            for (const order of leftoverOrders) {
+                try {
+                    await kite.cancelOrder("regular", order.order_id);
+                    console.log(`🧹 Cancelled leftover order ${order.order_id} for ${tradingsymbol} (position closed)`);
+                } catch (cancelErr) {
+                    console.log(cancelErr, `⚠️ Failed cancelling leftover order ${order.order_id} for ${tradingsymbol}`);
+                }
+            }
+
+        } catch (error) {
+
+            console.log(error, `❌ Post-close cleanup failed for ${tradingsymbol}`);
+        }
     }
 
 });
@@ -822,22 +1051,20 @@ async function main(){
 
 
 
-
-
 /*
-periodic safety net: catches any position that somehow ended
-up without an SL order and places one
+periodic safety net: catches any position that somehow ended up without
+its resting target/SL order and places the 2% target
 */
 
 setInterval(() => {
 
-    ensureStopLossForOpenPositions(kite, ticker);
+    ensureTargetForOpenPositions(kite, ticker);
 
 }, 10000);
 
 /*
-Keeps the trailing-check caches (positions, open SL orders, 3-candle low)
-current. The actual exit/trail decisions happen per tick in
+Keeps the guard caches (positions, resting SELL orders, 3-candle low)
+current. The actual modify/exit decisions happen per tick in
 evaluateTrailingExitOnTick, not here -- this only refreshes the REST-backed
 data it reads from.
 */
@@ -851,12 +1078,4 @@ setInterval(() => {
 }, 15000);
 
 
-
-
-
-
-
-
-
 } // <- closes main()
-

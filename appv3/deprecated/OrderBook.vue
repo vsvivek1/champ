@@ -210,7 +210,7 @@ import { io }  from 'socket.io-client';
 // import instruments from "../../../instruments/instrumentsAll.json" assert { type: 'json' } ;;
 
 
-const socket = io( 'http://localhost:4000' )
+const socket = io( 'http://think-vivek-thinkpad-e14-gen-5.taild05309.ts.net:4000' )
 
 //npm install socket..io/admin-ui
 

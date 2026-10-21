@@ -10,7 +10,7 @@ async function getTodaysAccessToken(params={}) {
 
    const accessTokenDoc = await AccesTocken.findOne({ 'date': today }, 'access_token');
    if (!accessTokenDoc) {
-      console.log("Access token not found for today");
+      console.log("Access token not found for today",today);
       return -1;
    }
 

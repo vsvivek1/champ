@@ -2,3 +2,34 @@ findiapp/node_modules/
 git.bash
 node_modules
 class/pricePoints*
+
+# secrets & sessions — never commit
+.env
+.env.*
+.wwebjs_auth/
+serviceAccountKey.json
+**/serviceAccountKey.json
+
+# backups & junk
+*.bak
+*.bak-*
+crontab.backup.*
+.claude/
+
+# logs & debug screenshots
+*.log
+newfetchlog.txt
+newFetchLog.txt
+*.png
+champ/tod.txt
+
+# runtime state written by live processes
+guardState.json
+breachOverride.json
+chartTriggers.json
+tradeLog.json
+
+# regenerated data dumps
+all_instruments.json
+stockOption_*.json
+backtest/results/

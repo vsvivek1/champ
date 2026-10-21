@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Champ Charts</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+<style>
+  :root { --bg:#131722; --panel:#1e222d; --border:#2a2e39; --text:#d1d4dc; --dim:#787b86; --green:#26a69a; --red:#ef5350; --accent:#2962ff; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font: 13px/1.4 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--panel); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+  select,input,button { background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:5px 8px; font-size:13px; }
+  button { cursor:pointer; background:var(--accent); border:none; color:#fff; }
+  button.sec { background:var(--panel); border:1px solid var(--border); }
+  button:disabled { opacity:.5; cursor:default; }
+  .badge { padding:4px 10px; border-radius:4px; font-weight:600; }
+  .badge.inside { background:rgba(38,166,154,.15); color:var(--green); }
+  .badge.outside { background:rgba(239,83,80,.15); color:var(--red); }
+  #spotLtp { font-size:16px; font-weight:700; }
+  .charts { display:flex; flex-wrap:wrap; gap:1px; background:var(--border); }
+  .chartbox { background:var(--bg); position:relative; flex:1 1 360px; min-width:300px; }
+  .chartbox h3 { position:absolute; z-index:5; top:6px; left:8px; font-size:12px; font-weight:600; color:var(--dim); }
+  .chartbox h3 b { color:var(--text); }
+  .chartbox .lp { position:absolute; z-index:5; top:6px; right:8px; font-size:13px; font-weight:700; }
+  .chartbox .ob { position:absolute; z-index:5; top:26px; right:8px; font-size:11px; font-weight:600; padding:2px 6px; border-radius:3px; }
+  .chartbox .quick { position:absolute; z-index:6; top:6px; left:50%; transform:translateX(-50%); display:flex; gap:4px; }
+  .chartbox .quick button { font-size:11px; font-weight:700; padding:2px 7px; border:none; border-radius:3px; color:#fff; cursor:pointer; opacity:.85; }
+  .chartbox .quick button:hover { opacity:1; }
+  .chartbox .quick button.qb { background:var(--green); }
+  .chartbox .quick button.qs { background:#b71c1c; }
+  .chartbox .quick button.armed { background:#ff6d00; }
+  .ob.below { background:rgba(239,83,80,.15); color:var(--red); }
+  .ob.above { background:rgba(38,166,154,.15); color:var(--green); }
+  .chart { height:340px; resize:both; overflow:hidden; min-height:180px; min-width:280px; max-width:100%; }
+  #ctxMenu { position:fixed; z-index:20; background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:8px; display:none; width:170px; box-shadow:0 4px 16px rgba(0,0,0,.5); }
+  #ctxMenu .px { font-weight:600; margin-bottom:6px; font-size:12px; cursor:move; user-select:none; padding:2px; border-bottom:1px dashed var(--border); }
+  #ctxMenu .pxbig { font-size:16px; font-weight:700; color:var(--accent); }
+  #ctxMenu .pxdim { color:var(--dim); font-weight:400; font-size:11px; }
+  #ctxMenu button { display:block; width:100%; margin-top:4px; }
+  #ctxMenu button.buy { background:var(--green); }
+  #ctxMenu button.sellb { background:#b71c1c; }
+  #ctxMenu button.confirm { background:var(--red); }
+  #marginTxt { color:var(--dim); }
+  #guardTxt { font-size:12px; }
+  #guardTxt.on { color:var(--green); }
+  #guardTxt.off { color:var(--red); font-weight:bold; }
+  #nakedAlert { display:none; background:var(--red); color:#fff; font-weight:bold;
+    padding:6px 10px; border-radius:4px; margin-top:6px; animation:nkblink 1s step-end infinite; }
+  @keyframes nkblink { 50% { opacity:0.45; } }
+  td.naked { color:var(--red); font-weight:bold; }
+  button.danger { background:var(--red); font-weight:bold; }
+  button.exitrow { background:var(--red); font-size:11px; padding:2px 6px; }
+  .indsel { display:flex; gap:8px; color:var(--dim); font-size:12px; }
+  .indsel label { display:flex; align-items:center; gap:3px; cursor:pointer; }
+  .cm { padding:5px 8px; font-size:12.5px; line-height:1.6; color:#c8cdd8; background:var(--panel); border-top:1px solid var(--border); min-height:24px; }
+  .cm.sc { animation:scblink 0.8s step-end infinite; border:1px solid var(--green); }
+  @keyframes scblink { 50% { background:#0e3321; } }
+  .cm .sctag { color:var(--green); font-weight:bold; }
+  .cm.fast { animation:fastblink 0.6s step-end infinite; border:1px solid #f0b90b; }
+  @keyframes fastblink { 50% { background:#3a2e07; } }
+  .cm .fasttag { color:#f0b90b; font-weight:bold; }
+  .cm .deadtag { color:#60656f; font-style:italic; }
+  #helpBtn { position:fixed; right:0; top:40%; z-index:60; writing-mode:vertical-rl;
+    padding:10px 4px; border-radius:6px 0 0 6px; background:var(--panel); border:1px solid var(--border); color:#c8cdd8; }
+  #helpDrawer { position:fixed; top:0; right:0; width:380px; max-width:92vw; height:100%;
+    background:#141821; border-left:1px solid var(--border); z-index:70;
+    transform:translateX(100%); transition:transform .25s; overflow-y:auto;
+    padding:14px 18px 40px; font-size:12.5px; line-height:1.65; color:#c8cdd8; }
+  #helpDrawer.open { transform:none; }
+  #helpDrawer h4 { margin:14px 0 4px; color:#f0b90b; }
+  #helpDrawer b.g { color:var(--green); } #helpDrawer b.r { color:var(--red); }
+  #helpClose { float:right; }
+  #trigList { margin-top:6px; }
+  .trig { display:inline-flex; align-items:center; gap:6px; margin:2px 8px 2px 0; padding:3px 8px; border:1px solid #f0b90b55; border-radius:4px; font-size:12px; color:#f0b90b; }
+  .trig button { padding:0 6px; font-size:12px; background:transparent; border:1px solid var(--border); color:var(--red); }
+  .cm .bull { color:var(--green); } .cm .bear { color:var(--red); } .cm .neu { color:var(--dim); }
+  #panel { padding:10px 12px; background:var(--panel); border-top:1px solid var(--border); }
+  table { border-collapse:collapse; width:100%; margin-bottom:8px; }
+  th,td { text-align:right; padding:4px 8px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; }
+  th { color:var(--dim); font-weight:500; }
+  th:first-child, td:first-child { text-align:left; }
+  .pos { color:var(--green); } .neg { color:var(--red); }
+  .orderctl { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:6px; }
+  .orderctl input { width:90px; }
+  #msg { margin-left:8px; color:var(--dim); }
+  #totalPnl { font-size:15px; font-weight:700; }
+</style>
+</head>
+<body>
+
+<header>
+  <select id="indexSel">
+    <option value="NIFTY">NIFTY</option>
+    <option value="SENSEX">SENSEX</option>
+  </select>
+  <label>strikes away <input id="offset" type="number" value="0" step="1" style="width:60px"></label>
+  <button id="loadBtn">Load</button>
+  <span class="indsel">
+    <label><input type="checkbox" id="iVol" checked> Vol</label>
+    <label><input type="checkbox" id="iOi" checked> OI</label>
+    <label><input type="checkbox" id="iMa" checked> MA20</label>
+    <label><input type="checkbox" id="iVwap" checked> VWAP</label>
+  </span>
+  <span id="spotLtp">—</span>
+  <span id="rangeBadge" class="badge">—</span>
+  <span id="ydayTxt" style="color:var(--dim)"></span>
+  <span id="expiryTxt" style="color:var(--dim)"></span>
+  <span style="flex:1"></span>
+  <span>Day P&L: <span id="totalPnl">—</span></span>
+</header>
+
+<div class="charts">
+  <div class="chartbox"><h3 id="t0">SPOT</h3><div class="lp" id="lp0"></div><div class="chart" id="c0"></div><div class="cm" id="cm0"></div></div>
+  <div class="chartbox"><h3 id="t1">CE</h3><div class="quick" id="qk1"></div><div class="lp" id="lp1"></div><div class="ob" id="ob1"></div><div class="chart" id="c1"></div><div class="cm" id="cm1"></div></div>
+  <div class="chartbox"><h3 id="t2">PE</h3><div class="quick" id="qk2"></div><div class="lp" id="lp2"></div><div class="ob" id="ob2"></div><div class="chart" id="c2"></div><div class="cm" id="cm2"></div></div>
+</div>
+
+<div id="ctxMenu"></div>
+
+<div id="panel">
+  <table id="posTable">
+    <thead><tr><th>Position</th><th>Qty</th><th>Entry</th><th>LTP</th><th>% gain / to SL</th><th>P&L (this entry)</th><th>P&L (day)</th><th>Resting order</th><th></th></tr></thead>
+    <tbody></tbody>
+  </table>
+  <div class="orderctl">
+    <select id="ordSymbol"></select>
+    <input id="tgtPrice" type="number" step="0.05" placeholder="target price">
+    <button id="btnTarget">Set / Modify Target</button>
+    <input id="slTrigger" type="number" step="0.05" placeholder="SL trigger">
+    <input id="slPrice" type="number" step="0.05" placeholder="SL limit (opt)">
+    <button id="btnSl" class="sec">Set / Modify SL</button>
+    <label>buy <input id="buyQty" type="number" step="1" placeholder="50" style="width:60px">
+      <select id="qtyMode">
+        <option value="pct">% of margin</option>
+        <option value="abs">abs qty</option>
+      </select>
+    </label>
+    <button id="btnExitAll" class="danger">EXIT ALL</button>
+    <label>on fill <select id="gFirst">
+      <option value="target">Target first</option>
+      <option value="sl">SL first</option>
+    </select></label>
+    <input id="gTgtPct" type="number" step="0.1" min="0.1" max="50" style="width:48px" title="target %">
+    <span style="color:var(--dim)">% tgt</span>
+    <input id="gSlPct" type="number" step="0.1" min="0.1" max="50" style="width:48px" title="SL %">
+    <span style="color:var(--dim)">% sl</span>
+    <button id="gSave" class="sec">Save</button>
+    <span id="marginTxt">—</span>
+    <span id="guardTxt">guard: …</span>
+    <button id="pnlBtn" class="sec">P&L history</button>
+    <span id="msg"></span>
+  </div>
+  <div id="nakedAlert"></div>
+  <div id="trigList"></div>
+  <div id="pnlPanel" style="display:none"></div>
+</div>
+
+<button id="helpBtn">? help</button>
+<div id="helpDrawer">
+  <button id="helpClose" class="sec">✕ close</button>
+  <h3>What the commentary means</h3>
+
+  <h4>⚡ Speed (first item)</h4>
+  <div>Avg range of the last 3 candles vs the normal range (prior 20 candles).
+  <b class="g">MOVING FAST ≥2×</b> = candles twice their normal size — momentum, your profit zone (amber blink + high double-beep).
+  <i>dead chart ≤0.35×</i> = nothing moving (low beep once). In between shows as plain speed 1.1×.</div>
+
+  <h4>Trend</h4>
+  <div><b class="g">uptrend (3/5 green, HH+HL)</b>: of the last 5 completed 1-min candles, 3 closed up; chart makes Higher Highs + Higher Lows. <b class="r">downtrend (LH+LL)</b> is the mirror. Otherwise sideways.</div>
+
+  <h4>% vs open</h4>
+  <div>Premium/spot vs today's 09:15 open. <b class="r">-54% vs open</b> = option lost half its value today.</div>
+
+  <h4>VWAP</h4>
+  <div>Volume-weighted avg price of the day = where the average rupee traded. Above = buyers of the day in profit (bullish); below = bearish.</div>
+
+  <h4>MA20</h4>
+  <div>20-minute moving average. "above MA20 (falling)" = price above the line but the line still slopes down — bounce not yet confirmed. Best: above + rising.</div>
+
+  <h4>Volume</h4>
+  <div><b class="g">volume spike 2.1× avg</b> = last candle traded twice the 20-candle average — the move has participation. <i>thin volume</i> = ≤half average, don't trust the move.</div>
+
+  <h4>OI + price (15 min) — options only</h4>
+  <div><b class="g">long buildup</b>: price ↑ OI ↑ — fresh buyers.<br>
+  <b class="g">short covering</b>: price ↑ OI ↓ — writers buying back their shorts; often fuels a sharp up-move (green blink + beep).<br>
+  <b class="r">short buildup</b>: price ↓ OI ↑ — fresh sellers.<br>
+  <b class="r">long unwinding</b>: price ↓ OI ↓ — buyers giving up.<br>
+  <b class="g">🔥 OI CRASH</b>: OI drops ≥2% within 5 min — writers bailing out fast. If price is holding or rising it says "covering rally likely" (green blink + beep: possible sharp up-move). With price falling it's longs dumping — bearish.</div>
+
+  <h4>B100 / B50 / S50 / S100 (top of each option chart)</h4>
+  <div>Emergency buttons. <b class="g">B100/B50</b> = BUY using 100%/50% of available margin at a marketable limit (LTP+2%). <b class="r">S100</b> = dump the whole position now (resting order modified to LTP−3%, never a second order). <b class="r">S50</b> = sell half: the resting SELL's quantity is cut to half and made marketable; the guard re-covers the remaining half within 15s. First click arms (SURE?), second click within 3s fires — regardless of existing orders.</div>
+
+  <h4>Candle patterns (last completed candle)</h4>
+  <div><i>doji</i> = open≈close, indecision.<br>
+  <b class="g">hammer</b> = long lower wick — sellers pushed it down, buyers took it back.<br>
+  <b class="r">shooting star</b> = long upper wick — the mirror, rejection on top.<br>
+  <b class="g">bullish engulfing</b> = green candle swallows previous red body.<br>
+  <b class="r">bearish engulfing</b> = red swallows previous green.</div>
+
+  <h4>Breakout / range</h4>
+  <div>"breaking above 10-min high" = LTP beyond the extreme of the last 10 completed candles. Spot also shows vs yesterday's high/low.</div>
+
+  <h4>Lines on the chart</h4>
+  <div><span style="color:#26a69a">teal dashed TGT</span> = your resting target — drag to modify.<br>
+  <span style="color:#ef5350">red dashed SL</span> = your resting SL trigger — drag to modify.<br>
+  <span style="color:#f0b90b">amber dashed #n</span> = pending spot trigger (BUY), red = SELL / EXIT ALL trigger. Click NIFTY chart to set them.<br>
+  <span style="color:#ff9800">orange dotted GUARD SL</span> = simpleGuard's breach level (lowest low of the 3 candles before entry, frozen) — the price where it force-exits. Drag it to move the level (applies within 15s).<br>
+  <span style="color:#2962ff">blue solid</span> = order being placed — drag it, then confirm in the pop-up.</div>
+
+  <h4>Panel</h4>
+  <div>"on fill Target/SL first" = what simpleGuard places the moment a BUY fills. qty 50 in % mode = spend 50% of available margin. EXIT / EXIT ALL = dump at deep marketable LIMIT regardless of target/SL (two clicks). "% gain / to SL" column = live % from entry, and the % loss if the SL/guard level is hit. "P&L history" = every closed trade (logged by simpleGuard), today's total and per-day totals.<br>
+  Click the NIFTY/SENSEX chart → "EXIT ALL LONGS if spot ≥/≤" sets an emergency exit level: all longs dumped the moment spot reaches it.</div>
+</div>
+
+<script>
+const IST_OFFSET = 19800; // show IST on the (UTC-rendered) time scale
+
+const chartOpts = {
+  layout: { background: { color: '#131722' }, textColor: '#d1d4dc' },
+  grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
+  timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#2a2e39' },
+  rightPriceScale: { borderColor: '#2a2e39' },
+  crosshair: { mode: 0 },
+};
+
+const charts = [], series = [], volSeries = [], oiSeries = [], ma20Series = [], vwapSeries = [];
+for (let i = 0; i < 3; i++) {
+  const el = document.getElementById('c' + i);
+  const ch = LightweightCharts.createChart(el, chartOpts);
+  const s = ch.addCandlestickSeries({ upColor:'#26a69a', downColor:'#ef5350', borderUpColor:'#26a69a', borderDownColor:'#ef5350', wickUpColor:'#26a69a', wickDownColor:'#ef5350' });
+  // indicator series (hidden until data is set)
+  const v = ch.addHistogramSeries({ priceScaleId:'vol', priceFormat:{ type:'volume' }, lastValueVisible:false, priceLineVisible:false });
+  ch.priceScale('vol').applyOptions({ scaleMargins:{ top:0.8, bottom:0 } });
+  const o = ch.addLineSeries({ priceScaleId:'oi', color:'#29b6f6', lineWidth:1, priceLineVisible:false, title:'OI' });
+  ch.priceScale('oi').applyOptions({ scaleMargins:{ top:0.05, bottom:0.55 } });
+  const m = ch.addLineSeries({ color:'#ff9800', lineWidth:1, priceLineVisible:false, title:'MA20' });
+  const w = ch.addLineSeries({ color:'#ab47bc', lineWidth:1, priceLineVisible:false, title:'VWAP' });
+  charts.push(ch); series.push(s); volSeries.push(v); oiSeries.push(o); ma20Series.push(m); vwapSeries.push(w);
+  new ResizeObserver(() => ch.applyOptions({ width: el.clientWidth, height: el.clientHeight })).observe(el);
+}
+
+let cfg = null;                 // /api/setup response
+let tokenSlot = {};             // instrument_token -> chart slot 0/1/2
+let lastCandle = [null, null, null];
+let ydayLines = [];
+let exSymbols = {};             // slot -> {tradingsymbol, exchange}
+let dayOpen = [null, null, null];   // today's first-candle open per slot
+let lastLtp = [null, null, null];
+let candleData = [[], [], []];      // full candle arrays incl. volume/oi, per slot
+let volBase = [0, 0, 0];            // day volume before the live candle (tick vol is cumulative)
+let marginCash = null;
+let clickLine = null;           // { slot, line } temp price line from chart click
+
+function fmt(n, d=2) { return n == null ? '—' : Number(n).toFixed(d); }
+function pnlClass(n) { return n >= 0 ? 'pos' : 'neg'; }
+
+async function load() {
+  const index = document.getElementById('indexSel').value;
+  const offset = document.getElementById('offset').value || 0;
+  msg('loading…');
+  const r = await fetch(`/api/setup?index=${index}&offset=${offset}`);
+  cfg = await r.json();
+  if (cfg.error) { msg('❌ ' + cfg.error); return; }
+
+  tokenSlot = {}; exSymbols = {};
+  tokenSlot[cfg.spot.token] = 0;
+  tokenSlot[cfg.ce.token] = 1;
+  tokenSlot[cfg.pe.token] = 2;
+  exSymbols[1] = { tradingsymbol: cfg.ce.tradingsymbol, exchange: cfg.ce.exchange };
+  exSymbols[2] = { tradingsymbol: cfg.pe.tradingsymbol, exchange: cfg.pe.exchange };
+
+  document.getElementById('t0').innerHTML = `<b>${cfg.index}</b> spot`;
+  document.getElementById('t1').innerHTML = `<b>${cfg.ce.tradingsymbol}</b> (CE ${cfg.ce.strike})`;
+  document.getElementById('t2').innerHTML = `<b>${cfg.pe.tradingsymbol}</b> (PE ${cfg.pe.strike})`;
+  document.getElementById('expiryTxt').textContent = 'exp ' + cfg.expiry;
+  if (cfg.spot.yday) {
+    document.getElementById('ydayTxt').textContent = `yday ${fmt(cfg.spot.yday.low)} – ${fmt(cfg.spot.yday.high)}`;
+  }
+
+  for (const [token, slot] of Object.entries(tokenSlot)) {
+    const cr = await fetch(`/api/candles?token=${token}`);
+    const candles = (await cr.json()).map(c => ({ ...c, time: c.time + IST_OFFSET }));
+    series[slot].setData(candles);
+    candleData[slot] = candles;
+    volBase[slot] = candles.slice(0, -1).reduce((s, c) => s + (c.volume || 0), 0);
+    lastCandle[slot] = candles.length ? candles[candles.length - 1] : null;
+    dayOpen[slot] = candles.length ? candles[0].open : null;
+    if (candles.length) { lastLtp[slot] = candles[candles.length - 1].close; updateOb(slot, lastLtp[slot]); }
+    recomputeIndicators(slot);
+    charts[slot].timeScale().fitContent();
+  }
+
+  const bq = document.getElementById('buyQty');
+  if (!bq.value) bq.value = 50; // default: 50% of available margin
+  hideMenu();
+  fetchMargin();
+
+  // yesterday's range lines on the spot chart
+  for (const l of ydayLines) { try { series[0].removePriceLine(l); } catch (e) {} }
+  ydayLines = [];
+  if (cfg.spot.yday) {
+    ydayLines.push(series[0].createPriceLine({ price: cfg.spot.yday.high, color: '#ef5350', lineStyle: 2, title: 'yday H' }));
+    ydayLines.push(series[0].createPriceLine({ price: cfg.spot.yday.low, color: '#26a69a', lineStyle: 2, title: 'yday L' }));
+  }
+
+  updateSpot(cfg.spot.ltp);
+  refreshPosition();
+  renderCommentary();
+  refreshTriggers();
+  msg('');
+}
+
+function updateSpot(ltp) {
+  document.getElementById('spotLtp').textContent = fmt(ltp);
+  const b = document.getElementById('rangeBadge');
+  if (cfg && cfg.spot.yday) {
+    const inside = ltp <= cfg.spot.yday.high && ltp >= cfg.spot.yday.low;
+    b.textContent = inside ? 'INSIDE yday range' : (ltp > cfg.spot.yday.high ? 'ABOVE yday high' : 'BELOW yday low');
+    b.className = 'badge ' + (inside ? 'inside' : 'outside');
+  }
+}
+
+function updateOb(slot, ltp) {
+  if (slot == 0) return;
+  const el = document.getElementById('ob' + slot);
+  if (dayOpen[slot] == null || ltp == null) { el.textContent = ''; el.className = 'ob'; return; }
+  const below = ltp < dayOpen[slot];
+  el.textContent = (below ? '▼ below open ' : '▲ above open ') + fmt(dayOpen[slot]);
+  el.className = 'ob ' + (below ? 'below' : 'above');
+}
+
+function indState() {
+  return {
+    vol: document.getElementById('iVol').checked,
+    oi: document.getElementById('iOi').checked,
+    ma20: document.getElementById('iMa').checked,
+    vwap: document.getElementById('iVwap').checked
+  };
+}
+
+function volColor(c) { return c.close >= c.open ? 'rgba(38,166,154,.45)' : 'rgba(239,83,80,.45)'; }
+
+function recomputeIndicators(slot) {
+  const ind = indState();
+  const arr = candleData[slot];
+  volSeries[slot].setData(ind.vol && slot > 0 ? arr.map(c => ({ time: c.time, value: c.volume || 0, color: volColor(c) })) : []);
+  oiSeries[slot].setData(ind.oi && slot > 0 ? arr.filter(c => c.oi > 0).map(c => ({ time: c.time, value: c.oi })) : []);
+  const ma = [];
+  if (ind.ma20) {
+    let s = 0;
+    for (let i = 0; i < arr.length; i++) {
+      s += arr[i].close;
+      if (i >= 20) s -= arr[i - 20].close;
+      if (i >= 19) ma.push({ time: arr[i].time, value: s / 20 });
+    }
+  }
+  ma20Series[slot].setData(ma);
+  const vw = [];
+  if (ind.vwap && slot > 0) {
+    let pv = 0, vv = 0;
+    for (const c of arr) {
+      const tp = (c.high + c.low + c.close) / 3;
+      pv += tp * (c.volume || 0); vv += (c.volume || 0);
+      if (vv > 0) vw.push({ time: c.time, value: pv / vv });
+    }
+  }
+  vwapSeries[slot].setData(vw);
+}
+
+function liveIndicatorTick(slot, c) {
+  const ind = indState();
+  const arr = candleData[slot];
+  const n = arr.length;
+  if (ind.vol && slot > 0) volSeries[slot].update({ time: c.time, value: c.volume || 0, color: volColor(c) });
+  if (ind.oi && slot > 0 && c.oi > 0) oiSeries[slot].update({ time: c.time, value: c.oi });
+  if (ind.ma20 && n >= 20) {
+    let s = 0;
+    for (let i = n - 20; i < n; i++) s += arr[i].close;
+    ma20Series[slot].update({ time: c.time, value: s / 20 });
+  }
+  if (ind.vwap && slot > 0) {
+    let pv = 0, vv = 0;
+    for (const x of arr) { const tp = (x.high + x.low + x.close) / 3; pv += tp * (x.volume || 0); vv += (x.volume || 0); }
+    if (vv > 0) vwapSeries[slot].update({ time: c.time, value: pv / vv });
+  }
+}
+
+for (const id of ['iVol', 'iOi', 'iMa', 'iVwap']) {
+  document.getElementById(id).onchange = () => { for (const s of [0, 1, 2]) recomputeIndicators(s); };
+}
+
+// ---- rule-based commentary (no AI: plain arithmetic on the candles) ----
+function commentary(slot) {
+  const arr = candleData[slot];
+  if (arr.length < 6) return '';
+  const done = arr.slice(0, -1);       // completed candles
+  const live = arr[arr.length - 1];
+  const ltp = live.close;
+  const parts = [];
+  const tag = (txt, cls) => `<span class="${cls}">${txt}</span>`;
+
+  // trend: last 5 completed candles
+  const w5 = done.slice(-5);
+  if (w5.length == 5) {
+    const ups = w5.filter(c => c.close >= c.open).length;
+    const hh = w5[4].high > w5[0].high, hl = w5[4].low > w5[0].low;
+    const lh = w5[4].high < w5[0].high, ll = w5[4].low < w5[0].low;
+    if (hh && hl) parts.push(tag(`uptrend (${ups}/5 green, HH+HL)`, 'bull'));
+    else if (lh && ll) parts.push(tag(`downtrend (${5 - ups}/5 red, LH+LL)`, 'bear'));
+    else parts.push(tag('sideways', 'neu'));
+  }
+
+  // vs day open
+  if (dayOpen[slot] != null) {
+    const d = (ltp - dayOpen[slot]) / dayOpen[slot] * 100;
+    parts.push(tag(`${d >= 0 ? '+' : ''}${d.toFixed(1)}% vs open`, d >= 0 ? 'bull' : 'bear'));
+  }
+
+  // vs VWAP (options)
+  if (slot > 0) {
+    let pv = 0, vv = 0;
+    for (const c of arr) { const tp = (c.high + c.low + c.close) / 3; pv += tp * (c.volume || 0); vv += c.volume || 0; }
+    if (vv > 0) {
+      const vwap = pv / vv;
+      parts.push(tag(`${ltp >= vwap ? 'above' : 'below'} VWAP ${vwap.toFixed(2)}`, ltp >= vwap ? 'bull' : 'bear'));
+    }
+  }
+
+  // vs MA20 + slope
+  if (arr.length >= 25) {
+    const ma = i => { let s = 0; for (let k = i - 19; k <= i; k++) s += arr[k].close; return s / 20; };
+    const m1 = ma(arr.length - 1), m5 = ma(arr.length - 6);
+    const cls = (ltp >= m1 && m1 > m5) ? 'bull' : (ltp < m1 && m1 < m5) ? 'bear' : 'neu';
+    parts.push(tag(`${ltp >= m1 ? 'above' : 'below'} MA20 (${m1 > m5 ? 'rising' : 'falling'})`, cls));
+  }
+
+  // volume of last completed candle vs 20-candle average
+  if (slot > 0 && done.length >= 21) {
+    const lastV = done[done.length - 1].volume || 0;
+    const avg = done.slice(-21, -1).reduce((s, c) => s + (c.volume || 0), 0) / 20;
+    if (avg > 0) {
+      const x = lastV / avg;
+      if (x >= 1.8) parts.push(tag(`volume spike ${x.toFixed(1)}× avg`, 'bull'));
+      else if (x <= 0.5) parts.push(tag('thin volume', 'neu'));
+    }
+  }
+
+  // OI vs price over ~15 min (options): buildup / covering / unwinding
+  if (slot > 0) {
+    const back = arr[Math.max(0, arr.length - 16)];
+    if (live.oi > 0 && back.oi > 0 && back.close > 0) {
+      const doi = (live.oi - back.oi) / back.oi * 100;
+      const dpx = (ltp - back.close) / back.close * 100;
+      let label = null, cls = 'neu';
+      if (dpx > 0.5 && doi > 0.5) { label = 'long buildup'; cls = 'bull'; }
+      else if (dpx > 0.5 && doi < -0.5) { label = 'short covering'; cls = 'bull sctag'; }
+      else if (dpx < -0.5 && doi > 0.5) { label = 'short buildup'; cls = 'bear'; }
+      else if (dpx < -0.5 && doi < -0.5) { label = 'long unwinding'; cls = 'bear'; }
+      if (label) parts.push(tag(`${label} (15m: px ${dpx >= 0 ? '+' : ''}${dpx.toFixed(1)}%, OI ${doi >= 0 ? '+' : ''}${doi.toFixed(1)}%)`, cls));
+    }
+    // sharp OI drop in just 5 min = writers bailing fast; with price holding
+    // or rising, a short-covering rally often follows
+    const back5 = arr[Math.max(0, arr.length - 6)];
+    if (live.oi > 0 && back5 && back5.oi > 0 && back5.close > 0) {
+      const doi5 = (live.oi - back5.oi) / back5.oi * 100;
+      if (doi5 <= -2) {
+        const holding = ltp >= back5.close * 0.998;
+        parts.unshift(tag(`🔥 OI CRASH ${doi5.toFixed(1)}% in 5m${holding ? ' — covering rally likely' : ''}`,
+          holding ? 'bull sctag' : 'bear'));
+      }
+    }
+  }
+
+  // candle pattern on last completed candle
+  const p = done[done.length - 1], q = done[done.length - 2];
+  const body = Math.abs(p.close - p.open), range = p.high - p.low;
+  if (range > 0) {
+    const upWick = p.high - Math.max(p.open, p.close);
+    const dnWick = Math.min(p.open, p.close) - p.low;
+    if (body <= range * 0.1) parts.push(tag('doji last candle', 'neu'));
+    else if (dnWick >= body * 2 && upWick <= body) parts.push(tag('hammer last candle', 'bull'));
+    else if (upWick >= body * 2 && dnWick <= body) parts.push(tag('shooting star last candle', 'bear'));
+    else if (q && p.close > p.open && q.close < q.open && p.close >= q.open && p.open <= q.close) parts.push(tag('bullish engulfing', 'bull'));
+    else if (q && p.close < p.open && q.close > q.open && p.close <= q.open && p.open >= q.close) parts.push(tag('bearish engulfing', 'bear'));
+  }
+
+  // breakout vs last 10 completed candles
+  if (done.length >= 11) {
+    const w = done.slice(-11, -1);
+    const hi = Math.max(...w.map(c => c.high)), lo = Math.min(...w.map(c => c.low));
+    if (ltp > hi) parts.push(tag(`breaking above 10-min high ${hi.toFixed(2)}`, 'bull'));
+    else if (ltp < lo) parts.push(tag(`breaking below 10-min low ${lo.toFixed(2)}`, 'bear'));
+    else if (slot == 0 && (hi - lo) / ltp < 0.004) parts.push(tag('tight 10-min range', 'neu'));
+  }
+
+  // spot vs yesterday's range
+  if (slot == 0 && cfg && cfg.spot.yday) {
+    const { high, low } = cfg.spot.yday;
+    if (ltp > high) parts.push(tag(`above yday high ${fmt(high)}`, 'bull'));
+    else if (ltp < low) parts.push(tag(`below yday low ${fmt(low)}`, 'bear'));
+    else parts.push(tag('inside yday range', 'neu'));
+  }
+
+  /*
+  Movement speed (goes FIRST — the signal the user trades on): avg range
+  of the last 3 candles (live included) vs the avg range of the prior 20.
+  ≥2× normal = MOVING FAST, ≤0.35× = dead chart.
+  */
+  if (done.length >= 21) {
+    const rng = c => (c.high - c.low) / (c.close || 1) * 100;
+    const base = done.slice(-21, -1).reduce((s, c) => s + rng(c), 0) / 20;
+    const recent = arr.slice(-3).reduce((s, c) => s + rng(c), 0) / 3;
+    if (base > 0) {
+      const x = recent / base;
+      if (x >= 2) parts.unshift(tag(`⚡ MOVING FAST ${x.toFixed(1)}×`, 'bull fasttag'));
+      else if (x <= 0.35) parts.unshift(tag(`dead chart ${x.toFixed(1)}×`, 'neu deadtag'));
+      else parts.unshift(tag(`speed ${x.toFixed(1)}×`, 'neu'));
+    }
+  }
+
+  return parts.join(' · ');
+}
+
+// ---- pending spot triggers: amber lines on the spot chart + chips in the panel ----
+let trigLines = [];
+async function refreshTriggers() {
+  try {
+    const d = await (await fetch('/api/triggers')).json();
+    for (const l of trigLines) { try { series[0].removePriceLine(l); } catch (e) {} }
+    trigLines = [];
+    const el = document.getElementById('trigList');
+    el.innerHTML = '';
+    for (const t of d.triggers) {
+      const act = (t.action || 'buy').toUpperCase();
+      const lineLabel = act == 'EXITALL' ? `#${t.id} EXIT ALL`
+        : `#${t.id} ${act} ${t.tradingsymbol.endsWith('PE') ? 'PE' : 'CE'}`;
+      trigLines.push(series[0].createPriceLine({ price: t.level, color: act == 'BUY' ? '#f0b90b' : '#ef5350', lineStyle: 2, title: lineLabel }));
+      const chipWhat = act == 'EXITALL' ? 'EXIT ALL LONGS' : `${act} ${act == 'BUY' ? t.quantity + ' ' : ''}${t.tradingsymbol}`;
+      el.insertAdjacentHTML('beforeend',
+        `<span class="trig">#${t.id} ${chipWhat} if ${t.index} ${t.direction == 'above' ? '≥' : '≤'} ${t.level}` +
+        `<button onclick="cancelTrigger(${t.id})">✕</button></span>`);
+    }
+  } catch (e) { /* transient */ }
+}
+async function cancelTrigger(id) {
+  await fetch('/api/trigger/' + id, { method: 'DELETE' });
+  msg(`trigger #${id} cancelled`);
+  refreshTriggers();
+}
+setInterval(refreshTriggers, 10000);
+
+// short covering + movement speed are the signals the user trades on:
+// blink the strip and sound distinct alarms on each state's first appearance
+const scBefore = [false, false, false];
+const fastBefore = [false, false, false];
+const deadBefore = [false, false, false];
+function renderCommentary() {
+  for (const s of [0, 1, 2]) {
+    const el = document.getElementById('cm' + s);
+    if (!el) continue;
+    const html = commentary(s);
+    el.innerHTML = html;
+    // OI CRASH with a covering rally likely blinks/beeps like short covering
+    const sc = html.includes('short covering') || html.includes('covering rally likely');
+    const fast = html.includes('MOVING FAST');
+    const dead = html.includes('dead chart');
+    el.classList.toggle('sc', sc);
+    el.classList.toggle('fast', fast && !sc);
+    if (sc && !scBefore[s]) beep();                 // 880Hz single
+    if (fast && !fastBefore[s]) beep(1320, 2);      // high double = moving fast
+    if (dead && !deadBefore[s]) beep(330);          // low single = gone dead
+    scBefore[s] = sc; fastBefore[s] = fast; deadBefore[s] = dead;
+  }
+}
+setInterval(renderCommentary, 5000);
+
+function onTick(token, ltp, ts, vol, oi) {
+  const slot = tokenSlot[token];
+  if (slot == null) return;
+  document.getElementById('lp' + slot).textContent = fmt(ltp);
+  document.getElementById('lp' + slot).className = 'lp';
+  lastLtp[slot] = ltp;
+  updateOb(slot, ltp);
+  if (slot == 0) updateSpot(ltp);
+
+  const t = Math.floor(ts / 1000 / 60) * 60 + IST_OFFSET;
+  const arr = candleData[slot];
+  let c = arr.length ? arr[arr.length - 1] : null;
+  if (!c || t > c.time) {
+    if (c) volBase[slot] += c.volume || 0; // previous candle closed
+    c = { time: t, open: ltp, high: ltp, low: ltp, close: ltp, volume: vol ? Math.max(0, vol - volBase[slot]) : 0, oi: oi || 0 };
+    arr.push(c);
+    recomputeIndicators(slot);
+    renderCommentary();
+  } else {
+    c.high = Math.max(c.high, ltp);
+    c.low = Math.min(c.low, ltp);
+    c.close = ltp;
+    if (vol) c.volume = Math.max(0, vol - volBase[slot]);
+    if (oi) c.oi = oi;
+  }
+  lastCandle[slot] = c;
+  series[slot].update(c);
+  liveIndicatorTick(slot, c);
+}
+
+// ---- live ticks ----
+function connectWs() {
+  const ws = new WebSocket((location.protocol == 'https:' ? 'wss://' : 'ws://') + location.host + '/ws');
+  ws.onmessage = ev => {
+    const m = JSON.parse(ev.data);
+    if (m.type == 'ticks') for (const t of m.ticks) onTick(t.token, t.ltp, t.ts, t.vol, t.oi);
+    if (m.type == 'order_update') refreshPosition();
+    if (m.type == 'trigger_fired') { msg(`⚡ trigger #${m.id} FIRED: ${m.action == 'exitall' ? 'EXIT ALL' : (m.action || 'buy').toUpperCase()} ${m.tradingsymbol} (spot crossed ${m.level})`); refreshTriggers(); refreshPosition(); }
+    if (m.type == 'trigger_failed') { msg(`❌ trigger #${m.id} order failed: ${m.error}`); refreshTriggers(); }
+  };
+  ws.onclose = () => setTimeout(connectWs, 2000);
+}
+connectWs();
+
+// ---- positions / orders ----
+let breachLevels = {}; // token -> {level, tradingsymbol, pending} from simpleGuard
+async function refreshPosition() {
+  try {
+    const [r, rb] = await Promise.all([fetch('/api/position'), fetch('/api/breach')]);
+    const d = await r.json();
+    try { breachLevels = (await rb.json()).levels || {}; } catch (e) { breachLevels = {}; }
+    if (d.error) return;
+    const tp = document.getElementById('totalPnl');
+    tp.textContent = (d.totalPnl >= 0 ? '+' : '') + fmt(d.totalPnl);
+    tp.className = pnlClass(d.totalPnl);
+
+    const tb = document.querySelector('#posTable tbody');
+    tb.innerHTML = '';
+    const sel = document.getElementById('ordSymbol');
+    const prev = sel.value;
+    sel.innerHTML = '';
+    const naked = [];
+    for (const p of d.positions) {
+      const isNaked = p.quantity > 0 && p.resting.length == 0;
+      if (isNaked) naked.push(p.tradingsymbol);
+      const resting = isNaked ? 'NONE ⚠' : (p.resting.map(o =>
+        o.order_type == 'SL' ? `SL trig ${fmt(o.trigger_price)} @ ${fmt(o.price)}` : `LIMIT @ ${fmt(o.price)}`
+      ).join(', ') || '—');
+      const exitBtn = p.quantity > 0
+        ? `<button class="exitrow" onclick="armExit(this, '${p.tradingsymbol}')">${armedExit == p.tradingsymbol ? 'CONFIRM EXIT' : 'EXIT'}</button>` : '';
+      // % gain since entry vs % at the SL (resting SL trigger, else the guard line)
+      let pctCell = '—';
+      if (p.quantity > 0 && p.entry > 0) {
+        const gain = (p.ltp - p.entry) / p.entry * 100;
+        const slO = p.resting.find(o => o.order_type == 'SL');
+        const b = breachLevels[p.token];
+        const slRef = slO ? slO.trigger_price : (b && b.level > 0 ? b.level : null);
+        const slPart = slRef ? ` / SL ${((slRef - p.entry) / p.entry * 100).toFixed(1)}%` : '';
+        pctCell = `<span class="${pnlClass(gain)}">${gain >= 0 ? '+' : ''}${gain.toFixed(1)}%</span>${slPart}`;
+      }
+      tb.insertAdjacentHTML('beforeend',
+        `<tr><td>${p.tradingsymbol}</td><td>${p.quantity}</td><td>${fmt(p.entry)}</td><td>${fmt(p.ltp)}</td>` +
+        `<td>${pctCell}</td>` +
+        `<td class="${pnlClass(p.entryPnl)}">${fmt(p.entryPnl)}</td>` +
+        `<td class="${pnlClass(p.dayPnl)}">${fmt(p.dayPnl)}</td><td${isNaked ? ' class="naked"' : ''}>${resting}</td><td>${exitBtn}</td></tr>`);
+      if (p.quantity > 0) {
+        sel.insertAdjacentHTML('beforeend', `<option value="${p.tradingsymbol}|${p.exchange}">${p.tradingsymbol}</option>`);
+      }
+    }
+    if (prev) sel.value = prev;
+    if (d.positions.length == 0) tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--dim)">no open F&O positions</td></tr>';
+    renderNakedAlert(naked);
+    renderOrderLines(d.positions);
+  } catch (e) { /* transient */ }
+}
+
+/*
+Resting SELL orders drawn on the matching option chart:
+target (LIMIT) = teal line at order price, SL = red line at trigger.
+Grab a line and drag to MODIFY the live order (sent on mouseup).
+*/
+let orderLines = [];
+let ordDrag = null;
+function olTitle(l, pending) {
+  const n = l.mode == 'guard' ? 'GUARD SL' : (l.mode == 'sl' ? 'SL ' : 'TGT ') + l.quantity;
+  return n + (pending ? ' …' : '');
+}
+function renderOrderLines(positions) {
+  if (ordDrag) return; // never yank the line out from under an active drag
+  for (const l of orderLines) { try { series[l.slot].removePriceLine(l.line); } catch (e) {} }
+  orderLines = [];
+  if (!cfg) return;
+  for (const p of positions) {
+    const slot = p.tradingsymbol == cfg.ce.tradingsymbol ? 1 : (p.tradingsymbol == cfg.pe.tradingsymbol ? 2 : null);
+    if (slot == null) continue;
+    for (const o of p.resting) {
+      const mode = o.order_type == 'SL' ? 'sl' : 'target';
+      const l = { slot, order_id: o.order_id, mode, quantity: o.quantity,
+        price: mode == 'sl' ? o.trigger_price : o.price,
+        tradingsymbol: p.tradingsymbol, exchange: p.exchange };
+      l.line = series[slot].createPriceLine({
+        price: l.price, color: mode == 'sl' ? '#ef5350' : '#26a69a',
+        lineStyle: 2, lineWidth: 2, title: olTitle(l)
+      });
+      orderLines.push(l);
+    }
+    // simpleGuard's proposed SL (3-candle-low breach level), orange dotted —
+    // draggable: a drag writes an override the guard applies within 15s
+    const b = breachLevels[p.token];
+    if (p.quantity > 0 && b && b.level > 0) {
+      const g = { slot, mode: 'guard', token: p.token, price: b.level,
+        tradingsymbol: p.tradingsymbol, exchange: p.exchange };
+      g.line = series[slot].createPriceLine({
+        price: g.price, color: '#ff9800', lineStyle: 1, lineWidth: 1,
+        title: olTitle(g, b.pending)
+      });
+      orderLines.push(g);
+    }
+  }
+}
+function nearestOrderLine(slot, y) {
+  let best = null, bestD = GRAB_PX + 1;
+  for (const l of orderLines) {
+    if (l.slot != slot) continue;
+    const ly = series[slot].priceToCoordinate(l.price);
+    if (ly == null) continue;
+    const d = Math.abs(y - ly);
+    if (d < bestD) { bestD = d; best = l; }
+  }
+  return best;
+}
+
+// red flashing banner + one beep when a long position has no resting SELL
+let nakedBefore = new Set();
+function renderNakedAlert(naked) {
+  const el = document.getElementById('nakedAlert');
+  if (naked.length == 0) { el.style.display = 'none'; nakedBefore = new Set(); return; }
+  el.textContent = `⚠ NO RESTING SELL on ${naked.join(', ')} — position is unprotected (set a Target/SL or check simpleGuard)`;
+  el.style.display = 'block';
+  if (naked.some(s => !nakedBefore.has(s))) beep();
+  nakedBefore = new Set(naked);
+}
+function beep(freq, count) {
+  freq = freq || 880; count = count || 1;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    for (let i = 0; i < count; i++) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = freq; g.gain.value = 0.15;
+      o.start(ctx.currentTime + i * 0.45);
+      o.stop(ctx.currentTime + i * 0.45 + 0.35);
+    }
+  } catch (e) { /* audio may need a user gesture first */ }
+}
+
+/*
+Emergency exit: dumps the position(s) at a deep marketable LIMIT whatever
+resting target/SL exists (the server modifies the resting order, never
+stacks a second SELL). Two-step: first click arms, second fires.
+The table redraw every 5s auto-disarms a forgotten CONFIRM.
+*/
+let armedExit = null;
+function armExit(btn, symbol) {
+  if (armedExit != symbol) { armedExit = symbol; btn.textContent = 'CONFIRM EXIT'; return; }
+  armedExit = null;
+  doExit(symbol);
+}
+async function doExit(symbol) {
+  msg(symbol ? `exiting ${symbol}…` : 'EXITING ALL…');
+  try {
+    const r = await fetch('/api/exit', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(symbol ? { tradingsymbol: symbol } : {}) });
+    const d = await r.json();
+    if (d.error) { msg('❌ exit failed: ' + d.error); return; }
+    if (!d.done || d.done.length == 0) { msg(d.message || 'nothing to exit'); return; }
+    msg('🚨 EXIT sent: ' + d.done.map(x => `${x.tradingsymbol} ${x.quantity} @ ${x.price}`).join(' | '));
+  } catch (e) { msg('❌ exit failed: ' + e); }
+  refreshPosition();
+}
+// P&L history (tradeLog.json, written by simpleGuard at every trade close):
+// today's trades, per-symbol totals, and the per-day running record
+document.getElementById('pnlBtn').onclick = async () => {
+  const el = document.getElementById('pnlPanel');
+  if (el.style.display == 'block') { el.style.display = 'none'; return; }
+  try {
+    const d = await (await fetch('/api/pnl')).json();
+    const pc = v => `class="${pnlClass(v)}"`;
+    const money = v => (v == null ? '—' : (v >= 0 ? '+' : '') + fmt(v));
+    let h = `<h4 style="margin:8px 0 4px">Today's trades — total <span ${pc(d.todayTotal)}>${money(d.todayTotal)}</span></h4>`;
+    if (d.today.length == 0) h += `<div style="color:var(--dim)">no closed trades yet today</div>`;
+    else {
+      h += `<table><thead><tr><th>Time</th><th>Symbol</th><th>Qty</th><th>Buy</th><th>Sell</th><th>P&L</th></tr></thead><tbody>`;
+      for (const t of d.today) h += `<tr><td>${t.time}</td><td>${t.tradingsymbol}</td><td>${t.quantity}</td><td>${fmt(t.buy)}</td><td>${fmt(t.sell)}</td><td ${pc(t.pnl)}>${money(t.pnl)}</td></tr>`;
+      h += `</tbody></table>`;
+      h += `<div style="color:var(--dim);margin-bottom:6px">per symbol: ` +
+        Object.entries(d.bySymbol).map(([s, v]) => `${s} <span ${pc(v)}>${money(v)}</span>`).join(' · ') + `</div>`;
+    }
+    if (d.days && d.days.length) {
+      h += `<h4 style="margin:8px 0 4px">By day</h4><table><thead><tr><th>Date</th><th>Trades</th><th>P&L</th></tr></thead><tbody>`;
+      for (const day of d.days) h += `<tr><td>${day.date}</td><td>${day.trades}</td><td ${pc(day.pnl)}>${money(day.pnl)}</td></tr>`;
+      h += `</tbody></table>`;
+    }
+    el.innerHTML = h;
+    el.style.display = 'block';
+  } catch (e) { msg('❌ pnl load failed: ' + e); }
+};
+
+document.getElementById('helpBtn').onclick = () => document.getElementById('helpDrawer').classList.add('open');
+document.getElementById('helpClose').onclick = () => document.getElementById('helpDrawer').classList.remove('open');
+
+const btnExitAll = document.getElementById('btnExitAll');
+btnExitAll.onclick = () => {
+  if (armedExit != '*ALL*') {
+    armedExit = '*ALL*';
+    btnExitAll.textContent = 'CONFIRM EXIT ALL';
+    setTimeout(() => { if (armedExit == '*ALL*') { armedExit = null; btnExitAll.textContent = 'EXIT ALL'; } }, 5000);
+    return;
+  }
+  armedExit = null;
+  btnExitAll.textContent = 'EXIT ALL';
+  doExit(null);
+};
+setInterval(refreshPosition, 5000);
+
+function msg(s) { document.getElementById('msg').textContent = s; }
+
+/* Quick emergency buttons on each option chart. B100/B50 buy with that %
+   of available margin; S50/S100 sell that % of the open position — the
+   server modifies the resting SELL (never stacks a second one). One click
+   arms (SURE?), second click within 3s fires. */
+let quickArmed = null, quickTimer = null;
+function disarmQuick() {
+  if (quickArmed) { quickArmed.btn.classList.remove('armed'); quickArmed.btn.textContent = quickArmed.label; }
+  quickArmed = null;
+  clearTimeout(quickTimer);
+}
+async function quickAction(btn, slot, side, pct) {
+  const o = cfg && (slot == 1 ? cfg.ce : cfg.pe);
+  if (!o) { msg('❌ load charts first'); return; }
+  if (!(quickArmed && quickArmed.btn === btn)) {
+    disarmQuick();
+    quickArmed = { btn, label: btn.textContent };
+    btn.classList.add('armed');
+    btn.textContent = 'SURE?';
+    quickTimer = setTimeout(disarmQuick, 3000);
+    return;
+  }
+  disarmQuick();
+  msg(`⚡ ${side.toUpperCase()} ${pct}% ${o.tradingsymbol} …`);
+  try {
+    const r = await fetch('/api/quick', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tradingsymbol: o.tradingsymbol, exchange: o.exchange, token: o.token, side, pct })
+    });
+    const j = await r.json();
+    if (!r.ok) { msg('❌ ' + (j.error || ('HTTP ' + r.status))); return; }
+    msg(`✅ ${side == 'buy' ? 'B' : 'S'}${pct}: ${side.toUpperCase()} ${j.qty} ${o.tradingsymbol} @ ${j.price}`);
+    refreshPosition();
+  } catch (e) { msg('❌ ' + e); }
+}
+for (const slot of [1, 2]) {
+  const el = document.getElementById('qk' + slot);
+  for (const [side, pct] of [['buy', 100], ['buy', 50], ['sell', 50], ['sell', 100]]) {
+    const b = document.createElement('button');
+    b.className = side == 'buy' ? 'qb' : 'qs';
+    b.textContent = (side == 'buy' ? 'B' : 'S') + pct;
+    b.onclick = () => quickAction(b, slot, side, pct);
+    el.appendChild(b);
+  }
+}
+
+async function sendOrder(mode) {
+  const v = document.getElementById('ordSymbol').value;
+  if (!v) { msg('no position selected'); return; }
+  const [tradingsymbol, exchange] = v.split('|');
+  const body = { tradingsymbol, exchange, mode };
+  if (mode == 'target') {
+    body.price = parseFloat(document.getElementById('tgtPrice').value);
+    if (!body.price) { msg('enter target price'); return; }
+  } else {
+    body.trigger_price = parseFloat(document.getElementById('slTrigger').value);
+    const lp = parseFloat(document.getElementById('slPrice').value);
+    if (lp) body.price = lp;
+    if (!body.trigger_price) { msg('enter SL trigger'); return; }
+  }
+  msg('sending…');
+  const r = await fetch('/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const d = await r.json();
+  msg(d.error ? ('❌ ' + d.error) : `✅ ${d.action} ${d.order_ids.join(',')}`);
+  refreshPosition();
+}
+
+document.getElementById('btnTarget').onclick = () => sendOrder('target');
+document.getElementById('btnSl').onclick = () => sendOrder('sl');
+document.getElementById('loadBtn').onclick = load;
+
+// ---- margin / max qty ----
+async function fetchMargin() {
+  try {
+    const d = await (await fetch('/api/margin')).json();
+    if (d.cash != null) marginCash = d.cash;
+    renderMargin();
+  } catch (e) { /* transient */ }
+}
+function renderMargin() {
+  if (marginCash == null || !cfg) return;
+  const parts = ['Margin ₹' + fmt(marginCash, 0)];
+  for (const [slot, o, tag] of [[1, cfg.ce, 'CE'], [2, cfg.pe, 'PE']]) {
+    const ltp = lastLtp[slot];
+    if (!ltp) continue;
+    const lots = Math.floor(marginCash / (ltp * o.lot_size));
+    parts.push(`${tag} max ${lots * o.lot_size} qty (${lots} lots)`);
+  }
+  document.getElementById('marginTxt').textContent = parts.join('  |  ');
+}
+setInterval(fetchMargin, 30000);
+setInterval(renderMargin, 5000);
+
+// ---- guard on-fill settings (what simpleGuard places on a BUY fill) ----
+async function fetchGuardSettings() {
+  try {
+    const s = await (await fetch('/api/guardSettings')).json();
+    document.getElementById('gFirst').value = s.firstOrder;
+    document.getElementById('gTgtPct').value = s.targetPct;
+    document.getElementById('gSlPct').value = s.slPct;
+  } catch (e) { /* transient */ }
+}
+document.getElementById('gSave').onclick = async () => {
+  const body = {
+    firstOrder: document.getElementById('gFirst').value,
+    targetPct: parseFloat(document.getElementById('gTgtPct').value),
+    slPct: parseFloat(document.getElementById('gSlPct').value)
+  };
+  const r = await fetch('/api/guardSettings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const d = await r.json();
+  msg(d.error ? ('❌ ' + d.error)
+    : `✅ on fill: ${d.firstOrder == 'sl' ? 'SL at -' + d.slPct + '%' : 'target at +' + d.targetPct + '%'} (applies to the next fill)`);
+};
+fetchGuardSettings();
+
+// ---- guard process status (simpleGuard manages the resting SELL) ----
+async function fetchGuard() {
+  const el = document.getElementById('guardTxt');
+  try {
+    const d = await (await fetch('/api/guard')).json();
+    if (d.error) { el.className = 'off'; el.textContent = 'guard: ?'; return; }
+    const on = d.simpleGuard && d.simpleGuard.status == 'online';
+    el.className = on ? 'on' : 'off';
+    el.textContent = on
+      ? `guard: simpleGuard ✓ (restarts ${d.simpleGuard.restarts})`
+      : `guard: simpleGuard ${d.simpleGuard ? d.simpleGuard.status : 'missing'} — NO AUTO TARGET/SL!`;
+  } catch (e) { el.className = 'off'; el.textContent = 'guard: ?'; }
+}
+fetchGuard();
+setInterval(fetchGuard, 30000);
+
+/*
+Resolve the BUY quantity from the qty input.
+pct mode: value = % of available margin spent at `price`, floored to lots.
+abs mode: value = exact quantity. Returns 0 when margin can't cover 1 lot.
+*/
+function resolveQty(o, price) {
+  const v = parseFloat(document.getElementById('buyQty').value);
+  if (document.getElementById('qtyMode').value == 'abs') return parseInt(v, 10) || o.lot_size;
+  const pct = (v > 0 ? Math.min(v, 100) : 50);
+  const px = price || lastLtp[o === cfg.ce ? 1 : 2];
+  if (marginCash == null || !px) return o.lot_size; // margin unknown yet: fall back to 1 lot
+  const lots = Math.floor((marginCash * pct / 100) / (px * o.lot_size));
+  return lots * o.lot_size;
+}
+
+// ---- click-to-trade on option charts (line is draggable) ----
+const menu = document.getElementById('ctxMenu');
+let clickCtx = null;            // { slot, price, o, qty } current order line
+let dragging = false, justDragged = false;
+const GRAB_PX = 8;
+
+function roundTick(p) { return +(Math.round(p / 0.05) * 0.05).toFixed(2); }
+function clearClickLine() {
+  if (clickLine) { try { series[clickLine.slot].removePriceLine(clickLine.line); } catch (e) {} clickLine = null; }
+}
+function hideMenu() {
+  menu.style.display = 'none';
+  clearClickLine();
+  if (clickCtx) charts[clickCtx.slot].applyOptions({ handleScroll: true, handleScale: true });
+  clickCtx = null;
+  dragging = false;
+}
+
+function pxHtml() {
+  const c = clickCtx;
+  const ltp = lastLtp[c.slot];
+  const diff = ltp != null ? c.price - ltp : null;
+  return `${c.o.tradingsymbol} <span class="pxdim">⠿ drag</span><br>` +
+    `<span class="pxbig">${c.price.toFixed(2)}</span><br>` +
+    `<span class="pxdim">LTP ${fmt(ltp)}${diff == null ? '' : ' (' + (diff >= 0 ? '+' : '') + diff.toFixed(2) + ')'}</span>`;
+}
+
+// keep the panel pinned beside its price line
+function positionMenu() {
+  if (!clickCtx) return;
+  const el = document.getElementById('c' + clickCtx.slot);
+  const y = series[clickCtx.slot].priceToCoordinate(clickCtx.price);
+  if (y == null) return;
+  menu.style.top = Math.max(el.getBoundingClientRect().top + y - 14, 4) + 'px';
+}
+
+function setCtxPrice(p) {
+  if (!clickCtx || !clickLine) return;
+  clickCtx.price = p;
+  clickLine.line.applyOptions({ price: p });
+  const px = document.getElementById('mPx');
+  if (px) px.innerHTML = pxHtml();
+  positionMenu();
+  disarmMenu(); // drag disarms a pending confirm and refreshes button labels
+}
+
+// drag the panel itself (anywhere except the buttons) — the line follows
+let menuDrag = false;
+menu.addEventListener('mousedown', e => {
+  if (e.target.tagName == 'BUTTON' || !clickCtx) return;
+  menuDrag = true;
+  e.preventDefault();
+});
+window.addEventListener('mousemove', e => {
+  if (!menuDrag || !clickCtx) return;
+  const el = document.getElementById('c' + clickCtx.slot);
+  const y = e.clientY - el.getBoundingClientRect().top;
+  const p = series[clickCtx.slot].coordinateToPrice(y);
+  if (p != null && p > 0) setCtxPrice(roundTick(p));
+});
+window.addEventListener('mouseup', () => { menuDrag = false; });
+
+for (const slot of [0, 1, 2]) {
+  charts[slot].subscribeClick(param => {
+    if (justDragged) { justDragged = false; return; }
+    if (!param.point || !cfg || dragging || ordDrag) return;
+    const raw = series[slot].coordinateToPrice(param.point.y);
+    if (raw == null || raw <= 0) return;
+    showMenu(slot, roundTick(raw), param.point);
+  });
+
+  const el = document.getElementById('c' + slot);
+  // capture phase so the chart never starts a pan when grabbing a line
+  el.addEventListener('mousedown', e => {
+    const y = e.clientY - el.getBoundingClientRect().top;
+    // the pending-order (blue) line takes priority
+    if (clickCtx && clickCtx.slot == slot && clickLine) {
+      const lineY = series[slot].priceToCoordinate(clickCtx.price);
+      if (lineY != null && Math.abs(y - lineY) <= GRAB_PX) {
+        dragging = true;
+        charts[slot].applyOptions({ handleScroll: false, handleScale: false });
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+    }
+    // a resting target/SL line: drag to modify the live order
+    const ol = nearestOrderLine(slot, y);
+    if (ol) {
+      ordDrag = ol;
+      charts[slot].applyOptions({ handleScroll: false, handleScale: false });
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }, true);
+
+  el.addEventListener('mousemove', e => {
+    const y = e.clientY - el.getBoundingClientRect().top;
+    if (ordDrag && ordDrag.slot == slot) {
+      const p = series[slot].coordinateToPrice(y);
+      if (p != null && p > 0) {
+        ordDrag.price = roundTick(p);
+        ordDrag.line.applyOptions({ price: ordDrag.price, title: olTitle(ordDrag, true) });
+        msg(`${ordDrag.mode == 'guard' ? 'guard SL' : ordDrag.mode == 'sl' ? 'SL' : 'target'} → ${ordDrag.price.toFixed(2)} (release to ${ordDrag.mode == 'guard' ? 'set' : 'modify'})`);
+      }
+      justDragged = true;
+      return;
+    }
+    if (clickCtx && clickCtx.slot == slot && clickLine) {
+      if (dragging) {
+        const p = series[slot].coordinateToPrice(y);
+        if (p != null && p > 0) setCtxPrice(roundTick(p));
+        justDragged = true;
+        return;
+      }
+      const lineY = series[slot].priceToCoordinate(clickCtx.price);
+      if (lineY != null && Math.abs(y - lineY) <= GRAB_PX) { el.style.cursor = 'ns-resize'; return; }
+    }
+    el.style.cursor = nearestOrderLine(slot, y) ? 'ns-resize' : '';
+  });
+}
+
+window.addEventListener('mouseup', async () => {
+  if (dragging) {
+    dragging = false;
+    if (clickCtx) charts[clickCtx.slot].applyOptions({ handleScroll: true, handleScale: true });
+  }
+  if (ordDrag) {
+    const od = ordDrag;
+    ordDrag = null;
+    charts[od.slot].applyOptions({ handleScroll: true, handleScale: true });
+    od.line.applyOptions({ title: olTitle(od, true) });
+    if (od.mode == 'guard') {
+      // not an order — just the level simpleGuard exits at (applied within 15s)
+      const r = await fetch('/api/breach', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: od.token, level: od.price }) });
+      const dd = await r.json();
+      msg(dd.error ? ('❌ guard SL: ' + dd.error) : (`✅ guard SL → ${dd.level} (simpleGuard applies within 15s)`));
+      refreshPosition();
+    } else {
+      await chartOrder({ tradingsymbol: od.tradingsymbol, exchange: od.exchange }, od.mode, od.price);
+    }
+  }
+});
+
+function showMenu(slot, price, point) {
+  clearClickLine();
+  const o = slot == 0 ? { tradingsymbol: cfg.index + ' spot' } : (slot == 1 ? cfg.ce : cfg.pe);
+  const qty = slot == 0 ? 0 : resolveQty(o, price);
+  clickCtx = { slot, price, o, qty };
+  clickLine = { slot, line: series[slot].createPriceLine({ price, color: '#2962ff', lineStyle: 0, title: '' }) };
+  if (slot == 0) {
+    // conditional orders on the loaded options, triggered by a spot level
+    menu.innerHTML =
+      `<div class="px" id="mPx"></div>` +
+      `<button class="buy" id="mTrigCe"></button>` +
+      `<button class="buy" id="mTrigPe"></button>` +
+      `<button class="sellb" id="mTrigCeS"></button>` +
+      `<button class="sellb" id="mTrigPeS"></button>` +
+      `<button class="sellb" id="mTrigExit"></button>` +
+      `<button class="sec" id="mX">Cancel</button>`;
+    document.getElementById('mTrigCe').onclick = () => armTrigger('ce', 'buy');
+    document.getElementById('mTrigPe').onclick = () => armTrigger('pe', 'buy');
+    document.getElementById('mTrigCeS').onclick = () => armTrigger('ce', 'sell');
+    document.getElementById('mTrigPeS').onclick = () => armTrigger('pe', 'sell');
+    document.getElementById('mTrigExit').onclick = () => armTrigger('all', 'exitall');
+  } else {
+    menu.innerHTML =
+      `<div class="px" id="mPx"></div>` +
+      `<button class="buy" id="mBuy">BUY ${qty}</button>` +
+      `<button id="mTgt">Target here</button>` +
+      `<button class="sec" id="mSl">SL here</button>` +
+      `<button class="sec" id="mX">Cancel</button>`;
+    document.getElementById('mBuy').onclick = armBuy;
+    document.getElementById('mTgt').onclick = () => { const c = clickCtx; chartOrder(c.o, 'target', c.price); hideMenu(); };
+    document.getElementById('mSl').onclick = () => { const c = clickCtx; chartOrder(c.o, 'sl', c.price); hideMenu(); };
+  }
+  document.getElementById('mPx').innerHTML = pxHtml();
+  disarmMenu();
+  const rect = document.getElementById('c' + slot).getBoundingClientRect();
+  menu.style.left = Math.min(rect.left + point.x + 10, window.innerWidth - 180) + 'px';
+  menu.style.display = 'block';
+  positionMenu();
+  document.getElementById('mX').onclick = hideMenu;
+}
+
+// reset menu buttons to their unarmed labels for the current price
+function disarmMenu() {
+  if (!clickCtx) return;
+  if (clickCtx.slot == 0) {
+    const dir = clickCtx.price >= (lastLtp[0] || clickCtx.price) ? '≥' : '≤';
+    for (const [id, key, act] of [['mTrigCe', 'ce', 'buy'], ['mTrigPe', 'pe', 'buy'],
+                                  ['mTrigCeS', 'ce', 'sell'], ['mTrigPeS', 'pe', 'sell'],
+                                  ['mTrigExit', 'all', 'exitall']]) {
+      const b = document.getElementById(id);
+      if (!b) continue;
+      b.className = act == 'buy' ? 'buy' : 'sellb';
+      b.textContent = act == 'exitall'
+        ? `EXIT ALL LONGS if spot ${dir} ${clickCtx.price.toFixed(2)}`
+        : `${act.toUpperCase()} ${key.toUpperCase()} if spot ${dir} ${clickCtx.price.toFixed(2)}`;
+      b.onclick = () => armTrigger(key, act);
+    }
+  } else {
+    const b = document.getElementById('mBuy');
+    if (b) {
+      clickCtx.qty = resolveQty(clickCtx.o, clickCtx.price); // price moved: recompute affordable qty
+      b.className = 'buy';
+      b.textContent = clickCtx.qty > 0 ? `BUY ${clickCtx.qty}` : 'margin < 1 lot';
+      b.onclick = armBuy;
+    }
+  }
+}
+
+// two-step conditional order: arm, then confirm → POST /api/trigger
+// action 'buy' enters (qty from % margin); 'sell' exits the open position (qty resolved server-side at fire time)
+function armTrigger(key, action) {
+  if (!clickCtx) return;
+  const b = document.getElementById(key == 'all' ? 'mTrigExit'
+    : (key == 'ce' ? 'mTrigCe' : 'mTrigPe') + (action == 'sell' ? 'S' : ''));
+  const o = key == 'all' ? null : (key == 'ce' ? cfg.ce : cfg.pe);
+  let qty = 0;
+  if (action == 'buy') {
+    qty = resolveQty(o, lastLtp[key == 'ce' ? 1 : 2]); // sized off the option's current LTP
+    if (!(qty > 0)) { msg('❌ margin too low for 1 lot of ' + o.tradingsymbol); return; }
+  }
+  const dir = clickCtx.price >= (lastLtp[0] || clickCtx.price) ? 'above' : 'below';
+  const what = action == 'exitall' ? 'EXIT ALL LONGS' : `${action.toUpperCase()} ${action == 'buy' ? qty + ' ' : ''}${key.toUpperCase()}`;
+  b.className = 'confirm';
+  b.textContent = `CONFIRM: ${what} if spot ${dir == 'above' ? '≥' : '≤'} ${clickCtx.price.toFixed(2)}`;
+  b.onclick = async () => {
+    const body = { index: cfg.index, action, direction: dir, level: clickCtx.price };
+    if (o) { body.tradingsymbol = o.tradingsymbol; body.exchange = o.exchange; body.token = o.token; body.quantity = qty; }
+    hideMenu();
+    msg('setting trigger…');
+    const r = await fetch('/api/trigger', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const d = await r.json();
+    msg(d.error ? ('❌ ' + d.error) : (`✅ trigger #${d.id} set: ${what} if spot ${dir} ${body.level}`));
+    refreshTriggers();
+  };
+}
+
+// two-step buy: first click arms, second click fires (real-money entry).
+// Prices are read from clickCtx at click time, so dragging updates them.
+function armBuy() {
+  if (!clickCtx) return;
+  if (!(clickCtx.qty > 0)) { msg('❌ margin too low for 1 lot at this price'); return; }
+  const b = document.getElementById('mBuy');
+  b.className = 'confirm';
+  b.textContent = `CONFIRM BUY ${clickCtx.qty} @ ${clickCtx.price.toFixed(2)}`;
+  b.onclick = async () => {
+    const c = clickCtx;
+    hideMenu();
+    msg('buying…');
+    const r = await fetch('/api/buy', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tradingsymbol: c.o.tradingsymbol, exchange: c.o.exchange, token: c.o.token, quantity: c.qty, price: c.price }) });
+    const d = await r.json();
+    msg(d.error ? ('❌ ' + d.error) : ('✅ BUY placed ' + d.order_ids.join(',')));
+    refreshPosition();
+  };
+}
+
+async function chartOrder(o, mode, price) {
+  msg('sending…');
+  const body = { tradingsymbol: o.tradingsymbol, exchange: o.exchange, mode };
+  if (mode == 'target') body.price = price; else body.trigger_price = price;
+  const r = await fetch('/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const d = await r.json();
+  msg(d.error ? ('❌ ' + d.error) : (`✅ ${mode} ${d.action} ${d.order_ids.join(',')}`));
+  refreshPosition();
+}
+
+load();
+</script>
+</body>
+</html>

@@ -1,4 +1,6 @@
 const express= require('express');
+
+//const fetchInstrumentsForMining=require('./newFetch.js').main;
 const path =require('path')
 const mongoose=require('mongoose');
 let ohlc=require('./scraping/ohlc');
@@ -6,6 +8,27 @@ const cluster = require("cluster");
 const os = require("os");
 const api_key=process.env.api_key;
 let AccesTocken=require('./models/AccessTokens');
+
+//const os = require("os");
+
+
+
+
+let access_token
+
+  let moment=require('moment');
+    
+      let today1=moment().format('Y-MM-DD')
+
+      var kc;
+
+
+
+
+//console.log('access_token',access_token,'access_token')
+
+
+
 ;
 let  Enable=true;
 let ProxyTrade=false;
@@ -48,6 +71,20 @@ const CI=require("./scraping/ci.js")
 
 const app=express();
 
+//3190
+
+//9495411722
+
+//let AccesTocken = require('./models/AccessTokens');
+const { connectToDatabase } = require('./connectToDatabase.js');
+
+
+const { getKiteConnectInstance } = require('./getKiteConnectInstance.js');
+
+//const kc = await getKiteConnectInstance(access_token);
+
+//console.log('kc instance created in server.js',kc)
+
 
 app.use(express.json({limit: '50mb'}));
 app.use(express.urlencoded({limit: '50mb'}));
@@ -59,13 +96,15 @@ process.on('uncaughtException', function(err) {
 
 
 app.use(history());
+app.use(cors());
 
 let port = process.env.PORT;
-if (port  ==  null || port  ==  "") {
-  const port =9090;
+
+if (!port) {
+    port = 9090;
 }
 
-// let port = 9091
+
 
 
 
@@ -113,19 +152,19 @@ let request_tocken;
 
 const api_secret=process.env.api_secret;
 // let access_token;
-let access_token=process.env.ACCESS_TOCKEN;
+//let access_token=process.env.ACCESS_TOCKEN;
 
 
 
 var KiteConnect = require("kiteconnect").KiteConnect;
 
+//
+
+
 // KiteConnect.invalidateAccessToken();
 const { exit } = require('process');
 const { isError } = require('util');
 
-var kc = new KiteConnect({
-	api_key: api_key
-});
 
 
 const { spawn } = require('child_process');
@@ -169,10 +208,19 @@ at.user_id=r.user_id;
 at.access_token=r.access_token;
 
 
-console.log(at.access_token,'at.access_token accesst token note')
+//console.log(at.access_token,'at.access_token accesst token note')
 
 let AccessTockenModel=new AccesTocken(at)
 AccessTockenModel.save();
+
+var kc = new KiteConnect({
+	api_key: api_key,access_token
+});
+
+
+
+
+console.log('access token set in server.js',kc.access_token,'access token set in server.js')
 // const AtModel=new AccessTocken(at);
 
 // AtModel.save().then(res=>{
@@ -269,6 +317,30 @@ app.post('/api/FetchInstruments', (req, res) => {
       res.json(instruments);
     }
   });
+});
+
+
+let {buyOrderHandler,sellOrderHandler,updateOrderHandler,cancelOrderHandler,subscribeChartInstrumentHandler}=require('./browserPluginFunction.js');
+app.post("/api/buy",                  buyOrderHandler);
+app.post("/api/sell",                 sellOrderHandler);
+app.post("/api/updateOrderFromTab",   updateOrderHandler);
+app.post("/api/cancelOrderFromTab",   cancelOrderHandler);
+app.post("/api/subscribeChartInstrument", subscribeChartInstrumentHandler);
+
+
+app.get('/api/public-ip', async (req, res) => {
+    try {
+        const response = await fetch('https://api64.ipify.org?format=json');
+        const data = await response.json();
+
+        res.json({
+            publicIp: data.ip
+        });
+    } catch (err) {
+        res.status(500).json({
+            error: err.message
+        });
+    }
 });
 
 app.post('/api/getHourlyCandleLows', async (req,res) =>{
@@ -654,9 +726,6 @@ arr.forEach(async a=>{
 // app.post('/api/FetchInstruments', async (req,res) => {
   
  
-//  let accessToken=req.body.accessToken;
-
-//  console.log('this is from fetch instruments route ',accessToken)
 //  //fetchInstrumentsForMining(accessToken)
 // });
 
@@ -1014,6 +1083,279 @@ app.post('/api/getQuoteFromZerodha',async (req,res)=>{
 });
 
 
+//////////////////////cancel orders/////////////////////////
+app.post(
+'/api/cancelOrderFromTab',
+
+async (req, res) => {
+ const accessTokenDoc = await AccesTocken.findOne({ 'date': today }, 'access_token');
+
+ kc.setAccessToken(accessTokenDoc.access_token);
+    try {
+
+        const {
+            instrumentToken
+        } = req.body;
+
+        console.log(
+            'Cancel Request:',
+            req.body
+        );
+
+        // =====================================
+        // GET ALL ORDERS
+        // =====================================
+
+        const orders =
+        await kc.getOrders();
+
+        // =====================================
+        // FILTER OPEN ORDERS
+        // =====================================
+
+        const matchingOrders =
+        orders.filter(order => {
+
+            return (
+
+                String(
+                    order.instrument_token
+                )
+
+                ===
+
+                String(instrumentToken)
+
+                &&
+
+                [
+                    'OPEN',
+                    'TRIGGER PENDING'
+                ].includes(order.status)
+
+            );
+
+        });
+
+        console.log(
+            'Orders Found:',
+            matchingOrders.length
+        );
+
+        // =====================================
+        // CANCEL ORDERS
+        // =====================================
+
+        for (const order of matchingOrders) {
+
+            console.log(
+                'Cancelling:',
+                order.order_id
+            );
+
+            await kc.cancelOrder(
+
+                order.variety,
+
+                order.order_id
+
+            );
+
+        }
+
+        res.json({
+
+            success: true,
+
+            cancelled:
+            matchingOrders.length
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+
+            success: false,
+
+            error: err.message
+
+        });
+
+    }
+
+});
+
+/////////////////cancel orders////////////////////////
+
+
+/////////////////////////////update order from tab///////////////////
+
+app.post('/api/updateOrderFromTab',async (req,res)=>{
+
+
+ const accessTokenDoc = await AccesTocken.findOne({ 'date': today }, 'access_token');
+ kc.setAccessToken(accessTokenDoc.access_token);
+
+
+
+try {
+
+        const {
+            instrumentToken,
+            price,
+            triggerPrice,
+            isSL
+        } = req.body;
+
+        console.log(req.body);
+
+        // =====================================
+        // FETCH ALL ORDERS
+        // =====================================
+
+        const orders =
+        await kc.getOrders();
+
+        // =====================================
+        // FILTER OPEN ORDERS
+        // =====================================
+
+        const matchingOrders =
+        orders.filter(order => {
+
+            return (
+
+                String(
+                    order.instrument_token
+                )
+
+                ===
+
+                String(instrumentToken)
+
+                &&
+
+                [
+                    'OPEN',
+                    'TRIGGER PENDING'
+                ].includes(order.status)
+
+            );
+
+        });
+
+        console.log(
+            'Matching Orders:',
+            matchingOrders.length
+        );
+
+        // =====================================
+        // MODIFY ORDERS
+        // =====================================
+
+        for (const order of matchingOrders) {
+
+            console.log(
+                'Updating Order:',
+                order.order_id
+            );
+
+            // ===============================
+            // SL ORDER
+            // ===============================
+
+            if (isSL) {
+
+                await kc.modifyOrder(
+
+                    order.variety,
+
+                    order.order_id,
+
+                    {
+
+                        order_type: 'SL',
+
+                        price: Number(price),
+
+                        trigger_price:
+                        Number(triggerPrice)
+
+                    }
+
+                );
+
+                console.log(
+                    'SL Updated'
+                );
+
+            }
+
+            // ===============================
+            // LIMIT ORDER
+            // ===============================
+
+            else {
+
+                await kc.modifyOrder(
+
+                    order.variety,
+
+                    order.order_id,
+
+                    {
+
+                        order_type: 'LIMIT',
+
+                        price: Number(price)
+
+                    }
+
+                );
+
+                console.log(
+                    'LIMIT Updated'
+                );
+
+            }
+
+        }
+
+        res.json({
+
+            success: true,
+
+            modified:
+            matchingOrders.length
+
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(err);
+
+        res.status(500).json({
+
+            success: false,
+
+            error: err.message
+
+        });
+
+    }
+
+
+  //res.send('ok');
+});
+
+/////////////////////////////update order from tab///////////////////
 
 app.get('/api/getInstruments/:accessToken',(req,res)=>{
   ZerodhaAPI.getInstruments(req.params.accessToken).then(r=>{
@@ -1329,16 +1671,78 @@ return;
 
 }
 
-app.get('/api/fetchInstrumentsForMining/accessToken/:accessToken',(req,res)=>{
+app.post('/api/fetchInstrumentsForMining',async (req,res)=>{
 
-  let accessToken=req.params.accessToken;
+  console.log('fetchInstrumentsForMining called')
 
-  fetchInstrumentsForMining(accessToken)
+  
+ let accessToken=req.body.accessToken;
 
+
+
+  //let accessToken=req.params.accessToken;
+console.log('fetchInstrumentsForMining' );
+const child = spawn('node', [
+    path.join(__dirname, 'newFetch.js'), {stdio: 'inherit'}
+]);
+
+   child.stdout.on('data', (data) => {
+    console.log('OUTPUT:', data.toString());
 });
 
+child.stderr.on('data', (data) => {
+    console.error('ERROR:', data.toString());
+});
+
+child.on('close', (code) => {
+    console.log(`Child exited with code ${code}`);
+
+  
+
+});
+}
+);
 
 
+
+
+app.post('/api/startMainfullJs',(req,res)=>{
+
+  console.log('startMainfulljs')
+
+  //let accessToken=req.params.accessToken;
+console.log('fetchInstrumentsForMining' );
+const child = spawn('node', [
+    path.join(__dirname,"champ","mainfull.mjs"), {stdio: 'inherit'}
+]);
+
+   child.stdout.on('data', (data) => {
+    console.log('OUTPUT:', data.toString());
+});
+
+child.stderr.on('data', (data) => {
+    console.error('ERROR:', data.toString());
+});
+
+child.on('close', (code) => {
+    console.log(`Child exited with code ${code}`);
+
+  
+
+});
+}
+);
+
+
+//fetchInstrumentsForMining=
+
+// app.get('/api/fetchInstrumentsForMining/accessToken/:accessToken',(req,res)=>{
+
+//   let accessToken=req.params.accessToken;
+
+//   fetchInstrumentsForMining(accessToken)
+
+// });
 
 app.get('/api/triggerWebsocktsInServer/accessToken/:accessToken',(req,res)=>{
 
@@ -1405,6 +1809,24 @@ let today = new Date().toISOString().slice(0, 10);
 
 const http = require('http')
 const server = http.createServer(app)
+const { Server } = require("socket.io");
+const io = new Server(server,{
+    cors:{
+        origin:"*"
+    }
+});
+ const StartWebSockets=require('./StartWebSockets');
+console.log('starting server')
+io.on('connection',socket=>{
+
+  console.log('socket connected');
+  StartWebSockets(socket,io);
+
+  
+
+initCisSending(socket,io);
+ 
+});
 
 
 
@@ -1412,21 +1834,16 @@ const server = http.createServer(app)
 
 
 ///webscokets server
+console.log("PORT =",port);
 
-StartServerConnections(app,port,today)///
+StartServerConnections(app,port,today, server)///
 
 
 
 
- const StartWebSockets=require('./StartWebSockets');
 
-var io = require('socket.io')(4000,{
 
-  cors:{
-         origin:"*"
-  }
 
-})
 
 
 /* const server4200 = http.createServer(app);
@@ -1439,14 +1856,6 @@ const io4200 = require('socket.io')(4200, {
 /* module.exports = {io4200,app,server4200};
 module.exports */
 
-io.on('connection',socket=>{
-  StartWebSockets(socket,io);
-
-  
-
-initCisSending(socket,io);
- 
-});
 
 
 function initCisSending(socket,io){
@@ -1455,7 +1864,7 @@ function initCisSending(socket,io){
   socket.on('sendCis',(cis)=>{
 
 
-    //console.log('socket',cis)
+   //console.log('from SendCis',cis.tradingSymbol)
     io.emit('sendCis',cis)
 
 //console.log(cis,'cis');

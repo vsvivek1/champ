@@ -2,6 +2,7 @@ let AccesTocken=require('./models/AccessTokens');
 let  Enable=true;
 
 const mongoose=require('mongoose');
+const ZerodhaAPI=require('./ZerodhaAPI');
 let ProxyTrade=false;
 
 var startedWebSockets=false;
@@ -164,6 +165,46 @@ module.exports=function StartWebSockets(socket,io,access_token){
     
     
     
+    // =====================================================
+    // PUSH POSITIONS / PNL (e.g. to the Chrome extension while it's open)
+    // =====================================================
+
+    socket.on('subscribe-positions-pnl', async () => {
+
+      console.log('subscribing to positions-pnl push');
+
+      let access_token_global = await AccesTocken.findOne(
+        { 'date': today },
+        'access_token'
+      ).then(e => e?.access_token);
+
+      if (!access_token_global) {
+        socket.emit('positions-pnl-error', { error: 'Access token not found' });
+        return;
+      }
+
+      const sendPositionsPnl = async () => {
+        try {
+          let positions = await ZerodhaAPI.getPositions(access_token_global);
+          socket.emit('positions-pnl', positions);
+        } catch (e) {
+          console.log(e, 'error fetching positions for positions-pnl push');
+        }
+      };
+
+      sendPositionsPnl();
+      let positionsPnlInterval = setInterval(sendPositionsPnl, 3000);
+
+      socket.on('unsubscribe-positions-pnl', () => {
+        clearInterval(positionsPnlInterval);
+      });
+
+      socket.on('disconnect', () => {
+        clearInterval(positionsPnlInterval);
+      });
+    });
+
+
     socket.on('subscribe-GTT',async r=>{
         
       const uri = "mongodb+srv://vivek:idea1234@cluster0.aqcvi.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";

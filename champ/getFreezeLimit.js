@@ -8,20 +8,14 @@ const freezeLimits = [
   ];
 export function getFreezeLimit(tradingSymbol) {
 
+    // Check longer/more specific symbols first -- e.g. "BANKNIFTY" contains
+    // "NIFTY" as a substring, so matching in table order would silently give
+    // BANKNIFTY/FINNIFTY/MIDCPNIFTY the plain NIFTY freeze limit.
+    const sortedLimits = [...freezeLimits].sort((a, b) => b.symbol.length - a.symbol.length);
 
-
-    for (const item of freezeLimits) {
+    for (const item of sortedLimits) {
       if (tradingSymbol.includes(item.symbol)) {
-        
-        
-return item.quantity_freeze_limit;
-
-
-      /*   return {
-          symbol: item.symbol,
-          lot_size: item.lot_size,
-          quantity_freeze_limit: item.quantity_freeze_limit
-        } */;
+        return item.quantity_freeze_limit;
       }
     }
     return null; // Return null if no match is found

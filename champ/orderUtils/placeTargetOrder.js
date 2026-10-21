@@ -1,8 +1,11 @@
 import { setTargetForTrade } from '../setTargetForTrade.js';
+import { placeOrderInFreezeChunks } from './placeOrderInFreezeChunks.js';
 
 export async function placeTargetOrder(cis, order, kite) {
-  
-  
+  // Stop-loss placement is now handled by the separate stopLossGuard.js
+  // pm2 process; disabled here to avoid placing duplicate SL orders.
+  return;
+
   if (cis.orderPlacementInProgress) {
     console.log(`🚫 Order already in progress for ${cis.tradingsymbol}, skipping.`);
     return;
@@ -142,13 +145,13 @@ const orderParams = {
 
          //    console.log('order update received at before place order' ,order.tradingsymbol,'status',order.status,'transaction_type',order.transaction_type  )
 
-    const orderId = await kite.placeOrder('regular', orderParams);
+    const orderIds = await placeOrderInFreezeChunks(kite, orderParams, cis.lot_size);
     cis.hasPlacedTarget = true;
     cis.hasLivePosition = true;
     cis.hasPosition = true;
 
     await setTargetForTrade(cis.tradingsymbol, orderParams.price, 'final');
-    console.log(`✅ Target order placed. Order ID: ${orderId}`,orderId,"\n");
+    console.log(`✅ Target order(s) placed. Order ID(s): ${orderIds.join(', ')}`,"\n");
   } catch (err) {
     console.error(`❌ Error placing target order for ${cis.tradingsymbol}:`, err.message || err);
   } finally {

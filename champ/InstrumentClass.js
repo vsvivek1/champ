@@ -1,15 +1,32 @@
 import fs from 'fs'
+import { fileURLToPath } from 'url';
+
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export class Instrument {
   constructor(identifier) {
-    const instrumentsData = JSON.parse(fs.readFileSync('../appv3/public/instruments/instrumentsAll.json', 'utf-8'));
-    
-    const instrument = instrumentsData.find(
+   const instrumentsFile = path.join(
+    __dirname,
+    '..',
+    'appv3',
+    'public',
+    'instruments',
+    'instrumentsAll.json'
+);
+const instrumentsData = JSON.parse(
+    fs.readFileSync(instrumentsFile, 'utf8')
+);
+
+
+const instrument = instrumentsData.find(
       (inst) => inst.tradingsymbol == identifier || inst.instrument_token == identifier
     );
 
     if (!instrument) {
-console.log(instrumentsData.length,'instrumentsDatalength')
+//console.log(instrumentsData.length,'instrumentsDatalength')
 
 return;
 

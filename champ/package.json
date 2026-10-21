@@ -6,8 +6,10 @@
   "type": "module",
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "dotenv": "^17.4.2",
     "express": "^4.21.0",
     "kiteconnect": "^5.0.1",
+    "nodemailer": "^9.0.3",
     "pg": "^8.13.1",
     "prisma": "^5.22.0",
     "regression": "^2.0.1",

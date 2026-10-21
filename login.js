@@ -3,6 +3,9 @@ const axios = require("axios");
 const { totp } = require("otplib");
 const crypto = require("crypto");
 const fs = require("fs");
+const mongoose = require("mongoose");
+const AccessToken = require("./models/AccessTokens");
+const { connectToDatabase, closeDatabaseConnection } = require("./connectToDatabase.js");
 require("dotenv").config();
 
 // ---- ENV (supports UPPER/lower)
@@ -54,6 +57,19 @@ function saveAccessToken({ access_token, request_token }) {
   console.log(`🎯 Saved to ${TOKEN_FILE}`);
 }
 
+async function saveAccessTokenToMongo({ access_token, user_id }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const connected = await connectToDatabase();
+  if (!connected) throw new Error("❌ Could not connect to MongoDB to save access token");
+
+  await AccessToken.findOneAndUpdate(
+    { date: today },
+    { $set: { user_id, access_token }, $setOnInsert: { _id: new mongoose.Types.ObjectId(), date: today } },
+    { upsert: true }
+  );
+  console.log(`🎯 Saved access token to MongoDB for ${today}`);
+}
+
 async function exchangeForAccessToken(requestToken) {
   const checksum = crypto
     .createHash("sha256")
@@ -71,8 +87,9 @@ async function exchangeForAccessToken(requestToken) {
   });
 
   const accessToken = data?.data?.access_token;
+  const userId = data?.data?.user_id;
   if (!accessToken) throw new Error(`Unexpected Kite response: ${JSON.stringify(data)}`);
-  return accessToken;
+  return { accessToken, userId };
 }
 
 async function waitForRedirectToCallback(browser, currentPage, timeoutMs = 70000) {
@@ -107,16 +124,33 @@ async function waitForRedirectToCallback(browser, currentPage, timeoutMs = 70000
   return null;
 }
 
+async function typeIntoFieldAndVerify(node, value) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    await node.click({ clickCount: 3 });
+    await node.press("Backspace").catch(() => {});
+    await node.type(value, { delay: 100 });
+    const actual = await node.evaluate((el) => el.value);
+    if (actual === value) return true;
+  }
+  return false;
+}
+
 async function typeTotp(page, otp) {
-  const selectors = ["#pin", 'input[name="twofa-value"]', 'input[autocomplete="one-time-code"]', 'input[type="password"]'];
+  const selectors = ["#pin", 'input[name="twofa-value"]', 'input[autocomplete="one-time-code"]', "#userid", 'input[type="number"]', 'input[type="password"]'];
   for (const sel of selectors) {
     try {
       await page.waitForSelector(sel, { timeout: 8000 });
       const nodes = await page.$$(sel);
-      if (nodes.length === 1) { await nodes[0].type(otp, { delay: 15 }); return true; }
+      if (nodes.length === 1) {
+        return await typeIntoFieldAndVerify(nodes[0], otp);
+      }
       if (nodes.length >= 6 && otp.length === 6) {
-        for (let i = 0; i < 6; i++) await nodes[i].type(otp[i], { delay: 15 });
-        return true;
+        let allOk = true;
+        for (let i = 0; i < 6; i++) {
+          const ok = await typeIntoFieldAndVerify(nodes[i], otp[i]);
+          if (!ok) allOk = false;
+        }
+        if (allOk) return true;
       }
     } catch {}
   }
@@ -141,7 +175,7 @@ async function run() {
     protocolTimeout: 120000,
   });
 
-  const page = await browser.newPage();
+  let page = await browser.newPage();
   page.setDefaultTimeout(45000);
   page.setDefaultNavigationTimeout(90000);
 
@@ -171,36 +205,55 @@ async function run() {
     await page.click("button[type='submit']");
     await sleep(800);
 
-    // 4) TOTP page (same tab or new tab)—just wait for a TOTP input to show
-    const totpSel = await (async () => {
-      const start = Date.now();
-      const sels = ["#pin", 'input[name="twofa-value"]', 'input[autocomplete="one-time-code"]', 'input[type="password"]'];
-      while (Date.now() - start < 35000) {
-        for (const sel of sels) {
-          const el = await page.$(sel).catch(() => null);
-          if (el) return sel;
-        }
-        // also check newest page in case of tab swap
-        const pages = await browser.pages();
-        const newest = pages[pages.length - 1];
-        if (newest !== page) {
-          page = newest;
-        }
+    // 4) TOTP page (same tab or new tab)—wait for it to appear, following tab swaps
+    const start = Date.now();
+    let otpEntered = false;
+    while (Date.now() - start < 35000 && !otpEntered) {
+      const pages = await browser.pages();
+      const newest = pages[pages.length - 1];
+      if (newest !== page) page = newest;
+
+      const otp = totp.generate(TOTP_SECRET);
+      otpEntered = await typeTotp(page, otp);
+      if (otpEntered) {
+        console.log("Generated TOTP:", otp);
+        await page.click("button[type='submit']");
+      } else {
         await sleep(250);
       }
-      return null;
-    })();
-    if (!totpSel) throw new Error("❌ Could not find TOTP input on 2FA screen");
-
-    // 5) Generate + enter TOTP and submit
-    const otp = totp.generate(TOTP_SECRET);
-    console.log("Generated TOTP:", otp);
-    await page.type(totpSel, otp, { delay: 15 });
-    await page.click("button[type='submit']");
+    }
+    if (!otpEntered) {
+      try {
+        await page.screenshot({ path: "./.login_debug.png" });
+        const inputs = await page.$$eval("input", (els) =>
+          els.map((el) => ({ id: el.id, name: el.name, type: el.type, autocomplete: el.autocomplete }))
+        );
+        console.error("🔎 Page URL at failure:", page.url());
+        console.error("🔎 Inputs on page:", JSON.stringify(inputs));
+        console.error("🔎 Screenshot saved to ./.login_debug.png");
+      } catch (debugErr) {
+        console.error("🔎 Failed to capture debug info:", debugErr.message);
+      }
+      throw new Error("❌ Could not find TOTP input on 2FA screen");
+    }
 
     // 6) Wait for **redirect to your callback URL** and capture request_token
     const callbackPage = await waitForRedirectToCallback(browser, page, 70000);
-    if (!callbackPage) throw new Error("❌ Did not see redirect to your REDIRECT_URL");
+    if (!callbackPage) {
+      try {
+        const allPages = await browser.pages();
+        const urls = allPages.map((p) => {
+          try { return p.url(); } catch { return "<err>"; }
+        });
+        console.error("🔎 Expected REDIRECT_URL prefix:", REDIRECT_URL);
+        console.error("🔎 Open tab URLs at timeout:", JSON.stringify(urls));
+        await page.screenshot({ path: "./.login_debug_redirect.png" });
+        console.error("🔎 Screenshot saved to ./.login_debug_redirect.png");
+      } catch (debugErr) {
+        console.error("🔎 Failed to capture debug info:", debugErr.message);
+      }
+      throw new Error("❌ Did not see redirect to your REDIRECT_URL");
+    }
 
     const redirectedUrl = callbackPage.url();
     console.log("Redirected to:", redirectedUrl);
@@ -211,15 +264,19 @@ async function run() {
     console.log("✅ request_token:", requestToken);
 
     // 7) Exchange for access_token and save
-    const accessToken = await exchangeForAccessToken(requestToken);
+    const { accessToken, userId } = await exchangeForAccessToken(requestToken);
     console.log("🎯 access_token:", accessToken);
     saveAccessToken({ access_token: accessToken, request_token: requestToken });
+    await saveAccessTokenToMongo({ access_token: accessToken, user_id: userId });
   } finally {
     try { await browser.close(); } catch {}
+    try { await closeDatabaseConnection(); } catch {}
   }
 }
 
-run().catch((err) => {
-  console.error("❌ Error:", err?.response?.data || err?.message || err);
-  process.exit(1);
-});
+run()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error("❌ Error:", err?.response?.data || err?.message || err);
+    process.exit(1);
+  });

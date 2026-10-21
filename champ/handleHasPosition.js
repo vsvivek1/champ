@@ -28,17 +28,7 @@ import {
 } from './stopLossEngine.js';
 
 import { checkReversalExit } from './checkReversalExit.js';
-
-const FREEZE_QTY = {
-  NIFTY: 1800,
-  SENSEX: 900
-};
-
-function getFreezeQty(tradingsymbol) {
-  if (tradingsymbol.includes('NIFTY')) return FREEZE_QTY.NIFTY;
-  if (tradingsymbol.includes('SENSEX')) return FREEZE_QTY.SENSEX;
-  return Infinity; // stocks / others
-}
+import { placeOrderInFreezeChunks } from './orderUtils/placeOrderInFreezeChunks.js';
 
 export async function handlePositionPresent(cis, kite) {
 
@@ -80,6 +70,9 @@ export async function handlePositionPresent(cis, kite) {
 
   cis.returnPoints="handlePositionPresent Missing qty check "+missingQty
   if (missingQty > 0) {
+    // Stop-loss / exit order repair is now handled by the separate
+    // stopLossGuard.js pm2 process; disabled here to avoid duplicate orders.
+    return;
 
     console.log(
       'Repairing reverse orders for',
@@ -101,33 +94,16 @@ export async function handlePositionPresent(cis, kite) {
      * 3. FREEZE-QTY AWARE SPLITTING
      * -------------------------------------------------- */
 
-    const freezeQty = getFreezeQty(cis.tradingsymbol);
-    let qtyRemaining = missingQty;
-
-    while (qtyRemaining > 0) {
-
-      let orderQty = Math.min(qtyRemaining, freezeQty);
-
-      // Lot-size alignment (important for options)
-      if (cis.lot_size && orderQty % cis.lot_size !== 0) {
-        orderQty = Math.floor(orderQty / cis.lot_size) * cis.lot_size;
-      }
-
-      if (orderQty <= 0) break;
-
-      await kite.placeOrder("regular", {
-        exchange: refreshedPosition.exchange,
-        tradingsymbol: refreshedPosition.tradingsymbol,
-        transaction_type: refreshedPosition.quantity > 0 ? "SELL" : "BUY",
-        quantity: orderQty,
-        order_type: "LIMIT",
-        price: Math.ceil(cis.minuteData.at(-1).close * 1.1),
-        product: "NRML",
-        validity: "DAY"
-      });
-
-      qtyRemaining -= orderQty;
-    }
+    await placeOrderInFreezeChunks(kite, {
+      exchange: refreshedPosition.exchange,
+      tradingsymbol: refreshedPosition.tradingsymbol,
+      transaction_type: refreshedPosition.quantity > 0 ? "SELL" : "BUY",
+      quantity: missingQty,
+      order_type: "LIMIT",
+      price: Math.ceil(cis.minuteData.at(-1).close * 1.1),
+      product: "NRML",
+      validity: "DAY"
+    }, cis.lot_size);
 
     global.orders = await kite.getOrders();
     return;
