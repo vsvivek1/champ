@@ -38,6 +38,9 @@
   .sd.otm { background:rgba(120,144,156,.2); color:var(--dim); }
   .sd.atm { background:rgba(255,167,38,.18); color:#ffa726; }
   .sd.itm { background:rgba(38,166,154,.15); color:var(--green); }
+  .chartbox .pb { position:absolute; z-index:5; top:64px; left:8px; font-size:11px; font-weight:700; padding:2px 6px; border-radius:3px; white-space:nowrap; }
+  .pb.up { background:rgba(38,166,154,.18); color:var(--green); }
+  .pb.dn { background:rgba(239,83,80,.18); color:var(--red); }
   .chart { height:clamp(340px, 54vh, 900px); resize:both; overflow:hidden; min-height:180px; min-width:280px; max-width:100%; }
   .fx { position:absolute; z-index:7; top:46px; right:8px; cursor:pointer; opacity:.55; font-size:15px; user-select:none; }
   .fx:hover { opacity:1; }
@@ -139,8 +142,8 @@
 
 <div class="charts">
   <div class="chartbox"><h3 id="t0">SPOT</h3><div class="quick" id="qk0"></div><div class="tfbox" id="tfbox0"></div><div class="lp" id="lp0"></div><div class="fx" onclick="toggleFull(0)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c0"></div><div class="cm" id="cm0"></div></div>
-  <div class="chartbox"><h3 id="t1">CE</h3><div class="quick" id="qk1"></div><div class="tfbox" id="tfbox1"></div><div class="lp" id="lp1"></div><div class="ob" id="ob1"></div><div class="sd" id="sd1"></div><div class="fx" onclick="toggleFull(1)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c1"></div><div class="cm" id="cm1"></div></div>
-  <div class="chartbox"><h3 id="t2">PE</h3><div class="quick" id="qk2"></div><div class="tfbox" id="tfbox2"></div><div class="lp" id="lp2"></div><div class="ob" id="ob2"></div><div class="sd" id="sd2"></div><div class="fx" onclick="toggleFull(2)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c2"></div><div class="cm" id="cm2"></div></div>
+  <div class="chartbox"><h3 id="t1">CE</h3><div class="quick" id="qk1"></div><div class="tfbox" id="tfbox1"></div><div class="lp" id="lp1"></div><div class="ob" id="ob1"></div><div class="sd" id="sd1"></div><div class="pb" id="pb1"></div><div class="fx" onclick="toggleFull(1)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c1"></div><div class="cm" id="cm1"></div></div>
+  <div class="chartbox"><h3 id="t2">PE</h3><div class="quick" id="qk2"></div><div class="tfbox" id="tfbox2"></div><div class="lp" id="lp2"></div><div class="ob" id="ob2"></div><div class="sd" id="sd2"></div><div class="pb" id="pb2"></div><div class="fx" onclick="toggleFull(2)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c2"></div><div class="cm" id="cm2"></div></div>
 </div>
 
 <div id="ctxMenu"></div>
@@ -264,6 +267,13 @@
   becomes 2 steps OTM once spot runs 100 points your way. Hover it for the strike, the live ATM and the
   distance in points. Shown in both manual and auto (IV) mode.</div>
 
+  <h4>open-entry badge (below the strikes-away badge)</h4>
+  <div>Shown only while that option has an open position: <b>entry 12.45 ×75 · +8.4% · +₹785</b> —
+  the price this entry filled at, the quantity, and the <b>live P&amp;L on this entry</b>. Green when in profit, red when not.
+  The money number updates on <b>every tick</b> (entry and qty refresh every 5s), so it is the P&amp;L right now, not at the last refresh.
+  Entry is the <b>last COMPLETE BUY fill of the day</b>, never Kite's blended average_price. Hover for the full sum.
+  Day P&amp;L for the symbol (realised included) stays in the positions table below.</div>
+
   <h4>B100 / B50 / S50 / S100 (top of each option chart)</h4>
   <div>Emergency buttons. <b class="g">B100/B50</b> = BUY using 100%/50% of available margin at a marketable limit (LTP+2%). <b class="r">S100</b> = dump the whole position now (resting order modified to LTP−3%, never a second order). <b class="r">S50</b> = sell half: the resting SELL's quantity is cut to half and made marketable; the guard re-covers the remaining half within 15s. First click arms (SURE?), second click within 3s fires — regardless of existing orders.</div>
 
@@ -282,6 +292,7 @@
   <span style="color:#ef5350">red dashed SL</span> = your resting SL trigger — drag to modify.<br>
   <span style="color:#f0b90b">amber dashed #n</span> = pending trigger (BUY), red = SELL / EXIT ALL trigger. On the index chart these watch the <b>spot</b>; on a CE/PE chart they watch <b>that option's own price</b>.<br>
   <span style="color:#ff9800">orange dotted GUARD SL</span> = simpleGuard's breach level (lowest low of the 3 candles before entry, frozen) — the price where it force-exits. Drag it to move the level (applies within 15s).<br>
+  <span style="color:#e0e3eb">white solid ENTRY ×qty</span> = the price your open position was filled at — reference only, not draggable.<br>
   <span style="color:#2962ff">blue solid</span> = order being placed — drag it, then confirm in the pop-up.</div>
 
   <h4>BUY waits for the price</h4>
@@ -487,6 +498,31 @@ function updateStrikeDist() {
   }
 }
 
+/*
+Open-entry badge above each option chart: the price this entry was filled at,
+the quantity, and the live P&L on it. Fed by /api/position every 5s for the
+entry/qty and by every tick for the LTP, so the money number moves with the
+market instead of once per refresh. Entry is the last COMPLETE BUY fill of the
+day (what /api/position returns), never Kite's blended average_price.
+*/
+let posBySlot = {};   // 1|2 -> position from /api/position, for the badge + entry line
+function updatePosBadge(slot) {
+  const el = document.getElementById('pb' + slot);
+  if (!el) return;
+  const p = posBySlot[slot];
+  // the live tick wins; /api/position's own ltp fills the gap before the first tick
+  const ltp = lastLtp[slot] > 0 ? lastLtp[slot] : (p ? p.ltp : null);
+  if (!p || !p.quantity || !(p.entry > 0) || !(ltp > 0)) { el.textContent = ''; el.className = 'pb'; el.title = ''; return; }
+  const pnl = (ltp - p.entry) * p.quantity;
+  const pct = (ltp - p.entry) / p.entry * 100;
+  el.textContent = `entry ${fmt(p.entry)} \u00d7${p.quantity} \u00b7 ${pct >= 0 ? '+' : '-'}${Math.abs(pct).toFixed(1)}% `
+    + `\u00b7 ${pnl >= 0 ? '+' : '-'}\u20b9${fmt(Math.abs(pnl), 0)}`;
+  el.className = 'pb ' + (pnl >= 0 ? 'up' : 'dn');
+  el.title = `${p.tradingsymbol}: live P&L on THIS entry = (ltp ${fmt(ltp)} - entry ${fmt(p.entry)}) \u00d7 ${p.quantity}`
+    + ` = ${fmt(pnl)}. Entry is the last COMPLETE BUY fill of the day, not Kite's blended average.`
+    + ` The white ENTRY line on the chart sits at that price. Day P&L for the symbol is in the table below.`;
+}
+
 async function load() {
   const index = document.getElementById('indexSel').value;
   const offset = document.getElementById('autoStrike').checked ? 'auto'
@@ -507,6 +543,8 @@ async function load() {
   tokenSlot[cfg.pe.token] = 2;
   exSymbols[1] = { tradingsymbol: cfg.ce.tradingsymbol, exchange: cfg.ce.exchange };
   exSymbols[2] = { tradingsymbol: cfg.pe.tradingsymbol, exchange: cfg.pe.exchange };
+  posBySlot = {};                       // stale entry badge/line off until the next refresh
+  updatePosBadge(1); updatePosBadge(2);
 
   const kiteLink = (exchange, tradingsymbol, token) =>
     ` <a class="ktlink" target="_blank" href="https://kite.zerodha.com/chart/ext/tvc/${exchange}/${encodeURIComponent(tradingsymbol)}/${token}">Kite ↗</a>`;
@@ -901,6 +939,7 @@ function onTick(token, ltp, ts, vol, oi) {
   document.getElementById('lp' + slot).className = 'lp';
   lastLtp[slot] = ltp;
   updateOb(slot, ltp);
+  updatePosBadge(slot);   // P&L on the open entry moves with the tick, not the 5s refresh
   if (slot == 0) updateSpot(ltp);
 
   const arr = candleData[slot];
@@ -960,6 +999,12 @@ async function refreshPosition() {
     sel.innerHTML = '';
     posByKey = {};
     for (const p of d.positions) posByKey[p.tradingsymbol + '|' + p.exchange] = p;
+    posBySlot = {};
+    for (const p of d.positions) {
+      const sl = slotForSymbol(p.tradingsymbol);
+      if (sl) posBySlot[sl] = p;
+    }
+    updatePosBadge(1); updatePosBadge(2);
     const naked = [];
     for (const p of d.positions) {
       const isNaked = p.quantity > 0 && p.resting.length == 0;
@@ -992,6 +1037,7 @@ async function refreshPosition() {
     if (d.positions.length == 0) tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--dim)">no open F&O positions</td></tr>';
     renderNakedAlert(naked);
     renderOrderLines(d.positions);
+    renderEntryLines(d.positions);
   } catch (e) { /* transient */ }
 }
 
@@ -1002,6 +1048,20 @@ Grab a line and drag to MODIFY the live order (sent on mouseup).
 */
 let orderLines = [];
 let ordDrag = null;
+let entryLines = [];   // white ENTRY line per open position; NOT draggable, so kept out of orderLines
+function renderEntryLines(positions) {
+  for (const l of entryLines) { try { series[l.slot].removePriceLine(l.line); } catch (e) {} }
+  entryLines = [];
+  if (!cfg) return;
+  for (const p of positions) {
+    const slot = slotForSymbol(p.tradingsymbol);
+    if (!slot || !p.quantity || !(p.entry > 0)) continue;
+    entryLines.push({ slot, line: series[slot].createPriceLine({
+      price: p.entry, color: '#e0e3eb', lineStyle: 0, lineWidth: 1,
+      title: `ENTRY \u00d7${p.quantity}`
+    }) });
+  }
+}
 function olTitle(l, pending) {
   const n = l.mode == 'guard' ? 'GUARD SL' : (l.mode == 'sl' ? 'SL ' : 'TGT ') + l.quantity;
   return n + (pending ? ' …' : '');
