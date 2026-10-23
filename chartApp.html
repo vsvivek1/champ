@@ -34,6 +34,10 @@
   .chartbox .quick button.armed { background:#ff6d00; }
   .ob.below { background:rgba(239,83,80,.15); color:var(--red); }
   .ob.above { background:rgba(38,166,154,.15); color:var(--green); }
+  .chartbox .sd { position:absolute; z-index:5; top:44px; left:8px; font-size:11px; font-weight:600; padding:2px 6px; border-radius:3px; }
+  .sd.otm { background:rgba(120,144,156,.2); color:var(--dim); }
+  .sd.atm { background:rgba(255,167,38,.18); color:#ffa726; }
+  .sd.itm { background:rgba(38,166,154,.15); color:var(--green); }
   .chart { height:clamp(340px, 54vh, 900px); resize:both; overflow:hidden; min-height:180px; min-width:280px; max-width:100%; }
   .fx { position:absolute; z-index:7; top:46px; right:8px; cursor:pointer; opacity:.55; font-size:15px; user-select:none; }
   .fx:hover { opacity:1; }
@@ -110,7 +114,7 @@
     <option value="SENSEX">SENSEX</option>
   </select>
   <label>strikes away <input id="offset" type="number" value="0" step="1" style="width:60px"></label>
-  <label title="OTM strike = spot ± 0.6 × spot × IV × √(D/365), rounded to strike step. IV from India VIX. After Load, the message line and the chart titles show how many strike steps off the ATM the pick landed."><input id="autoStrike" type="checkbox"> auto (IV)</label>
+  <label title="OTM strike = spot ± 0.6 × spot × IV × √(D/365), rounded to strike step. IV from India VIX. After Load, the message line shows how many strike steps off the ATM the pick landed; the badge on each option chart keeps that count live."><input id="autoStrike" type="checkbox"> auto (IV)</label>
   <label title="breakout alert level (default: yday high)">brk↑ <input id="brkUp" type="number" step="0.05" style="width:85px"></label>
   <label title="breakdown alert level (default: yday low)">brk↓ <input id="brkDn" type="number" step="0.05" style="width:85px"></label>
   <label title="sets the timeframe on all three charts at once; each chart also has its own tf picker">tf all <select id="tfSel">
@@ -135,8 +139,8 @@
 
 <div class="charts">
   <div class="chartbox"><h3 id="t0">SPOT</h3><div class="quick" id="qk0"></div><div class="tfbox" id="tfbox0"></div><div class="lp" id="lp0"></div><div class="fx" onclick="toggleFull(0)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c0"></div><div class="cm" id="cm0"></div></div>
-  <div class="chartbox"><h3 id="t1">CE</h3><div class="quick" id="qk1"></div><div class="tfbox" id="tfbox1"></div><div class="lp" id="lp1"></div><div class="ob" id="ob1"></div><div class="fx" onclick="toggleFull(1)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c1"></div><div class="cm" id="cm1"></div></div>
-  <div class="chartbox"><h3 id="t2">PE</h3><div class="quick" id="qk2"></div><div class="tfbox" id="tfbox2"></div><div class="lp" id="lp2"></div><div class="ob" id="ob2"></div><div class="fx" onclick="toggleFull(2)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c2"></div><div class="cm" id="cm2"></div></div>
+  <div class="chartbox"><h3 id="t1">CE</h3><div class="quick" id="qk1"></div><div class="tfbox" id="tfbox1"></div><div class="lp" id="lp1"></div><div class="ob" id="ob1"></div><div class="sd" id="sd1"></div><div class="fx" onclick="toggleFull(1)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c1"></div><div class="cm" id="cm1"></div></div>
+  <div class="chartbox"><h3 id="t2">PE</h3><div class="quick" id="qk2"></div><div class="tfbox" id="tfbox2"></div><div class="lp" id="lp2"></div><div class="ob" id="ob2"></div><div class="sd" id="sd2"></div><div class="fx" onclick="toggleFull(2)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c2"></div><div class="cm" id="cm2"></div></div>
 </div>
 
 <div id="ctxMenu"></div>
@@ -248,10 +252,15 @@
   strike = spot ± 0.6 × spot × IV × √(D÷365), rounded to the strike step (50 NIFTY / 100 SENSEX).
   + for CE, − for PE. D = days to expiry counting today as 1 (0.5 on expiry afternoon, after 12:00).
   IV comes from India VIX (fallback 0.13 if unavailable). Untick to use "strikes away" manually as before.
-  <br>After Load, the message line and each chart title say how far the pick landed from the ATM —
-  e.g. <b>4 steps OTM</b> means 4 strike steps out (200 pts on NIFTY, 400 on SENSEX). That is measured off the
-  strike actually loaded, so if the computed strike is not listed and snaps to a neighbour, the count follows it.
-  <b>ATM</b> means it landed on the money; <b>ITM</b> would mean inside it.</div>
+  <br>After Load, the message line says how far the pick landed from the ATM, measured off the strike
+  actually loaded — so if the computed strike is not listed and snaps to a neighbour, the count follows it.</div>
+
+  <h4>strikes-away badge (top-left of each option chart)</h4>
+  <div>Says how many strike steps that option is from the money right now, e.g. <b>4 steps OTM</b> = 4 steps out
+  (200 pts on NIFTY, 400 on SENSEX). <b class="g">ITM</b> green, <b>ATM</b> amber, OTM grey.
+  It is recomputed on every spot tick, not frozen at Load: the ATM moves with spot, so a 4-step OTM call
+  becomes 2 steps OTM once spot runs 100 points your way. Hover it for the strike, the live ATM and the
+  distance in points. Shown in both manual and auto (IV) mode.</div>
 
   <h4>B100 / B50 / S50 / S100 (top of each option chart)</h4>
   <div>Emergency buttons. <b class="g">B100/B50</b> = BUY using 100%/50% of available margin at a marketable limit (LTP+2%). <b class="r">S100</b> = dump the whole position now (resting order modified to LTP−3%, never a second order). <b class="r">S50</b> = sell half: the resting SELL's quantity is cut to half and made marketable; the guard re-covers the remaining half within 15s. First click arms (SURE?), second click within 3s fires — regardless of existing orders.</div>
@@ -439,18 +448,41 @@ async function loadSlot(slot) {
   renderCommentary();
 }
 
-/* How far the auto (IV) pick landed from the ATM strike, in strike steps.
-   Step counts come from the server, measured off the strike actually loaded.
-   Manual offset mode needs none of this — there the offset IS the step count. */
+/* How far a strike sits from the money, counted in strike steps.
+   Positive = OTM (a call above the ATM, a put below it), 0 = ATM, negative = ITM. */
 function stepsTxt(n) {
   if (!(typeof n == 'number') || !isFinite(n)) return '';
   if (n == 0) return 'ATM';
   return `${Math.abs(n)} step${Math.abs(n) == 1 ? '' : 's'} ${n > 0 ? 'OTM' : 'ITM'}`;
 }
-function autoSteps(side) {
-  if (!cfg || !cfg.auto) return '';
-  const t = stepsTxt(side == 'ce' ? cfg.auto.ceSteps : cfg.auto.peSteps);
-  return t ? ` · ${t}` : '';
+
+/*
+Badge above each option chart saying how many strikes away from the money that
+strike currently is. Recomputed on every spot tick, NOT frozen at Load: the ATM
+moves with spot, so a 4-step OTM call becomes 2 steps OTM once spot runs 100
+points your way — which is exactly the moment you want to know. Works the same
+in manual "strikes away" mode and in auto (IV) mode.
+*/
+let lastSpotLtp = null;
+function strikeStep() {
+  if (cfg && cfg.step > 0) return cfg.step;
+  return cfg && cfg.index == 'SENSEX' ? 100 : 50;   // only if an old server omits it
+}
+function updateStrikeDist() {
+  for (const slot of [1, 2]) {
+    const el = document.getElementById('sd' + slot);
+    if (!el) continue;
+    const o = cfg && !cfg.error ? (slot == 1 ? cfg.ce : cfg.pe) : null;
+    if (!o || !(o.strike > 0) || !(lastSpotLtp > 0)) { el.textContent = ''; el.className = 'sd'; el.title = ''; continue; }
+    const step = strikeStep();
+    const atm = Math.round(lastSpotLtp / step) * step;
+    const away = slot == 1 ? o.strike - atm : atm - o.strike;   // OTM is up for a CE, down for a PE
+    const steps = Math.round(away / step);
+    el.textContent = stepsTxt(steps);
+    el.className = 'sd ' + (steps > 0 ? 'otm' : steps < 0 ? 'itm' : 'atm');
+    el.title = `strike ${o.strike} vs the live ATM ${atm} (spot ${fmt(lastSpotLtp)}, step ${step}). `
+      + `${Math.abs(away)} pts ${away > 0 ? 'out of' : away < 0 ? 'in' : 'at'} the money. Moves with spot.`;
+  }
 }
 
 async function load() {
@@ -460,7 +492,7 @@ async function load() {
   msg('loading…');
   const r = await fetch(`${BASE}/api/setup?index=${index}&offset=${offset}`);
   cfg = await r.json();
-  if (cfg.error) { msg('❌ ' + cfg.error); return; }
+  if (cfg.error) { msg('❌ ' + cfg.error); updateStrikeDist(); return; }   // clear stale badges
   if (cfg.auto) {
     msg(`🎛 auto: IV ${(cfg.auto.iv * 100).toFixed(1)} (${cfg.auto.ivSource}), D=${cfg.auto.D}, ±${cfg.auto.dist} → ` +
       `CE ${cfg.ce.strike} (${stepsTxt(cfg.auto.ceSteps) || '?'}) / PE ${cfg.pe.strike} (${stepsTxt(cfg.auto.peSteps) || '?'})` +
@@ -478,8 +510,9 @@ async function load() {
     ` <a class="ktlink" target="_blank" href="https://kite.zerodha.com/chart/ext/tvc/${exchange}/${encodeURIComponent(tradingsymbol)}/${token}">Kite ↗</a>`;
   const spotSym = cfg.index == 'NIFTY' ? ['NSE', 'NIFTY 50'] : ['BSE', 'SENSEX'];
   document.getElementById('t0').innerHTML = `<b>${cfg.index}</b> spot` + kiteLink(spotSym[0], spotSym[1], cfg.spot.token);
-  document.getElementById('t1').innerHTML = `<b>${cfg.ce.tradingsymbol}</b> (CE ${cfg.ce.strike}${autoSteps('ce')})` + kiteLink(cfg.ce.exchange, cfg.ce.tradingsymbol, cfg.ce.token);
-  document.getElementById('t2').innerHTML = `<b>${cfg.pe.tradingsymbol}</b> (PE ${cfg.pe.strike}${autoSteps('pe')})` + kiteLink(cfg.pe.exchange, cfg.pe.tradingsymbol, cfg.pe.token);
+  // no step count in the title — the sd1/sd2 badges carry it and stay live
+  document.getElementById('t1').innerHTML = `<b>${cfg.ce.tradingsymbol}</b> (CE ${cfg.ce.strike})` + kiteLink(cfg.ce.exchange, cfg.ce.tradingsymbol, cfg.ce.token);
+  document.getElementById('t2').innerHTML = `<b>${cfg.pe.tradingsymbol}</b> (PE ${cfg.pe.strike})` + kiteLink(cfg.pe.exchange, cfg.pe.tradingsymbol, cfg.pe.token);
   document.getElementById('expiryTxt').textContent = 'exp ' + cfg.expiry;
   if (cfg.spot.yday) {
     // default brk levels to yday high/low; keep a hand-edited value
@@ -549,6 +582,8 @@ function checkBreakLevels(ltp) {
 
 function updateSpot(ltp) {
   document.getElementById('spotLtp').textContent = fmt(ltp);
+  lastSpotLtp = ltp;
+  updateStrikeDist();   // the ATM moved, so the strikes-away badges may have too
   checkBreakLevels(ltp);
   const b = document.getElementById('rangeBadge');
   if (cfg && cfg.spot.yday) {

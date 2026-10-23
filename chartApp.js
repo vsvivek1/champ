@@ -518,7 +518,8 @@ async function main() {
                 index: indexKey,
                 spot: { token: idx.spotToken, ltp: spot, yday, inside: yday ? (spot <= yday.high && spot >= yday.low) : null },
                 auto,
-                atm: opts.atm,
+                atm: opts.atm,          // the ATM at Load; the chart recomputes it live from spot
+                step: idx.strikeStep,   // so the chart can count strikes away without hardcoding it
                 expiry: opts.expiry,
                 ce: { token: Number(opts.ce.instrument_token), tradingsymbol: opts.ce.tradingsymbol, strike: Number(opts.ce.strike), exchange: opts.ce.exchange, lot_size: opts.ce.lot_size },
                 pe: { token: Number(opts.pe.instrument_token), tradingsymbol: opts.pe.tradingsymbol, strike: Number(opts.pe.strike), exchange: opts.pe.exchange, lot_size: opts.pe.lot_size },
