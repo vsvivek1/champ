@@ -203,6 +203,29 @@ async function exitAllLongs(only) {
     return done;
 }
 
+/*
+Per-entry "what to place on this fill" override, keyed by instrument token.
+simpleGuard normally reads guardSettings.json, which is one global choice for
+every fill. This file lets a single entry say "SL first" without flipping that
+global and having to remember to flip it back. Written just BEFORE the BUY
+goes out, so it is already on disk when simpleGuard sees the fill; simpleGuard
+consumes and deletes the entry, so it applies to exactly one fill.
+
+Same shape and failure style as breachOverride.json: if the file is missing or
+unreadable, everyone falls back to the global setting.
+*/
+const FIRST_ORDER_FILE = path.join(__dirname, 'firstOrderOverride.json');
+function setFirstOrderOverride(token, which) {
+    if (!['target', 'sl'].includes(which) || !(Number(token) > 0)) return false;
+    let ov = {};
+    try { ov = JSON.parse(fs.readFileSync(FIRST_ORDER_FILE, 'utf8')); } catch (e) { }
+    ov[Number(token)] = { which, at: new Date().toISOString() };
+    try { fs.writeFileSync(FIRST_ORDER_FILE, JSON.stringify(ov, null, 2)); }
+    catch (e) { console.log(e, '❌ could not write firstOrderOverride'); return false; }
+    console.log(`📌 on this fill for token ${token}: ${which.toUpperCase()} first (one fill only)`);
+    return true;
+}
+
 async function fireTrigger(trig, spotLtp) {
     // spotLtp is the watched instrument's ltp -- the index for a spot trigger,
     // the option's own price for an option trigger. Name the right one in logs.
@@ -252,6 +275,8 @@ async function fireTrigger(trig, spotLtp) {
             console.log(`⚡ trigger #${trig.id} fired at ${firedAt}: SELL ${trig.tradingsymbol} @ ${sellPrice} → ${orderIds.join(',')}`);
         } else {
             const price = roundToTick(optLtp * 1.02); // marketable LIMIT
+            // must be on disk before the BUY, or simpleGuard may reach the fill first
+            if (trig.firstOrder) setFirstOrderOverride(trig.token, trig.firstOrder);
             orderIds = await placeOrderInFreezeChunks(kite, {
                 exchange: trig.exchange,
                 tradingsymbol: trig.tradingsymbol,
@@ -473,6 +498,20 @@ async function main() {
                 return res.status(500).json({ error: "could not resolve CE/PE instruments" });
             }
 
+            /*
+            How far out the auto pick actually landed, in strike steps from the
+            ATM. Measured off the LOADED strike, not autoStrikes()'s ideal one:
+            if that strike is not listed, resolveOptions snaps to the nearest
+            one that is, and the honest answer is where the chart ended up.
+            Positive = OTM (CE above the ATM, PE below it).
+            */
+            if (auto) {
+                auto.atm = opts.atm;
+                auto.step = idx.strikeStep;
+                auto.ceSteps = Math.round((Number(opts.ce.strike) - opts.atm) / idx.strikeStep);
+                auto.peSteps = Math.round((opts.atm - Number(opts.pe.strike)) / idx.strikeStep);
+            }
+
             setChartedTokens([idx.spotToken, Number(opts.ce.instrument_token), Number(opts.pe.instrument_token)]);
 
             res.json({
@@ -623,12 +662,14 @@ async function main() {
     */
     app.post('/api/buy', async (req, res) => {
         try {
-            const { tradingsymbol, exchange, token, quantity, price } = req.body;
+            const { tradingsymbol, exchange, token, quantity, price, firstOrder } = req.body;
             const qty = parseInt(quantity, 10);
             const px = Number(price);
             if (!tradingsymbol || !exchange || !qty || qty <= 0 || !px || px <= 0) {
                 return res.status(400).json({ error: "tradingsymbol, exchange, quantity, price required" });
             }
+            // before the BUY: simpleGuard may reach the fill the moment it lands
+            if (['target', 'sl'].includes(firstOrder)) setFirstOrderOverride(token, firstOrder);
             const orderIds = await placeOrderInFreezeChunks(kite, {
                 exchange,
                 tradingsymbol,
@@ -658,7 +699,7 @@ async function main() {
     */
     app.post('/api/quick', async (req, res) => {
         try {
-            const { tradingsymbol, exchange, token, side, pct } = req.body;
+            const { tradingsymbol, exchange, token, side, pct, firstOrder } = req.body;
             const p = Number(pct);
             if (!tradingsymbol || !exchange || !token || !['buy', 'sell'].includes(side) || ![50, 100].includes(p)) {
                 return res.status(400).json({ error: "tradingsymbol, exchange, token, side buy|sell, pct 50|100 required" });
@@ -679,6 +720,7 @@ async function main() {
                 const price = roundToTick(ltp * 1.02);
                 const qty = Math.floor((cash * p / 100) / price / lot) * lot;
                 if (qty < lot) return res.status(400).json({ error: `margin too low for 1 lot (cash ${Math.round(cash)}, lot ~${Math.round(price * lot)})` });
+                if (['target', 'sl'].includes(firstOrder)) setFirstOrderOverride(token, firstOrder);
                 const ids = await placeOrderInFreezeChunks(kite, {
                     exchange, tradingsymbol, transaction_type: "BUY", quantity: qty,
                     order_type: "LIMIT", price, product: "NRML", validity: "DAY", tag: "QUICKB"
@@ -841,9 +883,11 @@ async function main() {
     app.get('/api/triggers', (req, res) => res.json({ triggers: spotTriggers }));
 
     app.post('/api/trigger', (req, res) => {
-        const { direction, level, tradingsymbol, exchange, token, quantity, index, action, watch } = req.body;
+        const { direction, level, tradingsymbol, exchange, token, quantity, index, action, watch, firstOrder } = req.body;
         const act = action || 'buy';
         const wat = watch == 'option' ? 'option' : 'spot';   // default keeps the old spot behaviour
+        // only a BUY produces a fill, so only a BUY can say what to rest on it
+        const fo = act == 'buy' && ['target', 'sl'].includes(firstOrder) ? firstOrder : null;
         const lvl = Number(level), qty = parseInt(quantity, 10) || 0;
         const idx = INDICES[index];
         if (!['above', 'below'].includes(direction) || !['buy', 'sell', 'exitall'].includes(act) || !lvl || !idx) {
@@ -866,13 +910,15 @@ async function main() {
             exchange: act == 'exitall' ? '' : exchange,
             token: act == 'exitall' ? 0 : Number(token),
             quantity: qty, // sell/exitall use live position qty at fire time
+            firstOrder: fo, // null = whatever guardSettings.json says at fill time
             created: new Date().toISOString()
         };
         spotTriggers.push(trig);
         saveTriggers();
         subscribeTriggerTokens();
         const onWhat = wat == 'option' ? `${trig.tradingsymbol} price` : `${index} spot`;
-        console.log(`🎯 trigger #${trig.id}: ${act.toUpperCase()} ${act == 'buy' ? qty + ' ' : ''}${trig.tradingsymbol} if ${onWhat} ${direction} ${lvl}`);
+        console.log(`🎯 trigger #${trig.id}: ${act.toUpperCase()} ${act == 'buy' ? qty + ' ' : ''}${trig.tradingsymbol} if ${onWhat} ${direction} ${lvl}` +
+            (fo ? ` → ${fo.toUpperCase()} first on fill` : ''));
         res.json({ id: trig.id, trigger: trig });
     });
 

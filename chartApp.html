@@ -110,7 +110,7 @@
     <option value="SENSEX">SENSEX</option>
   </select>
   <label>strikes away <input id="offset" type="number" value="0" step="1" style="width:60px"></label>
-  <label title="OTM strike = spot ± 0.6 × spot × IV × √(D/365), rounded to strike step. IV from India VIX."><input id="autoStrike" type="checkbox"> auto (IV)</label>
+  <label title="OTM strike = spot ± 0.6 × spot × IV × √(D/365), rounded to strike step. IV from India VIX. After Load, the message line and the chart titles show how many strike steps off the ATM the pick landed."><input id="autoStrike" type="checkbox"> auto (IV)</label>
   <label title="breakout alert level (default: yday high)">brk↑ <input id="brkUp" type="number" step="0.05" style="width:85px"></label>
   <label title="breakdown alert level (default: yday low)">brk↓ <input id="brkDn" type="number" step="0.05" style="width:85px"></label>
   <label title="sets the timeframe on all three charts at once; each chart also has its own tf picker">tf all <select id="tfSel">
@@ -247,7 +247,11 @@
   <div>Tick <b>auto (IV)</b> before Load and the OTM strike is picked by:
   strike = spot ± 0.6 × spot × IV × √(D÷365), rounded to the strike step (50 NIFTY / 100 SENSEX).
   + for CE, − for PE. D = days to expiry counting today as 1 (0.5 on expiry afternoon, after 12:00).
-  IV comes from India VIX (fallback 0.13 if unavailable). Untick to use "strikes away" manually as before.</div>
+  IV comes from India VIX (fallback 0.13 if unavailable). Untick to use "strikes away" manually as before.
+  <br>After Load, the message line and each chart title say how far the pick landed from the ATM —
+  e.g. <b>4 steps OTM</b> means 4 strike steps out (200 pts on NIFTY, 400 on SENSEX). That is measured off the
+  strike actually loaded, so if the computed strike is not listed and snaps to a neighbour, the count follows it.
+  <b>ATM</b> means it landed on the money; <b>ITM</b> would mean inside it.</div>
 
   <h4>B100 / B50 / S50 / S100 (top of each option chart)</h4>
   <div>Emergency buttons. <b class="g">B100/B50</b> = BUY using 100%/50% of available margin at a marketable limit (LTP+2%). <b class="r">S100</b> = dump the whole position now (resting order modified to LTP−3%, never a second order). <b class="r">S50</b> = sell half: the resting SELL's quantity is cut to half and made marketable; the guard re-covers the remaining half within 15s. First click arms (SURE?), second click within 3s fires — regardless of existing orders.</div>
@@ -284,6 +288,15 @@
   SL below, and the result is rounded to the 0.05 tick. The resolved price is previewed next to the buttons before
   you send, and the confirmation message reports the price that actually went to the exchange. "SL limit (opt)" is
   always an absolute price. % needs a known entry price, so it is rejected on a position that has not filled yet.</div>
+
+  <h4>Target or SL on this entry</h4>
+  <div>The panel's <b>on fill</b> dropdown is the global default for every fill. Every click menu now has its own
+  <b>on fill</b> picker, so one entry can rest an <b>SL first</b> instead of a target without touching that global
+  and having to switch it back. Leave it on "panel default" to behave exactly as before. The choice is shown on the
+  CONFIRM button and on the pending-trigger chip (<code>→ SL first</code>), travels with the entry, and simpleGuard
+  applies it to <b>that one fill only</b> — the next fill is back to the panel default. It is ignored by the
+  SELL/EXIT buttons (they close a position, they do not create a fill), and the B100/B50 quick buttons are one-click
+  by design, so they follow the panel default. An entry whose BUY never fills has its choice retired after 15min.</div>
 
   <h4>Auto target</h4>
   <div>Picking <b>Auto</b> in the target dropdown greys out the box and works the target out from the current
@@ -426,6 +439,20 @@ async function loadSlot(slot) {
   renderCommentary();
 }
 
+/* How far the auto (IV) pick landed from the ATM strike, in strike steps.
+   Step counts come from the server, measured off the strike actually loaded.
+   Manual offset mode needs none of this — there the offset IS the step count. */
+function stepsTxt(n) {
+  if (!(typeof n == 'number') || !isFinite(n)) return '';
+  if (n == 0) return 'ATM';
+  return `${Math.abs(n)} step${Math.abs(n) == 1 ? '' : 's'} ${n > 0 ? 'OTM' : 'ITM'}`;
+}
+function autoSteps(side) {
+  if (!cfg || !cfg.auto) return '';
+  const t = stepsTxt(side == 'ce' ? cfg.auto.ceSteps : cfg.auto.peSteps);
+  return t ? ` · ${t}` : '';
+}
+
 async function load() {
   const index = document.getElementById('indexSel').value;
   const offset = document.getElementById('autoStrike').checked ? 'auto'
@@ -435,7 +462,9 @@ async function load() {
   cfg = await r.json();
   if (cfg.error) { msg('❌ ' + cfg.error); return; }
   if (cfg.auto) {
-    msg(`🎛 auto: IV ${(cfg.auto.iv * 100).toFixed(1)} (${cfg.auto.ivSource}), D=${cfg.auto.D}, ±${cfg.auto.dist} → CE ${cfg.ce.strike} / PE ${cfg.pe.strike}`);
+    msg(`🎛 auto: IV ${(cfg.auto.iv * 100).toFixed(1)} (${cfg.auto.ivSource}), D=${cfg.auto.D}, ±${cfg.auto.dist} → ` +
+      `CE ${cfg.ce.strike} (${stepsTxt(cfg.auto.ceSteps) || '?'}) / PE ${cfg.pe.strike} (${stepsTxt(cfg.auto.peSteps) || '?'})` +
+      (cfg.auto.atm ? `, ATM ${cfg.auto.atm} · step ${cfg.auto.step}` : ''));
   }
 
   tokenSlot = {}; exSymbols = {};
@@ -449,8 +478,8 @@ async function load() {
     ` <a class="ktlink" target="_blank" href="https://kite.zerodha.com/chart/ext/tvc/${exchange}/${encodeURIComponent(tradingsymbol)}/${token}">Kite ↗</a>`;
   const spotSym = cfg.index == 'NIFTY' ? ['NSE', 'NIFTY 50'] : ['BSE', 'SENSEX'];
   document.getElementById('t0').innerHTML = `<b>${cfg.index}</b> spot` + kiteLink(spotSym[0], spotSym[1], cfg.spot.token);
-  document.getElementById('t1').innerHTML = `<b>${cfg.ce.tradingsymbol}</b> (CE ${cfg.ce.strike})` + kiteLink(cfg.ce.exchange, cfg.ce.tradingsymbol, cfg.ce.token);
-  document.getElementById('t2').innerHTML = `<b>${cfg.pe.tradingsymbol}</b> (PE ${cfg.pe.strike})` + kiteLink(cfg.pe.exchange, cfg.pe.tradingsymbol, cfg.pe.token);
+  document.getElementById('t1').innerHTML = `<b>${cfg.ce.tradingsymbol}</b> (CE ${cfg.ce.strike}${autoSteps('ce')})` + kiteLink(cfg.ce.exchange, cfg.ce.tradingsymbol, cfg.ce.token);
+  document.getElementById('t2').innerHTML = `<b>${cfg.pe.tradingsymbol}</b> (PE ${cfg.pe.strike}${autoSteps('pe')})` + kiteLink(cfg.pe.exchange, cfg.pe.tradingsymbol, cfg.pe.token);
   document.getElementById('expiryTxt').textContent = 'exp ' + cfg.expiry;
   if (cfg.spot.yday) {
     // default brk levels to yday high/low; keep a hand-edited value
@@ -764,7 +793,7 @@ async function refreshTriggers() {
       const chipWhat = act == 'EXITALL' ? 'EXIT ALL LONGS' : `${act} ${act == 'BUY' ? t.quantity + ' ' : ''}${t.tradingsymbol}`;
       const cond = onOpt ? 'its own price' : t.index;
       el.insertAdjacentHTML('beforeend',
-        `<span class="trig">#${t.id} ${chipWhat} if ${cond} ${t.direction == 'above' ? '≥' : '≤'} ${t.level}` +
+        `<span class="trig">#${t.id} ${chipWhat} if ${cond} ${t.direction == 'above' ? '≥' : '≤'} ${t.level}${foSuffix(t.firstOrder)}` +
         `<button onclick="cancelTrigger(${t.id})">✕</button></span>`);
     }
   } catch (e) { /* transient */ }
@@ -1552,6 +1581,29 @@ window.addEventListener('mouseup', async () => {
   }
 });
 
+/*
+"What should rest on this fill?" picked at the entry itself, instead of
+flipping the panel's global `on fill` setting and having to remember to flip
+it back. Blank = follow the panel. The choice rides along with the entry and
+simpleGuard applies it to that one fill only.
+Only a BUY produces a fill, so this is ignored by the SELL/EXIT buttons.
+*/
+function firstOrderHtml() {
+  const g = guardCfg.firstOrder == 'sl' ? 'SL' : 'Target';
+  return `<div style="font-size:11px;color:var(--dim);padding:2px 0">on fill ` +
+    `<select id="mFirst" style="font-size:11px" title="what simpleGuard rests on this fill (BUY only)">` +
+    `<option value="">panel default (${g})</option>` +
+    `<option value="target">Target first</option>` +
+    `<option value="sl">SL first</option>` +
+    `</select></div>`;
+}
+function pickedFirstOrder() {
+  const el = document.getElementById('mFirst');
+  return el && el.value ? el.value : null;
+}
+// " → SL first" for a label, "" when following the panel
+function foSuffix(fo) { return fo ? ` → ${fo == 'sl' ? 'SL' : 'Target'} first` : ''; }
+
 function showMenu(slot, price, point) {
   clearClickLine();
   const o = slot == 0 ? { tradingsymbol: cfg.index + ' spot' } : (slot == 1 ? cfg.ce : cfg.pe);
@@ -1567,6 +1619,7 @@ function showMenu(slot, price, point) {
       `<button class="sellb" id="mTrigCeS"></button>` +
       `<button class="sellb" id="mTrigPeS"></button>` +
       `<button class="sellb" id="mTrigExit"></button>` +
+      firstOrderHtml() +
       `<button class="sec" id="mX">Cancel</button>`;
     document.getElementById('mTrigCe').onclick = () => armTrigger('ce', 'buy');
     document.getElementById('mTrigPe').onclick = () => armTrigger('pe', 'buy');
@@ -1577,6 +1630,7 @@ function showMenu(slot, price, point) {
     menu.innerHTML =
       `<div class="px" id="mPx"></div>` +
       `<button class="buy" id="mBuy">BUY ${qty} when price gets here</button>` +
+      firstOrderHtml() +
       `<button id="mTgt">Target here</button>` +
       `<button class="sec" id="mSl">SL here</button>` +
       `<button class="sec" id="mX">Cancel</button>`;
@@ -1641,11 +1695,13 @@ function armTrigger(key, action) {
   b.onclick = async () => {
     const body = { index: cfg.index, action, direction: dir, level: clickCtx.price };
     if (o) { body.tradingsymbol = o.tradingsymbol; body.exchange = o.exchange; body.token = o.token; body.quantity = qty; }
+    const fo = action == 'buy' ? pickedFirstOrder() : null;   // read before hideMenu wipes the menu
+    if (fo) body.firstOrder = fo;
     hideMenu();
     msg('setting trigger…');
     const r = await fetch(BASE+'/api/trigger', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const d = await r.json();
-    msg(d.error ? ('❌ ' + d.error) : (`✅ trigger #${d.id} set: ${what} if spot ${dir} ${body.level}`));
+    msg(d.error ? ('❌ ' + d.error) : (`✅ trigger #${d.id} set: ${what} if spot ${dir} ${body.level}${foSuffix(fo)}`));
     refreshTriggers();
   };
 }
@@ -1670,14 +1726,16 @@ function armBuy() {
   b.onclick = async () => {
     const c = clickCtx;
     const dir = buyDir(c);
+    const fo = pickedFirstOrder();   // read before hideMenu wipes the menu
     hideMenu();
     msg('setting entry trigger…');
     const r = await fetch(BASE+'/api/trigger', { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ index: cfg.index, action: 'buy', watch: 'option', direction: dir, level: c.price,
-        tradingsymbol: c.o.tradingsymbol, exchange: c.o.exchange, token: c.o.token, quantity: c.qty }) });
+        tradingsymbol: c.o.tradingsymbol, exchange: c.o.exchange, token: c.o.token, quantity: c.qty,
+        firstOrder: fo }) });
     const d = await r.json();
     msg(d.error ? ('❌ ' + d.error)
-      : `✅ trigger #${d.id} set: BUY ${c.qty} ${c.o.tradingsymbol} if its price ${dir == 'above' ? '≥' : '≤'} ${c.price.toFixed(2)}`);
+      : `✅ trigger #${d.id} set: BUY ${c.qty} ${c.o.tradingsymbol} if its price ${dir == 'above' ? '≥' : '≤'} ${c.price.toFixed(2)}${foSuffix(fo)}`);
     refreshTriggers();
   };
 }

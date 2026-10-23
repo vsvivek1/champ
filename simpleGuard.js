@@ -59,6 +59,8 @@ guardSettings.json next to this file. Read fresh at every placement so a
 change applies to the NEXT fill without a restart.
   firstOrder: 'target' -> SELL LIMIT at buy + targetPct%
               'sl'     -> SELL SL, trigger at buy - slPct%
+This is the default for every fill; a single entry can override it for itself
+via firstOrderOverride.json (see below).
 */
 const SETTINGS_FILE = path.join(__dirname, 'guardSettings.json');
 function guardSettings() {
@@ -87,6 +89,40 @@ Files shared with the chartApp page:
 const STATE_FILE = path.join(__dirname, 'guardState.json');
 const OVERRIDE_FILE = path.join(__dirname, 'breachOverride.json');
 const TRADE_LOG_FILE = path.join(__dirname, 'tradeLog.json');
+
+/*
+firstOrderOverride.json (written by chartApp just before a BUY goes out):
+token -> {which: 'target'|'sl', at: ISO}, meaning "on THIS fill place that,
+whatever guardSettings.json says". Consumed below -- read once, deleted, so
+it can never apply to a second fill. A missing or corrupt file simply means
+every fill follows the global setting, exactly as before.
+
+Deliberately NOT cleared by clearOverride(): that runs whenever no long is
+open, which is exactly the gap between the BUY going out and its fill. An
+entry whose BUY was rejected and never filled is retired by age instead.
+*/
+const FIRST_ORDER_FILE = path.join(__dirname, 'firstOrderOverride.json');
+const FIRST_ORDER_TTL_MIN = 15;
+function takeFirstOrderOverride(token) {
+    try {
+        const ov = JSON.parse(fs.readFileSync(FIRST_ORDER_FILE, 'utf8'));
+        const e = ov[Number(token)];
+        if (!e) return null;
+        // tolerate the plain-string form in case an old file is lying around
+        const which = typeof e == 'string' ? e : e.which;
+        const at = typeof e == 'string' ? null : e.at;
+        delete ov[Number(token)];
+        fs.writeFileSync(FIRST_ORDER_FILE, JSON.stringify(ov, null, 2));
+        if (!['target', 'sl'].includes(which)) return null;
+        if (at && dayjs().diff(dayjs(at), 'minute') > FIRST_ORDER_TTL_MIN) {
+            console.log(`⏭ ignoring a ${FIRST_ORDER_TTL_MIN}min+ stale on-fill choice for token ${token} (its BUY never filled)`);
+            return null;
+        }
+        return which;
+    } catch (e) {
+        return null;
+    }
+}
 
 const instrumentLotSizeByToken = new Map();
 
@@ -191,8 +227,11 @@ guardSettings.json.
 async function placeTargetOrder(kite, { instrument_token, tradingsymbol, exchange, quantity, buyPrice }) {
 
     const s = guardSettings();
+    // a per-entry choice from the chart wins over the global setting, once
+    const perEntry = takeFirstOrderOverride(instrument_token);
+    const which = perEntry || s.firstOrder;
     let orderPart, desc;
-    if (s.firstOrder == 'sl') {
+    if (which == 'sl') {
         const trigger = roundDownToTick(buyPrice * (1 - s.slPct / 100));
         const limit = roundDownToTick(trigger * 0.99); // marketable once triggered
         orderPart = { order_type: "SL", price: limit, trigger_price: trigger };
@@ -214,7 +253,7 @@ async function placeTargetOrder(kite, { instrument_token, tradingsymbol, exchang
         tag: TARGET_ORDER_TAG
     }, instrumentLotSizeByToken.get(Number(instrument_token)));
 
-    console.log(`🎯 First order placed for ${tradingsymbol}: ${desc}. Order ID(s): ${orderIds.join(', ')}`);
+    console.log(`🎯 First order placed for ${tradingsymbol}: ${desc}${perEntry ? ' [per-entry choice from the chart]' : ''}. Order ID(s): ${orderIds.join(', ')}`);
 
     return orderIds;
 }
@@ -324,7 +363,8 @@ async function refreshCache(kite, ticker) {
                     actualBuyPriceByToken.set(token, buyPrice);
                 }
 
-                console.log(`⚠️ No resting SELL for ${position.tradingsymbol}, placing the first order (${guardSettings().firstOrder})`);
+                // placeTargetOrder decides target-vs-SL (a per-entry override may win), and logs which
+                console.log(`⚠️ No resting SELL for ${position.tradingsymbol}, placing the first order`);
 
                 try {
                     await placeTargetOrder(kite, {
