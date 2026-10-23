@@ -114,7 +114,7 @@
     <option value="SENSEX">SENSEX</option>
   </select>
   <label>strikes away <input id="offset" type="number" value="0" step="1" style="width:60px"></label>
-  <label title="OTM strike = spot ± 0.6 × spot × IV × √(D/365), rounded to strike step. IV from India VIX. After Load, the message line shows how many strike steps off the ATM the pick landed; the badge on each option chart keeps that count live."><input id="autoStrike" type="checkbox"> auto (IV)</label>
+  <label title="OTM strike = spot ± 0.6 × spot × IV × √(D/365), rounded to strike step. IV from India VIX. After Load, the message line shows how many strike steps off the ATM the pick landed; the badge on each option chart keeps that count live. On by default, so a fresh page loads the IV strikes straight away — untick it to use &quot;strikes away&quot; by hand."><input id="autoStrike" type="checkbox" checked> auto (IV)</label>
   <label title="breakout alert level (default: yday high)">brk↑ <input id="brkUp" type="number" step="0.05" style="width:85px"></label>
   <label title="breakdown alert level (default: yday low)">brk↓ <input id="brkDn" type="number" step="0.05" style="width:85px"></label>
   <label title="sets the timeframe on all three charts at once; each chart also has its own tf picker">tf all <select id="tfSel">
@@ -248,7 +248,9 @@
   without leaving it.</div>
 
   <h4>auto (IV) strike selection</h4>
-  <div>Tick <b>auto (IV)</b> before Load and the OTM strike is picked by:
+  <div><b>On by default</b> — opening the page loads the IV-picked strikes with no clicks, and
+  <b>strikes away</b> is greyed out while it is on. Untick it (and Load) to pick strikes by hand.
+  <br>The OTM strike is picked by:
   strike = spot ± 0.6 × spot × IV × √(D÷365), rounded to the strike step (50 NIFTY / 100 SENSEX).
   + for CE, − for PE. D = days to expiry counting today as 1 (0.5 on expiry afternoon, after 12:00).
   IV comes from India VIX (fallback 0.13 if unavailable). Untick to use "strikes away" manually as before.
@@ -1361,6 +1363,19 @@ for (const [selId, inpId] of [['tgtMode', 'tgtPrice'], ['slMode', 'slTrigger']])
 }
 // auto re-reads the live chart and position, so refresh the preview on each tick
 setInterval(() => { if (document.getElementById('tgtMode').value == 'auto') updateTgtHint(); }, 2000);
+
+/* auto (IV) is on by default, so a fresh page loads the IV-picked strikes with
+   no clicks. While it is on, "strikes away" is not read at all — grey it out
+   rather than leave a number sitting there looking like it still applies. */
+{
+  const box = document.getElementById('autoStrike'), off = document.getElementById('offset');
+  const sync = () => {
+    off.disabled = box.checked;
+    off.title = box.checked ? 'ignored while auto (IV) is on' : 'strikes away from ATM';
+  };
+  box.addEventListener('change', sync);
+  sync();
+}
 
 async function sendOrder(mode) {
   const v = document.getElementById('ordSymbol').value;
