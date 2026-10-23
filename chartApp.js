@@ -32,6 +32,7 @@ const dayjs = require('dayjs');
 
 const { connectToDatabase } = require('./connectToDatabase.js');
 const { getTodaysAccessToken } = require('./getTodaysAccessToken.js');
+const AccessTokens = require('./models/AccessTokens');
 const { getKiteConnectInstance, getTickerInstance } = require('./getKiteConnectInstance.js');
 const { placeOrderInFreezeChunks } = require('./placeOrderInFreezeChunks.js');
 
@@ -82,14 +83,51 @@ function broadcast(obj) {
 }
 
 /*
-Spot-level triggers: "BUY/SELL the loaded CE/PE when spot crosses a level".
-Watched server-side on the tick stream; one-shot. Persisted to disk so a
-restart keeps them — but only same-day triggers are restored (an overnight
-gap firing a stale trigger at open would be dangerous).
+Price-level triggers, watched server-side on the tick stream; one-shot.
+Two flavours, set by `watch`:
+  'spot'   — "BUY/SELL the loaded CE/PE when the INDEX crosses a level"
+  'option' — "BUY/SELL this option when ITS OWN price reaches a level"
+`watchToken` is the instrument whose ticks arm the trigger, so the matching
+loop does not care which flavour it is. Persisted to disk so a restart keeps
+them — but only same-day triggers are restored (an overnight gap firing a
+stale trigger at open would be dangerous).
 */
 let spotTriggers = [];
 let trigSeq = 1;
 const lastLtpByToken = new Map();
+
+/*
+Rolling 5s candles built from live ticks (Kite has no history below 1min).
+Covers every charted token (spot + CE + PE) from the moment it's charted.
+The first bucket swallows the day's cumulative volume so far, so the sum of
+bucket volumes always equals the day's cumulative — the page's live-volume
+math (cumVol − volBase) stays consistent. Capped at a full session.
+*/
+const SEC_BUCKET = 5, SEC_CAP = 5400; // 5400 × 5s = 7.5h
+const secCandles = new Map();  // token -> [{time,open,high,low,close,volume,oi}]
+const secVolBase = new Map();  // token -> day volume attributed to closed buckets
+function pushSecTick(tok, ltp, cumVol, oi) {
+    const bucket = Math.floor(Date.now() / 1000 / SEC_BUCKET) * SEC_BUCKET;
+    let arr = secCandles.get(tok);
+    if (!arr) { arr = []; secCandles.set(tok, arr); }
+    let c = arr[arr.length - 1];
+    if (!c || bucket > c.time) {
+        if (c) secVolBase.set(tok, (secVolBase.get(tok) || 0) + (c.volume || 0));
+        else secVolBase.set(tok, 0);
+        c = {
+            time: bucket, open: ltp, high: ltp, low: ltp, close: ltp,
+            volume: Math.max(0, cumVol - (secVolBase.get(tok) || 0)), oi: oi || 0
+        };
+        arr.push(c);
+        if (arr.length > SEC_CAP) arr.shift();
+    } else {
+        c.high = Math.max(c.high, ltp);
+        c.low = Math.min(c.low, ltp);
+        c.close = ltp;
+        if (cumVol) c.volume = Math.max(0, cumVol - (secVolBase.get(tok) || 0));
+        if (oi) c.oi = oi;
+    }
+}
 const TRIG_FILE = path.join(__dirname, 'chartTriggers.json');
 
 function saveTriggers() {
@@ -166,10 +204,13 @@ async function exitAllLongs(only) {
 }
 
 async function fireTrigger(trig, spotLtp) {
+    // spotLtp is the watched instrument's ltp -- the index for a spot trigger,
+    // the option's own price for an option trigger. Name the right one in logs.
+    const firedAt = trig.watch == 'option' ? `${trig.tradingsymbol} ${spotLtp}` : `spot ${spotLtp}`;
     try {
         if (trig.action == 'exitall') {
             const done = await exitAllLongs(null);
-            console.log(`⚡ trigger #${trig.id} fired at spot ${spotLtp}: EXIT ALL → ${done.map(d => `${d.tradingsymbol} ${d.quantity} @ ${d.price}`).join(' | ') || 'nothing open'}`);
+            console.log(`⚡ trigger #${trig.id} fired at ${firedAt}: EXIT ALL → ${done.map(d => `${d.tradingsymbol} ${d.quantity} @ ${d.price}`).join(' | ') || 'nothing open'}`);
             broadcast({ type: "trigger_fired", id: trig.id, action: 'exitall', tradingsymbol: done.map(d => d.tradingsymbol).join(',') || 'no longs', level: trig.level, order_ids: done.flatMap(d => d.order_ids) });
             return;
         }
@@ -208,7 +249,7 @@ async function fireTrigger(trig, spotLtp) {
                     product: "NRML", validity: "DAY", tag: "SPOTTRIG"
                 }, lotSizeByToken.get(Number(trig.token)));
             }
-            console.log(`⚡ trigger #${trig.id} fired at spot ${spotLtp}: SELL ${trig.tradingsymbol} @ ${sellPrice} → ${orderIds.join(',')}`);
+            console.log(`⚡ trigger #${trig.id} fired at ${firedAt}: SELL ${trig.tradingsymbol} @ ${sellPrice} → ${orderIds.join(',')}`);
         } else {
             const price = roundToTick(optLtp * 1.02); // marketable LIMIT
             orderIds = await placeOrderInFreezeChunks(kite, {
@@ -222,7 +263,7 @@ async function fireTrigger(trig, spotLtp) {
                 validity: "DAY",
                 tag: "SPOTTRIG"
             }, lotSizeByToken.get(Number(trig.token)));
-            console.log(`⚡ trigger #${trig.id} fired at spot ${spotLtp}: BUY ${trig.quantity} ${trig.tradingsymbol} @ ${price} → ${orderIds.join(',')}`);
+            console.log(`⚡ trigger #${trig.id} fired at ${firedAt}: BUY ${trig.quantity} ${trig.tradingsymbol} @ ${price} → ${orderIds.join(',')}`);
         }
         broadcast({ type: "trigger_fired", id: trig.id, action: trig.action, tradingsymbol: trig.tradingsymbol, level: trig.level, order_ids: orderIds });
     } catch (e) {
@@ -233,7 +274,12 @@ async function fireTrigger(trig, spotLtp) {
 
 function checkSpotTriggers(token, ltp) {
     if (spotTriggers.length == 0) return;
-    const due = spotTriggers.filter(g => g.spotToken == token &&
+    /*
+    Match on watchToken -- the index spot for a spot trigger, the option
+    itself for an option trigger. Triggers restored from a file written
+    before `watch` existed have no watchToken; those were all spot-watched.
+    */
+    const due = spotTriggers.filter(g => Number(g.watchToken || g.spotToken) == Number(token) &&
         ((g.direction == 'above' && ltp >= g.level) ||
          (g.direction == 'below' && ltp <= g.level)));
     if (due.length == 0) return;
@@ -245,13 +291,15 @@ function checkSpotTriggers(token, ltp) {
 /*
 Resolve the CE/PE n strikes away from spot for the nearest expiry.
 CE strike = ATM + n*step, PE strike = ATM - n*step (n=0 -> both ATM).
+want = {ceStrike, peStrike} overrides the offset math (auto-strike mode);
+those are snapped to the nearest strike that actually trades.
 */
-function resolveOptions(indexKey, spot, offset) {
+function resolveOptions(indexKey, spot, offset, want) {
 
     const idx = INDICES[indexKey];
     const atm = Math.round(spot / idx.strikeStep) * idx.strikeStep;
-    const ceStrike = atm + offset * idx.strikeStep;
-    const peStrike = atm - offset * idx.strikeStep;
+    const ceStrike = want ? want.ceStrike : atm + offset * idx.strikeStep;
+    const peStrike = want ? want.peStrike : atm - offset * idx.strikeStep;
 
     const today = dayjs().startOf('day');
 
@@ -269,10 +317,47 @@ function resolveOptions(indexKey, spot, offset) {
 
     const atExpiry = candidates.filter(i => dayjs(i.expiry).format('YYYY-MM-DD') == nearestExpiry);
 
-    const ce = atExpiry.find(i => i.instrument_type == "CE" && Number(i.strike) == ceStrike);
-    const pe = atExpiry.find(i => i.instrument_type == "PE" && Number(i.strike) == peStrike);
+    const snap = (type, target) => {
+        let best = null;
+        for (const i of atExpiry) {
+            if (i.instrument_type != type) continue;
+            if (!best || Math.abs(Number(i.strike) - target) < Math.abs(Number(best.strike) - target)) best = i;
+        }
+        return best;
+    };
+
+    const ce = atExpiry.find(i => i.instrument_type == "CE" && Number(i.strike) == ceStrike)
+        || (want && snap("CE", ceStrike));
+    const pe = atExpiry.find(i => i.instrument_type == "PE" && Number(i.strike) == peStrike)
+        || (want && snap("PE", peStrike));
 
     return { atm, expiry: nearestExpiry, ce, pe };
+}
+
+/*
+Auto-strike: OTM strike = spot ± 0.6 × spot × IV × √(D/365), rounded to the
+index's strike step (50 NIFTY / 100 SENSEX). + for CE, − for PE.
+D = calendar days to nearest expiry counting today as 1; 0.5 on expiry
+afternoon (≥12:00 IST). IV from India VIX, fallback 0.13.
+*/
+async function autoStrikes(idx, spot, expiry) {
+    let D = dayjs(expiry).startOf('day').diff(dayjs().startOf('day'), 'day') + 1;
+    if (D <= 1 && dayjs().hour() >= 12) D = 0.5;
+    let iv = 0.13, ivSource = 'fallback';
+    try {
+        const v = await kite.getLTP(["NSE:INDIA VIX"]);
+        if (v["NSE:INDIA VIX"] && v["NSE:INDIA VIX"].last_price > 0) {
+            iv = v["NSE:INDIA VIX"].last_price / 100;
+            ivSource = 'India VIX';
+        }
+    } catch (e) { /* keep fallback */ }
+    const dist = 0.6 * spot * iv * Math.sqrt(D / 365);
+    const step = idx.strikeStep;
+    return {
+        iv: +iv.toFixed(4), ivSource, D, dist: Math.round(dist),
+        ceStrike: Math.round((spot + dist) / step) * step,
+        peStrike: Math.round((spot - dist) / step) * step,
+    };
 }
 
 async function yesterdayRange(spotToken) {
@@ -316,6 +401,7 @@ async function main() {
         for (const t of ticks) {
             const tok = Number(t.instrument_token);
             lastLtpByToken.set(tok, t.last_price);
+            pushSecTick(tok, t.last_price, t.volume_traded != null ? t.volume_traded : (t.volume || 0), t.oi || 0);
             checkSpotTriggers(tok, t.last_price);
         }
         if (wsClients.size == 0) return;
@@ -344,13 +430,31 @@ async function main() {
     app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'chartApp.html')));
 
     /*
+    Today's Zerodha login gate. The home app (server.js) owns the login
+    flow; chartApp only reports whether a token for today is already in
+    the DB, so the page can let you straight in or send you to /login.
+    Date is recomputed per request -- do not reuse getTodaysAccessToken's
+    module-level `today`, which goes stale once the process crosses midnight.
+    */
+    app.get('/api/authStatus', async (req, res) => {
+        const date = new Date().toISOString().slice(0, 10);
+        try {
+            const doc = await AccessTokens.findOne({ date }, 'access_token user_id');
+            res.json({ ok: !!(doc && doc.access_token), date, user_id: doc ? doc.user_id : null });
+        } catch (e) {
+            res.json({ ok: false, date, error: e.message });
+        }
+    });
+
+    /*
     Everything the page needs to (re)build itself for one index+offset.
     Also points the tick stream at the three charted tokens.
     */
     app.get('/api/setup', async (req, res) => {
         try {
             const indexKey = (req.query.index || 'NIFTY').toUpperCase();
-            const offset = parseInt(req.query.offset || '0', 10) || 0;
+            const isAuto = (req.query.offset || '') == 'auto';
+            const offset = isAuto ? 0 : (parseInt(req.query.offset || '0', 10) || 0);
             const idx = INDICES[indexKey];
             if (!idx) return res.status(400).json({ error: "index must be NIFTY or SENSEX" });
 
@@ -358,7 +462,13 @@ async function main() {
             const spot = ltpData[idx.spotKey].last_price;
 
             const yday = await yesterdayRange(idx.spotToken);
-            const opts = resolveOptions(indexKey, spot, offset);
+            let auto = null;
+            let opts = resolveOptions(indexKey, spot, offset); // also gives nearest expiry for auto's D
+            if (isAuto && opts) {
+                auto = await autoStrikes(idx, spot, opts.expiry);
+                opts = resolveOptions(indexKey, spot, 0, auto);
+                console.log(`🎛 auto-strike ${indexKey}: spot ${spot}, IV ${auto.iv} (${auto.ivSource}), D ${auto.D}, dist ${auto.dist} → CE ${auto.ceStrike} / PE ${auto.peStrike}`);
+            }
             if (!opts || !opts.ce || !opts.pe) {
                 return res.status(500).json({ error: "could not resolve CE/PE instruments" });
             }
@@ -368,6 +478,7 @@ async function main() {
             res.json({
                 index: indexKey,
                 spot: { token: idx.spotToken, ltp: spot, yday, inside: yday ? (spot <= yday.high && spot >= yday.low) : null },
+                auto,
                 atm: opts.atm,
                 expiry: opts.expiry,
                 ce: { token: Number(opts.ce.instrument_token), tradingsymbol: opts.ce.tradingsymbol, strike: Number(opts.ce.strike), exchange: opts.ce.exchange, lot_size: opts.ce.lot_size },
@@ -379,16 +490,47 @@ async function main() {
         }
     });
 
+    /*
+    tf: 5s/15s/30s served from the live tick buffer (no Kite history below
+    1min — sub-minute charts fill from when the token was first charted);
+    1m/5m/15m from today via Kite; 1h last 10 days; day last 180 days.
+    */
     app.get('/api/candles', async (req, res) => {
         try {
             const token = Number(req.query.token);
-            const from = dayjs().hour(9).minute(0).second(0).format('YYYY-MM-DD HH:mm:ss');
+            const tf = req.query.tf || '1m';
+
+            if (tf == '5s' || tf == '15s' || tf == '30s') {
+                const n = parseInt(tf, 10);
+                const base = secCandles.get(token) || [];
+                if (n == SEC_BUCKET) return res.json(base);
+                const out = [];
+                for (const c of base) {
+                    const t = Math.floor(c.time / n) * n;
+                    const last = out[out.length - 1];
+                    if (!last || t > last.time) {
+                        out.push({ ...c, time: t });
+                    } else {
+                        last.high = Math.max(last.high, c.high);
+                        last.low = Math.min(last.low, c.low);
+                        last.close = c.close;
+                        last.volume += c.volume || 0;
+                        last.oi = c.oi || last.oi;
+                    }
+                }
+                return res.json(out);
+            }
+
+            const KITE_TF = { '1m': 'minute', '5m': '5minute', '15m': '15minute', '1h': '60minute', 'day': 'day' };
+            const interval = KITE_TF[tf] || 'minute';
+            const daysBack = tf == 'day' ? 180 : (tf == '1h' ? 10 : 0);
+            const from = dayjs().subtract(daysBack, 'day').hour(9).minute(0).second(0).format('YYYY-MM-DD HH:mm:ss');
             const to = dayjs().format('YYYY-MM-DD HH:mm:ss');
             let data;
             try {
-                data = await kite.getHistoricalData(token, 'minute', from, to, false, true); // with OI (F&O)
+                data = await kite.getHistoricalData(token, interval, from, to, false, true); // with OI (F&O)
             } catch (e) {
-                data = await kite.getHistoricalData(token, 'minute', from, to); // index spot has no OI
+                data = await kite.getHistoricalData(token, interval, from, to); // index spot has no OI
             }
             res.json(data.map(c => ({
                 time: Math.floor(new Date(c.date).getTime() / 1000),
@@ -699,8 +841,9 @@ async function main() {
     app.get('/api/triggers', (req, res) => res.json({ triggers: spotTriggers }));
 
     app.post('/api/trigger', (req, res) => {
-        const { direction, level, tradingsymbol, exchange, token, quantity, index, action } = req.body;
+        const { direction, level, tradingsymbol, exchange, token, quantity, index, action, watch } = req.body;
         const act = action || 'buy';
+        const wat = watch == 'option' ? 'option' : 'spot';   // default keeps the old spot behaviour
         const lvl = Number(level), qty = parseInt(quantity, 10) || 0;
         const idx = INDICES[index];
         if (!['above', 'below'].includes(direction) || !['buy', 'sell', 'exitall'].includes(act) || !lvl || !idx) {
@@ -711,8 +854,14 @@ async function main() {
             return res.status(400).json({ error: "tradingsymbol, exchange, token required" });
         }
         if (act == 'buy' && qty <= 0) return res.status(400).json({ error: "quantity required for buy trigger" });
+        // 'exitall' spans every long, so there is no single option price to watch
+        if (wat == 'option' && act == 'exitall') {
+            return res.status(400).json({ error: "exitall can only be watched on the spot" });
+        }
         const trig = {
             id: trigSeq++, index, spotToken: idx.spotToken, action: act, direction, level: lvl,
+            watch: wat,
+            watchToken: wat == 'option' ? Number(token) : Number(idx.spotToken),
             tradingsymbol: act == 'exitall' ? 'ALL LONGS' : tradingsymbol,
             exchange: act == 'exitall' ? '' : exchange,
             token: act == 'exitall' ? 0 : Number(token),
@@ -722,7 +871,8 @@ async function main() {
         spotTriggers.push(trig);
         saveTriggers();
         subscribeTriggerTokens();
-        console.log(`🎯 trigger #${trig.id}: ${act.toUpperCase()} ${act == 'buy' ? qty + ' ' : ''}${trig.tradingsymbol} if ${index} spot ${direction} ${lvl}`);
+        const onWhat = wat == 'option' ? `${trig.tradingsymbol} price` : `${index} spot`;
+        console.log(`🎯 trigger #${trig.id}: ${act.toUpperCase()} ${act == 'buy' ? qty + ' ' : ''}${trig.tradingsymbol} if ${onWhat} ${direction} ${lvl}`);
         res.json({ id: trig.id, trigger: trig });
     });
 

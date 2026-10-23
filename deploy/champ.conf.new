@@ -1,0 +1,122 @@
+server {
+    # Listen on port 80 as default vhost
+    listen       80 default_server;
+    listen       [::]:80 default_server;
+
+    # DO NOT put /shimna here
+    server_name  think-vivek-thinkpad-e14-gen-5.taild05309.ts.net;
+
+    # =====================================================
+    # MAIN APP (DEFAULT) AT ROOT `/`  → backend :9090
+    # =====================================================
+
+    # (If you build a frontend dist folder, point root there.
+    #  If your Node app on 9090 serves HTML itself, you can skip root.)
+    root   /home/think-vivek/champ/appv3/dist;
+    index  index.html;
+
+    # API for default app → Node on 9090
+    location ^~ /api/ {
+        proxy_pass         http://127.0.0.1:9090;
+        proxy_set_header   Host            $host;
+        proxy_set_header   X-Real-IP       $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_buffering    off;
+    }
+
+    # Example: /validate for default app → 9090
+    location ^~ /validate {
+        proxy_pass         http://127.0.0.1:9090;
+        proxy_set_header   Host            $host;
+        proxy_set_header   X-Real-IP       $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # If you have Socket.IO for the default app (on port 4000)
+    location ^~ /socket.io/ {
+        proxy_pass         http://127.0.0.1:9090/socket.io/;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade         $http_upgrade;
+        proxy_set_header   Connection      "upgrade";
+        proxy_set_header   Host            $host;
+        proxy_set_header   X-Real-IP       $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_buffering    off;
+    }
+
+    # SPA history mode for main app
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # =====================================================
+    # CHART APP UNDER `/chart`  → backend :3456
+    # =====================================================
+
+    # bare /chart -> /chart/ so the page's BASE prefix resolves
+    location = /chart { return 301 /chart/; }
+
+    # live tick stream (WebSocket) -- must precede /chart/
+    location ^~ /chart/ws {
+        proxy_pass         http://127.0.0.1:3456/ws;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade         $http_upgrade;
+        proxy_set_header   Connection      "upgrade";
+        proxy_set_header   Host            $host;
+        proxy_set_header   X-Real-IP       $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_buffering    off;
+        proxy_read_timeout 1d;
+        proxy_send_timeout 1d;
+    }
+
+    # page + /api/... (trailing slash on proxy_pass strips the /chart/ prefix)
+    location ^~ /chart/ {
+        proxy_pass         http://127.0.0.1:3456/;
+        proxy_http_version 1.1;
+        proxy_set_header   Host            $host;
+        proxy_set_header   X-Real-IP       $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_buffering    off;
+        proxy_read_timeout 300s;
+    }
+
+    # =====================================================
+    # SHIMNA APP UNDER `/shimna`  → backend :9092
+    # =====================================================
+
+    # Frontend build for shimna
+    location /shimna/ {
+        alias /home/think-vivek/shimna/appv3/dist/;
+        index index.html;
+
+        # Important for Vue/React router when app is under /shimna
+        try_files $uri $uri/ /shimna/index.html;
+    }
+
+    # Shimna API → Node on 9092
+    # We strip /shimna from the URL and forward as /api/...
+    location ^~ /shimna/api/ {
+        # Incoming:  /shimna/api/xyz
+        # Backend:   /api/xyz  on 9092
+        proxy_pass         http://127.0.0.1:9092/api/;
+        proxy_set_header   Host            $host;
+        proxy_set_header   X-Real-IP       $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_buffering    off;
+    }
+
+    # Shimna Socket.IO (if it has its own WS server, e.g. 4002)
+    location ^~ /shimna/socket.io/ {
+        # Map to shimna's WS backend
+        proxy_pass         http://127.0.0.1:4002/socket.io/;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade         $http_upgrade;
+        proxy_set_header   Connection      "upgrade";
+        proxy_set_header   Host            $host;
+        proxy_set_header   X-Real-IP       $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_buffering    off;
+    }
+}
+

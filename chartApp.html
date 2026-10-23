@@ -24,6 +24,8 @@
   .chartbox h3 b { color:var(--text); }
   .chartbox .lp { position:absolute; z-index:5; top:6px; right:8px; font-size:13px; font-weight:700; }
   .chartbox .ob { position:absolute; z-index:5; top:26px; right:8px; font-size:11px; font-weight:600; padding:2px 6px; border-radius:3px; }
+  .ktlink { font-size:11px; font-weight:600; color:#f0b90b; text-decoration:none; margin-left:6px; }
+  .ktlink:hover { text-decoration:underline; }
   .chartbox .quick { position:absolute; z-index:6; top:6px; left:50%; transform:translateX(-50%); display:flex; gap:4px; }
   .chartbox .quick button { font-size:11px; font-weight:700; padding:2px 7px; border:none; border-radius:3px; color:#fff; cursor:pointer; opacity:.85; }
   .chartbox .quick button:hover { opacity:1; }
@@ -32,8 +34,19 @@
   .chartbox .quick button.armed { background:#ff6d00; }
   .ob.below { background:rgba(239,83,80,.15); color:var(--red); }
   .ob.above { background:rgba(38,166,154,.15); color:var(--green); }
-  .chart { height:340px; resize:both; overflow:hidden; min-height:180px; min-width:280px; max-width:100%; }
-  #ctxMenu { position:fixed; z-index:20; background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:8px; display:none; width:170px; box-shadow:0 4px 16px rgba(0,0,0,.5); }
+  .chart { height:clamp(340px, 54vh, 900px); resize:both; overflow:hidden; min-height:180px; min-width:280px; max-width:100%; }
+  .fx { position:absolute; z-index:7; top:46px; right:8px; cursor:pointer; opacity:.55; font-size:15px; user-select:none; }
+  .fx:hover { opacity:1; }
+  .chartbox .tfbox { position:absolute; z-index:6; top:24px; left:8px; font-size:11px; color:var(--dim); }
+  .chartbox .tfbox select { background:#1e222d; color:var(--text); border:1px solid #2a2e39; border-radius:3px; font-size:11px; padding:1px 3px; cursor:pointer; }
+  .chartbox.full { position:fixed; inset:0; z-index:40; padding:6px 10px; overflow:auto; display:flex; flex-direction:column; }
+  .chartbox.full .chart { flex:1 1 auto; height:auto !important; width:100% !important; max-width:none; min-height:220px; resize:none; }
+  .chartbox.full .cm { flex:0 0 auto; }
+  .chartbox.full #panel { flex:0 0 auto; max-height:36vh; overflow:auto; }
+  #qk0 { display:none; }
+  .chartbox.full #qk0 { display:flex; }
+  .quick i { color:var(--dim); font-size:10px; font-style:normal; align-self:center; margin:0 1px 0 6px; }
+  #ctxMenu { position:fixed; z-index:45; background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:8px; display:none; width:170px; box-shadow:0 4px 16px rgba(0,0,0,.5); }
   #ctxMenu .px { font-weight:600; margin-bottom:6px; font-size:12px; cursor:move; user-select:none; padding:2px; border-bottom:1px dashed var(--border); }
   #ctxMenu .pxbig { font-size:16px; font-weight:700; color:var(--accent); }
   #ctxMenu .pxdim { color:var(--dim); font-weight:400; font-size:11px; }
@@ -61,6 +74,8 @@
   @keyframes fastblink { 50% { background:#3a2e07; } }
   .cm .fasttag { color:#f0b90b; font-weight:bold; }
   .cm .deadtag { color:#60656f; font-style:italic; }
+  .cm.hist { border:1px dashed #f0b90b; cursor:pointer; }
+  .cm .histtag { color:#f0b90b; font-weight:bold; }
   #helpBtn { position:fixed; right:0; top:40%; z-index:60; writing-mode:vertical-rl;
     padding:10px 4px; border-radius:6px 0 0 6px; background:var(--panel); border:1px solid var(--border); color:#c8cdd8; }
   #helpDrawer { position:fixed; top:0; right:0; width:380px; max-width:92vw; height:100%;
@@ -95,6 +110,14 @@
     <option value="SENSEX">SENSEX</option>
   </select>
   <label>strikes away <input id="offset" type="number" value="0" step="1" style="width:60px"></label>
+  <label title="OTM strike = spot ± 0.6 × spot × IV × √(D/365), rounded to strike step. IV from India VIX."><input id="autoStrike" type="checkbox"> auto (IV)</label>
+  <label title="breakout alert level (default: yday high)">brk↑ <input id="brkUp" type="number" step="0.05" style="width:85px"></label>
+  <label title="breakdown alert level (default: yday low)">brk↓ <input id="brkDn" type="number" step="0.05" style="width:85px"></label>
+  <label title="sets the timeframe on all three charts at once; each chart also has its own tf picker">tf all <select id="tfSel">
+    <option value="5s">5s</option><option value="15s">15s</option><option value="30s">30s</option>
+    <option value="1m" selected>1m</option><option value="5m">5m</option><option value="15m">15m</option>
+    <option value="1h">1h</option><option value="day">day</option>
+  </select></label>
   <button id="loadBtn">Load</button>
   <span class="indsel">
     <label><input type="checkbox" id="iVol" checked> Vol</label>
@@ -111,9 +134,9 @@
 </header>
 
 <div class="charts">
-  <div class="chartbox"><h3 id="t0">SPOT</h3><div class="lp" id="lp0"></div><div class="chart" id="c0"></div><div class="cm" id="cm0"></div></div>
-  <div class="chartbox"><h3 id="t1">CE</h3><div class="quick" id="qk1"></div><div class="lp" id="lp1"></div><div class="ob" id="ob1"></div><div class="chart" id="c1"></div><div class="cm" id="cm1"></div></div>
-  <div class="chartbox"><h3 id="t2">PE</h3><div class="quick" id="qk2"></div><div class="lp" id="lp2"></div><div class="ob" id="ob2"></div><div class="chart" id="c2"></div><div class="cm" id="cm2"></div></div>
+  <div class="chartbox"><h3 id="t0">SPOT</h3><div class="quick" id="qk0"></div><div class="tfbox" id="tfbox0"></div><div class="lp" id="lp0"></div><div class="fx" onclick="toggleFull(0)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c0"></div><div class="cm" id="cm0"></div></div>
+  <div class="chartbox"><h3 id="t1">CE</h3><div class="quick" id="qk1"></div><div class="tfbox" id="tfbox1"></div><div class="lp" id="lp1"></div><div class="ob" id="ob1"></div><div class="fx" onclick="toggleFull(1)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c1"></div><div class="cm" id="cm1"></div></div>
+  <div class="chartbox"><h3 id="t2">PE</h3><div class="quick" id="qk2"></div><div class="tfbox" id="tfbox2"></div><div class="lp" id="lp2"></div><div class="ob" id="ob2"></div><div class="fx" onclick="toggleFull(2)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c2"></div><div class="cm" id="cm2"></div></div>
 </div>
 
 <div id="ctxMenu"></div>
@@ -125,11 +148,21 @@
   </table>
   <div class="orderctl">
     <select id="ordSymbol"></select>
-    <input id="tgtPrice" type="number" step="0.05" placeholder="target price">
+    <input id="tgtPrice" type="number" step="0.05" placeholder="target">
+    <select id="tgtMode" title="₹ = absolute price · % = above entry · Auto = from the SL distance, ATR and current speed">
+      <option value="price">₹</option>
+      <option value="pct">%</option>
+      <option value="auto">Auto</option>
+    </select>
     <button id="btnTarget">Set / Modify Target</button>
     <input id="slTrigger" type="number" step="0.05" placeholder="SL trigger">
-    <input id="slPrice" type="number" step="0.05" placeholder="SL limit (opt)">
+    <select id="slMode" title="read the SL box as an absolute price, or as a % below entry">
+      <option value="price">₹</option>
+      <option value="pct">%</option>
+    </select>
+    <input id="slPrice" type="number" step="0.05" placeholder="SL limit (opt, ₹)" title="optional absolute limit price for the SL order; always ₹, never %">
     <button id="btnSl" class="sec">Set / Modify SL</button>
+    <span id="tgtHint" style="color:var(--dim);font-size:11px"></span>
     <label>buy <input id="buyQty" type="number" step="1" placeholder="50" style="width:60px">
       <select id="qtyMode">
         <option value="pct">% of margin</option>
@@ -166,6 +199,11 @@
   <b class="g">MOVING FAST ≥2×</b> = candles twice their normal size — momentum, your profit zone (amber blink + high double-beep).
   <i>dead chart ≤0.35×</i> = nothing moving (low beep once). In between shows as plain speed 1.1×.</div>
 
+  <h4>⏱ Replay a point in time</h4>
+  <div>Click any candle on any chart — the strip below shows what the commentary said at that moment
+  (<b>⏱ at HH:MM</b> + speed, trend, OI, pattern…), with an amber dashed border. It holds 20s;
+  click the strip to jump back to live.</div>
+
   <h4>Trend</h4>
   <div><b class="g">uptrend (3/5 green, HH+HL)</b>: of the last 5 completed 1-min candles, 3 closed up; chart makes Higher Highs + Higher Lows. <b class="r">downtrend (LH+LL)</b> is the mirror. Otherwise sideways.</div>
 
@@ -188,6 +226,29 @@
   <b class="r">long unwinding</b>: price ↓ OI ↓ — buyers giving up.<br>
   <b class="g">🔥 OI CRASH</b>: OI drops ≥2% within 5 min — writers bailing out fast. If price is holding or rising it says "covering rally likely" (green blink + beep: possible sharp up-move). With price falling it's longs dumping — bearish.</div>
 
+  <h4>brk↑ / brk↓ (breakout & breakdown alerts)</h4>
+  <div>Two spot levels, defaulted to yesterday's high and low on Load (edit them freely — your value survives
+  reloads). Drawn as dashed green/red lines on the spot chart. When spot crosses: high triple-beep + BREAKOUT
+  message (up), low triple-beep + BREAKDOWN (down). Re-arms after spot pulls back ~0.05% inside. Alert only —
+  it places no orders; use a chart-click trigger if you want an automatic order at the level.</div>
+
+  <h4>tf (timeframe) + full view</h4>
+  <div><b>Each chart has its own tf picker</b> (top-left, under the title) — so you can run a 5s CE next to a 15m
+  spot. Changing one refetches only that chart. The <b>tf all</b> picker in the header sets the same timeframe on
+  all three at once. 1m/5m/15m = today, 1h = 10 days, day = 180 days (Kite history).
+  <b>5s/15s/30s</b> are built from live ticks — Kite has no sub-minute history, so they only cover from when the
+  strike was first charted (server keeps the buffer even across page reloads). Commentary indicators (MA20, trend,
+  OI windows) are per-candle, so they get faster/slower with the timeframe. The ⛶ icon on each chart expands it to
+  full screen — Esc or ⛶ again to exit. The trading panel (positions, EXIT ALL, target/SL, messages) moves into
+  the full view with you, and the spot chart's full view also shows CE/PE quick buttons — everything is tradable
+  without leaving it.</div>
+
+  <h4>auto (IV) strike selection</h4>
+  <div>Tick <b>auto (IV)</b> before Load and the OTM strike is picked by:
+  strike = spot ± 0.6 × spot × IV × √(D÷365), rounded to the strike step (50 NIFTY / 100 SENSEX).
+  + for CE, − for PE. D = days to expiry counting today as 1 (0.5 on expiry afternoon, after 12:00).
+  IV comes from India VIX (fallback 0.13 if unavailable). Untick to use "strikes away" manually as before.</div>
+
   <h4>B100 / B50 / S50 / S100 (top of each option chart)</h4>
   <div>Emergency buttons. <b class="g">B100/B50</b> = BUY using 100%/50% of available margin at a marketable limit (LTP+2%). <b class="r">S100</b> = dump the whole position now (resting order modified to LTP−3%, never a second order). <b class="r">S50</b> = sell half: the resting SELL's quantity is cut to half and made marketable; the guard re-covers the remaining half within 15s. First click arms (SURE?), second click within 3s fires — regardless of existing orders.</div>
 
@@ -204,16 +265,48 @@
   <h4>Lines on the chart</h4>
   <div><span style="color:#26a69a">teal dashed TGT</span> = your resting target — drag to modify.<br>
   <span style="color:#ef5350">red dashed SL</span> = your resting SL trigger — drag to modify.<br>
-  <span style="color:#f0b90b">amber dashed #n</span> = pending spot trigger (BUY), red = SELL / EXIT ALL trigger. Click NIFTY chart to set them.<br>
+  <span style="color:#f0b90b">amber dashed #n</span> = pending trigger (BUY), red = SELL / EXIT ALL trigger. On the index chart these watch the <b>spot</b>; on a CE/PE chart they watch <b>that option's own price</b>.<br>
   <span style="color:#ff9800">orange dotted GUARD SL</span> = simpleGuard's breach level (lowest low of the 3 candles before entry, frozen) — the price where it force-exits. Drag it to move the level (applies within 15s).<br>
   <span style="color:#2962ff">blue solid</span> = order being placed — drag it, then confirm in the pop-up.</div>
 
+  <h4>BUY waits for the price</h4>
+  <div>Clicking a level on a <b>CE/PE</b> chart does <b>not</b> buy now. It parks a one-shot BUY and the server
+  fires it only when that option's own price actually reaches the level — click <b>below</b> LTP to wait for a dip,
+  <b>above</b> to wait for a rise. The button says <b>BUY n if ≤/≥ price</b>; first click arms, second click parks it.
+  It then shows as an amber <b>#n</b> line on that option's chart plus a chip in the panel — cancel with <b>✕</b>.
+  Drag the blue line before confirming to move the level. Clicking exactly at LTP arms a condition that is already
+  true, so it fires on the next tick. For an immediate entry use the <b class="g">B100/B50</b> quick buttons instead.
+  Triggers are one-shot, dropped overnight, and survive a restart.</div>
+
+  <h4>Target / SL — ₹ or %</h4>
+  <div>The <b>₹ / %</b> dropdown beside the target and SL boxes decides how your number is read. <b>₹</b> = an
+  absolute price, as before. <b>%</b> = a percentage off the selected position's entry — target goes above entry,
+  SL below, and the result is rounded to the 0.05 tick. The resolved price is previewed next to the buttons before
+  you send, and the confirmation message reports the price that actually went to the exchange. "SL limit (opt)" is
+  always an absolute price. % needs a known entry price, so it is rejected on a position that has not filled yet.</div>
+
+  <h4>Auto target</h4>
+  <div>Picking <b>Auto</b> in the target dropdown greys out the box and works the target out from the current
+  situation instead: <b>2× the distance to your SL</b> (your resting SL trigger if you have one, else simpleGuard's
+  orange breach line), falling back to <b>2× ATR(14)</b> on that chart's timeframe when there is no SL yet, and to
+  the panel's own target % when the chart is too short for an ATR. That distance is then multiplied by the live
+  <b>speed</b> factor from the commentary strip, clamped to 0.7–2.0 — a fast-moving option gets a wider target, a
+  dead one a tighter one. The preview shows the price <i>and</i> how it was derived
+  (e.g. <code>target → 142.65 (2R off SL 108.30 × speed 1.40)</code>), it refreshes every 2s as the chart moves, and
+  <b>nothing is sent until you click TARGET</b> — it is the same absolute tick-rounded price ₹ mode would send.
+  This is arithmetic on your own numbers, not a view on what you should aim for; the multipliers are the
+  <code>AUTO</code> constants at the top of the script.</div>
+
   <h4>Panel</h4>
-  <div>"on fill Target/SL first" = what simpleGuard places the moment a BUY fills. qty 50 in % mode = spend 50% of available margin. EXIT / EXIT ALL = dump at deep marketable LIMIT regardless of target/SL (two clicks). "% gain / to SL" column = live % from entry, and the % loss if the SL/guard level is hit. "P&L history" = every closed trade (logged by simpleGuard), today's total and per-day totals.<br>
+  <div>"on fill Target/SL first" = what simpleGuard places the moment a BUY fills (that pair is always in %). qty 50 in % mode = spend 50% of available margin. EXIT / EXIT ALL = dump at deep marketable LIMIT regardless of target/SL (two clicks). "% gain / to SL" column = live % from entry, and the % loss if the SL/guard level is hit. "P&L history" = every closed trade (logged by simpleGuard), today's total and per-day totals.<br>
   Click the NIFTY/SENSEX chart → "EXIT ALL LONGS if spot ≥/≤" sets an emergency exit level: all longs dumped the moment spot reaches it.</div>
 </div>
 
 <script>
+// Mount point: '' when hit directly on :3456, '/chart' when reverse-proxied
+// under the tailnet URL. All /api and /ws paths are prefixed with it.
+const BASE = location.pathname.startsWith('/chart') ? '/chart' : '';
+
 const IST_OFFSET = 19800; // show IST on the (UTC-rendered) time scale
 
 const chartOpts = {
@@ -255,13 +348,95 @@ let clickLine = null;           // { slot, line } temp price line from chart cli
 function fmt(n, d=2) { return n == null ? '—' : Number(n).toFixed(d); }
 function pnlClass(n) { return n >= 0 ? 'pos' : 'neg'; }
 
+const TF_SECONDS = { '5s': 5, '15s': 15, '30s': 30, '1m': 60, '5m': 300, '15m': 900, '1h': 3600, 'day': 86400 };
+
+/* Timeframe is per chart: slot 0 = spot, 1 = CE, 2 = PE. The header's
+   "tf all" picker just writes the same value into all three. Candle
+   bucketing (onTick) and the time labels are per slot too, so a 5s CE
+   next to a day spot both stay correct. */
+let TF = ['1m', '1m', '1m'];
+let TF_SEC = [60, 60, 60];
+let slotToken = [null, null, null];
+
+const tfSel = slot => document.getElementById('tf' + slot);
+
+function buildTfPickers() {
+  const opts = Object.keys(TF_SECONDS)
+    .map(k => `<option value="${k}">${k}</option>`).join('');
+  for (const s of [0, 1, 2]) {
+    document.getElementById('tfbox' + s).innerHTML =
+      `<select id="tf${s}" title="timeframe for this chart only">${opts}</select>`;
+    const sel = tfSel(s);
+    sel.value = TF[s];
+    // only this chart refetches -- the other two keep their own tf and data
+    sel.onchange = () => { if (cfg && !cfg.error) loadSlot(s); };
+  }
+}
+
+function applyTfScale(slot) {
+  charts[slot].applyOptions({
+    timeScale: { secondsVisible: TF_SEC[slot] < 60, timeVisible: TF_SEC[slot] < 86400 }
+  });
+}
+
+buildTfPickers();
+
+/* Full view carries the whole trading panel (positions, EXIT ALL, target/SL,
+   msg) along by moving the #panel node into the full chartbox; it is moved
+   back before #helpBtn (its original spot) on exit. */
+function setFull(box) {
+  const panel = document.getElementById('panel');
+  document.querySelectorAll('.chartbox.full').forEach(b => b.classList.remove('full'));
+  if (box) {
+    box.classList.add('full');
+    box.appendChild(panel);
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.insertBefore(panel, document.getElementById('helpBtn'));
+    document.body.style.overflow = '';
+  }
+}
+function toggleFull(slot) {
+  const box = document.getElementById('c' + slot).closest('.chartbox');
+  setFull(box.classList.contains('full') ? null : box);
+}
+document.addEventListener('keydown', e => { if (e.key == 'Escape') setFull(null); });
+
+/* Refetch one chart at its own timeframe, leaving the other two alone.
+   Called by load() for all three, and by a chart's tf picker for just that
+   one. Self-contained: reads the picker, so TF/TF_SEC stay in step. */
+async function loadSlot(slot) {
+  const token = slotToken[slot];
+  if (token == null) return;
+  TF[slot] = tfSel(slot).value;
+  TF_SEC[slot] = TF_SECONDS[TF[slot]] || 60;
+  applyTfScale(slot);
+
+  const cr = await fetch(`${BASE}/api/candles?token=${token}&tf=${TF[slot]}`);
+  const candles = (await cr.json()).map(c => ({ ...c, time: c.time + IST_OFFSET }));
+  series[slot].setData(candles);
+  candleData[slot] = candles;
+  volBase[slot] = candles.slice(0, -1).reduce((s, c) => s + (c.volume || 0), 0);
+  lastCandle[slot] = candles.length ? candles[candles.length - 1] : null;
+  dayOpen[slot] = candles.length ? candles[0].open : null;
+  if (candles.length) { lastLtp[slot] = candles[candles.length - 1].close; updateOb(slot, lastLtp[slot]); }
+  cmHold[slot] = 0;               // a tf change invalidates any pinned historical note
+  recomputeIndicators(slot);
+  charts[slot].timeScale().fitContent();
+  renderCommentary();
+}
+
 async function load() {
   const index = document.getElementById('indexSel').value;
-  const offset = document.getElementById('offset').value || 0;
+  const offset = document.getElementById('autoStrike').checked ? 'auto'
+    : (document.getElementById('offset').value || 0);
   msg('loading…');
-  const r = await fetch(`/api/setup?index=${index}&offset=${offset}`);
+  const r = await fetch(`${BASE}/api/setup?index=${index}&offset=${offset}`);
   cfg = await r.json();
   if (cfg.error) { msg('❌ ' + cfg.error); return; }
+  if (cfg.auto) {
+    msg(`🎛 auto: IV ${(cfg.auto.iv * 100).toFixed(1)} (${cfg.auto.ivSource}), D=${cfg.auto.D}, ±${cfg.auto.dist} → CE ${cfg.ce.strike} / PE ${cfg.pe.strike}`);
+  }
 
   tokenSlot = {}; exSymbols = {};
   tokenSlot[cfg.spot.token] = 0;
@@ -270,25 +445,25 @@ async function load() {
   exSymbols[1] = { tradingsymbol: cfg.ce.tradingsymbol, exchange: cfg.ce.exchange };
   exSymbols[2] = { tradingsymbol: cfg.pe.tradingsymbol, exchange: cfg.pe.exchange };
 
-  document.getElementById('t0').innerHTML = `<b>${cfg.index}</b> spot`;
-  document.getElementById('t1').innerHTML = `<b>${cfg.ce.tradingsymbol}</b> (CE ${cfg.ce.strike})`;
-  document.getElementById('t2').innerHTML = `<b>${cfg.pe.tradingsymbol}</b> (PE ${cfg.pe.strike})`;
+  const kiteLink = (exchange, tradingsymbol, token) =>
+    ` <a class="ktlink" target="_blank" href="https://kite.zerodha.com/chart/ext/tvc/${exchange}/${encodeURIComponent(tradingsymbol)}/${token}">Kite ↗</a>`;
+  const spotSym = cfg.index == 'NIFTY' ? ['NSE', 'NIFTY 50'] : ['BSE', 'SENSEX'];
+  document.getElementById('t0').innerHTML = `<b>${cfg.index}</b> spot` + kiteLink(spotSym[0], spotSym[1], cfg.spot.token);
+  document.getElementById('t1').innerHTML = `<b>${cfg.ce.tradingsymbol}</b> (CE ${cfg.ce.strike})` + kiteLink(cfg.ce.exchange, cfg.ce.tradingsymbol, cfg.ce.token);
+  document.getElementById('t2').innerHTML = `<b>${cfg.pe.tradingsymbol}</b> (PE ${cfg.pe.strike})` + kiteLink(cfg.pe.exchange, cfg.pe.tradingsymbol, cfg.pe.token);
   document.getElementById('expiryTxt').textContent = 'exp ' + cfg.expiry;
   if (cfg.spot.yday) {
+    // default brk levels to yday high/low; keep a hand-edited value
+    const bu = document.getElementById('brkUp'), bd = document.getElementById('brkDn');
+    if (!bu.value || +bu.value == brkDefault.up) { bu.value = cfg.spot.yday.high; brkFired.up = false; }
+    if (!bd.value || +bd.value == brkDefault.dn) { bd.value = cfg.spot.yday.low; brkFired.dn = false; }
+    brkDefault = { up: cfg.spot.yday.high, dn: cfg.spot.yday.low };
     document.getElementById('ydayTxt').textContent = `yday ${fmt(cfg.spot.yday.low)} – ${fmt(cfg.spot.yday.high)}`;
   }
 
   for (const [token, slot] of Object.entries(tokenSlot)) {
-    const cr = await fetch(`/api/candles?token=${token}`);
-    const candles = (await cr.json()).map(c => ({ ...c, time: c.time + IST_OFFSET }));
-    series[slot].setData(candles);
-    candleData[slot] = candles;
-    volBase[slot] = candles.slice(0, -1).reduce((s, c) => s + (c.volume || 0), 0);
-    lastCandle[slot] = candles.length ? candles[candles.length - 1] : null;
-    dayOpen[slot] = candles.length ? candles[0].open : null;
-    if (candles.length) { lastLtp[slot] = candles[candles.length - 1].close; updateOb(slot, lastLtp[slot]); }
-    recomputeIndicators(slot);
-    charts[slot].timeScale().fitContent();
+    slotToken[slot] = Number(token);
+    await loadSlot(slot);
   }
 
   const bq = document.getElementById('buyQty');
@@ -304,15 +479,48 @@ async function load() {
     ydayLines.push(series[0].createPriceLine({ price: cfg.spot.yday.low, color: '#26a69a', lineStyle: 2, title: 'yday L' }));
   }
 
+  renderBrkLines();
   updateSpot(cfg.spot.ltp);
   refreshPosition();
   renderCommentary();
   refreshTriggers();
-  msg('');
+  if (!cfg.auto) msg('');
+}
+
+/* Breakout / breakdown alert levels on the spot chart.
+   Defaulted to yday high/low on Load (kept if hand-edited); dashed lines
+   on the spot chart; beep + message on cross, re-armed once spot pulls
+   back ~0.05% inside. Alerts only — no orders (use triggers for that). */
+let brkLines = { up: null, dn: null };
+let brkFired = { up: false, dn: false };
+let brkDefault = { up: null, dn: null };
+function renderBrkLines() {
+  if (brkLines.up) { series[0].removePriceLine(brkLines.up); brkLines.up = null; }
+  if (brkLines.dn) { series[0].removePriceLine(brkLines.dn); brkLines.dn = null; }
+  const up = parseFloat(document.getElementById('brkUp').value);
+  const dn = parseFloat(document.getElementById('brkDn').value);
+  if (up > 0) brkLines.up = series[0].createPriceLine({ price: up, color: '#26a69a', lineStyle: 2, lineWidth: 1, title: 'BRK ↑' });
+  if (dn > 0) brkLines.dn = series[0].createPriceLine({ price: dn, color: '#ef5350', lineStyle: 2, lineWidth: 1, title: 'BRK ↓' });
+}
+document.getElementById('brkUp').onchange = () => { brkFired.up = false; renderBrkLines(); };
+document.getElementById('brkDn').onchange = () => { brkFired.dn = false; renderBrkLines(); };
+
+function checkBreakLevels(ltp) {
+  const up = parseFloat(document.getElementById('brkUp').value);
+  const dn = parseFloat(document.getElementById('brkDn').value);
+  if (up > 0) {
+    if (ltp >= up && !brkFired.up) { brkFired.up = true; msg(`🚀 BREAKOUT: spot ${fmt(ltp)} crossed ${fmt(up)}`); beep(1320, 3); }
+    else if (brkFired.up && ltp < up * 0.9995) brkFired.up = false;
+  }
+  if (dn > 0) {
+    if (ltp <= dn && !brkFired.dn) { brkFired.dn = true; msg(`📉 BREAKDOWN: spot ${fmt(ltp)} crossed ${fmt(dn)}`); beep(440, 3); }
+    else if (brkFired.dn && ltp > dn * 1.0005) brkFired.dn = false;
+  }
 }
 
 function updateSpot(ltp) {
   document.getElementById('spotLtp').textContent = fmt(ltp);
+  checkBreakLevels(ltp);
   const b = document.getElementById('rangeBadge');
   if (cfg && cfg.spot.yday) {
     const inside = ltp <= cfg.spot.yday.high && ltp >= cfg.spot.yday.low;
@@ -391,8 +599,10 @@ for (const id of ['iVol', 'iOi', 'iMa', 'iVwap']) {
 }
 
 // ---- rule-based commentary (no AI: plain arithmetic on the candles) ----
-function commentary(slot) {
-  const arr = candleData[slot];
+// upto (optional) = candle index: replay what the strip said at that moment,
+// treating that candle as the live one and ignoring everything after it.
+function commentary(slot, upto) {
+  const arr = upto == null ? candleData[slot] : candleData[slot].slice(0, upto + 1);
   if (arr.length < 6) return '';
   const done = arr.slice(0, -1);       // completed candles
   const live = arr[arr.length - 1];
@@ -526,29 +736,70 @@ function commentary(slot) {
 let trigLines = [];
 async function refreshTriggers() {
   try {
-    const d = await (await fetch('/api/triggers')).json();
-    for (const l of trigLines) { try { series[0].removePriceLine(l); } catch (e) {} }
+    const d = await (await fetch(BASE+'/api/triggers')).json();
+    for (const l of trigLines) { try { series[l.slot].removePriceLine(l.line); } catch (e) {} }
     trigLines = [];
     const el = document.getElementById('trigList');
     el.innerHTML = '';
     for (const t of d.triggers) {
       const act = (t.action || 'buy').toUpperCase();
-      const lineLabel = act == 'EXITALL' ? `#${t.id} EXIT ALL`
-        : `#${t.id} ${act} ${t.tradingsymbol.endsWith('PE') ? 'PE' : 'CE'}`;
-      trigLines.push(series[0].createPriceLine({ price: t.level, color: act == 'BUY' ? '#f0b90b' : '#ef5350', lineStyle: 2, title: lineLabel }));
+      /*
+      A trigger's line belongs on the chart of whatever price arms it: the
+      spot chart for a spot trigger, the option's own chart for an option
+      trigger. An option trigger on a strike that is no longer charted gets
+      no line -- but it still gets a chip, so it can be seen and cancelled.
+      */
+      const onOpt = t.watch == 'option';
+      let slot = 0;
+      if (onOpt) {
+        slot = cfg && t.tradingsymbol == cfg.ce.tradingsymbol ? 1
+             : cfg && t.tradingsymbol == cfg.pe.tradingsymbol ? 2 : null;
+      }
+      if (slot != null) {
+        const lineLabel = act == 'EXITALL' ? `#${t.id} EXIT ALL`
+          : `#${t.id} ${act}` + (onOpt ? '' : ' ' + (t.tradingsymbol.endsWith('PE') ? 'PE' : 'CE'));
+        trigLines.push({ slot, line: series[slot].createPriceLine({
+          price: t.level, color: act == 'BUY' ? '#f0b90b' : '#ef5350', lineStyle: 2, title: lineLabel }) });
+      }
       const chipWhat = act == 'EXITALL' ? 'EXIT ALL LONGS' : `${act} ${act == 'BUY' ? t.quantity + ' ' : ''}${t.tradingsymbol}`;
+      const cond = onOpt ? 'its own price' : t.index;
       el.insertAdjacentHTML('beforeend',
-        `<span class="trig">#${t.id} ${chipWhat} if ${t.index} ${t.direction == 'above' ? '≥' : '≤'} ${t.level}` +
+        `<span class="trig">#${t.id} ${chipWhat} if ${cond} ${t.direction == 'above' ? '≥' : '≤'} ${t.level}` +
         `<button onclick="cancelTrigger(${t.id})">✕</button></span>`);
     }
   } catch (e) { /* transient */ }
 }
 async function cancelTrigger(id) {
-  await fetch('/api/trigger/' + id, { method: 'DELETE' });
+  await fetch(BASE+'/api/trigger/' + id, { method: 'DELETE' });
   msg(`trigger #${id} cancelled`);
   refreshTriggers();
 }
 setInterval(refreshTriggers, 10000);
+
+/* Click any candle → the strip under that chart replays what the commentary
+   said at that moment (speed, trend, OI, pattern…), marked "⏱ at HH:MM".
+   It holds 20s or until you click the strip; then live commentary resumes. */
+const cmHold = [0, 0, 0];
+function showHistCommentary(slot, time) {
+  const arr = candleData[slot];
+  const i = arr.findIndex(c => c.time == time);
+  if (i < 0) return;
+  const html = commentary(slot, i);
+  if (!html) return;
+  const dt = new Date(time * 1000);     // candle times are IST-shifted, so UTC fields read as IST
+  const label = TF_SEC[slot] >= 86400 ? dt.toISOString().slice(0, 10)
+    : dt.toISOString().slice(11, TF_SEC[slot] < 60 ? 19 : 16);
+  const el = document.getElementById('cm' + slot);
+  el.classList.remove('sc', 'fast');
+  el.classList.add('hist');
+  el.innerHTML = `<span class="histtag">⏱ at ${label}</span> ` + html;
+  cmHold[slot] = Date.now() + 20000;
+}
+for (const s of [0, 1, 2]) {
+  const el = document.getElementById('cm' + s);
+  el.title = 'click to return to live commentary';
+  el.addEventListener('click', () => { cmHold[s] = 0; renderCommentary(); });
+}
 
 // short covering + movement speed are the signals the user trades on:
 // blink the strip and sound distinct alarms on each state's first appearance
@@ -559,6 +810,8 @@ function renderCommentary() {
   for (const s of [0, 1, 2]) {
     const el = document.getElementById('cm' + s);
     if (!el) continue;
+    if (Date.now() < cmHold[s]) continue;       // showing a clicked point in time
+    el.classList.remove('hist');
     const html = commentary(s);
     el.innerHTML = html;
     // OI CRASH with a covering rally likely blinks/beeps like short covering
@@ -584,9 +837,11 @@ function onTick(token, ltp, ts, vol, oi) {
   updateOb(slot, ltp);
   if (slot == 0) updateSpot(ltp);
 
-  const t = Math.floor(ts / 1000 / 60) * 60 + IST_OFFSET;
   const arr = candleData[slot];
   let c = arr.length ? arr[arr.length - 1] : null;
+  // day candles: keep updating today's candle instead of computing a bucket
+  const t = TF_SEC[slot] >= 86400 ? (c ? c.time : Math.floor((ts / 1000 + IST_OFFSET) / 86400) * 86400)
+    : Math.floor(ts / 1000 / TF_SEC[slot]) * TF_SEC[slot] + IST_OFFSET;
   if (!c || t > c.time) {
     if (c) volBase[slot] += c.volume || 0; // previous candle closed
     c = { time: t, open: ltp, high: ltp, low: ltp, close: ltp, volume: vol ? Math.max(0, vol - volBase[slot]) : 0, oi: oi || 0 };
@@ -607,7 +862,7 @@ function onTick(token, ltp, ts, vol, oi) {
 
 // ---- live ticks ----
 function connectWs() {
-  const ws = new WebSocket((location.protocol == 'https:' ? 'wss://' : 'ws://') + location.host + '/ws');
+  const ws = new WebSocket((location.protocol == 'https:' ? 'wss://' : 'ws://') + location.host + BASE + '/ws');
   ws.onmessage = ev => {
     const m = JSON.parse(ev.data);
     if (m.type == 'ticks') for (const t of m.ticks) onTick(t.token, t.ltp, t.ts, t.vol, t.oi);
@@ -617,13 +872,14 @@ function connectWs() {
   };
   ws.onclose = () => setTimeout(connectWs, 2000);
 }
-connectWs();
+// connectWs() is started by boot(), once today's login is confirmed.
 
 // ---- positions / orders ----
 let breachLevels = {}; // token -> {level, tradingsymbol, pending} from simpleGuard
+let posByKey = {};     // "tradingsymbol|exchange" -> position, for % → price maths
 async function refreshPosition() {
   try {
-    const [r, rb] = await Promise.all([fetch('/api/position'), fetch('/api/breach')]);
+    const [r, rb] = await Promise.all([fetch(BASE+'/api/position'), fetch(BASE+'/api/breach')]);
     const d = await r.json();
     try { breachLevels = (await rb.json()).levels || {}; } catch (e) { breachLevels = {}; }
     if (d.error) return;
@@ -636,6 +892,8 @@ async function refreshPosition() {
     const sel = document.getElementById('ordSymbol');
     const prev = sel.value;
     sel.innerHTML = '';
+    posByKey = {};
+    for (const p of d.positions) posByKey[p.tradingsymbol + '|' + p.exchange] = p;
     const naked = [];
     for (const p of d.positions) {
       const isNaked = p.quantity > 0 && p.resting.length == 0;
@@ -766,7 +1024,7 @@ function armExit(btn, symbol) {
 async function doExit(symbol) {
   msg(symbol ? `exiting ${symbol}…` : 'EXITING ALL…');
   try {
-    const r = await fetch('/api/exit', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    const r = await fetch(BASE+'/api/exit', { method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(symbol ? { tradingsymbol: symbol } : {}) });
     const d = await r.json();
     if (d.error) { msg('❌ exit failed: ' + d.error); return; }
@@ -781,7 +1039,7 @@ document.getElementById('pnlBtn').onclick = async () => {
   const el = document.getElementById('pnlPanel');
   if (el.style.display == 'block') { el.style.display = 'none'; return; }
   try {
-    const d = await (await fetch('/api/pnl')).json();
+    const d = await (await fetch(BASE+'/api/pnl')).json();
     const pc = v => `class="${pnlClass(v)}"`;
     const money = v => (v == null ? '—' : (v >= 0 ? '+' : '') + fmt(v));
     let h = `<h4 style="margin:8px 0 4px">Today's trades — total <span ${pc(d.todayTotal)}>${money(d.todayTotal)}</span></h4>`;
@@ -803,6 +1061,12 @@ document.getElementById('pnlBtn').onclick = async () => {
   } catch (e) { msg('❌ pnl load failed: ' + e); }
 };
 
+// "tf all" pushes one timeframe onto all three pickers, then refetches each
+document.getElementById('tfSel').onchange = async (e) => {
+  for (const s of [0, 1, 2]) tfSel(s).value = e.target.value;
+  if (!cfg || cfg.error) return;
+  for (const s of [0, 1, 2]) await loadSlot(s);
+};
 document.getElementById('helpBtn').onclick = () => document.getElementById('helpDrawer').classList.add('open');
 document.getElementById('helpClose').onclick = () => document.getElementById('helpDrawer').classList.remove('open');
 
@@ -846,7 +1110,7 @@ async function quickAction(btn, slot, side, pct) {
   disarmQuick();
   msg(`⚡ ${side.toUpperCase()} ${pct}% ${o.tradingsymbol} …`);
   try {
-    const r = await fetch('/api/quick', {
+    const r = await fetch(BASE+'/api/quick', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ tradingsymbol: o.tradingsymbol, exchange: o.exchange, token: o.token, side, pct })
     });
@@ -856,8 +1120,8 @@ async function quickAction(btn, slot, side, pct) {
     refreshPosition();
   } catch (e) { msg('❌ ' + e); }
 }
-for (const slot of [1, 2]) {
-  const el = document.getElementById('qk' + slot);
+function buildQuick(el, slot, tag) {
+  if (tag) { const t = document.createElement('i'); t.textContent = tag; el.appendChild(t); }
   for (const [side, pct] of [['buy', 100], ['buy', 50], ['sell', 50], ['sell', 100]]) {
     const b = document.createElement('button');
     b.className = side == 'buy' ? 'qb' : 'qs';
@@ -866,25 +1130,198 @@ for (const slot of [1, 2]) {
     el.appendChild(b);
   }
 }
+buildQuick(document.getElementById('qk1'), 1);
+buildQuick(document.getElementById('qk2'), 2);
+// spot full view: CE + PE quick rows (hidden on the 3-chart layout)
+buildQuick(document.getElementById('qk0'), 1, 'CE');
+buildQuick(document.getElementById('qk0'), 2, 'PE');
+
+/*
+Auto-target parameters. Deliberately page constants, not server settings:
+guardSettings.json is read by the live simpleGuard, and this feature has no
+business adding keys there. One-line edits if you want it tighter or wider.
+  R        reward multiple of the risk leg (entry → SL)
+  atrN/K   fallback when there is no SL yet: K × ATR(N) off entry
+  speed*   clamp on the live speed factor, so a fast chart targets wider
+           and a dead one tighter, but never absurdly either way
+*/
+const AUTO = { R: 2, atrN: 14, atrK: 2, speedMin: 0.7, speedMax: 2 };
+
+let guardCfg = { firstOrder: 'target', targetPct: 2, slPct: 2 };
+
+function slotForSymbol(sym) {
+  if (!cfg || cfg.error) return null;
+  if (sym == cfg.ce.tradingsymbol) return 1;
+  if (sym == cfg.pe.tradingsymbol) return 2;
+  return null;   // a position on a strike that is not charted right now
+}
+
+// Wilder true range averaged over the last n COMPLETED candles of that chart,
+// at whatever timeframe that chart is on (so ATR(14) on 5s != on day).
+function atr(slot, n) {
+  const done = (candleData[slot] || []).slice(0, -1);   // drop the live candle
+  if (done.length < n + 1) return null;
+  let sum = 0;
+  for (let i = done.length - n; i < done.length; i++) {
+    const c = done[i], p = done[i - 1];
+    sum += Math.max(c.high - c.low, Math.abs(c.high - p.close), Math.abs(c.low - p.close));
+  }
+  return sum / n;
+}
+
+// Same ratio the commentary strip shows as "speed N×": avg range of the last
+// 3 candles (live included) vs the avg range of the 20 before them.
+function speedFactor(slot) {
+  const arr = candleData[slot] || [];
+  const done = arr.slice(0, -1);
+  if (done.length < 21) return null;
+  const rng = c => (c.high - c.low) / (c.close || 1) * 100;
+  const base = done.slice(-21, -1).reduce((s, c) => s + rng(c), 0) / 20;
+  const recent = arr.slice(-3).reduce((s, c) => s + rng(c), 0) / 3;
+  return base > 0 ? recent / base : null;
+}
+
+/*
+Auto target: pick a distance from the current situation rather than a fixed
+number, then scale it by how fast the option is actually moving.
+
+  risk leg = entry − SL, where SL is your resting SL if you have one, else
+             simpleGuard's breach level (same precedence as the "/ SL %"
+             column). target = entry + R × risk.
+  no SL yet → fall back to K × ATR(N) off entry.
+  no ATR yet (chart too short) → fall back to the guard's own target %.
+  then × the clamped speed factor.
+
+This is mechanical output of that formula, not a view on what you should
+aim for -- the numbers come from AUTO above, which you control. Returns an
+absolute tick-rounded price, so /api/order sees exactly what ₹ mode sends.
+*/
+function autoTarget() {
+  const key = document.getElementById('ordSymbol').value;
+  if (!key) return { error: 'no position selected' };
+  const p = posByKey[key];
+  if (!p || !(p.entry > 0)) return { error: 'no entry price for this position yet — use ₹' };
+  const entry = p.entry;
+  const slot = slotForSymbol(p.tradingsymbol);
+
+  const slO = (p.resting || []).find(o => o.order_type == 'SL');
+  const b = breachLevels[p.token];
+  const slRef = slO ? slO.trigger_price : (b && b.level > 0 ? b.level : null);
+
+  let base, why;
+  if (slRef > 0 && slRef < entry) {
+    base = AUTO.R * (entry - slRef);
+    why = `${AUTO.R}R off ${slO ? 'your SL' : 'guard SL'} ${fmt(slRef)}`;
+  } else {
+    const a = slot == null ? null : atr(slot, AUTO.atrN);
+    if (a > 0) {
+      base = AUTO.atrK * a;
+      why = `${AUTO.atrK}× ATR(${AUTO.atrN}) ${a.toFixed(2)}`;
+    } else {
+      base = entry * guardCfg.targetPct / 100;
+      why = `${guardCfg.targetPct}% of entry (no SL or ATR yet)`;
+    }
+  }
+
+  const sp = slot == null ? null : speedFactor(slot);
+  let mult = 1, spWhy = '';
+  if (sp != null) {
+    mult = Math.min(AUTO.speedMax, Math.max(AUTO.speedMin, sp));
+    spWhy = ` × speed ${mult.toFixed(2)}`;
+  }
+
+  const price = roundTick(entry + base * mult);
+  if (!(price > entry)) return { error: `auto target ${fmt(price)} is not above entry ${fmt(entry)} — use ₹` };
+  return { price, from: `${why}${spWhy}` };
+}
+
+/* Target and SL can be typed either as an absolute price (₹) or as a
+   percentage off the position's entry (%); the target also has Auto, which
+   ignores the box entirely. Everything is resolved here against the selected
+   position's entry and rounded to the 0.05 tick -- so what reaches
+   /api/order is always an absolute price, as before.
+   Target is above entry, SL below. */
+function resolveLevel(kind, raw) {
+  const unit = document.getElementById(kind == 'target' ? 'tgtMode' : 'slMode').value;
+  if (unit == 'auto') return autoTarget();   // the typed value is not used
+
+  const v = parseFloat(raw);
+  if (!(v > 0)) return { error: `enter ${kind == 'target' ? 'a target' : 'an SL trigger'}` };
+  if (unit == 'price') return { price: v };
+
+  if (v > 100) return { error: `${v}% is not a sane ${kind} -- switch the box to ₹ for a price` };
+  const key = document.getElementById('ordSymbol').value;
+  const p = posByKey[key];
+  if (!p || !(p.entry > 0)) return { error: 'no entry price for this position yet — use ₹' };
+  const price = roundTick(p.entry * (kind == 'target' ? 1 + v / 100 : 1 - v / 100));
+  if (!(price > 0)) return { error: `${v}% off entry ${fmt(p.entry)} lands at or below zero` };
+  return { price, from: `${v}% off entry ${fmt(p.entry)}` };
+}
+
+/* Live preview of what a % or Auto will actually send -- nothing is ever sent
+   from here, you still click TARGET. Auto shows its derivation too, so an
+   odd-looking number can be traced back to the SL/ATR/speed it came from. */
+function updateTgtHint() {
+  const el = document.getElementById('tgtHint');
+  const bits = [];
+  for (const kind of ['target', 'sl']) {
+    const inp = document.getElementById(kind == 'target' ? 'tgtPrice' : 'slTrigger');
+    const unit = document.getElementById(kind == 'target' ? 'tgtMode' : 'slMode').value;
+    if (unit != 'pct' && unit != 'auto') continue;
+    if (unit == 'pct' && !inp.value) continue;   // auto needs no typed value
+    const r = resolveLevel(kind, inp.value);
+    bits.push(r.error ? `${kind}: ⚠ ${r.error}`
+      : `${kind} → ${fmt(r.price)}` + (unit == 'auto' && r.from ? ` (${r.from})` : ''));
+  }
+  el.textContent = bits.join('  ·  ');
+}
+for (const id of ['tgtPrice', 'tgtMode', 'slTrigger', 'slMode', 'ordSymbol']) {
+  const el = document.getElementById(id);
+  el.addEventListener('input', updateTgtHint);
+  el.addEventListener('change', updateTgtHint);
+}
+/* Stepping by 0.05 makes sense for a price, not for a percentage; and in auto
+   mode the box is not read at all, so grey it out rather than invite a number
+   that would be silently ignored. */
+for (const [selId, inpId] of [['tgtMode', 'tgtPrice'], ['slMode', 'slTrigger']]) {
+  const sel = document.getElementById(selId), inp = document.getElementById(inpId);
+  const sync = () => {
+    const mode = sel.value;
+    inp.step = mode == 'pct' ? '0.1' : '0.05';
+    inp.disabled = mode == 'auto';
+    inp.placeholder = mode == 'auto' ? 'auto'
+      : (inpId == 'tgtPrice' ? 'target' : 'SL trigger') + (mode == 'pct' ? ' %' : ' ₹');
+  };
+  sel.addEventListener('change', sync);
+  sync();
+}
+// auto re-reads the live chart and position, so refresh the preview on each tick
+setInterval(() => { if (document.getElementById('tgtMode').value == 'auto') updateTgtHint(); }, 2000);
 
 async function sendOrder(mode) {
   const v = document.getElementById('ordSymbol').value;
   if (!v) { msg('no position selected'); return; }
   const [tradingsymbol, exchange] = v.split('|');
   const body = { tradingsymbol, exchange, mode };
+  let note = '';
   if (mode == 'target') {
-    body.price = parseFloat(document.getElementById('tgtPrice').value);
-    if (!body.price) { msg('enter target price'); return; }
+    const r = resolveLevel('target', document.getElementById('tgtPrice').value);
+    if (r.error) { msg('❌ ' + r.error); return; }
+    body.price = r.price;
+    if (r.from) note = ` (${r.from})`;
   } else {
-    body.trigger_price = parseFloat(document.getElementById('slTrigger').value);
+    const r = resolveLevel('sl', document.getElementById('slTrigger').value);
+    if (r.error) { msg('❌ ' + r.error); return; }
+    body.trigger_price = r.price;
+    if (r.from) note = ` (${r.from})`;
     const lp = parseFloat(document.getElementById('slPrice').value);
     if (lp) body.price = lp;
-    if (!body.trigger_price) { msg('enter SL trigger'); return; }
   }
   msg('sending…');
-  const r = await fetch('/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const r = await fetch(BASE+'/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const d = await r.json();
-  msg(d.error ? ('❌ ' + d.error) : `✅ ${d.action} ${d.order_ids.join(',')}`);
+  const at = mode == 'target' ? fmt(body.price) : fmt(body.trigger_price);
+  msg(d.error ? ('❌ ' + d.error) : `✅ ${d.action} @ ${at}${note} ${d.order_ids.join(',')}`);
   refreshPosition();
 }
 
@@ -895,7 +1332,7 @@ document.getElementById('loadBtn').onclick = load;
 // ---- margin / max qty ----
 async function fetchMargin() {
   try {
-    const d = await (await fetch('/api/margin')).json();
+    const d = await (await fetch(BASE+'/api/margin')).json();
     if (d.cash != null) marginCash = d.cash;
     renderMargin();
   } catch (e) { /* transient */ }
@@ -917,7 +1354,8 @@ setInterval(renderMargin, 5000);
 // ---- guard on-fill settings (what simpleGuard places on a BUY fill) ----
 async function fetchGuardSettings() {
   try {
-    const s = await (await fetch('/api/guardSettings')).json();
+    const s = await (await fetch(BASE+'/api/guardSettings')).json();
+    guardCfg = s;   // autoTarget() falls back to the guard's own target %
     document.getElementById('gFirst').value = s.firstOrder;
     document.getElementById('gTgtPct').value = s.targetPct;
     document.getElementById('gSlPct').value = s.slPct;
@@ -929,8 +1367,9 @@ document.getElementById('gSave').onclick = async () => {
     targetPct: parseFloat(document.getElementById('gTgtPct').value),
     slPct: parseFloat(document.getElementById('gSlPct').value)
   };
-  const r = await fetch('/api/guardSettings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const r = await fetch(BASE+'/api/guardSettings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const d = await r.json();
+  if (!d.error) { guardCfg = d; updateTgtHint(); }
   msg(d.error ? ('❌ ' + d.error)
     : `✅ on fill: ${d.firstOrder == 'sl' ? 'SL at -' + d.slPct + '%' : 'target at +' + d.targetPct + '%'} (applies to the next fill)`);
 };
@@ -940,7 +1379,7 @@ fetchGuardSettings();
 async function fetchGuard() {
   const el = document.getElementById('guardTxt');
   try {
-    const d = await (await fetch('/api/guard')).json();
+    const d = await (await fetch(BASE+'/api/guard')).json();
     if (d.error) { el.className = 'off'; el.textContent = 'guard: ?'; return; }
     const on = d.simpleGuard && d.simpleGuard.status == 'online';
     el.className = on ? 'on' : 'off';
@@ -1033,6 +1472,7 @@ for (const slot of [0, 1, 2]) {
   charts[slot].subscribeClick(param => {
     if (justDragged) { justDragged = false; return; }
     if (!param.point || !cfg || dragging || ordDrag) return;
+    if (param.time != null) showHistCommentary(slot, param.time);
     const raw = series[slot].coordinateToPrice(param.point.y);
     if (raw == null || raw <= 0) return;
     showMenu(slot, roundTick(raw), param.point);
@@ -1101,7 +1541,7 @@ window.addEventListener('mouseup', async () => {
     od.line.applyOptions({ title: olTitle(od, true) });
     if (od.mode == 'guard') {
       // not an order — just the level simpleGuard exits at (applied within 15s)
-      const r = await fetch('/api/breach', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      const r = await fetch(BASE+'/api/breach', { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token: od.token, level: od.price }) });
       const dd = await r.json();
       msg(dd.error ? ('❌ guard SL: ' + dd.error) : (`✅ guard SL → ${dd.level} (simpleGuard applies within 15s)`));
@@ -1136,7 +1576,7 @@ function showMenu(slot, price, point) {
   } else {
     menu.innerHTML =
       `<div class="px" id="mPx"></div>` +
-      `<button class="buy" id="mBuy">BUY ${qty}</button>` +
+      `<button class="buy" id="mBuy">BUY ${qty} when price gets here</button>` +
       `<button id="mTgt">Target here</button>` +
       `<button class="sec" id="mSl">SL here</button>` +
       `<button class="sec" id="mX">Cancel</button>`;
@@ -1174,7 +1614,9 @@ function disarmMenu() {
     if (b) {
       clickCtx.qty = resolveQty(clickCtx.o, clickCtx.price); // price moved: recompute affordable qty
       b.className = 'buy';
-      b.textContent = clickCtx.qty > 0 ? `BUY ${clickCtx.qty}` : 'margin < 1 lot';
+      b.textContent = clickCtx.qty > 0
+        ? `BUY ${clickCtx.qty} if ${buyDir(clickCtx) == 'above' ? '≥' : '≤'} ${clickCtx.price.toFixed(2)}`
+        : 'margin < 1 lot';
       b.onclick = armBuy;
     }
   }
@@ -1201,30 +1643,42 @@ function armTrigger(key, action) {
     if (o) { body.tradingsymbol = o.tradingsymbol; body.exchange = o.exchange; body.token = o.token; body.quantity = qty; }
     hideMenu();
     msg('setting trigger…');
-    const r = await fetch('/api/trigger', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const r = await fetch(BASE+'/api/trigger', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     const d = await r.json();
     msg(d.error ? ('❌ ' + d.error) : (`✅ trigger #${d.id} set: ${what} if spot ${dir} ${body.level}`));
     refreshTriggers();
   };
 }
 
-// two-step buy: first click arms, second click fires (real-money entry).
-// Prices are read from clickCtx at click time, so dragging updates them.
+/*
+Two-step conditional entry: first click arms, second click parks the trigger.
+Clicking a level on a CE/PE chart does NOT buy now — the server watches the
+option's OWN price and fires the BUY only when it reaches that level
+(clicked below LTP = wait for a dip, above = wait for a rise). One-shot.
+Prices are read from clickCtx at click time, so dragging updates them.
+Clicking exactly at LTP arms a condition that is already true, so it fires
+on the next tick — that is the one case where this behaves like buying now.
+*/
+function buyDir(c) { return c.price >= (lastLtp[c.slot] || c.price) ? 'above' : 'below'; }
+
 function armBuy() {
   if (!clickCtx) return;
   if (!(clickCtx.qty > 0)) { msg('❌ margin too low for 1 lot at this price'); return; }
   const b = document.getElementById('mBuy');
   b.className = 'confirm';
-  b.textContent = `CONFIRM BUY ${clickCtx.qty} @ ${clickCtx.price.toFixed(2)}`;
+  b.textContent = `CONFIRM: BUY ${clickCtx.qty} if ${buyDir(clickCtx) == 'above' ? '≥' : '≤'} ${clickCtx.price.toFixed(2)}`;
   b.onclick = async () => {
     const c = clickCtx;
+    const dir = buyDir(c);
     hideMenu();
-    msg('buying…');
-    const r = await fetch('/api/buy', { method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tradingsymbol: c.o.tradingsymbol, exchange: c.o.exchange, token: c.o.token, quantity: c.qty, price: c.price }) });
+    msg('setting entry trigger…');
+    const r = await fetch(BASE+'/api/trigger', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ index: cfg.index, action: 'buy', watch: 'option', direction: dir, level: c.price,
+        tradingsymbol: c.o.tradingsymbol, exchange: c.o.exchange, token: c.o.token, quantity: c.qty }) });
     const d = await r.json();
-    msg(d.error ? ('❌ ' + d.error) : ('✅ BUY placed ' + d.order_ids.join(',')));
-    refreshPosition();
+    msg(d.error ? ('❌ ' + d.error)
+      : `✅ trigger #${d.id} set: BUY ${c.qty} ${c.o.tradingsymbol} if its price ${dir == 'above' ? '≥' : '≤'} ${c.price.toFixed(2)}`);
+    refreshTriggers();
   };
 }
 
@@ -1232,13 +1686,49 @@ async function chartOrder(o, mode, price) {
   msg('sending…');
   const body = { tradingsymbol: o.tradingsymbol, exchange: o.exchange, mode };
   if (mode == 'target') body.price = price; else body.trigger_price = price;
-  const r = await fetch('/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const r = await fetch(BASE+'/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const d = await r.json();
   msg(d.error ? ('❌ ' + d.error) : (`✅ ${mode} ${d.action} ${d.order_ids.join(',')}`));
   refreshPosition();
 }
 
-load();
+// ---- boot ----
+// Ask the server whether a Zerodha access token for today already exists.
+// Found -> straight in. Missing -> gate, with a link to the home app's
+// login (port 80 on this same host), which is what writes that token.
+async function boot() {
+  let st;
+  try {
+    st = await (await fetch(BASE + '/api/authStatus')).json();
+  } catch (e) {
+    st = { ok: false, error: e.message };
+  }
+  if (!st.ok) { showLoginGate(st); return; }
+  connectWs();
+  load();
+}
+
+function showLoginGate(st) {
+  const loginUrl = location.protocol + '//' + location.hostname + '/login';
+  const g = document.createElement('div');
+  g.style.cssText = 'position:fixed;inset:0;z-index:9999;background:#131722;color:#d1d4dc;'
+    + 'display:flex;align-items:center;justify-content:center;font:16px system-ui,sans-serif';
+  g.innerHTML = `<div style="text-align:center;max-width:430px;padding:20px">
+    <div style="font-size:22px;margin-bottom:12px">No Zerodha login for today</div>
+    <div style="color:#868993;margin-bottom:20px;line-height:1.5">
+      No access token stored for ${st.date || 'today'}${st.error ? ' — ' + st.error : ''}.
+      Log in on the home app, then re-check.
+    </div>
+    <a href="${loginUrl}" style="display:inline-block;padding:10px 18px;background:#2962ff;
+      color:#fff;border-radius:4px;text-decoration:none">Log in with Kite</a>
+    <button id="gateRetry" style="margin-left:8px;padding:10px 18px;background:#2a2e39;
+      color:#d1d4dc;border:0;border-radius:4px;cursor:pointer">Re-check</button>
+  </div>`;
+  document.body.appendChild(g);
+  g.querySelector('#gateRetry').onclick = () => { g.remove(); boot(); };
+}
+
+boot();
 </script>
 </body>
 </html>
