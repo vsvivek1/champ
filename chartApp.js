@@ -55,6 +55,24 @@ const lotSizeByToken = new Map();
 // tokens the dashboard currently charts (spot + CE + PE)
 let chartedTokens = [];
 
+/*
+Tokens of instruments we actually HOLD. Subscribed on top of the charted ones
+and never unsubscribed while the position is open, so the live P&L on an open
+entry keeps ticking even when that strike is not one of the two on screen.
+Harvested from /api/position (no extra Kite call).
+*/
+const heldTokens = new Set();
+function subscribeHeld() {
+    const toks = [...heldTokens].filter(t => !chartedTokens.includes(t));
+    if (toks.length == 0) return;
+    try {
+        ticker.subscribe(toks);
+        ticker.setMode(ticker.modeFull, toks);
+    } catch (e) {
+        console.log("⚠️ held subscribe failed", e.message || e);
+    }
+}
+
 // browser clients
 const wsClients = new Set();
 
@@ -71,6 +89,7 @@ function subscribeCharted() {
 function setChartedTokens(tokens) {
     // never unsubscribe a token a pending trigger still watches
     const needed = new Set(spotTriggers.flatMap(t => [Number(t.spotToken), Number(t.token)]));
+    for (const t of heldTokens) needed.add(Number(t));   // an open position keeps its ticks
     const old = chartedTokens.filter(t => !tokens.includes(t) && !needed.has(Number(t)));
     chartedTokens = tokens;
     try { if (old.length) ticker.unsubscribe(old); } catch (e) { /* ignore */ }
@@ -421,6 +440,7 @@ async function main() {
         console.log("🟢 Ticker connected (chartApp)");
         subscribeCharted();
         subscribeTriggerTokens(); // restored triggers must fire even before anyone presses Load
+        subscribeHeld();
     });
     ticker.on("ticks", ticks => {
         for (const t of ticks) {
@@ -531,6 +551,20 @@ async function main() {
     });
 
     /*
+    Re-register the tokens a page is charting, without re-running the strike
+    pick. A server restart forgets chartedTokens, so an open browser would sit
+    there with dead option charts until someone pressed Load; the page calls
+    this on every websocket (re)connect instead.
+    */
+    app.post('/api/watch', (req, res) => {
+        const tokens = (req.body && req.body.tokens || []).map(Number).filter(t => t > 0);
+        if (tokens.length == 0) return res.status(400).json({ error: "tokens required" });
+        setChartedTokens(tokens);
+        console.log(`👀 re-watching ${tokens.join(', ')}`);
+        res.json({ ok: true, tokens });
+    });
+
+    /*
     tf: 5s/15s/30s served from the live tick buffer (no Kite history below
     1min — sub-minute charts fill from when the token was first charted);
     1m/5m/15m from today via Kite; 1h last 10 days; day last 180 days.
@@ -595,6 +629,13 @@ async function main() {
             const totalPnl = fno.reduce((s, p) => s + (p.pnl || 0), 0);
 
             const open = fno.filter(p => p.quantity != 0);
+
+            // keep every held instrument ticking, charted or not (live entry P&L)
+            const before = heldTokens.size;
+            heldTokens.clear();
+            for (const p of open) heldTokens.add(Number(p.instrument_token));
+            if (heldTokens.size && (heldTokens.size != before || [...heldTokens].some(t => !chartedTokens.includes(t)))) subscribeHeld();
+
             const out = [];
             for (const p of open) {
                 const lastBuy = orders.filter(o =>

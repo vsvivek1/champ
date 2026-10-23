@@ -137,6 +137,7 @@
   <span id="ydayTxt" style="color:var(--dim)"></span>
   <span id="expiryTxt" style="color:var(--dim)"></span>
   <span style="flex:1"></span>
+  <span title="Unrealised P&L on the entries open right now, summed: (ltp - entry) x qty per position, using the last tick. Counts every open F&O position, including strikes that are not on screen. Realised P&L is NOT in here - that is in Day P&L.">entry P&L: <span id="entryPnlAll">—</span></span>
   <span>Day P&L: <span id="totalPnl">—</span></span>
 </header>
 
@@ -272,7 +273,16 @@
   the price this entry filled at, the quantity, and the <b>live P&amp;L on this entry</b>. Green when in profit, red when not.
   The money number updates on <b>every tick</b> (entry and qty refresh every 5s), so it is the P&amp;L right now, not at the last refresh.
   Entry is the <b>last COMPLETE BUY fill of the day</b>, never Kite's blended average_price. Hover for the full sum.
-  Day P&amp;L for the symbol (realised included) stays in the positions table below.</div>
+  Day P&amp;L for the symbol (realised included) stays in the positions table below.
+  A held strike that is <i>not</i> charted has no badge (there is no chart to put it on) — its live P&amp;L is in the
+  header's <b>entry P&amp;L</b> and in the table. The server keeps every held instrument subscribed either way.</div>
+
+  <h4>entry P&amp;L (header, next to Day P&amp;L)</h4>
+  <div>Unrealised P&amp;L on the entries open <b>right now</b>, summed: (ltp − entry) × qty per position.
+  It moves on <b>every tick</b> and covers every open F&amp;O position — including a strike that is not one of the
+  two charts on screen, which is why it can be live while a chart is not. Hover it for the per-symbol breakdown.
+  <b>Day P&amp;L</b> next to it is Kite's figure and <i>does</i> include realised P&amp;L, so the two differ after a part-exit.
+  The <b>ltp</b>, <b>%</b> and <b>entry P&amp;L</b> columns of the positions table tick live off the same prices.</div>
 
   <h4>B100 / B50 / S50 / S100 (top of each option chart)</h4>
   <div>Emergency buttons. <b class="g">B100/B50</b> = BUY using 100%/50% of available margin at a marketable limit (LTP+2%). <b class="r">S100</b> = dump the whole position now (resting order modified to LTP−3%, never a second order). <b class="r">S50</b> = sell half: the resting SELL's quantity is cut to half and made marketable; the guard re-covers the remaining half within 15s. First click arms (SURE?), second click within 3s fires — regardless of existing orders.</div>
@@ -505,13 +515,30 @@ entry/qty and by every tick for the LTP, so the money number moves with the
 market instead of once per refresh. Entry is the last COMPLETE BUY fill of the
 day (what /api/position returns), never Kite's blended average_price.
 */
-let posBySlot = {};   // 1|2 -> position from /api/position, for the badge + entry line
+let posBySlot = {};        // 1|2 -> position from /api/position, for the badge + entry line
+let livePositions = [];   // last /api/position payload, re-priced on every tick
+let ltpByToken = {};      // token -> last tick, including strikes that are not charted
+let tickAtByToken = {};   // token -> when that tick landed
+let posAt = 0;            // when the current /api/position snapshot was taken
+let slPartByToken = {};   // token -> " / SL -2.1%" tail for the table's % cell
+
+/*
+The freshest price we have for a position. A tick wins only if it landed AFTER
+the snapshot we are holding: a token that stops ticking (strike no longer
+charted, feed hiccup) must fall back to /api/position's own ltp instead of
+freezing on its last tick.
+*/
+function liveLtp(p) {
+  const tok = Number(p.token);
+  const t = ltpByToken[tok];
+  return (t > 0 && tickAtByToken[tok] >= posAt) ? t : p.ltp;
+}
+
 function updatePosBadge(slot) {
   const el = document.getElementById('pb' + slot);
   if (!el) return;
   const p = posBySlot[slot];
-  // the live tick wins; /api/position's own ltp fills the gap before the first tick
-  const ltp = lastLtp[slot] > 0 ? lastLtp[slot] : (p ? p.ltp : null);
+  const ltp = p ? liveLtp(p) : null;
   if (!p || !p.quantity || !(p.entry > 0) || !(ltp > 0)) { el.textContent = ''; el.className = 'pb'; el.title = ''; return; }
   const pnl = (ltp - p.entry) * p.quantity;
   const pct = (ltp - p.entry) / p.entry * 100;
@@ -521,6 +548,42 @@ function updatePosBadge(slot) {
   el.title = `${p.tradingsymbol}: live P&L on THIS entry = (ltp ${fmt(ltp)} - entry ${fmt(p.entry)}) \u00d7 ${p.quantity}`
     + ` = ${fmt(pnl)}. Entry is the last COMPLETE BUY fill of the day, not Kite's blended average.`
     + ` The white ENTRY line on the chart sits at that price. Day P&L for the symbol is in the table below.`;
+}
+
+/*
+Re-price every open entry from the latest ticks: the chart badges, the ltp / %
+/ entry-P&L cells of the positions table, and the header total. Runs on every
+tick, so these numbers move with the market; /api/position every 5s only
+refreshes what a tick cannot know (entry, qty, resting orders, realised P&L).
+*/
+function updateLiveEntries() {
+  let total = 0, any = false;
+  const bits = [];
+  for (const p of livePositions) {
+    const ltp = liveLtp(p);
+    if (!p.quantity || !(p.entry > 0) || !(ltp > 0)) continue;
+    const pnl = (ltp - p.entry) * p.quantity;
+    const pct = (ltp - p.entry) / p.entry * 100;
+    total += pnl; any = true;
+    bits.push(`${p.tradingsymbol} ${p.quantity > 0 ? '' : 'SHORT '}\u00d7${Math.abs(p.quantity)}: entry ${fmt(p.entry)} \u2192 ${fmt(ltp)} = ${fmt(pnl)}`);
+    const lc = document.getElementById('tl' + p.token);
+    if (lc) lc.textContent = fmt(ltp);
+    const pc = document.getElementById('tp' + p.token);
+    if (pc) pc.innerHTML = `<span class="${pnlClass(pct)}">${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%</span>`
+      + (slPartByToken[p.token] || '');
+    const ec = document.getElementById('te' + p.token);
+    if (ec) { ec.textContent = fmt(pnl); ec.className = pnlClass(pnl); }
+  }
+  const h = document.getElementById('entryPnlAll');
+  if (h) {
+    h.textContent = any ? (total >= 0 ? '+' : '') + fmt(total) : '\u2014';
+    h.className = any ? pnlClass(total) : '';
+    h.parentElement.title = any
+      ? 'Unrealised P&L on the open entries, live:\n' + bits.join('\n')
+        + '\nRealised P&L is not in here \u2014 that is in Day P&L.'
+      : 'No open F&O position.';
+  }
+  updatePosBadge(1); updatePosBadge(2);
 }
 
 async function load() {
@@ -544,7 +607,7 @@ async function load() {
   exSymbols[1] = { tradingsymbol: cfg.ce.tradingsymbol, exchange: cfg.ce.exchange };
   exSymbols[2] = { tradingsymbol: cfg.pe.tradingsymbol, exchange: cfg.pe.exchange };
   posBySlot = {};                       // stale entry badge/line off until the next refresh
-  updatePosBadge(1); updatePosBadge(2);
+  updateLiveEntries();
 
   const kiteLink = (exchange, tradingsymbol, token) =>
     ` <a class="ktlink" target="_blank" href="https://kite.zerodha.com/chart/ext/tvc/${exchange}/${encodeURIComponent(tradingsymbol)}/${token}">Kite ↗</a>`;
@@ -933,13 +996,17 @@ function renderCommentary() {
 setInterval(renderCommentary, 5000);
 
 function onTick(token, ltp, ts, vol, oi) {
+  // every tick is recorded by token, even for a strike that is not charted:
+  // a held position keeps its live P&L whether or not it is on screen
+  ltpByToken[Number(token)] = ltp;
+  tickAtByToken[Number(token)] = Date.now();
+  updateLiveEntries();
   const slot = tokenSlot[token];
   if (slot == null) return;
   document.getElementById('lp' + slot).textContent = fmt(ltp);
   document.getElementById('lp' + slot).className = 'lp';
   lastLtp[slot] = ltp;
   updateOb(slot, ltp);
-  updatePosBadge(slot);   // P&L on the open entry moves with the tick, not the 5s refresh
   if (slot == 0) updateSpot(ltp);
 
   const arr = candleData[slot];
@@ -968,6 +1035,17 @@ function onTick(token, ltp, ts, vol, oi) {
 // ---- live ticks ----
 function connectWs() {
   const ws = new WebSocket((location.protocol == 'https:' ? 'wss://' : 'ws://') + location.host + BASE + '/ws');
+  /*
+  The server forgets chartedTokens when it restarts, so the option legs would
+  go quiet until someone pressed Load again (the spot kept ticking only because
+  a pending trigger watches it). Re-register the tokens this page is already
+  showing — no strike re-pick, so an auto (IV) chart cannot silently move.
+  */
+  ws.onopen = () => {
+    const toks = Object.keys(tokenSlot).map(Number).filter(t => t > 0);
+    if (toks.length) fetch(BASE + '/api/watch', { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ tokens: toks }) }).catch(() => {});
+  };
   ws.onmessage = ev => {
     const m = JSON.parse(ev.data);
     if (m.type == 'ticks') for (const t of m.ticks) onTick(t.token, t.ltp, t.ts, t.vol, t.oi);
@@ -1000,11 +1078,12 @@ async function refreshPosition() {
     posByKey = {};
     for (const p of d.positions) posByKey[p.tradingsymbol + '|' + p.exchange] = p;
     posBySlot = {};
+    livePositions = d.positions;
+    posAt = Date.now();
     for (const p of d.positions) {
       const sl = slotForSymbol(p.tradingsymbol);
       if (sl) posBySlot[sl] = p;
     }
-    updatePosBadge(1); updatePosBadge(2);
     const naked = [];
     for (const p of d.positions) {
       const isNaked = p.quantity > 0 && p.resting.length == 0;
@@ -1016,18 +1095,23 @@ async function refreshPosition() {
         ? `<button class="exitrow" onclick="armExit(this, '${p.tradingsymbol}')">${armedExit == p.tradingsymbol ? 'CONFIRM EXIT' : 'EXIT'}</button>` : '';
       // % gain since entry vs % at the SL (resting SL trigger, else the guard line)
       let pctCell = '—';
+      slPartByToken[p.token] = '';
       if (p.quantity > 0 && p.entry > 0) {
-        const gain = (p.ltp - p.entry) / p.entry * 100;
+        const ltp = liveLtp(p);
+        const gain = (ltp - p.entry) / p.entry * 100;
         const slO = p.resting.find(o => o.order_type == 'SL');
         const b = breachLevels[p.token];
         const slRef = slO ? slO.trigger_price : (b && b.level > 0 ? b.level : null);
-        const slPart = slRef ? ` / SL ${((slRef - p.entry) / p.entry * 100).toFixed(1)}%` : '';
-        pctCell = `<span class="${pnlClass(gain)}">${gain >= 0 ? '+' : ''}${gain.toFixed(1)}%</span>${slPart}`;
+        // the SL leg of the cell only moves when an order does, so it is kept
+        // here and re-attached by updateLiveEntries() on every tick
+        slPartByToken[p.token] = slRef ? ` / SL ${((slRef - p.entry) / p.entry * 100).toFixed(1)}%` : '';
+        pctCell = `<span class="${pnlClass(gain)}">${gain >= 0 ? '+' : ''}${gain.toFixed(1)}%</span>${slPartByToken[p.token]}`;
       }
+      // ltp / % / entry P&L carry ids: updateLiveEntries() re-prices them per tick
       tb.insertAdjacentHTML('beforeend',
-        `<tr><td>${p.tradingsymbol}</td><td>${p.quantity}</td><td>${fmt(p.entry)}</td><td>${fmt(p.ltp)}</td>` +
-        `<td>${pctCell}</td>` +
-        `<td class="${pnlClass(p.entryPnl)}">${fmt(p.entryPnl)}</td>` +
+        `<tr><td>${p.tradingsymbol}</td><td>${p.quantity}</td><td>${fmt(p.entry)}</td><td id="tl${p.token}">${fmt(liveLtp(p))}</td>` +
+        `<td id="tp${p.token}">${pctCell}</td>` +
+        `<td id="te${p.token}" class="${pnlClass(p.entryPnl)}">${fmt(p.entryPnl)}</td>` +
         `<td class="${pnlClass(p.dayPnl)}">${fmt(p.dayPnl)}</td><td${isNaked ? ' class="naked"' : ''}>${resting}</td><td>${exitBtn}</td></tr>`);
       if (p.quantity > 0) {
         sel.insertAdjacentHTML('beforeend', `<option value="${p.tradingsymbol}|${p.exchange}">${p.tradingsymbol}</option>`);
@@ -1035,6 +1119,7 @@ async function refreshPosition() {
     }
     if (prev) sel.value = prev;
     if (d.positions.length == 0) tb.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--dim)">no open F&O positions</td></tr>';
+    updateLiveEntries();
     renderNakedAlert(naked);
     renderOrderLines(d.positions);
     renderEntryLines(d.positions);
