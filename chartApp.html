@@ -297,6 +297,7 @@
     <label><input type="checkbox" id="iOi" checked> OI</label>
     <label><input type="checkbox" id="iMa" checked> MA20</label>
     <label><input type="checkbox" id="iVwap" checked> VWAP</label>
+    <label title="The faint dashed R (resistance) and S (support) lines on the option charts -- the clustered swing pivots the stop trails up through. They are a map, not orders: untick to clear the chart. The guard still uses them server-side either way; hiding them changes nothing about where the stop goes."><input type="checkbox" id="iLvl" checked> R/S</label>
   </span>
   <span id="spotLtp">—</span>
   <span id="rangeBadge" class="badge">—</span>
@@ -1147,6 +1148,9 @@ function liveIndicatorTick(slot, c) {
 for (const id of ['iVol', 'iOi', 'iMa', 'iVwap']) {
   document.getElementById(id).onchange = () => { for (const s of [0, 1, 2]) recomputeIndicators(s); };
 }
+// the R/S ladder is drawn as price lines, not an indicator series, so it
+// repaints from the last positions snapshot instead of recomputeIndicators
+document.getElementById('iLvl').onchange = () => renderLevelLines(lastPositions);
 
 /*
 Movement speed -- ONE definition shared by every chart (spot and both option
@@ -1807,6 +1811,10 @@ function renderLevelLines(positions) {
   for (const l of levelLines) { try { series[l.slot].removePriceLine(l.line); } catch (e) {} }
   levelLines = [];
   if (!cfg || ordDrag) return;
+  // the R/S ladder is a map, not orders -- unticking only hides it. The guard
+  // reads the same levels server-side whatever this box says.
+  const lvlBox = document.getElementById('iLvl');
+  if (lvlBox && !lvlBox.checked) return;
   for (const p of (positions || [])) {
     const slot = slotForSymbol(p.tradingsymbol);
     if (!slot || !(p.quantity > 0)) continue;
@@ -2477,6 +2485,34 @@ function msg(s) { document.getElementById('msg').textContent = s; }
    of available margin; S50/S100 sell that % of the open position — the
    server modifies the resting SELL (never stacks a second one). One click
    arms (SURE?), second click within 3s fires. */
+/*
+The SURE? line has to say what the trade can LOSE, in rupees, before the
+second click. riskOf() cannot work it out on the page any more: in every
+level-based mode the stop is a tick under a level only the server holds, and
+with slMaxPct deleted there is not even a worst-case band to fall back on.
+So ask /api/risk the moment the button arms and rewrite the line when it
+answers -- a few ms, well inside the 3s arm window. If it does not answer,
+the line says UNKNOWN rather than a number it cannot stand behind.
+*/
+let quickRiskSeq = 0;
+async function quickRisk(o, px, qty, pct) {
+  if (!(px > 0) || !(qty > 0) || !o || !o.token) return;
+  const my = ++quickRiskSeq;
+  try {
+    const r = await (await fetch(BASE + `/api/risk?price=${px}&quantity=${qty}&token=${o.token}`)).json();
+    if (my != quickRiskSeq || !quickArmed || r.error) return;   // disarmed, or superseded
+    let line;
+    if (r.firstOrder != 'sl') line = `NO stop rests — ${inr(r.premium)} at risk`;
+    else if (r.risk != null) line = `max loss ${inr(r.risk)} (stop ${(+r.stop).toFixed(2)}, −${r.riskPct}%)`
+      + (r.known ? '' : ` · fallback, ${r.note}`);
+    else line = `max loss UNKNOWN — ${r.note || 'no level yet'}`;
+    // a green 1m bar flips this entry to target-first server-side, and that
+    // entry carries no exchange stop at all, so the premium is the real number
+    const flip = guardCfg.scalpGreenTarget ? ` · green bar → target first, then ${inr(r.premium)} at risk` : '';
+    msg(`B${pct} ${o.tradingsymbol} @ ~${px.toFixed(2)} ×${qty} — ${line}${flip} — click again to send`);
+  } catch (e) { /* the pending line stays on screen */ }
+}
+
 let quickArmed = null, quickTimer = null;
 function disarmQuick() {
   if (quickArmed) { quickArmed.btn.classList.remove('armed'); quickArmed.btn.textContent = quickArmed.label; }
@@ -2495,6 +2531,7 @@ async function quickAction(btn, slot, side, pct) {
       const px = lastLtp[slot];
       const q = resolveQty(o, px);
       msg(`B${pct} ${o.tradingsymbol} @ ~${px ? px.toFixed(2) : '?'} ×${q}${riskText(px, q, null)} — click again to send`);
+      quickRisk(o, px, q, pct);     // replaces the line with the real rupee loss
     }
     quickTimer = setTimeout(disarmQuick, 3000);
     return;
@@ -3024,6 +3061,7 @@ function clearClickLine() {
   if (clickLine) { try { series[clickLine.slot].removePriceLine(clickLine.line); } catch (e) {} clickLine = null; }
 }
 function hideMenu() {
+  riskFromServer = null;        // never quote this answer at some other price
   menu.style.display = 'none';
   clearClickLine();
   if (clickCtx) charts[clickCtx.slot].applyOptions({ handleScroll: true, handleScale: true });
