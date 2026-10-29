@@ -1,5 +1,12 @@
 {
-  "firstOrder": "target",
-  "targetPct": 2,
-  "slPct": 2
+  "firstOrder": "sl",
+  "targetPct": 50,
+  "slPct": 2,
+  "partialPct": 50,
+  "partialMode": "app",
+  "trail": true,
+  "levelGapPct": 2,
+  "levelMaxPct": 60,
+  "slMode": "level",
+  "slMaxPct": 8
 }
