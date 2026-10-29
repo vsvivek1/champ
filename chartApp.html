@@ -344,7 +344,21 @@
       </select>
     </label>
     <button id="btnExitAll" class="danger">EXIT ALL</button>
-    <label title="On every BUY fill the guard rests an SL this far under entry (clamped to the level just below, up to slMaxPct). There is no resting target any more — the app takes the partial and trails the stop.">on fill: SL at −<input id="gSlPct" type="number" step="0.1" min="0.1" max="50" style="width:48px">%</label>
+    <label title="On every BUY fill the guard rests an SL this far under entry (the level just below is the floor — never tighter than this, and there is NO maximum width). There is no resting target any more — the app takes the partial and trails the stop.">on fill: SL at −<input id="gSlPct" type="number" step="0.1" min="0.1" max="50" style="width:48px">%</label>
+    <label title="Where the resting exchange SL goes on a BUY fill.
+breach = one tick under the frozen 3-candle low — the same line the per-tick watcher exits on, so the position carries exactly ONE stop. This is the fix for 29/10, where a frozen level of 9.25 and an 8%-capped SL at 10.30 were both live and the capped one won.
+support = a tick under the immediate clustered support, floor slPct.
+No mode has a maximum-width cap any more. A stop too far for your rupee risk means cut the SIZE, not the stop.
+flat = slPct below entry, nothing else.">stop:
+      <select id="gSlMode" style="width:148px">
+        <option value="breach">3-candle low − 1 tick</option>
+        <option value="level">support (fenced)</option>
+        <option value="pct">flat −SL%</option>
+      </select>
+    </label>
+    <label title="A quick scalp (B50/B100) taken while THAT option's own live 1m bar is green rests the TARGET first instead of the SL: the whole lot at the immediate resistance.
+There is then NO exchange-side stop — the 3-candle line and the per-tick watcher are the only exit, and the risk line will say the whole premium.
+A flat bar, or a minute with no print yet, does NOT count as green. An explicit per-entry choice from the chart menu always wins over this."><input id="gScalpGreen" type="checkbox"> green-bar scalp → target first</label>
     <button id="gSave" class="sec">Save</button>
     <span id="marginTxt">—</span>
     <span id="guardTxt">guard: …</span>
@@ -587,9 +601,11 @@
   <ul>
   <li><b>Target</b> = the immediate resistance above entry (at least <code>levelGapPct</code> away, at most <code>levelMaxPct</code>,
   and always inside the upper circuit band). <code>partialPct</code> of the lot comes off there — the teal <b>PARTIAL</b> line.</li>
-  <li><b>Stop</b> = a tick under the immediate <i>support</i>, fenced in by the percentages: never tighter than <code>slPct</code>
-  (that would be inside the noise), never wider than <code>slMaxPct</code> (that would not be a stop). <code>slMode: "pct"</code>
-  restores the old flat percentage.</li>
+  <li><b>Stop</b> = a tick under the level — the frozen 3-candle low in <code>breach</code> mode, the immediate <i>support</i> in
+  <code>level</code> mode — never tighter than <code>slPct</code> (that would be inside the noise) and with <b>no maximum width</b>.
+  The cap is gone on purpose: on 29/10 the 3-candle low sat further than 8% from the close on ~65% of tradeable bars, so a cap
+  would have overridden the rule on two entries out of three. Too wide = smaller size, not a nearer stop.
+  <code>slMode: "pct"</code> restores the old flat percentage.</li>
   <li><b>Trail</b> — once price <b>clears</b> a resistance by 0.5%, that level becomes the stop: the orange guard line and the
   resting SL's trigger both move up to it. It only ever moves up, and the <b>Risk</b> column shows <code>trailed ×N</code>.</li>
   </ul>
@@ -1397,11 +1413,51 @@ function renderCommentary() {
 }
 setInterval(renderCommentary, 5000);
 
+/*
+The live 1-MINUTE bar per token, kept deliberately separate from
+candleData[] so the red-candle gate reads the same bar no matter which
+timeframe the chart is on. Mirrors liveMinCandle() on the server; this copy
+exists only to grey the buy buttons before the click, the refusal itself is
+still the server's.
+*/
+const minBarByToken = {};
+function pushMinBar(tok, ltp) {
+  const m = Math.floor(Date.now() / 60000) * 60;
+  const b = minBarByToken[tok];
+  if (!b || b.time < m) minBarByToken[tok] = { time: m, open: ltp, close: ltp };
+  else b.close = ltp;
+}
+
+/*
+Red = close below open on that bar. Flat and not-yet-printed both pass, so
+the rule only ever refuses a bar it can actually see falling.
+*/
+function redCandleCheck(slot) {
+  const label = 'Current 1m candle not red';
+  const off = gateState && gateState.settings && gateState.settings.blockRedCandle === false;
+  if (off) return { ok: true, na: true, soft: true, label, detail: 'red-candle filter switched off' };
+  const o = cfg && !cfg.error ? (slot == 1 ? cfg.ce : cfg.pe) : null;
+  if (!o) return { ok: true, na: true, soft: true, label, detail: 'n/a — no chart loaded' };
+  const b = minBarByToken[Number(o.token)];
+  if (!b) return { ok: true, na: true, soft: true, label: `${label} (${o.tradingsymbol})`, detail: 'n/a — no print yet this minute' };
+  const red = b.close < b.open;
+  const pct = b.open > 0 ? ((b.close - b.open) / b.open * 100) : 0;
+  const hhmm = new Date(b.time * 1000).toTimeString().slice(0, 5);
+  return {
+    ok: !red, na: false, soft: true,
+    label: `${label} (${o.tradingsymbol})`,
+    detail: `${hhmm} bar: open ${b.open} → ${b.close} (${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%)`
+      + (red ? ' — falling bar, the fill lands on the minute\'s worst tick'
+             : (b.close == b.open ? ' — flat' : ' — rising'))
+  };
+}
+
 function onTick(token, ltp, ts, vol, oi) {
   // every tick is recorded by token, even for a strike that is not charted:
   // a held position keeps its live P&L whether or not it is on screen
   ltpByToken[Number(token)] = ltp;
   tickAtByToken[Number(token)] = Date.now();
+  pushMinBar(Number(token), ltp);
   if (oi > 0) oiByToken[Number(token)] = oi;   // held strikes too, charted or not
   updateLiveEntries();
   const slot = tokenSlot[token];
@@ -1928,12 +1984,23 @@ function gateReasons() {
 }
 
 // grey every buy button when ANY hard rule (or the soft dead-chart one) says no
+/*
+The red-candle rule is the one gate that is PER LEG -- the CE bar can be
+green while the PE bar is red -- so the buttons are greyed per slot now
+instead of all together. Everything else still applies to both.
+*/
 function greyBuys() {
   const dead = !deadChartCheck().ok;
   const off = gateBlocked() || dead;
+  const why = gateReasons().join(' | ') || (dead ? 'chart is dead' : '');
   for (const b of document.querySelectorAll('button.qb')) {
-    b.classList.toggle('locked', off);
-    b.title = off ? ('NO TRADE: ' + (gateReasons().join(' | ') || 'chart is dead')) : '';
+    const slot = Number(b.dataset.slot || 0);
+    const rc = slot ? redCandleCheck(slot) : { ok: true };
+    const stop = off || !rc.ok;
+    b.classList.toggle('locked', stop);
+    b.title = stop
+      ? ('NO TRADE: ' + [why, rc.ok ? '' : rc.detail].filter(Boolean).join(' | '))
+      : '';
   }
 }
 
@@ -1954,9 +2021,24 @@ function paintGate() {
     + `<span class="${(st.pnl || 0) >= 0 ? 'pos' : 'neg'}">${money(st.pnl)}</span>`
     + ` · streak ${st.lossStreak || 0}L · ${gateState.openPositions} open · click for the rules</span>`;
 
-  const rows = [...(gateState.checks || [])].map(c => ({
-    ok: c.ok, na: /^n\/a/.test(c.detail || ''), label: c.label, detail: c.detail, soft: false, theory: c.theory
-  }));
+  /*
+  The server reports `redcandle` as one row and, with no symbol in the
+  query, always as n/a. The page has the live bar for both legs, so its
+  own row replaces that placeholder -- one per charted leg, since the CE
+  and PE bars disagree all day. Marked soft here because the refusal that
+  counts is still the server's, keyed to whichever symbol is being bought.
+  */
+  const srvRc = (gateState.checks || []).find(c => c.code == 'redcandle');
+  const rows = [...(gateState.checks || [])]
+    .filter(c => c.code != 'redcandle')
+    .map(c => ({
+      ok: c.ok, na: /^n\/a/.test(c.detail || ''), label: c.label, detail: c.detail, soft: false, theory: c.theory
+    }));
+  const rcOff = gateState.settings && gateState.settings.blockRedCandle === false;
+  for (const slot of (rcOff ? [1] : [1, 2])) {   // switched off reads the same for both legs
+    const rc = redCandleCheck(slot);
+    rows.push({ ...rc, theory: srvRc && srvRc.theory });
+  }
   rows.push(dead);
 
   pan.innerHTML = `<div class="rows">` + rows.map(c => {
@@ -1975,6 +2057,7 @@ function paintGate() {
     + `</div>`
     + `<div class="hint">Every ✗ above except the soft one refuses the order server-side — B50/B100, chart BUY and parked BUY triggers all pass through it. Exits are never blocked.
        Tune the numbers with <code>POST /api/noTrade</code> (e.g. <code>{"maxDayLoss":5000,"deadScore":4}</code>) — applies instantly, no restart.
+       <code>blockRedCandle</code> refuses a BUY while that strike's live 1-minute candle is red (close under open), read off the minute bar and not the chart's timeframe — flat bars and bars with no print yet pass. It is per leg, so the CE and PE buttons grey independently. Set <code>{"blockRedCandle":false}</code> to drop it.
        The midday block is no longer a clock: <code>blockDead</code> scores the CE+PE tape on flow, print size, OI movement and spread against today's own median minute, and only refuses when <code>deadScore</code> of those 4 are dead. Set <code>blockLunch:true</code> to put the old 12:00–13:15 window back.</div>`;
 
   const bcf = document.getElementById('btnCountFrom');
@@ -2016,12 +2099,33 @@ document.getElementById('gateBar').onclick = () =>
 document.getElementById('gatePanel2').classList.add('open');
 refreshGate();
 setInterval(refreshGate, 15000);
+/*
+The other rules change on the scale of minutes, so 15s is fine for them.
+A candle's COLOUR flips within a single second, and a buy button that is
+still green from 14 seconds ago is worse than no greying at all -- so the
+button state is re-read every second off the local bar. The click itself
+re-checks live either way; this is only so the button is honest.
+*/
+setInterval(greyBuys, 1000);
 
 /*
 The polite version of the server's 423: do not even send an entry the gate
 would refuse. Exits never call this.
 */
-function blockedByGate(what) {
+function blockedByGate(what, slot) {
+  /*
+  The red bar is a HARD refusal like the server's, not the soft
+  arm-and-click-again the dead chart gets -- so it is tested first and it
+  returns, rather than warning and falling through.
+  */
+  if (slot) {
+    const rc = redCandleCheck(slot);
+    if (!rc.ok) {
+      msg(`⛔ ${what} blocked — ${rc.detail}`);
+      showBlockModal(what, [{ label: rc.label, detail: rc.detail }]);
+      return true;
+    }
+  }
   if (!deadChartCheck().ok && !gateBlocked()) {
     msg(`⚠ ${what}: chart is dead (${deadChartCheck().detail}) — click again within 3s if you still want it`);
     // soft: the second click of the existing arm/confirm flow goes through
@@ -2396,7 +2500,7 @@ async function quickAction(btn, slot, side, pct) {
     return;
   }
   disarmQuick();
-  if (side == 'buy' && blockedByGate(`B${pct}`)) return;
+  if (side == 'buy' && blockedByGate(`B${pct}`, slot)) return;
   msg(`⚡ ${side.toUpperCase()} ${pct}% ${o.tradingsymbol} …`);
   try {
     const r = await fetch(BASE+'/api/quick', {
@@ -2419,6 +2523,7 @@ function buildQuick(el, slot, tag) {
   for (const [side, pct] of [['buy', 100], ['buy', 50], ['sell', 50], ['sell', 100]]) {
     const b = document.createElement('button');
     b.className = side == 'buy' ? 'qb' : 'qs';
+    b.dataset.slot = slot;   // greyBuys() needs to know whose candle to read
     b.textContent = (side == 'buy' ? 'B' : 'S') + pct;
     b.onclick = () => quickAction(b, slot, side, pct);
     el.appendChild(b);
@@ -2442,8 +2547,9 @@ business adding keys there. One-line edits if you want it tighter or wider.
 const AUTO = { R: 2, atrN: 14, atrK: 2, speedMin: 0.7, speedMax: 2 };
 
 let guardCfg = { firstOrder: 'target', targetPct: 50, slPct: 2,
-                 slMode: 'level', slMaxPct: 8, partialPct: 50, trail: true,
-                 levelGapPct: 2, levelMaxPct: 60 };
+                 slMode: 'breach', partialPct: 50, trail: true,
+                 levelGapPct: 2, levelMaxPct: 60,
+                 scalpGreenTarget: true, candleCount: 3 };
 
 function slotForSymbol(sym) {
   if (!cfg || cfg.error) return null;
@@ -2664,19 +2770,26 @@ async function fetchGuardSettings() {
     const s = await (await fetch(BASE+'/api/guardSettings')).json();
     guardCfg = s;   // autoTarget() falls back to the guard's own target %
     document.getElementById('gSlPct').value = s.slPct;
+    if (s.slMode) document.getElementById('gSlMode').value = s.slMode;
+    document.getElementById('gScalpGreen').checked = s.scalpGreenTarget !== false;
   } catch (e) { /* transient */ }
 }
 document.getElementById('gSave').onclick = async () => {
   const body = {
     firstOrder: 'sl',
     targetPct: guardCfg && guardCfg.targetPct != null ? Number(guardCfg.targetPct) : 50,
-    slPct: parseFloat(document.getElementById('gSlPct').value)
+    slPct: parseFloat(document.getElementById('gSlPct').value),
+    slMode: document.getElementById('gSlMode').value,
+    scalpGreenTarget: document.getElementById('gScalpGreen').checked
   };
   const r = await fetch(BASE+'/api/guardSettings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const d = await r.json();
   if (!d.error) { guardCfg = d; updateTgtHint(); }
   msg(d.error ? ('❌ ' + d.error)
-    : `✅ on fill: SL at -${d.slPct}% (applies to the next fill)`);
+    : `✅ on fill: stop = ${d.slMode == 'breach' ? `the ${guardCfg.candleCount || 3}-candle low − 1 tick (uncapped)`
+        : d.slMode == 'level' ? `a tick under the support, floor -${d.slPct}%, uncapped`
+        : `flat -${d.slPct}%`}`
+      + `${d.scalpGreenTarget ? ', green-bar quick scalp rests the target first' : ''} — applies to the next fill`);
 };
 fetchGuardSettings();
 
@@ -3082,17 +3195,17 @@ function riskOf(price, qty, fo) {
   const premium = Math.round(price * qty);
   if (which != 'sl') return { stop: null, risk: null, premium, sl: false };
   const tight = roundTick(price * (1 - guardCfg.slPct / 100));
-  const wide = roundTick(price * (1 - guardCfg.slMaxPct / 100));
   /*
-  slMode 'level' puts the stop a tick under the immediate support, so its
-  exact spot is not knowable from the page -- only the band it must land in.
-  Show the band until the server answers with the real one; never show the
-  tight end alone, which would promise a smaller loss than the order carries.
+  Both level-based modes put the stop a tick under a level this page does not
+  hold ('breach' = the 3-candle low frozen server-side off Kite's own candles,
+  'level' = the clustered support), and NEITHER has a maximum-width cap any
+  more -- so there is no band to quote either. Show nothing and let /api/risk
+  answer in a few ms: the old slPct number promised a loss several times
+  smaller than the order actually carries.
   */
-  const band = guardCfg.slMode == 'level';
-  return { sl: true, premium, band,
-    stop: tight, risk: Math.round((price - tight) * qty), pct: +(((price - tight) / price) * 100).toFixed(2),
-    worstStop: wide, worstRisk: Math.round((price - wide) * qty), worstPct: guardCfg.slMaxPct };
+  if (guardCfg.slMode != 'pct') return { sl: true, premium, breach: true, stop: null, risk: null };
+  return { sl: true, premium,
+    stop: tight, risk: Math.round((price - tight) * qty), pct: +(((price - tight) / price) * 100).toFixed(2) };
 }
 const inr = n => '₹' + Math.round(n).toLocaleString('en-IN');
 
@@ -3103,9 +3216,9 @@ function riskHtmlFrom(r, price, qty) {
     return `<div class="risk open" id="mRisk">risk <b>${inr(r.premium)}</b> `
       + `<span class="pxdim">— target first, so no stop rests at the exchange</span></div>`;
   }
-  if (r.band && !r.known) {
-    return `<div class="risk" id="mRisk">risk <b>${inr(r.risk)}–${inr(r.worstRisk)}</b> `
-      + `<span class="pxdim">(stop at the support, −${guardCfg.slPct}% to −${r.worstPct}%)</span><br>`
+  if (r.breach && r.risk == null) {
+    return `<div class="risk" id="mRisk">risk <b>…</b> `
+      + `<span class="pxdim">(stop = a tick under the level, uncapped — asking the server)</span><br>`
       + `<span class="pxdim">premium ${inr(r.premium)}</span></div>`;
   }
   // rr under 1.5 means the partial pays less than 1.5x what the stop costs
@@ -3127,7 +3240,8 @@ function riskText(price, qty, fo) {
   if (!r.sl) return ` — NO stop, ${inr(r.premium)} at risk`;
   const svr = riskFromServer;
   if (svr && svr.known && svr.risk != null) return ` — risk ${inr(svr.risk)}`;
-  return r.band ? ` — risk ${inr(r.risk)}–${inr(r.worstRisk)}` : ` — risk ${inr(r.risk)}`;
+  if (r.breach) return ` — risk: a tick under the level, pending`;
+  return ` — risk ${inr(r.risk)}`;
 }
 
 /*
@@ -3151,7 +3265,7 @@ async function updateRisk() {
     if (my != riskSeq || r.error) return;             // the line moved again: this answer is stale
     riskFromServer = r;
     const now = document.getElementById('mRisk');
-    if (now) now.outerHTML = riskHtmlFrom({ ...r, sl: r.stop != null, band: r.slMode == 'level' }, price, qty);
+    if (now) now.outerHTML = riskHtmlFrom({ ...r, sl: r.stop != null }, price, qty);
   } catch (e) { /* the band stays on screen */ }
 }
 

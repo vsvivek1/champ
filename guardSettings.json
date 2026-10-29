@@ -7,6 +7,6 @@
   "trail": true,
   "levelGapPct": 2,
   "levelMaxPct": 60,
-  "slMode": "level",
-  "slMaxPct": 8
+  "slMode": "breach",
+  "scalpGreenTarget": true
 }

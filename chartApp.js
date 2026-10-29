@@ -80,6 +80,7 @@ let kite, ticker;
 let optionInstruments = [];          // NFO + BFO option master
 const lotSizeByToken = new Map();
 const instByToken = new Map();       // token -> the option's master row (symbol, exchange)
+const tokenBySymbol = new Map();     // tradingsymbol -> token (reverse of the above)
 
 // tokens the dashboard currently charts (spot + CE + PE)
 let chartedTokens = [];
@@ -253,6 +254,61 @@ function pushSecTick(tok, ltp, cumVol, oi) {
         if (oi) c.oi = oi;
     }
 }
+/*
+THE LIVE 1-MINUTE CANDLE, built off the 5s buckets above rather than off
+whatever timeframe a chart happens to be showing. The red-candle gate has
+to mean the same thing whether the screen is on 5s or on 15m, so it reads
+this and not `candleData`.
+
+Returns null only when no tick has printed in the current minute at all --
+the caller treats that as "no opinion", which is the same answer a flat bar
+gets, so there is no window where the absence of data reads as a green light
+it has not earned.
+*/
+function liveMinCandle(tok) {
+    const arr = secCandles.get(Number(tok));
+    if (!arr || !arr.length) return null;
+    const bucket = Math.floor(Date.now() / 1000 / 60) * 60;
+    let open = null, high = -Infinity, low = Infinity, close = null, n = 0;
+    for (let i = arr.length - 1; i >= 0; i--) {
+        const c = arr[i];
+        if (c.time < bucket) break;
+        if (close == null) close = c.close;
+        open = c.open;
+        high = Math.max(high, c.high);
+        low = Math.min(low, c.low);
+        n++;
+    }
+    if (!n) return null;
+    return { time: bucket, open, high, low, close, buckets: n };
+}
+
+/*
+The breach level off our OWN tick buckets: min low of the last N COMPLETED
+1-minute bars. computeBreachLevel() stays the authority at entry (it reads
+Kite historical, which is what the frozen level must agree with); this one
+exists so the ADVISORY stops -- setup alerts, /api/levels, the risk preview
+-- quote the same number the SL will actually rest at instead of a swing
+support the order will never use. The forming minute is excluded: a retest
+of a low the live bar itself just printed is not a breach.
+*/
+function breachFromSec(tok, count) {
+    const arr = secCandles.get(Number(tok));
+    if (!arr || !arr.length) return null;
+    const cur = Math.floor(Date.now() / 1000 / 60) * 60;
+    const lowByMin = new Map();
+    for (const c of arr) {
+        const m = Math.floor(c.time / 60) * 60;
+        if (m >= cur) continue;                       // the forming bar is not completed
+        const prev = lowByMin.get(m);
+        if (prev == null || c.low < prev) lowByMin.set(m, c.low);
+    }
+    if (!lowByMin.size) return null;
+    const mins = [...lowByMin.keys()].sort((a, b) => a - b).slice(-count);
+    const low = Math.min(...mins.map(m => lowByMin.get(m)));
+    return Number.isFinite(low) ? low : null;
+}
+
 const TRIG_FILE = path.join(__dirname, 'chartTriggers.json');
 
 function saveTriggers() {
@@ -589,8 +645,35 @@ const GUARD_DEFAULTS = {
     trail: true,          // a cleared resistance becomes the new stop
     levelGapPct: 2,       // ignore a resistance closer than this (inside the noise)
     levelMaxPct: 60,      // ignore one further than this (not a target, a dream)
-    slMode: 'level',      // 'level' = stop just under the immediate support, 'pct' = flat slPct
-    slMaxPct: 8           // and never further from entry than this, whatever the support says
+    /*
+    Where the resting exchange SL goes:
+      'breach'  one TICK under the frozen CANDLE_COUNT-candle low -- the SAME
+                level the per-tick watcher exits on, so a position carries
+                exactly ONE stop. Two sources used to race and the exchange
+                one always won: on 29/10 the frozen 3-candle low was 9.25 and
+                the rested SL was an 8%-capped 10.30, which took the trade out
+                1.05 above the level that was supposed to decide it.
+      'level'   a tick under the immediate clustered support, no further
+                fence than the slPct floor
+      'pct'     flat slPct under entry
+
+    There is NO maximum-width cap on any of them. slMaxPct used to exist and
+    was deleted on 29/10/2026 at the user's instruction: on expiry day the
+    3-candle low sat further than 8% from the close on ~65% of tradeable
+    bars, so the cap was overriding the actual rule on two entries out of
+    three -- and a capped stop lands ABOVE the level it was meant to hide
+    under, which is how the 14:15 trade exited 1.05 above its own 9.25 line.
+    A stop that is too wide is a sizing problem, not a stop problem.
+    */
+    slMode: 'breach',
+    /*
+    Quick scalp on a rising 1m bar: rest the TARGET first instead of the SL.
+    A scalp taken while the candle is green is a momentum trade -- the race is
+    to the exit, not to the stop. Applies ONLY to /api/quick with no explicit
+    per-entry choice; the app-side breach line is armed either way, and a
+    refused target still falls back to an SL.
+    */
+    scalpGreenTarget: true
 };
 const PIVOT_WIN = 2;            // bars each side of a 1-min swing pivot
 const LEVEL_CLUSTER_PCT = 0.75; // pivots within this % of each other are one level
@@ -601,9 +684,17 @@ const TRADE_LOG_FILE = path.join(__dirname, 'tradeLog.json');
 
 const guardStartedAt = Date.now();
 
-function roundDownToTick(v) { return +(Math.floor(v / TICK) * TICK).toFixed(2); }
+/*
+EPS is not cosmetic. 9.2 / 0.05 is 183.99999999999997 in binary floating
+point, so a plain Math.floor() pushed 1395 of the first 4000 exact tick
+values a WHOLE TICK down -- a stop asked to sit at 9.20 rested at 9.15, and
+which prices it happened to apply to was arbitrary. Nudge before truncating
+so a value already on a tick stays on it.
+*/
+const TICK_EPS = 1e-9;
+function roundDownToTick(v) { return +(Math.floor(v / TICK + TICK_EPS) * TICK).toFixed(2); }
 // a target rounds UP so the locked profit is never less than targetPct
-function roundUpToTick(v) { return +(Math.ceil(v / TICK) * TICK).toFixed(2); }
+function roundUpToTick(v) { return +(Math.ceil(v / TICK - TICK_EPS) * TICK).toFixed(2); }
 
 /*
 What to place on a BUY fill -- editable from the dashboard, stored in
@@ -620,9 +711,9 @@ function readGuardSettings() {
         if (!(s.partialPct >= 0 && s.partialPct < 100)) s.partialPct = def.partialPct;
         if (!(s.levelGapPct >= 0 && s.levelGapPct <= 50)) s.levelGapPct = def.levelGapPct;
         if (!(s.levelMaxPct > 0 && s.levelMaxPct <= 300)) s.levelMaxPct = def.levelMaxPct;
-        if (!['level', 'pct'].includes(s.slMode)) s.slMode = def.slMode;
+        if (!['level', 'pct', 'breach'].includes(s.slMode)) s.slMode = def.slMode;
+        s.scalpGreenTarget = s.scalpGreenTarget !== false;
         if (!['app', 'exchange'].includes(s.partialMode)) s.partialMode = def.partialMode;
-        if (!(s.slMaxPct >= s.slPct && s.slMaxPct <= 50)) s.slMaxPct = Math.max(s.slPct, def.slMaxPct);
         s.trail = s.trail !== false;
         return s;
     } catch (e) {
@@ -1343,6 +1434,9 @@ const NO_TRADE_DEFAULTS = {
     blockWrongWay: true,      // a CE needs the index biased up, a PE down
     emaMin: 20,               // minutes in the direction EMA
 
+    /* red-candle gate -- do not buy into a falling bar */
+    blockRedCandle: true,     // refuse the buy while the live 1m candle is red
+
     /* participation gate -- see the PARTICIPATION block above */
     blockDead: true,          // refuse entries once size has left the tape
     partWin: 10,              // minutes averaged for "right now"
@@ -1447,6 +1541,8 @@ const RULE_THEORY = {
 
     wrongway: 'Buying a CE is a long delta bet and a PE is a short delta bet, so the position has a side whether or not the trade was framed that way. Price above a rising EMA and below a falling one is the cheapest honest read of which side the index is paying. Taking the other side means needing the index to turn before theta runs out - paying for time while betting against the drift.',
 
+    redcandle: 'A red bar means the last print is below where the minute opened: right now, in the only timeframe an entry actually lives in, sellers are winning. Buying into that is paying the ask while the bar is still falling, and the fill lands at the worst price the minute has printed so far.\n\nWhat the rule buys you is not direction, it is ENTRY PRICE. The bar being green does not make the trade right -- it makes the fill land on a tick that something is already lifting, which is the difference between a stop placed under a low and a stop placed under nothing. On a tape where the median 1-minute range is 15-20% of premium, that one tick of position is worth more than most of the other rules combined.\n\nRead off the live 1-MINUTE candle regardless of what the chart is showing, so the answer cannot be changed by switching timeframes. Close below open is red; close equal to open, or a minute with no print yet, is flat and passes -- the rule only ever refuses a bar it can see going down.\n\nThe honest caveat: this is a momentum entry filter and it will cost you the exact bottom. The best fills of a reversal are red bars by definition, and a V-shaped low will always refuse until the minute has already turned. It trades the first tick of the move for not being the one holding the falling knife.',
+
     guarded: 'A position with no resting SELL is protected only by your attention, and attention is exactly what goes missing in the move that needs it. One resting order per position, placed on the fill, is the difference between a known loss and an open-ended one.',
 
     open_count: 'Two positions do not halve the risk, they double the number of things needing a decision in the same moment. Attention is the scarce resource intraday, not capital.',
@@ -1540,6 +1636,32 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
             reg.bias != want,
             `index ${reg.px} vs ${s.emaMin}-min EMA ${reg.ema} (slope ${reg.slope >= 0 ? '+' : ''}${reg.slope}) — bias ${reg.bias}` +
             (reg.bias != want ? ` — a ${leg.toUpperCase()} here bets against the index` : ''));
+    }
+
+    /*
+    Red candle. The only rule that reads the instrument you are about to buy
+    rather than the index, so it needs a symbol before it has an opinion.
+    */
+    if (!s.blockRedCandle) {
+        chk.push({ code: 'redcandle', label: 'Current 1m candle not red', ok: true, blocked: false, hard: false, detail: 'red-candle filter switched off' });
+    } else if (!tradingsymbol) {
+        na('redcandle', 'Current 1m candle not red', 'n/a until a symbol is picked');
+    } else {
+        const rcTok = tokenBySymbol.get(tradingsymbol);
+        const bar = rcTok ? liveMinCandle(rcTok) : null;
+        if (!bar) {
+            na('redcandle', 'Current 1m candle not red',
+                rcTok ? `n/a — no print yet this minute on ${tradingsymbol}` : `n/a — ${tradingsymbol} is not a known option`);
+        } else {
+            const red = bar.close < bar.open;
+            const pct = bar.open > 0 ? +((bar.close - bar.open) / bar.open * 100).toFixed(1) : 0;
+            add('redcandle', 'Current 1m candle not red',
+                red,
+                `${dayjs.unix(bar.time).format('HH:mm')} bar: open ${bar.open} → ${bar.close} (${pct >= 0 ? '+' : ''}${pct}%)` +
+                (red
+                    ? ' — this is a falling bar: the fill would land on the worst tick the minute has printed'
+                    : (bar.close == bar.open ? ' — flat' : ' — rising')));
+        }
     }
 
     /*
@@ -1925,6 +2047,16 @@ async function placeFirstOrder({ instrument_token, tradingsymbol, exchange, quan
     }
 
     /*
+    A per-entry 'target' (the chart's own choice, or a green-candle quick
+    scalp) now BEATS the partial split: a scalp wants its exit resting at the
+    exchange, not an SL plus an app-side profit-take. Only the per-entry
+    choice does this -- the standing firstOrder setting keeps the old
+    stop-first behaviour -- and only if the circuit clamp above did not
+    already downgrade it to an SL.
+    */
+    const targetFirst = perEntry == 'target' && which == 'target';
+
+    /*
     Where the money comes off: the immediate resistance on this option's own
     chart, not a round +N%. Part of the lot rests there as a LIMIT, the rest
     keeps a real SL at the exchange, and once price CLEARS that resistance
@@ -1939,7 +2071,13 @@ async function placeFirstOrder({ instrument_token, tradingsymbol, exchange, quan
     const lot = lotSizeByToken.get(Number(instrument_token)) || quantity;
     const res = pickResistance(levels, buyPrice, s, upper);
     const sup = pickSupport(levels, buyPrice);
-    const planned = plannedStop(buyPrice, levels, s);
+    /*
+    The level was frozen by freezeBreachLevel() immediately before this call,
+    so in 'breach' mode the resting SL and the per-tick watcher are the same
+    number by construction. No second Kite call, no chance of drift.
+    */
+    const frozen = breachLevelByToken.get(Number(instrument_token));
+    const planned = plannedStop(buyPrice, levels, s, frozen);
 
     let partial = null;
     if (res && s.partialPct > 0) {
@@ -1958,10 +2096,12 @@ async function placeFirstOrder({ instrument_token, tradingsymbol, exchange, quan
             return { part: { order_type: "SL", price: limit, trigger_price: trigger },
                 desc: `SL trigger ${trigger} @ ${limit} — ${planned.why}, ${(((buyPrice - trigger) / buyPrice) * 100).toFixed(1)}% under ${buyPrice}` };
         }
-        if (kind == 'level') {
+        if (kind == 'level' || kind == 'scalp') {
             const pct = (((price - buyPrice) / buyPrice) * 100).toFixed(1);
             return { part: { order_type: "LIMIT", price },
-                desc: `partial target ${price} at the immediate resistance (+${pct}%)` };
+                desc: kind == 'scalp'
+                    ? `SCALP exit ${price} at the immediate resistance (+${pct}%), whole lot, NO exchange stop`
+                    : `partial target ${price} at the immediate resistance (+${pct}%)` };
         }
         let targetPrice = roundUpToTick(buyPrice * (1 + s.targetPct / 100));
         if (upper && targetPrice >= upper) targetPrice = roundDownToTick(upper * 0.995);
@@ -2010,6 +2150,22 @@ async function placeFirstOrder({ instrument_token, tradingsymbol, exchange, quan
     };
 
     try {
+
+        if (targetFirst) {
+            /*
+            Whole lot resting at the immediate resistance -- that is the scalp.
+            No resistance found means no level to scalp into, so fall back to
+            the +targetPct% LIMIT. Either way there is no exchange-side stop:
+            the frozen breach line and the per-tick watcher are the exit, and
+            sayRisk() reports the whole premium, not a stop distance.
+            */
+            const ids = res ? await send('scalp', quantity, res.price) : await send('target', quantity);
+            console.log(`⚡ ${tradingsymbol}: TARGET FIRST (per-entry) — ${res ? `whole lot at the resistance ${res.price}` : `+${s.targetPct}% LIMIT, no resistance found`}; the ${CANDLE_COUNT}-candle line is the only stop until the next guard refresh`);
+            sayRisk(null, res ? 'scalp' : 'target');
+            armTrail(instrument_token, tradingsymbol, { entry: buyPrice, levels, partial: null, support: sup, trail: s.trail, slIds: [] });
+            markProtected(instrument_token);
+            return ids;
+        }
 
         if (partial && s.partialMode == 'app') {
             /*
@@ -2131,20 +2287,23 @@ async function riskPreview({ price, quantity, firstOrder, token }) {
     /*
     With slMode 'level' the stop is a tick under the immediate support, so
     the honest preview needs that support -- hence the token. Without one
-    the exact spot is unknowable in advance, so the reply carries the BAND
-    the stop must land in (slPct .. slMaxPct) and the page shows a range
-    rather than a single number it would be wrong about.
+    the exact spot is unknowable in advance, so the reply says so instead of
+    quoting a single number it would be wrong about.
     */
     let levels = null, known = true;
-    if (s.slMode == 'level') {
-        if (Number(token) > 0) {
-            try { levels = await computeLevels(Number(token)); } catch (e) { known = false; }
-        } else {
-            known = false;
-        }
+    if (Number(token) > 0) {
+        // levels are wanted in every mode: the resistance is the partial
+        // target and so the R:R, whatever decides the stop
+        try { levels = await computeLevels(Number(token)); }
+        catch (e) { if (s.slMode == 'level') known = false; }
+    } else if (s.slMode == 'level') {
+        known = false;
     }
-    const { stop, why } = plannedStop(price, levels, s);
-    const widest = roundDownToTick(price * (1 - s.slMaxPct / 100));
+    const breach = Number(token) > 0
+        ? (breachLevelByToken.get(Number(token)) != null ? breachLevelByToken.get(Number(token)) : breachFromSec(token, CANDLE_COUNT))
+        : null;
+    if (s.slMode == 'breach' && !(breach > 0)) known = false;
+    const { stop, why } = plannedStop(price, levels, s, breach);
     /*
     The partial target is the immediate resistance, so its reward-to-risk is
     knowable at entry -- and worth reporting, because a level only 2% up
@@ -2158,10 +2317,13 @@ async function riskPreview({ price, quantity, firstOrder, token }) {
         target: res ? res.price : null, rr,
         risk: +((price - stop) * quantity).toFixed(0),
         riskPct: +(((price - stop) / price) * 100).toFixed(2),
-        worstStop: widest,
-        worstRisk: +((price - widest) * quantity).toFixed(0),
-        worstPct: s.slMaxPct,
-        note: known ? why : `stop lands between ${s.slPct}% and ${s.slMaxPct}% under entry, at the immediate support`
+        // no mode is capped any more, so there is no "worst case" to quote:
+        // the stop is wherever the level puts it. Kept as nulls so an older
+        // cached page that still reads these fields renders nothing, not a lie.
+        worstStop: null, worstRisk: null, worstPct: null,
+        note: known ? why : (s.slMode == 'breach'
+            ? `no ${CANDLE_COUNT} completed 1m candles on this token yet — the stop would fall back to a flat ${s.slPct}%`
+            : `no support located yet — the stop lands a tick under the immediate support, floor ${s.slPct}%`)
     };
 }
 
@@ -2355,7 +2517,7 @@ async function checkSetups(token, ltp) {
         if (fired != null && min - fired < cfg.cooldownMin) continue;
         setupLastFire.set(key, min);
 
-        const ps = plannedStop(ltp, lv, gset);
+        const ps = plannedStop(ltp, lv, gset, breachFromSec(token, CANDLE_COUNT));
         const res = pickResistance(lv, ltp, gset, null);
         const target = res ? res.price : null;
         const rr = (target && ps.stop < ltp) ? +((target - ltp) / (ltp - ps.stop)).toFixed(2) : null;
@@ -2422,7 +2584,7 @@ async function checkOiSignal(token, ltp, oi) {
     try {
         const s = readGuardSettings();
         const lv = await computeLevels(token);
-        const ps = plannedStop(ltp, lv, s);
+        const ps = plannedStop(ltp, lv, s, breachFromSec(token, CANDLE_COUNT));
         stop = ps.stop; why = ps.why;
         const res = pickResistance(lv, ltp, s, null);
         target = res ? res.price : null;
@@ -2564,22 +2726,32 @@ wherever the percentage lands, which on a quiet option is inside the
 spread and on a fast one is miles past the level that mattered. So the
 LEVEL picks the spot and the PERCENTAGES fence it in:
 
-  slPct     the tightest it may ever be  (closer than this is noise)
-  slMaxPct  the widest it may ever be    (further than this is not a stop)
+  slPct  the tightest it may ever be  (closer than this is noise)
 
-A tick under the support, clamped into that band. slMode 'pct' restores
-the old flat behaviour, and the band is why the risk figure stays bounded:
-worst case is always slMaxPct of the premium.
+A tick under the level, with slPct as the only floor. There is deliberately
+no ceiling: a stop is never moved closer than the level just because the
+level is far. If the level is too far for the risk you want, cut the SIZE,
+not the stop. slMode 'pct' restores the old flat behaviour.
 */
-function plannedStop(entry, levels, s) {
+function plannedStop(entry, levels, s, breach) {
     const tight = roundDownToTick(entry * (1 - s.slPct / 100));
-    const wide = roundDownToTick(entry * (1 - s.slMaxPct / 100));
+    /*
+    'breach' mode: the stop IS the breach level, one tick under it. If the
+    level is unknown (no completed candles yet) there is nothing to be one
+    tick under, so fall back to the flat slPct rather than invent a number.
+    */
+    if (s.slMode == 'breach' && breach > 0) {
+        const raw = roundDownToTick(breach - TICK);
+        if (raw <= 0) return { stop: tight, why: `${CANDLE_COUNT}-candle low ${breach} is one tick off zero — flat ${s.slPct}%` };
+        const pct = ((entry - raw) / entry * 100).toFixed(1);
+        return { stop: raw, why: `one tick under the ${CANDLE_COUNT}-candle low ${breach} (${pct}% under entry, uncapped)` };
+    }
+    if (s.slMode == 'breach') return { stop: tight, why: `no ${CANDLE_COUNT}-candle low yet — flat ${s.slPct}%` };
     if (s.slMode != 'level') return { stop: tight, why: `flat ${s.slPct}% under entry` };
     const sup = pickSupport(levels, entry);
     if (!sup) return { stop: tight, why: `no support found below entry — flat ${s.slPct}%` };
     const raw = roundDownToTick(sup.price - TICK);        // a tick UNDER the level, not on it
     if (raw > tight) return { stop: tight, why: `support ${sup.price} is inside the ${s.slPct}% noise band — held at ${s.slPct}%` };
-    if (raw < wide) return { stop: wide, why: `support ${sup.price} is further than ${s.slMaxPct}% — capped at ${s.slMaxPct}%` };
     return { stop: raw, why: `a tick under the immediate support ${sup.price} (${sup.touches} touch${sup.touches > 1 ? 'es' : ''})` };
 }
 
@@ -3118,6 +3290,7 @@ async function main() {
         if ((i.exchange == "NFO" || i.exchange == "BFO") && (i.instrument_type == "CE" || i.instrument_type == "PE")) {
             optionInstruments.push(i);
             instByToken.set(Number(i.instrument_token), i);
+            tokenBySymbol.set(i.tradingsymbol, Number(i.instrument_token));
         }
     }
     console.log(`Loaded ${optionInstruments.length} option instruments`);
@@ -3341,7 +3514,21 @@ async function main() {
             } catch (e) {
                 data = await kite.getHistoricalData(token, interval, from, to); // index spot has no OI
             }
-            if (intraday) data = lastSession(data);
+            /*
+            ?date=YYYY-MM-DD picks THAT session instead of the latest one, so
+            today's per-minute behaviour can be compared against a prior day
+            without a second data source. Read-only; an unknown date returns
+            an empty array rather than silently falling back to today, which
+            would make a comparison quietly compare today with itself.
+            */
+            const wantDate = String(req.query.date || '').trim();
+            if (intraday) {
+                if (/^\d{4}-\d{2}-\d{2}$/.test(wantDate)) {
+                    data = data.filter(c => dayjs(c.date).format('YYYY-MM-DD') == wantDate);
+                } else {
+                    data = lastSession(data);
+                }
+            }
             res.json(data.map(c => ({
                 time: Math.floor(new Date(c.date).getTime() / 1000),
                 open: c.open, high: c.high, low: c.low, close: c.close,
@@ -3508,12 +3695,28 @@ async function main() {
                 const price = roundToTick(ltp * 1.02);
                 const qty = Math.floor((cash * p / 100) / price / lot) * lot;
                 if (qty < lot) return res.status(400).json({ error: `margin too low for 1 lot (cash ${Math.round(cash)}, lot ~${Math.round(price * lot)})` });
-                if (['target', 'sl'].includes(firstOrder)) setFirstOrderOverride(token, firstOrder);
+                /*
+                A quick scalp taken while the option's own live 1m bar is
+                RISING rests the target first (scalpGreenTarget). An explicit
+                choice from the chart always wins, and a flat or not-yet-
+                printing bar is not green -- only close > open flips it.
+                */
+                let effFirst = firstOrder;
+                if (['target', 'sl'].includes(firstOrder)) {
+                    setFirstOrderOverride(token, firstOrder);
+                } else if (readGuardSettings().scalpGreenTarget) {
+                    const bar = liveMinCandle(token);
+                    if (bar && bar.close > bar.open) {
+                        effFirst = 'target';
+                        setFirstOrderOverride(token, 'target');
+                        console.log(`⚡ scalpGreenTarget: ${tradingsymbol} 1m bar ${bar.open} → ${bar.close} is green — TARGET rests first on this fill`);
+                    }
+                }
                 const ids = await placeOrderInFreezeChunks(kite, {
                     exchange, tradingsymbol, transaction_type: "BUY", quantity: qty,
                     order_type: "LIMIT", price, product: "NRML", validity: "DAY", tag: "QUICKB"
                 }, lot);
-                const risk = await riskPreview({ price, quantity: qty, firstOrder, token });
+                const risk = await riskPreview({ price, quantity: qty, firstOrder: effFirst, token });
                 console.log(`⚡ QUICK B${p}: BUY ${qty} ${tradingsymbol} @ ${price} → ${ids.join(',')}`
                     + (risk.risk != null ? ` — risk ₹${risk.risk} (stop ${risk.stop})` : ` — NO stop: ₹${risk.premium} premium at risk`));
                 return res.json({ side, pct: p, qty, price, order_ids: ids, risk });
@@ -3564,7 +3767,9 @@ async function main() {
     guard re-reads the file at every placement, so a change applies to the
     next fill with no restart.
     */
-    app.get('/api/guardSettings', (req, res) => res.json(readGuardSettings()));
+    // candleCount is not a setting (it is a code constant) but the page has to
+    // name the level correctly in the risk line, so it ships with the reply
+    app.get('/api/guardSettings', (req, res) => res.json({ ...readGuardSettings(), candleCount: CANDLE_COUNT }));
     app.post('/api/guardSettings', (req, res) => {
         const { firstOrder, targetPct, slPct } = req.body || {};
         const s = readGuardSettings();
@@ -3582,7 +3787,8 @@ async function main() {
             if (!(v > 0 && v <= 50)) return res.status(400).json({ error: "slPct must be 0–50" });
             s.slPct = v;
         }
-        const { partialPct, trail, slMode, slMaxPct, levelGapPct, levelMaxPct } = req.body || {};
+        const { partialPct, trail, slMode, levelGapPct, levelMaxPct, scalpGreenTarget } = req.body || {};
+        if (scalpGreenTarget != null) s.scalpGreenTarget = !!scalpGreenTarget;
         if (partialPct != null) {
             const v = Number(partialPct);
             if (!(v >= 0 && v < 100)) return res.status(400).json({ error: "partialPct must be 0–99" });
@@ -3594,13 +3800,8 @@ async function main() {
             s.partialMode = req.body.partialMode;
         }
         if (slMode != null) {
-            if (!['level', 'pct'].includes(slMode)) return res.status(400).json({ error: "slMode must be 'level' or 'pct'" });
+            if (!['level', 'pct', 'breach'].includes(slMode)) return res.status(400).json({ error: "slMode must be 'breach', 'level' or 'pct'" });
             s.slMode = slMode;
-        }
-        if (slMaxPct != null) {
-            const v = Number(slMaxPct);
-            if (!(v >= s.slPct && v <= 50)) return res.status(400).json({ error: `slMaxPct must be ${s.slPct}–50` });
-            s.slMaxPct = v;
         }
         if (levelGapPct != null) {
             const v = Number(levelGapPct);
@@ -3614,7 +3815,8 @@ async function main() {
         }
         try { fs.writeFileSync(GUARD_SETTINGS_FILE, JSON.stringify(s, null, 2)); }
         catch (e) { return res.status(500).json({ error: String(e.message || e) }); }
-        console.log(`⚙️ guardSettings: on fill → ${s.firstOrder}, stop ${s.slMode == 'level' ? `at the support (${s.slPct}–${s.slMaxPct}%)` : `${s.slPct}% flat`}`
+        console.log(`⚙️ guardSettings: on fill → ${s.firstOrder}${s.scalpGreenTarget ? ' (quick scalp on a green 1m bar → target first)' : ''}`
+            + `, stop ${s.slMode == 'breach' ? `one tick under the ${CANDLE_COUNT}-candle low` : s.slMode == 'level' ? `a tick under the support (floor ${s.slPct}%)` : `${s.slPct}% flat`} — uncapped`
             + `, partial ${s.partialPct}% at the resistance (${s.partialMode == 'app' ? 'app-side, stop covers the full lot' : 'resting LIMIT, stop covers the remainder only'})`
             + `, trail ${s.trail ? 'on' : 'off'}`);
         res.json(s);
@@ -3884,7 +4086,7 @@ async function main() {
                 const s = readGuardSettings();
                 const px = Number(req.query.price) || null;
                 const r = px ? pickResistance(lv, px, s, null) : null;
-                const st = px ? plannedStop(px, lv, s) : null;
+                const st = px ? plannedStop(px, lv, s, breachFromSec(token, CANDLE_COUNT)) : null;
                 return res.json({ token, live: false, levels: lv,
                     resistance: r, support: px ? pickSupport(lv, px) : null,
                     plannedStop: st,
@@ -4070,7 +4272,10 @@ async function main() {
     loadLock();
     guardRefresh();
     setInterval(guardRefresh, GUARD_REFRESH_MS);
-    console.log(`🛡 built-in guard armed (refresh ${GUARD_REFRESH_MS / 1000}s, breach = ${CANDLE_COUNT}-candle low, on fill → ${readGuardSettings().firstOrder})`);
+    const gsb = readGuardSettings();
+    console.log(`🛡 built-in guard armed (refresh ${GUARD_REFRESH_MS / 1000}s, breach = ${CANDLE_COUNT}-candle low, on fill → ${gsb.firstOrder}`
+        + `, resting SL = ${gsb.slMode == 'breach' ? `the breach level − 1 tick (ONE stop)` : gsb.slMode == 'level' ? `a tick under the support (floor ${gsb.slPct}%)` : `flat ${gsb.slPct}%`}, NO max-width cap`
+        + `${gsb.scalpGreenTarget ? ', green-bar quick scalp → target first' : ''})`);
 
     const server = app.listen(PORT, () => console.log(`🌐 chartApp on http://localhost:${PORT}`));
 
