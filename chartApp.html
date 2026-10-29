@@ -330,7 +330,6 @@
       <option value="price">₹</option>
       <option value="pct">%</option>
     </select>
-    <input id="slPrice" type="number" step="0.05" placeholder="SL limit (opt, ₹)" title="optional absolute limit price for the SL order; always ₹, never %">
     <button id="btnSl" class="sec">Set / Modify SL</button>
     <span id="tgtHint" style="color:var(--dim);font-size:11px"></span>
     <label>buy <input id="buyQty" type="number" step="1" placeholder="50" style="width:60px">
@@ -340,14 +339,7 @@
       </select>
     </label>
     <button id="btnExitAll" class="danger">EXIT ALL</button>
-    <label>on fill <select id="gFirst">
-      <option value="target">Target first</option>
-      <option value="sl">SL first</option>
-    </select></label>
-    <input id="gTgtPct" type="range" min="0.5" max="50" step="0.5" value="50" style="width:110px;vertical-align:middle;accent-color:#4caf50" title="target % (slider)">
-    <span id="gTgtPctOut" style="color:var(--dim);display:inline-block;min-width:52px">—% tgt</span>
-    <input id="gSlPct" type="number" step="0.1" min="0.1" max="50" style="width:48px" title="SL %">
-    <span style="color:var(--dim)">% sl</span>
+    <label title="On every BUY fill the guard rests an SL this far under entry (clamped to the level just below, up to slMaxPct). There is no resting target any more — the app takes the partial and trails the stop.">on fill: SL at −<input id="gSlPct" type="number" step="0.1" min="0.1" max="50" style="width:48px">%</label>
     <button id="gSave" class="sec">Save</button>
     <span id="marginTxt">—</span>
     <span id="guardTxt">guard: …</span>
@@ -533,13 +525,15 @@
   <div>The <b>₹ / %</b> dropdown beside the target and SL boxes decides how your number is read. <b>₹</b> = an
   absolute price, as before. <b>%</b> = a percentage off the selected position's entry — target goes above entry,
   SL below, and the result is rounded to the 0.05 tick. The resolved price is previewed next to the buttons before
-  you send, and the confirmation message reports the price that actually went to the exchange. "SL limit (opt)" is
-  always an absolute price. % needs a known entry price, so it is rejected on a position that has not filled yet.</div>
+  you send, and the confirmation message reports the price that actually went to the exchange. The SL goes out as an
+  SL-M on the trigger, so there is no separate limit box. % needs a known entry price, so it is rejected on a
+  position that has not filled yet.</div>
 
   <h4>Target or SL on this entry</h4>
-  <div>The panel's <b>on fill</b> dropdown is the global default for every fill. Every click menu now has its own
-  <b>on fill</b> picker, so one entry can rest an <b>SL first</b> instead of a target without touching that global
-  and having to switch it back. Leave it on "panel default" to behave exactly as before. The choice is shown on the
+  <div>The global default is now fixed at <b>SL first</b> — the panel's old on-fill dropdown and target-% slider are
+  gone, because a resting target was what hard-capped every win. Every click menu still has its own <b>on fill</b>
+  picker, so one entry can rest a target instead if you really want one. Leave it on "panel default" (SL first) for
+  the normal path: exchange SL, in-app partial at the first resistance, stop trailed up behind cleared levels. The choice is shown on the
   CONFIRM button and on the pending-trigger chip (<code>→ SL first</code>), travels with the entry, and the guard
   applies it to <b>that one fill only</b> — the next fill is back to the panel default. It is ignored by the
   SELL/EXIT buttons (they close a position, they do not create a fill), and the B100/B50 quick buttons are one-click
@@ -558,7 +552,7 @@
   <code>AUTO</code> constants at the top of the script.</div>
 
   <h4>Panel</h4>
-  <div>"on fill Target/SL first" = what the guard places the moment a BUY fills (that pair is always in %). qty 50 in % mode = spend 50% of available margin. EXIT / EXIT ALL = dump at deep marketable LIMIT regardless of target/SL (two clicks). "% gain / to SL" column = live % from entry, and the % loss if the SL/guard level is hit. "P&L history" = every closed trade (logged by the guard), today's total and per-day totals.<br>
+  <div>"on fill: SL at -x%" = the stop the guard rests the moment a BUY fills (always in %, clamped to the level just below entry). qty 50 in % mode = spend 50% of available margin. EXIT / EXIT ALL = dump at deep marketable LIMIT regardless of target/SL (two clicks). "% gain / to SL" column = live % from entry, and the % loss if the SL/guard level is hit. "P&L history" = every closed trade (logged by the guard), today's total and per-day totals.<br>
   Click the NIFTY/SENSEX chart → "EXIT ALL LONGS if spot ≥/≤" sets an emergency exit level: all longs dumped the moment spot reaches it.</div>
 
   <h4>After every trade</h4>
@@ -2617,8 +2611,6 @@ async function sendOrder(mode) {
     if (r.error) { msg('❌ ' + r.error); return; }
     body.trigger_price = r.price;
     if (r.from) note = ` (${r.from})`;
-    const lp = parseFloat(document.getElementById('slPrice').value);
-    if (lp) body.price = lp;
   }
   msg('sending…');
   const r = await fetch(BASE+'/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -2655,39 +2647,30 @@ function renderMargin() {
 setInterval(fetchMargin, 30000);
 setInterval(renderMargin, 5000);
 
-// ---- guard on-fill settings (what the guard places on a BUY fill) ----
-// target % comes from the slider; the readout mirrors it live (saved on Save)
-function renderTgtPctSlider() {
-  const v = parseFloat(document.getElementById('gTgtPct').value);
-  const dirty = guardCfg && Number(guardCfg.targetPct) != v;
-  const out = document.getElementById('gTgtPctOut');
-  out.textContent = v + '% tgt' + (dirty ? ' *' : '');
-  out.style.color = dirty ? '#ff9800' : 'var(--dim)';
-}
-document.getElementById('gTgtPct').addEventListener('input', renderTgtPctSlider);
-renderTgtPctSlider();
+/* ---- guard on-fill settings (what the guard places on a BUY fill) ----
+   Only the SL % is editable here. firstOrder is always 'sl' and targetPct is
+   left at whatever guardSettings.json holds (50 = no cap): a resting target is
+   exactly what used to hard-cap every win, so there is no knob to re-add one.
+   The upside is handled by the in-app partial and the trailing stop. */
 
 async function fetchGuardSettings() {
   try {
     const s = await (await fetch(BASE+'/api/guardSettings')).json();
     guardCfg = s;   // autoTarget() falls back to the guard's own target %
-    document.getElementById('gFirst').value = s.firstOrder;
-    document.getElementById('gTgtPct').value = s.targetPct;
-    renderTgtPctSlider();
     document.getElementById('gSlPct').value = s.slPct;
   } catch (e) { /* transient */ }
 }
 document.getElementById('gSave').onclick = async () => {
   const body = {
-    firstOrder: document.getElementById('gFirst').value,
-    targetPct: parseFloat(document.getElementById('gTgtPct').value),
+    firstOrder: 'sl',
+    targetPct: guardCfg && guardCfg.targetPct != null ? Number(guardCfg.targetPct) : 50,
     slPct: parseFloat(document.getElementById('gSlPct').value)
   };
   const r = await fetch(BASE+'/api/guardSettings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const d = await r.json();
-  if (!d.error) { guardCfg = d; updateTgtHint(); renderTgtPctSlider(); }
+  if (!d.error) { guardCfg = d; updateTgtHint(); }
   msg(d.error ? ('❌ ' + d.error)
-    : `✅ on fill: ${d.firstOrder == 'sl' ? 'SL at -' + d.slPct + '%' : 'target at +' + d.targetPct + '%'} (applies to the next fill)`);
+    : `✅ on fill: SL at -${d.slPct}% (applies to the next fill)`);
 };
 fetchGuardSettings();
 
