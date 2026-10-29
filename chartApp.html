@@ -188,6 +188,27 @@
   #review .why ul, #analysis .why ul { margin:0 0 0 18px; }
   #review .why li, #analysis .why li { margin:3px 0; color:#c7cbd4; }
   #review.tagwin .why, #analysis.tagwin .why { border-left-color:var(--green); }
+
+  /* ---- NO-TRADE block modal: a refused entry must stop the hand, not scroll
+     past in the status line. Full-screen, red, and it names the rule that
+     said no plus why. Exits never raise it. ---- */
+  #blockModal { position:fixed; inset:0; z-index:95; background:rgba(8,6,8,.93);
+            display:none; align-items:center; justify-content:center; padding:20px; }
+  #blockModal.open { display:flex; }
+  #blockModal .bmBox { background:var(--panel); border:1px solid #6b2230; border-top:4px solid var(--red);
+            border-radius:10px; max-width:620px; width:100%; max-height:88vh; overflow:auto;
+            padding:18px 20px 16px; box-shadow:0 18px 60px rgba(0,0,0,.7); }
+  #blockModal .bmHead { font-size:26px; font-weight:800; color:var(--red); letter-spacing:.5px; }
+  #blockModal .bmWhat { color:var(--dim); font-size:12.5px; margin:4px 0 14px; }
+  #blockModal .bmRow { background:rgba(255,90,110,.07); border:1px solid #5d2029; border-left:3px solid var(--red);
+            border-radius:6px; padding:9px 11px; margin:7px 0; }
+  #blockModal .bmRow .l { font-size:14.5px; font-weight:700; color:#ffd4da; }
+  #blockModal .bmRow .d { font-size:12.5px; color:#c7cbd4; margin-top:3px; line-height:1.45; }
+  #blockModal .bmLock { color:var(--amber,#ffc857); font-size:13px; margin:10px 0 0; font-weight:600; }
+  #blockModal .bmFoot { display:flex; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  #blockModal .bmFoot button { font-size:14px; padding:8px 18px; font-weight:700; }
+  #blockModal .bmHint { color:var(--dim); font-size:11.5px; }
+
   #review.tagentry .why, #analysis.tagentry .why, #review.tagexit .why, #analysis.tagexit .why, #review.taglevel .why, #analysis.taglevel .why, #review.tagrisk .why, #analysis.tagrisk .why, #review.tagtiming .why, #analysis.tagtiming .why, #review.tagtheta .why, #analysis.tagtheta .why { border-left-color:var(--red); }
   #review table, #analysis table { width:100%; border-collapse:collapse; margin-top:6px; }
   #review th, #analysis th, #review td, #analysis td { border-bottom:1px solid var(--border); padding:4px 6px; text-align:right; font-size:12px; }
@@ -240,6 +261,8 @@
   #gatePanel2 .row.bad .lb { color:var(--red); font-weight:600; }
   #gatePanel2 .row .dt { color:var(--dim); font-size:11.5px; }
   #gatePanel2 .soft { color:#e0b050; }
+  #gatePanel2 .gateFoot { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:9px 0 2px; }
+  #gatePanel2 .gateFoot .hint2 { color:var(--dim); font-size:11px; }
   #gatePanel2 .hint { color:var(--dim); font-size:11.5px; margin-top:6px; }
 </style>
 </head>
@@ -360,6 +383,19 @@
   </div>
   <div id="trigList"></div>
   <div id="pnlPanel" style="display:none"></div>
+</div>
+
+<div id="blockModal" role="alertdialog" aria-modal="true" aria-labelledby="bmHead">
+  <div class="bmBox">
+    <div class="bmHead" id="bmHead">&#9940; NO TRADE</div>
+    <div class="bmWhat" id="bmWhat"></div>
+    <div id="bmRows"></div>
+    <div class="bmLock" id="bmLock" style="display:none"></div>
+    <div class="bmFoot">
+      <button id="bmClose" class="sec">OK &mdash; stand down</button>
+      <span class="bmHint">Esc or click outside also closes. Exits are never blocked.</span>
+    </div>
+  </div>
 </div>
 
 <div id="review"></div>
@@ -1909,7 +1945,9 @@ function paintGate() {
   bar.innerHTML = (hard
       ? `⛔ NO TRADE — ${gateReasons().join(' · ')}`
       : (!dead.ok ? `⚠ CAUTION — ${dead.detail}` : `✅ ENTRIES ALLOWED`))
-    + ` <span class="n">· ${st.trades || 0}/${gateState.settings.maxTradesPerDay} trades · day `
+    + ` <span class="n">· ${st.trades || 0}/${gateState.settings.maxTradesPerDay} trades`
+    + (st.countFrom ? ` since ${st.countFrom} (${st.tradesAllDay} all day)` : '')
+    + ` · day `
     + `<span class="${(st.pnl || 0) >= 0 ? 'pos' : 'neg'}">${money(st.pnl)}</span>`
     + ` · streak ${st.lossStreak || 0}L · ${gateState.openPositions} open · click for the rules</span>`;
 
@@ -1925,10 +1963,36 @@ function paintGate() {
         + `<span class="lb">${c.label}${c.soft ? ' <span class="soft">(soft)</span>' : ''}</span>`
         + `<span class="dt">${c.detail || ''}</span></div>`;
     }).join('') + `</div>`
+    + `<div class="gateFoot">`
+    +   `<button id="btnCountFrom" class="sec">restart the ${gateState.settings.maxTradesPerDay}-trade count from now</button>`
+    +   (st.countFrom ? `<button id="btnCountAll" class="sec">count the whole day again</button>` : '')
+    +   `<span class="hint2">resets the CLICK COUNT only — the day-loss and losing-streak brakes keep counting the full day</span>`
+    + `</div>`
     + `<div class="hint">Every ✗ above except the soft one refuses the order server-side — B50/B100, chart BUY and parked BUY triggers all pass through it. Exits are never blocked.
        Tune the numbers with <code>POST /api/noTrade</code> (e.g. <code>{"maxDayLoss":5000,"blockLunch":false}</code>) — applies instantly, no restart.</div>`;
 
+  const bcf = document.getElementById('btnCountFrom');
+  if (bcf) bcf.onclick = () => setCountFrom({});
+  const bca = document.getElementById('btnCountAll');
+  if (bca) bca.onclick = () => setCountFrom({ clear: true });
+
   greyBuys();
+}
+
+async function setCountFrom(body) {
+  try {
+    const r = await fetch(BASE + '/api/countFrom', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    });
+    const j = await r.json();
+    if (!r.ok) { msg('❌ ' + (j.error || ('HTTP ' + r.status))); return; }
+    gateState = j;
+    const st = j.stats || {};
+    msg(st.countFrom
+      ? `🔄 trade cap restarted — ${st.trades}/${j.settings.maxTradesPerDay} counting from ${st.countFrom}`
+      : `↩ trade count back to the whole day — ${st.trades}/${j.settings.maxTradesPerDay}`);
+    paintGate();
+  } catch (e) { msg('❌ ' + e); }
 }
 
 async function refreshGate() {
@@ -1958,9 +2022,77 @@ function blockedByGate(what) {
   }
   if (!gateBlocked()) return false;
   msg(`⛔ ${what} blocked — ${gateReasons().join(' | ')}`);
+  showBlockModal(what, (gateState && gateState.blockers) || null);
   refreshGate();
   return true;
 }
+
+/* ---------------------- NO-TRADE BLOCK MODAL ----------------------
+A refused entry used to land in the one-line status strip, where it is
+easy to miss and easier to click past. It now throws a modal that names
+every rule that said no and the detail behind it, so the reason is read
+before the next click. Raised from two places: this page's pre-check
+(blockedByGate) and the server's own 423, which returns the same
+{label, detail} blockers -- so a block decided server-side looks
+identical to one caught here.
+------------------------------------------------------------------- */
+function esc(x) {
+  return String(x == null ? '' : x)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function showBlockModal(what, blockers) {
+  const box = document.getElementById('blockModal');
+  if (!box) return;
+  let list = (blockers && blockers.length) ? blockers.slice() : [];
+  // a page-side lockout is not in the server's blocker array
+  if (lockedNow() && !list.some(b => /stop-out|lock/i.test(b.label || ''))) {
+    list.push({ label: `Locked for another ${mmss(lockLeft())}`,
+                detail: 'a stop-style exit locks new entries for 10 minutes — that pause is the point' });
+  }
+  if (!list.length) list = [{ label: 'Entry refused by the no-trade gate',
+                              detail: gateReasons().join(' | ') || 'open the gate panel for the current rule states' }];
+
+  document.getElementById('bmWhat').textContent =
+    `${what} refused — ${list.length} rule${list.length > 1 ? 's' : ''} said no`;
+  document.getElementById('bmRows').innerHTML = list.map(b =>
+    `<div class="bmRow"><div class="l">✗ ${esc(b.label || 'rule')}</div>`
+    + (b.detail ? `<div class="d">${esc(b.detail)}</div>` : '') + `</div>`).join('');
+
+  const lk = document.getElementById('bmLock');
+  if (lockedNow()) { lk.style.display = ''; lk.textContent = `⏱ new entries unlock in ${mmss(lockLeft())}`; }
+  else lk.style.display = 'none';
+
+  box.classList.add('open');
+  const btn = document.getElementById('bmClose');
+  if (btn) btn.focus();
+}
+function hideBlockModal() {
+  const box = document.getElementById('blockModal');
+  if (box) box.classList.remove('open');
+}
+function blockModalOpen() {
+  const box = document.getElementById('blockModal');
+  return !!(box && box.classList.contains('open'));
+}
+/*
+Server-side 423. Returns true when it handled the response, so the caller
+stops and does not also print its own error line.
+*/
+function handled423(r, d, what) {
+  if (r.status != 423) return false;
+  msg('⛔ ' + (d.error || `${what} blocked`));
+  showBlockModal(what, d.blockers || null);
+  if (d.lock) applyLock(d.lock);
+  refreshGate();
+  return true;
+}
+document.getElementById('bmClose').onclick = hideBlockModal;
+document.getElementById('blockModal').addEventListener('click', e => {
+  if (e.target.id == 'blockModal') hideBlockModal();   // backdrop only
+});
+document.addEventListener('keydown', e => {
+  if (e.key == 'Escape' && blockModalOpen()) { e.stopPropagation(); hideBlockModal(); }
+}, true);
 
 /* ====================== POST-TRADE REVIEW + LOCKOUT ======================
 Every close pushes a `trade_closed` over the websocket and this throws the
@@ -2260,6 +2392,7 @@ async function quickAction(btn, slot, side, pct) {
       body: JSON.stringify({ tradingsymbol: o.tradingsymbol, exchange: o.exchange, token: o.token, side, pct })
     });
     const j = await r.json();
+    if (handled423(r, j, `B${pct}`)) return;
     if (!r.ok) { msg('❌ ' + (j.error || ('HTTP ' + r.status))); return; }
     const rk = j.risk;
     msg(`✅ ${side == 'buy' ? 'B' : 'S'}${pct}: ${side.toUpperCase()} ${j.qty} ${o.tradingsymbol} @ ${j.price}`
@@ -2478,6 +2611,7 @@ async function sendOrder(mode) {
   msg('sending…');
   const r = await fetch(BASE+'/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const d = await r.json();
+  if (handled423(r, d, mode)) return;
   const at = mode == 'target' ? fmt(body.price) : fmt(body.trigger_price);
   msg(d.error ? ('❌ ' + d.error) : `✅ ${d.action} @ ${at}${note} ${d.order_ids.join(',')}`);
   refreshPosition();
@@ -3149,6 +3283,7 @@ async function chartOrder(o, mode, price) {
   if (mode == 'target') body.price = price; else body.trigger_price = price;
   const r = await fetch(BASE+'/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const d = await r.json();
+  if (handled423(r, d, mode)) return;
   msg(d.error ? ('❌ ' + d.error) : (`✅ ${mode} ${d.action} ${d.order_ids.join(',')}`));
   refreshPosition();
 }

@@ -1185,8 +1185,29 @@ function todayStats() {
     for (let i = rows.length - 1; i >= 0; i--) {
         if ((rows[i].pnl || 0) < 0) streak++; else break;
     }
+    /*
+    A mid-day reset of the CLICK COUNT only. Set `countFrom` (POST
+    /api/countFrom) and the trade cap starts counting from that time, so a
+    morning spent over-clicking does not lock the rest of the day out.
+
+    Deliberately NOT applied to pnl, lossStreak, wins or losses: the day-loss
+    brake and the streak brake exist to stop a bad day getting worse, and a
+    reset that wiped those would hand back the exact protection that keeps a
+    -3000 day from becoming a -6000 one. Only the count moves.
+
+    `countFromDate` pins it to one session, so tomorrow ignores a stale value
+    without anyone having to clear it.
+    */
+    const cfg = readNoTrade();
+    let counted = rows, since = null;
+    if (cfg.countFrom && cfg.countFromDate == today) {
+        since = String(cfg.countFrom);
+        counted = rows.filter(t => String(t.time || '') >= since);
+    }
     return {
-        trades: rows.length,
+        trades: counted.length,
+        tradesAllDay: rows.length,
+        countFrom: since,
         pnl: +rows.reduce((s, t) => s + (t.pnl || 0), 0).toFixed(2),
         lossStreak: streak,
         wins: rows.filter(t => (t.pnl || 0) > 0).length,
@@ -1245,7 +1266,9 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
 
     add('cap', `Max ${s.maxTradesPerDay} trades a day`,
         st.trades >= s.maxTradesPerDay,
-        `${st.trades} closed today`);
+        st.countFrom
+            ? `${st.trades} closed since ${st.countFrom} (${st.tradesAllDay} all day)`
+            : `${st.trades} closed today`);
 
     /*
     Regime. Reported even when switched off (as a passing soft row) so the
@@ -3472,6 +3495,35 @@ async function main() {
     restart. Deliberately permissive about values: they are your rules, the
     point is only that they exist and are enforced.
     */
+    /*
+    Restart the trade cap from now (or from an explicit HH:MM:SS), without
+    touching the day-loss or streak brakes. `{ clear: true }` puts the count
+    back on the whole day.
+    */
+    app.post('/api/countFrom', (req, res) => {
+        const sIn = readNoTrade();
+        const body = req.body || {};
+        if (body.clear) {
+            delete sIn.countFrom; delete sIn.countFromDate;
+            writeNoTrade(sIn);
+            console.log('↩ trade count back to the full day');
+            return res.json(noTradeChecks());
+        }
+        let at = String(body.at || '').trim();
+        if (at) {
+            if (!/^\d{1,2}:\d{2}(:\d{2})?$/.test(at)) return res.status(400).json({ error: 'at must be HH:MM or HH:MM:SS' });
+            if (at.length <= 5) at += ':00';
+            at = at.padStart(8, '0');
+        } else {
+            at = dayjs().format('HH:mm:ss');
+        }
+        sIn.countFrom = at;
+        sIn.countFromDate = dayjs().format('YYYY-MM-DD');
+        writeNoTrade(sIn);
+        console.log(`🔄 trade cap restarted: ${sIn.maxTradesPerDay} trades counting from ${at} (day-loss and streak brakes untouched)`);
+        res.json(noTradeChecks());
+    });
+
     app.post('/api/noTrade', (req, res) => {
         const s = readNoTrade();
         const body = req.body || {};
