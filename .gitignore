@@ -28,6 +28,7 @@ guardState.json
 breachOverride.json
 chartTriggers.json
 tradeLog.json
+tradeLock.json
 
 # regenerated data dumps
 all_instruments.json

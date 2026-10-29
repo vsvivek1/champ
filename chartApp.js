@@ -309,6 +309,67 @@ function breachFromSec(tok, count) {
     return Number.isFinite(low) ? low : null;
 }
 
+/*
+Completed 1-minute bars off our own tick buckets, newest last. breachFromSec
+only needs the lows; the steep-candle gate needs the whole bar, so this is
+the shared builder. The forming minute is NEVER included -- a gate that read
+the live bar would change its mind mid-minute.
+*/
+function minBarsFromSec(tok, count) {
+    const arr = secCandles.get(Number(tok));
+    if (!arr || !arr.length) return [];
+    const cur = Math.floor(Date.now() / 1000 / 60) * 60;
+    const byMin = new Map();
+    for (const c of arr) {
+        const m = Math.floor(c.time / 60) * 60;
+        if (m >= cur) continue;
+        const b = byMin.get(m);
+        if (!b) byMin.set(m, { time: m, open: c.open, high: c.high, low: c.low, close: c.close });
+        else {
+            b.high = Math.max(b.high, c.high);
+            b.low = Math.min(b.low, c.low);
+            b.close = c.close;
+        }
+    }
+    return [...byMin.keys()].sort((a, b) => a - b).slice(-count).map(m => byMin.get(m));
+}
+
+/*
+STEEP CANDLE
+
+"Do not enter after a steep candle." A steep bar is not a fixed percentage:
+on 28/10 the median 1-minute move on these strikes was 3.8%, on expiry day
+29/10 it was 6.9%, and the 90th percentile went from 16% to 27%. A hard
+number would be half the market's normal breath one day and three times it
+the next, so the gate measures the option against ITSELF: the last completed
+bar's body against the median body of the window behind it.
+
+Two conditions, both required, because each alone misfires:
+  - more than steepMult x the median body  -- relative, so it tracks expiry
+  - at least steepMinPct in absolute terms -- so a dead strike with a 0.3%
+    median does not call a routine 1% bar "steep"
+
+Why it matters here: you buy the top tick of the move and the 3-candle low
+is now miles below, so the same stop that is 6% away on a normal bar is 25%
+away on this one. That is the -7,947 trade's shape.
+*/
+function steepBar(tok, s) {
+    const bars = minBarsFromSec(tok, (s.steepWin || 30) + 1);
+    if (bars.length < 6) return { ok: false, why: `only ${bars.length} completed 1m bars so far` };
+    const body = b => (b.open > 0 ? Math.abs(b.close - b.open) / b.open * 100 : 0);
+    const last = bars[bars.length - 1];
+    const hist = bars.slice(0, -1).map(body).sort((a, b) => a - b);
+    const med = hist[Math.floor(hist.length / 2)];
+    const mv = body(last);
+    const mult = med > 0 ? mv / med : 0;
+    const steep = med > 0 && mult > (s.steepMult || 2.5) && mv >= (s.steepMinPct || 5);
+    return {
+        ok: true, steep, move: +mv.toFixed(1), median: +med.toFixed(1),
+        mult: +mult.toFixed(1), bar: last,
+        dir: last.close >= last.open ? 'up' : 'down', n: hist.length
+    };
+}
+
 const TRIG_FILE = path.join(__dirname, 'chartTriggers.json');
 
 function saveTriggers() {
@@ -888,6 +949,13 @@ const STOP_REASONS = ['sl_hit', 'guard_breach'];
 
 let lockUntil = 0, lockWhy = null;
 
+/*
+When the last entry actually FILLED. Set in placeFirstOrder(), which every
+entry path funnels through on its BUY fill, so there is exactly one writer
+and no path can forget to update it. The impulse gate reads it.
+*/
+let lastEntryAt = 0, lastEntrySym = null;
+
 // the review the page re-opens with its "last trade" button
 let lastClosedTrade = null;
 
@@ -1437,6 +1505,41 @@ const NO_TRADE_DEFAULTS = {
     /* red-candle gate -- do not buy into a falling bar */
     blockRedCandle: true,     // refuse the buy while the live 1m candle is red
 
+    /*
+    STEEP-CANDLE GATE -- see the steepBar() block above. Measured against the
+    option's own recent bars, so one setting works on a quiet strike and on
+    expiry day. Both conditions must hold before a bar counts as steep.
+    */
+    blockSteep: true,
+    steepMult: 2.5,           // x the median 1m body of the window behind it
+    steepMinPct: 5,           // and at least this much in absolute terms
+    steepWin: 30,             // completed bars in the median window
+
+    /*
+    IMPULSE GATE. Not a judgement about your entries -- a speed limit. The
+    measured leak over 149 trades was 37 clicks a day against a stated cap of
+    8, and 97.6% of 29/10's premium movement was round-trip churn. A minimum
+    gap makes the second click a decision instead of a reflex. The 10-minute
+    stop-out lockout (LOCKOUT_MIN) already covers the post-loss case.
+    */
+    minGapSec: 60,            // seconds since the last entry FILL, 0 = off
+
+    /*
+    NO-STOP ENTRIES. scalpGreenTarget rests the TARGET first on a green-bar
+    quick scalp, which means that position carries no exchange-side stop at
+    all -- only the app-side breach line, which dies with the process. On by
+    default: refuse the entry rather than carry the whole premium naked.
+    */
+    blockNoStop: true,
+
+    /*
+    RISK-BASED SIZE. Max loss per trade = riskPctOfCapital of the Kite cash
+    balance, and the SIZE is what moves to honour it -- never the stop. If
+    the 3-candle low is far, the quantity shrinks; the stop stays where the
+    candles put it. 0 = off (fall back to the margin-percentage buttons).
+    */
+    riskPctOfCapital: 25,
+
     /* participation gate -- see the PARTICIPATION block above */
     blockDead: true,          // refuse entries once size has left the tape
     partWin: 10,              // minutes averaged for "right now"
@@ -1662,6 +1765,74 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
                     ? ' — this is a falling bar: the fill would land on the worst tick the minute has printed'
                     : (bar.close == bar.open ? ' — flat' : ' — rising')));
         }
+    }
+
+    /*
+    Steep candle. Same shape as the red-candle rule: it reads the instrument
+    you are about to buy, so it needs a symbol first.
+    */
+    const stTok = tradingsymbol ? tokenBySymbol.get(tradingsymbol) : null;
+    if (!s.blockSteep) {
+        chk.push({ code: 'steep', label: 'Last 1m candle not steep', ok: true, blocked: false, hard: false, detail: 'steep-candle filter switched off' });
+    } else if (!tradingsymbol) {
+        na('steep', 'Last 1m candle not steep', 'n/a until a symbol is picked');
+    } else if (!stTok) {
+        na('steep', 'Last 1m candle not steep', `n/a — ${tradingsymbol} is not a known option`);
+    } else {
+        const sb = steepBar(stTok, s);
+        if (!sb.ok) {
+            na('steep', 'Last 1m candle not steep', `n/a — ${sb.why}`);
+        } else {
+            add('steep', `Last 1m candle under ${s.steepMult}x its own median body`,
+                sb.steep,
+                `${dayjs.unix(sb.bar.time).format('HH:mm')} bar: ${sb.bar.open} → ${sb.bar.close} = ${sb.move}% ${sb.dir}, `
+                + `median body ${sb.median}% over ${sb.n} bars = ${sb.mult}x`
+                + (sb.steep
+                    ? ` — buying after a ${sb.move}% bar means paying its last tick, and the ${CANDLE_COUNT}-candle low is now a long way under you`
+                    : ' — normal breath for this strike'));
+        }
+    }
+
+    /*
+    Impulse. A speed limit between fills, not an opinion about the setup.
+    */
+    const sinceEntry = lastEntryAt ? Math.floor((Date.now() - lastEntryAt) / 1000) : null;
+    if (!(s.minGapSec > 0)) {
+        chk.push({ code: 'impulse', label: 'Gap since the last entry', ok: true, blocked: false, hard: false, detail: 'impulse gate switched off (minGapSec 0)' });
+    } else if (sinceEntry == null) {
+        na('impulse', `At least ${s.minGapSec}s since the last entry`, 'n/a — no entry filled yet this session');
+    } else {
+        add('impulse', `At least ${s.minGapSec}s since the last entry`,
+            sinceEntry < s.minGapSec,
+            sinceEntry < s.minGapSec
+                ? `${sinceEntry}s since ${lastEntrySym} filled — ${s.minGapSec - sinceEntry}s left. 37 clicks a day against a cap of 8 is what this is for`
+                : `${sinceEntry}s since ${lastEntrySym || 'the last entry'} filled`);
+    }
+
+    /*
+    No-stop entries. scalpGreenTarget flips a green-bar quick scalp to
+    target-first, and that fill carries NO exchange-side stop -- so the gate
+    has to predict the flip the same way /api/quick will make it.
+    */
+    const gs = readGuardSettings();
+    if (!s.blockNoStop) {
+        chk.push({ code: 'nostop', label: 'The fill will rest a real stop', ok: true, blocked: false, hard: false, detail: 'no-stop filter switched off' });
+    } else if (gs.firstOrder == 'target') {
+        add('nostop', 'The fill will rest a real stop', true,
+            `guard firstOrder is 'target' — every fill rests a LIMIT and NO exchange stop, so the whole premium is at risk`);
+    } else if (!gs.scalpGreenTarget) {
+        add('nostop', 'The fill will rest a real stop', false,
+            `firstOrder 'sl' and scalpGreenTarget off — an exchange SL rests on every fill`);
+    } else if (!stTok) {
+        na('nostop', 'The fill will rest a real stop',
+            tradingsymbol ? `n/a — ${tradingsymbol} is not a known option` : 'n/a until a symbol is picked');
+    } else {
+        const bar = liveMinCandle(stTok);
+        const green = !!(bar && bar.close > bar.open);
+        add('nostop', 'The fill will rest a real stop', green,
+            green
+                ? `live 1m bar ${bar.open} → ${bar.close} is GREEN, so scalpGreenTarget would rest the TARGET first — no exchange stop on this fill`
+                : (bar ? `live 1m bar ${bar.open} → ${bar.close} is not green — an SL rests` : 'no print yet this minute — an SL rests'));
     }
 
     /*
@@ -2010,6 +2181,7 @@ Places THE resting SELL on a fill: a LIMIT target or an SL, per
 guardSettings.json (or this entry's one-shot override).
 */
 async function placeFirstOrder({ instrument_token, tradingsymbol, exchange, quantity, buyPrice }) {
+    lastEntryAt = Date.now(); lastEntrySym = tradingsymbol;   // the impulse gate's clock
 
     const s = readGuardSettings();
     const perEntry = takeFirstOrderOverride(instrument_token);
@@ -2753,6 +2925,42 @@ function plannedStop(entry, levels, s, breach) {
     const raw = roundDownToTick(sup.price - TICK);        // a tick UNDER the level, not on it
     if (raw > tight) return { stop: tight, why: `support ${sup.price} is inside the ${s.slPct}% noise band — held at ${s.slPct}%` };
     return { stop: raw, why: `a tick under the immediate support ${sup.price} (${sup.touches} touch${sup.touches > 1 ? 'es' : ''})` };
+}
+
+/*
+RISK-BASED SIZE CAP
+
+"25% of capital max loss for a trade." The stop is not negotiable -- it is a
+tick under the 3-candle low, wherever the candles put it -- so the only thing
+left to move is the QUANTITY. This is a CAP, never a floor: B100 still means
+"as much as margin allows", it just cannot ask for more than the configured
+loss. Returns the original qty untouched when the rule cannot be applied, and
+always says why, because a silent resize is worse than no resize.
+
+The 25% figure is the user's explicit choice (29/10/2026) over a 25%-of-
+premium reading. It is very aggressive: at a 45% measured loss rate, four
+losers in a row is the account. maxDayLoss and maxLossStreak are the only
+things standing between that number and ruin -- they are not optional here.
+*/
+function riskCappedQty({ price, lot, token, qty, cash }) {
+    const s = readNoTrade();
+    const pct = Number(s.riskPctOfCapital);
+    if (!(pct > 0)) return { qty, capped: false, why: 'risk sizing off (riskPctOfCapital 0)' };
+    if (!(cash > 0)) return { qty, capped: false, why: 'no cash balance to size against' };
+    const g = readGuardSettings();
+    const frozen = token ? (breachLevelByToken.get(Number(token)) ?? breachFromSec(token, CANDLE_COUNT)) : null;
+    const { stop } = plannedStop(price, null, g, frozen);
+    if (!(stop > 0) || !(stop < price)) return { qty, capped: false, why: 'no usable stop to size against' };
+    const per = price - stop;
+    const budget = cash * pct / 100;
+    const want = Math.floor(budget / per / lot) * lot;
+    const base = `max loss ${pct}% of ₹${Math.round(cash)} = ₹${Math.round(budget)}, stop ${stop} is ₹${per.toFixed(2)} under ${price}`;
+    if (want < lot) return { qty: 0, capped: true, lot, stop, per, budget,
+        why: `${base} — that is under one lot of ${lot}, so this trade cannot be taken inside your own risk limit` };
+    if (want >= qty) return { qty, capped: false, stop, per, budget,
+        why: `${base} — allows ${want}, asked ${qty}, no cap needed` };
+    return { qty: want, capped: true, stop, per, budget, asked: qty,
+        why: `${base} — cut ${qty} → ${want} (risk ₹${Math.round(per * want)})` };
 }
 
 /* ---------------------------------------------------------------------
@@ -3634,12 +3842,29 @@ async function main() {
     app.post('/api/buy', async (req, res) => {
         try {
             const { tradingsymbol, exchange, token, quantity, price, firstOrder } = req.body;
-            const qty = parseInt(quantity, 10);
+            let qty = parseInt(quantity, 10);
             const px = Number(price);
             if (!tradingsymbol || !exchange || !qty || qty <= 0 || !px || px <= 0) {
                 return res.status(400).json({ error: "tradingsymbol, exchange, quantity, price required" });
             }
             if (entryBlocked(res, { premium: px, tradingsymbol })) return;   // the no-trade gate
+            /*
+            The clicked quantity is a request, not a licence. Cap it at the
+            configured max loss before anything reaches the exchange.
+            */
+            try {
+                const m = await kite.getMargins();
+                const cash = (m.equity && m.equity.available && m.equity.available.live_balance != null)
+                    ? m.equity.available.live_balance : (m.equity ? m.equity.net : 0);
+                const lot = lotSizeByToken.get(Number(token)) || qty;
+                const rc = riskCappedQty({ price: roundToTick(px), lot, token, qty, cash });
+                if (rc.capped && rc.qty < lot) return res.status(400).json({ error: `risk limit: ${rc.why}` });
+                if (rc.capped) console.log(`📐 ${tradingsymbol}: risk cap — ${rc.why}`);
+                qty = rc.qty;
+            } catch (e) {
+                // a margin call that fails must not silently drop the cap
+                console.log(`⚠️ ${tradingsymbol}: risk cap skipped — ${e.message || e}`);
+            }
             // before the BUY: the guard sees the fill the moment it lands
             if (['target', 'sl'].includes(firstOrder)) setFirstOrderOverride(token, firstOrder);
             const orderIds = await placeOrderInFreezeChunks(kite, {
@@ -3693,8 +3918,16 @@ async function main() {
                 const cash = (m.equity && m.equity.available && m.equity.available.live_balance != null)
                     ? m.equity.available.live_balance : (m.equity ? m.equity.net : 0);
                 const price = roundToTick(ltp * 1.02);
-                const qty = Math.floor((cash * p / 100) / price / lot) * lot;
+                let qty = Math.floor((cash * p / 100) / price / lot) * lot;
                 if (qty < lot) return res.status(400).json({ error: `margin too low for 1 lot (cash ${Math.round(cash)}, lot ~${Math.round(price * lot)})` });
+                /*
+                The margin buttons say how much you CAN buy; the risk cap says
+                how much you may LOSE. The smaller of the two wins.
+                */
+                const rc = riskCappedQty({ price, lot, token, qty, cash });
+                if (rc.capped && rc.qty < lot) return res.status(400).json({ error: `risk limit: ${rc.why}` });
+                if (rc.capped) console.log(`📐 ${tradingsymbol}: risk cap — ${rc.why}`);
+                qty = rc.qty;
                 /*
                 A quick scalp taken while the option's own live 1m bar is
                 RISING rests the target first (scalpGreenTarget). An explicit

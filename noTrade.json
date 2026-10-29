@@ -17,8 +17,7 @@
   "minEff": 10,
   "blockWrongWay": true,
   "emaMin": 20,
-  "countFrom": "11:51:23",
-  "countFromDate": "2026-10-29",
+  "blockRedCandle": true,
   "blockDead": true,
   "partWin": 10,
   "partMinMin": 25,
@@ -26,5 +25,14 @@
   "flowPct": 35,
   "sizePct": 50,
   "oiPct": 25,
-  "spreadMult": 1.8
+  "spreadMult": 1.8,
+  "countFrom": "11:51:23",
+  "countFromDate": "2026-10-29",
+  "blockSteep": true,
+  "steepMult": 2.5,
+  "steepMinPct": 5,
+  "steepWin": 30,
+  "minGapSec": 60,
+  "blockNoStop": true,
+  "riskPctOfCapital": 25
 }
