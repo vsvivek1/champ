@@ -1131,14 +1131,202 @@ function legOfSymbol(sym) {
     return m ? m[1].toLowerCase() : null;
 }
 
+/* ---------------------------------------------------------------------
+PARTICIPATION GATE -- "is size still in this tape?", measured, not clocked.
+
+This replaces the 12:00-13:15 lunch block. The clock was only ever a
+stand-in for one real question: is there enough institutional flow here
+for a directional move to carry? Some days the big money is gone by
+11:40 and back at 13:05; some days it never leaves. A fixed window is
+wrong on both, and it is wrong in the expensive direction -- it refuses
+the 13:00 breakout that pays and waves through the 13:20 drift that
+does not.
+
+Four things go dead when size stops participating, and they go dead
+INDEPENDENTLY, which is what makes a score across them worth more than
+any one of them alone. All four are read off the charted option legs
+(CE + PE folded into one tape) -- the index itself prints no volume, so
+it cannot answer this question at all.
+
+  flow   contracts traded per minute. The obvious one: size leaves, the
+         tape thins.
+  size   mean last_traded_quantity -- the average PRINT. This is the
+         institutional tell proper. A tape made of 1-2 lot prints is
+         retail churn even when total volume still looks respectable,
+         and it is independent of flow because fifty small prints and
+         five big ones sum to the same volume.
+  oi     |change in open interest| per minute. Volume with no OI change
+         is the same contracts going round between day traders --
+         churn, not positioning. Institutions build and unwind, and
+         that lands in OI or it did not happen.
+  book   top-of-book spread as a % of mid. Market makers quote tight
+         when there is flow to lean on and widen when there is not, so
+         the spread is their own live read on participation. It is the
+         only one of the four that goes UP when the tape dies.
+
+Each is scored against TODAY'S OWN MEDIAN minute, never a fixed number.
+That self-calibrates: a quiet expiry and a busy Thursday are each judged
+on their own terms, a 40-rupee strike and a 300-rupee one need no
+separate tuning, and switching index or strike mid-day does not
+invalidate the baseline. Dead on >= deadScore of the four (default 3)
+blocks the entry; two dead is a thin tape, not an empty one.
+
+The measurement window is deliberately short (default 10 min). The whole
+point of measuring instead of clock-watching is that the gate LIFTS the
+minute the flow comes back -- 12:50 on a day when the clock would still
+have been saying no for another 25 minutes.
+--------------------------------------------------------------------- */
+
+const partSeries = new Map();   // option token -> [{min, vol, oi, ltqSum, ltqN, spSum, spN}]
+const PART_CAP = 420;           // a session of minutes, plus slack
+
+/*
+One row a minute per charted option leg. `vol` and `oi` are stored as the raw
+CUMULATIVE values off the tick and differenced at read time, so a minute the
+socket missed can be skipped rather than silently double-counted into the
+next one. ltq and spread are accumulated as sum+count so the minute's mean
+survives however many ticks happened to arrive.
+*/
+function pushPartSample(tok, t) {
+    tok = Number(tok);
+    if (INDEX_SPOT_TOKENS.has(tok)) return;                    // the index prints no tape
+    if (!chartedTokens.some(x => Number(x) == tok)) return;    // only the legs on screen
+    const min = Math.floor(Date.now() / 60000);
+    let a = partSeries.get(tok);
+    if (!a) { a = []; partSeries.set(tok, a); }
+    if (a.length && min - a[a.length - 1].min > 60) a.length = 0;   // new session / long restart
+    let r = a[a.length - 1];
+    if (!r || r.min != min) {
+        r = { min, vol: 0, oi: 0, ltqSum: 0, ltqN: 0, spSum: 0, spN: 0 };
+        a.push(r);
+        if (a.length > PART_CAP) a.shift();
+    }
+    const v = t.volume_traded != null ? t.volume_traded : (t.volume || 0);
+    if (v > 0) r.vol = v;        // cumulative: the last tick of the minute is the minute's close
+    if (t.oi > 0) r.oi = t.oi;
+    const q = Number(t.last_traded_quantity);
+    if (q > 0) { r.ltqSum += q; r.ltqN++; }
+    const d = t.depth;
+    const bid = d && d.buy && d.buy[0] && Number(d.buy[0].price);
+    const ask = d && d.sell && d.sell[0] && Number(d.sell[0].price);
+    if (bid > 0 && ask > 0 && ask >= bid) {
+        const mid = (bid + ask) / 2;
+        if (mid > 0) { r.spSum += (ask - bid) / mid * 100; r.spN++; }
+    }
+}
+
+function participation() {
+    const s = readNoTrade();
+    const win = Math.max(3, Math.round(s.partWin));
+    const need = Math.max(10, Math.round(s.partMinMin));
+
+    /*
+    Fold every charted option leg into one per-minute row. The ATM straddle's
+    combined tape is a better read of option participation than either leg on
+    its own -- on a one-sided move the losing leg goes quiet for reasons that
+    have nothing to do with whether size is in the market -- and it keeps
+    working when the strike is switched mid-session.
+    */
+    const byMin = new Map();
+    for (const a of partSeries.values()) {
+        for (let i = 1; i < a.length; i++) {
+            const p = a[i - 1], c = a[i];
+            if (c.min - p.min != 1) continue;          // a gap cannot be differenced honestly
+            const row = byMin.get(c.min) ||
+                { min: c.min, flow: 0, ltqSum: 0, ltqN: 0, spSum: 0, spN: 0 };
+            if (c.vol > 0 && p.vol > 0 && c.vol >= p.vol) row.flow += c.vol - p.vol;
+            row.ltqSum += c.ltqSum; row.ltqN += c.ltqN;
+            row.spSum += c.spSum;   row.spN += c.spN;
+            byMin.set(c.min, row);
+        }
+    }
+    const rows = [...byMin.values()].sort((x, y) => x.min - y.min);
+    if (rows.length < need) {
+        return { ok: false, mins: rows.length, need,
+            why: `only ${rows.length} min of option tape, need ${need} — press Load on the charts` };
+    }
+
+    /* Median for the baseline, not mean: the opening and the 15:20 squaring-off
+       are genuine outliers and a mean lets them set a bar the middle of the day
+       can never clear. Mean for "right now", because over 10 minutes the
+       outlier IS the information. */
+    const med = arr => {
+        const v = arr.filter(x => x > 0).sort((x, y) => x - y);
+        return v.length ? v[Math.floor(v.length / 2)] : 0;
+    };
+    const mean = arr => {
+        const v = arr.filter(x => x > 0);
+        return v.length ? v.reduce((x, y) => x + y, 0) / v.length : 0;
+    };
+    const sizeOf = r => r.ltqN ? r.ltqSum / r.ltqN : 0;
+    const spOf = r => r.spN ? r.spSum / r.spN : 0;
+
+    /*
+    OI needs its own treatment: Kite republishes open interest roughly every
+    three minutes, not every tick, so differencing consecutive MINUTES gives
+    two zeros and a spike and a median of zero -- the axis would never fire.
+    Measure it across the whole window instead (contracts of OI moved per
+    minute, averaged over `win`), and build the baseline from every sliding
+    window of the same length, so like is compared with like. Each leg's last
+    known OI is carried forward before summing, so a leg that simply has not
+    reprinted this minute does not read as its OI going to zero.
+    */
+    const oiAt = (() => {
+        const legs = [...partSeries.entries()].map(([tok, a]) => [tok, new Map(a.filter(r => r.oi > 0).map(r => [r.min, r.oi]))]);
+        const out = new Map();
+        const last = new Map();
+        for (const r of rows) {
+            let sum = 0, have = false;
+            for (const [tok, m] of legs) {
+                if (m.has(r.min)) last.set(tok, m.get(r.min));
+                const v = last.get(tok);
+                if (v > 0) { sum += v; have = true; }
+            }
+            if (have) out.set(r.min, sum);
+        }
+        return out;
+    })();
+    const oiRateOver = i => {           // contracts of OI moved per minute, ending at rows[i]
+        const a = oiAt.get(rows[Math.max(0, i - win)].min), b = oiAt.get(rows[i].min);
+        return (a > 0 && b > 0) ? Math.abs(b - a) / win : 0;
+    };
+    const oiWindows = [];
+    for (let i = win; i < rows.length; i++) oiWindows.push(oiRateOver(i));
+
+    const recent = rows.slice(-win);
+    const bFlow = med(rows.map(r => r.flow)),  nFlow = mean(recent.map(r => r.flow));
+    const bOi   = med(oiWindows),               nOi  = oiWindows.length ? oiWindows[oiWindows.length - 1] : 0;
+    const bSize = med(rows.map(sizeOf)),       nSize = mean(recent.map(sizeOf));
+    const bSp   = med(rows.map(spOf)),         nSp   = mean(recent.map(spOf));
+
+    const pct = (n, b) => b > 0 ? Math.round(n / b * 100) : null;
+    const axes = [
+        { key: 'flow', label: 'contracts/min', now: Math.round(nFlow), base: Math.round(bFlow),
+          at: pct(nFlow, bFlow), need: s.flowPct,
+          dead: bFlow > 0 && nFlow < bFlow * s.flowPct / 100 },
+        { key: 'size', label: 'avg print', now: +nSize.toFixed(1), base: +bSize.toFixed(1),
+          at: pct(nSize, bSize), need: s.sizePct,
+          dead: bSize > 0 && nSize < bSize * s.sizePct / 100 },
+        { key: 'oi', label: 'OI move/min', now: Math.round(nOi), base: Math.round(bOi),
+          at: pct(nOi, bOi), need: s.oiPct,
+          dead: bOi > 0 && nOi < bOi * s.oiPct / 100 },
+        { key: 'book', label: 'spread', now: +nSp.toFixed(2), base: +bSp.toFixed(2),
+          at: pct(nSp, bSp), need: Math.round(s.spreadMult * 100), wide: true,
+          dead: bSp > 0 && nSp > bSp * s.spreadMult }
+    ];
+    const score = axes.filter(a => a.dead).length;
+    return { ok: true, mins: rows.length, win, axes, score,
+             deadScore: s.deadScore, dead: score >= s.deadScore };
+}
+
 const NO_TRADE_FILE = path.join(__dirname, 'noTrade.json');
 
 const NO_TRADE_DEFAULTS = {
     noEntryBefore: '09:20',   // let the open settle; the first prints are noise
-    lunchFrom: '12:00',       // the dead zone: wide spreads, no follow-through
+    lunchFrom: '12:00',       // the old clock-based dead zone, kept as a fallback
     lunchTo: '13:15',
     noEntryAfter: '15:10',    // nothing new this late -- only theta and squaring off
-    blockLunch: true,
+    blockLunch: false,        // off: participation is measured now, not clocked
     maxDayLoss: 3000,         // INR realised, today
     maxLossStreak: 3,         // consecutive losing trades today
     maxTradesPerDay: 8,       // closed trades today
@@ -1153,7 +1341,17 @@ const NO_TRADE_DEFAULTS = {
     regimeWin: 30,            // minutes in the efficiency window
     minEff: 10,               // % efficiency below which it counts as chop
     blockWrongWay: true,      // a CE needs the index biased up, a PE down
-    emaMin: 20                // minutes in the direction EMA
+    emaMin: 20,               // minutes in the direction EMA
+
+    /* participation gate -- see the PARTICIPATION block above */
+    blockDead: true,          // refuse entries once size has left the tape
+    partWin: 10,              // minutes averaged for "right now"
+    partMinMin: 25,           // minutes of tape before the gate is allowed an opinion
+    deadScore: 3,             // how many of the four axes must be dead to block
+    flowPct: 35,              // contracts/min, as % of today's median minute
+    sizePct: 50,              // mean print size, as % of today's median
+    oiPct: 25,                // |OI change|/min, as % of today's median
+    spreadMult: 1.8           // spread counts as dead above this x today's median
 };
 
 function readNoTrade() {
@@ -1231,7 +1429,9 @@ faith.
 const RULE_THEORY = {
     open: 'The first prints of the day are a price-discovery auction, not a trend. Spreads are at their widest and the first 5 minutes routinely reverse, so an entry here pays the widest cost for the least information.',
 
-    lunch: 'Institutional flow thins out midday. Volume drops but theta does not: the option keeps decaying at the same rate while the underlying stops producing the moves that would pay for it. Worst cost-to-opportunity window of the session.',
+    lunch: 'The clock-based version of the participation rule, kept switchable but off by default. It encodes a real effect -- institutional flow does thin midday while theta keeps charging -- but it encodes it as a fixed window, which is wrong on any day the flow leaves early or comes back early. The measured gate below asks the same question of the tape itself.',
+
+    dead: 'The question a lunch-hour block was always trying to ask: is size still in this tape? Four things go dead independently when institutions stop participating, and all four are read off the CE+PE tape, because the index prints no volume of its own.\n\nflow -- contracts per minute. The obvious one.\n\nsize -- the mean last_traded_quantity, i.e. the average PRINT. This is the institutional tell proper: a tape of 1-2 lot prints is retail churn even when total volume still looks fine, and it is independent of flow because fifty small prints and five big ones sum to the same number.\n\noi -- |change in open interest| per minute. Volume with no OI change is the same contracts going round between day traders. Positioning lands in OI or it did not happen.\n\nbook -- top-of-book spread as a % of mid. Market makers quote tight when there is flow to lean on and widen when there is not, so this is their own live read on participation, and it is the one axis that goes UP as the tape dies.\n\nEvery axis is scored against TODAY\'S OWN MEDIAN minute, never a fixed number, so a quiet expiry and a busy Thursday are each judged on their own terms and a change of strike needs no re-tuning. Three of four dead is the block; two is a thin tape, not an empty one.\n\nWhy a score and not a single number: any one axis alone is noisy enough to fire several times an hour, and requiring all four would mean it never fires. Three of four is the point where the four disagree rarely enough to mean something.\n\nThe honest caveat: this measures participation, not direction. A dead tape can still break out on news, and the gate will refuse that first minute until the flow shows up in the numbers -- which, with a 10-minute window, is usually one to two minutes after the move starts rather than before it.',
 
     late: 'A long option this late has no time left to be right. Theta is at its steepest in the final hour and the exchange-wide square-off pressure makes the last prints mechanical rather than directional.',
 
@@ -1280,9 +1480,11 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
         before != null && mins < before,
         `now ${now.format('HH:mm')} — the first minutes are a spread-widening coin flip`);
 
-    add('lunch', `No entry ${s.lunchFrom}–${s.lunchTo} (chop)`,
+    add('lunch', `No entry ${s.lunchFrom}–${s.lunchTo} (clock)`,
         s.blockLunch && lFrom != null && lTo != null && mins >= lFrom && mins < lTo,
-        `now ${now.format('HH:mm')} — no follow-through, theta still charging`);
+        s.blockLunch
+            ? `now ${now.format('HH:mm')} — fixed-clock block`
+            : 'off — participation is measured on the tape instead, see the row below');
 
     add('late', `No entry after ${s.noEntryAfter}`,
         after != null && mins >= after,
@@ -1340,6 +1542,26 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
             (reg.bias != want ? ` — a ${leg.toUpperCase()} here bets against the index` : ''));
     }
 
+    /*
+    Participation. The measured replacement for the lunch clock -- reported
+    even when switched off, so the checklist never quietly loses a line.
+    */
+    const part = participation();
+    if (!s.blockDead) {
+        chk.push({ code: 'dead', label: 'Size still in the tape', ok: true, blocked: false, hard: false, detail: 'participation filter switched off' });
+    } else if (!part.ok) {
+        na('dead', 'Size still in the tape', `n/a — ${part.why}`);
+    } else {
+        const bits = part.axes.map(a =>
+            `${a.label} ${a.now}${a.at != null ? ` = ${a.at}% of median ${a.base}` : ` (median ${a.base})`}${a.dead ? ' ✗' : ' ✓'}`);
+        add('dead', `Size still in the tape (under ${s.deadScore} of 4 dead)`,
+            part.dead,
+            `${part.score}/4 dead over the last ${part.win} min — ` + bits.join(' · ') +
+            (part.dead
+                ? ' — this is churn, not flow: nobody is behind the move you are about to pay for'
+                : ''));
+    }
+
     const bare = unprotectedList();
     add('guarded', 'Every open position has a resting SELL',
         bare.length > 0,
@@ -1369,7 +1591,7 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
 
     for (const c of chk) if (RULE_THEORY[c.code]) c.theory = RULE_THEORY[c.code];
     const blockers = chk.filter(c => c.blocked);
-    return { checks: chk, blockers, blocked: blockers.length > 0, settings: s, stats: st, lock: l, openPositions: open.length, regime: reg };
+    return { checks: chk, blockers, blocked: blockers.length > 0, settings: s, stats: st, lock: l, openPositions: open.length, regime: reg, part };
 }
 
 /*
@@ -2923,6 +3145,8 @@ async function main() {
             if (INDEX_SPOT_TOKENS.has(tok)) {
                 pushSpotSample(tok, t.last_price);
                 seedSpotSeries(tok).catch(() => { });   // once, then a no-op
+            } else {
+                pushPartSample(tok, t);   // option tape: flow, print size, OI, spread
             }
             checkOiSignal(tok, t.last_price, t.oi || 0).catch(e =>
                 console.log('⚠️ OI signal check failed', e.message || e));
@@ -3489,7 +3713,7 @@ async function main() {
     also evaluate the two instrument-specific rules for what you are about
     to buy.
     */
-    app.get('/api/regime', (req, res) => res.json(spotRegime()));
+    app.get('/api/regime', (req, res) => res.json({ ...spotRegime(), part: participation() }));
 
     /*
     Setup alerts: today's fires newest first, plus the live settings. Alert
@@ -3839,7 +4063,7 @@ async function main() {
         // quiet socket, which would otherwise leave the readout blank all day
         const t = activeSpotToken();
         if (t) seedSpotSeries(t).catch(() => { });
-        broadcast({ type: 'regime', regime: spotRegime() });
+        broadcast({ type: 'regime', regime: spotRegime(), part: participation() });
     }, 30000);
 
     setInterval(checkRivalGuards, 60000);

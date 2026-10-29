@@ -95,6 +95,11 @@
   #regBar .bar i { display:block; height:100%; background:currentColor; }
   #regBar .meta { color:var(--dim); }
   #regBar label { color:var(--dim); }
+  #regBar .psep { color:var(--line); }
+  #regBar .plive { color:#9fe8bf; }
+  #regBar .pdead { color:#ff9e9e; }
+  #regBar .psc { font-weight:600; letter-spacing:.02em; }
+  #regBar .psc b { letter-spacing:.04em; }
 
   /* SETUP ALERTS -- a standing list, not a toast. A setup you missed because
      you looked away is the same as a setup that never fired, so these stay on
@@ -1462,7 +1467,7 @@ function connectWs() {
       levelInfo[m.token] = m;
       renderLevelLines(lastPositions);
     }
-    if (m.type == 'regime') { paintRegime(m.regime); }
+    if (m.type == 'regime') { paintRegime(m.regime, m.part); }
     if (m.type == 'setup_alert') { onSetupAlert(m); }
     if (m.type == 'oi_signal') {
       // short covering: OI falling while price climbs
@@ -1969,7 +1974,8 @@ function paintGate() {
     +   `<span class="hint2">resets the CLICK COUNT only — the day-loss and losing-streak brakes keep counting the full day</span>`
     + `</div>`
     + `<div class="hint">Every ✗ above except the soft one refuses the order server-side — B50/B100, chart BUY and parked BUY triggers all pass through it. Exits are never blocked.
-       Tune the numbers with <code>POST /api/noTrade</code> (e.g. <code>{"maxDayLoss":5000,"blockLunch":false}</code>) — applies instantly, no restart.</div>`;
+       Tune the numbers with <code>POST /api/noTrade</code> (e.g. <code>{"maxDayLoss":5000,"deadScore":4}</code>) — applies instantly, no restart.
+       The midday block is no longer a clock: <code>blockDead</code> scores the CE+PE tape on flow, print size, OI movement and spread against today's own median minute, and only refuses when <code>deadScore</code> of those 4 are dead. Set <code>blockLunch:true</code> to put the old 12:00–13:15 window back.</div>`;
 
   const bcf = document.getElementById('btnCountFrom');
   if (bcf) bcf.onclick = () => setCountFrom({});
@@ -2731,12 +2737,30 @@ document.getElementById('oiSave').onclick = async () => {
    WITHOUT reading numbers. Colour carries it: green = a real leg is running,
    amber = no side (flat EMA), red+blinking = chop, grey = not enough data.
    The server is the single source of truth (/api/regime); this only paints. */
-function paintRegime(r) {
+let lastPart = null;   // the last participation payload, so a regime-only repaint keeps the strip
+
+/* The participation strip. Four ticks/crosses and the score, so a tape going
+   quiet is visible WHILE it happens -- the clock block it replaced could only
+   ever tell you the time. Each axis shows where it sits as a % of today's own
+   median minute, which is the only comparison that means anything. */
+function partStrip(p) {
+  if (!p) return '';
+  if (!p.ok) return `<span class="meta">size: ${p.why || 'no tape yet'}</span>`;
+  const bits = p.axes.map(a =>
+    `<span class="${a.dead ? 'pdead' : 'plive'}" title="${a.label}: ${a.now} now vs median ${a.base} — ${a.dead ? 'DEAD' : 'alive'}">`
+    + `${a.dead ? '✗' : '✓'} ${a.label} ${a.at != null ? a.at + '%' : '—'}</span>`).join(' ');
+  const head = p.dead ? 'NO SIZE' : (p.score >= 1 ? 'thinning' : 'size in');
+  return `<span class="psc ${p.dead ? 'pdead' : 'plive'}"><b>${head}</b> ${p.score}/4 dead</span>${bits}`;
+}
+
+function paintRegime(r, part) {
   const el = document.getElementById('regBar');
   if (!el) return;
+  if (part !== undefined) lastPart = part;
+  const ps = partStrip(lastPart);
   if (!r || !r.ok) {
     el.className = 'cold';
-    el.innerHTML = `index regime — ${(r && r.why) || 'no data'}`;
+    el.innerHTML = `index regime — ${(r && r.why) || 'no data'}` + (ps ? ` <span class="psep">|</span> ${ps}` : '');
     return;
   }
   const chop = r.chop, bias = r.bias;
@@ -2751,11 +2775,14 @@ function paintRegime(r) {
     + `<span>eff ${r.eff}% <span class="meta">(need ≥ ${r.minEff}%)</span></span>`
     + `<span>${r.net >= 0 ? '+' : ''}${r.net} pts moved / ${r.path} pts walked</span>`
     + `<span>${chop ? '—' : legOk}</span>`
-    + `<span class="meta">spot ${r.px} vs EMA ${r.ema} (${r.slope >= 0 ? '+' : ''}${r.slope}) · ${r.win}m window · ${r.bars}m data</span>`;
+    + `<span class="meta">spot ${r.px} vs EMA ${r.ema} (${r.slope >= 0 ? '+' : ''}${r.slope}) · ${r.win}m window · ${r.bars}m data</span>`
+    + (ps ? `<span class="psep">|</span>${ps}` : '');
 }
 async function refreshRegime() {
-  try { paintRegime(await (await fetch(BASE + '/api/regime')).json()); }
-  catch (e) { /* transient */ }
+  try {
+    const d = await (await fetch(BASE + '/api/regime')).json();
+    paintRegime(d, d.part);
+  } catch (e) { /* transient */ }
 }
 
 /* SETUP ALERTS -- render only. The server decides what is a setup and whether
