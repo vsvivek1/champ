@@ -35,6 +35,7 @@ const { getTodaysAccessToken } = require('./getTodaysAccessToken.js');
 const AccessTokens = require('./models/AccessTokens');
 const { getKiteConnectInstance, getTickerInstance } = require('./getKiteConnectInstance.js');
 const { placeOrderInFreezeChunks } = require('./placeOrderInFreezeChunks.js');
+const { initAlerts, alertPhone, marketOpenIst } = require('./chartAlerts.js');
 
 const PORT = 3456;
 const TICK = 0.05;
@@ -99,6 +100,74 @@ function setChartedTokens(tokens) {
 function broadcast(obj) {
     const p = JSON.stringify(obj);
     for (const c of wsClients) if (c.readyState == 1) c.send(p);
+    phoneAlertFor(obj);
+}
+
+// Trigger outcomes go to the phone too, not just to open browser tabs.
+function phoneAlertFor(obj) {
+    if (obj.type == 'trigger_fired') {
+        alertPhone(`⚡ Trigger #${obj.id} fired`,
+            `${String(obj.action).toUpperCase()} ${obj.tradingsymbol} at level ${obj.level}`);
+    } else if (obj.type == 'trigger_failed') {
+        alertPhone(`❌ Trigger #${obj.id} failed`, obj.error || 'order failed');
+    }
+}
+
+/*
+Fills and rejections from Kite's order_update stream. Kite sends several
+updates per order (OPEN, UPDATE, COMPLETE...), so only the final states
+alert, once per order_id + status.
+*/
+const alertedOrders = new Set();
+function phoneAlertForOrder(u) {
+    if (!['COMPLETE', 'REJECTED'].includes(u.status)) return;
+    const k = `${u.order_id}:${u.status}`;
+    if (alertedOrders.has(k)) return;
+    alertedOrders.add(k);
+    const qty = u.filled_quantity || u.quantity;
+    const px = u.average_price || u.price;
+    if (u.status == 'REJECTED') {
+        alertPhone(`🚫 ${u.transaction_type} rejected: ${u.tradingsymbol}`,
+            u.status_message || 'rejected by Kite', { key: k });
+    } else if (u.transaction_type == 'BUY') {
+        alertPhone(`✅ Bought ${u.tradingsymbol}`, `${qty} @ ${px}`, { key: k });
+    } else {
+        alertPhone(`💰 Sold ${u.tradingsymbol}`, `${qty} @ ${px}${u.tag ? ` (${u.tag})` : ''}`, { key: k });
+    }
+}
+
+/*
+Unprotected position watch: during market hours, every 30s, any long F&O
+position with no resting SELL (target or SL) for two checks in a row
+alerts once; it re-arms when the position is covered or closed. Two
+checks, so the few seconds between a fill and simpleGuard's target don't
+cause false alarms.
+*/
+const nakedSince = new Map();   // tradingsymbol -> consecutive naked checks
+async function checkNakedPositions() {
+    if (!marketOpenIst()) return;
+    try {
+        const [positions, orders] = await Promise.all([kite.getPositions(), kite.getOrders()]);
+        const longs = (positions.net || []).filter(p =>
+            (p.exchange == 'NFO' || p.exchange == 'BFO') && p.quantity > 0);
+        const seen = new Set();
+        for (const p of longs) {
+            seen.add(p.tradingsymbol);
+            const covered = orders.some(o => o.tradingsymbol == p.tradingsymbol &&
+                o.transaction_type == 'SELL' && RESTING_ORDER_STATUSES.includes(o.status));
+            if (covered) { nakedSince.delete(p.tradingsymbol); continue; }
+            const n = (nakedSince.get(p.tradingsymbol) || 0) + 1;
+            nakedSince.set(p.tradingsymbol, n);
+            if (n == 2) {
+                alertPhone(`⚠️ No reverse order: ${p.tradingsymbol}`,
+                    `${p.quantity} qty open with no resting SELL (target/SL). Check simpleGuard.`,
+                    { key: `naked:${p.tradingsymbol}` });
+            }
+        }
+        for (const sym of [...nakedSince.keys()]) if (!seen.has(sym)) nakedSince.delete(sym);
+    } catch (e) {
+        console.log('⚠️ naked-position check failed', e.message || e);
+    }
 }
 
 /*
@@ -404,6 +473,14 @@ async function autoStrikes(idx, spot, expiry) {
     };
 }
 
+// Keep only the candles of the latest date in `data` (Kite returns oldest first).
+function lastSession(data) {
+    if (!data || data.length == 0) return [];
+    const day = c => dayjs(c.date).format('YYYY-MM-DD');
+    const last = day(data[data.length - 1]);
+    return data.filter(c => day(c) == last);
+}
+
 async function yesterdayRange(spotToken) {
     const from = dayjs().subtract(10, 'day').format('YYYY-MM-DD HH:mm:ss');
     const to = dayjs().format('YYYY-MM-DD HH:mm:ss');
@@ -435,6 +512,9 @@ async function main() {
 
     loadTriggers();
 
+    initAlerts();
+    setInterval(checkNakedPositions, 30000);
+
     ticker.connect();
     ticker.on("connect", () => {
         console.log("🟢 Ticker connected (chartApp)");
@@ -465,6 +545,7 @@ async function main() {
         }
     });
     ticker.on("order_update", u => {
+        phoneAlertForOrder(u);
         const payload = JSON.stringify({ type: "order_update", status: u.status, tradingsymbol: u.tradingsymbol });
         for (const c of wsClients) if (c.readyState == 1) c.send(payload);
     });
@@ -473,6 +554,13 @@ async function main() {
     app.use(express.json());
 
     app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'chartApp.html')));
+
+    // Fire a test alert at every registered phone: curl -X POST localhost:3456/api/testAlert
+    app.post('/api/testAlert', async (req, res) => {
+        await alertPhone('🔔 chartApp test', `Alerts reach this phone (${new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })})`,
+            { key: `test:${Date.now()}` });
+        res.json({ ok: true });
+    });
 
     /*
     Today's Zerodha login gate. The home app (server.js) owns the login
@@ -597,7 +685,14 @@ async function main() {
 
             const KITE_TF = { '1m': 'minute', '5m': '5minute', '15m': '15minute', '1h': '60minute', 'day': 'day' };
             const interval = KITE_TF[tf] || 'minute';
-            const daysBack = tf == 'day' ? 180 : (tf == '1h' ? 10 : 0);
+            /*
+            Intraday tfs show ONE session: today once the market has opened,
+            otherwise the last trading day. Asking for "today from 09:00" only
+            left the charts blank after midnight, before 09:15, on weekends and
+            on holidays -- so look back a week and keep the latest date present.
+            */
+            const intraday = tf != 'day' && tf != '1h';
+            const daysBack = tf == 'day' ? 180 : (tf == '1h' ? 10 : 7);
             const from = dayjs().subtract(daysBack, 'day').hour(9).minute(0).second(0).format('YYYY-MM-DD HH:mm:ss');
             const to = dayjs().format('YYYY-MM-DD HH:mm:ss');
             let data;
@@ -606,6 +701,7 @@ async function main() {
             } catch (e) {
                 data = await kite.getHistoricalData(token, interval, from, to); // index spot has no OI
             }
+            if (intraday) data = lastSession(data);
             res.json(data.map(c => ({
                 time: Math.floor(new Date(c.date).getTime() / 1000),
                 open: c.open, high: c.high, low: c.low, close: c.close,

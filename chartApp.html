@@ -458,7 +458,10 @@ async function loadSlot(slot) {
   applyTfScale(slot);
 
   const cr = await fetch(`${BASE}/api/candles?token=${token}&tf=${TF[slot]}`);
-  const candles = (await cr.json()).map(c => ({ ...c, time: c.time + IST_OFFSET }));
+  const body = await cr.json();
+  // an error object here used to throw on .map and leave the chart silently blank
+  if (!Array.isArray(body)) { msg(`❌ chart ${slot} candles: ${body.error || cr.status}`); return; }
+  const candles = body.map(c => ({ ...c, time: c.time + IST_OFFSET }));
   series[slot].setData(candles);
   candleData[slot] = candles;
   volBase[slot] = candles.slice(0, -1).reduce((s, c) => s + (c.volume || 0), 0);
