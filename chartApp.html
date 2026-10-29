@@ -273,6 +273,18 @@
   #blockModal .bmWhy summary { font-size:11.5px; }
   #blockModal .bmWhy p { color:#b9bfca; font-size:12px; margin:6px 0; line-height:1.55; }
   #gatePanel2 .hint { color:var(--dim); font-size:11.5px; margin-top:6px; }
+  #gatePanel2 .tuner { margin:10px 0 2px; border-top:1px solid var(--border); padding-top:8px; }
+  #gatePanel2 .tuner > summary { cursor:pointer; color:var(--accent); font-size:12px; font-weight:600; }
+  #gatePanel2 .tgrid { display:grid; grid-template-columns:repeat(auto-fit,minmax(215px,1fr)); gap:5px 16px; margin:8px 0; }
+  #gatePanel2 .tf { display:flex; align-items:center; gap:7px; font-size:11.5px; }
+  #gatePanel2 .tf label { color:#aeb4c0; flex:1 1 auto; min-width:0; }
+  #gatePanel2 .tf label code { color:var(--dim); font-size:10.5px; }
+  #gatePanel2 .tf input[type=number], #gatePanel2 .tf input[type=text] {
+    width:68px; flex:0 0 68px; background:var(--bg); color:var(--fg);
+    border:1px solid var(--border); border-radius:3px; padding:2px 5px; font-size:11.5px; font-family:inherit; }
+  #gatePanel2 .tf input.dirty { border-color:var(--accent); }
+  #gatePanel2 .tf input[type=checkbox] { flex:0 0 auto; }
+  #gatePanel2 .tfoot { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
 </style>
 </head>
 <body>
@@ -2068,6 +2080,9 @@ function paintGate() {
        <code>blockRedCandle</code> refuses a BUY while that strike's live 1-minute candle is red (close under open), read off the minute bar and not the chart's timeframe — flat bars and bars with no print yet pass. It is per leg, so the CE and PE buttons grey independently. Set <code>{"blockRedCandle":false}</code> to drop it.
        The midday block is no longer a clock: <code>blockDead</code> scores the CE+PE tape on flow, print size, OI movement and spread against today's own median minute, and only refuses when <code>deadScore</code> of those 4 are dead. Set <code>blockLunch:true</code> to put the old 12:00–13:15 window back.</div>`;
 
+  pan.insertAdjacentHTML('beforeend', tunerHtml(gateState.settings || {}));
+  wireTuner();
+
   const bcf = document.getElementById('btnCountFrom');
   if (bcf) bcf.onclick = () => setCountFrom({});
   const bca = document.getElementById('btnCountAll');
@@ -2075,6 +2090,143 @@ function paintGate() {
 
   greyBuys();
 }
+
+/*
+The gate numbers used to be editable only by POSTing JSON by hand, which
+means in practice they were never edited -- a brake you cannot reach at
+14:00 is not a brake. This builds the form from whatever keys the server
+actually reports, so a setting added in chartApp.js appears here with no
+change to this page; only the label and the group are looked up, and an
+unknown key still renders under "other" with its raw name. countFrom and
+countFromDate are left out on purpose: they are run-time state owned by
+the two buttons above, not settings.
+*/
+const TUNE_SKIP = ['countFrom', 'countFromDate'];
+const TUNE_GROUPS = [
+  ['risk per trade', [
+    ['riskPctOfCapital', '% of capital at risk in one trade (0 = off)'],
+    ['blockNoStop',      'refuse entries that would rest no exchange stop'],
+    ['maxDayLoss',       'stop for the day after this much loss (₹)'],
+    ['maxLossStreak',    'stop after this many losses in a row'],
+  ]],
+  ['how often I may click', [
+    ['maxTradesPerDay',  'entries allowed per day'],
+    ['minGapSec',        'seconds that must pass between entries'],
+    ['maxOpenPositions', 'positions open at once'],
+    ['oneEntryPerSymbol','one entry per strike per day'],
+  ]],
+  ['what the bar has to look like', [
+    ['blockRedCandle',   'no buy while the live 1m bar is red'],
+    ['blockSteep',       'no buy on the bar after a blow-off'],
+    ['steepMult',        'steep = body this many × the median body'],
+    ['steepMinPct',      'and at least this % move'],
+    ['steepWin',         'bars of history the median is taken over'],
+    ['blockWrongWay',    'no buy against the EMA'],
+    ['emaMin',           'EMA length'],
+  ]],
+  ['what the tape has to look like', [
+    ['blockChop',        'no buy in a chopping tape'],
+    ['minSpeed',         'minimum % move per minute'],
+    ['minEff',           'minimum % of the range the move keeps'],
+    ['regimeWin',        'minutes the tape is measured over'],
+    ['blockDead',        'no buy in a dead tape'],
+    ['deadScore',        'how many of the 4 tape tests must be dead'],
+    ['flowPct',          'flow below this % of the median is dead'],
+    ['sizePct',          'print size below this % is dead'],
+    ['oiPct',            'OI movement below this % is dead'],
+    ['spreadMult',       'spread above this × the median is dead'],
+    ['partWin',          'minutes of participation history'],
+    ['partMinMin',       'minimum minutes that must have traded'],
+  ]],
+  ['price and clock', [
+    ['minPremium',       'cheapest premium I may buy (₹)'],
+    ['maxPremium',       'dearest premium I may buy (₹)'],
+    ['noEntryBefore',    'no entry before (HH:MM)'],
+    ['noEntryAfter',     'no entry after (HH:MM)'],
+    ['blockLunch',       'put the old midday clock back'],
+    ['lunchFrom',        'midday window from (HH:MM)'],
+    ['lunchTo',          'midday window to (HH:MM)'],
+  ]],
+];
+
+function tunerHtml(st) {
+  const placed = new Set(TUNE_SKIP);
+  const groups = TUNE_GROUPS.map(([title, keys]) => {
+    const fields = keys.filter(([k]) => k in st).map(([k, lb]) => { placed.add(k); return fld(k, lb, st[k]); });
+    return fields.length ? `<div class="tsec"><div class="hint2">${title}</div><div class="tgrid">${fields.join('')}</div></div>` : '';
+  });
+  const rest = Object.keys(st).filter(k => !placed.has(k)).map(k => fld(k, '', st[k]));
+  if (rest.length) groups.push(`<div class="tsec"><div class="hint2">other</div><div class="tgrid">${rest.join('')}</div></div>`);
+  return `<details class="tuner"><summary>change these numbers</summary>`
+    + groups.join('')
+    + `<div class="tfoot"><button id="btnTuneSave" class="sec">save</button>`
+    +   `<button id="btnTuneReset" class="sec">undo my edits</button>`
+    +   `<span class="hint2" id="tuneMsg">applies the moment it saves — no restart. Exits are never gated.</span></div>`
+    + `</details>`;
+}
+
+function fld(k, lb, v) {
+  const label = `<label for="tn_${k}">${lb || k}${lb ? ` <code>${k}</code>` : ''}</label>`;
+  if (typeof v == 'boolean')
+    return `<span class="tf"><input type="checkbox" id="tn_${k}" data-k="${k}" data-t="b"${v ? ' checked' : ''}>${label}</span>`;
+  if (typeof v == 'number')
+    return `<span class="tf">${label}<input type="number" step="any" id="tn_${k}" data-k="${k}" data-t="n" value="${v}"></span>`;
+  return `<span class="tf">${label}<input type="text" id="tn_${k}" data-k="${k}" data-t="s" value="${v == null ? '' : String(v)}"></span>`;
+}
+
+/*
+Only changed fields are sent. The whole-object POST would work too, but a
+15-second refreshGate can land between reading the form and posting it,
+and sending every key back would then quietly re-write a value that was
+changed elsewhere (the Kite app, another tab) with what this page happened
+to be showing.
+*/
+function wireTuner() {
+  const ins = [...document.querySelectorAll('#gatePanel2 .tuner input')];
+  const dirty = i => i.dataset.t == 'b'
+    ? i.checked != i.defaultChecked
+    : i.value.trim() != i.defaultValue.trim();
+  const paint = () => ins.forEach(i => i.classList.toggle('dirty', dirty(i)));
+  ins.forEach(i => { i.oninput = paint; i.onchange = paint; });
+
+  const open = tunerWasOpen;
+  const det = document.querySelector('#gatePanel2 .tuner');
+  if (det) { det.open = open; det.ontoggle = () => { tunerWasOpen = det.open; }; }
+
+  const rst = document.getElementById('btnTuneReset');
+  if (rst) rst.onclick = () => {
+    ins.forEach(i => { if (i.dataset.t == 'b') i.checked = i.defaultChecked; else i.value = i.defaultValue; });
+    paint();
+  };
+
+  const sv = document.getElementById('btnTuneSave');
+  if (sv) sv.onclick = async () => {
+    const body = {}, bad = [];
+    for (const i of ins) {
+      if (!dirty(i)) continue;
+      if (i.dataset.t == 'b') { body[i.dataset.k] = i.checked; continue; }
+      if (i.dataset.t == 'n') {
+        const n = Number(i.value);
+        if (i.value.trim() === '' || !isFinite(n)) { bad.push(i.dataset.k); continue; }
+        body[i.dataset.k] = n; continue;
+      }
+      body[i.dataset.k] = i.value.trim();
+    }
+    if (bad.length) { msg('❌ not a number: ' + bad.join(', ')); return; }
+    const keys = Object.keys(body);
+    if (!keys.length) { msg('nothing changed'); return; }
+    try {
+      const r = await fetch(BASE + '/api/noTrade', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+      });
+      const j = await r.json();
+      if (!r.ok) { msg('❌ ' + (j.error || ('HTTP ' + r.status))); return; }
+      msg('✅ saved ' + keys.map(k => `${k}=${body[k]}`).join(', '));
+      await refreshGate();
+    } catch (e) { msg('❌ ' + e); }
+  };
+}
+let tunerWasOpen = false;
 
 async function setCountFrom(body) {
   try {
