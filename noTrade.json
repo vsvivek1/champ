@@ -1,0 +1,22 @@
+{
+  "noEntryBefore": "09:20",
+  "lunchFrom": "12:00",
+  "lunchTo": "13:15",
+  "noEntryAfter": "15:10",
+  "blockLunch": true,
+  "maxDayLoss": 3000,
+  "maxLossStreak": 3,
+  "maxTradesPerDay": 8,
+  "minPremium": 8,
+  "maxPremium": 400,
+  "maxOpenPositions": 1,
+  "oneEntryPerSymbol": true,
+  "minSpeed": 0.6,
+  "blockChop": true,
+  "regimeWin": 30,
+  "minEff": 10,
+  "blockWrongWay": true,
+  "emaMin": 20,
+  "countFrom": "11:51:23",
+  "countFromDate": "2026-10-29"
+}

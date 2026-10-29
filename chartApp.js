@@ -1222,6 +1222,42 @@ whole checklist (passing rules included) instead of only the first failure.
 same-symbol rules are reported as "n/a", which is what the page wants on
 load, before you have picked anything.
 */
+/*
+WHY EACH RULE EXISTS. The reason text says what tripped; this says what the
+rule believes. It rides along on every check so the block modal can show the
+theory next to the number instead of leaving "efficiency 5.6%" to be taken on
+faith.
+*/
+const RULE_THEORY = {
+    open: 'The first prints of the day are a price-discovery auction, not a trend. Spreads are at their widest and the first 5 minutes routinely reverse, so an entry here pays the widest cost for the least information.',
+
+    lunch: 'Institutional flow thins out midday. Volume drops but theta does not: the option keeps decaying at the same rate while the underlying stops producing the moves that would pay for it. Worst cost-to-opportunity window of the session.',
+
+    late: 'A long option this late has no time left to be right. Theta is at its steepest in the final hour and the exchange-wide square-off pressure makes the last prints mechanical rather than directional.',
+
+    lock: 'A stop-out is the market saying your read was wrong, and the urge to immediately win it back is the single most reliable way a bad trade becomes a bad day. The lock is not about the market, it is about the ten minutes after a loss.',
+
+    dayloss: 'A hard floor on the day. Position sizing protects you per trade; this protects you from the sequence. Any day can be recovered tomorrow, which is only true if there is capital left tomorrow.',
+
+    streak: 'Three losses in a row is evidence the read is wrong, not that variance is unlucky. At a genuine 60% win rate three straight losses happen about 6% of the time; more often it means conditions changed and the setup stopped working.',
+
+    cap: 'Every click costs brokerage, STT and a bid-ask crossing whatever the outcome. Those costs are linear in the number of trades while edge is not, so past some count the day is paying the broker to break even. The cap is a brake on the clicking, not on the opportunity.',
+
+    chop: 'EFFICIENCY RATIO (Kaufman). Over the window, efficiency = |net displacement| / total distance walked, as a percent. 100% is a straight line; 0% is ending exactly where it started after walking all day.\n\nIt matters for a LONG option specifically because of which side each cost sits on. What pays you is NET displacement (delta times the move). What charges you is TIME (theta) and every bid-ask crossing. Distance walked pays you nothing at all. So efficiency is literally the ratio of the thing that pays to the thing you sit through.\n\nThe anchor worth knowing: a pure coin-flip random walk over n bars has an expected efficiency of about 1/sqrt(n). Over 30 bars that is roughly 18%. So ~18% is what NO edge looks like; meaningfully below it means price is actively pulling back on itself (mean-reverting), and above it means it is trending more than chance.\n\nCaveat worth being honest about: this rule assumes you are making a DIRECTIONAL bet that needs follow-through. A small fixed-target scalp that harvests pops does not need net displacement and can prefer a choppy tape - against that style this rule is mis-aimed.',
+
+    wrongway: 'Buying a CE is a long delta bet and a PE is a short delta bet, so the position has a side whether or not the trade was framed that way. Price above a rising EMA and below a falling one is the cheapest honest read of which side the index is paying. Taking the other side means needing the index to turn before theta runs out - paying for time while betting against the drift.',
+
+    guarded: 'A position with no resting SELL is protected only by your attention, and attention is exactly what goes missing in the move that needs it. One resting order per position, placed on the fill, is the difference between a known loss and an open-ended one.',
+
+    open_count: 'Two positions do not halve the risk, they double the number of things needing a decision in the same moment. Attention is the scarce resource intraday, not capital.',
+
+    same_symbol: 'Adding to the same strike is averaging into a position the market is already disagreeing with, and it concentrates the whole day into one strike\'s outcome.',
+
+    premium: 'Too cheap and the bid-ask spread is a large share of the premium, so the spread alone can exceed the target. Too expensive and a single stop costs a disproportionate slice of the day. The band keeps the cost of being wrong proportional.',
+
+    speed: 'A flat option chart cannot pay for the spread it costs to enter. If the instrument is not moving, the only certain outcome is the crossing cost.'
+};
+
 function noTradeChecks({ premium, tradingsymbol } = {}) {
     const s = readNoTrade();
     const st = todayStats();
@@ -1331,6 +1367,7 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
         chk.push({ code: 'premium', label: `Premium ₹${s.minPremium}–${s.maxPremium}`, ok: true, blocked: false, hard: true, detail: 'n/a until a price is picked' });
     }
 
+    for (const c of chk) if (RULE_THEORY[c.code]) c.theory = RULE_THEORY[c.code];
     const blockers = chk.filter(c => c.blocked);
     return { checks: chk, blockers, blocked: blockers.length > 0, settings: s, stats: st, lock: l, openPositions: open.length, regime: reg };
 }

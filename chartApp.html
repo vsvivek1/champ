@@ -263,6 +263,10 @@
   #gatePanel2 .soft { color:#e0b050; }
   #gatePanel2 .gateFoot { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:9px 0 2px; }
   #gatePanel2 .gateFoot .hint2 { color:var(--dim); font-size:11px; }
+  #gatePanel2 .rowWhy summary, #blockModal .bmWhy summary { cursor:pointer; color:var(--accent); font-size:11px; margin-top:3px; }
+  #gatePanel2 .rowWhy p { color:#aeb4c0; font-size:11.5px; margin:5px 0; line-height:1.5; max-width:70ch; }
+  #blockModal .bmWhy summary { font-size:11.5px; }
+  #blockModal .bmWhy p { color:#b9bfca; font-size:12px; margin:6px 0; line-height:1.55; }
   #gatePanel2 .hint { color:var(--dim); font-size:11.5px; margin-top:6px; }
 </style>
 </head>
@@ -1952,7 +1956,7 @@ function paintGate() {
     + ` · streak ${st.lossStreak || 0}L · ${gateState.openPositions} open · click for the rules</span>`;
 
   const rows = [...(gateState.checks || [])].map(c => ({
-    ok: c.ok, na: /^n\/a/.test(c.detail || ''), label: c.label, detail: c.detail, soft: false
+    ok: c.ok, na: /^n\/a/.test(c.detail || ''), label: c.label, detail: c.detail, soft: false, theory: c.theory
   }));
   rows.push(dead);
 
@@ -1961,7 +1965,9 @@ function paintGate() {
       const mk = c.na ? '–' : (c.ok ? '✓' : '✗');
       return `<div class="row ${cls}"><span class="mk">${mk}</span>`
         + `<span class="lb">${c.label}${c.soft ? ' <span class="soft">(soft)</span>' : ''}</span>`
-        + `<span class="dt">${c.detail || ''}</span></div>`;
+        + `<span class="dt">${c.detail || ''}`
+        + (c.theory ? `<details class="rowWhy"><summary>theory</summary>${paras(c.theory)}</details>` : '')
+        + `</span></div>`;
     }).join('') + `</div>`
     + `<div class="gateFoot">`
     +   `<button id="btnCountFrom" class="sec">restart the ${gateState.settings.maxTradesPerDay}-trade count from now</button>`
@@ -2040,6 +2046,10 @@ function esc(x) {
   return String(x == null ? '' : x)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
+// rule theory arrives as plain text with blank-line paragraphs
+function paras(t) {
+  return String(t || '').split(/\n\s*\n/).map(x => `<p>${esc(x.trim())}</p>`).join('');
+}
 function showBlockModal(what, blockers) {
   const box = document.getElementById('blockModal');
   if (!box) return;
@@ -2056,7 +2066,9 @@ function showBlockModal(what, blockers) {
     `${what} refused — ${list.length} rule${list.length > 1 ? 's' : ''} said no`;
   document.getElementById('bmRows').innerHTML = list.map(b =>
     `<div class="bmRow"><div class="l">✗ ${esc(b.label || 'rule')}</div>`
-    + (b.detail ? `<div class="d">${esc(b.detail)}</div>` : '') + `</div>`).join('');
+    + (b.detail ? `<div class="d">${esc(b.detail)}</div>` : '')
+    + (b.theory ? `<details class="bmWhy"><summary>why this rule exists</summary>${paras(b.theory)}</details>` : '')
+    + `</div>`).join('');
 
   const lk = document.getElementById('bmLock');
   if (lockedNow()) { lk.style.display = ''; lk.textContent = `⏱ new entries unlock in ${mmss(lockLeft())}`; }
