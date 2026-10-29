@@ -33,3 +33,10 @@ tradeLog.json
 all_instruments.json
 stockOption_*.json
 backtest/results/
+
+# runtime state + live-tunable config (code has defaults for all of these)
+oiLog.json
+oiSignals.json
+regimeIndex.json
+setupAlerts.json
+setupLog.json
