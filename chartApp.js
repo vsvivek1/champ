@@ -555,6 +555,19 @@ async function main() {
 
     app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'chartApp.html')));
 
+    /*
+    Relay for the page's own alerts (breakout/breakdown, short covering,
+    OI crash, moving fast, dead chart, no resting SELL), so they reach the
+    phone and not just the browser's beep. Text is capped; dedup is by key.
+    */
+    app.post('/api/phoneAlert', (req, res) => {
+        const { title, body, key } = req.body || {};
+        if (typeof title != 'string' || !title.trim()) return res.status(400).json({ error: 'title required' });
+        alertPhone(title.slice(0, 120), String(body || '').slice(0, 300),
+            { key: key ? String(key).slice(0, 120) : undefined });
+        res.json({ ok: true });
+    });
+
     // Fire a test alert at every registered phone: curl -X POST localhost:3456/api/testAlert
     app.post('/api/testAlert', async (req, res) => {
         await alertPhone('🔔 chartApp test', `Alerts reach this phone (${new Date().toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })})`,

@@ -677,11 +677,17 @@ function checkBreakLevels(ltp) {
   const up = parseFloat(document.getElementById('brkUp').value);
   const dn = parseFloat(document.getElementById('brkDn').value);
   if (up > 0) {
-    if (ltp >= up && !brkFired.up) { brkFired.up = true; msg(`🚀 BREAKOUT: spot ${fmt(ltp)} crossed ${fmt(up)}`); beep(1320, 3); }
+    if (ltp >= up && !brkFired.up) {
+      brkFired.up = true; msg(`🚀 BREAKOUT: spot ${fmt(ltp)} crossed ${fmt(up)}`); beep(1320, 3);
+      phone(`🚀 BREAKOUT ${slotName(0)}`, `spot ${fmt(ltp)} crossed ${fmt(up)}`, `brk:up:${up}`);
+    }
     else if (brkFired.up && ltp < up * 0.9995) brkFired.up = false;
   }
   if (dn > 0) {
-    if (ltp <= dn && !brkFired.dn) { brkFired.dn = true; msg(`📉 BREAKDOWN: spot ${fmt(ltp)} crossed ${fmt(dn)}`); beep(440, 3); }
+    if (ltp <= dn && !brkFired.dn) {
+      brkFired.dn = true; msg(`📉 BREAKDOWN: spot ${fmt(ltp)} crossed ${fmt(dn)}`); beep(440, 3);
+      phone(`📉 BREAKDOWN ${slotName(0)}`, `spot ${fmt(ltp)} crossed ${fmt(dn)}`, `brk:dn:${dn}`);
+    }
     else if (brkFired.dn && ltp > dn * 1.0005) brkFired.dn = false;
   }
 }
@@ -990,9 +996,21 @@ function renderCommentary() {
     const dead = html.includes('dead chart');
     el.classList.toggle('sc', sc);
     el.classList.toggle('fast', fast && !sc);
-    if (sc && !scBefore[s]) beep();                 // 880Hz single
-    if (fast && !fastBefore[s]) beep(1320, 2);      // high double = moving fast
-    if (dead && !deadBefore[s]) beep(330);          // low single = gone dead
+    const ltpTxt = lastLtp[s] != null ? ` · ltp ${fmt(lastLtp[s])}` : '';
+    if (sc && !scBefore[s]) {                       // 880Hz single
+      beep();
+      const crash = html.includes('covering rally likely');
+      phone(`🟢 ${crash ? 'OI CRASH — covering rally likely' : 'Short covering'}: ${slotName(s)}`,
+        `price ↑ OI ↓ (writers buying back)${ltpTxt}`, `sc:${slotName(s)}`);
+    }
+    if (fast && !fastBefore[s]) {                   // high double = moving fast
+      beep(1320, 2);
+      phone(`⚡ MOVING FAST: ${slotName(s)}`, `candles ≥2× normal size${ltpTxt}`, `fast:${slotName(s)}`);
+    }
+    if (dead && !deadBefore[s]) {                   // low single = gone dead
+      beep(330);
+      phone(`💤 Dead chart: ${slotName(s)}`, `candles ≤0.35× normal size${ltpTxt}`, `dead:${slotName(s)}`);
+    }
     scBefore[s] = sc; fastBefore[s] = fast; deadBefore[s] = dead;
   }
 }
@@ -1206,9 +1224,30 @@ function renderNakedAlert(naked) {
   if (naked.length == 0) { el.style.display = 'none'; nakedBefore = new Set(); return; }
   el.textContent = `⚠ NO RESTING SELL on ${naked.join(', ')} — position is unprotected (set a Target/SL or check simpleGuard)`;
   el.style.display = 'block';
-  if (naked.some(s => !nakedBefore.has(s))) beep();
+  if (naked.some(s => !nakedBefore.has(s))) {
+    beep();
+    for (const sym of naked.filter(x => !nakedBefore.has(x))) {
+      // same key as the server's own 30s watch, so the phone gets it once
+      phone(`⚠️ No reverse order: ${sym}`, 'position open with no resting SELL (target/SL). Check simpleGuard.', `naked:${sym}`);
+    }
+  }
   nakedBefore = new Set(naked);
 }
+/* Send a page alert to the phone too (server: /api/phoneAlert -> FCM).
+   key groups repeats; the server drops the same key within a minute, so
+   several open tabs don't send it several times. */
+function phone(title, body, key) {
+  fetch(BASE + '/api/phoneAlert', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, body, key })
+  }).catch(() => { /* alert relay is best-effort */ });
+}
+// readable chart name for slot 0 (spot) / 1 (CE) / 2 (PE)
+function slotName(s) {
+  if (s == 0) return cfg ? `${cfg.index} spot` : 'spot';
+  return (exSymbols[s] && exSymbols[s].tradingsymbol) || (s == 1 ? 'CE' : 'PE');
+}
+
 function beep(freq, count) {
   freq = freq || 880; count = count || 1;
   try {
