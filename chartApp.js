@@ -47,8 +47,44 @@ const AccessTokens = require('./models/AccessTokens');
 const { getKiteConnectInstance, getTickerInstance } = require('./getKiteConnectInstance.js');
 const { placeOrderInFreezeChunks } = require('./placeOrderInFreezeChunks.js');
 const { initAlerts, alertPhone, marketOpenIst } = require('./chartAlerts.js');
+const { createMockBroker } = require('./mockBroker.js');
+const { createAutoPilot } = require('./autoPilot.js');
 
-const PORT = 3456;
+/* ---------------------------------------------------------------------
+HEADLESS / MOCK MODE
+
+Three env flags, all off by default, so plain `node chartApp.js` is exactly
+the dashboard it has always been. chartHeadless.js sets them.
+
+  CHART_HEADLESS=1   nobody is going to press Load. The process picks the
+                     strikes itself at startup, re-picks them while flat,
+                     and runs the autopilot off the setup detector. The
+                     HTTP server still comes up -- it is the read-out.
+  CHART_MOCK=1       every order goes to mockBroker instead of the
+                     exchange. Real prices, real candles, real levels,
+                     real gate, paper fills.
+  CHART_PORT=n       so a mock run can sit alongside the live dashboard.
+
+MOCK MODE ISOLATES ITS PAPERWORK. The guard writes state and journals as
+it trades (guardState, tradeLock, tradeLog, setupLog, triggers...). A paper
+session writing those would corrupt the real account's level freeze, lock
+out real entries after a paper stop-out, and poison the P&L history the
+review and the no-trade gate are computed from. So in mock mode every
+WRITTEN file gets a mock- prefix, while the SETTINGS files (guardSettings,
+noTrade, setupAlerts, oiSignals) stay shared -- a paper run has to be
+judged against the same rules as a real one, or it proves nothing.
+--------------------------------------------------------------------- */
+const HEADLESS = process.env.CHART_HEADLESS == '1';
+const MOCK = process.env.CHART_MOCK == '1';
+const MOCK_CASH = Number(process.env.CHART_MOCK_CASH) || 200000;
+// phone alerts on paper fills are noise; CHART_MOCK_ALERTS=1 turns them back on
+const ALERTS_ON = !MOCK || process.env.CHART_MOCK_ALERTS == '1';
+
+function dataFile(name) {
+    return path.join(__dirname, MOCK ? 'mock-' + name : name);
+}
+
+const PORT = Number(process.env.CHART_PORT) || 3456;
 const TICK = 0.05;
 
 const INDICES = {
@@ -77,6 +113,8 @@ async function kiteRetry(fn, tries = 3, waitMs = 350) {
 }
 
 let kite, ticker;
+let mock = null;        // the paper broker in MOCK mode, else null
+let autoPilot = null;   // the headless entry decision, else null
 let optionInstruments = [];          // NFO + BFO option master
 const lotSizeByToken = new Map();
 const instByToken = new Map();       // token -> the option's master row (symbol, exchange)
@@ -370,7 +408,7 @@ function steepBar(tok, s) {
     };
 }
 
-const TRIG_FILE = path.join(__dirname, 'chartTriggers.json');
+const TRIG_FILE = dataFile('chartTriggers.json');
 
 function saveTriggers() {
     try {
@@ -458,7 +496,7 @@ a Map, so a restart between the BUY and its fill still honours the choice).
 Same shape and failure style as breachOverride.json: if the file is missing or
 unreadable, everyone falls back to the global setting.
 */
-const FIRST_ORDER_FILE = path.join(__dirname, 'firstOrderOverride.json');
+const FIRST_ORDER_FILE = dataFile('firstOrderOverride.json');
 function setFirstOrderOverride(token, which) {
     if (!['target', 'sl'].includes(which) || !(Number(token) > 0)) return false;
     let ov = {};
@@ -639,6 +677,66 @@ async function autoStrikes(idx, spot, expiry) {
     };
 }
 
+/*
+Pick the index and its two strikes, and register them as the charted
+tokens. This is what pressing Load does -- the page's /api/setup is a thin
+wrapper over it, and headless mode calls it directly at startup and again
+on a timer while flat, because nobody is there to press anything and spot
+drifts away from the strike that was picked at 09:20.
+
+Throws on a bad index or an unresolvable chain; the route turns that into a
+400/500 and the headless loop just retries on its next pass.
+*/
+async function loadIndex(index, offsetArg) {
+    const indexKey = String(index || 'NIFTY').toUpperCase();
+    const isAuto = String(offsetArg || '') == 'auto';
+    const offset = isAuto ? 0 : (parseInt(offsetArg || '0', 10) || 0);
+    const idx = INDICES[indexKey];
+    if (!idx) throw new Error("index must be NIFTY or SENSEX");
+
+    const ltpData = await kite.getLTP([idx.spotKey]);
+    const spot = ltpData[idx.spotKey].last_price;
+
+    const yday = await yesterdayRange(idx.spotToken);
+    let auto = null;
+    let opts = resolveOptions(indexKey, spot, offset); // also gives nearest expiry for auto's D
+    if (isAuto && opts) {
+        auto = await autoStrikes(idx, spot, opts.expiry);
+        opts = resolveOptions(indexKey, spot, 0, auto);
+        console.log(`🎛 auto-strike ${indexKey}: spot ${spot}, IV ${auto.iv} (${auto.ivSource}), D ${auto.D}, dist ${auto.dist} → CE ${auto.ceStrike} / PE ${auto.peStrike}`);
+    }
+    if (!opts || !opts.ce || !opts.pe) throw new Error("could not resolve CE/PE instruments");
+
+    /*
+    How far out the auto pick actually landed, in strike steps from the
+    ATM. Measured off the LOADED strike, not autoStrikes()'s ideal one:
+    if that strike is not listed, resolveOptions snaps to the nearest
+    one that is, and the honest answer is where the chart ended up.
+    Positive = OTM (CE above the ATM, PE below it).
+    */
+    if (auto) {
+        auto.atm = opts.atm;
+        auto.step = idx.strikeStep;
+        auto.ceSteps = Math.round((Number(opts.ce.strike) - opts.atm) / idx.strikeStep);
+        auto.peSteps = Math.round((opts.atm - Number(opts.pe.strike)) / idx.strikeStep);
+    }
+
+    setChartedTokens([idx.spotToken, Number(opts.ce.instrument_token), Number(opts.pe.instrument_token)]);
+    setRegimeToken(idx.spotToken);
+    seedSpotSeries(regimeToken).catch(() => { });
+
+    return {
+        index: indexKey,
+        spot: { token: idx.spotToken, ltp: spot, yday, inside: yday ? (spot <= yday.high && spot >= yday.low) : null },
+        auto,
+        atm: opts.atm,          // the ATM at Load; the chart recomputes it live from spot
+        step: idx.strikeStep,   // so the chart can count strikes away without hardcoding it
+        expiry: opts.expiry,
+        ce: { token: Number(opts.ce.instrument_token), tradingsymbol: opts.ce.tradingsymbol, strike: Number(opts.ce.strike), exchange: opts.ce.exchange, lot_size: opts.ce.lot_size },
+        pe: { token: Number(opts.pe.instrument_token), tradingsymbol: opts.pe.tradingsymbol, strike: Number(opts.pe.strike), exchange: opts.pe.exchange, lot_size: opts.pe.lot_size },
+    };
+}
+
 // Keep only the candles of the latest date in `data` (Kite returns oldest first).
 function lastSession(data) {
     if (!data || data.length == 0) return [];
@@ -739,9 +837,9 @@ const GUARD_DEFAULTS = {
 const PIVOT_WIN = 2;            // bars each side of a 1-min swing pivot
 const LEVEL_CLUSTER_PCT = 0.75; // pivots within this % of each other are one level
 const TRAIL_CLEAR_PCT = 0.5;    // price must clear a level by this much before it becomes the stop
-const GUARD_STATE_FILE = path.join(__dirname, 'guardState.json');
-const BREACH_OVERRIDE_FILE = path.join(__dirname, 'breachOverride.json');
-const TRADE_LOG_FILE = path.join(__dirname, 'tradeLog.json');
+const GUARD_STATE_FILE = dataFile('guardState.json');
+const BREACH_OVERRIDE_FILE = dataFile('breachOverride.json');
+const TRADE_LOG_FILE = dataFile('tradeLog.json');
 
 const guardStartedAt = Date.now();
 
@@ -925,7 +1023,7 @@ blocked -- you can always close what you are holding.
 --------------------------------------------------------------------- */
 
 const LOCKOUT_MIN = 10;
-const LOCK_FILE = path.join(__dirname, 'tradeLock.json');
+const LOCK_FILE = dataFile('tradeLock.json');
 
 // token -> live picture of the open trade, from its BUY fill onward
 const tradeCtxByToken = new Map();
@@ -2526,7 +2624,7 @@ instead of a hunch. Turn autoBuy on when it does.
 --------------------------------------------------------------------- */
 
 const OI_FILE = path.join(__dirname, 'oiSignals.json');
-const OI_LOG_FILE = path.join(__dirname, 'oiLog.json');
+const OI_LOG_FILE = dataFile('oiLog.json');
 
 const OI_DEFAULTS = {
     enabled: true,      // detect and log
@@ -2624,7 +2722,7 @@ Runs once per completed minute per token, off the back of the tick that
 opens a new minute.
 --------------------------------------------------------------------- */
 const SETUP_FILE = path.join(__dirname, 'setupAlerts.json');
-const SETUP_LOG_FILE = path.join(__dirname, 'setupLog.json');
+const SETUP_LOG_FILE = dataFile('setupLog.json');
 const SETUP_DEFAULTS = {
     enabled: true,
     cooldownMin: 10,     // per token per kind, so one level is not twenty alerts
@@ -2702,6 +2800,7 @@ async function checkSetups(token, ltp) {
         const row = {
             at: dayjs().format('YYYY-MM-DD HH:mm:ss'), date: dayjs().format('YYYY-MM-DD'),
             min, token: Number(token), tradingsymbol: inst.tradingsymbol,
+            exchange: inst.exchange,   // the autopilot orders off this row
             kind: h.kind, level: h.level, touches: h.touches, what: h.what,
             ltp: +ltp.toFixed(2), stop: ps.stop, stopWhy: ps.why, riskPerUnit: risk,
             target, rr, verdict,
@@ -2719,6 +2818,18 @@ async function checkSetups(token, ltp) {
         rows.push(row);
         writeSetupLog(rows);
         broadcast({ type: 'setup_alert', ...row });
+
+        /*
+        Headless, this row is the click. The autopilot re-runs the gate and
+        the risk sizer itself before anything goes out -- see autoPilot.js
+        for why the verdict above is not trusted on its own.
+        */
+        if (autoPilot) {
+            const out = await autoPilot.onSetup(row);
+            if (out && out.action != 'skip' && out.action != 'off') {
+                broadcast({ type: 'autopilot', setup: row.kind, tradingsymbol: row.tradingsymbol, ...out });
+            }
+        }
     }
 }
 
@@ -3458,6 +3569,20 @@ async function guardOnOrderUpdate(u) {
 }
 
 /*
+The one entry point for a fill, wherever it came from: Kite's order_update
+stream for a real order, mockBroker's own callback for a paper one. The
+guard, the phone and the page are fed identically either way -- a paper
+fill must travel exactly the path a real fill travels, or mock mode is
+testing something other than what trades.
+*/
+function onOrderUpdate(u) {
+    phoneAlertForOrder(u);
+    const payload = JSON.stringify({ type: "order_update", status: u.status, tradingsymbol: u.tradingsymbol });
+    for (const c of wsClients) if (c.readyState == 1) c.send(payload);
+    guardOnOrderUpdate(u);   // a BUY fill arms the guard; a flattening SELL closes the trade
+}
+
+/*
 Two guards on one account both place a target on the same buy -> duplicate
 SELL -> margin rejection. The guard now lives here, so a leftover
 simpleGuard/stopLossGuard/targetGuard pm2 process is a real hazard: say so
@@ -3466,6 +3591,9 @@ loudly at startup and keep saying it in /api/guard.
 const RIVAL_GUARDS = ['simpleGuard', 'stopLossGuard', 'targetGuard'];
 let rivalGuardsOnline = [];
 function checkRivalGuards() {
+    // a mock run holds no real position, so it cannot collide with anything
+    // -- and it is itself the second process, so warning about one is wrong
+    if (MOCK) return;
     require('child_process').exec('pm2 jlist', { timeout: 10000 }, (err, stdout) => {
         if (err) return;
         try {
@@ -3492,6 +3620,27 @@ async function main() {
     kite = await getKiteConnectInstance(accessToken);
     ticker = await getTickerInstance(accessToken);
 
+    /*
+    Paper mode: wrap the live connection. Reads still go to Kite (so the
+    prices, candles, circuit bands and levels are the real ones); every
+    write is simulated. Everything downstream -- the guard, the gate, the
+    review -- is handed this object and cannot tell the difference, which
+    is the only way a paper run proves anything about the live one.
+    */
+    if (MOCK) {
+        mock = createMockBroker(kite, {
+            cash: MOCK_CASH,
+            stateFile: path.join(__dirname, 'mockState.json'),
+            ltpOf: tok => lastLtpByToken.get(Number(tok)),
+            tokenOf: (exch, sym) => tokenBySymbol.get(sym),
+            lotOf: tok => lotSizeByToken.get(Number(tok)),
+            onUpdate: u => onOrderUpdate(u),
+        });
+        kite = mock;
+        console.log(`🧪 MOCK MODE: no order will reach the exchange. Opening paper cash ₹${MOCK_CASH}.`);
+        console.log(`   paperwork: mock-tradeLog.json, mock-guardState.json, mock-tradeLock.json, mock-setupLog.json, mockState.json`);
+    }
+
     const all = await kite.getInstruments();
     for (const i of all) {
         lotSizeByToken.set(Number(i.instrument_token), i.lot_size);
@@ -3505,7 +3654,10 @@ async function main() {
 
     loadTriggers();
 
-    initAlerts();
+    // a paper fill buzzing the phone is noise; alertPhone is a no-op unless
+    // initAlerts() ran, so not calling it is the whole switch
+    if (ALERTS_ON) initAlerts();
+    else console.log('📱 phone alerts off in mock mode (CHART_MOCK_ALERTS=1 to keep them)');
     setInterval(checkNakedPositions, 30000);
 
     ticker.connect();
@@ -3520,6 +3672,9 @@ async function main() {
         for (const t of ticks) {
             const tok = Number(t.instrument_token);
             lastLtpByToken.set(tok, t.last_price);
+            // paper fills happen against this tick, BEFORE the guard looks at
+            // it: a real fill would already have been on the wire by now
+            if (mock) mock.onTick(tok);
             pushSecTick(tok, t.last_price, t.volume_traded != null ? t.volume_traded : (t.volume || 0), t.oi || 0);
             checkSpotTriggers(tok, t.last_price);
             guardOnTick(tok, t.last_price);   // breach-level exit
@@ -3549,12 +3704,20 @@ async function main() {
             if (c.readyState == 1) c.send(payload);
         }
     });
-    ticker.on("order_update", u => {
-        phoneAlertForOrder(u);
-        const payload = JSON.stringify({ type: "order_update", status: u.status, tradingsymbol: u.tradingsymbol });
-        for (const c of wsClients) if (c.readyState == 1) c.send(payload);
-        guardOnOrderUpdate(u);   // a BUY fill arms the guard; a flattening SELL closes the trade
-    });
+    /*
+    In MOCK mode the ticker is still a connection to the REAL account, so it
+    still streams the real order_updates -- including those of a live
+    chartApp trading alongside this one. Feeding those to the paper guard
+    would have it arm a breach level and try to rest a paper SELL against a
+    position it does not hold. Paper fills arrive on mockBroker's own
+    callback; the exchange's stream is not this process's business.
+    */
+    if (MOCK) {
+        ticker.on("order_update", u =>
+            console.log(`🧪 ignoring a REAL order_update in mock mode: ${u.transaction_type} ${u.tradingsymbol} ${u.status}`));
+    } else {
+        ticker.on("order_update", onOrderUpdate);
+    }
 
     const app = express();
     app.use(express.json());
@@ -3604,58 +3767,12 @@ async function main() {
     */
     app.get('/api/setup', async (req, res) => {
         try {
-            const indexKey = (req.query.index || 'NIFTY').toUpperCase();
-            const isAuto = (req.query.offset || '') == 'auto';
-            const offset = isAuto ? 0 : (parseInt(req.query.offset || '0', 10) || 0);
-            const idx = INDICES[indexKey];
-            if (!idx) return res.status(400).json({ error: "index must be NIFTY or SENSEX" });
-
-            const ltpData = await kite.getLTP([idx.spotKey]);
-            const spot = ltpData[idx.spotKey].last_price;
-
-            const yday = await yesterdayRange(idx.spotToken);
-            let auto = null;
-            let opts = resolveOptions(indexKey, spot, offset); // also gives nearest expiry for auto's D
-            if (isAuto && opts) {
-                auto = await autoStrikes(idx, spot, opts.expiry);
-                opts = resolveOptions(indexKey, spot, 0, auto);
-                console.log(`🎛 auto-strike ${indexKey}: spot ${spot}, IV ${auto.iv} (${auto.ivSource}), D ${auto.D}, dist ${auto.dist} → CE ${auto.ceStrike} / PE ${auto.peStrike}`);
-            }
-            if (!opts || !opts.ce || !opts.pe) {
-                return res.status(500).json({ error: "could not resolve CE/PE instruments" });
-            }
-
-            /*
-            How far out the auto pick actually landed, in strike steps from the
-            ATM. Measured off the LOADED strike, not autoStrikes()'s ideal one:
-            if that strike is not listed, resolveOptions snaps to the nearest
-            one that is, and the honest answer is where the chart ended up.
-            Positive = OTM (CE above the ATM, PE below it).
-            */
-            if (auto) {
-                auto.atm = opts.atm;
-                auto.step = idx.strikeStep;
-                auto.ceSteps = Math.round((Number(opts.ce.strike) - opts.atm) / idx.strikeStep);
-                auto.peSteps = Math.round((opts.atm - Number(opts.pe.strike)) / idx.strikeStep);
-            }
-
-            setChartedTokens([idx.spotToken, Number(opts.ce.instrument_token), Number(opts.pe.instrument_token)]);
-            setRegimeToken(idx.spotToken);
-            seedSpotSeries(regimeToken).catch(() => { });
-
-            res.json({
-                index: indexKey,
-                spot: { token: idx.spotToken, ltp: spot, yday, inside: yday ? (spot <= yday.high && spot >= yday.low) : null },
-                auto,
-                atm: opts.atm,          // the ATM at Load; the chart recomputes it live from spot
-                step: idx.strikeStep,   // so the chart can count strikes away without hardcoding it
-                expiry: opts.expiry,
-                ce: { token: Number(opts.ce.instrument_token), tradingsymbol: opts.ce.tradingsymbol, strike: Number(opts.ce.strike), exchange: opts.ce.exchange, lot_size: opts.ce.lot_size },
-                pe: { token: Number(opts.pe.instrument_token), tradingsymbol: opts.pe.tradingsymbol, strike: Number(opts.pe.strike), exchange: opts.pe.exchange, lot_size: opts.pe.lot_size },
-            });
+            const out = await loadIndex(req.query.index, req.query.offset);
+            res.json(out);
         } catch (e) {
             console.log(e, "❌ /api/setup");
-            res.status(500).json({ error: String(e.message || e) });
+            res.status(/must be NIFTY|could not resolve/.test(String(e.message)) ? 400 : 500)
+                .json({ error: String(e.message || e) });
         }
     });
 
@@ -4510,6 +4627,47 @@ async function main() {
         + `, resting SL = ${gsb.slMode == 'breach' ? `the breach level − 1 tick (ONE stop)` : gsb.slMode == 'level' ? `a tick under the support (floor ${gsb.slPct}%)` : `flat ${gsb.slPct}%`}, NO max-width cap`
         + `${gsb.scalpGreenTarget ? ', green-bar quick scalp → target first' : ''})`);
 
+    /*
+    The autopilot and the mock book, for whoever is watching -- a terminal
+    with curl, or the page. GET is always available (it is a read-out);
+    POST /api/autopilot edits autoTrade.json the way /api/noTrade edits the
+    gate, so a running headless session can be retuned or switched off
+    without a restart.
+    */
+    app.get('/api/autopilot', (req, res) => {
+        res.json({
+            headless: HEADLESS, mock: MOCK,
+            running: !!autoPilot,
+            ...(autoPilot ? autoPilot.status() : { cfg: require('./autoPilot.js').readCfg() }),
+            book: mock ? mock.snapshot() : null,
+        });
+    });
+
+    app.post('/api/autopilot', (req, res) => {
+        const ap = require('./autoPilot.js');
+        const cur = ap.readCfg();
+        const b = req.body || {};
+        const next = { ...cur };
+        for (const k of Object.keys(ap.AUTO_DEFAULTS)) {
+            if (b[k] === undefined) continue;
+            if (k == 'kinds') next.kinds = [].concat(b.kinds).filter(v => ['bounce', 'break'].includes(v));
+            else if (k == 'enabled') next.enabled = !!b.enabled;
+            else if (k == 'index') next.index = String(b.index).toUpperCase();
+            else if (k == 'offset') next.offset = b.offset == 'auto' ? 'auto' : (parseInt(b.offset, 10) || 0);
+            else if (k == 'firstOrder') next.firstOrder = ['target', 'sl'].includes(b.firstOrder) ? b.firstOrder : null;
+            else if (Number.isFinite(Number(b[k]))) next[k] = Number(b[k]);
+        }
+        if (!next.kinds.length) return res.status(400).json({ error: 'kinds must include bounce and/or break' });
+        ap.writeCfg(next);
+        console.log(`🤖 autopilot settings updated: ${JSON.stringify(next)}`);
+        res.json({ ok: true, cfg: next });
+    });
+
+    app.get('/api/mock', (req, res) => {
+        if (!mock) return res.status(400).json({ error: 'not running in mock mode' });
+        res.json(mock.snapshot());
+    });
+
     const server = app.listen(PORT, () => console.log(`🌐 chartApp on http://localhost:${PORT}`));
 
     const wss = new WebSocketServer({ server, path: '/ws' });
@@ -4517,6 +4675,77 @@ async function main() {
         wsClients.add(ws);
         ws.on('close', () => wsClients.delete(ws));
     });
+
+    if (HEADLESS) await startHeadless();
+}
+
+/* ---------------------------------------------------------------------
+HEADLESS BOOTSTRAP
+
+Everything the browser does on load, done by the process itself:
+
+1. Pick the index and its strikes (what Load does) and keep them picked --
+   re-run while FLAT every reloadMin, because spot walks away from the
+   09:20 strike and the setup detector only scans what is charted. NEVER
+   re-picked while a position is open: that would swap the charted tokens
+   out from under an armed guard.
+2. Arm the autopilot, which takes it from there -- see autoPilot.js.
+3. Print a book summary on a timer, so `pm2 logs` is the dashboard.
+--------------------------------------------------------------------- */
+async function startHeadless() {
+    const ap = require('./autoPilot.js');
+    const cfg = ap.readCfg();
+
+    autoPilot = createAutoPilot({
+        kite,
+        lotOf: tok => lotSizeByToken.get(Number(tok)),
+        ltpOf: tok => lastLtpByToken.get(Number(tok)),
+        noTradeChecks, riskCappedQty, setFirstOrderOverride,
+        placeOrderInFreezeChunks, roundToTick,
+        openCount: () => guardPositionByToken.size,
+        isMock: MOCK,
+    });
+
+    const load = async () => {
+        if (guardPositionByToken.size > 0) return;   // never while holding
+        try {
+            const s = await loadIndex(cfg.index, cfg.offset);
+            console.log(`🤖 headless watching ${s.index} ${s.spot.ltp} (${s.expiry}): `
+                + `CE ${s.ce.tradingsymbol} / PE ${s.pe.tradingsymbol}`);
+        } catch (e) {
+            console.log(`⚠️ headless strike pick failed, retrying in ${cfg.reloadMin} min — ${e.message || e}`);
+        }
+    };
+    await load();
+    setInterval(load, Math.max(1, cfg.reloadMin) * 60000);
+
+    const s = ap.readCfg();
+    console.log(`🤖 AUTOPILOT ${s.enabled ? 'ARMED' : 'DISARMED'}${MOCK ? ' (MOCK — nothing reaches the exchange)' : ' ⚠️  LIVE — REAL ORDERS'}: `
+        + `${s.kinds.join('/')} setups, ≥${s.minRR}R, ≥${s.minTouches} touch(es), `
+        + `max ${s.maxLots} lots asked (risk cap decides), ${s.maxOpen} open, `
+        + `${s.maxTradesPerDay}/day, ${s.minGapMin} min between entries. Edit autoTrade.json or POST /api/autopilot.`);
+
+    setInterval(() => {
+        const st = autoPilot.status();
+        const b = mock ? mock.snapshot() : null;
+        const day = todayStats(), lock = lockInfo();
+        /*
+        Entry comes off the guard's own trail state, never off Kite's
+        position.average_price -- after a partial exit Kite re-averages that
+        number and it stops being the price this trade was entered at.
+        */
+        const open = [...guardPositionByToken.entries()].map(([tok, p]) => {
+            const t = trailByToken.get(Number(tok));
+            return `${p.tradingsymbol} ×${p.quantity}`
+                + (t && t.entry ? ` @ ${t.entry}` : '')
+                + (t && t.stop ? ` stop ${t.stop}` : '');
+        });
+        console.log(`📋 ${MOCK ? 'MOCK ' : ''}book: ${open.length ? open.join(' | ') : 'flat'}`
+            + ` — ${st.tradesToday} autopilot trade(s) today, ${st.left} left`
+            + (b ? `, paper cash ₹${Math.round(b.cash)} (realised ${b.realised >= 0 ? '+' : ''}₹${Math.round(b.realised)})` : '')
+            + `, day ${day.pnl >= 0 ? '+' : ''}₹${day.pnl}`
+            + (lock.locked ? `, LOCKED ${lock.secondsLeft}s` : ''));
+    }, 300000);
 }
 
 main();

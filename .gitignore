@@ -41,3 +41,12 @@ oiSignals.json
 regimeIndex.json
 setupAlerts.json
 setupLog.json
+
+# paper trading: the mock book and every journal a mock run writes
+# (dataFile() in chartApp prefixes them so a paper run cannot touch the real ones)
+mockState.json
+mock-*.json
+
+# autopilot tunables -- autoPilot.js has defaults for all of them
+autoTrade.json
+firstOrderOverride.json
