@@ -1757,6 +1757,22 @@ const RULE_THEORY = {
     speed: 'A flat option chart cannot pay for the spread it costs to enter. If the instrument is not moving, the only certain outcome is the crossing cost.'
 };
 
+// Calculate speed: ratio of last 3 candles' avg range vs previous 20 candles' avg range
+function calcSpeed(token) {
+    const arr = secCandles.get(Number(token)) || [];
+    if (arr.length < 23) return null; // need 20 prior + 3 recent
+
+    const last3 = arr.slice(-3);
+    const last3Ranges = last3.map(c => (c.high - c.low) || 0);
+    const avg3 = last3Ranges.reduce((a, b) => a + b, 0) / 3;
+
+    const prev20 = arr.slice(-23, -3);
+    const prev20Ranges = prev20.map(c => (c.high - c.low) || 0);
+    const avgPrev20 = prev20Ranges.reduce((a, b) => a + b, 0) / 20;
+
+    return avgPrev20 > 0 ? +(avg3 / avgPrev20).toFixed(2) : null;
+}
+
 function noTradeChecks({ premium, tradingsymbol } = {}) {
     const s = readNoTrade();
     const st = todayStats();
@@ -1768,6 +1784,9 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
         ? open.some(t => breachSymbolByToken.get(t) == tradingsymbol)
         : false;
     const stTok = tradingsymbol ? tokenBySymbol.get(tradingsymbol) : null;
+    const speed = stTok ? calcSpeed(stTok) : null;
+    const speedThreshold = s.speedThreshold || 1.2;
+    const fastMoving = speed && speed > speedThreshold; // momentum override threshold
 
     const chk = [];
     const add = (code, label, failed, detail, hard = true) =>
@@ -1847,7 +1866,8 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
         add('chop', `Index not chopping (${s.regimeWin}-min efficiency ≥ ${s.minEff}%)`,
             reg.chop,
             `efficiency ${reg.eff}% — ${reg.net >= 0 ? '+' : ''}${reg.net} pts of progress for ${reg.path} pts walked` +
-            (reg.chop ? ' — this is the day that bleeds you: swings that pay nothing while theta runs' : ''));
+            (reg.chop ? ' — this is the day that bleeds you: swings that pay nothing while theta runs' : ''),
+            !fastMoving); // soft check when speed > 1.2x
     }
 
     if (!s.blockWrongWay) {
@@ -1886,7 +1906,8 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
                 `${dayjs.unix(bar.time).format('HH:mm')} bar: open ${bar.open} → ${bar.close} (${pct >= 0 ? '+' : ''}${pct}%)` +
                 (red
                     ? ' — this is a falling bar: the fill would land on the worst tick the minute has printed'
-                    : (bar.close == bar.open ? ' — flat' : ' — rising')));
+                    : (bar.close == bar.open ? ' — flat' : ' — rising')),
+                !fastMoving); // soft check when speed > 1.2x
         }
     }
 
@@ -1912,7 +1933,8 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
                 + `median body ${sb.median}% over ${sb.n} bars = ${sb.mult}x`
                 + (sb.steep
                     ? ` — buying after a ${sb.move}% bar means paying its last tick, and the ${CANDLE_COUNT}-candle low is now a long way under you`
-                    : ' — normal breath for this strike'));
+                    : ' — normal breath for this strike'),
+                !fastMoving); // soft check when speed > 1.2x
         }
     }
 
