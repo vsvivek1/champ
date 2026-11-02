@@ -2918,7 +2918,12 @@ async function sendOrder(mode) {
   const d = await r.json();
   if (handled423(r, d, mode)) return;
   const at = mode == 'target' ? fmt(body.price) : fmt(body.trigger_price);
-  msg(d.error ? ('❌ ' + d.error) : `✅ ${d.action} @ ${at}${note} ${d.order_ids.join(',')}`);
+  if (d.error) {
+    alert('❌ ' + d.error);
+    msg('❌ ' + d.error);
+    return;
+  }
+  msg(`✅ ${d.action} @ ${at}${note} ${d.order_ids.join(',')}`);
   refreshPosition();
 }
 
@@ -3610,7 +3615,12 @@ async function chartOrder(o, mode, price) {
   const r = await fetch(BASE+'/api/order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const d = await r.json();
   if (handled423(r, d, mode)) return;
-  msg(d.error ? ('❌ ' + d.error) : (`✅ ${mode} ${d.action} ${d.order_ids.join(',')}`));
+  if (d.error) {
+    alert('❌ ' + d.error);
+    msg('❌ ' + d.error);
+    return;
+  }
+  msg(`✅ ${mode} ${d.action} ${d.order_ids.join(',')}`);
   refreshPosition();
 }
 
