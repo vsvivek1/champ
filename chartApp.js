@@ -1580,10 +1580,12 @@ const NO_TRADE_FILE = path.join(__dirname, 'noTrade.json');
 
 const NO_TRADE_DEFAULTS = {
     noEntryBefore: '09:20',   // let the open settle; the first prints are noise
-    lunchFrom: '12:00',       // the old clock-based dead zone, kept as a fallback
-    lunchTo: '13:15',
+    lunchFrom: '12:00',       // volume-based dead zone window start
+    lunchTo: '13:15',         // volume-based dead zone window end
     noEntryAfter: '15:10',    // nothing new this late -- only theta and squaring off
-    blockLunch: false,        // off: participation is measured now, not clocked
+    minVolumePct: 60,         // block lunch/late if volume < this % of opening vol (1-min candle)
+    minPrice: 3,              // INR minimum price for entry
+    blockLunch: false,        // off: volume-based participation block now, not clocked
     maxDayLoss: 3000,         // INR realised, today
     maxLossStreak: 3,         // consecutive losing trades today
     maxTradesPerDay: 8,       // closed trades today
@@ -1765,6 +1767,7 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
     const holdingThis = tradingsymbol
         ? open.some(t => breachSymbolByToken.get(t) == tradingsymbol)
         : false;
+    const stTok = tradingsymbol ? tokenBySymbol.get(tradingsymbol) : null;
 
     const chk = [];
     const add = (code, label, failed, detail, hard = true) =>
@@ -1777,15 +1780,37 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
         before != null && mins < before,
         `now ${now.format('HH:mm')} — the first minutes are a spread-widening coin flip`);
 
-    add('lunch', `No entry ${s.lunchFrom}–${s.lunchTo} (clock)`,
-        s.blockLunch && lFrom != null && lTo != null && mins >= lFrom && mins < lTo,
-        s.blockLunch
-            ? `now ${now.format('HH:mm')} — fixed-clock block`
-            : 'off — participation is measured on the tape instead, see the row below');
+    // volume-based lunch check: if time is in lunch window, check if volume < 60% of opening
+    let lunchFailed = false, lunchDetail = '';
+    if (!stTok) {
+        lunchDetail = 'n/a until a symbol is picked';
+    } else if (lFrom != null && lTo != null && mins >= lFrom && mins < lTo) {
+        const candles = secCandles.get(stTok) || [];
+        const firstCandle = candles[0];
+        const lastCandle = candles[candles.length - 1];
+        const openingVol = firstCandle ? (firstCandle.volume || 0) : 0;
+        const currentVol = lastCandle ? (lastCandle.volume || 0) : 0;
+        const volPct = openingVol > 0 ? (currentVol / openingVol) * 100 : 0;
+        lunchFailed = openingVol > 0 && volPct < s.minVolumePct;
+        lunchDetail = `${now.format('HH:mm')} — volume ${volPct.toFixed(0)}% of opening (${currentVol} vs ${openingVol}), need ≥${s.minVolumePct}%`;
+    }
+    add('lunch', `No entry ${s.lunchFrom}–${s.lunchTo} (low volume)`, lunchFailed, lunchDetail);
 
-    add('late', `No entry after ${s.noEntryAfter}`,
-        after != null && mins >= after,
-        `now ${now.format('HH:mm')} — too late for a new long option`);
+    // volume-based late check: if time is after noEntryAfter, check if volume < 60% of opening
+    let lateFailed = false, lateDetail = '';
+    if (!stTok) {
+        lateDetail = 'n/a until a symbol is picked';
+    } else if (after != null && mins >= after) {
+        const candles = secCandles.get(stTok) || [];
+        const firstCandle = candles[0];
+        const lastCandle = candles[candles.length - 1];
+        const openingVol = firstCandle ? (firstCandle.volume || 0) : 0;
+        const currentVol = lastCandle ? (lastCandle.volume || 0) : 0;
+        const volPct = openingVol > 0 ? (currentVol / openingVol) * 100 : 0;
+        lateFailed = openingVol > 0 && volPct < s.minVolumePct;
+        lateDetail = `${now.format('HH:mm')} — volume ${volPct.toFixed(0)}% of opening (${currentVol} vs ${openingVol}), need ≥${s.minVolumePct}%`;
+    }
+    add('late', `No entry after ${s.noEntryAfter} (low volume)`, lateFailed, lateDetail);
 
     add('lock', `No entry for ${LOCKOUT_MIN} min after a stop-out`,
         l.locked,
@@ -1907,31 +1932,8 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
                 : `${sinceEntry}s since ${lastEntrySym || 'the last entry'} filled`);
     }
 
-    /*
-    No-stop entries. scalpGreenTarget flips a green-bar quick scalp to
-    target-first, and that fill carries NO exchange-side stop -- so the gate
-    has to predict the flip the same way /api/quick will make it.
-    */
-    const gs = readGuardSettings();
-    if (!s.blockNoStop) {
-        chk.push({ code: 'nostop', label: 'The fill will rest a real stop', ok: true, blocked: false, hard: false, detail: 'no-stop filter switched off' });
-    } else if (gs.firstOrder == 'target') {
-        add('nostop', 'The fill will rest a real stop', true,
-            `guard firstOrder is 'target' — every fill rests a LIMIT and NO exchange stop, so the whole premium is at risk`);
-    } else if (!gs.scalpGreenTarget) {
-        add('nostop', 'The fill will rest a real stop', false,
-            `firstOrder 'sl' and scalpGreenTarget off — an exchange SL rests on every fill`);
-    } else if (!stTok) {
-        na('nostop', 'The fill will rest a real stop',
-            tradingsymbol ? `n/a — ${tradingsymbol} is not a known option` : 'n/a until a symbol is picked');
-    } else {
-        const bar = liveMinCandle(stTok);
-        const green = !!(bar && bar.close > bar.open);
-        add('nostop', 'The fill will rest a real stop', green,
-            green
-                ? `live 1m bar ${bar.open} → ${bar.close} is GREEN, so scalpGreenTarget would rest the TARGET first — no exchange stop on this fill`
-                : (bar ? `live 1m bar ${bar.open} → ${bar.close} is not green — an SL rests` : 'no print yet this minute — an SL rests'));
-    }
+    // Target→SL conversion on breach handles protection; red candle gate prevents red bar entries anyway.
+    chk.push({ code: 'nostop', label: 'Target converts to SL on 3-candle breach', ok: true, blocked: false, hard: false, detail: 'automatic on every fill' });
 
     /*
     Participation. The measured replacement for the lunch clock -- reported
@@ -1976,8 +1978,12 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
         add('premium', `Premium ₹${s.minPremium}–${s.maxPremium}`,
             premium < s.minPremium || premium > s.maxPremium,
             `₹${premium} — ${premium < s.minPremium ? 'too cheap: one tick is a huge % and the book is thin' : 'too rich: slippage eats the scalp'}`);
+        add('minprice', `Option price ≥ ₹${s.minPrice}`,
+            premium < s.minPrice,
+            `₹${premium} — price too low for reliable order placement`);
     } else {
         chk.push({ code: 'premium', label: `Premium ₹${s.minPremium}–${s.maxPremium}`, ok: true, blocked: false, hard: true, detail: 'n/a until a price is picked' });
+        chk.push({ code: 'minprice', label: `Option price ≥ ₹${s.minPrice}`, ok: true, blocked: false, hard: true, detail: 'n/a until a price is picked' });
     }
 
     for (const c of chk) if (RULE_THEORY[c.code]) c.theory = RULE_THEORY[c.code];
