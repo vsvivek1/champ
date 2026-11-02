@@ -369,9 +369,6 @@ flat = slPct below entry, nothing else.">stop:
         <option value="pct">flat −SL%</option>
       </select>
     </label>
-    <label title="A quick scalp (B50/B100) taken while THAT option's own live 1m bar is green rests the TARGET first instead of the SL: the whole lot at the immediate resistance.
-There is then NO exchange-side stop — the 3-candle line and the per-tick watcher are the only exit, and the risk line will say the whole premium.
-A flat bar, or a minute with no print yet, does NOT count as green. An explicit per-entry choice from the chart menu always wins over this."><input id="gScalpGreen" type="checkbox"> green-bar scalp → target first</label>
     <button id="gSave" class="sec">Save</button>
     <span id="marginTxt">—</span>
     <span id="guardTxt">guard: …</span>
@@ -2658,10 +2655,7 @@ async function quickRisk(o, px, qty, pct) {
     else if (r.risk != null) line = `max loss ${inr(r.risk)} (stop ${(+r.stop).toFixed(2)}, −${r.riskPct}%)`
       + (r.known ? '' : ` · fallback, ${r.note}`);
     else line = `max loss UNKNOWN — ${r.note || 'no level yet'}`;
-    // a green 1m bar flips this entry to target-first server-side, and that
-    // entry carries no exchange stop at all, so the premium is the real number
-    const flip = guardCfg.scalpGreenTarget ? ` · green bar → target first, then ${inr(r.premium)} at risk` : '';
-    msg(`B${pct} ${o.tradingsymbol} @ ~${px.toFixed(2)} ×${qty} — ${line}${flip} — click again to send`);
+    msg(`B${pct} ${o.tradingsymbol} @ ~${px.toFixed(2)} ×${qty} — ${line} — click again to send`);
   } catch (e) { /* the pending line stays on screen */ }
 }
 
@@ -2738,7 +2732,7 @@ const AUTO = { R: 2, atrN: 14, atrK: 2, speedMin: 0.7, speedMax: 2 };
 let guardCfg = { firstOrder: 'target', targetPct: 50, slPct: 2,
                  slMode: 'breach', partialPct: 50, trail: true,
                  levelGapPct: 2, levelMaxPct: 60,
-                 scalpGreenTarget: true, candleCount: 3 };
+                 candleCount: 3 };
 
 function slotForSymbol(sym) {
   if (!cfg || cfg.error) return null;
@@ -2965,7 +2959,6 @@ async function fetchGuardSettings() {
     guardCfg = s;   // autoTarget() falls back to the guard's own target %
     document.getElementById('gSlPct').value = s.slPct;
     if (s.slMode) document.getElementById('gSlMode').value = s.slMode;
-    document.getElementById('gScalpGreen').checked = s.scalpGreenTarget !== false;
   } catch (e) { /* transient */ }
 }
 document.getElementById('gSave').onclick = async () => {
@@ -2973,8 +2966,7 @@ document.getElementById('gSave').onclick = async () => {
     firstOrder: 'sl',
     targetPct: guardCfg && guardCfg.targetPct != null ? Number(guardCfg.targetPct) : 50,
     slPct: parseFloat(document.getElementById('gSlPct').value),
-    slMode: document.getElementById('gSlMode').value,
-    scalpGreenTarget: document.getElementById('gScalpGreen').checked
+    slMode: document.getElementById('gSlMode').value
   };
   const r = await fetch(BASE+'/api/guardSettings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const d = await r.json();
@@ -2982,8 +2974,7 @@ document.getElementById('gSave').onclick = async () => {
   msg(d.error ? ('❌ ' + d.error)
     : `✅ on fill: stop = ${d.slMode == 'breach' ? `the ${guardCfg.candleCount || 3}-candle low − 1 tick (uncapped)`
         : d.slMode == 'level' ? `a tick under the support, floor -${d.slPct}%, uncapped`
-        : `flat -${d.slPct}%`}`
-      + `${d.scalpGreenTarget ? ', green-bar quick scalp rests the target first' : ''} — applies to the next fill`);
+        : `flat -${d.slPct}%`} — applies to the next fill`);
 };
 fetchGuardSettings();
 
