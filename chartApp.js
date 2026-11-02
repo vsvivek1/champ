@@ -832,7 +832,6 @@ const GUARD_DEFAULTS = {
     per-entry choice; the app-side breach line is armed either way, and a
     refused target still falls back to an SL.
     */
-    scalpGreenTarget: true
 };
 const PIVOT_WIN = 2;            // bars each side of a 1-min swing pivot
 const LEVEL_CLUSTER_PCT = 0.75; // pivots within this % of each other are one level
@@ -871,7 +870,6 @@ function readGuardSettings() {
         if (!(s.levelGapPct >= 0 && s.levelGapPct <= 50)) s.levelGapPct = def.levelGapPct;
         if (!(s.levelMaxPct > 0 && s.levelMaxPct <= 300)) s.levelMaxPct = def.levelMaxPct;
         if (!['level', 'pct', 'breach'].includes(s.slMode)) s.slMode = def.slMode;
-        s.scalpGreenTarget = s.scalpGreenTarget !== false;
         if (!['app', 'exchange'].includes(s.partialMode)) s.partialMode = def.partialMode;
         s.trail = s.trail !== false;
         return s;
@@ -1625,10 +1623,10 @@ const NO_TRADE_DEFAULTS = {
     minGapSec: 60,            // seconds since the last entry FILL, 0 = off
 
     /*
-    NO-STOP ENTRIES. scalpGreenTarget rests the TARGET first on a green-bar
-    quick scalp, which means that position carries no exchange-side stop at
-    all -- only the app-side breach line, which dies with the process. On by
-    default: refuse the entry rather than carry the whole premium naked.
+    NO-STOP ENTRIES. Every BUY must have a resting SL at the exchange when it
+    fills (either the explicit SL, or the breach level if target rests first).
+    Refuse the entry if something would leave the position with no exchange-side
+    protection -- the app-side breach line is not enough, it dies with a restart.
     */
     blockNoStop: true,
 
@@ -4074,21 +4072,12 @@ async function main() {
                 if (rc.capped) console.log(`📐 ${tradingsymbol}: risk cap — ${rc.why}`);
                 qty = rc.qty;
                 /*
-                A quick scalp taken while the option's own live 1m bar is
-                RISING rests the target first (scalpGreenTarget). An explicit
-                choice from the chart always wins, and a flat or not-yet-
-                printing bar is not green -- only close > open flips it.
+                Use the firstOrder setting from guardSettings (target or SL).
+                An explicit choice from the chart menu always wins over this default.
                 */
                 let effFirst = firstOrder;
                 if (['target', 'sl'].includes(firstOrder)) {
                     setFirstOrderOverride(token, firstOrder);
-                } else if (readGuardSettings().scalpGreenTarget) {
-                    const bar = liveMinCandle(token);
-                    if (bar && bar.close > bar.open) {
-                        effFirst = 'target';
-                        setFirstOrderOverride(token, 'target');
-                        console.log(`⚡ scalpGreenTarget: ${tradingsymbol} 1m bar ${bar.open} → ${bar.close} is green — TARGET rests first on this fill`);
-                    }
                 }
                 const ids = await placeOrderInFreezeChunks(kite, {
                     exchange, tradingsymbol, transaction_type: "BUY", quantity: qty,
@@ -4165,8 +4154,7 @@ async function main() {
             if (!(v > 0 && v <= 50)) return res.status(400).json({ error: "slPct must be 0–50" });
             s.slPct = v;
         }
-        const { partialPct, trail, slMode, levelGapPct, levelMaxPct, scalpGreenTarget } = req.body || {};
-        if (scalpGreenTarget != null) s.scalpGreenTarget = !!scalpGreenTarget;
+        const { partialPct, trail, slMode, levelGapPct, levelMaxPct } = req.body || {};
         if (partialPct != null) {
             const v = Number(partialPct);
             if (!(v >= 0 && v < 100)) return res.status(400).json({ error: "partialPct must be 0–99" });
@@ -4193,7 +4181,7 @@ async function main() {
         }
         try { fs.writeFileSync(GUARD_SETTINGS_FILE, JSON.stringify(s, null, 2)); }
         catch (e) { return res.status(500).json({ error: String(e.message || e) }); }
-        console.log(`⚙️ guardSettings: on fill → ${s.firstOrder}${s.scalpGreenTarget ? ' (quick scalp on a green 1m bar → target first)' : ''}`
+        console.log(`⚙️ guardSettings: on fill → ${s.firstOrder}`
             + `, stop ${s.slMode == 'breach' ? `one tick under the ${CANDLE_COUNT}-candle low` : s.slMode == 'level' ? `a tick under the support (floor ${s.slPct}%)` : `${s.slPct}% flat`} — uncapped`
             + `, partial ${s.partialPct}% at the resistance (${s.partialMode == 'app' ? 'app-side, stop covers the full lot' : 'resting LIMIT, stop covers the remainder only'})`
             + `, trail ${s.trail ? 'on' : 'off'}`);
@@ -4652,8 +4640,7 @@ async function main() {
     setInterval(guardRefresh, GUARD_REFRESH_MS);
     const gsb = readGuardSettings();
     console.log(`🛡 built-in guard armed (refresh ${GUARD_REFRESH_MS / 1000}s, breach = ${CANDLE_COUNT}-candle low, on fill → ${gsb.firstOrder}`
-        + `, resting SL = ${gsb.slMode == 'breach' ? `the breach level − 1 tick (ONE stop)` : gsb.slMode == 'level' ? `a tick under the support (floor ${gsb.slPct}%)` : `flat ${gsb.slPct}%`}, NO max-width cap`
-        + `${gsb.scalpGreenTarget ? ', green-bar quick scalp → target first' : ''})`);
+        + `, resting SL = ${gsb.slMode == 'breach' ? `the breach level − 1 tick (ONE stop)` : gsb.slMode == 'level' ? `a tick under the support (floor ${gsb.slPct}%)` : `flat ${gsb.slPct}%`}, NO max-width cap)`);
 
     /*
     The autopilot and the mock book, for whoever is watching -- a terminal
