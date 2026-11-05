@@ -102,6 +102,9 @@ console.log("🚀 chartApp starting", new Date().toISOString());
 process.on('unhandledRejection', r => console.error('🔥 UNHANDLED REJECTION', r));
 process.on('uncaughtException', e => console.error('💥 UNCAUGHT EXCEPTION', e.stack || e));
 
+// the Anthropic key for the lockout decision lives in .env, same as the rest
+try { require('dotenv').config(); } catch (e) { /* no dotenv: claudeLock just stays off */ }
+
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
@@ -116,6 +119,7 @@ const AccessTokens = require('./models/AccessTokens');
 const { getKiteConnectInstance, getTickerInstance } = require('./getKiteConnectInstance.js');
 const { placeOrderInFreezeChunks } = require('./placeOrderInFreezeChunks.js');
 const { initAlerts, alertPhone, marketOpenIst } = require('./chartAlerts.js');
+const claudeLock = require('./claudeLock.js');
 const { createMockBroker } = require('./mockBroker.js');
 const { createAutoPilot } = require('./autoPilot.js');
 
@@ -1087,6 +1091,10 @@ And the rule a quick-entry/quick-exit buyer breaks most: re-entering
 straight after being stopped out. Any stop-style exit (SL order triggered
 or guard breach) locks NEW entries for LOCKOUT_MIN minutes. Exits are never
 blocked -- you can always close what you are holding.
+
+LOCKOUT_MIN is only the opening bid. reviewLockout() then asks Claude to
+judge the exit and it may clear, shorten or extend the lock (0..30 min).
+See claudeLock.js. If that call cannot run, LOCKOUT_MIN stands.
 --------------------------------------------------------------------- */
 
 const LOCKOUT_MIN = 10;
@@ -1166,6 +1174,73 @@ function unlockTrading(by) {
     console.log(`🔓 lockout cleared early${by ? ' (' + by + ')' : ''}`);
     broadcast({ type: 'lock', lock: lockInfo() });
     return true;
+}
+
+/*
+CLAUDE REVIEWS THE LOCKOUT.
+
+The flat lock is armed first, by the caller, exactly as before. This runs
+after it, in the background, and may shorten, clear or extend it.
+
+Why it is not armed by this call: a network call must never sit between a
+SELL fill and the protection it triggers. If the key is missing, the call
+fails, the model is slow or the answer does not parse, decideLockout()
+returns null and the 10 minute lock simply stands. Failure always leaves
+you MORE protected, never less.
+
+On 05/11/2026 two breaches exited GREEN (+8.7%, +21.1%) and the flat rule
+locked both, refusing re-entry at 13:30, 13:33 and 13:42 while SENSEX ran
++346 points. That is the case this is here to catch.
+*/
+const LOCK_DECISION_FILE = dataFile('lockDecisions.json');
+
+async function reviewLockout(rec, flatMinutes) {
+    if (!rec) return;
+    const armedAt = lockUntil;        // if a newer trade re-locks, this call is stale
+    const day = todayStats();
+    let regime = null;
+    try { regime = spotRegime(); } catch (e) { /* no index subscribed */ }
+
+    const out = await claudeLock.decideLockout({
+        trade: rec,
+        day,
+        regime,
+        side: legOfSymbol(rec.tradingsymbol),
+        nowHHmm: dayjs().format('HH:mm'),
+        flatMinutes
+    });
+    if (!out) return;                 // flat lock stands
+
+    claudeLock.logDecision(LOCK_DECISION_FILE, {
+        date: rec.date, time: dayjs().format('HH:mm:ss'),
+        tradingsymbol: rec.tradingsymbol, reason: rec.reason,
+        exitPct: rec.exitPct, mfePct: rec.mfePct, maePct: rec.maePct,
+        dayPnl: day.pnl, lossStreak: day.lossStreak,
+        eff: regime && regime.ok ? regime.eff : null,
+        chop: regime && regime.ok ? regime.chop : null,
+        bias: regime && regime.ok ? regime.bias : null,
+        flatMinutes, lock: out.lock, minutes: out.minutes, why: out.why,
+        model: out.model, requestId: out.requestId
+    });
+
+    // a trade that closed while we were waiting owns the lock now, not this one
+    if (lockUntil !== armedAt) {
+        console.log(`🔒 claude said ${out.lock ? out.minutes + ' min' : 'no lock'} but a newer exit re-locked — ignored`);
+        return;
+    }
+
+    if (!out.lock) {
+        unlockTrading(`claude: ${out.why}`);
+        broadcast({ type: 'lock', lock: lockInfo(), claude: out });
+        console.log(`🔓 claude cleared the lockout — ${out.why}`);
+        return;
+    }
+    if (out.minutes === flatMinutes) {
+        console.log(`🔒 claude kept the ${flatMinutes} min lock — ${out.why}`);
+        return;
+    }
+    lockTrading(out.minutes, `claude: ${out.why}`);
+    console.log(`🔒 claude moved the lockout ${flatMinutes} → ${out.minutes} min — ${out.why}`);
 }
 
 function noteExitReason(token, reason, detail) {
@@ -1898,7 +1973,7 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
     }
     add('late', `No entry after ${s.noEntryAfter} (low volume)`, lateFailed, lateDetail);
 
-    add('lock', `No entry for ${LOCKOUT_MIN} min after a stop-out`,
+    add('lock', `No entry while the stop-out lockout runs (Claude sets the minutes)`,
         l.locked,
         l.locked ? `${l.secondsLeft}s left — ${l.why}` : 'no recent stop-out');
 
@@ -3624,6 +3699,11 @@ async function guardOnOrderUpdate(u) {
             // stop-out is the one that doubles the damage
             if (STOP_REASONS.includes(reason)) {
                 lockTrading(LOCKOUT_MIN, `${EXIT_LABELS[reason]} on ${tradingsymbol}`);
+                // then Claude re-reads it: a breach that filled green is not a
+                // stop-out. Never awaited -- the fill handler must not wait on
+                // a network call, and a failed call leaves the lock in place.
+                reviewLockout(rec, LOCKOUT_MIN)
+                    .catch(e => console.log('🔒 lockout review failed —', e.message || e));
             }
             if (rec) {
                 lastClosedTrade = rec;
