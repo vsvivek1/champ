@@ -908,7 +908,46 @@ const GUARD_DEFAULTS = {
 };
 const PIVOT_WIN = 2;            // bars each side of a 1-min swing pivot
 const LEVEL_CLUSTER_PCT = 0.75; // pivots within this % of each other are one level
-const TRAIL_CLEAR_PCT = 0.5;    // price must clear a level by this much before it becomes the stop
+/*
+TRAIL CLEAR -- how far price must go ABOVE a resistance before that level
+becomes the stop.
+
+It used to be a flat 0.5%. That number is not small, it is meaningless: it
+has to be read against how much the option moves in one minute, and that
+changes completely by strike and by day. On 05/11/2026 the median 1-minute
+high-low range on SENSEX 79800CE inside the 13:19-13:48 leg was 15.3% and
+the 90th percentile was 38%. So 0.5% was about 30x tighter than one normal
+breath. The level was cleared on the first tick, the stop snapped onto it,
+and the very next wiggle took the trade out -- the two exits that day lasted
+20 and 36 seconds on a move that ran 7x.
+
+So the same trick the steep-candle gate uses: measure the option against
+ITSELF. Clear = the median 1-minute high-low range of the last
+TRAIL_CLEAR_WIN completed bars, floored and capped:
+
+  - floor 0.5%  -- a dead strike with a 0.2% range keeps the old behaviour
+  - cap 25%     -- a wild bar must not switch trailing off completely
+
+A bigger clear is NOT a bigger risk. The 3-candle breach line is still
+sitting under the trade the whole time; a slower trail only means the stop
+stays at that line longer instead of jumping up onto a level price has
+barely touched.
+*/
+const TRAIL_CLEAR_MIN_PCT = 0.5;
+const TRAIL_CLEAR_MAX_PCT = 25;
+const TRAIL_CLEAR_WIN = 20;     // completed 1-min bars behind the current one
+
+function trailClearPct(tok) {
+    const bars = minBarsFromSec(tok, TRAIL_CLEAR_WIN);
+    // too early in the session to have a range: fall back to the old flat number
+    if (bars.length < 6) return { pct: TRAIL_CLEAR_MIN_PCT, median: null, n: bars.length };
+    const rng = bars
+        .map(b => (b.open > 0 ? (b.high - b.low) / b.open * 100 : 0))
+        .sort((a, b) => a - b);
+    const med = rng[Math.floor(rng.length / 2)];
+    const pct = Math.min(TRAIL_CLEAR_MAX_PCT, Math.max(TRAIL_CLEAR_MIN_PCT, med));
+    return { pct: +pct.toFixed(2), median: +med.toFixed(2), n: rng.length };
+}
 const GUARD_STATE_FILE = dataFile('guardState.json');
 const BREACH_OVERRIDE_FILE = dataFile('breachOverride.json');
 const TRADE_LOG_FILE = dataFile('tradeLog.json');
@@ -3251,7 +3290,8 @@ resistance, and a real SL at the exchange for the rest. Together they are
 exactly the position size, so neither half looks like a naked short.
 
 Then the ratchet: each time price CLEARS one of the resistances above entry
-by TRAIL_CLEAR_PCT, that level becomes the stop -- the app-side guard line
+by trailClearPct() -- the option's own median 1-minute range, not a flat
+number -- that level becomes the stop: the app-side guard line
 and the resting SL order's trigger both move up to it. A level price has
 just broken through is where it should hold on the way back; if it does
 not, the trade is over and the gain is kept. The stop only moves UP, never
@@ -3263,15 +3303,19 @@ const trailInProgress = new Set();
 function armTrail(token, tradingsymbol, { entry, levels, partial, support, trail, appSide, slIds }) {
     const t = Number(token);
     const ladder = levels ? levels.resistances.map(L => L.price).filter(p => p > entry) : [];
+    const clear = trailClearPct(t);
     trailByToken.set(t, {
         tradingsymbol, entry, trail: trail !== false, ladder, slIds: slIds || [],
+        clearPct: clear.pct, clearMedian: clear.median,
         stop: breachLevelByToken.get(t) != null ? breachLevelByToken.get(t) : null,
         partial: partial ? { price: partial.price, qty: partial.qty, appSide: !!appSide, done: false } : null,
         support: support ? support.price : null,
         steps: []
     });
     console.log(`🪜 ${tradingsymbol}: ladder above entry ${ladder.length ? ladder.join(' → ') : '(none)'}`
-        + `${support ? `, immediate support ${support.price}` : ''}${trail === false ? ' [trail off]' : ''}`);
+        + `${support ? `, immediate support ${support.price}` : ''}${trail === false ? ' [trail off]' : ''}`
+        + `, trail clear ${clear.pct}%`
+        + `${clear.median != null ? ` (1m median range ${clear.median}%)` : ' (too few bars, flat floor)'}`);
     broadcastTrail(t);
 }
 function trailInfo(t) {
@@ -3280,6 +3324,8 @@ function trailInfo(t) {
     return {
         token: Number(t), tradingsymbol: st.tradingsymbol, entry: st.entry, ladder: st.ladder,
         stop: st.stop, support: st.support, trail: st.trail,
+        clearPct: st.clearPct != null ? st.clearPct : null,
+        clearMedian: st.clearMedian != null ? st.clearMedian : null,
         partial: st.partial ? { ...st.partial } : null, steps: st.steps
     };
 }
@@ -3294,11 +3340,16 @@ async function maybeTrail(token, ltp) {
     if (!st || !st.trail || !st.ladder.length) return;
     if (trailInProgress.has(t) || exitInProgressByToken.has(t)) return;
 
+    // how much this option moves in a normal minute, right now
+    const clear = trailClearPct(t);
+    st.clearPct = clear.pct;
+    st.clearMedian = clear.median;
+
     // the HIGHEST level price has cleared, not merely the first one
     let lv = null;
     for (const L of st.ladder) {
         if (st.stop != null && L <= st.stop) continue;
-        if (ltp >= L * (1 + TRAIL_CLEAR_PCT / 100)) lv = L;
+        if (ltp >= L * (1 + clear.pct / 100)) lv = L;
     }
     if (lv == null) return;
 
@@ -3322,9 +3373,11 @@ async function maybeTrail(token, ltp) {
             o.trigger_price = trigger; o.price = limit;         // cache honest until the next refresh
             moved++;
         }
-        st.steps.push({ at: new Date().toISOString(), level: lv, ltp, moved });
+        st.steps.push({ at: new Date().toISOString(), level: lv, ltp, moved, clearPct: clear.pct });
         const lockedPct = +(((lv - st.entry) / st.entry) * 100).toFixed(1);
-        console.log(`🪜 TRAIL ${st.tradingsymbol}: LTP ${ltp} cleared ${lv} → stop ${prev == null ? '—' : prev} to ${lv}`
+        console.log(`🪜 TRAIL ${st.tradingsymbol}: LTP ${ltp} cleared ${lv} by ${clear.pct}%`
+            + `${clear.median != null ? ` (1m median range ${clear.median}%, ${clear.n} bars)` : ' (flat floor, too few bars)'}`
+            + ` → stop ${prev == null ? '—' : prev} to ${lv}`
             + ` (${lockedPct >= 0 ? '+' : ''}${lockedPct}% vs entry ${st.entry})`
             + (moved ? `, ${moved} SL order${moved > 1 ? 's' : ''} modified`
                      : `, app-side line only — no SL order resting`));
