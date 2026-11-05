@@ -481,6 +481,53 @@ function steepBar(tok, s) {
     };
 }
 
+/*
+HIGHER HIGHS -- the direction half of the momentum override.
+
+calcSpeed() says the option is moving fast. It does not say which way. A
+collapsing premium is just as "fast" as a vertical one, so speed alone was
+softening the red-candle and steep-candle gates on exactly the bars those
+gates exist for. This is the other half: each of the last n completed
+1-minute bars must print a higher high than the one before it.
+*/
+function higherHighs(tok, n) {
+    const bars = minBarsFromSec(tok, n);
+    if (bars.length < n) return { ok: false, higher: false, why: `only ${bars.length} of ${n} completed 1m bars` };
+    let higher = true;
+    for (let i = 1; i < bars.length; i++) if (!(bars[i].high > bars[i - 1].high)) higher = false;
+    return {
+        ok: true, higher, n,
+        highs: bars.map(b => b.high),
+        from: bars[0].time, to: bars[bars.length - 1].time
+    };
+}
+
+/*
+VOLUME OF THE LAST COMPLETED 1-MINUTE BAR, against its own recent median.
+The liquidity test the premium floor used to stand in for.
+*/
+function volFlow(tok, win) {
+    const arr = secCandles.get(Number(tok));
+    if (!arr || !arr.length) return { ok: false, why: 'no ticks yet on this strike' };
+    const cur = Math.floor(Date.now() / 1000 / 60) * 60;
+    const byMin = new Map();
+    for (const c of arr) {
+        const m = Math.floor(c.time / 60) * 60;
+        if (m >= cur) continue;                       // never read the forming minute
+        byMin.set(m, (byMin.get(m) || 0) + (c.volume || 0));
+    }
+    const mins = [...byMin.keys()].sort((a, b) => a - b).slice(-(win + 1));
+    if (mins.length < 6) return { ok: false, why: `only ${mins.length} completed 1m bars so far` };
+    const last = byMin.get(mins[mins.length - 1]) || 0;
+    const hist = mins.slice(0, -1).map(m => byMin.get(m) || 0).sort((a, b) => a - b);
+    const med = hist[Math.floor(hist.length / 2)] || 0;
+    return {
+        ok: true, vol: last, median: med, n: hist.length,
+        volX: med > 0 ? +(last / med).toFixed(2) : null,
+        at: mins[mins.length - 1]
+    };
+}
+
 const TRIG_FILE = dataFile('chartTriggers.json');
 
 function saveTriggers() {
@@ -1770,8 +1817,58 @@ const NO_TRADE_DEFAULTS = {
     maxDayLoss: 3000,         // INR realised, today
     maxLossStreak: 3,         // consecutive losing trades today
     maxTradesPerDay: 8,       // closed trades today
-    minPremium: 8,            // INR per unit
+    /*
+    PREMIUM BAND. minPremium used to be 8, on the theory that a cheap option
+    has a thin book. On SENSEX expiry strikes that theory is simply false.
+    Measured over all of 05/11/2026 (2,920 option-minutes, 8 strikes):
+
+      premium 0-3    median 172,460 units a minute
+      premium 3-6    median 123,760
+      premium 6-10   median 188,280
+      premium 10-20  median 269,380
+
+    A 2.75 option traded as much as a 9 rupee one. And the 8 floor hid the
+    two biggest moves of the day: 80300CE at 2.75 went to 20.25 (7.36x) and
+    80000CE at 5.65 went to 41.30 (7.31x), both inside 30 minutes.
+
+    So the floor is now only the honest one: TICK RISK. One tick is 0.05, so
+    at 2.00 a single tick is 2.5% of the premium. Below that the spread
+    itself decides the trade. Liquidity is no longer guessed from the price
+    -- the `thin` gate below reads the traded volume instead.
+    */
+    minPremium: 2,            // INR per unit: one tick = 2.5% here
     maxPremium: 400,
+
+    /*
+    THIN GATE -- the real liquidity test, replacing the price proxy.
+    Blocks only a strike with genuinely no flow: BOTH below its own recent
+    median volume AND below an absolute floor. 50,000 units cuts the bottom
+    5% of minutes (p5 was 47,960 on 05/11), so a normal cheap strike passes
+    and a dead one does not. AND, not OR, on purpose: low volume relative to
+    its own median is the chop and direction gates' business, not this one.
+    */
+    minVolUnits: 50000,       // absolute floor, units traded in the last completed 1m bar
+    minVolX: 1,               // and below this much of its own 20-bar median
+
+    /*
+    MOMENTUM OVERRIDE. Speed on its own is direction-blind: a crash is fast
+    too, and softening the red-candle gate on a falling option is exactly
+    backwards. So the override needs the direction half as well -- the last
+    momentumBars completed bars each printing a higher high.
+
+    Measured on 05/11/2026 -- 2,664 option-minutes, entry at the bar close,
+    exit on the 3-candle low or 30 minutes, whichever came first:
+
+      every bar (no filter)          11% win, avg +3.5%
+      speed > 1.2 alone (old gate)   21% win, avg +18%
+      speed >= 1.5 AND higher highs  45% win, avg +19%
+
+    Adding the direction half doubles the hit rate at the same payoff, and it
+    fires on 2% of bars instead of 21%, so it stays an override and never
+    becomes the normal path.
+    */
+    momentumSpeed: 1.5,       // x the recent range, from calcSpeed()
+    momentumBars: 3,          // completed 1m bars that must each make a higher high
     maxOpenPositions: 1,      // how many option longs at once
     oneEntryPerSymbol: true,  // no averaging into an open position
     minSpeed: 0.6,            // page-side only: chart dead-ness cutoff
@@ -1933,7 +2030,11 @@ const RULE_THEORY = {
 
     same_symbol: 'Adding to the same strike is averaging into a position the market is already disagreeing with, and it concentrates the whole day into one strike\'s outcome.',
 
-    premium: 'Too cheap and the bid-ask spread is a large share of the premium, so the spread alone can exceed the target. Too expensive and a single stop costs a disproportionate slice of the day. The band keeps the cost of being wrong proportional.',
+    premium: 'This rule used to do two jobs and only one of them honestly. The expensive side is real: a single stop on a rich option costs a disproportionate slice of the day. The cheap side was guessing -- a low price was treated as proof of a thin book, and on 05/11/2026 that guess cost the whole day. Measured over 2,920 option-minutes, median volume per minute by premium band was: ₹0-3 = 172,460 units, ₹3-6 = 123,760, ₹6-10 = 188,280, ₹10-20 = 269,380, ₹20-60 = 447,520, ₹60+ = 551,760. The cheap bands are not thin; they are within a factor of two of the ₹20-60 band. The floor was set at ₹8 and it hid 80300CE at ₹2.75, which went 7.36x in the next 25 minutes on 207,560 units a minute, while the ₹7.60-11.55 strikes it allowed through went 1.04-1.47x on half their own median volume.\n\nSo the floor is now ₹2, and it is there for one reason only: tick risk. At ₹2 a single 0.05 tick is 2.5% of the price, so the spread alone decides the trade. Liquidity is no longer inferred from the price -- the `thin` rule reads the traded volume instead.',
+
+    thin: 'The measured replacement for the premium floor. Price never predicted liquidity; volume is liquidity.\n\nTwo tests, and both must fail before this blocks. The absolute floor (50,000 units in the last completed minute) is set at roughly the 5th percentile of the day: measured percentiles were p1 20,500, p5 47,960, p10 94,600, p25 180,320, median 324,320. The relative test asks whether this minute is under the strike\'s own 20-bar median, so a strike with a naturally small median is not punished for it.\n\nEither one failing alone is normal -- a quiet minute inside a busy strike, or a small-median strike having an ordinary minute. Both failing together is the real thing: no size, no median to fall back on, and an exit that will be worse than the entry.\n\nWhy per-strike and not the folded tape: `dead` reads CE+PE together on purpose, because on a one-sided move the losing leg goes quiet for reasons that have nothing to do with participation. That is the right question for the market and the wrong question for the one contract you are about to buy. A busy day can still contain a dead strike.\n\nmomentum turns this soft: speed plus consecutive higher highs is live buying flow, which is itself the proof of tradeability that the volume number was being used to establish.',
+
+    momentum: 'calcSpeed() is direction-blind. It measures range, so a premium collapsing at 3x reads exactly as fast as one going vertical at 3x -- and it was being used on its own to soften the red-candle and steep-candle gates, which exist for precisely those collapsing bars.\n\nThis is the direction half: each of the last 3 completed 1-minute bars must print a higher high than the one before it. Speed at or above 1.5x AND higher highs together means the move is real and one-way, and only that combination is allowed to soften the liquidity gate.\n\nIt never blocks anything. It is reported so the checklist can say why a soft row passed, instead of showing a green tick with no reason behind it.',
 
     speed: 'A flat option chart cannot pay for the spread it costs to enter. If the instrument is not moving, the only certain outcome is the crossing cost.'
 };
@@ -1967,7 +2068,16 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
     const stTok = tradingsymbol ? tokenBySymbol.get(tradingsymbol) : null;
     const speed = stTok ? calcSpeed(stTok) : null;
     const speedThreshold = s.speedThreshold || 1.2;
-    const fastMoving = speed && speed > speedThreshold; // momentum override threshold
+    /*
+    Two overrides, and the difference matters. `fastMoving` is the old
+    direction-blind one: speed alone. `momentum` also wants the last
+    momentumBars bars each making a higher high, so a fast COLLAPSE does not
+    count. Only momentum is allowed to soften the liquidity gate -- real
+    buying flow is the one thing that proves a cheap strike is tradeable.
+    */
+    const hh = stTok ? higherHighs(stTok, s.momentumBars || 3) : { ok: false, higher: false, why: 'no symbol picked' };
+    const momentum = speed != null && speed >= (s.momentumSpeed || 1.5) && hh.higher === true;
+    const fastMoving = momentum || (speed && speed > speedThreshold);
 
     const chk = [];
     const add = (code, label, failed, detail, hard = true) =>
@@ -2179,7 +2289,11 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
     if (premium > 0) {
         add('premium', `Premium ₹${s.minPremium}–${s.maxPremium}`,
             premium < s.minPremium || premium > s.maxPremium,
-            `₹${premium} — ${premium < s.minPremium ? 'too cheap: one tick is a huge % and the book is thin' : 'too rich: slippage eats the scalp'}`);
+            `₹${premium} — ${premium < s.minPremium
+                ? `too cheap: one ${TICK} tick is ${(TICK / premium * 100).toFixed(0)}% of the price, so the spread alone decides the trade`
+                : premium > s.maxPremium
+                    ? 'too rich: slippage eats the scalp'
+                    : `in band, one ${TICK} tick is ${(TICK / premium * 100).toFixed(1)}% of the price`}`);
         add('minprice', `Option price ≥ ₹${s.minPrice}`,
             premium < s.minPrice,
             `₹${premium} — price too low for reliable order placement`);
@@ -2187,6 +2301,54 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
         chk.push({ code: 'premium', label: `Premium ₹${s.minPremium}–${s.maxPremium}`, ok: true, blocked: false, hard: true, detail: 'n/a until a price is picked' });
         chk.push({ code: 'minprice', label: `Option price ≥ ₹${s.minPrice}`, ok: true, blocked: false, hard: true, detail: 'n/a until a price is picked' });
     }
+
+    /*
+    THIN -- this strike's own traded volume. The real test the premium floor
+    was only guessing at. `dead` above reads the whole option tape folded
+    together; this one reads the single strike you are about to buy, because a
+    busy day can still have a dead strike in it.
+
+    Both conditions must fail together: under the absolute floor AND under its
+    own median. One alone is normal -- a quiet minute in a busy strike, or a
+    strike whose median is simply small. Both together means nobody is there.
+    */
+    if (!stTok) {
+        na('thin', 'This strike is being traded', 'n/a until a symbol is picked');
+    } else {
+        const vf = volFlow(stTok, 20);
+        if (!vf.ok) {
+            na('thin', 'This strike is being traded', `n/a — ${vf.why}`);
+        } else {
+            const thin = vf.vol < s.minVolUnits && (vf.volX == null || vf.volX < s.minVolX);
+            add('thin', `Last 1m volume ≥ ${s.minVolUnits} units or ≥ ${s.minVolX}x its own median`,
+                thin,
+                `${dayjs.unix(vf.at).format('HH:mm')} bar: ${vf.vol} units`
+                + `, median ${vf.median} over ${vf.n} bars`
+                + (vf.volX != null ? ` = ${vf.volX}x` : ' (no median yet)')
+                + (thin
+                    ? ' — no flow in this strike: the exit will be worse than the entry'
+                    : ''),
+                !momentum);   // soft when speed and higher highs both agree
+        }
+    }
+
+    /*
+    MOMENTUM -- never blocks. It is the reason the soft rows above passed, so
+    the page has to show it or the checklist lies about why an entry was let
+    through.
+    */
+    chk.push({
+        code: 'momentum', label: `Fast and making higher highs (≥ ${s.momentumSpeed}x, ${s.momentumBars} bars)`,
+        ok: true, blocked: false, hard: false,
+        detail: !stTok ? 'n/a until a symbol is picked'
+            : `speed ${speed == null ? 'n/a' : speed + 'x'}`
+              + (hh.ok ? `, highs ${hh.highs.join(' → ')}` : `, ${hh.why}`)
+              + (momentum
+                  ? ' — momentum ON: liquidity, red-candle and steep gates are soft'
+                  : (fastMoving
+                      ? ' — fast but not making higher highs: only the old soft gates are soft'
+                      : ' — normal pace'))
+    });
 
     for (const c of chk) if (RULE_THEORY[c.code]) c.theory = RULE_THEORY[c.code];
     const blockers = chk.filter(c => c.blocked);
