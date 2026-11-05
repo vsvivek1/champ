@@ -122,6 +122,7 @@ const { initAlerts, alertPhone, marketOpenIst } = require('./chartAlerts.js');
 const claudeLock = require('./claudeLock.js');
 const { createMockBroker } = require('./mockBroker.js');
 const { createAutoPilot } = require('./autoPilot.js');
+const { createCoilWatch } = require('./coilWatch.js');
 
 /* ---------------------------------------------------------------------
 HEADLESS / MOCK MODE
@@ -187,7 +188,8 @@ async function kiteRetry(fn, tries = 3, waitMs = 350) {
 
 let kite, ticker;
 let mock = null;        // the paper broker in MOCK mode, else null
-let autoPilot = null;   // the headless entry decision, else null
+let autoPilot = null;   // the entry decision when nobody is clicking
+let coilWatch = null;   // the pre-move sign watcher, see coilWatch.js
 let optionInstruments = [];          // NFO + BFO option master
 const lotSizeByToken = new Map();
 const instByToken = new Map();       // token -> the option's master row (symbol, exchange)
@@ -3193,8 +3195,14 @@ async function checkSetups(token, ltp) {
         Headless, this row is the click. The autopilot re-runs the gate and
         the risk sizer itself before anything goes out -- see autoPilot.js
         for why the verdict above is not trusted on its own.
+
+        With the browser open the human is the click, so bounce/break rows
+        are only shown, not traded. HEADLESS is checked here rather than at
+        creation because the autopilot object now exists in both modes --
+        coilWatch needs it, and it has to be the SAME object so the
+        per-day cap, the open cap and the entry gap are shared.
         */
-        if (autoPilot) {
+        if (autoPilot && HEADLESS) {
             const out = await autoPilot.onSetup(row);
             if (out && out.action != 'skip' && out.action != 'off') {
                 broadcast({ type: 'autopilot', setup: row.kind, tradingsymbol: row.tradingsymbol, ...out });
@@ -4077,6 +4085,14 @@ async function main() {
                 console.log('⚠️ OI signal check failed', e.message || e));
             checkSetups(tok, t.last_price).catch(e =>
                 console.log('⚠️ setup scan failed', e.message || e));
+            /*
+            The coil watcher. Index ticks only, once per minute -- it does
+            its own gating inside. It runs off this tick stream and not off
+            the browser, so the alarm and the entry both happen with no
+            page open.
+            */
+            if (coilWatch) coilWatch.onTick(tok, t.last_price).catch(e =>
+                console.log('⚠️ coil watch failed', e.message || e));
         }
         if (wsClients.size == 0) return;
         const payload = JSON.stringify({
@@ -5028,17 +5044,51 @@ async function main() {
         const next = { ...cur };
         for (const k of Object.keys(ap.AUTO_DEFAULTS)) {
             if (b[k] === undefined) continue;
-            if (k == 'kinds') next.kinds = [].concat(b.kinds).filter(v => ['bounce', 'break'].includes(v));
+            if (k == 'kinds') next.kinds = [].concat(b.kinds).filter(v => ['bounce', 'break', 'coil'].includes(v));
+            else if (k == 'levelKinds') next.levelKinds = [].concat(b.levelKinds).filter(v => ['bounce', 'break', 'coil'].includes(v));
             else if (k == 'enabled') next.enabled = !!b.enabled;
             else if (k == 'index') next.index = String(b.index).toUpperCase();
             else if (k == 'offset') next.offset = b.offset == 'auto' ? 'auto' : (parseInt(b.offset, 10) || 0);
             else if (k == 'firstOrder') next.firstOrder = ['target', 'sl'].includes(b.firstOrder) ? b.firstOrder : null;
             else if (Number.isFinite(Number(b[k]))) next[k] = Number(b[k]);
         }
-        if (!next.kinds.length) return res.status(400).json({ error: 'kinds must include bounce and/or break' });
+        if (!next.kinds.length) return res.status(400).json({ error: 'kinds must include bounce, break and/or coil' });
         ap.writeCfg(next);
         console.log(`🤖 autopilot settings updated: ${JSON.stringify(next)}`);
         res.json({ ok: true, cfg: next });
+    });
+
+    /*
+    The coil watcher, read-out and retune. GET recomputes both sides from
+    scratch, so it is the honest way to ask "what does it see right now"
+    and the way to check a threshold before changing it. POST writes
+    coilWatch.json; `trade: false` leaves the alarm on and the orders off,
+    which is how to run it for a few days before letting it buy.
+    */
+    app.get('/api/coil', (req, res) => {
+        if (!coilWatch) return res.status(400).json({ error: 'coil watch is not armed' });
+        try { res.json(coilWatch.status()); }
+        catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+    });
+
+    app.post('/api/coil', (req, res) => {
+        const cw = require('./coilWatch.js');
+        const cur = cw.readCfg();
+        const b = req.body || {};
+        const next = { ...cur };
+        for (const k of Object.keys(cw.COIL_DEFAULTS)) {
+            if (b[k] === undefined) continue;
+            if (k == 'enabled' || k == 'trade') next[k] = !!b[k];
+            else if (Number.isFinite(Number(b[k]))) next[k] = Number(b[k]);
+        }
+        cw.writeCfg(next);
+        console.log(`🧭 coil watch settings updated: ${JSON.stringify(next)}`);
+        res.json({ ok: true, cfg: next });
+    });
+
+    app.get('/api/coilLog', (req, res) => {
+        try { res.json(JSON.parse(fs.readFileSync(path.join(__dirname, 'coilLog.json'), 'utf8'))); }
+        catch { res.json([]); }
     });
 
     app.get('/api/mock', (req, res) => {
@@ -5054,7 +5104,69 @@ async function main() {
         ws.on('close', () => wsClients.delete(ws));
     });
 
+    /*
+    The autopilot and the coil watcher are armed in BOTH modes on purpose.
+    The user's rule is "whether the chart is on or not, the auto trade must
+    happen", and a coil release at 13:37 does not care whether a browser
+    tab happens to be open. The autopilot itself still only acts on what is
+    handed to it: bounce/break rows are handed over only when HEADLESS (see
+    checkSetups), while a coil release is handed over always.
+    */
+    armAutoPilot();
+    armCoilWatch();
+
     if (HEADLESS) await startHeadless();
+}
+
+/*
+Build the one autopilot instance. Both callers must share it: two
+instances would keep two separate trade counters and the maxTradesPerDay,
+maxOpen and minGapMin caps would quietly double.
+*/
+function armAutoPilot() {
+    if (autoPilot) return autoPilot;
+    autoPilot = createAutoPilot({
+        kite,
+        lotOf: tok => lotSizeByToken.get(Number(tok)),
+        ltpOf: tok => lastLtpByToken.get(Number(tok)),
+        noTradeChecks, riskCappedQty, setFirstOrderOverride,
+        placeOrderInFreezeChunks, roundToTick,
+        openCount: () => guardPositionByToken.size,
+        isMock: MOCK,
+    });
+    return autoPilot;
+}
+
+/*
+The coil watcher -- the signs that came before the 05/11/2026 move. See
+coilWatch.js for what each sign is and why it is measured that way. All it
+gets here is read access to series chartApp already keeps; it owns no
+state of its own except its score history.
+*/
+function armCoilWatch() {
+    coilWatch = createCoilWatch({
+        kite, dayjs,
+        instByToken,
+        chartedTokens: () => chartedTokens,
+        spotToken: () => activeSpotToken(),
+        minBarsFromSec,
+        partSeriesOf: tok => partSeries.get(Number(tok)),
+        oiSeriesOf: tok => oiSeries.get(Number(tok)),
+        ltpOf: tok => lastLtpByToken.get(Number(tok)),
+        breachFromSec, plannedStop, readGuardSettings,
+        noTradeChecks, computeLevels, pickResistance,
+        alertPhone, broadcast,
+        autoPilot: armAutoPilot(),
+        openCount: () => guardPositionByToken.size,
+        logFile: path.join(__dirname, 'coilLog.json'),
+    });
+    const c = coilWatch.readCfg();
+    console.log(`🧭 COIL WATCH ${c.enabled ? 'ON' : 'OFF'}`
+        + (c.enabled && c.trade ? (MOCK ? ' (MOCK orders)' : ' ⚠️  LIVE — REAL ORDERS on release') : ' — alarm only')
+        + `: alarm at ${c.armScore}/12 signs, trade on a ${c.expandMult}x expansion bar`
+        + ` closing in the top ${100 - c.closeTopPct}% within ${c.armWindowMin} min.`
+        + ` Edit coilWatch.json or POST /api/coil.`);
+    return coilWatch;
 }
 
 /* ---------------------------------------------------------------------
@@ -5074,15 +5186,7 @@ async function startHeadless() {
     const ap = require('./autoPilot.js');
     const cfg = ap.readCfg();
 
-    autoPilot = createAutoPilot({
-        kite,
-        lotOf: tok => lotSizeByToken.get(Number(tok)),
-        ltpOf: tok => lastLtpByToken.get(Number(tok)),
-        noTradeChecks, riskCappedQty, setFirstOrderOverride,
-        placeOrderInFreezeChunks, roundToTick,
-        openCount: () => guardPositionByToken.size,
-        isMock: MOCK,
-    });
+    armAutoPilot();   // already built in main(); this is only a safety net
 
     const load = async () => {
         if (guardPositionByToken.size > 0) return;   // never while holding

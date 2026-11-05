@@ -36,7 +36,16 @@ const DEFAULTS = {
     index: 'NIFTY',          // NIFTY | SENSEX -- which chain to watch
     offset: 'auto',          // strike offset, or 'auto' for the IV-based pick
     reloadMin: 15,           // re-pick the strikes this often while FLAT (spot drifts)
-    kinds: ['bounce', 'break'],
+    kinds: ['bounce', 'break', 'coil'],
+    /*
+    minRR and minTouches are measured against a horizontal level, so they
+    only mean something for a setup that HAS one. A coil release has no
+    level and no touch count -- it is a range expansion off the index, not
+    a bounce off a price. Those two checks are applied to levelKinds only.
+    The honest alternative was to put fake numbers on the coil row so it
+    passes; that would have lied to the log as well as to the gate.
+    */
+    levelKinds: ['bounce', 'break'],
     minRR: 1.5,              // on top of the setup detector's own minRR
     minTouches: 2,           // a level with one touch is a line, not a level
     maxTradesPerDay: 6,      // after this, the day is over whatever the tape says
@@ -109,13 +118,16 @@ function createAutoPilot(deps) {
                     + (row.blockers && row.blockers.length ? ` — ${row.blockers.join(' | ')}` : ''));
                 return { action: 'skip', why: `verdict ${row.verdict}` };
             }
-            if (!(row.rr >= cfg.minRR)) {
-                note('rr', `${row.tradingsymbol} ${row.rr}R is under the autopilot's ${cfg.minRR}R`);
-                return { action: 'skip', why: `${row.rr}R < ${cfg.minRR}R` };
-            }
-            if (!(row.touches >= cfg.minTouches)) {
-                note('touches', `${row.tradingsymbol} level ${row.level} has ${row.touches} touch(es), autopilot wants ${cfg.minTouches}`);
-                return { action: 'skip', why: `${row.touches} touches < ${cfg.minTouches}` };
+            const levelKinds = cfg.levelKinds || DEFAULTS.levelKinds;
+            if (levelKinds.includes(row.kind)) {
+                if (!(row.rr >= cfg.minRR)) {
+                    note('rr', `${row.tradingsymbol} ${row.rr}R is under the autopilot's ${cfg.minRR}R`);
+                    return { action: 'skip', why: `${row.rr}R < ${cfg.minRR}R` };
+                }
+                if (!(row.touches >= cfg.minTouches)) {
+                    note('touches', `${row.tradingsymbol} level ${row.level} has ${row.touches} touch(es), autopilot wants ${cfg.minTouches}`);
+                    return { action: 'skip', why: `${row.touches} touches < ${cfg.minTouches}` };
+                }
             }
             if (!(row.stop > 0) || !(row.stop < row.ltp)) {
                 note('nostop', `${row.tradingsymbol} has no usable stop under ${row.ltp} — nothing to size against`);
@@ -204,7 +216,9 @@ function createAutoPilot(deps) {
             };
             taken.push(rec);
             console.log(`🤖 AUTOPILOT${isMock ? ' (MOCK)' : ''} BUY ${qty} ${row.tradingsymbol} @ ${price}`
-                + ` — ${row.kind} off ${row.level} (${row.touches}t), stop ${row.stop}, ${row.rr}R`
+                + ` — ${row.kind}`
+                + (row.level != null ? ` off ${row.level} (${row.touches}t)` : ` — ${row.what || ''}`)
+                + `, stop ${row.stop}${row.rr != null ? `, ${row.rr}R` : ''}`
                 + (rec.riskRs != null ? `, risk ₹${rec.riskRs}` : '')
                 + ` → ${ids.join(',')} [${n + 1}/${cfg.maxTradesPerDay} today]`);
             return { action: 'placed', ...rec };
