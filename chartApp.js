@@ -1,32 +1,101 @@
 
 /*
 
-chartApp.js -- self-hosted Zerodha-style live chart dashboard.
+chartApp.js -- unified live chart dashboard with mock & headless modes.
 
-- Pick NIFTY or SENSEX: spot chart with yesterday's high/low lines and a
-  live INSIDE/OUTSIDE yesterday's-range badge.
-- The CE and PE n strikes away from spot (nearest expiry) charted
-  alongside, all three fed by the same live tick stream (one KiteTicker,
-  forwarded to the browser over a WebSocket).
-- Position panel: current qty, entry, P&L for this entry and day total,
-  the single resting SELL order, and place/modify Target (LIMIT) or
-  SL (SL) -- always by MODIFYING the one resting order when it exists
-  (a second resting SELL gets margin-checked as a naked short).
-- The GUARD (what used to be simpleGuard.js) is built in: on a BUY fill it
-  places the one resting SELL (target or SL), freezes the 3-candle breach
-  level, and exits the moment a live tick breaks it. See the BUILT-IN GUARD
-  section below.
+MODES:
+- chartApp.js                         UI dashboard with live Zerodha feeds
+- chartApp.js --headless              headless autopilot (picks strikes, trades)
+- chartApp.js --mock [options]        paper trading (mock fills, real prices)
+- chartApp.js --live --i-mean-it      real trading (both flags required)
 
-- After every close: a full-page REVIEW (trade P&L + today's history + a
-  verdict saying what went wrong), and if the exit was a stop (SL order or
-  guard breach) NEW ENTRIES ARE LOCKED FOR 10 MINUTES. See the POST-TRADE
-  REVIEW section below. Exits are never locked.
+UI mode:
+- Pick NIFTY or SENSEX: spot chart with yesterday's high/low, INSIDE/OUTSIDE badge
+- CE and PE n strikes away from spot (nearest expiry) charted alongside
+- Position panel: qty, entry, P&L, single resting SELL order, place/modify targets
+- Built-in GUARD: on BUY fill places resting SELL, freezes 3-candle breach level,
+  exits on breach. After stop: 10 min lock. After target: no lock.
 
-Runs standalone on PORT below -- ONE process, nothing else to start. Do not
-run simpleGuard.js / stopLossGuard.js / targetGuard.js alongside it: two
-guards would each place a SELL on the same fill (margin rejection).
+Headless/Mock:
+- Set up strikes and lots in autoTrade.json
+- Rules (stop, risk, clock, streak, premium band) shared from guardSettings.json
+- Mock writes to mock-prefixed files (mock-tradeLog.json, mock-guardState.json etc)
+- Real settings (guardSettings.json, noTrade.json) stay shared
+- HTTP /api endpoints for monitoring, --port for running alongside live app
+
+OPTIONS:
+  --headless                autopilot mode (requires autoTrade.json)
+  --mock                    paper trading (default for headless)
+  --live                    real orders (needs --i-mean-it too)
+  --i-mean-it               confirmation flag for --live
+  --watch                   dry-run: log what would trade, don't execute
+  --arm                     autopilot on (default after --watch)
+  --cash N                  paper trading balance (default 200000)
+  --port N                  HTTP port (default 3456 live, 3457 mock)
+  --index NIFTY|SENSEX      which index to trade
+  --offset N                strike offset (default from autoTrade.json)
+  --lots N                  max lots per trade
+  --max N                   max trades per day
+  --alerts                  enable phone alerts in mock mode
+  --help                    show this
 
 */
+
+/* ===== COMMAND-LINE MODE DETECTION ===== */
+const args = process.argv.slice(2);
+const has = f => args.includes(f);
+const val = (f, d) => { const i = args.indexOf(f); return i >= 0 && args[i + 1] ? args[i + 1] : d; };
+
+if (has('--help') || has('-h')) {
+    console.log(require('fs').readFileSync(__filename, 'utf8').split('*/')[0].replace(/^\/\*/, ''));
+    process.exit(0);
+}
+
+const live = has('--live');
+const headless = has('--headless') || has('--watch') || has('--arm') || has('--mock');
+
+// Two flags to go live, checked here before any connections
+if (live && !has('--i-mean-it')) {
+    console.error('\n❌ --live places REAL orders with no human in the loop.');
+    console.error('   If that is what you want, say so twice:\n');
+    console.error('       node chartApp.js --live --i-mean-it\n');
+    console.error('   Before you do: run in mock mode first and read mock-tradeLog.json.\n');
+    process.exit(1);
+}
+
+// Set env vars from CLI args
+process.env.CHART_HEADLESS = headless ? '1' : '0';
+process.env.CHART_MOCK = live ? '0' : '1';
+process.env.CHART_PORT = val('--port', live ? '3456' : '3457');
+if (val('--cash', null)) process.env.CHART_MOCK_CASH = val('--cash');
+if (has('--alerts')) process.env.CHART_MOCK_ALERTS = '1';
+
+// Write autoTrade.json config if headless mode with overrides
+let headlessCfg = null;
+if (headless) {
+    const ap = require('./autoPilot.js');
+    const cfg = ap.readCfg();
+    let touched = false;
+    if (has('--watch')) { cfg.enabled = false; touched = true; }
+    if (has('--arm')) { cfg.enabled = true; touched = true; }
+    if (val('--index', null)) { cfg.index = val('--index').toUpperCase(); touched = true; }
+    if (val('--offset', null)) { const o = val('--offset'); cfg.offset = o == 'auto' ? 'auto' : (parseInt(o, 10) || 0); touched = true; }
+    if (val('--lots', null)) { cfg.maxLots = parseInt(val('--lots'), 10) || cfg.maxLots; touched = true; }
+    if (val('--max', null)) { cfg.maxTradesPerDay = parseInt(val('--max'), 10) || cfg.maxTradesPerDay; touched = true; }
+    if (touched) ap.writeCfg(cfg);
+    headlessCfg = cfg;
+}
+
+console.log('');
+if (headless && headlessCfg) {
+    console.log(`🤖 chartApp HEADLESS — ${live ? '🔴 LIVE: ORDERS GO TO THE EXCHANGE' : '🧪 MOCK: paper orders only'}`);
+    console.log(`   index ${headlessCfg.index} ${headlessCfg.offset == 'auto' ? '(auto strike)' : `offset ${headlessCfg.offset}`}`
+        + `, autopilot ${headlessCfg.enabled ? 'ARMED' : 'DISARMED (watch only)'}`
+        + `, port ${process.env.CHART_PORT}`);
+} else if (!headless) {
+    console.log('🚀 chartApp UI mode — open browser to http://localhost:' + (val('--port', '3456')));
+}
+console.log('');
 
 console.log("🚀 chartApp starting", new Date().toISOString());
 
@@ -54,7 +123,7 @@ const { createAutoPilot } = require('./autoPilot.js');
 HEADLESS / MOCK MODE
 
 Three env flags, all off by default, so plain `node chartApp.js` is exactly
-the dashboard it has always been. chartHeadless.js sets them.
+the dashboard it has always been. CLI args at the top set them.
 
   CHART_HEADLESS=1   nobody is going to press Load. The process picks the
                      strikes itself at startup, re-picks them while flat,
@@ -1913,7 +1982,6 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
     Steep candle. Same shape as the red-candle rule: it reads the instrument
     you are about to buy, so it needs a symbol first.
     */
-    const stTok = tradingsymbol ? tokenBySymbol.get(tradingsymbol) : null;
     if (!s.blockSteep) {
         chk.push({ code: 'steep', label: 'Last 1m candle not steep', ok: true, blocked: false, hard: false, detail: 'steep-candle filter switched off' });
     } else if (!tradingsymbol) {
