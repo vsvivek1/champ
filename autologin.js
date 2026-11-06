@@ -51,8 +51,21 @@ async function login() {
   const passSelector = '#password';
   const submitSelector = 'button[type="submit"]';
 
- const browser = await puppeteer.launch({
-  headless: false,
+/*
+Use the Chrome that is already on the machine. Puppeteer's own download
+lives in ~/.cache/puppeteer and goes missing after a node_modules wipe or
+a puppeteer version bump, and then login fails at 09:00 with "Could not
+find Chrome". The system Chrome is always there.
+PUPPETEER_EXECUTABLE_PATH overrides it; no value falls back to whatever
+puppeteer has downloaded.
+*/
+const chrome = process.env.PUPPETEER_EXECUTABLE_PATH
+  || ['/usr/bin/google-chrome', '/usr/bin/google-chrome-stable', '/usr/bin/chromium']
+    .find(p => require('fs').existsSync(p));
+
+const browser = await puppeteer.launch({
+  headless: process.env.LOGIN_HEADLESS == '1' ? 'new' : false,
+  ...(chrome ? { executablePath: chrome } : {}),
   args: [
     '--no-sandbox',
     '--disable-setuid-sandbox'

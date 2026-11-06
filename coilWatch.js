@@ -488,8 +488,22 @@ function createCoilWatch(deps) {
     const spotOhlc = new Map();     // minute key -> {time, open, high, low, close}
     let seeded = false, seeding = false;
 
+    /*
+    Before 09:15 there is nothing to seed: "from 09:00" is later than "now",
+    and Kite answers "from date cannot be after to date". Without the two
+    guards below that call went out on EVERY pre-open tick -- a history
+    request per tick for over an hour, and the same line in the log a
+    thousand times. Retry at most once every 30 seconds, and not at all
+    until the first minute has actually closed.
+    */
+    let seedTriedAt = 0;
+
     async function seedSpot(tok) {
         if (seeded || seeding) return;
+        const now = dayjs();
+        if (now.hour() * 60 + now.minute() < 9 * 60 + 16) return;
+        if (Date.now() - seedTriedAt < 30000) return;
+        seedTriedAt = Date.now();
         seeding = true;
         try {
             const from = dayjs().hour(9).minute(0).second(0).format('YYYY-MM-DD HH:mm:ss');
