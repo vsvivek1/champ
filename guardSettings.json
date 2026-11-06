@@ -8,5 +8,6 @@
   "levelGapPct": 2,
   "levelMaxPct": 60,
   "slMode": "breach",
+  "slMaxPct": 25,
   "scalpGreenTarget": true
 }

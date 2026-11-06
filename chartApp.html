@@ -3592,9 +3592,10 @@ document.getElementById('gSave').onclick = async () => {
   const d = await r.json();
   if (!d.error) { guardCfg = d; updateTgtHint(); }
   msg(d.error ? ('❌ ' + d.error)
-    : `✅ on fill: stop = ${d.slMode == 'breach' ? `the ${guardCfg.candleCount || 3}-candle low − 1 tick (uncapped)`
-        : d.slMode == 'level' ? `a tick under the support, floor -${d.slPct}%, uncapped`
-        : `flat -${d.slPct}%`} — applies to the next fill`);
+    : `✅ on fill: stop = ${d.slMode == 'breach' ? `the ${guardCfg.candleCount || 3}-candle low − 1 tick`
+        : d.slMode == 'level' ? `a tick under the support, floor -${d.slPct}%`
+        : `flat -${d.slPct}%`}`
+      + `${d.slMaxPct > 0 ? `, capped at -${d.slMaxPct}%` : ', uncapped'} — applies to the next fill`);
 };
 fetchGuardSettings();
 
@@ -4413,7 +4414,7 @@ function riskHtmlFrom(r, price, qty) {
   }
   if (r.breach && r.risk == null) {
     return `<div class="risk" id="mRisk">risk <b>…</b> `
-      + `<span class="pxdim">(stop = a tick under the level, uncapped — asking the server)</span><br>`
+      + `<span class="pxdim">(stop = a tick under the level, capped at -${guardCfg.slMaxPct || 25}% — asking the server)</span><br>`
       + `<span class="pxdim">premium ${inr(r.premium)}</span></div>`;
   }
   // rr under 1.5 means the partial pays less than 1.5x what the stop costs

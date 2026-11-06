@@ -1067,15 +1067,33 @@ const GUARD_DEFAULTS = {
                 fence than the slPct floor
       'pct'     flat slPct under entry
 
-    There is NO maximum-width cap on any of them. slMaxPct used to exist and
-    was deleted on 29/10/2026 at the user's instruction: on expiry day the
-    3-candle low sat further than 8% from the close on ~65% of tradeable
-    bars, so the cap was overriding the actual rule on two entries out of
-    three -- and a capped stop lands ABOVE the level it was meant to hide
-    under, which is how the 14:15 trade exited 1.05 above its own 9.25 line.
-    A stop that is too wide is a sizing problem, not a stop problem.
     */
     slMode: 'breach',
+    /*
+    MAXIMUM STOP WIDTH -- back on the user's instruction of 06/11/2026.
+
+    An 8% cap used to live here and was deleted on 29/10/2026, for a good
+    reason: on expiry day the 3-candle low sat more than 8% under the close
+    on about 65% of tradeable bars, so the cap was overriding the actual
+    rule on two entries out of three. Worse, a capped stop lands ABOVE the
+    level it was meant to hide under, so the 14:15 trade exited 1.05 above
+    its own 9.25 line.
+
+    25% is a different number, not the same mistake. On 06/11/2026 exactly
+    1 fire out of 130 had a 3-candle low wider than 25% under entry, and
+    across every logged day 15 out of 377 -- so this bites the few really
+    wild bars and leaves the normal rule alone.
+
+    The 29/10 race is handled, not ignored: when the cap bites,
+    placeFirstOrder moves the frozen breach line ONTO the capped line, so
+    the per-tick watcher and the resting exchange SL are still ONE number.
+    A capped stop never hides under a level that the app is still watching
+    lower down.
+
+    0 switches the cap off. Must stay wider than slPct, else a "cap" would
+    be the tightest stop in the file.
+    */
+    slMaxPct: 25,
     /*
     Quick scalp on a rising 1m bar: rest the TARGET first instead of the SL.
     A scalp taken while the candle is green is a momentum trade -- the race is
@@ -1160,6 +1178,8 @@ function readGuardSettings() {
         if (!(s.levelGapPct >= 0 && s.levelGapPct <= 50)) s.levelGapPct = def.levelGapPct;
         if (!(s.levelMaxPct > 0 && s.levelMaxPct <= 300)) s.levelMaxPct = def.levelMaxPct;
         if (!['level', 'pct', 'breach'].includes(s.slMode)) s.slMode = def.slMode;
+        // 0 = cap off. Anything tighter than the slPct floor is not a cap, so drop it
+        if (!(s.slMaxPct === 0 || (s.slMaxPct > s.slPct && s.slMaxPct <= 100))) s.slMaxPct = def.slMaxPct;
         if (!['app', 'exchange'].includes(s.partialMode)) s.partialMode = def.partialMode;
         s.trail = s.trail !== false;
         return s;
@@ -3138,6 +3158,21 @@ async function placeFirstOrder({ instrument_token, tradingsymbol, exchange, quan
     */
     const frozen = breachLevelByToken.get(Number(instrument_token));
     const planned = plannedStop(buyPrice, levels, s, frozen);
+    /*
+    The cap bit, so the stop is no longer under the real low. Move the
+    watched line up to the capped line as well, or the app would sit there
+    waiting for a low the exchange SL will never let the trade reach --
+    the 29/10/2026 split brain, in the other direction.
+    */
+    if (planned.capped && planned.line > 0) {
+        const t = Number(instrument_token);
+        breachLevelByToken.set(t, planned.line);
+        breachSymbolByToken.set(t, tradingsymbol);
+        saveBreachOverride(t, planned.line);   // else applyBreachOverrides() puts the raw low back
+        writeGuardState();
+        console.log(`📏 ${tradingsymbol}: ${CANDLE_COUNT}-candle low ${planned.rawLevel} is too far`
+            + ` (stop would be ${planned.rawStop}) — breach line capped to ${planned.line}, stop ${planned.stop}`);
+    }
 
     let partial = null;
     if (res && s.partialPct > 0) {
@@ -4071,15 +4106,35 @@ wherever the percentage lands, which on a quiet option is inside the
 spread and on a fast one is miles past the level that mattered. So the
 LEVEL picks the spot and the PERCENTAGES fence it in:
 
-  slPct  the tightest it may ever be  (closer than this is noise)
+  slPct     the tightest it may ever be  (closer than this is noise)
+  slMaxPct  the widest it may ever be     (further than this is not a stop)
 
-A tick under the level, with slPct as the only floor. There is deliberately
-no ceiling: a stop is never moved closer than the level just because the
-level is far. If the level is too far for the risk you want, cut the SIZE,
-not the stop. slMode 'pct' restores the old flat behaviour.
+A tick under the level, fenced by both. The size is cut first -- riskCappedQty
+takes the stop as given and cuts the QUANTITY -- so the cap is only for the
+rare bar whose 3-candle low is so far away that no sane size fits under it.
+
+When the cap bites it returns capped:true and the capped LINE, because the
+caller has to move the frozen breach line onto that same line. Otherwise the
+app would watch the real low while the exchange SL sits far above it, which
+is exactly how the 29/10/2026 trade exited 1.05 above its own level.
 */
+/*
+The widest the stop may sit: the LINE at slMaxPct under entry, and the stop
+one tick under that line -- the same geometry as the breach rule, so the line
+can be handed straight to the per-tick watcher. null when the cap is off.
+*/
+function stopCap(entry, s) {
+    const pct = Number(s.slMaxPct);
+    if (!(pct > 0) || !(entry > 0)) return null;
+    const line = roundDownToTick(entry * (1 - pct / 100));
+    const stop = roundDownToTick(line - TICK);
+    if (!(stop > 0)) return null;
+    return { line, stop, pct };
+}
+
 function plannedStop(entry, levels, s, breach) {
     const tight = roundDownToTick(entry * (1 - s.slPct / 100));
+    const cap = stopCap(entry, s);
     /*
     'breach' mode: the stop IS the breach level, one tick under it. If the
     level is unknown (no completed candles yet) there is nothing to be one
@@ -4089,7 +4144,12 @@ function plannedStop(entry, levels, s, breach) {
         const raw = roundDownToTick(breach - TICK);
         if (raw <= 0) return { stop: tight, why: `${CANDLE_COUNT}-candle low ${breach} is one tick off zero — flat ${s.slPct}%` };
         const pct = ((entry - raw) / entry * 100).toFixed(1);
-        return { stop: raw, why: `one tick under the ${CANDLE_COUNT}-candle low ${breach} (${pct}% under entry, uncapped)` };
+        if (cap && raw < cap.stop) {
+            return { stop: cap.stop, line: cap.line, capped: true, rawStop: raw, rawLevel: breach,
+                why: `${CANDLE_COUNT}-candle low ${breach} is ${pct}% under entry — capped at ${cap.pct}%,`
+                    + ` stop ${cap.stop} (one tick under ${cap.line})` };
+        }
+        return { stop: raw, why: `one tick under the ${CANDLE_COUNT}-candle low ${breach} (${pct}% under entry)` };
     }
     if (s.slMode == 'breach') return { stop: tight, why: `no ${CANDLE_COUNT}-candle low yet — flat ${s.slPct}%` };
     if (s.slMode != 'level') return { stop: tight, why: `flat ${s.slPct}% under entry` };
@@ -4097,6 +4157,12 @@ function plannedStop(entry, levels, s, breach) {
     if (!sup) return { stop: tight, why: `no support found below entry — flat ${s.slPct}%` };
     const raw = roundDownToTick(sup.price - TICK);        // a tick UNDER the level, not on it
     if (raw > tight) return { stop: tight, why: `support ${sup.price} is inside the ${s.slPct}% noise band — held at ${s.slPct}%` };
+    if (cap && raw < cap.stop) {
+        const pct = ((entry - raw) / entry * 100).toFixed(1);
+        return { stop: cap.stop, line: cap.line, capped: true, rawStop: raw, rawLevel: sup.price,
+            why: `support ${sup.price} is ${pct}% under entry — capped at ${cap.pct}%,`
+                + ` stop ${cap.stop} (one tick under ${cap.line})` };
+    }
     return { stop: raw, why: `a tick under the immediate support ${sup.price} (${sup.touches} touch${sup.touches > 1 ? 'es' : ''})` };
 }
 
@@ -5362,10 +5428,18 @@ async function main() {
             if (!(v > 0 && v <= 300)) return res.status(400).json({ error: "levelMaxPct must be 0–300" });
             s.levelMaxPct = v;
         }
+        if (req.body && req.body.slMaxPct != null) {
+            const v = Number(req.body.slMaxPct);
+            if (!(v === 0 || (v > s.slPct && v <= 100))) {
+                return res.status(400).json({ error: `slMaxPct must be 0 (off) or wider than slPct (${s.slPct}) up to 100` });
+            }
+            s.slMaxPct = v;
+        }
         try { fs.writeFileSync(GUARD_SETTINGS_FILE, JSON.stringify(s, null, 2)); }
         catch (e) { return res.status(500).json({ error: String(e.message || e) }); }
         console.log(`⚙️ guardSettings: on fill → ${s.firstOrder}`
-            + `, stop ${s.slMode == 'breach' ? `one tick under the ${CANDLE_COUNT}-candle low` : s.slMode == 'level' ? `a tick under the support (floor ${s.slPct}%)` : `${s.slPct}% flat`} — uncapped`
+            + `, stop ${s.slMode == 'breach' ? `one tick under the ${CANDLE_COUNT}-candle low` : s.slMode == 'level' ? `a tick under the support (floor ${s.slPct}%)` : `${s.slPct}% flat`}`
+            + `${s.slMaxPct > 0 ? ` — capped at ${s.slMaxPct}% wide` : ' — uncapped'}`
             + `, partial ${s.partialPct}% at the resistance (${s.partialMode == 'app' ? 'app-side, stop covers the full lot' : 'resting LIMIT, stop covers the remainder only'})`
             + `, trail ${s.trail ? 'on' : 'off'}`);
         res.json(s);
@@ -5838,7 +5912,7 @@ async function main() {
     setInterval(guardRefresh, GUARD_REFRESH_MS);
     const gsb = readGuardSettings();
     console.log(`🛡 built-in guard armed (refresh ${GUARD_REFRESH_MS / 1000}s, breach = ${CANDLE_COUNT}-candle low, on fill → ${gsb.firstOrder}`
-        + `, resting SL = ${gsb.slMode == 'breach' ? `the breach level − 1 tick (ONE stop)` : gsb.slMode == 'level' ? `a tick under the support (floor ${gsb.slPct}%)` : `flat ${gsb.slPct}%`}, NO max-width cap)`);
+        + `, resting SL = ${gsb.slMode == 'breach' ? `the breach level − 1 tick (ONE stop)` : gsb.slMode == 'level' ? `a tick under the support (floor ${gsb.slPct}%)` : `flat ${gsb.slPct}%`}${gsb.slMaxPct > 0 ? `, max width ${gsb.slMaxPct}%` : ', NO max-width cap'})`);
 
     /*
     The autopilot and the mock book, for whoever is watching -- a terminal
