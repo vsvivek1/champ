@@ -50,7 +50,14 @@ const DEFAULTS = {
     premLo: 15,
     premHi: 25,          // strike offset, or 'auto' for the IV-based pick
     reloadMin: 15,           // re-pick the strikes this often while FLAT (spot drifts)
-    kinds: ['bounce', 'break', 'coil'],
+    /*
+    speedgreen and holdlow are in here because they were asked for as auto
+    entries. They are NOT in levelKinds: neither is built on a level with a
+    measured target above it, so the R and touch-count rules below would
+    refuse all of them. Their vetoes are waived in chartApp.js --
+    WAIVED_BY_KIND says exactly which ones and what is never waived.
+    */
+    kinds: ['bounce', 'break', 'coil', 'speedgreen', 'holdlow'],
     /*
     minRR and minTouches are measured against a horizontal level, so they
     only mean something for a setup that HAS one. A coil release has no
@@ -234,7 +241,13 @@ function createAutoPilot(deps) {
             The row's verdict was computed when the minute closed; a stop-out
             lock or the day-loss cap can have landed since.
             */
-            const g = noTradeChecks({ premium: ltp, tradingsymbol: row.tradingsymbol });
+            /*
+            row.waive carries the setup's waiver list from the scan, so this
+            second look applies the same rules the first one did. A setup
+            that passed the gate at the minute close and is then refused here
+            by a rule its own kind waives is the worst of both ends.
+            */
+            const g = noTradeChecks({ premium: ltp, tradingsymbol: row.tradingsymbol, waive: row.waive });
             if (g.blocked) {
                 const why = g.blockers.map(b => b.label).join(' | ');
                 console.log(`⛔ autopilot BUY ${row.tradingsymbol} refused at the gate — ${why}`);

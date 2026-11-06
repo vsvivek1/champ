@@ -2310,7 +2310,41 @@ function calcSpeed(token) {
     return avgPrev20 > 0 ? +(avg3 / avgPrev20).toFixed(2) : null;
 }
 
-function noTradeChecks({ premium, tradingsymbol } = {}) {
+/*
+WAIVED VETOES.
+
+Two of the setups are DEFINED by the very thing some of the gates veto, so
+running them through the full gate is not caution, it is a contradiction:
+
+  speedgreen  fires because the option is moving 2x its own pace. The steep
+              gate exists to stop you buying a bar like that. The chop gate
+              reads the index, which can be going nowhere while this single
+              strike runs. Both would refuse every single one of these.
+  holdlow     fires after three red candles whose low then holds. A base IS
+              a stretch of chop, the bars behind it ARE red, and the index
+              bias is usually still pointing the wrong way at a turn.
+
+So these kinds carry a waiver list. A waived check still runs, still shows
+in the checklist, and is marked `waived` with the reason -- it just does not
+block. The checklist must never quietly lose a line, or it starts lying
+about why an order went out.
+
+WHAT IS NEVER WAIVED, whatever a setup asks for: the day loss cap, the loss
+streak, the trade cap, the exit lockout, an open position with no resting
+SELL, the open-position limit, already holding the symbol, and the premium
+and price floors. Those are not opinions about the tape -- they are the
+things that stop one bad afternoon becoming a bad month, and a setup is not
+allowed to vote on them.
+*/
+const NEVER_WAIVED = ['dayloss', 'streak', 'cap', 'lock', 'guarded',
+    'open_count', 'same_symbol', 'premium', 'minprice'];
+
+const WAIVED_BY_KIND = {
+    speedgreen: ['chop', 'wrongway', 'steep', 'redcandle', 'dead', 'thin', 'lunch', 'late', 'open', 'impulse'],
+    holdlow:    ['chop', 'wrongway', 'steep', 'redcandle', 'dead', 'thin', 'lunch', 'late', 'open', 'impulse'],
+};
+
+function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
     const s = readNoTrade();
     const st = todayStats();
     const l = lockInfo();
@@ -2608,6 +2642,21 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
     });
 
     for (const c of chk) if (RULE_THEORY[c.code]) c.theory = RULE_THEORY[c.code];
+
+    /*
+    The waiver, applied last so it can only ever turn a block OFF and is
+    visible on the row that it changed.
+    */
+    const waived = [].concat(waive || []).filter(k => !NEVER_WAIVED.includes(k));
+    if (waived.length) {
+        for (const c of chk) {
+            if (!c.blocked || !waived.includes(c.code)) continue;
+            c.blocked = false;
+            c.waived = true;
+            c.detail = (c.detail || '') + ' — WAIVED: this setup is defined by the thing this rule vetoes';
+        }
+    }
+
     const blockers = chk.filter(c => c.blocked);
     return { checks: chk, blockers, blocked: blockers.length > 0, settings: s, stats: st, lock: l, openPositions: open.length, regime: reg, part };
 }
@@ -3405,7 +3454,16 @@ const SETUP_DEFAULTS = {
     minRR: 1.5,          // below this the partial is not worth the spread
     minTouches: 1,       // raise to 2 once there is a multi-day sample
     breakClearPct: 0.5,  // how far past the level the close must be
-    wickPct: 0.2         // how deep into the support the low may poke
+    wickPct: 0.2,        // how deep into the support the low may poke
+
+    // speedgreen: the option moving this many times its own recent pace
+    // while the minute in progress is green
+    speedMult: 2,
+
+    // holdlow: this many red candles in a row, whose lowest low then holds
+    // for this many completed minutes
+    redRun: 3,
+    holdMin: 3
 };
 function readSetupCfg() {
     try { return { ...SETUP_DEFAULTS, ...JSON.parse(fs.readFileSync(SETUP_FILE, 'utf8')) }; }
@@ -3497,6 +3555,57 @@ async function checkSetups(token, ltp) {
         hits.push({ kind: 'break', level: R.price, touches: R.touches,
             what: `closed ${last.close} — ${cfg.breakClearPct}% clear of ${R.price} (${R.touches}t)` });
     }
+    /*
+    SPEEDGREEN -- the option is moving more than speedMult times its own
+    recent pace and the minute in progress is green.
+
+    Two halves, and both are needed. calcSpeed is deliberately direction
+    blind: it compares the last 15 seconds of range against the previous
+    100, so a premium collapsing vertically scores exactly as high as one
+    going vertical the other way. The green live candle is what tells the
+    two apart. Read off the live bar, not a completed one, because by the
+    time a 2x minute has closed the move it was reporting is already paid
+    for.
+    */
+    const sp = calcSpeed(Number(token));
+    const liveBar = liveMinCandle(Number(token));
+    if (sp != null && sp >= cfg.speedMult && liveBar && liveBar.close > liveBar.open) {
+        const pct = liveBar.open > 0 ? +(((liveBar.close - liveBar.open) / liveBar.open) * 100).toFixed(1) : 0;
+        hits.push({ kind: 'speedgreen', level: liveBar.open, touches: null,
+            what: `moving ${sp}x its own pace and this minute is green: ${liveBar.open} → ${liveBar.close} (+${pct}%)` });
+    }
+
+    /*
+    HOLDLOW -- at least redRun red candles in a row, and then the lowest low
+    of that run holds for holdMin completed minutes.
+
+    The run has to end exactly where the hold window begins, so this fires
+    on the minute the hold completes rather than every minute afterwards.
+    "Held" means not one of the hold bars TRADED under the low -- the low
+    itself, not the close, because a wick through it is the thing being
+    tested. Equal to the low counts as held: that is the level being
+    retested, which is the whole point.
+    */
+    const run = (() => {
+        if (c.length < cfg.redRun + cfg.holdMin) return null;
+        const holdBars = c.slice(-cfg.holdMin);
+        const before = c.slice(0, -cfg.holdMin);
+        let n = 0;
+        for (let i = before.length - 1; i >= 0; i--) {
+            if (before[i].close < before[i].open) n++; else break;
+        }
+        if (n < cfg.redRun) return null;
+        const redBars = before.slice(before.length - n);
+        const low = +Math.min(...redBars.map(b => b.low)).toFixed(2);
+        if (holdBars.some(b => b.low < low)) return null;      // it broke
+        return { n, low, holdBars };
+    })();
+    if (run) {
+        hits.push({ kind: 'holdlow', level: run.low, touches: run.n,
+            what: `${run.n} red candles down to ${run.low}, held for ${cfg.holdMin} min`
+                + ` (lows ${run.holdBars.map(b => b.low).join(', ')})` });
+    }
+
     if (!hits.length) return;
 
     const gset = readGuardSettings();
@@ -3512,8 +3621,24 @@ async function checkSetups(token, ltp) {
         const rr = (target && ps.stop < ltp) ? +((target - ltp) / (ltp - ps.stop)).toFixed(2) : null;
         const risk = +((ltp - ps.stop)).toFixed(2);
 
-        const g = noTradeChecks({ premium: ltp, tradingsymbol: inst.tradingsymbol });
-        const thin = rr == null || rr < cfg.minRR;
+        /*
+        The waiver travels with the row, so the autopilot's second look at
+        the gate -- taken a few seconds later, on the price it is about to
+        pay -- applies the same one. Without that the setup would pass here
+        and be refused there, which is the worst of both.
+        */
+        const waive = WAIVED_BY_KIND[h.kind] || null;
+        const g = noTradeChecks({ premium: ltp, tradingsymbol: inst.tradingsymbol, waive });
+
+        /*
+        R is a veto too, and for these two it is the wrong one. Both fire on
+        movement, not on a level with a measured target above it, so there is
+        often no resistance to quote an R against -- and rr == null would
+        make every one of them THIN, which the autopilot skips. For a waived
+        kind the R is still computed and still shown; it just does not decide
+        the verdict.
+        */
+        const thin = !waive && (rr == null || rr < cfg.minRR);
         const verdict = g.blocked ? 'BLOCKED' : (thin ? 'THIN' : 'TAKE');
 
         const row = {
@@ -3522,7 +3647,8 @@ async function checkSetups(token, ltp) {
             exchange: inst.exchange,   // the autopilot orders off this row
             kind: h.kind, level: h.level, touches: h.touches, what: h.what,
             ltp: +ltp.toFixed(2), stop: ps.stop, stopWhy: ps.why, riskPerUnit: risk,
-            target, rr, verdict,
+            target, rr, verdict, waive,
+            waived: g.checks.filter(x => x.waived).map(x => x.code),
             blockers: g.blocked ? g.blockers.map(b => b.label) : [],
             regime: g.regime && g.regime.ok
                 ? { eff: g.regime.eff, chop: g.regime.chop, bias: g.regime.bias }
@@ -5603,8 +5729,8 @@ async function main() {
         const next = { ...cur };
         for (const k of Object.keys(ap.AUTO_DEFAULTS)) {
             if (b[k] === undefined) continue;
-            if (k == 'kinds') next.kinds = [].concat(b.kinds).filter(v => ['bounce', 'break', 'coil'].includes(v));
-            else if (k == 'levelKinds') next.levelKinds = [].concat(b.levelKinds).filter(v => ['bounce', 'break', 'coil'].includes(v));
+            if (k == 'kinds') next.kinds = [].concat(b.kinds).filter(v => ['bounce', 'break', 'coil', 'speedgreen', 'holdlow'].includes(v));
+            else if (k == 'levelKinds') next.levelKinds = [].concat(b.levelKinds).filter(v => ['bounce', 'break', 'coil', 'speedgreen', 'holdlow'].includes(v));
             else if (k == 'enabled') next.enabled = !!b.enabled;
             else if (k == 'index') next.index = String(b.index).toUpperCase();
             else if (k == 'offset') next.offset = b.offset == 'auto' ? 'auto' : (parseInt(b.offset, 10) || 0);

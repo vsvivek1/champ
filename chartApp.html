@@ -956,6 +956,28 @@ flat = slPct below entry, nothing else.">stop:
   limit all apply to it, so the simulation is as tight as the real thing and it cannot write down six trades it would
   never have been allowed to take.</div>
 
+  <h4>Two setups that break their own rules &mdash; and the waiver</h4>
+  <div>Two more auto entries were added, and they are not like bounce and break. They are not built on a level, so
+  there is no measured target above them and no touch count. Their R rule is switched off for this reason.
+  <ul>
+  <li><b>speedgreen</b> &mdash; the option is moving at least <b>2x its own recent pace</b> (last 15 seconds against
+  the 100 seconds before it) <b>and</b> the minute in progress is green. It reads the <i>running</i> minute on
+  purpose: by the time a 2x minute has closed, the move it was reporting is already paid for.</li>
+  <li><b>holdlow</b> &mdash; at least <b>3 red candles in a row</b>, and then their lowest low <b>holds for 3
+  minutes</b>. "Holds" is tested on the low of each of those 3 bars, not on the close. Touching the low again is
+  still a hold; trading below it is not, and then the setup is dead.</li>
+  </ul>
+  <b>These two are defined by the very thing some gates veto</b>, so running them through the full gate is not
+  caution, it is a contradiction. A speed burst <i>is</i> a steep bar. A base <i>is</i> chop with red bars behind it.
+  So for these two kinds the tape vetoes are <b>waived</b>: chop, wrong way, steep, red candle, dead chart, thin
+  book, lunch, late, open, impulse, and the R/THIN verdict.<br><br>
+  <b>A waived check still runs and still shows in the checklist</b>, marked <code>WAIVED</code> with the reason. It
+  only stops blocking. The list must never quietly lose a line, or it starts lying about why an order went out.<br><br>
+  <b>What is never waived, whatever a setup asks for:</b> the day loss cap, the loss streak, the trade cap, the
+  10-minute exit lockout, an open position with no resting SELL, the open-position limit, already holding that
+  symbol, and the premium and price floors. Those protect the account, not the entry. Change the numbers
+  (<code>speedMult</code>, <code>redRun</code>, <code>holdMin</code>) in <code>guardSettings</code>.</div>
+
   <h4>&#128241; What reaches the phone</h4>
   <div>The chip in the autopilot header is the honest state of the alert channel.
   <b class="g">&#128241; 1 phone</b> = alerts are being delivered. <b class="r">&#128245; phone gets nothing</b> = either
