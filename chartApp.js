@@ -125,6 +125,7 @@ const { createMockBroker } = require('./mockBroker.js');
 const { createAutoPilot } = require('./autoPilot.js');
 const { createCoilWatch } = require('./coilWatch.js');
 const { roundTrip } = require('./charges.js');
+const familiar = require('./familiar.js');
 
 /* ---------------------------------------------------------------------
 HEADLESS / MOCK MODE
@@ -2788,6 +2789,7 @@ function logClosedTrade({ tradingsymbol, position, sellPrice, fallbackQty, token
         };
         log.push(rec);
         fs.writeFileSync(TRADE_LOG_FILE, JSON.stringify(log, null, 2));
+        familiar.forget();          // the record this trade is judged against just changed
         console.log(`🧾 Trade logged: ${tradingsymbol} qty ${qty} buy ${buy} sell ${sellPrice} `
             + `gross ${pnl}${trip ? ` − charges ${trip.total} = NET ${trip.net}` : ''} [${rec.reasonLabel}]`);
         console.log(`   ↳ ${rec.verdict}`);
@@ -3330,7 +3332,10 @@ function scoreSetupLog(token, ltp) {
             }
         }
     }
-    if (touched) writeSetupLog(rows);
+    if (touched) {
+        writeSetupLog(rows);
+        familiar.forget();      // some setups just learned what they did
+    }
 }
 
 const setupLastMin = new Map();          // token -> last minute scanned
@@ -3404,13 +3409,37 @@ async function checkSetups(token, ltp) {
                 : null
         };
 
+        /*
+        HAVE I DONE THIS BEFORE.
+
+        The setup row said what the plan was and never said what the
+        same plan did the last nine times. Only the counts and the one
+        sentence go on the row -- the matched rows themselves are not
+        stored, because setupLog would then carry a copy of its own
+        history inside every entry and grow without end. /api/familiar
+        serves the full working when it is asked for.
+        */
+        try {
+            const f = familiar.familiarFor(row);
+            row.familiar = {
+                line: f.line,
+                trades: { n: f.trades.n, wins: f.trades.wins, netSum: f.trades.netSum, why: f.trades.why },
+                shapes: { n: f.shapes.n, wins: f.shapes.wins, medPct: f.shapes.medPct },
+            };
+        } catch (e) {
+            // a broken history must not stop a live alert
+            console.log('⚠️ familiar lookup failed —', e.message || e);
+        }
+
         console.log(`🔔 SETUP ${h.kind.toUpperCase()} ${inst.tradingsymbol} @ ${row.ltp} — ${h.what}`
             + (rr != null ? ` — stop ${ps.stop}, partial ${target}, ${rr}R` : ' — no partial above')
             + ` — ${verdict}` + (g.blocked ? ': ' + row.blockers.join(' | ') : ''));
+        if (row.familiar) console.log(`   📖 ${row.familiar.line}`);
 
         const rows = readSetupLog();
         rows.push(row);
         writeSetupLog(rows);
+        familiar.forget();          // the history just gained a row
         broadcast({ type: 'setup_alert', ...row });
 
         /*
@@ -5430,6 +5459,39 @@ async function main() {
         cw.writeCfg(next);
         console.log(`🧭 coil watch settings updated: ${JSON.stringify(next)}`);
         res.json({ ok: true, cfg: next });
+    });
+
+    /*
+    "Have I done this before, and did it pay?"
+
+    With no query it is the standing record: every closed trade priced
+    through charges.js, and how many setups have a result stamped on them
+    yet. With a symbol and a price it is the same question about one
+    setup, and then `shapes.nearest` carries the actual matches so the
+    answer can be checked rather than believed.
+
+    Read-only, and reads nothing but the two log files -- safe to hit at
+    any time, including from a phone during market hours.
+    */
+    app.get('/api/familiar', (req, res) => {
+        try {
+            const q = req.query || {};
+            if (!q.tradingsymbol && !q.symbol) return res.json(familiar.overall());
+
+            const live = {
+                tradingsymbol: q.tradingsymbol || q.symbol,
+                ltp: Number(q.ltp || q.price) || 0,
+                kind: q.kind || null,
+                at: q.at || null,
+                level: q.level != null ? Number(q.level) : null,
+                riskPerUnit: q.riskPerUnit != null ? Number(q.riskPerUnit) : null,
+                rr: q.rr != null ? Number(q.rr) : null,
+                touches: q.touches != null ? Number(q.touches) : null,
+            };
+            res.json({ ...familiar.familiarFor(live), overall: familiar.overall() });
+        } catch (e) {
+            res.status(500).json({ error: String(e.message || e) });
+        }
     });
 
     app.get('/api/coilLog', (req, res) => {

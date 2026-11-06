@@ -172,6 +172,8 @@
   #setupList .sym { font-weight:bold; }
   #setupList .plan { font-variant-numeric:tabular-nums; }
   #setupList .note { color:var(--dim); }
+  #setupList .hist { flex:0 0 100%; color:#c9a227; font-size:11px; }
+  #panel.lightui #setupList .hist { color:#8a6616; }
   #setupList .empty { padding:8px; color:var(--dim); }
   #oiAlert { display:none; background:#8a5a00; color:#fff; font-weight:bold;
     padding:6px 10px; border-radius:4px; margin-top:6px; animation:nkblink 1s step-end infinite; }
@@ -3475,7 +3477,18 @@ function setupRow(a, fresh) {
     + `<span class="v">${a.verdict}</span>`
     + `<span class="sym">${a.kind.toUpperCase()} ${a.tradingsymbol}</span>`
     + `<span class="plan">@ ${a.ltp} — ${plan}</span>`
-    + `<span class="note">${reg} · ${note}</span></div>`;
+    + `<span class="note">${reg} · ${note}</span>`
+    /*
+    The record goes BELOW the plan, not beside it. The plan is what the
+    app thinks; this line is what actually happened the last time the
+    same thing was in front of you, and the two deserve different
+    weight on the eye. Rows written before familiar.js existed simply
+    do not have it, so the line is left out rather than faked.
+    */
+    + (a.familiar && a.familiar.line
+        ? `<span class="hist" title="from tradeLog.json priced through charges.js, and from past setups that have a forward price stamped on them">📖 ${esc(a.familiar.line)}</span>`
+        : '')
+    + `</div>`;
 }
 function onSetupAlert(a) {
   const list = document.getElementById('setupList');
@@ -3489,6 +3502,7 @@ function onSetupAlert(a) {
   msg(`🔔 ${a.verdict} · ${a.kind} ${a.tradingsymbol} @ ${a.ltp}`
     + (a.rr != null ? ` — stop ${a.stop}, partial ${a.target}, ${a.rr}R` : '')
     + (a.verdict == 'BLOCKED' ? ' — ' + a.blockers.join(' | ') : ''));
+  if (a.familiar && a.familiar.line) msg(`📖 ${a.familiar.line}`);
 }
 async function refreshSetups() {
   try {
