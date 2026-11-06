@@ -29,6 +29,7 @@ breachOverride.json
 chartTriggers.json
 tradeLog.json
 tradeLock.json
+lockDecisions.json
 
 # regenerated data dumps
 all_instruments.json
