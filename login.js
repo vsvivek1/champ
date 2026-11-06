@@ -157,10 +157,40 @@ async function typeTotp(page, otp) {
   return false;
 }
 
+/*
+Which Chrome to drive.
+
+puppeteer.executablePath() points inside ~/.cache/puppeteer. That download
+goes missing after a node_modules wipe or a puppeteer version bump, and
+then the login dies with "Could not find Chrome" -- at 09:00, with no
+token in the DB and nobody watching. The Chrome installed on the machine
+is always there, so prefer it and keep puppeteer's copy as the fallback.
+autologin.js was fixed the same way; chartApp now runs THIS file, so it
+needs the same footing.
+*/
+function chromePath() {
+  const fromEnv = process.env.PUPPETEER_EXECUTABLE_PATH;
+  if (fromEnv && fs.existsSync(fromEnv)) return fromEnv;
+
+  const system = ["/usr/bin/google-chrome", "/usr/bin/google-chrome-stable", "/usr/bin/chromium"]
+    .find((p) => fs.existsSync(p));
+  if (system) return system;
+
+  try {
+    const bundled = puppeteer.executablePath();
+    if (bundled && fs.existsSync(bundled)) return bundled;
+  } catch {}
+
+  throw new Error("❌ No Chrome found. Install google-chrome or set PUPPETEER_EXECUTABLE_PATH.");
+}
+
 async function run() {
+  const chrome = chromePath();
+  console.log("🧭 Chrome:", chrome);
+
   const browser = await puppeteer.launch({
     headless: "new",
-    executablePath: puppeteer.executablePath(),
+    executablePath: chrome,
     dumpio: true,
     args: [
       "--no-sandbox",
