@@ -15,7 +15,19 @@ const pm2 = require('/usr/local/lib/node_modules/pm2');
 const mongoose = require('mongoose');
 const { KiteConnect } = require('kiteconnect');
 
-const SOURCES = ['server', 'stopLossGuard', 'entryGuard'];
+/*
+chartApp is in here because it is the process that now does the trading.
+
+The feed was listening to server, stopLossGuard and entryGuard -- the old
+set -- so everything the autopilot decided (every setup found, every one
+refused at the gate, every order sent) went to the pm2 log and nowhere
+else. The phone showed a timeline with the trading left out of it.
+
+Everything the autopilot says already starts with an emoji, which is this
+file's own rule for "this is an event", so nothing in chartApp had to
+change: adding the name here is what puts the decisions on the phone.
+*/
+const SOURCES = ['chartApp', 'server', 'stopLossGuard', 'entryGuard'];
 const DEDUPE_MS = 10 * 60 * 1000;
 const KEEP_DAYS = 7;
 
@@ -25,6 +37,15 @@ const NOISE = [
   /^📡 (Subscribed|Unsubscribed)/,
   /Current Name/,
   /pop option attaching/,
+  /*
+  chartApp chatter that would bury the decisions.
+
+  The "alert skipped" line is the FCM channel complaining that no phone
+  has registered -- putting it in the phone feed is both useless and
+  circular. "Dead chart" fires every minute on every quiet strike.
+  */
+  /^⚠️ alert skipped, no device registered/,
+  /^💤 Dead chart/,
 ];
 
 // Anything token-shaped (Kite access/request tokens are 32 alphanumerics)
@@ -34,6 +55,17 @@ const redact = (text) => text.replace(/\b[A-Za-z0-9]{32}\b/g, '••••');
 const startsWithEmoji = (text) => /^\p{Extended_Pictographic}/u.test(text);
 
 function levelOf(text) {
+  /*
+  The autopilot's own lines are classified before the general rules, so
+  the phone can colour a refusal differently from an order. A refusal is
+  the one worth reading -- an opportunity was found and something stopped
+  it -- and it is a 'warn', not an error: the gate doing its job is not a
+  fault. Order sent, and a setup worth taking, are 'trade'.
+  */
+  if (/autopilot (BUY .* refused|skip)|⛔/i.test(text)) return 'warn';
+  if (/AUTOPILOT.*BUY|autopilot is OFF/i.test(text)) return 'trade';
+  if (/^🔔 SETUP/.test(text)) return /— TAKE/.test(text) ? 'trade' : 'warn';
+
   if (/^(❌|💥|🔥)|error|failed|rejected/i.test(text)) return 'error';
   if (/^🧪 Running in/.test(text)) return 'info';
   if (/^(🚨|🧪|💰|🎯)|order id|placed|exit|buy|sell/i.test(text)) return 'trade';
