@@ -551,6 +551,8 @@
     <div class="hd"><b>SETUP ALERTS</b>
       <span id="suStat" class="stat">—</span>
       <span class="stat">alert only — never places an order</span>
+      <span style="flex:1"></span>
+      <span id="famStat" class="stat" title="every closed trade in tradeLog.json, priced through charges.js">&nbsp;</span>
     </div>
     <div id="setupList"><div class="empty">no setups yet today</div></div>
   </div>
@@ -831,6 +833,36 @@ flat = slPct below entry, nothing else.">stop:
   worst hour of the day, and any single trade that was more than half the damage. Under each abstract: every trade of that day with
   its exit reason and diagnosis. Click a date to fold it open or shut. Days logged before the per-trade review existed show
   day-level patterns only (no MFE/MAE or hold time).</div>
+
+  <h4>FAMILIAR SETUP &mdash; the 05/11 coil</h4>
+  <div>The band above the setup list watches for the shape that came before the 13:37 move on 05/11: the market
+  going quiet and tight, then breaking out of it. It scores <b>both</b> sides every minute out of 12, and the eight
+  chips are the signs in plain words &mdash; higher lows, range squeeze, path shrinking, calls over puts, puts gone
+  quiet, put OI falling, call OI building, new highs held (mirrored for the DOWN side). A green chip is a sign that
+  is present now; hover any chip for the measured number behind it.<br><br>
+  At <b>6 of 12</b> that side is <b>ARMED</b> and the box turns amber with one beep &mdash; armed means the coil is
+  wound, not that you should buy. The trade is the <b>release bar</b>: one candle at least twice the normal range
+  closing in the top 60% of its own range. That line turns red and triple-beeps when it happens.<br><br>
+  If <code>coilWatch.json</code> has <code>trade:true</code> the header says
+  <b class="r">&#9888; will BUY on the release bar</b> in red &mdash; that is the one state where this band sends an
+  order by itself. With <code>trade:false</code> it is an alarm only.</div>
+
+  <h4>&#128214; What happened the last time (the history line)</h4>
+  <div>Under each setup's plan, in amber: what the same kind of setup actually did before, taken from two memories.
+  <b>Real trades</b> come from <code>tradeLog.json</code> with every row priced through <code>charges.js</code>, so
+  green means green <i>after</i> costs. <b>Past setups</b> are older alerts that now have a forward price stamped on
+  them (5, 10, 15 and 30 minutes after the alert; this stamping started 06/11/2026, so that memory is still filling).<br><br>
+  It matches on index, side, premium band and time of day, and widens the net until it has enough rows.
+  <b>Below 5 matching rows it refuses to give a percentage</b> and says how few there were instead &mdash; a made-up
+  "works 80% of the time" would cause exactly the impulse clicking the lock rules exist to stop.<br><br>
+  When the win count and the money disagree it says so, e.g. <i>"8 of 11 ended green after charges, &#8377;-1,871 net
+  &mdash; more winners than losers but still down, so the losers were the bigger ones"</i>. That sentence is the whole
+  point of the line. The standing record is also on <code>/api/familiar</code> with no arguments.</div>
+
+  <h4>&#9685; light / dark (panel header)</h4>
+  <div>Switches <b>only the portion below the charts</b> &mdash; the text and numbers that are actually read.
+  The charts stay dark on purpose: candles are read against dark. The choice is kept in the browser, so it
+  survives the reload after every restart.</div>
 
   <h4>🔒 10-minute lockout after EVERY exit</h4>
   <div><b>Any</b> exit locks new entries for 10 minutes — the SL triggering, the guard breaking the 3-candle low, the target filling,
@@ -3685,6 +3717,40 @@ in progress -- a minute-long poll can show "not yet" for the whole of
 the minute the setup actually releases in.
 */
 setInterval(refreshCoil, 20000);
+
+/*
+The standing record, in the setup header.
+
+Not decoration. Every setup line says what happened the last time THAT
+shape came round; this says what happens across all of them, and the two
+numbers do not agree -- 52% of trades end green and the account is still
+down, because the losers are bigger. Having that on screen while looking
+at a fresh alert is the whole reason it is there.
+
+Once every 5 minutes: it only moves when a trade closes.
+*/
+async function refreshFamStat() {
+  const el = document.getElementById('famStat');
+  if (!el) return;
+  try {
+    const d = await (await fetch(BASE + '/api/familiar')).json();
+    const t = d.trades || {};
+    if (!t.n) { el.innerHTML = '&nbsp;'; return; }
+    const net = t.netSum != null ? t.netSum : 0;
+    const col = net >= 0 ? 'var(--green)' : 'var(--red)';
+    el.innerHTML = `record: ${t.n} trades, ${t.wins} green after charges`
+      + (t.rate != null ? ` (${t.rate}%)` : '')
+      + ` \u00b7 <b style="color:${col}">${net >= 0 ? '+' : '\u2212'}\u20b9${Math.abs(Math.round(net)).toLocaleString('en-IN')}</b>`
+      + ` \u00b7 \u20b9${Math.round(t.charged || 0).toLocaleString('en-IN')} of it charges`;
+    el.title = `${t.n} closed trades over ${t.days || 0} days. ${t.grossWins || 0} were green before charges,`
+      + ` ${t.wins} after. Median net ${t.medPct != null ? t.medPct + '%' : 'n/a'} of the money put in.`
+      + (d.shapes && d.shapes.labelled
+          ? ` ${d.shapes.labelled} past setups have a forward price stamped on them.`
+          : ' No past setup has a forward price yet, so that memory is still empty.');
+  } catch (e) { /* transient */ }
+}
+refreshFamStat();
+setInterval(refreshFamStat, 300000);
 
 fetchOiCfg();
 refreshOiStat();
