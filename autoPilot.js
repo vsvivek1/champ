@@ -88,6 +88,21 @@ function createAutoPilot(deps) {
     let lastEntryAt = 0;
     let skipLog = new Map();       // reason -> last time it was logged (keep the log readable)
 
+    /*
+    Every decision, kept so somebody can see what the script is DOING.
+
+    Until now the only account of the autopilot's work was stdout, and
+    stdout is behind pm2 on a machine nobody is looking at. From the
+    outside a flat, quiet day looked the same whether the autopilot had
+    examined 200 setups and refused them all, or had been dead since 09:15.
+    Those are completely different situations.
+
+    Skips are kept as well as entries, and that is the point: the refusals
+    ARE the work. 60 is about two hours of three charted tokens.
+    */
+    const journal = [];
+    const JOURNAL_MAX = 60;
+
     function note(reason, msg) {
         const now = Date.now();
         if (now - (skipLog.get(reason) || 0) < 60000) return;
@@ -104,7 +119,7 @@ function createAutoPilot(deps) {
     One setup row in, at most one BUY out. Returns what it decided, so the
     caller can log or broadcast it; never throws.
     */
-    async function onSetup(row) {
+    async function decide(row) {
         const cfg = readCfg();
         try {
             if (!cfg.enabled) return { action: 'off' };
@@ -229,6 +244,32 @@ function createAutoPilot(deps) {
         }
     }
 
+    /*
+    One entry point so there is exactly one place the journal is written.
+    Recording at each of the dozen early returns would have meant a dozen
+    chances to forget one.
+    */
+    async function onSetup(row) {
+        const out = await decide(row);
+        journal.push({
+            at: new Date().toISOString(),
+            tradingsymbol: row && row.tradingsymbol,
+            kind: row && row.kind,
+            ltp: row && row.ltp,
+            rr: row && row.rr,
+            touches: row && row.touches,
+            verdict: row && row.verdict,
+            blockers: (row && row.blockers) || [],
+            action: (out && out.action) || 'error',
+            why: (out && out.why) || null,
+            qty: out && out.qty != null ? out.qty : null,
+            price: out && out.price != null ? out.price : null,
+            riskRs: out && out.riskRs != null ? out.riskRs : null,
+        });
+        while (journal.length > JOURNAL_MAX) journal.shift();
+        return out;
+    }
+
     function status() {
         const cfg = readCfg();
         return {
@@ -237,6 +278,15 @@ function createAutoPilot(deps) {
             left: Math.max(0, cfg.maxTradesPerDay - todayCount()),
             lastEntryAt: lastEntryAt || null,
             taken: taken.slice(-20),
+            /*
+            Newest first: the page reads top-down and the last decision is
+            the one that matters.
+            */
+            journal: journal.slice(-30).reverse(),
+            scanned: journal.length,
+            nextEntryInSec: lastEntryAt
+                ? Math.max(0, Math.round(cfg.minGapMin * 60 - (Date.now() - lastEntryAt) / 1000))
+                : 0,
         };
     }
 

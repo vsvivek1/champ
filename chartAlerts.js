@@ -81,4 +81,27 @@ function marketOpenIst(now = new Date()) {
     return m >= 9 * 60 + 15 && m <= 15 * 60 + 30;
 }
 
-module.exports = { initAlerts, alertPhone, marketOpenIst };
+/*
+Whether an alert would actually reach anything.
+
+Worth asking, because the two ways this goes silent are invisible from the
+outside and mean different things. No Firebase key: the whole channel is
+off and the log says so once at boot. Key fine but zero devices: the
+channel is up and every alert is dropped with one line a minute, so the
+system looks healthy and the phone never buzzes. That second state ran for
+a long time unnoticed.
+*/
+async function alertStatus() {
+    if (!ready) return { ready: false, devices: 0, why: 'no Firebase key, so the channel is off' };
+    try {
+        const n = (await deviceTokens()).length;
+        return {
+            ready: true, devices: n,
+            why: n ? null : 'no phone has registered, so every alert is dropped',
+        };
+    } catch (e) {
+        return { ready: true, devices: null, why: String(e.message || e) };
+    }
+}
+
+module.exports = { initAlerts, alertPhone, marketOpenIst, alertStatus };

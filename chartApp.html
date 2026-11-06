@@ -110,6 +110,57 @@
      you looked away is the same as a setup that never fired, so these stay on
      screen with the plan already worked out. Verdict colour does the sorting:
      green = take it, amber = R too thin, red = the gate says no. */
+  /* AUTOPILOT -- what the script is doing when nobody is watching.
+
+     This had no UI at all. The autopilot has been reading every setup row,
+     applying its own caps and either ordering or refusing, and the only
+     record was stdout behind pm2. From the page, a day on which it examined
+     two hundred setups and correctly refused all of them looked identical
+     to a day on which it was dead -- both show an empty position table.
+
+     So the feed shows REFUSALS as loudly as entries. "Looked at it, said
+     no, here is why" is the line that proves the thing is alive, and it is
+     also the line that teaches you where your own caps are biting. */
+  #autoBox { margin-top:6px; border:1px solid var(--line); border-radius:4px;
+             background:var(--panel); font-size:12px; }
+  #autoBox .hd { padding:5px 8px; border-bottom:1px solid var(--line);
+                 display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  #autoBox .hd b { color:var(--fg); letter-spacing:.04em; }
+  #autoBox.live { border-color:#4e8f6d; }
+  #autoBox.off  { opacity:.75; }
+  #apState { font-weight:bold; letter-spacing:.04em; }
+  #apState.on  { color:var(--green); }
+  #apState.off { color:var(--dim); }
+  #apState.mock { color:#c9a227; }
+  #apPhone { cursor:help; }
+  #apPhone.ok   { color:#9fe3bd; }
+  #apPhone.dead { color:#ff9e9e; font-weight:bold; }
+  #apCaps { padding:4px 8px; display:flex; flex-wrap:wrap; gap:4px;
+            border-bottom:1px solid var(--line); }
+  #apCaps .cap { padding:1px 5px; border-radius:3px; font-size:10.5px; letter-spacing:.03em;
+                 border:1px solid var(--line); color:var(--dim); cursor:help; }
+  #apCaps .cap.bite { border-color:#c9a227; color:#ffd98a; }
+  #apFeed { max-height:150px; overflow-y:auto; font-variant-numeric:tabular-nums; }
+  #apFeed .r { padding:3px 8px; border-bottom:1px solid var(--line);
+               display:flex; gap:8px; align-items:baseline; flex-wrap:wrap; }
+  #apFeed .r:last-child { border-bottom:0; }
+  #apFeed .t { color:var(--dim); font-size:11px; }
+  #apFeed .sym { color:var(--fg); }
+  #apFeed .k { color:var(--dim); font-size:11px; letter-spacing:.03em; }
+  #apFeed .act { font-size:10.5px; padding:0 4px; border-radius:3px; letter-spacing:.04em; }
+  #apFeed .why { color:var(--dim); font-size:11px; flex:1 1 auto; }
+  /* placed is the only green one on purpose: a skip is normal, a block is
+     the gate doing its job, and only an order is an event */
+  #apFeed .r.placed  { background:rgba(78,143,109,.12); }
+  #apFeed .r.placed .act  { background:#2e7d52; color:#eafff2; }
+  #apFeed .r.placed .why  { color:#9fe3bd; }
+  #apFeed .r.blocked .act { background:#8e2a2a; color:#ffe9e9; }
+  #apFeed .r.blocked .why { color:#ff9e9e; }
+  #apFeed .r.error .act   { background:#c62828; color:#fff; }
+  #apFeed .r.skip .act    { border:1px solid var(--line); color:var(--dim); }
+  #apFeed .r.off .act     { border:1px solid var(--line); color:var(--dim); }
+  #apFeed .empty { padding:8px; color:var(--dim); }
+
   /* FAMILIAR SETUP (the 05/11 coil).
 
      coilWatch.js has been scoring these signs every minute since it was
@@ -288,6 +339,13 @@
   #panel.lightui .cside.lead .sc { color:#8a6616; }
   #panel.lightui .cside.hot .sc  { color:#b02626; }
   #panel.lightui .sign.on { border-color:#7cc69c; background:#e7f7ee; color:#135a3b; }
+  #panel.lightui #apPhone.ok { color:#1d6b43; }
+  #panel.lightui #apPhone.dead { color:#a31414; }
+  #panel.lightui #apFeed .r.placed { background:rgba(46,125,82,.1); }
+  #panel.lightui #apFeed .r.placed .why { color:#1d6b43; }
+  #panel.lightui #apFeed .r.blocked .why { color:#a31414; }
+  #panel.lightui #apCaps .cap.bite { color:#8a6616; }
+  #panel.lightui #apState.mock { color:#8a6616; }
   #panel.lightui #coilRel.ready { color:#b02626; }
   #panel.lightui #setupList .take .v    { color:#0b7a4d; }
   #panel.lightui #setupList .thin .v    { color:#8a6616; }
@@ -534,6 +592,18 @@
   <!-- the shape that came before the 05/11 13:37 move, scored live both
        ways round. Alert only: the orders are coilWatch's own decision and
        are governed by coilWatch.json, not by anything on this page. -->
+  <div id="autoBox">
+    <div class="hd"><b>AUTOPILOT</b>
+      <span id="apState" class="off">reading&hellip;</span>
+      <span id="apWhere" class="stat"></span>
+      <span id="apPhone" class="stat"></span>
+      <span style="flex:1"></span>
+      <span id="apCount" class="stat"></span>
+    </div>
+    <div id="apCaps"></div>
+    <div id="apFeed"><div class="empty">nothing scanned yet</div></div>
+  </div>
+
   <div id="coilBox">
     <div class="hd"><b>FAMILIAR SETUP &mdash; the 05/11 coil</b>
       <span id="coilStat" class="stat">reading&hellip;</span>
@@ -833,6 +903,41 @@ flat = slPct below entry, nothing else.">stop:
   worst hour of the day, and any single trade that was more than half the damage. Under each abstract: every trade of that day with
   its exit reason and diagnosis. Click a date to fold it open or shut. Days logged before the per-trade review existed show
   day-level patterns only (no MFE/MAE or hold time).</div>
+
+  <h4>AUTOPILOT &mdash; what the script is doing</h4>
+  <div>The top box. <b class="g">ARMED &middot; LIVE</b> means real orders; <b>ARMED &middot; MOCK BOOK</b> is amber and
+  never green, because the two look the same in a log and are not the same thing. Then the index, the strike mode,
+  how many trades it has taken today, how many are left, how many setups it has scanned, and the countdown to the
+  next entry it is allowed to make.<br><br>
+  <b>The feed below shows refusals as loudly as entries, and that is the point.</b> Before this, a day on which it
+  examined two hundred setups and correctly refused every one looked exactly like a day on which it was dead &mdash;
+  both show an empty position table. Each line is time, symbol, setup kind, price, the decision and the reason:
+  <ul>
+  <li><b>skip</b> &mdash; it never got near an order. The reason is either the no-trade gate's own words, or one of
+  its own caps.</li>
+  <li><b class="r">blocked</b> &mdash; the setup passed every check and was then refused at the gate or by the risk
+  cap. This is the one worth reading: an opportunity was found and something stopped it.</li>
+  <li><b class="g">placed</b> &mdash; an order went out, with the quantity, the price and the rupee risk.</li>
+  </ul>
+  The row of chips is its own caps. A chip turns amber when that cap is what stopped the last decision, so you can
+  see <i>which</i> of your rules is biting instead of guessing. Edit them in <code>autoTrade.json</code> or
+  <code>POST /api/autopilot</code>.<br><br>
+  <b>While this page is open the autopilot does not act on bounce/break setups</b> &mdash; you are the hand on the
+  button, and the header says so. It still runs the coil release.</div>
+
+  <h4>&#128241; What reaches the phone</h4>
+  <div>The chip in the autopilot header is the honest state of the alert channel.
+  <b class="g">&#128241; 1 phone</b> = alerts are being delivered. <b class="r">&#128245; phone gets nothing</b> = either
+  there is no Firebase key, or <b>no phone has registered</b> &mdash; and in that second case every alert is dropped
+  while the system looks perfectly healthy. Open the appOptions app once while it can reach this machine; it
+  registers itself on every launch. Test any time with
+  <code>curl -X POST localhost:3456/api/testAlert</code>.<br><br>
+  What gets pushed: a <b>takeable setup</b> (TAKE only &mdash; blocked ones are the gate working and there are dozens
+  a day), <b>autopilot bought</b>, <b>autopilot refused</b> something that was takeable, autopilot errors, every
+  <b>order fill and rejection</b>, a price trigger firing, <b>coil armed and released</b>, a held position with no
+  resting SELL, and a <b>dead Kite session</b>. Same alert at most once a minute.<br><br>
+  <b>Not</b> pushed: plain skips, OI signals, and the browser-side commentary (OI crash, dead chart, moving fast,
+  breakout and breakdown) &mdash; those are relayed by an open page, so with no browser open they never fire at all.</div>
 
   <h4>FAMILIAR SETUP &mdash; the 05/11 coil</h4>
   <div>The band above the setup list watches for the shape that came before the 13:37 move on 05/11: the market
@@ -1800,6 +1905,30 @@ function connectWs() {
         refreshPosition();
       } else if (m.event == 'armed') {
         msg(`🧭 coil armed ${String(m.side || '').toUpperCase()} ${m.score}/${of} — ${(m.signs || []).join(', ')}`);
+      }
+    }
+
+    /*
+    Every autopilot decision, skips included. The panel is repainted from
+    the server's own journal rather than from this message, so there is one
+    source of truth; the message only says "something happened, look again".
+
+    The message line is kept for the two that matter. A msg() per skip
+    would push the useful lines off the top within a minute.
+    */
+    if (m.type == 'autopilot') {
+      refreshAuto();
+      if (m.action == 'placed') {
+        msg(`🤖 AUTOPILOT BOUGHT ${m.quantity || m.qty} ${m.tradingsymbol} @ ${m.price}`
+          + ` — ${m.setup || ''}, stop ${m.stop}`
+          + (m.riskRs != null ? `, risk ₹${m.riskRs}` : ''));
+        beep(880, 3);
+        refreshPosition();
+      } else if (m.action == 'blocked') {
+        msg(`⛔ autopilot refused ${m.tradingsymbol} (${m.setup || ''} was takeable) — ${m.why}`);
+        beep(420, 1);
+      } else if (m.action == 'error') {
+        msg(`❌ autopilot error on ${m.tradingsymbol}: ${m.why}`);
       }
     }
 
@@ -3717,6 +3846,140 @@ in progress -- a minute-long poll can show "not yet" for the whole of
 the minute the setup actually releases in.
 */
 setInterval(refreshCoil, 20000);
+
+/*
+AUTOPILOT panel -- render only. The server decides everything; this just
+shows the decisions, including the ones where it said no.
+*/
+function apTime(iso) {
+  const d = new Date(iso);
+  return isNaN(d) ? '--:--' : d.toLocaleTimeString('en-IN',
+    { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'Asia/Kolkata' });
+}
+
+/* The caps, as chips. A chip turns amber when that cap is what stopped the
+   last decision -- so you can see WHICH of your own rules is biting
+   instead of guessing from an empty table. */
+function apCapsHtml(cfg, last) {
+  const why = (last && last.why) || '';
+  const caps = [
+    { on: /kind /.test(why), txt: (cfg.kinds || []).join(' '), t: 'setup kinds the autopilot will take' },
+    { on: /R <|R under/.test(why), txt: '≥' + cfg.minRR + 'R', t: 'minimum reward-to-risk, on level setups only' },
+    { on: /touches/.test(why), txt: '≥' + cfg.minTouches + ' touch', t: 'a level with one touch is a line, not a level' },
+    { on: /open >=/.test(why), txt: 'max ' + cfg.maxOpen + ' open', t: 'positions held at once' },
+    { on: /trades today/.test(why), txt: cfg.maxTradesPerDay + '/day', t: 'after this the day is over, whatever the tape says' },
+    { on: /since the last entry/.test(why), txt: cfg.minGapMin + ' min gap', t: 'cooling-off between autopilot entries' },
+    { on: /cash/.test(why), txt: cfg.maxLots + ' lots ask', t: 'the upper bound asked for; the risk cap decides the real size' },
+  ];
+  return caps.map(c => `<span class="cap${c.on ? ' bite' : ''}" title="${esc(c.t)}">${esc(c.txt)}</span>`).join('');
+}
+
+function apRowHtml(r) {
+  const act = String(r.action || '').toLowerCase();
+  const bits = [];
+  if (act == 'placed') {
+    bits.push(`${r.qty} @ ${r.price}` + (r.riskRs != null ? ` — risk ₹${r.riskRs}` : ''));
+  } else if (r.why) {
+    bits.push(r.why);
+  }
+  /* the blockers are the gate's own words; the autopilot's "why" for a
+     blocked verdict is just "verdict BLOCKED", which says nothing */
+  if (act == 'skip' && /^verdict /.test(r.why || '') && (r.blockers || []).length) {
+    bits.length = 0;
+    bits.push(r.blockers.join(' | '));
+  }
+  return `<div class="r ${esc(act)}">`
+    + `<span class="t">${apTime(r.at)}</span>`
+    + `<span class="sym">${esc(r.tradingsymbol || '?')}</span>`
+    + `<span class="k">${esc(r.kind || '')}${r.ltp != null ? ' @ ' + r.ltp : ''}</span>`
+    + `<span class="act">${esc(act)}</span>`
+    + `<span class="why">${esc(bits.join(' · '))}</span>`
+    + `</div>`;
+}
+
+function paintAuto(d) {
+  const box = document.getElementById('autoBox');
+  const st = document.getElementById('apState');
+  if (!box || !st) return;
+  const cfg = d.cfg || {};
+  const on = !!(d.running && cfg.enabled);
+
+  /*
+  Three states, not two. "armed and live" and "armed on the mock book" look
+  the same in a log and are not the same thing at all, so MOCK is said in
+  amber and never in green.
+  */
+  if (!on) { st.className = 'off'; st.textContent = 'DISARMED'; }
+  else if (d.mock) { st.className = 'mock'; st.textContent = 'ARMED · MOCK BOOK'; }
+  else { st.className = 'on'; st.textContent = 'ARMED · LIVE'; }
+  box.className = on && !d.mock ? 'live' : (on ? '' : 'off');
+
+  document.getElementById('apWhere').textContent =
+    [cfg.index || '?',
+      cfg.offset == 'auto' ? 'auto strike' : (cfg.offset != null ? cfg.offset + ' away' : ''),
+    ].filter(Boolean).join(' ')
+    + (d.headless ? '' : ' · page open, so bounce/break are yours to click');
+
+  const nx = d.nextEntryInSec || 0;
+  document.getElementById('apCount').innerHTML =
+    `${d.tradesToday || 0}/${cfg.maxTradesPerDay || 0} today · ${d.left || 0} left`
+    + ` · ${d.scanned || 0} scanned`
+    + (nx > 0 ? ` · <b style="color:#ffd98a">next in ${Math.floor(nx / 60)}:${String(nx % 60).padStart(2, '0')}</b>` : '');
+
+  const feed = d.journal || [];
+  document.getElementById('apCaps').innerHTML = apCapsHtml(cfg, feed[0]);
+  document.getElementById('apFeed').innerHTML = feed.length
+    ? feed.map(apRowHtml).join('')
+    : `<div class="empty">${d.headless
+        ? 'nothing scanned yet — setups are checked on each minute boundary'
+        : 'the autopilot does not act on setups while this page is open'}</div>`;
+}
+
+/*
+The phone channel, said out loud.
+
+"AUTOPILOT ARMED" was the only claim on the page, and it is not the claim
+that matters when you are away from the desk. The app can be trading
+perfectly and telling nobody: the Firebase key is read at boot and the
+device list is read per alert, so zero registered phones silently drops
+every message. This chip is red in that case, which is the honest state.
+*/
+async function refreshPhoneStat() {
+  const el = document.getElementById('apPhone');
+  if (!el) return;
+  try {
+    const d = await (await fetch(BASE + '/api/alertStatus')).json();
+    if (d.ready && d.devices > 0) {
+      el.className = 'stat ok';
+      el.textContent = `\u{1F4F1} ${d.devices} phone${d.devices == 1 ? '' : 's'}`;
+      el.title = 'Order fills, autopilot entries, refusals at the gate, coil arm and release,'
+        + ' takeable setups and a dead Kite session are pushed to the app.';
+    } else {
+      el.className = 'stat dead';
+      el.textContent = '\u{1F4F5} phone gets nothing';
+      el.title = (d.why || 'the alert channel is down')
+        + '. Open the appOptions app once while it can reach this machine --'
+        + ' it registers itself on every launch.';
+    }
+  } catch (e) { /* transient */ }
+}
+refreshPhoneStat();
+setInterval(refreshPhoneStat, 120000);
+
+async function refreshAuto() {
+  try {
+    const res = await fetch(BASE + '/api/autopilot');
+    paintAuto(await res.json());
+  } catch (e) { /* transient; the next poll covers it */ }
+}
+refreshAuto();
+/*
+15s. Decisions land on the minute boundary, but the entry-gap countdown
+runs continuously and a stale "next in 2:59" is worse than no countdown.
+The ws 'autopilot' message refreshes it the moment anything happens, so
+this poll is only the safety net.
+*/
+setInterval(refreshAuto, 15000);
 
 /*
 The standing record, in the setup header.

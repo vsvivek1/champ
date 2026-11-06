@@ -119,7 +119,7 @@ const { ensureTodaysAccessToken, loginStatus } = require('./ensureAccessToken.js
 const AccessTokens = require('./models/AccessTokens');
 const { getKiteConnectInstance, getTickerInstance } = require('./getKiteConnectInstance.js');
 const { placeOrderInFreezeChunks } = require('./placeOrderInFreezeChunks.js');
-const { initAlerts, alertPhone, marketOpenIst } = require('./chartAlerts.js');
+const { initAlerts, alertPhone, marketOpenIst, alertStatus } = require('./chartAlerts.js');
 const claudeLock = require('./claudeLock.js');
 const { createMockBroker } = require('./mockBroker.js');
 const { createAutoPilot } = require('./autoPilot.js');
@@ -3443,6 +3443,25 @@ async function checkSetups(token, ltp) {
         broadcast({ type: 'setup_alert', ...row });
 
         /*
+        The phone only ever heard about FILLS -- bought, sold, rejected. So
+        the one thing it never reported was the search itself: the app could
+        find and refuse opportunities all day and the phone stayed silent,
+        which reads exactly like a dead process.
+
+        Only a TAKE goes out. A blocked setup is the gate working and there
+        are dozens a day; a phone that buzzes for those gets silenced, and
+        then the fills stop being seen too. alertPhone dedups on the key, so
+        the same symbol and kind is at most one buzz a minute.
+        */
+        if (verdict == 'TAKE') {
+            alertPhone(`\u{1F514} ${h.kind.toUpperCase()} ${inst.tradingsymbol}`,
+                `@ ${row.ltp} \u2014 ${h.what}`
+                + (rr != null ? ` \u2014 stop ${ps.stop}, ${rr}R` : '')
+                + (row.familiar && row.familiar.line ? `\n\u{1F4D6} ${row.familiar.line}` : ''),
+                { key: `setup:${inst.tradingsymbol}:${h.kind}` });
+        }
+
+        /*
         Headless, this row is the click. The autopilot re-runs the gate and
         the risk sizer itself before anything goes out -- see autoPilot.js
         for why the verdict above is not trusted on its own.
@@ -3455,8 +3474,37 @@ async function checkSetups(token, ltp) {
         */
         if (autoPilot && HEADLESS) {
             const out = await autoPilot.onSetup(row);
-            if (out && out.action != 'skip' && out.action != 'off') {
-                broadcast({ type: 'autopilot', setup: row.kind, tradingsymbol: row.tradingsymbol, ...out });
+            /*
+            Skips are broadcast too now. The page has an AUTOPILOT feed and
+            the refusals are what fills it -- "looked at it, said no, here is
+            why" is the useful line, and hiding it left the panel empty on
+            every day the autopilot correctly did nothing.
+            */
+            if (out) {
+                broadcast({
+                    type: 'autopilot', setup: row.kind, tradingsymbol: row.tradingsymbol,
+                    ltp: row.ltp, verdict: row.verdict, ...out,
+                });
+
+                /*
+                The phone gets the two that cost money to miss: an order
+                actually sent, and an opportunity that passed every setup
+                check and was then refused at the gate or by the risk cap.
+                Plain skips stay off the phone -- see the note above.
+                */
+                if (out.action == 'placed') {
+                    alertPhone(`\u{1F916} Autopilot bought ${row.tradingsymbol}`,
+                        `${out.qty} @ ${out.price} \u2014 ${row.kind}, stop ${out.stop}`
+                        + (out.riskRs != null ? `, risk \u20b9${out.riskRs}` : ''),
+                        { key: `auto:placed:${row.tradingsymbol}` });
+                } else if (out.action == 'blocked') {
+                    alertPhone(`\u26d4 Autopilot refused ${row.tradingsymbol}`,
+                        `${row.kind} was takeable \u2014 ${out.why}`,
+                        { key: `auto:blocked:${row.tradingsymbol}` });
+                } else if (out.action == 'error') {
+                    alertPhone('\u274c Autopilot error', `${row.tradingsymbol}: ${out.why}`,
+                        { key: 'auto:error' });
+                }
             }
         }
     }
@@ -4480,6 +4528,17 @@ async function main() {
         alertPhone(title.slice(0, 120), String(body || '').slice(0, 300),
             { key: key ? String(key).slice(0, 120) : undefined });
         res.json({ ok: true });
+    });
+
+    /*
+    Is the phone channel actually going to deliver anything. The page shows
+    this next to the autopilot state, because "autopilot armed" and "you
+    will be told about it" are two separate claims and only one of them was
+    ever on screen.
+    */
+    app.get('/api/alertStatus', async (req, res) => {
+        try { res.json(await alertStatus()); }
+        catch (e) { res.status(500).json({ error: String(e.message || e) }); }
     });
 
     // Fire a test alert at every registered phone: curl -X POST localhost:3456/api/testAlert
