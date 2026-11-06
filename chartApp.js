@@ -3297,6 +3297,42 @@ function writeSetupLog(rows) {
     catch (e) { console.log('⚠️ setupLog write failed', e.message); }
 }
 
+/*
+WHAT HAPPENED NEXT.
+
+Every setup row was written and then forgotten. 261 of them on disk and
+not one carried its own result, so there was no way to ask the only
+question that matters about a setup: when this exact thing happened
+before, did it pay? oiLog has had forward prices from the start
+(scoreOiLog) and setupLog never did -- that gap is the whole reason
+"familiar setup" could not be answered.
+
+Same shape as scoreOiLog: when a row is h minutes old, stamp the current
+price on it as fwd<h>. The option's own premium, not the index, because
+the premium is what a trade on this row would have been holding.
+
+30 minutes is the longest look, which is also longer than almost every
+trade in tradeLog -- a setup that needs more than half an hour to work
+was not the setup you took.
+*/
+function scoreSetupLog(token, ltp) {
+    const rows = readSetupLog();
+    const min = Math.floor(Date.now() / 60000);
+    let touched = false;
+    for (const r of rows) {
+        if (r.token != token || r.min == null) continue;
+        for (const h of [5, 10, 15, 30]) {
+            const k = 'fwd' + h;
+            if (r[k] == null && min - r.min >= h) {
+                r[k] = +ltp.toFixed(2);
+                r[k + 'Pct'] = +(((ltp - r.ltp) / r.ltp) * 100).toFixed(2);
+                touched = true;
+            }
+        }
+    }
+    if (touched) writeSetupLog(rows);
+}
+
 const setupLastMin = new Map();          // token -> last minute scanned
 const setupLastFire = new Map();         // token|kind -> minute it last fired
 
@@ -3310,6 +3346,10 @@ async function checkSetups(token, ltp) {
     const min = Math.floor(Date.now() / 60000);
     if (setupLastMin.get(token) == min) return;                      // already did this minute
     setupLastMin.set(token, min);
+
+    // stamp the result on the older rows first: a setup that fires today is
+    // judged against rows that already know what they did
+    scoreSetupLog(Number(token), ltp);
 
     const lv = await computeLevels(token);
     if (!lv || !lv.candles || lv.candles.length < 3) return;
@@ -4274,7 +4314,9 @@ async function main() {
     process back once the reason is gone (restart delay covers the rest).
     */
     const accessToken = await ensureTodaysAccessToken();
-    console.log(accessToken, "accessToken");
+    // the token is a live key to the account and pm2 keeps these logs on
+    // disk for days, so say only that there is one
+    console.log(`🔑 access token present (…${String(accessToken).slice(-4)})`);
 
     if (!accessToken || accessToken == -1) {
         console.log('🛑 No Kite session and the login did not get one. Not starting blind -- exiting.');

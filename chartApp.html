@@ -110,6 +110,49 @@
      you looked away is the same as a setup that never fired, so these stay on
      screen with the plan already worked out. Verdict colour does the sorting:
      green = take it, amber = R too thin, red = the gate says no. */
+  /* FAMILIAR SETUP (the 05/11 coil).
+
+     coilWatch.js has been scoring these signs every minute since it was
+     written, and none of it was on the page -- not the score, not which
+     sign was lit, not whether it had armed. The only way to see it was
+     curl /api/coil or the pm2 log. So the one setup that was studied
+     properly, written down in presigns-2026-11-05.md and wired to an
+     alarm was invisible to the person it was built for.
+
+     Two columns, up and down, because the signs are read both ways round
+     every minute and the two scores disagreeing IS the information: both
+     sides at 3/12 is a market doing nothing, one side at 8/12 is a
+     market leaning. */
+  #coilBox { margin-top:6px; border:1px solid var(--line); border-radius:4px;
+             background:var(--panel); font-size:12px; }
+  #coilBox .hd { padding:5px 8px; border-bottom:1px solid var(--line);
+                 display:flex; gap:10px; align-items:center; }
+  #coilBox .hd b { color:var(--fg); letter-spacing:.04em; }
+  #coilBox.armed { border-color:#c9a227; box-shadow:inset 0 0 0 1px rgba(201,162,39,.35); }
+  #coilBox.fire  { border-color:#c62828; animation:nkblink 1.4s step-end 4; }
+  #coilSides { display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); }
+  .cside { background:var(--panel); padding:6px 8px; }
+  .cside .top { display:flex; align-items:baseline; gap:8px; margin-bottom:5px; }
+  .cside .dir { font-weight:bold; letter-spacing:.06em; }
+  .cside .sc  { font-size:17px; font-weight:bold; font-variant-numeric:tabular-nums; }
+  .cside .of  { color:var(--dim); font-size:11px; }
+  /* the meter is the fastest read on the panel: a bar that is nearly full
+     means the setup is nearly here, and you can see that without reading */
+  .cside .meter { height:4px; border-radius:2px; background:rgba(255,255,255,.1); margin-bottom:6px; }
+  .cside .meter i { display:block; height:4px; border-radius:2px; background:#5a6472; }
+  .cside.lead .sc { color:#ffd98a; }
+  .cside.lead .meter i { background:#c9a227; }
+  .cside.hot .sc { color:#ff9e9e; }
+  .cside.hot .meter i { background:#c62828; }
+  .signs { display:flex; flex-wrap:wrap; gap:4px; }
+  .sign { padding:1px 5px; border-radius:3px; font-size:10.5px; letter-spacing:.03em;
+          border:1px solid var(--line); color:var(--dim); cursor:help; }
+  .sign.on { border-color:#4e8f6d; background:rgba(78,143,109,.18); color:#9fe3bd; }
+  .sign.na { opacity:.45; font-style:italic; }
+  .sign .w { opacity:.6; }
+  #coilRel { padding:5px 8px; border-top:1px solid var(--line); color:var(--dim);
+             font-variant-numeric:tabular-nums; }
+  #coilRel.ready { color:#ff9e9e; font-weight:bold; }
   #setupBox { margin-top:6px; border:1px solid var(--line); border-radius:4px;
     background:var(--panel); font-size:12px; }
   #setupBox .hd { padding:5px 8px; border-bottom:1px solid var(--line);
@@ -239,6 +282,11 @@
   #panel.lightui #regBar.flat  { background:#fdf5e0; border-color:#d6b765; color:#6a5312; }
   #panel.lightui #regBar.chop  { background:#fdeaea; border-color:#e09a9a; color:#9b2222; }
   #panel.lightui #regBar.cold  { background:#eef0f5; color:var(--dim); }
+  #panel.lightui .cside .meter { background:rgba(0,0,0,.08); }
+  #panel.lightui .cside.lead .sc { color:#8a6616; }
+  #panel.lightui .cside.hot .sc  { color:#b02626; }
+  #panel.lightui .sign.on { border-color:#7cc69c; background:#e7f7ee; color:#135a3b; }
+  #panel.lightui #coilRel.ready { color:#b02626; }
   #panel.lightui #setupList .take .v    { color:#0b7a4d; }
   #panel.lightui #setupList .thin .v    { color:#8a6616; }
   #panel.lightui #setupList .blocked .v { color:#b02626; }
@@ -481,6 +529,22 @@
   <div id="nakedAlert"></div>
   <div id="oiAlert"></div>
   <div id="regBar" class="cold">index regime — waiting for ticks…</div>
+  <!-- the shape that came before the 05/11 13:37 move, scored live both
+       ways round. Alert only: the orders are coilWatch's own decision and
+       are governed by coilWatch.json, not by anything on this page. -->
+  <div id="coilBox">
+    <div class="hd"><b>FAMILIAR SETUP &mdash; the 05/11 coil</b>
+      <span id="coilStat" class="stat">reading&hellip;</span>
+      <span style="flex:1"></span>
+      <span id="coilMode" class="stat"></span>
+    </div>
+    <div id="coilSides">
+      <div class="cside" id="coilUp"></div>
+      <div class="cside" id="coilDown"></div>
+    </div>
+    <div id="coilRel">release bar: waiting</div>
+  </div>
+
   <div id="setupBox">
     <div class="hd"><b>SETUP ALERTS</b>
       <span id="suStat" class="stat">—</span>
@@ -1682,6 +1746,29 @@ function connectWs() {
     }
     if (m.type == 'regime') { paintRegime(m.regime, m.part); }
     if (m.type == 'setup_alert') { onSetupAlert(m); }
+    /*
+    The coil arms and releases on a minute boundary, so waiting for the
+    20-second poll can cost most of the minute the release happens in.
+    refreshCoil re-reads the whole thing rather than trusting the push:
+    the message carries the event, the endpoint carries every sign.
+    */
+    if (m.type == 'coil') {
+      refreshCoil();
+      const of = m.max != null ? m.max : m.scoreMax;
+      if (m.event == 'released') {
+        document.getElementById('coilBox').className = 'fire';
+        msg(`🧭 COIL RELEASED ${String(m.side || '').toUpperCase()} ${m.score}/${of}`
+          + ` → ${m.tradingsymbol || ''} @ ${m.ltp} — stop ${m.stop} — ${m.verdict}`
+          + (m.blockers && m.blockers.length ? ': ' + m.blockers.join(' | ') : ''));
+        beep(1180, 3);
+      } else if (m.event == 'order') {
+        msg(`🧭 coil order on ${m.tradingsymbol}: ${m.action || ''} ${m.why || m.error || ''}`);
+        refreshPosition();
+      } else if (m.event == 'armed') {
+        msg(`🧭 coil armed ${String(m.side || '').toUpperCase()} ${m.score}/${of} — ${(m.signs || []).join(', ')}`);
+      }
+    }
+
     if (m.type == 'oi_signal') {
       // short covering: OI falling while price climbs
       const head = `📉 OI SIGNAL ${m.tradingsymbol}: OI ${m.dOi}% while px +${m.dPx}% to ${m.ltp} over ${m.lookMin}m`;
@@ -3435,6 +3522,155 @@ document.getElementById('suSave').onclick = async () => {
   msg(`✅ setup alerts ${d.enabled ? 'on' : 'off'} — min ${d.minRR}R, ≥${d.minTouches} touches, ${d.cooldownMin}m cooldown`);
   refreshSetups();
 };
+
+/* ---------------------------------------------------------------------
+THE FAMILIAR SETUP BAND
+
+What it answers: is the market making the same shape it made before the
+05/11 13:37 move, right now, and how far along is it.
+
+The server has been able to answer that every minute for days
+(/api/coil). Nothing asked it. So the signs were only ever readable in
+the pm2 log, after the fact, which is the one time they are worthless.
+
+Plain names for the eight signs, because "oppoi" means nothing at a
+glance and the detail string underneath it is the part worth reading.
+Each sign keeps its own weight on screen: they are not worth the same,
+and a 6/12 made of two 2-pointers is not a 6/12 made of six 1-pointers.
+--------------------------------------------------------------------- */
+const SIGN_NAMES = {
+  hilo:    { up: 'higher lows',        down: 'lower highs' },
+  squeeze: { up: 'range squeeze',      down: 'range squeeze' },
+  coil:    { up: 'path shrinking',     down: 'path shrinking' },
+  ratio:   { up: 'calls over puts',    down: 'puts over calls' },
+  quiet:   { up: 'puts gone quiet',    down: 'calls gone quiet' },
+  oppoi:   { up: 'put OI falling',     down: 'call OI falling' },
+  ownoi:   { up: 'call OI building',   down: 'put OI building' },
+  highs:   { up: 'new highs held',     down: 'new lows held' },
+};
+
+let coilArmedSide = null;     // which side we last beeped for
+let coilRelBeeped = 0;        // minute of the last release beep
+
+function signName(key, side) {
+  const n = SIGN_NAMES[key];
+  return n ? n[side] || key : key;
+}
+
+function coilSideHtml(sc, side, cfg, lead) {
+  const el = document.getElementById(side == 'up' ? 'coilUp' : 'coilDown');
+  if (!sc) {
+    el.className = 'cside';
+    el.innerHTML = `<div class="top"><span class="dir">${side == 'up' ? '▲ UP' : '▼ DOWN'}</span>`
+      + `<span class="of">not enough bars yet</span></div>`;
+    return;
+  }
+  const arm = Number(cfg && cfg.armScore) || 6;
+  /*
+  Three states and they mean different things. "hot" is at or past the
+  arming score -- the setup is standing and only the release bar is
+  missing. "lead" is this side winning but not yet armed, which is the
+  state to watch and NOT the state to trade.
+  */
+  const hot = sc.score >= arm;
+  el.className = 'cside' + (hot ? ' hot' : (lead ? ' lead' : ''));
+
+  const pct = Math.round(sc.score / sc.max * 100);
+  const chips = sc.signs.map(g => {
+    const cls = g.pass ? 'sign on' : (g.ok ? 'sign' : 'sign na');
+    return `<span class="${cls}" title="${esc(g.detail || '')}">`
+      + `${esc(signName(g.key, side))} <span class="w">${g.weight}</span></span>`;
+  }).join('');
+
+  el.innerHTML = `<div class="top">
+      <span class="dir">${side == 'up' ? '▲ UP' : '▼ DOWN'}</span>
+      <span class="sc">${sc.score}</span><span class="of">/ ${sc.max}`
+    + (hot ? ' — ARMED' : ` — needs ${arm}`) + `</span>
+    </div>
+    <div class="meter"><i style="width:${pct}%"></i></div>
+    <div class="signs">${chips}</div>`;
+}
+
+function paintCoil(d) {
+  const box = document.getElementById('coilBox');
+  const stat = document.getElementById('coilStat');
+  const mode = document.getElementById('coilMode');
+  const rel = document.getElementById('coilRel');
+
+  if (!d || d.error) {
+    box.className = '';
+    stat.textContent = d && d.error ? d.error : 'not running';
+    rel.textContent = 'release bar: —';
+    return;
+  }
+
+  const cfg = d.cfg || {};
+  const u = d.up, dn = d.down;
+  const best = (u && dn) ? (u.score >= dn.score ? u : dn) : (u || dn);
+
+  coilSideHtml(u, 'up', cfg, best === u);
+  coilSideHtml(dn, 'down', cfg, best === dn);
+
+  /*
+  Say what it will DO, not only what it sees. coilWatch.json decides
+  whether a release places an order, and that is the difference between
+  a buzz and money leaving the account -- it belongs on screen.
+  */
+  mode.textContent = !cfg.enabled ? 'watcher off'
+    : (cfg.trade ? '⚠ will BUY on the release bar' : 'alarm only — no orders');
+  mode.style.color = cfg.trade && cfg.enabled ? '#ff9e9e' : '';
+
+  if (!d.seeded || !d.bars) {
+    stat.textContent = 'waiting for index bars';
+  } else if (d.armed) {
+    stat.textContent = `ARMED ${d.armed.side} ${d.armed.score}/${best ? best.max : 12}`
+      + ` — ${d.armed.signs.length} signs stacked`;
+  } else {
+    stat.textContent = `${d.bars} index minutes read — nothing stacked yet`;
+  }
+
+  box.className = d.armed ? 'armed' : '';
+
+  const r = d.release;
+  if (!r) {
+    rel.textContent = 'release bar: waiting';
+    rel.className = '';
+  } else {
+    rel.textContent = 'release bar: ' + (r.ok
+      ? `READY — ${r.why || 'expansion bar in place'}`
+      : (r.why || 'not yet'));
+    rel.className = r.ok ? 'ready' : '';
+  }
+
+  /*
+  Beep once per arming, not once per poll. The phone alarm is
+  coilWatch's own (alertPhone); this is only for the person sitting in
+  front of the screen, and it has to stay quiet or it gets ignored.
+  */
+  const armedSide = d.armed ? d.armed.side : null;
+  if (armedSide && armedSide != coilArmedSide) { beep(760, 2); }
+  coilArmedSide = armedSide;
+
+  if (d.armed && r && r.ok) {
+    const nowMin = Math.floor(Date.now() / 60000);
+    if (nowMin - coilRelBeeped >= 3) { coilRelBeeped = nowMin; beep(1180, 3); }
+  }
+}
+
+async function refreshCoil() {
+  try {
+    const res = await fetch(BASE + '/api/coil');
+    paintCoil(await res.json());
+  } catch (e) { /* transient; the next poll covers it */ }
+}
+refreshCoil();
+/*
+20 seconds, not 60. The signs are rebuilt from completed minute bars so
+they only change once a minute, but the release bar is read off the bar
+in progress -- a minute-long poll can show "not yet" for the whole of
+the minute the setup actually releases in.
+*/
+setInterval(refreshCoil, 20000);
 
 fetchOiCfg();
 refreshOiStat();

@@ -295,7 +295,8 @@ async function run() {
 
     // 7) Exchange for access_token and save
     const { accessToken, userId } = await exchangeForAccessToken(requestToken);
-    console.log("🎯 access_token:", accessToken);
+    // the token itself is not printed: this runs under pm2 and the log is kept
+    console.log(`🎯 access_token received (…${String(accessToken).slice(-4)})`);
     saveAccessToken({ access_token: accessToken, request_token: requestToken });
     await saveAccessTokenToMongo({ access_token: accessToken, user_id: userId });
   } finally {

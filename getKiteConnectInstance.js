@@ -131,7 +131,17 @@ if(!accessToken ){
 
 }
 
-   console.log(accessToken ,'accessToken ');
+   /*
+   This used to print the access token itself. That token is a live key to
+   the trading account for the rest of the day, and chartApp runs under
+   pm2 -- so every restart wrote it into ~/.pm2/logs in plain text, where
+   it sits for as long as the logs are kept. Print only whether there is
+   one, and the last four characters so two different sessions can still
+   be told apart in a log.
+   */
+   console.log(accessToken && accessToken !== -1
+      ? `access token present (…${String(accessToken).slice(-4)})`
+      : 'no access token');
    
 
 

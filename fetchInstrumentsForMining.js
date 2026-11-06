@@ -103,7 +103,7 @@ async function fetchInstrumentsForMining(accessToken) {
 
 
 
-		console.log(accessToken, 'ACCESS TOKEN @285');
+		console.log(`access token present (…${String(accessToken).slice(-4)})`);
 
 		let ohlcs = await ohlc(accessToken, a);
 
@@ -241,7 +241,7 @@ async function fetchInstrumentsForMining(accessToken) {
 		async function setCurrentInstrumentParameters(e) {
 			let instruAll = require(FILE_LOCATION + '/instrumentsAll.json');
 
-			console.log(accessToken, 'accessToken @ 415');
+			console.log(`access token present (…${String(accessToken).slice(-4)})`);
 			let a = new pricePoint(e.instrument_token, accessToken);
 
 

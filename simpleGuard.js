@@ -448,7 +448,8 @@ async function main() {
 
     await connectToDatabase();
     const accessToken = await getTodaysAccessToken();
-    console.log(accessToken, "accessToken");
+    // last four only -- pm2 keeps this log on disk
+    console.log(`🔑 access token present (…${String(accessToken).slice(-4)})`);
 
     const kite = await getKiteConnectInstance(accessToken);
     const ticker = await getTickerInstance(accessToken);
