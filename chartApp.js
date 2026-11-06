@@ -1184,13 +1184,24 @@ review up the moment a trade ends:
   timing) rather than just the number.
 
 And the rule a quick-entry/quick-exit buyer breaks most: re-entering
-straight after being stopped out. Any stop-style exit (SL order triggered
-or guard breach) locks NEW entries for LOCKOUT_MIN minutes. Exits are never
-blocked -- you can always close what you are holding.
+straight after the last trade. EVERY exit -- stop, target, EXIT button,
+quick S100, price trigger -- locks NEW entries for LOCKOUT_MIN minutes
+(noTrade.json lockAllExits). Exits are never blocked: you can always
+close what you are holding.
 
-LOCKOUT_MIN is only the opening bid. reviewLockout() then asks Claude to
-judge the exit and it may clear, shorten or extend the lock (0..30 min).
-See claudeLock.js. If that call cannot run, LOCKOUT_MIN stands.
+Only one thing opens it early, and it is a number, not a mood: the trade
+that just closed made at least ultraPosPct NET of the money put in. See
+ultraPositive(). That single bar governs all three ways out --
+
+  - the dashboard clear button (refuses with 423 and says the number),
+  - Claude's review, which may always lengthen the lock but may only
+    shorten it on an ultra-positive exit,
+  - nothing else. There is no override.
+
+LOCKOUT_MIN is the opening bid. reviewLockout() asks Claude to judge the
+exit and it may extend it freely, or cut it (0..30 min) on an
+ultra-positive trade. See claudeLock.js. If that call cannot run,
+LOCKOUT_MIN stands.
 --------------------------------------------------------------------- */
 
 const LOCKOUT_MIN = 10;
@@ -1230,13 +1241,31 @@ let lastClosedTrade = null;
 
 function lockInfo() {
     const left = Math.max(0, lockUntil - Date.now());
-    return {
+    const info = {
         locked: left > 0,
         until: lockUntil || null,
         secondsLeft: Math.ceil(left / 1000),
         minutes: LOCKOUT_MIN,
         why: left > 0 ? lockWhy : null
     };
+    /*
+    Whether the clear button can do anything, decided here rather than on
+    the page: a button that looks live and then returns 423 teaches you to
+    keep clicking it. Guarded because lockInfo() is also called before
+    readNoTrade/ultraPositive exist in the module's own startup order.
+    */
+    if (left > 0) {
+        try {
+            const u = ultraPositive(lastClosedTrade);
+            info.canClear = u.ultra;
+            info.clearWhy = u.why;
+            info.netPct = u.pct;
+            info.needPct = u.need;
+        } catch (e) { info.canClear = false; info.clearWhy = 'not known yet'; }
+    } else {
+        info.canClear = false;
+    }
+    return info;
 }
 
 function saveLock() {
@@ -1270,6 +1299,49 @@ function unlockTrading(by) {
     console.log(`🔓 lockout cleared early${by ? ' (' + by + ')' : ''}`);
     broadcast({ type: 'lock', lock: lockInfo() });
     return true;
+}
+
+// net P&L as a % of the money actually put in (entry price x quantity)
+function netGainPct(rec) {
+    if (!rec) return null;
+    const cost = Number(rec.buy) * Number(rec.quantity);
+    const net = rec.net != null ? Number(rec.net) : null;
+    if (!(cost > 0) || net == null || !isFinite(net)) return null;
+    return +(net / cost * 100).toFixed(2);
+}
+
+/*
+WHAT COUNTS AS "ULTRA POSITIVE", AND WHY IT IS THE ONLY WAY OUT EARLY.
+
+The lockout is there to stop the NEXT click, so by default nothing
+relaxes it. There is exactly one exception and it is measured, not felt:
+the trade that just closed made at least ultraPosPct NET on the money put
+in. Net, so every charge on both legs is already paid out of it.
+
+Note what the denominator is: the money PUT IN (entry x qty), not the
+premium move. A +10% move on the premium is nowhere near +10% net, since
+the charges come out of the same pot -- 163 -> 180 on 20 SENSEX units is
++10.4% on the price and +8.8% net on the money. The screen number people
+feel good about is always the bigger one.
+
+A "+3% winner" is noise and must not buy a fresh entry: that re-entry is
+the impulse trade wearing a green shirt.
+
+Always returns the same shape, pass or fail: the reason is shown on the
+page and written to the lock log, and "you cannot" is useless without the
+number next to it.
+*/
+function ultraPositive(rec) {
+    const need = Number(readNoTrade().ultraPosPct);
+    const pct = netGainPct(rec);
+    if (pct == null) return { ultra: false, pct: null, need, why: 'no net figure for the last trade' };
+    /*
+    One decimal, except when one decimal would round to exactly the bar --
+    "made only 15.0%, needs 15%" reads like a bug and gets argued with.
+    */
+    const show = pct.toFixed(1) == need.toFixed(1) ? pct.toFixed(2) : pct.toFixed(1);
+    if (pct >= need) return { ultra: true, pct, need, why: `last trade made ${show}% net (needs ${need}%)` };
+    return { ultra: false, pct, need, why: `last trade made only ${show}% net, needs ${need}% to open early` };
 }
 
 /*
@@ -1325,10 +1397,27 @@ async function reviewLockout(rec, flatMinutes) {
         return;
     }
 
+    /*
+    Claude can always make the lock LONGER. It can only make it shorter on
+    an ultra-positive exit.
+
+    Without this the relaxation is unbounded: a model that reads one green
+    print as "that was a good exit, carry on" hands back exactly the
+    re-entry this whole lock exists to refuse, and it does it on the
+    trades where the pull to click again is strongest. The 05/11 case this
+    was built for (+8.7% and +21.1% breaches) is what the ultra bar is set
+    around: +21.1% gross clears the bar, +8.7% does not.
+    */
+    const ultra = ultraPositive(rec);
+    if (!ultra.ultra && (!out.lock || out.minutes < flatMinutes)) {
+        console.log(`🔒 claude wanted ${out.lock ? out.minutes + ' min' : 'no lock'} — refused, ${ultra.why}`);
+        return;
+    }
+
     if (!out.lock) {
         unlockTrading(`claude: ${out.why}`);
         broadcast({ type: 'lock', lock: lockInfo(), claude: out });
-        console.log(`🔓 claude cleared the lockout — ${out.why}`);
+        console.log(`🔓 claude cleared the lockout — ${out.why} (${ultra.why})`);
         return;
     }
     if (out.minutes === flatMinutes) {
@@ -1828,6 +1917,23 @@ const NO_TRADE_DEFAULTS = {
     maxLossStreak: 3,         // consecutive losing trades today
     maxTradesPerDay: 8,       // closed trades today
     /*
+    THE IMPULSE LOCK. Every exit arms the lockout now, not only the
+    stop-style ones: the click straight after closing something by hand is
+    the same impulse as the click after a stop-out, and it was not blocked.
+    Only one thing opens it early -- a trade that actually worked, meaning
+    a NET gain (all charges on both legs already paid) of at least
+    ultraPosPct of the money that was put in.
+    */
+    lockAllExits: true,       // every exit locks new entries, not just stops
+    /*
+    15% NET, and the number is picked from the two exits of 05/11/2026,
+    not from taste. That day one breach filled +8.7% gross and another
+    +21.1% gross. After charges they are roughly +6.7% and +19%: the bar
+    sits between them on purpose. The wobble stays locked, the runner
+    opens the door.
+    */
+    ultraPosPct: 15,          // % NET gain that counts as "ultra positive"
+    /*
     PREMIUM BAND. minPremium used to be 8, on the theory that a cheap option
     has a thin book. On SENSEX expiry strikes that theory is simply false.
     Measured over all of 05/11/2026 (2,920 option-minutes, 8 strikes):
@@ -2150,9 +2256,11 @@ function noTradeChecks({ premium, tradingsymbol } = {}) {
     }
     add('late', `No entry after ${s.noEntryAfter} (low volume)`, lateFailed, lateDetail);
 
-    add('lock', `No entry while the stop-out lockout runs (Claude sets the minutes)`,
+    add('lock', `No entry while the exit lockout runs — only an ultra-positive trade (≥${s.ultraPosPct}% net) opens it early`,
         l.locked,
-        l.locked ? `${l.secondsLeft}s left — ${l.why}` : 'no recent stop-out');
+        l.locked
+            ? `${l.secondsLeft}s left — ${l.why}${l.canClear ? ' (clearable: ' + l.clearWhy + ')' : (l.clearWhy ? ' — ' + l.clearWhy : '')}`
+            : 'no recent exit');
 
     add('dayloss', `Day loss under ₹${s.maxDayLoss}`,
         st.pnl <= -Math.abs(s.maxDayLoss),
@@ -4049,10 +4157,21 @@ async function guardOnOrderUpdate(u) {
                 token, reason, level, ctx
             });
 
-            // a stop-style exit locks new entries: the click straight after a
-            // stop-out is the one that doubles the damage
-            if (STOP_REASONS.includes(reason)) {
-                lockTrading(LOCKOUT_MIN, `${EXIT_LABELS[reason]} on ${tradingsymbol}`);
+            /*
+            EVERY exit locks new entries, not only the stop-style ones.
+
+            It used to be sl_hit and guard_breach only, which left the
+            commonest impulse trade completely open: hit EXIT by hand or
+            S100 on a wobble, watch the next candle, click straight back
+            in. Same minute, same symbol, no stop involved, no lock.
+
+            So the lock is now armed by the exit itself. What the exit was
+            only decides the words. The way out early is the trade being
+            ultra positive -- see ultraPositive().
+            */
+            const lockAll = readNoTrade().lockAllExits;
+            if (lockAll || STOP_REASONS.includes(reason)) {
+                lockTrading(LOCKOUT_MIN, `${EXIT_LABELS[reason] || 'exit'} on ${tradingsymbol}`);
                 // then Claude re-reads it: a breach that filled green is not a
                 // stop-out. Never awaited -- the fill handler must not wait on
                 // a network call, and a failed call leaves the lock in place.
@@ -5022,9 +5141,24 @@ async function main() {
     });
     app.post('/api/lock', (req, res) => {
         const { action, minutes, why } = req.body || {};
+        /*
+        The clear button was the hole in the whole scheme: one click, no
+        condition, no record, and the lock was gone -- which is the
+        impulse itself, just with a confirmation step. It now needs the
+        last closed trade to have been ultra positive, and says the number
+        when it refuses so the answer is arguable with data, not with
+        feeling. 423 (locked) so the page can show it as a refusal rather
+        than a bug.
+        */
         if (action == 'clear') {
-            unlockTrading('dashboard');
-            return res.json(lockInfo());
+            if (!lockInfo().locked) return res.json(lockInfo());
+            const ultra = ultraPositive(lastClosedTrade);
+            if (!ultra.ultra) {
+                console.log(`🔒 dashboard tried to clear the lock — refused, ${ultra.why}`);
+                return res.status(423).json({ ...lockInfo(), error: ultra.why, ultra });
+            }
+            unlockTrading(`dashboard — ${ultra.why}`);
+            return res.json({ ...lockInfo(), ultra });
         }
         const m = Number(minutes) || LOCKOUT_MIN;
         if (!(m > 0 && m <= 240)) return res.status(400).json({ error: "minutes must be 1-240" });
