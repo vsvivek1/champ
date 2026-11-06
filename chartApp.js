@@ -124,6 +124,7 @@ const claudeLock = require('./claudeLock.js');
 const { createMockBroker } = require('./mockBroker.js');
 const { createAutoPilot } = require('./autoPilot.js');
 const { createCoilWatch } = require('./coilWatch.js');
+const { roundTrip } = require('./charges.js');
 
 /* ---------------------------------------------------------------------
 HEADLESS / MOCK MODE
@@ -1963,9 +1964,25 @@ function todayStats() {
     try { log = JSON.parse(fs.readFileSync(TRADE_LOG_FILE, 'utf8')); } catch (e) { }
     const today = dayjs().format('YYYY-MM-DD');
     const rows = log.filter(t => t.date == today);
+
+    /*
+    The day is judged on NET, not gross.
+
+    The brakes exist to stop a bad day getting worse, and the money that
+    left the account is the net. A row with gross +40 and net -20 is a
+    LOSS: it fed the loss streak nothing and the day-loss brake nothing,
+    while the balance went down. Over a day of scalps that gap is the
+    difference between the brake working and the brake being decorative.
+
+    `net` falls back to `pnl` because every row logged before charges.js
+    has no net field. Those rows read gross, exactly as they always did --
+    no history is rewritten, and nothing has to be backfilled.
+    */
+    const money = t => (t.net != null ? t.net : (t.pnl || 0));
+
     let streak = 0;
     for (let i = rows.length - 1; i >= 0; i--) {
-        if ((rows[i].pnl || 0) < 0) streak++; else break;
+        if (money(rows[i]) < 0) streak++; else break;
     }
     /*
     A mid-day reset of the CLICK COUNT only. Set `countFrom` (POST
@@ -1990,10 +2007,12 @@ function todayStats() {
         trades: counted.length,
         tradesAllDay: rows.length,
         countFrom: since,
-        pnl: +rows.reduce((s, t) => s + (t.pnl || 0), 0).toFixed(2),
+        pnl: +rows.reduce((s, t) => s + money(t), 0).toFixed(2),
         lossStreak: streak,
-        wins: rows.filter(t => (t.pnl || 0) > 0).length,
-        losses: rows.filter(t => (t.pnl || 0) < 0).length
+        wins: rows.filter(t => money(t) > 0).length,
+        losses: rows.filter(t => money(t) < 0).length,
+        grossPnl: +rows.reduce((s, t) => s + (t.pnl || 0), 0).toFixed(2),
+        charges: +rows.reduce((s, t) => s + (t.charges || 0), 0).toFixed(2)
     };
 }
 
@@ -2636,18 +2655,33 @@ function logClosedTrade({ tradingsymbol, position, sellPrice, fallbackQty, token
                 tag: 'partial'
             };
 
+        /*
+        What the trade actually made. `pnl` stays gross -- it is what the
+        exchange reports, every old row in the log is gross, and changing
+        its meaning would silently rewrite the history. `net` is the money
+        that reached the account. On a scalp the two can have different
+        signs, which is the whole reason this is here.
+        */
+        const trip = (buy > 0 && sellPrice > 0 && qty > 0)
+            ? roundTrip({ buy, sell: sellPrice, quantity: qty, exchange: position ? position.exchange : null })
+            : null;
+
         const rec = {
             date: today, time: dayjs().format('HH:mm:ss'), tradingsymbol,
             quantity: qty, buy: buy != null ? +Number(buy).toFixed(2) : null,
             sell: sellPrice ? +Number(sellPrice).toFixed(2) : null,
             pnl, symbolDayPnl: position ? position.pnl : null,
+            net: trip ? trip.net : null,
+            charges: trip ? trip.total : null,
+            breakEven: trip ? trip.breakEven : null,
             reason: reason || 'unknown', reasonLabel: EXIT_LABELS[reason] || EXIT_LABELS.unknown,
             mfePct, maePct, exitPct, heldMin, level: level != null ? level : null, levelGapPct,
             verdict: why.verdict, points: why.points, tag: why.tag
         };
         log.push(rec);
         fs.writeFileSync(TRADE_LOG_FILE, JSON.stringify(log, null, 2));
-        console.log(`🧾 Trade logged: ${tradingsymbol} qty ${qty} buy ${buy} sell ${sellPrice} pnl ${pnl} [${rec.reasonLabel}]`);
+        console.log(`🧾 Trade logged: ${tradingsymbol} qty ${qty} buy ${buy} sell ${sellPrice} `
+            + `gross ${pnl}${trip ? ` − charges ${trip.total} = NET ${trip.net}` : ''} [${rec.reasonLabel}]`);
         console.log(`   ↳ ${rec.verdict}`);
         return rec;
     } catch (err) { console.log(err, '⚠️ trade log failed'); return null; }
@@ -2925,12 +2959,23 @@ What this entry puts at risk, BEFORE it is placed: the stop the guard will
 rest, in rupees. SL first -> a real number. Target first -> there is no
 exchange-side stop, so the premium is the risk; the caller shows that.
 */
+// NFO or BFO for a token: the charges differ between NSE and BSE options
+function exchangeOf(token) {
+    const inst = instByToken.get(Number(token));
+    return inst ? inst.exchange : null;
+}
+
 async function riskPreview({ price, quantity, firstOrder, token }) {
     const s = readGuardSettings();
     const which = ['target', 'sl'].includes(firstOrder) ? firstOrder : s.firstOrder;
     const premium = +(price * quantity).toFixed(0);
     if (which != 'sl') {
+        // no resting stop: the whole premium is the risk, and it still costs
+        // the round trip on top
+        const t = roundTrip({ buy: price, quantity, exchange: exchangeOf(token) });
         return { firstOrder: which, stop: null, risk: null, riskPct: null, premium, slMode: s.slMode,
+            charges: t.total, breakEven: t.breakEven, breakEvenPct: t.breakEvenPct,
+            riskNet: -Math.round(premium + t.total),
             note: 'target first — no exchange-side stop, the app-side guard line is the only exit' };
     }
     /*
@@ -2961,11 +3006,33 @@ async function riskPreview({ price, quantity, firstOrder, token }) {
     */
     const res = levels ? pickResistance(levels, price, s, null) : null;
     const rr = (res && stop < price) ? +((res.price - price) / (price - stop)).toFixed(2) : null;
+    /*
+    What the click can actually cost, and what it has to clear to be worth
+    anything. `risk` is the price distance to the stop -- the honest answer
+    to "how far can it go against me". `riskNet` is the money gone if the
+    stop fills: that distance PLUS the round-trip bill, which is charged
+    whether the trade works or not. On a one-lot scalp the bill is a real
+    part of the loss and leaving it out made every preview flattering.
+
+    The exit leg is costed at the STOP price, because that is the sell this
+    number is about.
+    */
+    const atStop = roundTrip({ buy: price, sell: stop, quantity, exchange: exchangeOf(token) });
+    const atEntry = roundTrip({ buy: price, quantity, exchange: exchangeOf(token) });
+    const rrNet = (res && stop < price && atEntry.breakEven < res.price)
+        ? +((res.price - atEntry.breakEven) / (atEntry.breakEven - stop)).toFixed(2)
+        : null;
     return {
         firstOrder: which, stop, premium, slMode: s.slMode, known,
         target: res ? res.price : null, rr,
         risk: +((price - stop) * quantity).toFixed(0),
         riskPct: +(((price - stop) / price) * 100).toFixed(2),
+        // the same loss with the bill in it, and the price that gets out whole
+        riskNet: atStop.net != null ? -Math.round(Math.abs(atStop.net)) : null,
+        charges: atEntry.total,
+        breakEven: atEntry.breakEven,
+        breakEvenPct: atEntry.breakEvenPct,
+        rrNet,
         // no mode is capped any more, so there is no "worst case" to quote:
         // the stop is wherever the level puts it. Kept as nulls so an older
         // cached page that still reads these fields renders nothing, not a lie.
@@ -4386,6 +4453,9 @@ async function main() {
                 ).pop();
                 const entry = lastBuy ? lastBuy.average_price : p.average_price;
                 const ltp = p.last_price;
+                const trip = roundTrip({
+                    buy: entry, sell: ltp, quantity: Math.abs(p.quantity), exchange: p.exchange
+                });
                 const resting = orders.filter(o =>
                     o.tradingsymbol == p.tradingsymbol && o.transaction_type == "SELL" &&
                     RESTING_ORDER_STATUSES.includes(o.status)
@@ -4403,6 +4473,18 @@ async function main() {
                     entryAt: isoOrNull(lastBuy && lastBuy.order_timestamp),
                     entryPnl: (ltp - entry) * p.quantity,
                     dayPnl: p.pnl,
+                    /*
+                    The same position after the bill. `entryPnl` above is
+                    gross and always will be -- it is what the exchange
+                    says. `net` is the money that would reach the account
+                    if this closed at the LTP right now, and `breakEven`
+                    is the price that gets out whole. On a one-lot scalp
+                    the gap between the two is the whole trade.
+                    */
+                    charges: trip.total,
+                    netEntryPnl: trip.net,
+                    breakEven: trip.breakEven,
+                    breakEvenPct: trip.breakEvenPct,
                     resting
                 });
             }
