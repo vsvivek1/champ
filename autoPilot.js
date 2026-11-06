@@ -34,7 +34,21 @@ const CFG_FILE = path.join(__dirname, 'autoTrade.json');
 const DEFAULTS = {
     enabled: true,
     index: 'NIFTY',          // NIFTY | SENSEX -- which chain to watch
-    offset: 'auto',          // strike offset, or 'auto' for the IV-based pick
+    offset: 'auto',
+
+    /*
+    The premium band the auto strike pick aims for, in rupees.
+
+    Not a taste: measured over the 157 closed trades in tradeLog.json,
+    bucketed by entry premium and judged on the money put in, 15-25 is
+    the only band with a positive median net (+0.89%, 61% green) and it
+    buys about three times the quantity the old IV-distance pick was
+    buying. The two cheapest bands are the two WORST, so "cheaper strike,
+    more lots" is not the way to more money. Why, and the whole table,
+    is in the comment over premiumStrikes() in chartApp.js.
+    */
+    premLo: 15,
+    premHi: 25,          // strike offset, or 'auto' for the IV-based pick
     reloadMin: 15,           // re-pick the strikes this often while FLAT (spot drifts)
     kinds: ['bounce', 'break', 'coil'],
     /*

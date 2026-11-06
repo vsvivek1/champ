@@ -783,6 +783,104 @@ function resolveOptions(indexKey, spot, offset, want) {
 }
 
 /*
+AUTO-STRIKE BY PREMIUM, which is the number that decides the trade.
+
+The old pick stood at 0.6 sigma OTM (autoStrikes below). That is a
+defensible place to stand, but it never looks at the premium, and on
+06/11/2026 it chose CE 24850 at ₹66.30 and PE 24350 at ₹78.35. With
+₹1.2L of cash that is 1,800 and 1,500 units. The same money at ₹20 buys
+6,000.
+
+MEASURED, over the 157 closed trades in tradeLog.json, bucketed by entry
+premium and judged on the money put in (charges inside):
+
+  under 8   22 trades  45% green  median net -1.63%   -₹2,051
+  8-15      35 trades  49% green  median net -2.07%   -₹5,553
+  15-25     28 trades  61% green  median net +0.89%   -₹1,336
+  25-40     34 trades  29% green  median net -2.96%   -₹6,120
+  over 40   38 trades  71% green  median net +0.91%  -₹12,736
+
+Two things in that table matter.
+
+THE CHEAP END IS NOT WHERE THE MONEY IS. "More quantity per rupee" sounds
+like more profit and this book says the opposite: the two cheapest bands
+are the two worst by median net. The reason is the tick, not the charges.
+Charges are a flat ~0.23% of the money deployed at ANY premium -- a round
+trip on ₹1.2L costs about ₹270 whether that buys 1,950 units at 60 or
+24,000 at 5 -- so going cheaper saves nothing. But one 0.05 tick is 1.0%
+of a ₹5 option and 0.08% of a ₹60 one. Cheaper multiplies the spread you
+pay on the way in and the way out; it does not multiply the edge.
+
+THE RICH END WINS MORE OFTEN AND STILL LOST THE MOST. 71% green, and
+-₹12,736 -- because a stop on a ₹60 option is a big rupee number. One
+trade in that band cost ₹8,026, more than the band's whole net loss.
+
+So the band to stand in is 15-25: the only positive median net, and about
+three times the quantity the sigma pick was buying, which is the part that
+serves the original instinct. premLo/premHi in autoTrade.json.
+
+This quotes the chain around the ATM and picks by premium instead of
+computing a distance. OTM only, both sides. If the quotes do not arrive it
+falls back to the sigma formula -- a chart on a less ideal strike beats no
+chart at all.
+
+ONE HONEST CAVEAT, because it would be easy to over-read the table: 157
+trades over 6 days, and the band is a proxy for moneyness and days to
+expiry both. It is enough to say the cheap end is not the answer. It is
+not enough to call 15-25 the optimum, and the number is in the config
+file rather than in the code for exactly that reason.
+*/
+async function premiumStrikes(indexKey, spot, expiry, lo, hi) {
+    const idx = INDICES[indexKey];
+    const step = idx.strikeStep;
+    const atm = Math.round(spot / step) * step;
+    const mid = (lo + hi) / 2;
+
+    const side = type => optionInstruments.filter(i =>
+        i.exchange == idx.optExchange && i.name == idx.optName &&
+        i.instrument_type == type &&
+        dayjs(i.expiry).format('YYYY-MM-DD') == expiry &&
+        // OTM only: this buys direction, and an ITM premium is mostly
+        // intrinsic -- paying for a move that has already happened
+        (type == 'CE' ? Number(i.strike) >= atm : Number(i.strike) <= atm) &&
+        Math.abs(Number(i.strike) - atm) <= 20 * step);
+
+    const want = [...side('CE'), ...side('PE')];
+    if (!want.length) return null;
+
+    const keys = want.map(i => `${i.exchange}:${i.tradingsymbol}`);
+    const q = {};
+    // getLTP takes a limited list, and 40 strikes x 2 sides can exceed it
+    for (let i = 0; i < keys.length; i += 180) {
+        Object.assign(q, await kite.getLTP(keys.slice(i, i + 180)));
+    }
+
+    const best = type => {
+        let win = null;
+        for (const i of want) {
+            if (i.instrument_type != type) continue;
+            const row = q[`${i.exchange}:${i.tradingsymbol}`];
+            const prem = row ? Number(row.last_price) : 0;
+            if (!(prem > 0)) continue;
+            // inside the band first; among those, nearest to its middle
+            const inBand = prem >= lo && prem <= hi;
+            const score = (inBand ? 0 : 1e6) + Math.abs(prem - mid);
+            if (!win || score < win.score) win = { strike: Number(i.strike), prem, inBand, score };
+        }
+        return win;
+    };
+
+    const ce = best('CE'), pe = best('PE');
+    if (!ce || !pe) return null;
+    return {
+        by: 'premium', lo, hi,
+        ceStrike: ce.strike, peStrike: pe.strike,
+        cePrem: ce.prem, pePrem: pe.prem,
+        inBand: ce.inBand && pe.inBand,
+    };
+}
+
+/*
 Auto-strike: OTM strike = spot ± 0.6 × spot × IV × √(D/365), rounded to the
 index's strike step (50 NIFTY / 100 SENSEX). + for CE, − for PE.
 D = calendar days to nearest expiry counting today as 1; 0.5 on expiry
@@ -832,9 +930,31 @@ async function loadIndex(index, offsetArg) {
     let auto = null;
     let opts = resolveOptions(indexKey, spot, offset); // also gives nearest expiry for auto's D
     if (isAuto && opts) {
-        auto = await autoStrikes(idx, spot, opts.expiry);
-        opts = resolveOptions(indexKey, spot, 0, auto);
-        console.log(`🎛 auto-strike ${indexKey}: spot ${spot}, IV ${auto.iv} (${auto.ivSource}), D ${auto.D}, dist ${auto.dist} → CE ${auto.ceStrike} / PE ${auto.peStrike}`);
+        /*
+        Premium first, the IV distance only if the chain will not answer.
+        The band comes from autoTrade.json so it can be moved without a
+        code change; the defaults are the measured 15-25.
+        */
+        const apCfg = require('./autoPilot.js').readCfg();
+        const lo = Number(apCfg.premLo) > 0 ? Number(apCfg.premLo) : 15;
+        const hi = Number(apCfg.premHi) > lo ? Number(apCfg.premHi) : lo + 10;
+
+        let byPrem = null;
+        try { byPrem = await premiumStrikes(indexKey, spot, opts.expiry, lo, hi); }
+        catch (e) { console.log(`⚠️ premium strike pick failed (${e.message}) -- falling back to the IV distance`); }
+
+        if (byPrem) {
+            auto = byPrem;
+            opts = resolveOptions(indexKey, spot, 0, auto);
+            console.log(`🎛 auto-strike ${indexKey} by premium ₹${lo}-${hi}: spot ${spot}`
+                + ` → CE ${auto.ceStrike} @ ₹${auto.cePrem} / PE ${auto.peStrike} @ ₹${auto.pePrem}`
+                + (auto.inBand ? '' : ' ⚠️ nothing listed inside the band, took the nearest'));
+        } else {
+            auto = await autoStrikes(idx, spot, opts.expiry);
+            auto.by = 'iv';
+            opts = resolveOptions(indexKey, spot, 0, auto);
+            console.log(`🎛 auto-strike ${indexKey} by IV distance: spot ${spot}, IV ${auto.iv} (${auto.ivSource}), D ${auto.D}, dist ${auto.dist} → CE ${auto.ceStrike} / PE ${auto.peStrike}`);
+        }
     }
     if (!opts || !opts.ce || !opts.pe) throw new Error("could not resolve CE/PE instruments");
 

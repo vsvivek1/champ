@@ -1359,7 +1359,14 @@ async function load() {
   const r = await fetch(`${BASE}/api/setup?index=${index}&offset=${offset}`);
   cfg = await r.json();
   if (cfg.error) { msg('❌ ' + cfg.error); updateStrikeDist(); return; }   // clear stale badges
-  if (cfg.auto) {
+  if (cfg.auto && cfg.auto.by == 'premium') {
+    // picked by premium: say the premium, and what the band buys
+    msg(`🎛 auto: premium band ₹${cfg.auto.lo}-${cfg.auto.hi}` +
+      (cfg.auto.inBand ? '' : ' (nothing listed inside it, took the nearest)') + ' → ' +
+      `CE ${cfg.ce.strike} @ ₹${cfg.auto.cePrem} (${stepsTxt(cfg.auto.ceSteps) || '?'}) / ` +
+      `PE ${cfg.pe.strike} @ ₹${cfg.auto.pePrem} (${stepsTxt(cfg.auto.peSteps) || '?'})` +
+      (cfg.auto.atm ? `, ATM ${cfg.auto.atm} · step ${cfg.auto.step}` : ''));
+  } else if (cfg.auto) {
     msg(`🎛 auto: IV ${(cfg.auto.iv * 100).toFixed(1)} (${cfg.auto.ivSource}), D=${cfg.auto.D}, ±${cfg.auto.dist} → ` +
       `CE ${cfg.ce.strike} (${stepsTxt(cfg.auto.ceSteps) || '?'}) / PE ${cfg.pe.strike} (${stepsTxt(cfg.auto.peSteps) || '?'})` +
       (cfg.auto.atm ? `, ATM ${cfg.auto.atm} · step ${cfg.auto.step}` : ''));
