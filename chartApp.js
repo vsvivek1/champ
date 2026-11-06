@@ -1805,6 +1805,28 @@ function computeRegime(token) {
     for (let i = 1; i < seg.length; i++) path += Math.abs(seg[i].px - seg[i - 1].px);
     const eff = path > 0 ? +(Math.abs(net) / path * 100).toFixed(1) : 0;
 
+    /*
+    HAS PRICE LEFT THE BOX. The last breakWin minutes are set aside as the
+    candidate break; the high and low of the window BEFORE them is the
+    range that was being traded. See the breakWin note in the noTrade
+    defaults for why this is measured instead of efficiency over a shorter
+    window.
+    */
+    const bw = Math.max(2, Math.round(s.breakWin || 5));
+    const frac = Math.max(0, Number(s.escapeFrac) || 0);
+    const box = seg.slice(0, Math.max(0, seg.length - bw));
+    let boxHi = null, boxLo = null, escape = null, escapePts = null;
+    if (box.length >= 5) {
+        boxHi = Math.max(...box.map(q => q.px));
+        boxLo = Math.min(...box.map(q => q.px));
+        const w = boxHi - boxLo;
+        const margin = w * frac;
+        const now = seg[seg.length - 1].px;
+        if (now > boxHi + margin) { escape = 'up'; escapePts = +(now - boxHi).toFixed(1); }
+        else if (now < boxLo - margin) { escape = 'down'; escapePts = +(boxLo - now).toFixed(1); }
+        boxHi = +boxHi.toFixed(2); boxLo = +boxLo.toFixed(2);
+    }
+
     const n = Math.max(5, Math.round(s.emaMin));
     const k = 2 / (n + 1);
     const e = [];
@@ -1819,6 +1841,7 @@ function computeRegime(token) {
     return {
         ok: true, token, bars: a.length, win, eff, minEff: s.minEff,
         chop: eff < s.minEff, bias,
+        breakWin: bw, boxHi, boxLo, escape, escapePts,
         px: +px.toFixed(2), ema: +emaNow.toFixed(2), slope: +slope.toFixed(2),
         net: +net.toFixed(1), path: +path.toFixed(1)
     };
@@ -2114,6 +2137,47 @@ const NO_TRADE_DEFAULTS = {
     blockChop: true,          // refuse entries while the index is chopping
     regimeWin: 30,            // minutes in the efficiency window
     minEff: 10,               // % efficiency below which it counts as chop
+    /*
+    THE BREAKOUT OVERRIDE -- why the efficiency window alone was wrong.
+
+    A range is low efficiency BY DEFINITION. The index walks up and down
+    inside it and ends near where it started, so the 30-minute number goes
+    to near zero -- and the breakout, when it comes, is the last one or two
+    minutes of that same window, drowned by the 28 minutes of rotation in
+    front of it.
+
+    Worked through: 30 bars rotating in a 20-point range walk ~300 points
+    for ~0 net, so efficiency ~0%. A 40-point break then reads about 5%,
+    still under the 10% line. Make the coil wider and the SAME break reads
+    1.5%. So the tighter and longer the coil -- the better the setup -- the
+    more certainly this gate said no. Exactly backwards, and that is the
+    resistance break and the range break that got missed.
+
+    A shorter efficiency window does not fix it either, and that is worth
+    writing down so it is not tried again: a 10-minute window still holds
+    6 minutes of rotation in front of a 4-minute break, which measured
+    17.6% on the case above -- nowhere near a thrust. Efficiency is a ratio
+    of net to DISTANCE WALKED, and the whole problem is that a coil walks a
+    lot. No window length rescues it.
+
+    So the override measures the thing a breakout actually is: price has
+    LEFT THE BOX. Take the window, set aside the last breakWin minutes, and
+    the high and low of what remains is the range that was being traded.
+    A move clear of that edge by escapeFrac of the box's own width is a
+    break -- and because the margin scales with the box, a longer and
+    tighter coil makes this EASIER to satisfy instead of harder, which is
+    the right way round.
+
+    It must point the way of the leg. A vertical collapse leaves the box
+    just as convincingly as a vertical rise, and must never be the thing
+    that unlocks a CE.
+
+    This is an override with evidence, not a waiver. A fake break inside a
+    rotting range never leaves the box, so it is still refused -- which is
+    the whole reason the gate exists.
+    */
+    breakWin: 5,              // minutes set aside as "the break", the rest is the box
+    escapeFrac: 0.25,         // clear of the box edge by this fraction of its width
     blockWrongWay: true,      // a CE needs the index biased up, a PE down
     emaMin: 20,               // minutes in the direction EMA
 
@@ -2273,7 +2337,7 @@ const RULE_THEORY = {
 
     cap: 'Every click costs brokerage, STT and a bid-ask crossing whatever the outcome. Those costs are linear in the number of trades while edge is not, so past some count the day is paying the broker to break even. The cap is a brake on the clicking, not on the opportunity.',
 
-    chop: 'EFFICIENCY RATIO (Kaufman). Over the window, efficiency = |net displacement| / total distance walked, as a percent. 100% is a straight line; 0% is ending exactly where it started after walking all day.\n\nIt matters for a LONG option specifically because of which side each cost sits on. What pays you is NET displacement (delta times the move). What charges you is TIME (theta) and every bid-ask crossing. Distance walked pays you nothing at all. So efficiency is literally the ratio of the thing that pays to the thing you sit through.\n\nThe anchor worth knowing: a pure coin-flip random walk over n bars has an expected efficiency of about 1/sqrt(n). Over 30 bars that is roughly 18%. So ~18% is what NO edge looks like; meaningfully below it means price is actively pulling back on itself (mean-reverting), and above it means it is trending more than chance.\n\nCaveat worth being honest about: this rule assumes you are making a DIRECTIONAL bet that needs follow-through. A small fixed-target scalp that harvests pops does not need net displacement and can prefer a choppy tape - against that style this rule is mis-aimed.',
+    chop: 'EFFICIENCY RATIO (Kaufman). Over the window, efficiency = |net displacement| / total distance walked, as a percent. 100% is a straight line; 0% is ending exactly where it started after walking all day.\n\nIt matters for a LONG option specifically because of which side each cost sits on. What pays you is NET displacement (delta times the move). What charges you is TIME (theta) and every bid-ask crossing. Distance walked pays you nothing at all. So efficiency is literally the ratio of the thing that pays to the thing you sit through.\n\nThe anchor worth knowing: a pure coin-flip random walk over n bars has an expected efficiency of about 1/sqrt(n). Over 30 bars that is roughly 18%. So ~18% is what NO edge looks like; meaningfully below it means price is actively pulling back on itself (mean-reverting), and above it means it is trending more than chance.\n\nCaveat worth being honest about: this rule assumes you are making a DIRECTIONAL bet that needs follow-through. A small fixed-target scalp that harvests pops does not need net displacement and can prefer a choppy tape - against that style this rule is mis-aimed.\n\nTHE BREAKOUT OVERRIDE. A range is low efficiency by construction -- price ends near where it started -- and the break out of it is the last minute or two of the same 30-minute window, drowned by the rotation in front of it. 30 bars rotating in a 20-point range walk ~300 points for ~0 net; a 40-point break then still reads only ~5%, and on a wider coil the SAME break reads 1.5%. The tighter and longer the coil -- the better the setup -- the more certainly this gate said no.\n\nA shorter efficiency window does not fix it: 10 minutes still holds 6 minutes of rotation in front of a 4-minute break, which measures 17.6%. Efficiency is net over DISTANCE WALKED, and the problem is that a coil walks a lot. No window length rescues it.\n\nSo the override measures what a breakout actually is: price has LEFT THE BOX. The last breakWin minutes are set aside as the candidate break, and the high and low of the rest of the window is the range that was being traded. Clear of that edge by escapeFrac of the box own width and it is a break. Because the margin scales with the box, a longer and tighter coil makes this easier to satisfy, not harder -- the right way round.\n\nIt must point the way of the leg: a collapse leaves the box just as convincingly as a rise, and must not unlock a CE. This is an override with evidence, not a waiver -- a fake break inside a rotting range never leaves the box, so it is still refused.',
 
     wrongway: 'Buying a CE is a long delta bet and a PE is a short delta bet, so the position has a side whether or not the trade was framed that way. Price above a rising EMA and below a falling one is the cheapest honest read of which side the index is paying. Taking the other side means needing the index to turn before theta runs out - paying for time while betting against the drift.',
 
@@ -2445,10 +2509,44 @@ function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
     } else if (!reg.ok) {
         na('chop', `Index not chopping (${s.regimeWin}-min efficiency ≥ ${s.minEff}%)`, `n/a — ${reg.why}`);
     } else {
-        add('chop', `Index not chopping (${s.regimeWin}-min efficiency ≥ ${s.minEff}%)`,
-            reg.chop,
-            `efficiency ${reg.eff}% — ${reg.net >= 0 ? '+' : ''}${reg.net} pts of progress for ${reg.path} pts walked` +
-            (reg.chop ? ' — this is the day that bleeds you: swings that pay nothing while theta runs' : ''),
+        /*
+        THE BREAKOUT OVERRIDE.
+
+        A coil is chop by construction, and the break out of it is the last
+        minute or two of the very window being measured. Judged on the 30
+        minutes alone, the better the coil the more certainly the break was
+        refused -- see the breakWin note in the noTrade defaults for the
+        arithmetic. So the short window gets a say: if the index has run
+        one-way in the last breakWin minutes, at an efficiency well above
+        what chance produces over that few bars, the 30-minute number is
+        describing the cage and not the escape.
+
+        It has to point the right way for the leg. A vertical COLLAPSE is
+        exactly as efficient as a vertical rise, and must never be the
+        thing that unlocks a CE. With no symbol picked yet, any one-way
+        thrust counts -- the wrongway gate is the one that owns direction.
+
+        This is an override with evidence, NOT a waiver. A fake break
+        inside a rotting range has a messy short window too, so that one
+        is still refused, which is the whole reason the gate exists.
+        */
+        const wantDir = leg ? (leg == 'ce' ? 'up' : 'down') : null;
+        const broke = !!reg.escape && (!wantDir || reg.escape == wantDir);
+
+        const base = `efficiency ${reg.eff}% — ${reg.net >= 0 ? '+' : ''}${reg.net} pts of progress for ${reg.path} pts walked`;
+        const boxTxt = reg.boxHi == null ? ''
+            : `, box ${reg.boxLo}-${reg.boxHi}` +
+              (reg.escape ? ` and price is ${reg.escapePts} pts ${reg.escape == 'up' ? 'above it' : 'below it'}` : ' and price is inside it');
+
+        add('chop', `Index not chopping (${s.regimeWin}-min efficiency ≥ ${s.minEff}%, or out of the range)`,
+            reg.chop && !broke,
+            base + boxTxt +
+            (reg.chop && broke
+                ? ` — CHOP over ${reg.win} min but price has LEFT the range: BREAKOUT OVERRIDE, the efficiency number is measuring the box this just escaped`
+                : (reg.chop ? ' — this is the day that bleeds you: swings that pay nothing while theta runs' : '')) +
+            (reg.chop && reg.escape && !broke
+                ? ` — the break is ${reg.escape}, which is the wrong way for a ${leg ? leg.toUpperCase() : 'long'}`
+                : ''),
             !fastMoving); // soft check when speed > 1.2x
     }
 
@@ -3683,7 +3781,11 @@ async function checkSetups(token, ltp) {
             waived: g.checks.filter(x => x.waived).map(x => x.code),
             blockers: g.blocked ? g.blockers.map(b => b.label) : [],
             regime: g.regime && g.regime.ok
-                ? { eff: g.regime.eff, chop: g.regime.chop, bias: g.regime.bias }
+                ? { eff: g.regime.eff, chop: g.regime.chop, bias: g.regime.bias,
+                    // the box and the escape, so a row that passed on a chop
+                    // day can be audited later for WHY it was let through
+                    boxHi: g.regime.boxHi, boxLo: g.regime.boxLo,
+                    escape: g.regime.escape, escapePts: g.regime.escapePts }
                 : null
         };
 
