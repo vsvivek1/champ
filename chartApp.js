@@ -5576,6 +5576,55 @@ async function main() {
     });
 
     /*
+    EVERY RULE, IN ONE PLACE -- what the RULES tab on the chart page prints.
+
+    The rules were spread over four files (noTrade.json, guardSettings.json,
+    autoTrade.json and confidence.js) and three of them had no screen at all,
+    so the only way to read a rule was to open the file. Each block below is
+    read LIVE from the same function the live path uses, never from a copy, so
+    the tab cannot show a rule that is not the one being enforced.
+    */
+    app.get('/api/rules', (req, res) => {
+        try {
+            const g = readGuardSettings();
+            const nt = readNoTrade();
+            const gate = noTradeChecks({});
+            const ap = require('./autoPilot.js');
+            const apCfg = ap.readCfg();
+            const conf = require('./confidence.js');
+
+            const gates = gate.checks.map(c => ({
+                code: c.code, label: c.label,
+                // hard = the gate refuses the order; soft = it only colours the row
+                hard: !!c.hard,
+                never: NEVER_WAIVED.includes(c.code),
+                waivedFor: Object.keys(WAIVED_BY_KIND).filter(k => WAIVED_BY_KIND[k].includes(c.code)),
+                theory: RULE_THEORY[c.code] || null,
+            }));
+
+            res.json({
+                asOf: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+                candleCount: CANDLE_COUNT,
+                stop: {
+                    mode: g.slMode, slPct: g.slPct, slMaxPct: g.slMaxPct,
+                    partialPct: g.partialPct, partialMode: g.partialMode,
+                    trail: g.trail, levelGapPct: g.levelGapPct, levelMaxPct: g.levelMaxPct,
+                    firstOrder: g.firstOrder, targetPct: g.targetPct,
+                    riskPctOfCapital: nt.riskPctOfCapital,
+                },
+                gates, noTrade: nt,
+                waivers: WAIVED_BY_KIND, neverWaived: NEVER_WAIVED,
+                autopilot: apCfg,
+                confidence: {
+                    live: false,        // built and measured, not wired into the gate yet
+                    base: conf.BASE, factors: conf.FACTORS, grades: conf.GRADES,
+                    breakable: conf.BREAKABLE, unbreakable: conf.UNBREAKABLE,
+                },
+            });
+        } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+    });
+
+    /*
     Tune the thresholds (noTrade.json). Every key is optional; what you send
     is merged over the current file and applies to the very next check -- no
     restart. Deliberately permissive about values: they are your rules, the

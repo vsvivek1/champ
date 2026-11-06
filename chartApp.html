@@ -309,6 +309,45 @@
   #panel .pset .inner .orderctl:first-child { margin-top:4px; }
   #panel .sechd { font-size:11px; letter-spacing:.06em; color:var(--dim); margin:10px 0 2px; }
 
+  /* ---- THE TABS ----
+     One strip, three panes. A hidden pane is display:none, so nothing in it
+     is measured or painted -- the charts are outside the panel, so none of
+     them get resized by a tab change. */
+  #panelTabs { display:flex; gap:6px; align-items:center; flex-wrap:wrap;
+               padding-bottom:7px; margin-bottom:8px; border-bottom:1px solid var(--border); }
+  #panelTabs .ptab { background:var(--bg); border:1px solid var(--border); color:var(--dim);
+                     font-size:11.5px; font-weight:600; letter-spacing:.06em; padding:5px 11px; }
+  #panelTabs .ptab:hover { color:var(--fg); }
+  #panelTabs .ptab.on { color:#fff; background:var(--accent); border-color:var(--accent); }
+  #panel .pane { display:none; }
+  #panel .pane.on { display:block; }
+
+  /* ---- THE RULES TAB ----
+     A print, not a control. Wide tables scroll inside themselves so the
+     panel never scrolls sideways. */
+  #rulesBody .rsec { margin:12px 0 18px; }
+  #rulesBody .rsec > h4 { font-size:12px; letter-spacing:.06em; color:var(--fg);
+                          border-left:3px solid var(--accent); padding-left:7px; margin-bottom:3px; }
+  #rulesBody .rsec > .rnote { font-size:11.5px; color:var(--dim); margin:3px 0 7px; padding-left:10px; }
+  #rulesBody .rwrap { overflow-x:auto; }
+  #rulesBody table { width:100%; border-collapse:collapse; font-size:12px; }
+  #rulesBody th { text-align:left; font-size:10.5px; letter-spacing:.05em; color:var(--dim);
+                  font-weight:600; padding:4px 7px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  #rulesBody td { padding:4px 7px; border-bottom:1px solid var(--border); vertical-align:top; }
+  #rulesBody tr:hover td { background:rgba(41,98,255,.06); }
+  #rulesBody td.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  #rulesBody .code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; color:var(--dim); }
+  #rulesBody .hard { color:var(--red); font-weight:600; }
+  #rulesBody .soft { color:#f0b90b; }
+  #rulesBody .pos { color:var(--green); font-weight:600; }
+  #rulesBody .neg { color:var(--red); font-weight:600; }
+  #rulesBody .why { color:var(--dim); }
+  #rulesBody details.th { margin-top:3px; }
+  #rulesBody details.th > summary { cursor:pointer; font-size:11px; color:var(--accent); }
+  #rulesBody details.th p { font-size:11.5px; color:var(--dim); margin:4px 0; white-space:pre-wrap; }
+  #rulesBody .warn { border:1px solid #f0b90b; background:rgba(240,185,11,.08); color:#f0b90b;
+                     border-radius:4px; padding:6px 9px; font-size:11.5px; margin:4px 0 8px; }
+
   /* THE NUMBER THAT MATTERS BEFORE A CLICK.
      Deliberately the biggest thing in the panel: this is the rupees
      that leave the account if the trade is wrong, charges included.
@@ -531,7 +570,24 @@
 <div id="ctxMenu"></div>
 
 <div id="panel">
+  <!-- THREE TABS.
+       The panel had grown to eleven stacked boxes and the autopilot -- the
+       thing that actually trades -- was one of them, scrolled off the screen
+       under the position table. So: AUTO RUN holds the autopilot, its
+       settings and every alert, and nothing else. Positions and the order
+       buttons move to their own tab, and RULES is a read-only print of every
+       rule the app enforces. Only the display moves; no element is removed,
+       so every script on this page still finds its ids. -->
+  <div id="panelTabs">
+    <button class="ptab on" data-pane="paneAuto">AUTO RUN</button>
+    <button class="ptab" data-pane="paneTrade">POSITIONS &amp; ORDERS</button>
+    <button class="ptab" data-pane="paneRules">RULES</button>
+    <span style="flex:1"></span>
+    <button id="uiTheme" class="sec" title="light or dark for this panel only — the charts stay dark">◐ light</button>
+  </div>
+  <div id="msg"></div>
 
+  <div class="pane on" id="paneAuto">
   <div id="autoBox">
     <div class="hd"><b>AUTOPILOT</b>
       <button id="apArm" class="sec">&hellip;</button>
@@ -546,6 +602,85 @@
   </div>
 
 
+  <!-- band 3: what the app is shouting about -->
+  <div id="gateBar" class="ok">checking the no-trade rules…</div>
+  <div id="gatePanel2"></div>
+  <div id="nakedAlert"></div>
+  <div id="oiAlert"></div>
+  <div id="regBar" class="cold">index regime — waiting for ticks…</div>
+  <!-- the shape that came before the 05/11 13:37 move, scored live both
+       ways round. Alert only: the orders are coilWatch's own decision and
+       are governed by coilWatch.json, not by anything on this page. -->
+  <div id="coilBox">
+    <div class="hd"><b>FAMILIAR SETUP &mdash; the 05/11 coil</b>
+      <span id="coilStat" class="stat">reading&hellip;</span>
+      <span style="flex:1"></span>
+      <span id="coilMode" class="stat"></span>
+    </div>
+    <div id="coilSides">
+      <div class="cside" id="coilUp"></div>
+      <div class="cside" id="coilDown"></div>
+    </div>
+    <div id="coilRel">release bar: waiting</div>
+  </div>
+
+  <div id="setupBox">
+    <div class="hd"><b>SETUP ALERTS</b>
+      <span id="suStat" class="stat">—</span>
+      <span class="stat">alert only — never places an order</span>
+      <span style="flex:1"></span>
+      <span id="famStat" class="stat" title="every closed trade in tradeLog.json, priced through charges.js">&nbsp;</span>
+    </div>
+    <div id="setupList"><div class="empty">no setups yet today</div></div>
+  </div>
+  <div id="trigList"></div>
+
+  <!-- set once, then left alone for weeks. Folded, so it stops competing
+       with the position table for attention. -->
+  <details class="pset">
+    <summary>settings — stop on fill · OI entry · setup alerts</summary>
+    <div class="inner">
+      <div class="orderctl">
+        <label title="On every BUY fill the guard rests an SL this far under entry. This is the FLOOR — the stop is never tighter than this. There is no resting target any more — the app takes the partial and trails the stop.">on fill: SL at −<input id="gSlPct" type="number" step="0.1" min="0.1" max="50" style="width:48px">%</label>
+        <label title="The widest the stop may ever sit. If the 3-candle low is further than this under entry, the stop is capped here AND the line the app watches moves to the same place, so one number still decides the exit. 0 switches the cap off and the low decides, however far it is.">max width −<input id="gSlMaxPct" type="number" step="1" min="0" max="100" style="width:48px">%</label>
+        <label title="Where the resting exchange SL goes on a BUY fill.
+breach = one tick under the frozen 3-candle low — the same line the per-tick watcher exits on, so the position carries exactly ONE stop. This is the fix for 29/10, where a frozen level of 9.25 and an 8%-capped SL at 10.30 were both live and the capped one won.
+support = a tick under the immediate clustered support, floor slPct.
+A stop too far for your rupee risk means cut the SIZE, not the stop — the quantity is cut first. The max-width box is only for the rare bar whose low no sane size fits under.
+flat = slPct below entry, nothing else.">stop:
+          <select id="gSlMode" style="width:148px">
+            <option value="breach">3-candle low − 1 tick</option>
+            <option value="level">support (fenced)</option>
+            <option value="pct">flat −SL%</option>
+          </select>
+        </label>
+        <button id="gSave" class="sec">Save</button>
+      </div>
+      <div class="sechd">SETUP ALERTS</div>
+      <div class="orderctl">
+        <label title="watch the charted strikes for bounce / break setups"><input id="suEnabled" type="checkbox"> on</label>
+        <label>min <input id="suRR" type="number" step="0.1" min="0" max="10" style="width:52px">R</label>
+        <label>≥<input id="suTouch" type="number" step="1" min="1" max="5" style="width:42px"> touches</label>
+        <label>cooldown <input id="suCool" type="number" step="1" min="0" max="240" style="width:48px">m</label>
+        <button id="suSave" class="sec">Save</button>
+      </div>
+      <div class="sechd">OI ENTRY</div>
+      <div id="oiSigBar">
+        <label><input id="oiEnabled" type="checkbox"> detect</label>
+        <label>OI ≤ -<input id="oiDrop" type="number" step="0.5" min="0.1" max="50">%</label>
+        <label>px ≥ +<input id="oiPx" type="number" step="0.5" min="0.1" max="50">%</label>
+        <label>over <input id="oiLook" type="number" step="1" min="1" max="60">m</label>
+        <label>min <input id="oiRR" type="number" step="0.1" min="0" max="10">R</label>
+        <label title="places a real BUY on every fire"><input id="oiAuto" type="checkbox"> <span id="oiAutoLbl" class="off">auto-buy off</span></label>
+        <button id="oiSave" class="sec">Save</button>
+        <span id="oiStat" class="stat">—</span>
+      </div>
+    </div>
+  </details>
+
+  </div>
+
+  <div class="pane" id="paneTrade">
   <!-- band 1: state. Who is stopping you, what you can spend, is the guard
        alive. Plus the reading buttons, which are not order buttons and so
        do not belong next to EXIT ALL. -->
@@ -558,7 +693,6 @@
     <button id="pnlBtn" class="sec">P&amp;L history</button>
     <button id="reviewBtn" class="sec">last trade</button>
     <button id="anaBtn" class="sec">trade analysis</button>
-    <button id="uiTheme" class="sec" title="light or dark for this panel only — the charts stay dark">◐ light</button>
   </div>
 
   <div id="posStale"></div>
@@ -607,84 +741,20 @@
     <button id="btnExitAll" class="danger">EXIT ALL</button>
     <span id="tgtHint" style="color:var(--dim);font-size:11px"></span>
   </div>
-  <div id="msg"></div>
-
-  <!-- band 3: what the app is shouting about -->
-  <div id="gateBar" class="ok">checking the no-trade rules…</div>
-  <div id="gatePanel2"></div>
-  <div id="nakedAlert"></div>
-  <div id="oiAlert"></div>
-  <div id="regBar" class="cold">index regime — waiting for ticks…</div>
-  <!-- the shape that came before the 05/11 13:37 move, scored live both
-       ways round. Alert only: the orders are coilWatch's own decision and
-       are governed by coilWatch.json, not by anything on this page. -->
-  <div id="coilBox">
-    <div class="hd"><b>FAMILIAR SETUP &mdash; the 05/11 coil</b>
-      <span id="coilStat" class="stat">reading&hellip;</span>
-      <span style="flex:1"></span>
-      <span id="coilMode" class="stat"></span>
-    </div>
-    <div id="coilSides">
-      <div class="cside" id="coilUp"></div>
-      <div class="cside" id="coilDown"></div>
-    </div>
-    <div id="coilRel">release bar: waiting</div>
-  </div>
-
-  <div id="setupBox">
-    <div class="hd"><b>SETUP ALERTS</b>
-      <span id="suStat" class="stat">—</span>
-      <span class="stat">alert only — never places an order</span>
-      <span style="flex:1"></span>
-      <span id="famStat" class="stat" title="every closed trade in tradeLog.json, priced through charges.js">&nbsp;</span>
-    </div>
-    <div id="setupList"><div class="empty">no setups yet today</div></div>
-  </div>
-  <div id="trigList"></div>
-
-  <!-- set once, then left alone for weeks. Folded, so it stops competing
-       with the position table for attention. -->
-  <details class="pset">
-    <summary>settings — stop on fill · OI entry · setup alerts</summary>
-    <div class="inner">
-      <div class="orderctl">
-        <label title="On every BUY fill the guard rests an SL this far under entry (the level just below is the floor — never tighter than this, and there is NO maximum width). There is no resting target any more — the app takes the partial and trails the stop.">on fill: SL at −<input id="gSlPct" type="number" step="0.1" min="0.1" max="50" style="width:48px">%</label>
-        <label title="Where the resting exchange SL goes on a BUY fill.
-breach = one tick under the frozen 3-candle low — the same line the per-tick watcher exits on, so the position carries exactly ONE stop. This is the fix for 29/10, where a frozen level of 9.25 and an 8%-capped SL at 10.30 were both live and the capped one won.
-support = a tick under the immediate clustered support, floor slPct.
-No mode has a maximum-width cap any more. A stop too far for your rupee risk means cut the SIZE, not the stop.
-flat = slPct below entry, nothing else.">stop:
-          <select id="gSlMode" style="width:148px">
-            <option value="breach">3-candle low − 1 tick</option>
-            <option value="level">support (fenced)</option>
-            <option value="pct">flat −SL%</option>
-          </select>
-        </label>
-        <button id="gSave" class="sec">Save</button>
-      </div>
-      <div class="sechd">SETUP ALERTS</div>
-      <div class="orderctl">
-        <label title="watch the charted strikes for bounce / break setups"><input id="suEnabled" type="checkbox"> on</label>
-        <label>min <input id="suRR" type="number" step="0.1" min="0" max="10" style="width:52px">R</label>
-        <label>≥<input id="suTouch" type="number" step="1" min="1" max="5" style="width:42px"> touches</label>
-        <label>cooldown <input id="suCool" type="number" step="1" min="0" max="240" style="width:48px">m</label>
-        <button id="suSave" class="sec">Save</button>
-      </div>
-      <div class="sechd">OI ENTRY</div>
-      <div id="oiSigBar">
-        <label><input id="oiEnabled" type="checkbox"> detect</label>
-        <label>OI ≤ -<input id="oiDrop" type="number" step="0.5" min="0.1" max="50">%</label>
-        <label>px ≥ +<input id="oiPx" type="number" step="0.5" min="0.1" max="50">%</label>
-        <label>over <input id="oiLook" type="number" step="1" min="1" max="60">m</label>
-        <label>min <input id="oiRR" type="number" step="0.1" min="0" max="10">R</label>
-        <label title="places a real BUY on every fire"><input id="oiAuto" type="checkbox"> <span id="oiAutoLbl" class="off">auto-buy off</span></label>
-        <button id="oiSave" class="sec">Save</button>
-        <span id="oiStat" class="stat">—</span>
-      </div>
-    </div>
-  </details>
-
   <div id="pnlPanel" style="display:none"></div>
+  </div>
+
+  <div class="pane" id="paneRules">
+    <div class="pbar">
+      <span class="ph">RULES</span>
+      <span class="stat">read-only — every number comes live from the files the guard reads</span>
+      <span style="flex:1"></span>
+      <span id="rulesAsOf" class="stat"></span>
+      <button id="rulesRe" class="sec">reload</button>
+    </div>
+    <div id="rulesBody"><div class="empty">reading the rules…</div></div>
+  </div>
+
 </div>
 
 <div id="blockModal" role="alertdialog" aria-modal="true" aria-labelledby="bmHead">
@@ -3578,6 +3648,7 @@ async function fetchGuardSettings() {
     const s = await (await fetch(BASE+'/api/guardSettings')).json();
     guardCfg = s;   // autoTarget() falls back to the guard's own target %
     document.getElementById('gSlPct').value = s.slPct;
+    document.getElementById('gSlMaxPct').value = s.slMaxPct != null ? s.slMaxPct : 0;
     if (s.slMode) document.getElementById('gSlMode').value = s.slMode;
   } catch (e) { /* transient */ }
 }
@@ -3586,6 +3657,7 @@ document.getElementById('gSave').onclick = async () => {
     firstOrder: 'sl',
     targetPct: guardCfg && guardCfg.targetPct != null ? Number(guardCfg.targetPct) : 50,
     slPct: parseFloat(document.getElementById('gSlPct').value),
+    slMaxPct: parseFloat(document.getElementById('gSlMaxPct').value),
     slMode: document.getElementById('gSlMode').value
   };
   const r = await fetch(BASE+'/api/guardSettings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -3598,6 +3670,172 @@ document.getElementById('gSave').onclick = async () => {
       + `${d.slMaxPct > 0 ? `, capped at -${d.slMaxPct}%` : ', uncapped'} — applies to the next fill`);
 };
 fetchGuardSettings();
+
+/* ======================================================================
+THE PANEL TABS, AND THE RULES TAB
+
+The rules live in four files -- noTrade.json, guardSettings.json,
+autoTrade.json and confidence.js -- and three of them had no screen. So the
+only way to read a rule was to open the file, and a rule you cannot read is
+a rule you cannot check. /api/rules reads each one through the SAME function
+the live path uses, so this tab can never show a rule that is not the one
+being enforced.
+
+It is a print, not a control: nothing here saves anything. The boxes that
+change a rule stay where they already are, in the AUTO RUN tab.
+====================================================================== */
+const panelTabs = document.getElementById('panelTabs');
+let rulesLoaded = false;
+
+function showPane(id) {
+  for (const b of panelTabs.querySelectorAll('.ptab')) b.classList.toggle('on', b.dataset.pane == id);
+  for (const p of document.querySelectorAll('#panel .pane')) p.classList.toggle('on', p.id == id);
+  // read the rules the first time the tab is opened, not on every page load
+  if (id == 'paneRules' && !rulesLoaded) loadRules();
+}
+panelTabs.addEventListener('click', e => {
+  const b = e.target.closest('.ptab');
+  if (b) showPane(b.dataset.pane);
+});
+
+// one row of a two-column "setting — what it means" table
+function rRow(name, val, note) {
+  return `<tr><td>${esc(name)}</td><td class="num">${val == null ? '—' : esc(val)}</td>`
+    + `<td class="why">${esc(note || '')}</td></tr>`;
+}
+function rTable(head, body) {
+  // body may be an array of rows: join it, or the template puts commas between them
+  const rows = Array.isArray(body) ? body.join('') : String(body || '');
+  return `<div class="rwrap"><table><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>`
+    + `<tbody>${rows}</tbody></table></div>`;
+}
+function rSec(title, note, inner) {
+  return `<div class="rsec"><h4>${esc(title)}</h4>`
+    + (note ? `<div class="rnote">${esc(note)}</div>` : '') + inner + '</div>';
+}
+
+async function loadRules() {
+  const box = document.getElementById('rulesBody');
+  box.innerHTML = '<div class="empty">reading the rules…</div>';
+  let d;
+  try {
+    const r = await fetch(BASE + '/api/rules');
+    d = await r.json();
+    if (d.error) throw new Error(d.error);
+  } catch (e) {
+    box.innerHTML = `<div class="warn">could not read the rules — ${esc(e.message || e)}</div>`;
+    return;
+  }
+  rulesLoaded = true;
+  document.getElementById('rulesAsOf').textContent = 'as of ' + (d.asOf || '');
+
+  const out = [];
+  const st = d.stop || {}, nt = d.noTrade || {}, cf = d.confidence || {}, ap = d.autopilot || {};
+  const cc = d.candleCount || 3;
+
+  /* 1. the exit. One number decides it, and that is the whole point. */
+  out.push(rSec('THE STOP — where the exit sits',
+    `One position carries exactly ONE stop: the app watches the same line the exchange SL rests under, so the two can never race.`,
+    rTable(['rule', 'now', 'what it means'], [
+      rRow('stop mode', st.mode,
+        st.mode == 'breach' ? `one tick under the frozen ${cc}-candle low`
+          : st.mode == 'level' ? 'a tick under the immediate support' : 'flat % under entry'),
+      rRow('tightest stop (slPct)', st.slPct + '%', 'closer than this is inside the noise, so it is never used'),
+      rRow('widest stop (slMaxPct)', st.slMaxPct > 0 ? st.slMaxPct + '%' : 'off',
+        st.slMaxPct > 0 ? `if the ${cc}-candle low is further than this, the stop is capped here and the watched line moves with it`
+          : 'no cap — the low decides, however far it is'),
+      rRow('risk per trade', st.riskPctOfCapital + '% of capital',
+        'the stop is not moved to fit this; the QUANTITY is cut instead'),
+      rRow('partial exit', st.partialPct + '% (' + (st.partialMode || '') + ')',
+        'that much of the lot comes off at the immediate resistance'),
+      rRow('trail', st.trail ? 'on' : 'off', 'a resistance that price clears becomes the new stop'),
+      rRow('levels used', `${st.levelGapPct}% – ${st.levelMaxPct}%`,
+        'a level closer than the first is noise, further than the second is a dream'),
+      rRow('on fill', st.firstOrder, 'what rests at the exchange the moment a BUY fills'),
+    ])));
+
+  /* 2. the gate. Hard rows refuse the order; soft rows only colour it. */
+  const gates = d.gates || [];
+  const gRows = gates.map(g => {
+    const kind = g.never ? '<span class="hard">never waived</span>'
+      : g.hard ? '<span class="hard">hard</span>' : '<span class="soft">soft</span>';
+    const wv = (g.waivedFor || []).length ? esc(g.waivedFor.join(', ')) : '—';
+    return `<tr><td>${esc(g.label)}<br><span class="code">${esc(g.code)}</span>`
+      + (g.theory ? `<details class="th"><summary>why</summary>${paras(g.theory)}</details>` : '')
+      + `</td><td>${kind}</td><td class="why">${wv}</td></tr>`;
+  }).join('');
+  out.push(rSec('THE NO-TRADE GATE — every check, in the order it runs',
+    'A hard check refuses the order. A soft check only marks the row. "waived for" names the setups that are DEFINED by the thing the rule vetoes, so the rule still shows but does not block.',
+    rTable(['rule', 'kind', 'waived for'], gRows)));
+
+  /* 3. the raw numbers behind those labels */
+  out.push(rSec('THE NUMBERS BEHIND THE GATE', 'noTrade.json — change these from the AUTO RUN tab or /api/noTrade.',
+    rTable(['setting', 'now', 'what it means'], [
+      rRow('no entry before', nt.noEntryBefore, 'the first prints are an auction, not a trend'),
+      rRow('no entry after', nt.noEntryAfter, 'too late for a long option to be right'),
+      rRow('lunch window', `${nt.lunchFrom}–${nt.lunchTo}`, (nt.blockLunch ? 'ON' : 'OFF') + ' — clock version, kept switchable'),
+      rRow('min volume %', nt.minVolumePct + '%', 'lunch and late ask for this much of the opening volume'),
+      rRow('max day loss', '₹' + nt.maxDayLoss, 'realised, today'),
+      rRow('max loss streak', nt.maxLossStreak, 'losses in a row before the day stops'),
+      rRow('max trades a day', nt.maxTradesPerDay, 'closed trades today'),
+      rRow('max open', nt.maxOpenPositions, 'positions at a time'),
+      rRow('premium band', `₹${nt.minPremium}–${nt.maxPremium}`, 'below the floor one tick is too big a slice'),
+      rRow('min price', '₹' + nt.minPrice, 'price floor for an entry'),
+      rRow('thin gate', `${nt.minVolUnits} units or ${nt.minVolX}x median`, 'BOTH must fail before it blocks'),
+      rRow('chop gate', `${nt.regimeWin}-min efficiency ≥ ${nt.minEff}%`, 'a break out of the box overrides it'),
+      rRow('steep candle', nt.steepMult + 'x its own median body', 'do not buy the top of a vertical bar'),
+      rRow('gap since last entry', nt.minGapSec + 's', 'the impulse brake'),
+      rRow('dead tape', nt.deadScore + ' of 4 axes dead', 'flow, print size, OI, spread'),
+      rRow('lockout opens early at', nt.ultraPosPct + '% net', 'only a trade that really worked opens the door'),
+    ])));
+
+  /* 4. who may skip what */
+  const wv = d.waivers || {};
+  out.push(rSec('WAIVERS — which setup may skip which check', '',
+    rTable(['setup', 'may skip'], Object.keys(wv).map(k =>
+      `<tr><td class="code">${esc(k)}</td><td class="why">${esc(wv[k].join(', '))}</td></tr>`).join('')
+      + `<tr><td class="hard">never waived</td><td class="why">${esc((d.neverWaived || []).join(', '))}</td></tr>`)));
+
+  /* 5. the auto run itself */
+  out.push(rSec('THE AUTO RUN — autoTrade.json', 'What the headless autopilot is allowed to do on its own.',
+    rTable(['setting', 'now', 'what it means'], [
+      rRow('enabled', ap.enabled ? 'yes' : 'no', 'the master switch'),
+      rRow('index', ap.index, ''),
+      rRow('strike', ap.offset, 'auto = picked from IV'),
+      rRow('premium band', `₹${ap.premLo}–${ap.premHi}`, 'only strikes inside this band are bought'),
+      rRow('setups taken', (ap.kinds || []).join(', '), ''),
+      rRow('level setups', (ap.levelKinds || []).join(', '), 'only these are asked for R and touches'),
+      rRow('min R', ap.minRR, 'level setups only'),
+      rRow('min touches', ap.minTouches, 'level setups only'),
+      rRow('max trades a day', ap.maxTradesPerDay, 'the auto run stops here even if the gate allows more'),
+      rRow('max open', ap.maxOpen, ''),
+      rRow('gap between entries', ap.minGapMin + ' min', ''),
+      rRow('max lots', ap.maxLots, 'hard size ceiling'),
+      rRow('slippage allowed', ap.slipPct + '%', 'the limit price is put this far above the last price'),
+      rRow('reload strikes', ap.reloadMin + ' min', ''),
+    ])));
+
+  /* 6. the confidence index -- built and measured, not wired in yet */
+  const br = cf.breakable || {};
+  const fRows = (cf.factors || []).map(f =>
+    `<tr><td>${esc(f.factor)}</td><td class="why">${esc(f.test)}</td>`
+    + `<td class="num ${f.pts > 0 ? 'pos' : f.pts < 0 ? 'neg' : ''}">${f.pts > 0 ? '+' : ''}${f.pts}</td>`
+    + `<td class="why">${esc(f.why || '')}</td></tr>`).join('');
+  out.push(rSec('CONFIDENCE SCORE — how good is this fire?',
+    `Base ${cf.base}, and every factor is worth a few points only, so a fire has to be good on several counts to reach a bar. Nothing here looks at what happened after the fire.`,
+    (cf.live ? '' : '<div class="warn">NOT LIVE YET — built and measured on 06/11/2026, but the gate does not read it. Nothing on this list can cross a rule today.</div>')
+    + rTable(['factor', 'test', 'points', 'why'], fRows)
+    + '<div class="sechd">HOW TO READ IT</div>'
+    + rTable(['score', 'grade', 'meaning'], (cf.grades || []).map(g =>
+        `<tr><td class="num">${g.from}–${g.to}</td><td>${esc(g.name)}</td><td class="why">${esc(g.what)}</td></tr>`).join(''))
+    + '<div class="sechd">WHICH RULE A SCORE MAY CROSS</div>'
+    + rTable(['soft rule', 'score needed'], Object.keys(br).map(k =>
+        `<tr><td class="code">${esc(k)}</td><td class="num">${br[k]}</td></tr>`).join('')
+      + `<tr><td class="hard">never, at any score</td><td class="why">${esc((cf.unbreakable || []).join(', '))}</td></tr>`)));
+
+  box.innerHTML = out.join('');
+}
+document.getElementById('rulesRe').onclick = () => { rulesLoaded = false; loadRules(); };
 
 /*
 OI short-covering entries. The switch that matters is auto-buy: everything
