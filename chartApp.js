@@ -115,6 +115,7 @@ const dayjs = require('dayjs');
 
 const { connectToDatabase } = require('./connectToDatabase.js');
 const { getTodaysAccessToken } = require('./getTodaysAccessToken.js');
+const { ensureTodaysAccessToken, loginStatus } = require('./ensureAccessToken.js');
 const AccessTokens = require('./models/AccessTokens');
 const { getKiteConnectInstance, getTickerInstance } = require('./getKiteConnectInstance.js');
 const { placeOrderInFreezeChunks } = require('./placeOrderInFreezeChunks.js');
@@ -187,6 +188,12 @@ async function kiteRetry(fn, tries = 3, waitMs = 350) {
 }
 
 let kite, ticker;
+/*
+The real KiteConnect, kept apart from `kite` because MOCK mode replaces
+`kite` with the paper broker. A re-login has to re-point the live
+connection, and mockBroker has no setAccessToken of its own.
+*/
+let liveKite = null;
 let mock = null;        // the paper broker in MOCK mode, else null
 let autoPilot = null;   // the entry decision when nobody is clicking
 let coilWatch = null;   // the pre-move sign watcher, see coilWatch.js
@@ -3661,6 +3668,61 @@ REST refresh: positions, resting SELL orders and the breach level per token.
 Also the safety net that places a missing first order (e.g. a buy that
 filled while this process was down).
 */
+/*
+Is this error Kite saying the session is dead, rather than anything else?
+A dead session is the one failure where retrying the call is pointless and
+getting a new token is the fix.
+*/
+function isDeadSession(err) {
+    if (!err) return false;
+    if (err.error_type == 'TokenException') return true;
+    const msg = String(err.message || err);
+    return /TokenException|Incorrect .?api_key.? or .?access_token.?|Invalid .?access_token.?/i.test(msg);
+}
+
+/*
+The session died under a running process. Get a new token and re-point the
+live connection at it.
+
+This is the state the 15-second guardRefresh used to sit in forever: the
+token row was for yesterday, every call threw, and the process kept
+logging the same error while holding an unprotected position.
+
+The REST side recovers fully -- getPositions, getOrders, placeOrder and
+modifyOrder all go through `kite`, so the guard can protect a position
+again as soon as the token is swapped. The ticker cannot: its token is
+baked into a connected socket and its handlers are wired once in main().
+So say so loudly and alert the phone, because a guard with no tick stream
+cannot see a breach, and that needs a human to restart the process.
+*/
+let reloginAt = 0;
+async function reloginLive(err) {
+
+    // one re-login per cooldown; ensureTodaysAccessToken has its own guard too
+    if (Date.now() - reloginAt < 60000) return false;
+    reloginAt = Date.now();
+
+    console.log(`🔑 Kite session is dead mid-session (${err && err.message || err}) -- getting a new one`);
+
+    const fresh = await ensureTodaysAccessToken({ force: true });
+    if (!fresh || fresh == -1) {
+        await alertPhone('🛑 Kite session dead', 'The session expired and the login could not get a new one. No guard.',
+            { key: `relogin-failed:${new Date().toISOString().slice(0, 10)}` });
+        return false;
+    }
+
+    if (liveKite) liveKite.setAccessToken(fresh);
+
+    console.log('✅ orders and positions are back on a fresh token');
+    console.log('🛑 the tick stream is NOT -- it still holds the dead token, so the breach exit is blind.');
+    console.log('   restart chartApp (`pm2 restart chartApp`) to put the feed on the new session.');
+
+    await alertPhone('⚠️ Kite re-login done', 'Orders work again. The tick feed is still on the old token -- restart chartApp.',
+        { key: `relogin:${Date.now()}` });
+
+    return true;
+}
+
 async function guardRefresh() {
 
     try {
@@ -3757,6 +3819,8 @@ async function guardRefresh() {
 
     } catch (err) {
         console.log(err, "❌ guardRefresh error");
+        // a dead session repeats here every 15 seconds until the token is replaced
+        if (isDeadSession(err)) await reloginLive(err);
     }
 }
 
@@ -4011,11 +4075,30 @@ function checkRivalGuards() {
 async function main() {
 
     await connectToDatabase();
-    const accessToken = await getTodaysAccessToken();
+
+    /*
+    Get the session here instead of only reading it. The login used to be
+    cron's job, and with cron disabled chartApp would start with
+    accessToken -1, fail every Kite call and still look alive -- incident 3
+    in incidents-2026-11-05.md. Now a start with no token for today does
+    the login itself and comes up with a working session.
+
+    A start with no session is not worth continuing: the charts, the guard
+    and the entry all need Kite. Exit instead, and let pm2 bring the
+    process back once the reason is gone (restart delay covers the rest).
+    */
+    const accessToken = await ensureTodaysAccessToken();
     console.log(accessToken, "accessToken");
+
+    if (!accessToken || accessToken == -1) {
+        console.log('🛑 No Kite session and the login did not get one. Not starting blind -- exiting.');
+        console.log('   run `node login.js` by hand to see the login fail with its own output.');
+        process.exit(1);
+    }
 
     kite = await getKiteConnectInstance(accessToken);
     ticker = await getTickerInstance(accessToken);
+    liveKite = kite;
 
     /*
     Paper mode: wrap the live connection. Reads still go to Kite (so the
@@ -4160,9 +4243,14 @@ async function main() {
         const date = new Date().toISOString().slice(0, 10);
         try {
             const doc = await AccessTokens.findOne({ date }, 'access_token user_id');
-            res.json({ ok: !!(doc && doc.access_token), date, user_id: doc ? doc.user_id : null });
+            res.json({
+                ok: !!(doc && doc.access_token), date,
+                user_id: doc ? doc.user_id : null,
+                // chartApp can do the login itself now, so say where that stands
+                login: loginStatus(),
+            });
         } catch (e) {
-            res.json({ ok: false, date, error: e.message });
+            res.json({ ok: false, date, error: e.message, login: loginStatus() });
         }
     });
 

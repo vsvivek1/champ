@@ -34,7 +34,13 @@ const path = require('path');
 const { spawn } = require('child_process');
 const { getTodaysAccessToken } = require('./getTodaysAccessToken.js');
 
-const LOGIN_SCRIPT = path.join(__dirname, 'login.js');
+/*
+LOGIN_SCRIPT is overridable so the spawn wrapper can be tested against a
+stub. A real login replaces today's token, which blinds the chartApp that
+is already running on the old one -- not something to do to prove the
+child process plumbing works.
+*/
+const LOGIN_SCRIPT = process.env.LOGIN_SCRIPT || path.join(__dirname, 'login.js');
 
 // a Kite login with TOTP and the callback redirect takes ~30-60s on this machine
 const LOGIN_TIMEOUT_MS = Number(process.env.LOGIN_TIMEOUT_MS || 3 * 60 * 1000);
