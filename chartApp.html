@@ -36,7 +36,7 @@
   .chartbox .quick button:hover { opacity:1; }
   .chartbox .quick button.qb { background:var(--green); }
   .chartbox .quick button.qs { background:#b71c1c; }
-  .chartbox .quick button.armed { background:#ff6d00; }
+  .chartbox .quick button.armed { background:#ff6d00; white-space:nowrap; letter-spacing:-.2px; }
   .ob.below { background:rgba(239,83,80,.15); color:var(--red); }
   .ob.above { background:rgba(38,166,154,.15); color:var(--green); }
   .chartbox .sd { position:absolute; z-index:5; top:44px; left:8px; font-size:11px; font-weight:600; padding:2px 6px; border-radius:3px; }
@@ -132,6 +132,15 @@
   #apState.on  { color:var(--green); }
   #apState.off { color:var(--dim); }
   #apState.mock { color:#c9a227; }
+  /* disarming is one click because it is the safe direction. Arming asks
+     twice, the same way B50/B100 do, because it turns on a thing that
+     spends money with nobody at the keyboard. */
+  #apArm { min-width:86px; }
+  #apArm.on   { border-color:#4e8f6d; color:#9fe3bd; }
+  #apArm.sure { border-color:#c62828; color:#ff9e9e; font-weight:bold; }
+  #apFeed .r.would .act { background:#3d4757; color:#cfd8e3; }
+  #apFeed .r.would { background:rgba(255,255,255,.04); }
+  #apFeed .r.would .why { color:#cfd8e3; }
   #apPhone { cursor:help; }
   #apPhone.ok   { color:#9fe3bd; }
   #apPhone.dead { color:#ff9e9e; font-weight:bold; }
@@ -339,6 +348,9 @@
   #panel.lightui .cside.lead .sc { color:#8a6616; }
   #panel.lightui .cside.hot .sc  { color:#b02626; }
   #panel.lightui .sign.on { border-color:#7cc69c; background:#e7f7ee; color:#135a3b; }
+  #panel.lightui #apFeed .r.would { background:rgba(0,0,0,.04); }
+  #panel.lightui #apFeed .r.would .why { color:#4a5568; }
+  #panel.lightui #apFeed .r.would .act { background:#c3ccd8; color:#2b3340; }
   #panel.lightui #apPhone.ok { color:#1d6b43; }
   #panel.lightui #apPhone.dead { color:#a31414; }
   #panel.lightui #apFeed .r.placed { background:rgba(46,125,82,.1); }
@@ -520,6 +532,20 @@
 
 <div id="panel">
 
+  <div id="autoBox">
+    <div class="hd"><b>AUTOPILOT</b>
+      <button id="apArm" class="sec">&hellip;</button>
+      <span id="apState" class="off">reading&hellip;</span>
+      <span id="apWhere" class="stat"></span>
+      <span id="apPhone" class="stat"></span>
+      <span style="flex:1"></span>
+      <span id="apCount" class="stat"></span>
+    </div>
+    <div id="apCaps"></div>
+    <div id="apFeed"><div class="empty">nothing scanned yet</div></div>
+  </div>
+
+
   <!-- band 1: state. Who is stopping you, what you can spend, is the guard
        alive. Plus the reading buttons, which are not order buttons and so
        do not belong next to EXIT ALL. -->
@@ -592,18 +618,6 @@
   <!-- the shape that came before the 05/11 13:37 move, scored live both
        ways round. Alert only: the orders are coilWatch's own decision and
        are governed by coilWatch.json, not by anything on this page. -->
-  <div id="autoBox">
-    <div class="hd"><b>AUTOPILOT</b>
-      <span id="apState" class="off">reading&hellip;</span>
-      <span id="apWhere" class="stat"></span>
-      <span id="apPhone" class="stat"></span>
-      <span style="flex:1"></span>
-      <span id="apCount" class="stat"></span>
-    </div>
-    <div id="apCaps"></div>
-    <div id="apFeed"><div class="empty">nothing scanned yet</div></div>
-  </div>
-
   <div id="coilBox">
     <div class="hd"><b>FAMILIAR SETUP &mdash; the 05/11 coil</b>
       <span id="coilStat" class="stat">reading&hellip;</span>
@@ -891,6 +905,9 @@ flat = slPct below entry, nothing else.">stop:
   <div>Before you send a BUY, the menu says what it risks: <b>risk ₹X</b> = (entry − the stop the guard will rest) × qty,
   with the premium under it. Drag the line or change <b>on fill</b> and the number re-computes.
   The CONFIRM label and the B50/B100 "SURE?" step carry the same figure, so nothing is sent without the money being on screen.
+  The armed button itself now reads <b>SURE? −₹1,318</b> — a <b>~</b> in front means it is still the page's estimate and the
+  server's exact stop is on the way, <b>LOSS ?</b> means the server could not quote one, and <b>−₹9,375 ALL</b> means no stop
+  will rest and the whole premium is the risk. S50/S100 stay a plain SURE?: they close a position, they cannot lose anything new.
   When the first order fills, a <b>💸</b> message reports the risk read off the order that actually rested — the real number, not the estimate.
   The positions table has a <b>Risk</b> column doing the same from the live resting SL.
   With <code>firstOrder: target</code> there is no exchange-side stop, so every one of these reads the <b>whole premium</b> in red:
@@ -924,6 +941,20 @@ flat = slPct below entry, nothing else.">stop:
   <code>POST /api/autopilot</code>.<br><br>
   <b>While this page is open the autopilot does not act on bounce/break setups</b> &mdash; you are the hand on the
   button, and the header says so. It still runs the coil release.</div>
+
+  <h4>The ARM switch &mdash; off does not mean asleep</h4>
+  <div>The button in the autopilot header. One press switches it <b>off</b>; arming asks twice and says
+  <b class="r">SURE? LIVE</b> on the second press, within 5 seconds, the same way B50/B100 do &mdash; because it is
+  turning on a thing that spends money with nobody watching.<br><br>
+  <b>OFF means it will not send the order. It does not mean it stops deciding.</b> A switched-off autopilot still runs
+  the whole thing &mdash; every gate, the quantity, the stop, the rupee risk &mdash; and then stops at the order and
+  writes down what it would have bought. The feed shows those as <b>would</b> rows, and the header reads
+  <b>would have taken 3/6 today &middot; risking ₹4,120</b>. That is the one question the old code could never answer:
+  whether arming it was a good idea. Now you can watch it for a day with your money untouched and decide from its own
+  record instead of from a guess.<br><br>
+  This shadow book is kept separate but counts the same &mdash; the daily cap, the 3-minute gap and the open-position
+  limit all apply to it, so the simulation is as tight as the real thing and it cannot write down six trades it would
+  never have been allowed to take.</div>
 
   <h4>&#128241; What reaches the phone</h4>
   <div>The chip in the autopilot header is the honest state of the alert channel.
@@ -1924,6 +1955,11 @@ function connectWs() {
           + (m.riskRs != null ? `, risk ₹${m.riskRs}` : ''));
         beep(880, 3);
         refreshPosition();
+      } else if (m.action == 'would') {
+        msg(`💤 autopilot is OFF — would have bought ${m.qty} ${m.tradingsymbol} @ ${m.price}`
+          + ` (${m.setup || ''}, stop ${m.stop}`
+          + (m.riskRs != null ? `, risk ₹${m.riskRs}` : '') + ')');
+        beep(620, 2);
       } else if (m.action == 'blocked') {
         msg(`⛔ autopilot refused ${m.tradingsymbol} (${m.setup || ''} was takeable) — ${m.why}`);
         beep(420, 1);
@@ -3166,6 +3202,20 @@ So ask /api/risk the moment the button arms and rewrite the line when it
 answers -- a few ms, well inside the 3s arm window. If it does not answer,
 the line says UNKNOWN rather than a number it cannot stand behind.
 */
+/*
+The rupee loss belongs ON THE BUTTON, not only beside it.
+
+The armed button said just "SURE?" and the number lived in #msg and in the
+risk box -- both away from the finger that is about to press again. The eye
+is on the button it just hit, so the loss is written on its face: an
+estimate with a ~ while the server is asked, the exact figure once it
+answers, and "LOSS ?" if it never does. Exit buttons (S50/S100) keep the
+plain SURE? -- they close a position, they cannot lose anything new.
+*/
+function armLabel(btn, txt) {
+  if (quickArmed && quickArmed.btn === btn) btn.textContent = txt;
+}
+
 let quickRiskSeq = 0;
 async function quickRisk(o, px, qty, pct) {
   if (!(px > 0) || !(qty > 0) || !o || !o.token) return;
@@ -3179,6 +3229,8 @@ async function quickRisk(o, px, qty, pct) {
     const line = r.firstOrder != 'sl' ? `NO stop rests — ${inr(r.premium)} at risk`
       : (net != null ? `max loss ${inr(net)} (stop ${(+r.stop).toFixed(2)}, −${r.riskPct}%)`
         : `max loss UNKNOWN — ${r.note || 'no level yet'}`);
+    armLabel(quickArmed.btn, r.firstOrder != 'sl' ? `SURE? −${inr(r.premium)} ALL`
+      : (net != null ? `SURE? −${inr(net)}` : 'SURE? LOSS ?'));
     msg(`B${pct} ${o.tradingsymbol} @ ~${px.toFixed(2)} ×${qty} — ${line} — click again to send`);
   } catch (e) { /* the pending line stays on screen */ }
 }
@@ -3213,6 +3265,9 @@ async function quickAction(btn, slot, side, pct) {
           detail: band.sl ? `B${pct} ${o.tradingsymbol} ×${q} — asking the server for the exact stop…`
                           : `B${pct} ${o.tradingsymbol} ×${q} — target first, no stop will rest`
       });
+      armLabel(btn, !band ? 'SURE? …'
+        : (band.sl ? (band.risk != null ? `SURE? ~−${inr(band.risk)}` : 'SURE? …')
+                   : `SURE? −${inr(band.premium)} ALL`));
       quickRisk(o, px, q, pct);     // replaces the line with the real rupee loss
     }
     quickTimer = setTimeout(disarmQuick, 3000);
@@ -3848,9 +3903,11 @@ the minute the setup actually releases in.
 setInterval(refreshCoil, 20000);
 
 /*
-AUTOPILOT panel -- render only. The server decides everything; this just
-shows the decisions, including the ones where it said no.
+AUTOPILOT panel -- render only, except for the one switch. The server
+decides everything; this just shows the decisions, including the ones
+where it said no.
 */
+let apArmPending = 0;     // ms of the first ARM press, while it asks again
 function apTime(iso) {
   const d = new Date(iso);
   return isNaN(d) ? '--:--' : d.toLocaleTimeString('en-IN',
@@ -3877,8 +3934,9 @@ function apCapsHtml(cfg, last) {
 function apRowHtml(r) {
   const act = String(r.action || '').toLowerCase();
   const bits = [];
-  if (act == 'placed') {
-    bits.push(`${r.qty} @ ${r.price}` + (r.riskRs != null ? ` — risk ₹${r.riskRs}` : ''));
+  if (act == 'placed' || act == 'would') {
+    bits.push((act == 'would' ? 'would buy ' : '') + `${r.qty} @ ${r.price}`
+      + (r.riskRs != null ? ` — risk ₹${r.riskRs}` : ''));
   } else if (r.why) {
     bits.push(r.why);
   }
@@ -3909,10 +3967,24 @@ function paintAuto(d) {
   the same in a log and are not the same thing at all, so MOCK is said in
   amber and never in green.
   */
-  if (!on) { st.className = 'off'; st.textContent = 'DISARMED'; }
+  if (!on) { st.className = 'off'; st.textContent = 'OFF · still deciding'; }
   else if (d.mock) { st.className = 'mock'; st.textContent = 'ARMED · MOCK BOOK'; }
   else { st.className = 'on'; st.textContent = 'ARMED · LIVE'; }
   box.className = on && !d.mock ? 'live' : (on ? '' : 'off');
+
+  /*
+  The switch. Off is one click, because stopping is always allowed. On
+  asks twice and says LIVE on the second press, the same as B50/B100 --
+  it turns on a thing that spends real money with nobody watching.
+  */
+  const arm = document.getElementById('apArm');
+  if (arm && !apArmPending) {
+    arm.className = on ? 'sec on' : 'sec';
+    arm.textContent = on ? 'switch off' : 'ARM';
+    arm.title = on
+      ? 'Stop sending orders. It keeps reading every setup and the feed keeps filling, so you still see what it would have done.'
+      : 'Start sending real orders. Right now it is deciding but not buying.';
+  }
 
   document.getElementById('apWhere').textContent =
     [cfg.index || '?',
@@ -3921,8 +3993,16 @@ function paintAuto(d) {
     + (d.headless ? '' : ' · page open, so bounce/break are yours to click');
 
   const nx = d.nextEntryInSec || 0;
+  /*
+  Switched off, "0/6 today" is true and useless. The number that matters
+  then is how many it WOULD have taken and what they would have risked --
+  that is the answer to whether arming it is a good idea.
+  */
   document.getElementById('apCount').innerHTML =
-    `${d.tradesToday || 0}/${cfg.maxTradesPerDay || 0} today · ${d.left || 0} left`
+    (on
+      ? `${d.tradesToday || 0}/${cfg.maxTradesPerDay || 0} today · ${d.left || 0} left`
+      : `would have taken ${d.wouldToday || 0}/${cfg.maxTradesPerDay || 0} today`
+        + (d.wouldRiskRs ? ` · risking ₹${Math.round(d.wouldRiskRs).toLocaleString('en-IN')}` : ''))
     + ` · ${d.scanned || 0} scanned`
     + (nx > 0 ? ` · <b style="color:#ffd98a">next in ${Math.floor(nx / 60)}:${String(nx % 60).padStart(2, '0')}</b>` : '');
 
@@ -3980,6 +4060,41 @@ The ws 'autopilot' message refreshes it the moment anything happens, so
 this poll is only the safety net.
 */
 setInterval(refreshAuto, 15000);
+
+async function setArmed(on) {
+  try {
+    const res = await fetch(BASE + '/api/autopilot', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: !!on }),
+    });
+    const d = await res.json();
+    if (!res.ok) { msg(`⚠️ autopilot switch refused: ${d.error || res.status}`); return; }
+    msg(on
+      ? '🤖 AUTOPILOT ARMED — it will send real orders on a TAKE setup'
+      : '💤 autopilot switched off — it keeps deciding, it just will not buy');
+    beep(on ? 880 : 420, on ? 3 : 1);
+  } catch (e) {
+    msg(`⚠️ autopilot switch failed: ${e.message || e}`);
+  }
+  refreshAuto();
+}
+
+document.getElementById('apArm').onclick = function () {
+  const armed = this.classList.contains('on');
+  if (armed) { apArmPending = 0; setArmed(false); return; }
+
+  // first press asks; second press within 5s does it
+  if (apArmPending && Date.now() - apArmPending < 5000) {
+    apArmPending = 0;
+    setArmed(true);
+    return;
+  }
+  apArmPending = Date.now();
+  this.className = 'sec sure';
+  this.textContent = 'SURE? LIVE';
+  this.title = 'Press again within 5 seconds to let it send real orders by itself.';
+  setTimeout(() => { if (apArmPending) { apArmPending = 0; refreshAuto(); } }, 5000);
+};
 
 /*
 The standing record, in the setup header.

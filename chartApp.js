@@ -3497,6 +3497,11 @@ async function checkSetups(token, ltp) {
                         `${out.qty} @ ${out.price} \u2014 ${row.kind}, stop ${out.stop}`
                         + (out.riskRs != null ? `, risk \u20b9${out.riskRs}` : ''),
                         { key: `auto:placed:${row.tradingsymbol}` });
+                } else if (out.action == 'would') {
+                    alertPhone(`\u{1F4A4} Autopilot is OFF \u2014 ${row.tradingsymbol}`,
+                        `would have bought ${out.qty} @ ${out.price}, stop ${out.stop}`
+                        + (out.riskRs != null ? `, risk \u20b9${out.riskRs}` : ''),
+                        { key: `auto:would:${row.tradingsymbol}` });
                 } else if (out.action == 'blocked') {
                     alertPhone(`\u26d4 Autopilot refused ${row.tradingsymbol}`,
                         `${row.kind} was takeable \u2014 ${out.why}`,

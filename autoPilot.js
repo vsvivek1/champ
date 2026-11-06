@@ -86,6 +86,22 @@ function createAutoPilot(deps) {
 
     const taken = [];              // this session's autopilot entries
     let lastEntryAt = 0;
+
+    /*
+    The shadow book: what it WOULD have bought while switched off.
+
+    `enabled: false` used to return { action: 'off' } on the first line and
+    stop. So the one thing you could never find out was whether arming it
+    was a good idea -- switched off it said nothing at all, and switched on
+    it was already spending money.
+
+    Now a disarmed autopilot runs the whole decision and stops at the order.
+    The caps count against this book instead of the real one, so the
+    simulation is faithful: six would-be trades a day really is the sixth
+    one refused, not an unbounded list.
+    */
+    const shadow = [];
+    let lastShadowAt = 0;
     let skipLog = new Map();       // reason -> last time it was logged (keep the log readable)
 
     /*
@@ -110,9 +126,27 @@ function createAutoPilot(deps) {
         console.log(`🤖 autopilot skip (${reason}): ${msg}`);
     }
 
-    function todayCount() {
+    function todayCount(book = taken) {
         const d = new Date().toDateString();
-        return taken.filter(t => new Date(t.at).toDateString() == d).length;
+        return book.filter(t => new Date(t.at).toDateString() == d).length;
+    }
+
+    /*
+    Free cash, for the sizing.
+
+    The live path reads it fresh every time: it is about to spend the money
+    and a stale balance oversizes. The shadow run reads it at most once a
+    minute, because it now evaluates every setup of every charted token and
+    a margin call per row for a decision nobody acts on is waste.
+    */
+    let cashCache = 0, cashAt = 0;
+    async function cashAvailable(dry) {
+        if (dry && Date.now() - cashAt < 60000) return cashCache;
+        const m = await kite.getMargins();
+        const c = (m.equity && m.equity.available && m.equity.available.live_balance != null)
+            ? m.equity.available.live_balance : (m.equity ? m.equity.net : 0);
+        cashCache = c; cashAt = Date.now();
+        return c;
     }
 
     /*
@@ -121,8 +155,13 @@ function createAutoPilot(deps) {
     */
     async function decide(row) {
         const cfg = readCfg();
+        /*
+        Switched off means "do not send the order", not "do not think". Every
+        check below runs either way; only the last step changes.
+        */
+        const dry = !cfg.enabled;
+        const book = dry ? shadow : taken;
         try {
-            if (!cfg.enabled) return { action: 'off' };
 
             if (!cfg.kinds.includes(row.kind)) {
                 note('kind', `${row.kind} is not in [${cfg.kinds.join(', ')}]`);
@@ -149,18 +188,25 @@ function createAutoPilot(deps) {
                 return { action: 'skip', why: 'no usable stop' };
             }
 
+            /*
+            The open-position cap is read off the real guard either way. A
+            shadow run cannot pretend the desk is free while a real trade is
+            on -- the whole point is to simulate what WOULD have happened,
+            and what would have happened is that it waited.
+            */
             const open = openCount();
             if (open >= cfg.maxOpen) {
                 note('open', `${open} position(s) already open, max ${cfg.maxOpen}`);
                 return { action: 'skip', why: `${open} open >= max ${cfg.maxOpen}` };
             }
-            const n = todayCount();
+            const n = todayCount(book);
             if (n >= cfg.maxTradesPerDay) {
-                note('count', `${n} autopilot trades today, max ${cfg.maxTradesPerDay} — done for the day`);
+                note('count', `${n}${dry ? ' would-be' : ''} autopilot trades today, max ${cfg.maxTradesPerDay} — done for the day`);
                 return { action: 'skip', why: `${n} trades today >= max ${cfg.maxTradesPerDay}` };
             }
-            const gapMin = (Date.now() - lastEntryAt) / 60000;
-            if (lastEntryAt && gapMin < cfg.minGapMin) {
+            const sinceLast = dry ? lastShadowAt : lastEntryAt;
+            const gapMin = (Date.now() - sinceLast) / 60000;
+            if (sinceLast && gapMin < cfg.minGapMin) {
                 note('gap', `last entry was ${gapMin.toFixed(1)} min ago, waiting ${cfg.minGapMin}`);
                 return { action: 'skip', why: `only ${gapMin.toFixed(1)} min since the last entry` };
             }
@@ -184,9 +230,7 @@ function createAutoPilot(deps) {
             const lot = lotOf(token) || 1;
             const price = roundToTick(ltp * (1 + cfg.slipPct / 100));
 
-            const m = await kite.getMargins();
-            const cash = (m.equity && m.equity.available && m.equity.available.live_balance != null)
-                ? m.equity.available.live_balance : (m.equity ? m.equity.net : 0);
+            const cash = await cashAvailable(dry);
 
             // the ask: the configured lot ceiling, or whatever the cash buys,
             // whichever is smaller. The risk cap decides the real number.
@@ -204,6 +248,29 @@ function createAutoPilot(deps) {
             }
             if (rc.capped) console.log(`📐 autopilot ${row.tradingsymbol}: risk cap — ${rc.why}`);
             qty = rc.qty;
+
+            /*
+            Disarmed, this is where it stops. Everything above has already
+            happened -- the gate, the sizing, the risk cap -- so the line in
+            the feed is the real decision with the real quantity, just
+            without an order behind it.
+            */
+            if (dry) {
+                lastShadowAt = Date.now();
+                const would = {
+                    at: new Date().toISOString(), tradingsymbol: row.tradingsymbol, token,
+                    kind: row.kind, level: row.level, touches: row.touches,
+                    qty, price, stop: row.stop, target: row.target, rr: row.rr,
+                    riskRs: rc.per ? Math.round(rc.per * qty) : null,
+                    order_ids: [], mock: false, dry: true,
+                };
+                shadow.push(would);
+                console.log(`\u{1F4A4} autopilot is OFF \u2014 would have bought ${qty} ${row.tradingsymbol} @ ${price}`
+                    + ` (${row.kind}, stop ${row.stop}`
+                    + (would.riskRs != null ? `, risk \u20b9${would.riskRs}` : '')
+                    + `) [${n + 1}/${cfg.maxTradesPerDay} would-be today]`);
+                return { action: 'would', ...would };
+            }
 
             // on disk before the BUY: a mock fill can land on the next tick
             const first = cfg.firstOrder || row.firstOrder;
@@ -274,19 +341,33 @@ function createAutoPilot(deps) {
         const cfg = readCfg();
         return {
             cfg, mock: !!isMock,
+            armed: !!cfg.enabled,
             tradesToday: todayCount(),
-            left: Math.max(0, cfg.maxTradesPerDay - todayCount()),
+            left: Math.max(0, cfg.maxTradesPerDay - todayCount(cfg.enabled ? taken : shadow)),
             lastEntryAt: lastEntryAt || null,
             taken: taken.slice(-20),
+            /*
+            What it would have done while switched off, and what that risk
+            added up to. This is the number that answers "is arming this a
+            good idea", which switched off used to be unanswerable.
+            */
+            wouldToday: todayCount(shadow),
+            would: shadow.slice(-20),
+            wouldRiskRs: shadow
+                .filter(t => new Date(t.at).toDateString() == new Date().toDateString())
+                .reduce((a, t) => a + (t.riskRs || 0), 0),
             /*
             Newest first: the page reads top-down and the last decision is
             the one that matters.
             */
             journal: journal.slice(-30).reverse(),
             scanned: journal.length,
-            nextEntryInSec: lastEntryAt
-                ? Math.max(0, Math.round(cfg.minGapMin * 60 - (Date.now() - lastEntryAt) / 1000))
-                : 0,
+            nextEntryInSec: (() => {
+                const last = cfg.enabled ? lastEntryAt : lastShadowAt;
+                return last
+                    ? Math.max(0, Math.round(cfg.minGapMin * 60 - (Date.now() - last) / 1000))
+                    : 0;
+            })(),
         };
     }
 
