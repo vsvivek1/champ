@@ -3527,12 +3527,45 @@ async function checkSetups(token, ltp) {
     if (!inst) return;                                               // spot has no setups
 
     const min = Math.floor(Date.now() / 60000);
-    if (setupLastMin.get(token) == min) return;                      // already did this minute
-    setupLastMin.set(token, min);
 
-    // stamp the result on the older rows first: a setup that fires today is
-    // judged against rows that already know what they did
-    scoreSetupLog(Number(token), ltp);
+    /*
+    WHY SPEEDGREEN GETS ITS OWN WAY IN.
+
+    This function is called on every tick and then gated to one pass per
+    minute. For a level setup that is right: the levels and the completed
+    bars only change when a bar closes. speedgreen is the opposite -- it
+    reads the minute IN PROGRESS, so the once-a-minute gate gave it exactly
+    one look, on the first tick of a new minute, when the live bar is zero
+    seconds old and its open still equals its close. It would almost never
+    have fired, and a burst in the middle of a minute would be over and
+    inside calcSpeed's own baseline before the next pass came.
+
+    So the speed test is done first, off in-memory buckets with no API
+    call, and a live burst is allowed in mid-minute. computeLevels below
+    DOES hit the Kite historical API, which is why that is allowed only
+    when the burst is real and the kind's own cooldown has passed -- at
+    most one extra pass per cooldownMin per token, not one per tick.
+
+    A mid-minute pass is speed ONLY: the level detectors and the forward
+    scoring stay on the minute, where their inputs actually change.
+    */
+    const sp = calcSpeed(Number(token));
+    const liveBar = liveMinCandle(Number(token));
+    const burst = sp != null && sp >= cfg.speedMult
+        && liveBar && liveBar.close > liveBar.open;
+
+    const newMinute = setupLastMin.get(token) != min;
+    const spFired = setupLastFire.get(token + '|speedgreen');
+    const spReady = burst && (spFired == null || min - spFired >= cfg.cooldownMin);
+    if (!newMinute && !spReady) return;
+    const speedOnly = !newMinute;
+
+    if (newMinute) {
+        setupLastMin.set(token, min);
+        // stamp the result on the older rows first: a setup that fires today is
+        // judged against rows that already know what they did
+        scoreSetupLog(Number(token), ltp);
+    }
 
     const lv = await computeLevels(token);
     if (!lv || !lv.candles || lv.candles.length < 3) return;
@@ -3540,14 +3573,14 @@ async function checkSetups(token, ltp) {
     const last = c[c.length - 1], prev = c[c.length - 2];
 
     const hits = [];
-    const sup = pickSupport(lv, last.close);
+    const sup = speedOnly ? null : pickSupport(lv, last.close);
     if (sup && sup.touches >= cfg.minTouches
         && last.low <= sup.price * (1 + cfg.wickPct / 100)
         && last.close > sup.price && last.close > last.open) {
         hits.push({ kind: 'bounce', level: sup.price, touches: sup.touches,
             what: `wicked into ${sup.price} (${sup.touches}t) and closed back above at ${last.close}` });
     }
-    const below = lv.resistances.filter(L => L.price < last.close);
+    const below = speedOnly ? [] : lv.resistances.filter(L => L.price < last.close);
     const R = below[below.length - 1];
     if (R && R.touches >= cfg.minTouches
         && last.close >= R.price * (1 + cfg.breakClearPct / 100)
@@ -3567,9 +3600,7 @@ async function checkSetups(token, ltp) {
     time a 2x minute has closed the move it was reporting is already paid
     for.
     */
-    const sp = calcSpeed(Number(token));
-    const liveBar = liveMinCandle(Number(token));
-    if (sp != null && sp >= cfg.speedMult && liveBar && liveBar.close > liveBar.open) {
+    if (burst) {
         const pct = liveBar.open > 0 ? +(((liveBar.close - liveBar.open) / liveBar.open) * 100).toFixed(1) : 0;
         hits.push({ kind: 'speedgreen', level: liveBar.open, touches: null,
             what: `moving ${sp}x its own pace and this minute is green: ${liveBar.open} → ${liveBar.close} (+${pct}%)` });
@@ -3587,6 +3618,7 @@ async function checkSetups(token, ltp) {
     retested, which is the whole point.
     */
     const run = (() => {
+        if (speedOnly) return null;
         if (c.length < cfg.redRun + cfg.holdMin) return null;
         const holdBars = c.slice(-cfg.holdMin);
         const before = c.slice(0, -cfg.holdMin);
