@@ -52,6 +52,39 @@ let inFlight = null;      // the running login, shared by every caller
 let lastFailAt = 0;       // when the last login failed, for the cooldown
 let lastError = '';       // why it failed, for the status endpoint
 
+/*
+The cooldown lives on disk, not just in this variable.
+
+chartApp exits when it cannot get a session, and pm2 has autorestart on
+with no restart_delay -- so it comes straight back. A cooldown held only
+in memory dies with the process, and the fresh one launches another Chrome
+at once. A login that fails for a standing reason (TOTP secret changed,
+Kite down, no Chrome) would spawn Chrome in a tight loop until the machine
+gives up. Keeping the timestamp in a file means a restarted process waits
+out the same cooldown and exits cheaply instead.
+*/
+const COOLDOWN_FILE = path.join(__dirname, '.loginCooldown.json');
+
+function readCooldown() {
+    try {
+        const saved = JSON.parse(require('fs').readFileSync(COOLDOWN_FILE, 'utf8'));
+        if (saved && Number(saved.lastFailAt) > 0) {
+            lastFailAt = Number(saved.lastFailAt);
+            lastError = String(saved.lastError || 'a login failed in an earlier run');
+        }
+    } catch (e) { /* no file, or junk in it: no cooldown, which is the safe default */ }
+}
+
+function writeCooldown() {
+    try {
+        require('fs').writeFileSync(COOLDOWN_FILE, JSON.stringify({ lastFailAt, lastError }));
+    } catch (e) {
+        console.log('⚠️ could not save the login cooldown', e.message);
+    }
+}
+
+readCooldown();
+
 function hasToken(t) {
     return !!t && t !== -1 && t !== '-1';
 }
@@ -129,6 +162,7 @@ async function ensureTodaysAccessToken({ force = false } = {}) {
     if (!result.ok) {
         lastFailAt = Date.now();
         lastError = result.error;
+        writeCooldown();
         console.log(`❌ login.js failed: ${result.error}`);
         return -1;
     }
@@ -142,12 +176,14 @@ async function ensureTodaysAccessToken({ force = false } = {}) {
     if (!hasToken(fresh)) {
         lastFailAt = Date.now();
         lastError = 'login.js exited 0 but wrote no token for today';
+        writeCooldown();
         console.log(`❌ ${lastError}`);
         return -1;
     }
 
     lastFailAt = 0;
     lastError = '';
+    writeCooldown();
     console.log('✅ Kite session is live');
     return fresh;
 }

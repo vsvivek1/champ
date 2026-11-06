@@ -54,3 +54,4 @@ firstOrderOverride.json
 # coil watcher: same rule -- coilWatch.js has defaults, and coilLog is a journal
 coilWatch.json
 coilLog.json
+.loginCooldown.json
