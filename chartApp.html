@@ -10,10 +10,16 @@
      rules below already use. They were never declared, so every
      border:1px solid var(--line) in this file has been drawing nothing.
      Declared here rather than hunted down one by one. */
-  :root { --bg:#131722; --panel:#1e222d; --border:#2a2e39; --text:#d1d4dc; --dim:#787b86; --green:#26a69a; --red:#ef5350; --accent:#2962ff;
-          --line:#2a2e39; --fg:#d1d4dc; }
+  /* 09/11/2026 redesign: the palette moved to a deeper slate and every
+     box reads these tokens, so this one block IS the theme. The chart
+     canvas colour (search '#0e1320' below) must match --bg. */
+  :root { --bg:#0e1320; --panel:#161c2c; --border:#242e45; --text:#dde3ef; --dim:#8a93a8; --green:#2dbd85; --red:#f6465d; --accent:#4f8cff;
+          --line:#242e45; --fg:#dde3ef;
+          --card:#131929; --amber:#e8b33d; --radius:8px; --radius-s:5px;
+          --shadow:0 1px 2px rgba(0,0,0,.35), 0 4px 14px rgba(0,0,0,.22); }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font: 13px/1.4 -apple-system, "Segoe UI", Roboto, sans-serif; }
+  body { background: var(--bg); color: var(--text); font: 13px/1.45 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+         -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
   header { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--panel); border-bottom:1px solid var(--border); flex-wrap:wrap; }
   select,input,button { background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:5px 8px; font-size:13px; }
   button { cursor:pointer; background:var(--accent); border:none; color:#fff; }
@@ -237,6 +243,18 @@
   #setupList .empty { padding:8px; color:var(--dim); }
   #oiAlert { display:none; background:#8a5a00; color:#fff; font-weight:bold;
     padding:6px 10px; border-radius:4px; margin-top:6px; animation:nkblink 1s step-end infinite; }
+  /* ASK TO LOCK PROFIT. Deliberately not red and not blinking: this is a
+     question about money already made, not an emergency. It must be
+     impossible to miss and equally impossible to mistake for a stop-out. */
+  #lockAsk { display:none; background:#13324a; border:1px solid #2f7fb8; color:#cfe8ff;
+    padding:8px 10px; border-radius:4px; margin-top:6px; font-size:13px;
+    gap:10px; align-items:center; flex-wrap:wrap; }
+  #lockAsk.show { display:flex; }
+  #lockAsk b { color:#8fd3ff; }
+  #lockAsk .amt { color:var(--green); font-weight:bold; }
+  #lockAsk button { padding:4px 12px; font-weight:bold; cursor:pointer; }
+  #lockAsk .go { background:#1b6e3a; color:#fff; border:1px solid #2e9d57; }
+  #lockAsk .no { background:#3a3a3a; color:#ccc; border:1px solid #555; }
   @keyframes nkblink { 50% { opacity:0.45; } }
   /* positions shown from the cached snapshot (right after a refresh, or while
      /api/position is failing) are dimmed, with #posStale saying why */
@@ -319,6 +337,15 @@
                      font-size:11.5px; font-weight:600; letter-spacing:.06em; padding:5px 11px; }
   #panelTabs .ptab:hover { color:var(--fg); }
   #panelTabs .ptab.on { color:#fff; background:var(--accent); border-color:var(--accent); }
+  #autoRunChip { font:inherit; font-size:11px; font-weight:700; letter-spacing:.04em;
+                 padding:2px 7px; border-radius:3px; border:1px solid var(--border);
+                 background:var(--bg); cursor:pointer; white-space:nowrap; }
+  #autoRunChip.off  { color:var(--dim); }
+  #autoRunChip.on   { color:#9fe3bd; border-color:#4e8f6d; background:rgba(79,143,109,.14); }
+  #autoRunChip.mock { color:#ffd98a; border-color:#c9a227; background:rgba(201,162,39,.12); }
+  /* arming asks twice, and the question is red -- same rule as the ARM
+     button in the autopilot header and as B50/B100 */
+  #autoRunChip.sure { color:#ff9e9e; border-color:#c62828; background:rgba(198,40,40,.14); }
   #panel .pane { display:none; }
   #panel .pane.on { display:block; }
 
@@ -454,6 +481,14 @@
   #blockModal .bmFoot { display:flex; align-items:center; gap:10px; margin-top:16px; flex-wrap:wrap; }
   #blockModal .bmFoot button { font-size:14px; padding:8px 18px; font-weight:700; }
   #blockModal .bmHint { color:var(--dim); font-size:11.5px; }
+  /*
+  The override is deliberately the UGLIER button. Standing down stays first
+  and keeps the normal grey; this one is a bare amber outline, so the eye
+  lands on OK and the hand has to travel to say yes.
+  */
+  #blockModal #bmTake { background:transparent; color:var(--amber,#ffc857);
+      border:1px solid var(--amber,#ffc857); }
+  #blockModal #bmTake:disabled { opacity:.45; }
 
   #review.tagentry .why, #analysis.tagentry .why, #review.tagexit .why, #analysis.tagexit .why, #review.taglevel .why, #analysis.taglevel .why, #review.tagrisk .why, #analysis.tagrisk .why, #review.tagtiming .why, #analysis.tagtiming .why, #review.tagtheta .why, #analysis.tagtheta .why { border-left-color:var(--red); }
   #review table, #analysis table { width:100%; border-collapse:collapse; margin-top:6px; }
@@ -526,6 +561,85 @@
   #gatePanel2 .tf input.dirty { border-color:var(--accent); }
   #gatePanel2 .tf input[type=checkbox] { flex:0 0 auto; }
   #gatePanel2 .tfoot { display:flex; align-items:center; gap:9px; flex-wrap:wrap; }
+
+  /* =====================================================================
+     09/11/2026 REDESIGN LAYER.
+     Written as overrides at the end of the sheet on purpose: every rule
+     above keeps working, this layer only re-skins. Nothing here changes
+     an id, a class the scripts toggle, or a layout the charts measure.
+     ===================================================================== */
+
+  /* type and numbers: every figure on the page lines up in columns */
+  body { font-variant-numeric: tabular-nums; }
+  code, .code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+  /* thin dark scrollbars instead of the browser default */
+  * { scrollbar-width: thin; scrollbar-color: #2c344f transparent; }
+  *::-webkit-scrollbar { width:8px; height:8px; }
+  *::-webkit-scrollbar-thumb { background:#2c344f; border-radius:4px; }
+  *::-webkit-scrollbar-track { background:transparent; }
+
+  /* controls: one radius, one focus ring, one hover rule everywhere */
+  select, input, button { border-radius: var(--radius-s); transition: background-color .15s, border-color .15s, color .15s, opacity .15s; }
+  button { font-weight:600; }
+  button:hover:not(:disabled) { filter: brightness(1.12); }
+  button.sec:hover:not(:disabled) { filter:none; border-color:var(--accent); color:var(--fg); }
+  :is(button, select, input):focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+
+  header { position:relative; z-index:20; box-shadow: var(--shadow); border-bottom:1px solid var(--border); }
+
+  /* the big boxes become cards: same bones, quieter borders, soft depth */
+  #autoBox, #coilBox, #setupBox, #panel .pset {
+    border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
+  #autoBox .hd b, #coilBox .hd b, #setupBox .hd b {
+    font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
+
+  /* tabs: a segmented strip, the active pane filled, the rest ghosted */
+  #panelTabs { gap:4px; border-bottom:1px solid var(--border); }
+  #panelTabs .ptab { border:1px solid transparent; background:transparent; border-radius:6px 6px 0 0;
+    padding:7px 14px; letter-spacing:.08em; }
+  #panelTabs .ptab:hover { background:rgba(79,140,255,.08); }
+  #panelTabs .ptab.on { background:var(--accent); color:#fff; }
+
+  /* the gate: the one strip that decides money gets the strongest voice */
+  #gateBar { border-radius: var(--radius-s); margin-top:6px; border-left:4px solid transparent; cursor:pointer; }
+  #gateBar.no { border-left-color: var(--red); background:rgba(246,70,93,.12); }
+  #gateBar.ok { border-left-color: var(--green); background:rgba(45,189,133,.10); }
+  #gatePanel2 { border:1px solid var(--border); border-radius: var(--radius); margin-top:6px; background:var(--card); }
+  #gatePanel2 .row { border-bottom:1px solid rgba(255,255,255,.05); padding:4px 0; }
+  #gatePanel2 .row .mk { width:18px; flex:0 0 18px; text-align:center; border-radius:4px; font-size:11px; line-height:17px; }
+  #gatePanel2 .row.bad .mk  { background:rgba(246,70,93,.15); }
+  #gatePanel2 .row.good .mk { background:rgba(45,189,133,.13); }
+  #gatePanel2 .row.na .mk   { background:rgba(255,255,255,.05); }
+
+  /* tables: calmer headers, a visible row under the pointer */
+  th { font-size:10.5px; letter-spacing:.07em; text-transform:uppercase; }
+  tbody tr:hover td { background:rgba(79,140,255,.05); }
+
+  /* THEORY tab: one card per rule, text set for reading, not scanning */
+  #theoryBody { max-width:88ch; }
+  #theoryBody .tcard { border:1px solid var(--border); border-radius:var(--radius); background:var(--card);
+    padding:10px 14px; margin:10px 0; box-shadow:var(--shadow); }
+  #theoryBody .tcard h4 { font-size:13px; margin-bottom:2px; color:var(--fg); }
+  #theoryBody .tcard .meta { display:flex; gap:6px; flex-wrap:wrap; align-items:center; margin:4px 0 6px; }
+  #theoryBody .tcard .chip { font-size:10px; letter-spacing:.05em; padding:1px 7px; border-radius:99px;
+    border:1px solid var(--border); color:var(--dim); }
+  #theoryBody .tcard .chip.hard  { border-color:#7a2a2a; color:#ff9e9e; background:rgba(246,70,93,.08); }
+  #theoryBody .tcard .chip.never { border-color:#7a2a2a; color:#ff9e9e; font-weight:700; background:rgba(246,70,93,.14); }
+  #theoryBody .tcard .chip.soft  { border-color:#7a6220; color:#ffd98a; background:rgba(232,179,61,.08); }
+  #theoryBody .tcard .chip.codec { font-family:ui-monospace,Menlo,monospace; }
+  #theoryBody .tcard p { color:#b6bdcc; font-size:12.5px; line-height:1.6; margin:7px 0; }
+  #theoryBody .empty, #theoryBody .warn { padding:10px; color:var(--dim); }
+  #panel.lightui #theoryBody .tcard p { color:#454d5c; }
+  #panel.lightui #theoryBody .tcard { background:#fff; }
+
+  /* the one soft row on the checklist points here now */
+  #gatePanel2 .thHint { color:var(--dim); font-size:11px; margin-top:6px; }
+  #gatePanel2 .thHint b { color:var(--accent); cursor:pointer; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation:none !important; transition:none !important; }
+  }
 </style>
 </head>
 <body>
@@ -582,6 +696,17 @@
     <button class="ptab on" data-pane="paneAuto">AUTO RUN</button>
     <button class="ptab" data-pane="paneTrade">POSITIONS &amp; ORDERS</button>
     <button class="ptab" data-pane="paneRules">RULES</button>
+    <!-- THEORY: the long "why this rule exists" essays used to hang as a
+         dropdown under every checklist row, which buried the numbers.
+         The help moved here; the checklist keeps only the live reading. -->
+    <button class="ptab" data-pane="paneTheory">THEORY</button>
+    <!--
+    The AUTOPILOT header already says ARMED or OFF, but only on the AUTO RUN
+    tab. Sitting on POSITIONS for twenty minutes and not knowing whether
+    anything is buying is the state this chip exists to remove, so it lives
+    in the tab bar and is on screen whatever tab is open.
+    -->
+    <button id="autoRunChip" class="off" title="reading&hellip;">auto run &hellip;</button>
     <span style="flex:1"></span>
     <button id="uiTheme" class="sec" title="light or dark for this panel only — the charts stay dark">◐ light</button>
   </div>
@@ -607,6 +732,7 @@
   <div id="gatePanel2"></div>
   <div id="nakedAlert"></div>
   <div id="oiAlert"></div>
+  <div id="lockAsk"></div>
   <div id="regBar" class="cold">index regime — waiting for ticks…</div>
   <!-- the shape that came before the 05/11 13:37 move, scored live both
        ways round. Alert only: the orders are coilWatch's own decision and
@@ -755,6 +881,16 @@ flat = slPct below entry, nothing else.">stop:
     <div id="rulesBody"><div class="empty">reading the rules…</div></div>
   </div>
 
+  <div class="pane" id="paneTheory">
+    <div class="pbar">
+      <span class="ph">THEORY</span>
+      <span class="stat">why each rule exists — reading, not controls; the live numbers stay on the checklist</span>
+      <span style="flex:1"></span>
+      <button id="theoryRe" class="sec">reload</button>
+    </div>
+    <div id="theoryBody"><div class="empty">reading the theory…</div></div>
+  </div>
+
 </div>
 
 <div id="blockModal" role="alertdialog" aria-modal="true" aria-labelledby="bmHead">
@@ -765,7 +901,9 @@ flat = slPct below entry, nothing else.">stop:
     <div class="bmLock" id="bmLock" style="display:none"></div>
     <div class="bmFoot">
       <button id="bmClose" class="sec">OK &mdash; stand down</button>
-      <span class="bmHint">Esc or click outside also closes. Exits are never blocked.</span>
+      <button id="bmTake" style="display:none">TAKE IT ANYWAY</button>
+      <span class="bmHint" id="bmTakeHint" style="display:none"></span>
+      <span class="bmHint" id="bmHint">Esc or click outside also closes. Exits are never blocked.</span>
     </div>
   </div>
 </div>
@@ -1116,10 +1254,10 @@ const BASE = location.pathname.startsWith('/chart') ? '/chart' : '';
 const IST_OFFSET = 19800; // show IST on the (UTC-rendered) time scale
 
 const chartOpts = {
-  layout: { background: { color: '#131722' }, textColor: '#d1d4dc' },
-  grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
-  timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#2a2e39' },
-  rightPriceScale: { borderColor: '#2a2e39' },
+  layout: { background: { color: '#0e1320' }, textColor: '#dde3ef' },
+  grid: { vertLines: { color: '#171e30' }, horzLines: { color: '#171e30' } },
+  timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#242e45' },
+  rightPriceScale: { borderColor: '#242e45' },
   crosshair: { mode: 0 },
 };
 
@@ -1127,7 +1265,7 @@ const charts = [], series = [], volSeries = [], oiSeries = [], ma20Series = [], 
 for (let i = 0; i < 3; i++) {
   const el = document.getElementById('c' + i);
   const ch = LightweightCharts.createChart(el, chartOpts);
-  const s = ch.addCandlestickSeries({ upColor:'#26a69a', downColor:'#ef5350', borderUpColor:'#26a69a', borderDownColor:'#ef5350', wickUpColor:'#26a69a', wickDownColor:'#ef5350' });
+  const s = ch.addCandlestickSeries({ upColor:'#2dbd85', downColor:'#f6465d', borderUpColor:'#2dbd85', borderDownColor:'#f6465d', wickUpColor:'#2dbd85', wickDownColor:'#f6465d' });
   // indicator series (hidden until data is set)
   const v = ch.addHistogramSeries({ priceScaleId:'vol', priceFormat:{ type:'volume' }, lastValueVisible:false, priceLineVisible:false });
   ch.priceScale('vol').applyOptions({ scaleMargins:{ top:0.8, bottom:0 } });
@@ -2088,6 +2226,26 @@ function connectWs() {
         + (m.left ? `, ${m.left} still running` : '') + (m.appSide ? ' [app-side]' : ''));
       refreshPosition();
     }
+    if (m.type == 'lock_ask') {
+      // the server raised a new question -- show it and make a noise
+      lockAsks[m.token] = m;
+      renderLockAsk();
+      beep(760, 2);
+    }
+    if (m.type == 'lock_answer') {
+      delete lockAsks[m.token];
+      renderLockAsk();
+      if (m.action == 'locked') {
+        msg(`\u{1f512} ${m.tradingsymbol}: LOCKED +${m.lockPct}% \u2014 stop ${m.prev == null ? '\u2014' : m.prev} \u2192 ${m.stop}`
+          + (m.moved ? '' : ' (app-side line only, no SL order resting)')
+          + (m.failed ? ` \u2014 exchange refused: ${m.failed}` : ''));
+        refreshPosition();
+      } else if (m.action == 'dismiss') {
+        msg(`\u{1f91a} ${m.tradingsymbol}: +${m.rung}% lock dismissed, stop left where it was`);
+      } else {
+        msg(`\u23ed ${m.tradingsymbol}: lock did nothing \u2014 ${m.why}`);
+      }
+    }
     if (m.type == 'lock') applyLock(m.lock);
     if (m.type == 'unprotected') {
       bareWhy = {};
@@ -2421,6 +2579,87 @@ function nearestOrderLine(slot, y) {
 
 // red flashing banner + one beep when a long position has no resting SELL
 let nakedBefore = new Set();
+/* ---- ASK TO LOCK PROFIT ----
+   The server decides WHEN to ask (guardSettings lockFrom/lockStep/lockBehind)
+   and what stop to offer; this only draws the question and sends the answer.
+   Keyed by token so two open positions can each have their own question. */
+let lockAsks = {};
+
+function renderLockAsk() {
+  const el = document.getElementById('lockAsk');
+  const list = Object.values(lockAsks);
+  if (!list.length) { el.className = ''; el.innerHTML = ''; return; }
+  // one at a time, oldest first -- two questions stacked is how you answer the wrong one
+  const a = list.sort((x, y) => (x.at || '').localeCompare(y.at || ''))[0];
+  const gain = a.entry > 0 ? (((a.ltp - a.entry) / a.entry) * 100).toFixed(1) : '?';
+  el.className = 'show';
+  el.innerHTML = '';
+
+  const txt = document.createElement('span');
+  txt.innerHTML = `\u{1f512} <b>${a.tradingsymbol}</b> is <span class="amt">+${gain}%</span>`
+    + ` (${a.entry} \u2192 ${a.ltp}) \u2014 hit the +${a.rung}% rung.`
+    + ` Lock <b>+${a.lockPct}%</b> by moving the stop to <b>${a.stop}</b>?`
+    + (a.nowStop != null ? ` <span style="color:#9ab">(stop is ${a.nowStop} now)</span>`
+                         : ` <span style="color:#e8a">(no stop line yet)</span>`);
+  el.appendChild(txt);
+
+  const go = document.createElement('button');
+  go.className = 'go'; go.textContent = `Lock at ${a.stop}`;
+  go.onclick = () => answerLock(a.token, 'lock', go);
+  el.appendChild(go);
+
+  const no = document.createElement('button');
+  no.className = 'no'; no.textContent = 'Dismiss';
+  no.onclick = () => answerLock(a.token, 'dismiss', no);
+  el.appendChild(no);
+
+  const note = document.createElement('span');
+  note.style.color = '#9ab'; note.style.fontSize = '11px';
+  note.textContent = `either way, quiet until +${(a.rung + (lockCfg.step || 5)).toFixed(0)}%`;
+  el.appendChild(note);
+}
+
+/* Disable both buttons while the answer is in flight: a double click on
+   "Lock" would send the modify twice, and the second one 409s. */
+async function answerLock(token, action, btn) {
+  const el = document.getElementById('lockAsk');
+  [...el.querySelectorAll('button')].forEach(b => b.disabled = true);
+  btn.textContent = action == 'lock' ? 'locking…' : 'dismissing…';
+  try {
+    const r = await fetch(BASE + '/api/lockProfit', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, action })
+    });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      msg(`\u274c lock failed: ${d.error || r.status}`);
+      [...el.querySelectorAll('button')].forEach(b => b.disabled = false);
+      renderLockAsk();   // put the real labels back
+      return;
+    }
+    // the broadcast clears it; this is only for the tab that clicked
+    delete lockAsks[token];
+    renderLockAsk();
+  } catch (e) {
+    msg(`\u274c lock failed: ${e.message || e}`);
+    [...el.querySelectorAll('button')].forEach(b => b.disabled = false);
+    renderLockAsk();
+  }
+}
+
+/* A reload loses the WebSocket message that raised the question, so ask
+   the server what is still open. */
+let lockCfg = {};
+async function refreshLockAsk() {
+  try {
+    const d = await (await fetch(BASE + '/api/lockProfit')).json();
+    lockCfg = d;
+    lockAsks = {};
+    (d.asks || []).forEach(a => lockAsks[a.token] = a);
+    renderLockAsk();
+  } catch (e) { /* best effort: the WS will raise the next one anyway */ }
+}
+
 function renderNakedAlert(naked) {
   const el = document.getElementById('nakedAlert');
   if (naked.length == 0) { el.style.display = 'none'; nakedBefore = new Set(); return; }
@@ -2614,12 +2853,13 @@ function paintGate() {
   pan.innerHTML = `<div class="rows">` + rows.map(c => {
       const cls = c.na ? 'na' : (c.ok ? 'good' : 'bad');
       const mk = c.na ? '–' : (c.ok ? '✓' : '✗');
+      /* the essays moved to the THEORY tab (09/11/2026): a dropdown under
+         every row buried the one part of this list that changes */
       return `<div class="row ${cls}"><span class="mk">${mk}</span>`
         + `<span class="lb">${c.label}${c.soft ? ' <span class="soft">(soft)</span>' : ''}</span>`
-        + `<span class="dt">${c.detail || ''}`
-        + (c.theory ? `<details class="rowWhy"><summary>theory</summary>${paras(c.theory)}</details>` : '')
-        + `</span></div>`;
+        + `<span class="dt">${c.detail || ''}</span></div>`;
     }).join('') + `</div>`
+    + `<div class="thHint">why each rule exists is written out on the <b onclick="showPane('paneTheory')">THEORY</b> tab</div>`
     + `<div class="gateFoot">`
     +   `<button id="btnCountFrom" class="sec">restart the ${gateState.settings.maxTradesPerDay}-trade count from now</button>`
     +   (st.countFrom ? `<button id="btnCountAll" class="sec">count the whole day again</button>` : '')
@@ -2655,6 +2895,10 @@ const TUNE_SKIP = ['countFrom', 'countFromDate'];
 const TUNE_GROUPS = [
   ['risk per trade', [
     ['riskPctOfCapital', '% of capital at risk in one trade (0 = off)'],
+    ['maxStopPct',       'refuse the trade if the stop is further than this % under entry (0 = off)'],
+    ['maxStopAsk',       'allow a hand click to take it anyway, after a second confirmation'],
+    ['maxStopAskSec',    'seconds that second confirmation stays valid'],
+    ['maxStopAskBand',   '% the premium may drift before the question is asked again'],
     ['blockNoStop',      'refuse entries that would rest no exchange stop'],
     ['maxDayLoss',       'stop for the day after this much loss (₹)'],
     ['maxLossStreak',    'stop after this many losses in a row'],
@@ -2794,10 +3038,92 @@ async function setCountFrom(body) {
   } catch (e) { msg('❌ ' + e); }
 }
 
+/*
+The one place the words "auto run is on" / "auto run off" are written, so
+the chip, the refusal lines and the block modal can never disagree. Fed
+from three directions -- the 15s gate poll, the autopilot panel, and the
+423 that comes back from a refused entry -- and they all carry the same
+{ on, mock, text } the server built.
+*/
+let autoRunState = null;
+
+function autoRunText() {
+  return autoRunState ? autoRunState.text : 'auto run …';
+}
+
+/*
+The chip is also the switch, because the state and the control belong in
+the same place: you notice "auto run off" from any tab, and switching it on
+should not mean hunting for a tab first. It drives the same
+POST /api/autopilot the ARM button in the autopilot header does, so the two
+can never hold different opinions -- both are repainted from the server's
+answer, not from what was clicked.
+
+Same asymmetry as the ARM button and as B50/B100: switching OFF is one
+click, because stopping is always allowed. Switching ON asks again and goes
+red, because it starts a thing that spends real money with nobody at the
+keyboard. The question times out after 5 seconds.
+*/
+let chipArmPending = 0;     // ms of the first press, while it asks again
+
+function paintAutoRun(ar) {
+  if (ar) autoRunState = ar;
+  const el = document.getElementById('autoRunChip');
+  if (!el) return;
+  // a repaint must not wipe the question out from under the second click
+  if (chipArmPending) return;
+  const a = autoRunState;
+  el.textContent = a ? a.text : 'auto run …';
+  el.className = !a ? 'off' : (!a.on ? 'off' : (a.mock ? 'mock' : 'on'));
+  el.disabled = !a;
+  el.title = !a ? 'reading…'
+    : (a.on
+        ? (a.mock
+            ? 'The autopilot is armed but on the MOCK book — it decides and fills nothing real. Click to switch it off.'
+            : 'The autopilot is armed and sending real orders with nobody at the keyboard. Click to switch it off.')
+        : (a.running
+            ? 'The autopilot is running and still deciding, but it will NOT send orders. Click twice to arm it.'
+            : 'No autopilot in this process — entries only happen when you click. Arming will not help here.'));
+}
+
+document.getElementById('autoRunChip').onclick = function () {
+  const a = autoRunState;
+  if (!a) return;
+  /*
+  Nothing to arm in this process. Said plainly rather than firing a POST
+  that would come back enabled:true and still buy nothing -- a chip reading
+  "auto run is on" with no autopilot behind it is the worst outcome here.
+  */
+  if (!a.running) {
+    msg('⚠️ no autopilot in this process — arming it would change nothing. Entries are yours to click.');
+    return;
+  }
+  if (a.on) { chipArmPending = 0; setArmed(false); return; }
+
+  if (chipArmPending && Date.now() - chipArmPending < 5000) {
+    chipArmPending = 0;
+    setArmed(true);
+    return;
+  }
+  chipArmPending = Date.now();
+  this.className = 'sure';
+  this.textContent = a.mock ? 'SURE? ARM (mock)' : 'SURE? ARM LIVE';
+  this.title = 'Press again within 5 seconds to let it send real orders by itself.';
+  msg(a.mock
+    ? '🤖 press again within 5s to arm the autopilot on the MOCK book'
+    : '🤖 press again within 5s to arm the autopilot — it will send REAL orders with nobody watching');
+  setTimeout(() => {
+    if (!chipArmPending) return;
+    chipArmPending = 0;
+    paintAutoRun();                       // the question expired: back to the state
+  }, 5000);
+};
+
 async function refreshGate() {
   try {
     gateState = await (await fetch(BASE + '/api/noTrade')).json();
     if (gateState.lock) applyLock(gateState.lock);
+    if (gateState.autoRun) paintAutoRun(gateState.autoRun);
     paintGate();
   } catch (e) { }
 }
@@ -2864,9 +3190,45 @@ function esc(x) {
 function paras(t) {
   return String(t || '').split(/\n\s*\n/).map(x => `<p>${esc(x.trim())}</p>`).join('');
 }
-function showBlockModal(what, blockers) {
+/*
+THE SECOND CLICK.
+
+The server refuses a too-wide stop and hands back a one-shot ticket. That
+ticket arrives here as `ask`, and `retry` is the same order function the
+first click used -- called again with the ticket id. Nothing is cached and
+nothing is remembered: close the modal and the ticket simply expires.
+
+Only ever offered when a wide stop was the ONLY thing wrong. Any other rule
+in the list and the button is not drawn at all -- those rules are not
+questions.
+*/
+function showBlockModal(what, blockers, ask, retry) {
   const box = document.getElementById('blockModal');
   if (!box) return;
+  const take = document.getElementById('bmTake');
+  const hint = document.getElementById('bmTakeHint');
+  if (take) {
+    if (ask && typeof retry == 'function') {
+      take.style.display = '';
+      take.disabled = false;
+      take.textContent = `TAKE IT ANYWAY — stop ${ask.away}% away`;
+      if (hint) {
+        hint.style.display = '';
+        hint.textContent = `asked at ₹${ask.premium}; valid ${ask.validSec}s and only within ${ask.bandPct}% of that price`;
+      }
+      take.onclick = async () => {
+        take.disabled = true;                 // one click, not three
+        take.textContent = 'sending…';
+        hideBlockModal();
+        try { await retry(ask.id); }
+        finally { take.disabled = false; take.textContent = 'TAKE IT ANYWAY'; }
+      };
+    } else {
+      take.style.display = 'none';
+      take.onclick = null;
+      if (hint) hint.style.display = 'none';
+    }
+  }
   let list = (blockers && blockers.length) ? blockers.slice() : [];
   // a page-side lockout is not in the server's blocker array
   if (lockedNow() && !list.some(b => /stop-out|lock/i.test(b.label || ''))) {
@@ -2883,6 +3245,15 @@ function showBlockModal(what, blockers) {
     + (b.detail ? `<div class="d">${esc(b.detail)}</div>` : '')
     + (b.theory ? `<details class="bmWhy"><summary>why this rule exists</summary>${paras(b.theory)}</details>` : '')
     + `</div>`).join('');
+
+  /*
+  A refusal means two different things depending on this, so it is said on
+  the modal and not only in the chip: with auto run OFF nothing was going
+  to buy it anyway; with auto run ON the gate is the only reason it was
+  not bought.
+  */
+  const bh = document.getElementById('bmHint');
+  if (bh) bh.textContent = `${autoRunText()} · Esc or click outside also closes. Exits are never blocked.`;
 
   const lk = document.getElementById('bmLock');
   if (lockedNow()) { lk.style.display = ''; lk.textContent = `⏱ new entries unlock in ${mmss(lockLeft())}`; }
@@ -2904,10 +3275,12 @@ function blockModalOpen() {
 Server-side 423. Returns true when it handled the response, so the caller
 stops and does not also print its own error line.
 */
-function handled423(r, d, what) {
+function handled423(r, d, what, retry) {
   if (r.status != 423) return false;
-  msg('⛔ ' + (d.error || `${what} blocked`));
-  showBlockModal(what, d.blockers || null);
+  // the server's reading at the instant of the refusal beats the last poll
+  if (d.autoRun) paintAutoRun(d.autoRun);
+  msg('⛔ ' + (d.error || `${what} blocked`) + ` — ${autoRunText()}`);
+  showBlockModal(what, d.blockers || null, d.confirm || null, retry);
   if (d.lock) applyLock(d.lock);
   refreshGate();
   return true;
@@ -3374,22 +3747,34 @@ async function quickAction(btn, slot, side, pct) {
   }
   disarmQuick();
   if (side == 'buy' && blockedByGate(`B${pct}`, slot)) return;
-  msg(`⚡ ${side.toUpperCase()} ${pct}% ${o.tradingsymbol} …`);
-  try {
-    const r = await fetch(BASE+'/api/quick', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tradingsymbol: o.tradingsymbol, exchange: o.exchange, token: o.token, side, pct })
-    });
-    const j = await r.json();
-    if (handled423(r, j, `B${pct}`)) return;
-    if (!r.ok) { msg('❌ ' + (j.error || ('HTTP ' + r.status))); return; }
-    const rk = j.risk;
-    msg(`✅ ${side == 'buy' ? 'B' : 'S'}${pct}: ${side.toUpperCase()} ${j.qty} ${o.tradingsymbol} @ ${j.price}`
-      + (rk ? (rk.risk != null
-          ? ` — risk ₹${rk.risk.toLocaleString('en-IN')} (stop ${rk.stop})`
-          : ` — NO stop resting, ₹${rk.premium.toLocaleString('en-IN')} at risk`) : ''));
-    refreshPosition();
-  } catch (e) { msg('❌ ' + e); }
+  /*
+  One send function, called twice at most. The first call carries no ticket
+  and may come back 423 with a wide-stop question; the TAKE IT ANYWAY button
+  calls this same function again with the ticket id, so the second order is
+  the same order -- not a new one assembled from stale screen values.
+  The retry is passed only on the first call, so a confirmed order can never
+  itself raise another question.
+  */
+  const send = async (confirmSlwide) => {
+    msg(`⚡ ${side.toUpperCase()} ${pct}% ${o.tradingsymbol} …`
+      + (confirmSlwide ? ' (wide stop, confirmed)' : ''));
+    try {
+      const r = await fetch(BASE+'/api/quick', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tradingsymbol: o.tradingsymbol, exchange: o.exchange, token: o.token, side, pct, confirmSlwide })
+      });
+      const j = await r.json();
+      if (handled423(r, j, `B${pct}`, confirmSlwide ? null : send)) return;
+      if (!r.ok) { msg('❌ ' + (j.error || ('HTTP ' + r.status))); return; }
+      const rk = j.risk;
+      msg(`✅ ${side == 'buy' ? 'B' : 'S'}${pct}: ${side.toUpperCase()} ${j.qty} ${o.tradingsymbol} @ ${j.price}`
+        + (rk ? (rk.risk != null
+            ? ` — risk ₹${rk.risk.toLocaleString('en-IN')} (stop ${rk.stop})`
+            : ` — NO stop resting, ₹${rk.premium.toLocaleString('en-IN')} at risk`) : ''));
+      refreshPosition();
+    } catch (e) { msg('❌ ' + e); }
+  };
+  await send(null);
 }
 function buildQuick(el, slot, tag) {
   if (tag) { const t = document.createElement('i'); t.textContent = tag; el.appendChild(t); }
@@ -3692,6 +4077,7 @@ function showPane(id) {
   for (const p of document.querySelectorAll('#panel .pane')) p.classList.toggle('on', p.id == id);
   // read the rules the first time the tab is opened, not on every page load
   if (id == 'paneRules' && !rulesLoaded) loadRules();
+  if (id == 'paneTheory' && !theoryLoaded) loadTheory();
 }
 panelTabs.addEventListener('click', e => {
   const b = e.target.closest('.ptab');
@@ -3761,11 +4147,10 @@ async function loadRules() {
       : g.hard ? '<span class="hard">hard</span>' : '<span class="soft">soft</span>';
     const wv = (g.waivedFor || []).length ? esc(g.waivedFor.join(', ')) : '—';
     return `<tr><td>${esc(g.label)}<br><span class="code">${esc(g.code)}</span>`
-      + (g.theory ? `<details class="th"><summary>why</summary>${paras(g.theory)}</details>` : '')
       + `</td><td>${kind}</td><td class="why">${wv}</td></tr>`;
   }).join('');
   out.push(rSec('THE NO-TRADE GATE — every check, in the order it runs',
-    'A hard check refuses the order. A soft check only marks the row. "waived for" names the setups that are DEFINED by the thing the rule vetoes, so the rule still shows but does not block.',
+    'A hard check refuses the order. A soft check only marks the row. "waived for" names the setups that are DEFINED by the thing the rule vetoes, so the rule still shows but does not block. The reasoning behind each rule is on the THEORY tab.',
     rTable(['rule', 'kind', 'waived for'], gRows)));
 
   /* 3. the raw numbers behind those labels */
@@ -3836,6 +4221,49 @@ async function loadRules() {
   box.innerHTML = out.join('');
 }
 document.getElementById('rulesRe').onclick = () => { rulesLoaded = false; loadRules(); };
+
+/* =======================================================================
+THE THEORY TAB.
+
+RULE_THEORY in chartApp.js is help text: the essay behind each rule. It
+used to print as a "theory" dropdown under every checklist row, so the
+checklist read as a wall of the word "theory" and the live numbers -- the
+only part that changes -- were the hardest thing to find. The essays now
+live here, one card per rule, pulled through /api/rules so the text can
+never drift from what the gate actually ships.
+======================================================================= */
+let theoryLoaded = false;
+
+async function loadTheory() {
+  const box = document.getElementById('theoryBody');
+  box.innerHTML = '<div class="empty">reading the theory…</div>';
+  let d;
+  try {
+    const r = await fetch(BASE + '/api/rules');
+    d = await r.json();
+    if (d.error) throw new Error(d.error);
+  } catch (e) {
+    box.innerHTML = `<div class="warn">could not read the theory — ${esc(e.message || e)}</div>`;
+    return;
+  }
+  theoryLoaded = true;
+  const gates = (d.gates || []).filter(g => g.theory);
+  if (!gates.length) {
+    box.innerHTML = '<div class="empty">no theory shipped with the rules — is chartApp.js older than this page?</div>';
+    return;
+  }
+  box.innerHTML = gates.map(g => {
+    const kind = g.never ? '<span class="chip never">never waived</span>'
+      : g.hard ? '<span class="chip hard">hard — refuses the order</span>'
+      : '<span class="chip soft">soft — marks the row only</span>';
+    const wv = (g.waivedFor || []).length
+      ? `<span class="chip">waived for: ${esc(g.waivedFor.join(', '))}</span>` : '';
+    return `<div class="tcard"><h4>${esc(g.label)}</h4>`
+      + `<div class="meta"><span class="chip codec">${esc(g.code)}</span>${kind}${wv}</div>`
+      + paras(g.theory) + `</div>`;
+  }).join('');
+}
+document.getElementById('theoryRe').onclick = () => { theoryLoaded = false; loadTheory(); };
 
 /*
 OI short-covering entries. The switch that matters is auto-buy: everything
@@ -4238,6 +4666,15 @@ function paintAuto(d) {
   if (!on) { st.className = 'off'; st.textContent = 'OFF · still deciding'; }
   else if (d.mock) { st.className = 'mock'; st.textContent = 'ARMED · MOCK BOOK'; }
   else { st.className = 'on'; st.textContent = 'ARMED · LIVE'; }
+  /*
+  Repaint the tab-bar chip from the same numbers, now rather than at the
+  next 15s gate poll: the switch was just thrown, and a chip that still
+  says OFF for ten seconds after arming is worse than no chip.
+  */
+  paintAutoRun({
+    on, mock: !!d.mock, enabled: !!cfg.enabled, running: !!d.running,
+    text: !on ? 'auto run off' : (d.mock ? 'auto run is on (MOCK book)' : 'auto run is on'),
+  });
   box.className = on && !d.mock ? 'live' : (on ? '' : 'off');
 
   /*
@@ -4889,6 +5326,9 @@ async function boot() {
   // it gets anywhere near refreshPosition(), and a refresh must not hide the
   // open entries for that long
   refreshPosition();
+  // an unanswered lock question must survive a reload -- the WS message that
+  // raised it is long gone by now
+  refreshLockAsk();
   load();
 }
 
