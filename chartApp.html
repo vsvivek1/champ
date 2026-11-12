@@ -265,20 +265,28 @@
   button.exitrow { background:var(--red); font-size:11px; padding:2px 6px; }
   .indsel { display:flex; gap:8px; color:var(--dim); font-size:12px; }
   .indsel label { display:flex; align-items:center; gap:3px; cursor:pointer; }
-  /* COMMENTARY STRIP (12/11/2026 redesign). One long dot-separated line was
-     unreadable: every signal now sits in its own colour-coded chip, so the
-     eye lands on red/green blocks instead of parsing a sentence. The words
-     inside each chip are unchanged -- the help drawer still describes them. */
-  .cm { display:flex; flex-wrap:wrap; align-items:center; gap:5px 6px; padding:7px 10px;
-        font-size:13px; line-height:1.3; color:#c8cdd8; background:var(--panel);
-        border-top:1px solid var(--border); min-height:38px; }
+  /* COMMENTARY STRIP (12/11/2026, two passes). First pass: one chip per
+     signal instead of a dot-separated line. Second pass ("i cant infer
+     anything"): a READ chip in front adds green vs red chips into one
+     conclusion, and every chip carries a small label (<i>) saying what
+     it measures, so the strip reads as verdict + evidence. */
+  .cm { display:flex; flex-wrap:wrap; align-items:center; gap:7px 8px; padding:9px 10px;
+        font-size:14.5px; line-height:1.35; color:#dde2ec; background:var(--panel);
+        border-top:1px solid var(--border); min-height:44px; }
   .cm:empty::after { content:'waiting for candles…'; color:var(--dim); font-size:12px; }
-  .cm .chip { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px;
+  .cm .chip { display:inline-flex; align-items:center; padding:5px 12px; border-radius:999px;
         font-weight:600; white-space:nowrap; border:1px solid transparent;
         font-variant-numeric:tabular-nums; }
   .cm .chip.bull { color:var(--green); background:rgba(45,189,133,.12); border-color:rgba(45,189,133,.35); }
   .cm .chip.bear { color:var(--red);   background:rgba(246,70,93,.12);  border-color:rgba(246,70,93,.35); }
   .cm .chip.neu  { color:#aab3c5;      background:rgba(138,147,168,.10); border-color:rgba(138,147,168,.28); }
+  /* small label inside a chip: says WHAT the chip measures */
+  .cm .chip i { font-style:normal; text-transform:uppercase; font-size:10.5px;
+        font-weight:700; letter-spacing:.08em; opacity:.65; margin-right:7px; }
+  /* the READ chip: the conclusion, always first, bigger than the rest */
+  .cm .chip.verdict { font-size:15.5px; padding:6px 14px; font-weight:700; border-width:2px; }
+  .cm .chip.verdict.bull { background:rgba(45,189,133,.22); }
+  .cm .chip.verdict.bear { background:rgba(246,70,93,.22); }
   .cm.sc { animation:scblink 0.8s step-end infinite; border:1px solid var(--green); }
   @keyframes scblink { 50% { background:#0e3321; } }
   .cm .chip.sctag { color:#071912; background:var(--green); border-color:var(--green); font-weight:700; }
@@ -929,7 +937,13 @@ flat = slPct below entry, nothing else.">stop:
   <button id="helpClose" class="sec">✕ close</button>
   <h3>What the commentary means</h3>
 
-  <h4>⚡ Speed (first item)</h4>
+  <h4>READ (first chip)</h4>
+  <div>The conclusion. Counts green chips vs red chips on the strip:
+  <b class="g">LEANING UP</b> when greens lead by 2 or more, <b class="r">LEANING DOWN</b> when reds lead by 2 or more,
+  else <i>MIXED — no clear side</i>. One signal either way is noise, not a lean. Each chip also carries a
+  small label (TREND, VWAP, OI 15M…) saying what it measures.</div>
+
+  <h4>⚡ Speed (second chip)</h4>
   <div>Avg range of the last 3 candles vs the normal range (prior 20 candles).
   <b class="g">MOVING FAST ≥2×</b> = candles twice their normal size — momentum, your profit zone (amber blink + high double-beep).
   <i>dead chart ≤0.35×</i> = nothing moving (low beep once). In between shows as plain speed 1.1×.</div>
@@ -1828,8 +1842,20 @@ function commentary(slot, upto) {
   const live = arr[arr.length - 1];
   const ltp = live.close;
   const parts = [];
-  // each signal is its own chip now; the words inside are unchanged
-  const tag = (txt, cls) => `<span class="chip ${cls}">${txt}</span>`;
+  /*
+  12/11/2026 second redesign ("i cant infer anything"): every chip now
+  carries a small LABEL saying what it measures, the words after it say
+  only the answer, and a READ chip in front adds the signals up — green
+  chips vs red chips — so the strip opens with the conclusion instead of
+  asking the eye to tally ten facts. The phrases renderCommentary() greps
+  for ('short covering', 'covering rally likely', 'MOVING FAST',
+  'dead chart') are kept exactly.
+  */
+  let nUp = 0, nDn = 0;
+  const tag = (lbl, txt, cls) => {
+    if (cls.indexOf('bull') >= 0) nUp++; else if (cls.indexOf('bear') >= 0) nDn++;
+    return `<span class="chip ${cls}">${lbl ? `<i>${lbl}</i>` : ''}${txt}</span>`;
+  };
 
   // trend: last 5 completed candles
   const w5 = done.slice(-5);
@@ -1837,15 +1863,15 @@ function commentary(slot, upto) {
     const ups = w5.filter(c => c.close >= c.open).length;
     const hh = w5[4].high > w5[0].high, hl = w5[4].low > w5[0].low;
     const lh = w5[4].high < w5[0].high, ll = w5[4].low < w5[0].low;
-    if (hh && hl) parts.push(tag(`uptrend (${ups}/5 green, HH+HL)`, 'bull'));
-    else if (lh && ll) parts.push(tag(`downtrend (${5 - ups}/5 red, LH+LL)`, 'bear'));
-    else parts.push(tag('sideways', 'neu'));
+    if (hh && hl) parts.push(tag('trend', `UP — HH+HL, ${ups}/5 green`, 'bull'));
+    else if (lh && ll) parts.push(tag('trend', `DOWN — LH+LL, ${5 - ups}/5 red`, 'bear'));
+    else parts.push(tag('trend', 'sideways', 'neu'));
   }
 
   // vs day open
   if (dayOpen[slot] != null) {
     const d = (ltp - dayOpen[slot]) / dayOpen[slot] * 100;
-    parts.push(tag(`${d >= 0 ? '+' : ''}${d.toFixed(1)}% vs open`, d >= 0 ? 'bull' : 'bear'));
+    parts.push(tag('vs open', `${d >= 0 ? '+' : ''}${d.toFixed(1)}%`, d >= 0 ? 'bull' : 'bear'));
   }
 
   // vs VWAP (options)
@@ -1854,7 +1880,7 @@ function commentary(slot, upto) {
     for (const c of arr) { const tp = (c.high + c.low + c.close) / 3; pv += tp * (c.volume || 0); vv += c.volume || 0; }
     if (vv > 0) {
       const vwap = pv / vv;
-      parts.push(tag(`${ltp >= vwap ? 'above' : 'below'} VWAP ${vwap.toFixed(2)}`, ltp >= vwap ? 'bull' : 'bear'));
+      parts.push(tag('vwap', `${ltp >= vwap ? 'above' : 'below'} ${vwap.toFixed(2)}`, ltp >= vwap ? 'bull' : 'bear'));
     }
   }
 
@@ -1863,7 +1889,7 @@ function commentary(slot, upto) {
     const ma = i => { let s = 0; for (let k = i - 19; k <= i; k++) s += arr[k].close; return s / 20; };
     const m1 = ma(arr.length - 1), m5 = ma(arr.length - 6);
     const cls = (ltp >= m1 && m1 > m5) ? 'bull' : (ltp < m1 && m1 < m5) ? 'bear' : 'neu';
-    parts.push(tag(`${ltp >= m1 ? 'above' : 'below'} MA20 (${m1 > m5 ? 'rising' : 'falling'})`, cls));
+    parts.push(tag('ma20', `${ltp >= m1 ? 'above' : 'below'} · ${m1 > m5 ? 'rising' : 'falling'}`, cls));
   }
 
   // volume of last completed candle vs 20-candle average
@@ -1872,8 +1898,8 @@ function commentary(slot, upto) {
     const avg = done.slice(-21, -1).reduce((s, c) => s + (c.volume || 0), 0) / 20;
     if (avg > 0) {
       const x = lastV / avg;
-      if (x >= 1.8) parts.push(tag(`volume spike ${x.toFixed(1)}× avg`, 'bull'));
-      else if (x <= 0.5) parts.push(tag('thin volume', 'neu'));
+      if (x >= 1.8) parts.push(tag('volume', `spike ${x.toFixed(1)}× avg`, 'bull'));
+      else if (x <= 0.5) parts.push(tag('volume', 'thin — ≤½ avg', 'neu'));
     }
   }
 
@@ -1888,7 +1914,7 @@ function commentary(slot, upto) {
       else if (dpx > 0.5 && doi < -0.5) { label = 'short covering'; cls = 'bull sctag'; }
       else if (dpx < -0.5 && doi > 0.5) { label = 'short buildup'; cls = 'bear'; }
       else if (dpx < -0.5 && doi < -0.5) { label = 'long unwinding'; cls = 'bear'; }
-      if (label) parts.push(tag(`${label} (15m: px ${dpx >= 0 ? '+' : ''}${dpx.toFixed(1)}%, OI ${doi >= 0 ? '+' : ''}${doi.toFixed(1)}%)`, cls));
+      if (label) parts.push(tag('oi 15m', `${label} · px ${dpx >= 0 ? '+' : ''}${dpx.toFixed(1)}% oi ${doi >= 0 ? '+' : ''}${doi.toFixed(1)}%`, cls));
     }
     // sharp OI drop in just 5 min = writers bailing fast; with price holding
     // or rising, a short-covering rally often follows
@@ -1897,7 +1923,7 @@ function commentary(slot, upto) {
       const doi5 = (live.oi - back5.oi) / back5.oi * 100;
       if (doi5 <= -2) {
         const holding = ltp >= back5.close * 0.998;
-        parts.unshift(tag(`🔥 OI CRASH ${doi5.toFixed(1)}% in 5m${holding ? ' — covering rally likely' : ''}`,
+        parts.unshift(tag('', `🔥 OI CRASH ${doi5.toFixed(1)}% in 5m${holding ? ' — covering rally likely' : ''}`,
           holding ? 'bull sctag' : 'bear'));
       }
     }
@@ -1909,40 +1935,52 @@ function commentary(slot, upto) {
   if (range > 0) {
     const upWick = p.high - Math.max(p.open, p.close);
     const dnWick = Math.min(p.open, p.close) - p.low;
-    if (body <= range * 0.1) parts.push(tag('doji last candle', 'neu'));
-    else if (dnWick >= body * 2 && upWick <= body) parts.push(tag('hammer last candle', 'bull'));
-    else if (upWick >= body * 2 && dnWick <= body) parts.push(tag('shooting star last candle', 'bear'));
-    else if (q && p.close > p.open && q.close < q.open && p.close >= q.open && p.open <= q.close) parts.push(tag('bullish engulfing', 'bull'));
-    else if (q && p.close < p.open && q.close > q.open && p.close <= q.open && p.open >= q.close) parts.push(tag('bearish engulfing', 'bear'));
+    if (body <= range * 0.1) parts.push(tag('last bar', 'doji', 'neu'));
+    else if (dnWick >= body * 2 && upWick <= body) parts.push(tag('last bar', 'hammer', 'bull'));
+    else if (upWick >= body * 2 && dnWick <= body) parts.push(tag('last bar', 'shooting star', 'bear'));
+    else if (q && p.close > p.open && q.close < q.open && p.close >= q.open && p.open <= q.close) parts.push(tag('last bar', 'bullish engulfing', 'bull'));
+    else if (q && p.close < p.open && q.close > q.open && p.close <= q.open && p.open >= q.close) parts.push(tag('last bar', 'bearish engulfing', 'bear'));
   }
 
   // breakout vs last 10 completed candles
   if (done.length >= 11) {
     const w = done.slice(-11, -1);
     const hi = Math.max(...w.map(c => c.high)), lo = Math.min(...w.map(c => c.low));
-    if (ltp > hi) parts.push(tag(`breaking above 10-min high ${hi.toFixed(2)}`, 'bull'));
-    else if (ltp < lo) parts.push(tag(`breaking below 10-min low ${lo.toFixed(2)}`, 'bear'));
-    else if (slot == 0 && (hi - lo) / ltp < 0.004) parts.push(tag('tight 10-min range', 'neu'));
+    if (ltp > hi) parts.push(tag('10-bar', `breaking HIGH ${hi.toFixed(2)}`, 'bull'));
+    else if (ltp < lo) parts.push(tag('10-bar', `breaking LOW ${lo.toFixed(2)}`, 'bear'));
+    else if (slot == 0 && (hi - lo) / ltp < 0.004) parts.push(tag('10-bar', 'tight range', 'neu'));
   }
 
   // spot vs yesterday's range
   if (slot == 0 && cfg && cfg.spot.yday) {
     const { high, low } = cfg.spot.yday;
-    if (ltp > high) parts.push(tag(`above yday high ${fmt(high)}`, 'bull'));
-    else if (ltp < low) parts.push(tag(`below yday low ${fmt(low)}`, 'bear'));
-    else parts.push(tag('inside yday range', 'neu'));
+    if (ltp > high) parts.push(tag('yday', `above high ${fmt(high)}`, 'bull'));
+    else if (ltp < low) parts.push(tag('yday', `below low ${fmt(low)}`, 'bear'));
+    else parts.push(tag('yday', 'inside range', 'neu'));
+  }
+
+  // movement speed, from the one shared speedRatio():
+  // ≥2× normal = MOVING FAST, ≤0.35× = dead chart
+  const x = speedRatio(arr);
+  if (x != null) {
+    if (x >= 2) parts.unshift(tag('', `⚡ MOVING FAST ${x.toFixed(1)}×`, 'bull fasttag'));
+    else if (x <= 0.35) parts.unshift(tag('', `dead chart ${x.toFixed(1)}×`, 'neu deadtag'));
+    else parts.unshift(tag('speed', `${x.toFixed(1)}× normal`, 'neu'));
   }
 
   /*
-  Movement speed (goes FIRST — the signal the user trades on), from the one
-  shared speedRatio(): ≥2× normal = MOVING FAST, ≤0.35× = dead chart.
+  THE READ — goes first. Green chips vs red chips, added up, so the strip
+  states its conclusion before its evidence. ±2 is the margin: one signal
+  either way is noise, not a lean. Counted BEFORE this chip is made, so
+  the verdict never counts itself.
   */
-  const x = speedRatio(arr);
-  if (x != null) {
-    if (x >= 2) parts.unshift(tag(`⚡ MOVING FAST ${x.toFixed(1)}×`, 'bull fasttag'));
-    else if (x <= 0.35) parts.unshift(tag(`dead chart ${x.toFixed(1)}×`, 'neu deadtag'));
-    else parts.unshift(tag(`speed ${x.toFixed(1)}×`, 'neu'));
-  }
+  const up = nUp, dn = nDn;
+  let vTxt, vCls;
+  if (up + dn == 0) { vTxt = 'no signals yet'; vCls = 'neu'; }
+  else if (up - dn >= 2) { vTxt = `LEANING UP · ${up} up / ${dn} down`; vCls = 'bull'; }
+  else if (dn - up >= 2) { vTxt = `LEANING DOWN · ${up} up / ${dn} down`; vCls = 'bear'; }
+  else { vTxt = `MIXED · ${up} up / ${dn} down — no clear side`; vCls = 'neu'; }
+  parts.unshift(tag('read', vTxt, vCls + ' verdict'));
 
   return parts.join('');   // the flex gap separates the chips
 }
