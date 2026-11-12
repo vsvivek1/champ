@@ -373,41 +373,66 @@
   #panel .pane.on { display:block; }
 
   /* ---- THE RULES TAB ----
-     A print, not a control. 09+12/11/2026 redesign: each section is a
-     card, body text is 13.5-14px (the old 12px was unreadable), the
-     NOW column is the loudest thing in each row, and hard/soft are
-     pill chips instead of coloured words. Wide tables scroll inside
-     themselves so the panel never scrolls sideways. */
-  #rulesBody { max-width:1100px; padding-bottom:12px; }
+     A print, not a control. 12/11/2026 novice pass: the 3-column
+     tables died -- the global th,td right-align rule (line ~317)
+     threw the meaning column to the far edge, a screen away from the
+     rule it explained. Now one intro card says what the page is, each
+     setting is its own small card (name, big value, plain meaning
+     under it), and the gate is a checklist with BLOCKS/WARNS pills.
+     Only the confidence section still uses tables, left-aligned. */
+  #rulesBody { max-width:1150px; padding-bottom:14px; }
+  #rulesBody th, #rulesBody td { text-align:left; }
+  #rulesBody .rintro { background:var(--card); border:1px solid var(--accent); border-radius:var(--radius);
+                       padding:14px 16px; margin:14px 0; font-size:13.5px; line-height:1.65;
+                       color:var(--text); max-width:88ch; }
+  #rulesBody .rintro b { color:var(--fg); }
+  #rulesBody .rleg { margin-top:9px; color:var(--dim); font-size:12.5px; display:flex;
+                     gap:14px; align-items:center; flex-wrap:wrap; }
   #rulesBody .rsec { background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
-                     padding:16px 18px 8px; margin:14px 0; box-shadow:var(--shadow); }
-  #rulesBody .rsec > h4 { font-size:14.5px; font-weight:700; letter-spacing:.05em; color:var(--fg);
+                     padding:16px 18px 14px; margin:14px 0; box-shadow:var(--shadow); }
+  #rulesBody .rsec > h4 { font-size:15px; font-weight:700; letter-spacing:.04em; color:var(--fg);
                           display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-  #rulesBody .rsec > h4::before { content:''; width:4px; height:17px; border-radius:2px;
-                          background:var(--accent); flex:0 0 auto; }
+  #rulesBody .rno { flex:0 0 auto; width:24px; height:24px; border-radius:50%; background:var(--accent);
+                    color:#fff; font-size:13px; font-weight:700; display:flex;
+                    align-items:center; justify-content:center; }
   #rulesBody .rsec > .rnote { font-size:13px; line-height:1.6; color:var(--dim);
-                          margin:2px 0 12px 14px; max-width:78ch; }
-  #rulesBody .rwrap { overflow-x:auto; }
-  #rulesBody table { width:100%; border-collapse:collapse; font-size:13.5px; line-height:1.5; }
-  #rulesBody th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.09em;
-                  color:var(--dim); font-weight:600; padding:8px 10px;
-                  border-bottom:1px solid var(--border); white-space:nowrap; }
-  #rulesBody td { padding:9px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
-  #rulesBody tbody tr:last-child td { border-bottom:none; }
-  #rulesBody tr:hover td { background:rgba(79,140,255,.07); }
-  #rulesBody td:first-child { color:var(--fg); font-weight:600; }
-  #rulesBody td.num { text-align:right; font-size:14px; font-weight:700; color:var(--fg);
-                      font-variant-numeric:tabular-nums; white-space:nowrap; }
-  #rulesBody .code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11.5px;
-                     font-weight:400; color:var(--accent); opacity:.8; }
-  #rulesBody span.hard, #rulesBody span.soft { display:inline-block; font-size:10.5px; font-weight:700;
-                     letter-spacing:.08em; text-transform:uppercase; padding:2px 9px; border-radius:99px; }
+                          margin:2px 0 12px 34px; max-width:80ch; }
+  /* one card per setting: name on top, the live value big, meaning under */
+  #rulesBody .rgrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:10px; }
+  #rulesBody .rcard { background:var(--panel); border:1px solid var(--border); border-radius:7px;
+                      padding:10px 12px; }
+  #rulesBody .rcName { font-size:12px; letter-spacing:.04em; color:var(--dim); }
+  #rulesBody .rcVal { font-size:17px; font-weight:700; color:var(--fg); margin:3px 0 5px;
+                      font-variant-numeric:tabular-nums; }
+  #rulesBody .rcWhy { font-size:12.5px; line-height:1.55; color:var(--dim); }
+  /* the gate checklist and the waiver list: pill first, words after */
+  #rulesBody .grow { display:flex; gap:12px; align-items:flex-start; padding:10px 4px;
+                     border-bottom:1px solid var(--border); }
+  #rulesBody .grow:last-child { border-bottom:none; }
+  #rulesBody .gtxt { font-size:13.5px; line-height:1.5; color:var(--fg); }
+  #rulesBody .gtxt b { font-weight:600; }
+  #rulesBody .gwv { font-size:12.5px; color:var(--dim); margin-top:1px; }
+  #rulesBody span.hard, #rulesBody span.soft { flex:0 0 auto; display:inline-block; min-width:68px;
+                     text-align:center; font-size:10.5px; font-weight:700; letter-spacing:.08em;
+                     text-transform:uppercase; padding:3px 9px; border-radius:99px; margin-top:1px; }
   #rulesBody span.hard { color:var(--red); background:rgba(246,70,93,.12); border:1px solid rgba(246,70,93,.4); }
   #rulesBody span.soft { color:var(--amber); background:rgba(232,179,61,.12); border:1px solid rgba(232,179,61,.4); }
+  /* the confidence tables -- the only tables left on the tab */
+  #rulesBody .rwrap { overflow-x:auto; }
+  #rulesBody table { width:100%; border-collapse:collapse; font-size:13px; line-height:1.5; }
+  #rulesBody th { font-size:11px; text-transform:uppercase; letter-spacing:.09em; color:var(--dim);
+                  font-weight:600; padding:8px 10px; border-bottom:1px solid var(--border); white-space:nowrap; }
+  #rulesBody td { padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  #rulesBody tbody tr:last-child td { border-bottom:none; }
+  #rulesBody td:first-child { color:var(--fg); font-weight:600; }
+  #rulesBody td.num { text-align:right; font-weight:700; color:var(--fg);
+                      font-variant-numeric:tabular-nums; white-space:nowrap; }
   #rulesBody td.hard { color:var(--red); font-weight:700; }
   #rulesBody .pos { color:var(--green); font-weight:700; }
   #rulesBody .neg { color:var(--red); font-weight:700; }
-  #rulesBody td.why, #rulesBody .why { color:var(--dim); font-weight:400; font-size:13px; }
+  #rulesBody td.why, #rulesBody .why { color:var(--dim); font-weight:400; font-size:12.5px; }
+  #rulesBody .code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11.5px;
+                     font-weight:400; color:var(--accent); opacity:.8; }
   #rulesBody .sechd { font-size:11.5px; margin:16px 0 4px; font-weight:700; }
   #rulesBody details.th { margin-top:3px; }
   #rulesBody details.th > summary { cursor:pointer; font-size:12px; color:var(--accent); }
@@ -4241,19 +4266,21 @@ panelTabs.addEventListener('click', e => {
   if (b) showPane(b.dataset.pane);
 });
 
-// one row of a two-column "setting — what it means" table
-function rRow(name, val, note) {
-  return `<tr><td>${esc(name)}</td><td class="num">${val == null ? '—' : esc(val)}</td>`
-    + `<td class="why">${esc(note || '')}</td></tr>`;
+// one small card: setting name, the live value big, plain meaning under it
+function rCard(name, val, note) {
+  return `<div class="rcard"><div class="rcName">${esc(name)}</div>`
+    + `<div class="rcVal">${val == null ? '—' : esc(val)}</div>`
+    + `<div class="rcWhy">${esc(note || '')}</div></div>`;
 }
+function rGrid(cards) { return `<div class="rgrid">${cards.join('')}</div>`; }
 function rTable(head, body) {
   // body may be an array of rows: join it, or the template puts commas between them
   const rows = Array.isArray(body) ? body.join('') : String(body || '');
   return `<div class="rwrap"><table><thead><tr>${head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>`
     + `<tbody>${rows}</tbody></table></div>`;
 }
-function rSec(title, note, inner) {
-  return `<div class="rsec"><h4>${esc(title)}</h4>`
+function rSec(no, title, note, inner) {
+  return `<div class="rsec"><h4><span class="rno">${no}</span>${esc(title)}</h4>`
     + (note ? `<div class="rnote">${esc(note)}</div>` : '') + inner + '</div>';
 }
 
@@ -4276,86 +4303,110 @@ async function loadRules() {
   const st = d.stop || {}, nt = d.noTrade || {}, cf = d.confidence || {}, ap = d.autopilot || {};
   const cc = d.candleCount || 3;
 
-  /* 1. the exit. One number decides it, and that is the whole point. */
-  out.push(rSec('THE STOP — where the exit sits',
-    `One position carries exactly ONE stop: the app watches the same line the exchange SL rests under, so the two can never race.`,
-    rTable(['rule', 'now', 'what it means'], [
-      rRow('stop mode', st.mode,
-        st.mode == 'breach' ? `one tick under the frozen ${cc}-candle low`
-          : st.mode == 'level' ? 'a tick under the immediate support' : 'flat % under entry'),
-      rRow('tightest stop (slPct)', st.slPct + '%', 'closer than this is inside the noise, so it is never used'),
-      rRow('widest stop (slMaxPct)', st.slMaxPct > 0 ? st.slMaxPct + '%' : 'off',
-        st.slMaxPct > 0 ? `if the ${cc}-candle low is further than this, the stop is capped here and the watched line moves with it`
-          : 'no cap — the low decides, however far it is'),
-      rRow('risk per trade', st.riskPctOfCapital + '% of capital',
-        'the stop is not moved to fit this; the QUANTITY is cut instead'),
-      rRow('partial exit', st.partialPct + '% (' + (st.partialMode || '') + ')',
-        'that much of the lot comes off at the immediate resistance'),
-      rRow('trail', st.trail ? 'on' : 'off', 'a resistance that price clears becomes the new stop'),
-      rRow('levels used', `${st.levelGapPct}% – ${st.levelMaxPct}%`,
-        'a level closer than the first is noise, further than the second is a dream'),
-      rRow('on fill', st.firstOrder, 'what rests at the exchange the moment a BUY fills'),
-    ])));
+  /* 0. what this page even is -- the first thing a new reader needs */
+  out.push(`<div class="rintro"><b>What this page is.</b> The app trades by written rules. `
+    + `This page prints every rule, read live from the same files the app reads — so what you `
+    + `see here is exactly what runs. It only shows; every switch stays on the AUTO RUN tab. `
+    + `The WHY behind each rule is on the THEORY tab.`
+    + `<div class="rleg"><span class="hard">blocks</span> this check can refuse a buy `
+    + `<span class="soft">warns</span> this check only marks the trade, it never blocks</div></div>`);
 
-  /* 2. the gate. Hard rows refuse the order; soft rows only colour it. */
+  /* 1. the gate -- what a novice meets first: can I buy or not */
   const gates = d.gates || [];
   const gRows = gates.map(g => {
-    const kind = g.never ? '<span class="hard">never waived</span>'
-      : g.hard ? '<span class="hard">hard</span>' : '<span class="soft">soft</span>';
-    const wv = (g.waivedFor || []).length ? esc(g.waivedFor.join(', ')) : '—';
-    return `<tr><td>${esc(g.label)}<br><span class="code">${esc(g.code)}</span>`
-      + `</td><td>${kind}</td><td class="why">${wv}</td></tr>`;
+    const kind = g.never ? '<span class="hard">blocks</span>'
+      : g.hard ? '<span class="hard">blocks</span>' : '<span class="soft">warns</span>';
+    const extra = g.never ? 'no setup may ever skip this'
+      : (g.waivedFor || []).length ? 'skipped for these setups: ' + g.waivedFor.join(', ') : '';
+    return `<div class="grow">${kind}<div class="gtxt"><b>${esc(g.label)}</b> `
+      + `<span class="code">${esc(g.code)}</span>`
+      + (extra ? `<div class="gwv">${esc(extra)}</div>` : '') + `</div></div>`;
   }).join('');
-  out.push(rSec('THE NO-TRADE GATE — every check, in the order it runs',
-    'A hard check refuses the order. A soft check only marks the row. "waived for" names the setups that are DEFINED by the thing the rule vetoes, so the rule still shows but does not block. The reasoning behind each rule is on the THEORY tab.',
-    rTable(['rule', 'kind', 'waived for'], gRows)));
+  out.push(rSec(1, 'BEFORE A BUY — the checklist',
+    'Every buy, manual or auto, walks this list top to bottom. One red check and the order is refused. Some setups are allowed to skip a check — that is written under the check itself.',
+    gRows));
 
-  /* 3. the raw numbers behind those labels */
-  out.push(rSec('THE NUMBERS BEHIND THE GATE', 'noTrade.json — change these from the AUTO RUN tab or /api/noTrade.',
-    rTable(['setting', 'now', 'what it means'], [
-      rRow('no entry before', nt.noEntryBefore, 'the first prints are an auction, not a trend'),
-      rRow('no entry after', nt.noEntryAfter, 'too late for a long option to be right'),
-      rRow('lunch window', `${nt.lunchFrom}–${nt.lunchTo}`, (nt.blockLunch ? 'ON' : 'OFF') + ' — clock version, kept switchable'),
-      rRow('min volume %', nt.minVolumePct + '%', 'lunch and late ask for this much of the opening volume'),
-      rRow('max day loss', '₹' + nt.maxDayLoss, 'realised, today'),
-      rRow('max loss streak', nt.maxLossStreak, 'losses in a row before the day stops'),
-      rRow('max trades a day', nt.maxTradesPerDay, 'closed trades today'),
-      rRow('max open', nt.maxOpenPositions, 'positions at a time'),
-      rRow('premium band', `₹${nt.minPremium}–${nt.maxPremium}`, 'below the floor one tick is too big a slice'),
-      rRow('min price', '₹' + nt.minPrice, 'price floor for an entry'),
-      rRow('thin gate', `${nt.minVolUnits} units or ${nt.minVolX}x median`, 'BOTH must fail before it blocks'),
-      rRow('chop gate', `${nt.regimeWin}-min efficiency ≥ ${nt.minEff}%`, 'a break out of the box overrides it'),
-      rRow('steep candle', nt.steepMult + 'x its own median body', 'do not buy the top of a vertical bar'),
-      rRow('gap since last entry', nt.minGapSec + 's', 'the impulse brake'),
-      rRow('dead tape', nt.deadScore + ' of 4 axes dead', 'flow, print size, OI, spread'),
-      rRow('lockout opens early at', nt.ultraPosPct + '% net', 'only a trade that really worked opens the door'),
+  /* 2. the raw numbers behind those labels */
+  out.push(rSec(2, 'THE NUMBERS THE CHECKLIST USES',
+    'These live in noTrade.json. Change them from the AUTO RUN tab, not here.',
+    rGrid([
+      rCard('trading window', nt.noEntryBefore + ' – ' + nt.noEntryAfter,
+        'no buy before the first time (the open is an auction, not a trend) and none after the second (too late for a long option)'),
+      rCard('lunch window', `${nt.lunchFrom}–${nt.lunchTo} (${nt.blockLunch ? 'ON' : 'OFF'})`,
+        'the slow middle of the day; needs ' + nt.minVolumePct + '% of the opening volume to allow a buy'),
+      rCard('max loss in a day', '₹' + nt.maxDayLoss, 'lose this much (booked) and the app stops buying for the day'),
+      rCard('max losses in a row', nt.maxLossStreak, 'this many losing trades back to back also stops the day'),
+      rCard('max trades a day', nt.maxTradesPerDay, 'closed trades counted today'),
+      rCard('max open positions', nt.maxOpenPositions, 'at any one time'),
+      rCard('option price band', `₹${nt.minPremium} – ₹${nt.maxPremium}`,
+        'only options priced inside this band are bought; below the floor one tick is too big a slice of the price'),
+      rCard('price floor', '₹' + nt.minPrice, 'nothing cheaper than this is ever bought'),
+      rCard('thin market', `${nt.minVolUnits} units or ${nt.minVolX}x median`,
+        'volume test; BOTH must fail before the buy is blocked'),
+      rCard('choppy market', `${nt.regimeWin}-min efficiency ≥ ${nt.minEff}%`,
+        'price must actually go somewhere, not just shake; a clean break out of the range overrides this'),
+      rCard('steep candle', nt.steepMult + 'x its own median body',
+        'do not buy the top of a bar that is already vertical'),
+      rCard('gap between entries', nt.minGapSec + ' seconds',
+        'the brake on impulse clicks — two buys cannot land back to back'),
+      rCard('dead market', nt.deadScore + ' of 4 signs dead',
+        'the four signs: order flow, print size, open interest, spread'),
+      rCard('lockout reopens at', '+' + nt.ultraPosPct + '% net',
+        'after the day stops, only a trade that really worked opens the door again'),
     ])));
 
-  /* 4. who may skip what */
+  /* 3. the exit. One number decides it, and that is the whole point. */
+  out.push(rSec(3, 'AFTER A BUY — where the stop sits',
+    'The moment a buy fills, one sell order rests at the exchange. The app watches the same line the exchange order rests under, so the two can never disagree.',
+    rGrid([
+      rCard('stop mode', st.mode,
+        st.mode == 'breach' ? `the stop sits one tick under the lowest point of the last ${cc} candles, frozen at entry`
+          : st.mode == 'level' ? 'the stop sits a tick under the nearest support' : 'the stop sits a flat % under the buy price'),
+      rCard('tightest stop allowed', st.slPct + '%',
+        'a stop closer than this is inside normal shake, so it is never used'),
+      rCard('widest stop allowed', st.slMaxPct > 0 ? st.slMaxPct + '%' : 'no cap',
+        st.slMaxPct > 0 ? `if the ${cc}-candle low is further away than this, the stop is capped here and the watched line moves with the cap`
+          : 'the low decides, however far it is'),
+      rCard('risk per trade', st.riskPctOfCapital + '% of capital',
+        'the stop is never moved to fit this — the QUANTITY is cut instead'),
+      rCard('partial exit', st.partialPct + '% (' + (st.partialMode || '') + ')',
+        'this much of the lot is sold at the first resistance, the rest rides'),
+      rCard('trailing', st.trail ? 'on' : 'off',
+        'when price clears a resistance, that resistance becomes the new stop'),
+      rCard('levels used', `${st.levelGapPct}% – ${st.levelMaxPct}% away`,
+        'a support/resistance closer than the first number is noise, further than the second is a dream'),
+      rCard('order on fill', st.firstOrder,
+        'the order type resting at the exchange the moment a buy fills'),
+    ])));
+
+  /* 4. the auto run itself */
+  out.push(rSec(4, 'THE AUTO RUN — what the robot may do alone',
+    'These live in autoTrade.json. The checklist above still applies on top of all of this.',
+    rGrid([
+      rCard('switched on', ap.enabled ? 'yes' : 'no', 'the master switch'),
+      rCard('index traded', ap.index, ''),
+      rCard('strike picked', ap.offset, '"auto" means picked from IV'),
+      rCard('price band', `₹${ap.premLo} – ₹${ap.premHi}`, 'only option strikes priced inside this band are bought'),
+      rCard('setups it takes', (ap.kinds || []).join(', ') || '—', ''),
+      rCard('level setups', (ap.levelKinds || []).join(', ') || '—',
+        `only these must also show reward ≥ ${ap.minRR}R and ${ap.minTouches}+ touches of the level`),
+      rCard('max trades a day', ap.maxTradesPerDay, 'the robot stops here even if the checklist would allow more'),
+      rCard('max open at once', ap.maxOpen, ''),
+      rCard('gap between entries', ap.minGapMin + ' min', ''),
+      rCard('max lots', ap.maxLots, 'the hard size ceiling'),
+      rCard('slippage allowed', ap.slipPct + '%', 'the limit price is placed this far above the last traded price'),
+      rCard('strike list refresh', ap.reloadMin + ' min', ''),
+    ])));
+
+  /* 5. who may skip what */
   const wv = d.waivers || {};
-  out.push(rSec('WAIVERS — which setup may skip which check', '',
-    rTable(['setup', 'may skip'], Object.keys(wv).map(k =>
-      `<tr><td class="code">${esc(k)}</td><td class="why">${esc(wv[k].join(', '))}</td></tr>`).join('')
-      + `<tr><td class="hard">never waived</td><td class="why">${esc((d.neverWaived || []).join(', '))}</td></tr>`)));
-
-  /* 5. the auto run itself */
-  out.push(rSec('THE AUTO RUN — autoTrade.json', 'What the headless autopilot is allowed to do on its own.',
-    rTable(['setting', 'now', 'what it means'], [
-      rRow('enabled', ap.enabled ? 'yes' : 'no', 'the master switch'),
-      rRow('index', ap.index, ''),
-      rRow('strike', ap.offset, 'auto = picked from IV'),
-      rRow('premium band', `₹${ap.premLo}–${ap.premHi}`, 'only strikes inside this band are bought'),
-      rRow('setups taken', (ap.kinds || []).join(', '), ''),
-      rRow('level setups', (ap.levelKinds || []).join(', '), 'only these are asked for R and touches'),
-      rRow('min R', ap.minRR, 'level setups only'),
-      rRow('min touches', ap.minTouches, 'level setups only'),
-      rRow('max trades a day', ap.maxTradesPerDay, 'the auto run stops here even if the gate allows more'),
-      rRow('max open', ap.maxOpen, ''),
-      rRow('gap between entries', ap.minGapMin + ' min', ''),
-      rRow('max lots', ap.maxLots, 'hard size ceiling'),
-      rRow('slippage allowed', ap.slipPct + '%', 'the limit price is put this far above the last price'),
-      rRow('reload strikes', ap.reloadMin + ' min', ''),
-    ])));
+  out.push(rSec(5, 'WHO MAY SKIP A CHECK',
+    'A few setups are DEFINED by the very thing a check vetoes (a bounce is defined by a red candle). For those, that one check still shows but does not block.',
+    Object.keys(wv).map(k =>
+      `<div class="grow"><span class="soft">setup</span><div class="gtxt"><b>${esc(k)}</b>`
+      + `<div class="gwv">may skip: ${esc(wv[k].join(', '))}</div></div></div>`).join('')
+    + `<div class="grow"><span class="hard">never</span><div class="gtxt"><b>no setup may ever skip</b>`
+    + `<div class="gwv">${esc((d.neverWaived || []).join(', '))}</div></div></div>`));
 
   /* 6. the confidence index -- built and measured, not wired in yet */
   const br = cf.breakable || {};
@@ -4363,8 +4414,8 @@ async function loadRules() {
     `<tr><td>${esc(f.factor)}</td><td class="why">${esc(f.test)}</td>`
     + `<td class="num ${f.pts > 0 ? 'pos' : f.pts < 0 ? 'neg' : ''}">${f.pts > 0 ? '+' : ''}${f.pts}</td>`
     + `<td class="why">${esc(f.why || '')}</td></tr>`).join('');
-  out.push(rSec('CONFIDENCE SCORE — how good is this fire?',
-    `Base ${cf.base}, and every factor is worth a few points only, so a fire has to be good on several counts to reach a bar. Nothing here looks at what happened after the fire.`,
+  out.push(rSec(6, 'CONFIDENCE SCORE — how good is this signal?',
+    `Each signal starts at ${cf.base} points and every factor below adds or removes a few, so a signal has to be good on several counts to score high. Nothing here looks at what happened after the signal.`,
     (cf.live ? '' : '<div class="warn">NOT LIVE YET — built and measured on 06/11/2026, but the gate does not read it. Nothing on this list can cross a rule today.</div>')
     + rTable(['factor', 'test', 'points', 'why'], fRows)
     + '<div class="sechd">HOW TO READ IT</div>'
