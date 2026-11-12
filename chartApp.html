@@ -373,30 +373,48 @@
   #panel .pane.on { display:block; }
 
   /* ---- THE RULES TAB ----
-     A print, not a control. Wide tables scroll inside themselves so the
-     panel never scrolls sideways. */
-  #rulesBody .rsec { margin:12px 0 18px; }
-  #rulesBody .rsec > h4 { font-size:12px; letter-spacing:.06em; color:var(--fg);
-                          border-left:3px solid var(--accent); padding-left:7px; margin-bottom:3px; }
-  #rulesBody .rsec > .rnote { font-size:11.5px; color:var(--dim); margin:3px 0 7px; padding-left:10px; }
+     A print, not a control. 09+12/11/2026 redesign: each section is a
+     card, body text is 13.5-14px (the old 12px was unreadable), the
+     NOW column is the loudest thing in each row, and hard/soft are
+     pill chips instead of coloured words. Wide tables scroll inside
+     themselves so the panel never scrolls sideways. */
+  #rulesBody { max-width:1100px; padding-bottom:12px; }
+  #rulesBody .rsec { background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+                     padding:16px 18px 8px; margin:14px 0; box-shadow:var(--shadow); }
+  #rulesBody .rsec > h4 { font-size:14.5px; font-weight:700; letter-spacing:.05em; color:var(--fg);
+                          display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  #rulesBody .rsec > h4::before { content:''; width:4px; height:17px; border-radius:2px;
+                          background:var(--accent); flex:0 0 auto; }
+  #rulesBody .rsec > .rnote { font-size:13px; line-height:1.6; color:var(--dim);
+                          margin:2px 0 12px 14px; max-width:78ch; }
   #rulesBody .rwrap { overflow-x:auto; }
-  #rulesBody table { width:100%; border-collapse:collapse; font-size:12px; }
-  #rulesBody th { text-align:left; font-size:10.5px; letter-spacing:.05em; color:var(--dim);
-                  font-weight:600; padding:4px 7px; border-bottom:1px solid var(--border); white-space:nowrap; }
-  #rulesBody td { padding:4px 7px; border-bottom:1px solid var(--border); vertical-align:top; }
-  #rulesBody tr:hover td { background:rgba(41,98,255,.06); }
-  #rulesBody td.num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
-  #rulesBody .code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; color:var(--dim); }
-  #rulesBody .hard { color:var(--red); font-weight:600; }
-  #rulesBody .soft { color:#f0b90b; }
-  #rulesBody .pos { color:var(--green); font-weight:600; }
-  #rulesBody .neg { color:var(--red); font-weight:600; }
-  #rulesBody .why { color:var(--dim); }
+  #rulesBody table { width:100%; border-collapse:collapse; font-size:13.5px; line-height:1.5; }
+  #rulesBody th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.09em;
+                  color:var(--dim); font-weight:600; padding:8px 10px;
+                  border-bottom:1px solid var(--border); white-space:nowrap; }
+  #rulesBody td { padding:9px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+  #rulesBody tbody tr:last-child td { border-bottom:none; }
+  #rulesBody tr:hover td { background:rgba(79,140,255,.07); }
+  #rulesBody td:first-child { color:var(--fg); font-weight:600; }
+  #rulesBody td.num { text-align:right; font-size:14px; font-weight:700; color:var(--fg);
+                      font-variant-numeric:tabular-nums; white-space:nowrap; }
+  #rulesBody .code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11.5px;
+                     font-weight:400; color:var(--accent); opacity:.8; }
+  #rulesBody span.hard, #rulesBody span.soft { display:inline-block; font-size:10.5px; font-weight:700;
+                     letter-spacing:.08em; text-transform:uppercase; padding:2px 9px; border-radius:99px; }
+  #rulesBody span.hard { color:var(--red); background:rgba(246,70,93,.12); border:1px solid rgba(246,70,93,.4); }
+  #rulesBody span.soft { color:var(--amber); background:rgba(232,179,61,.12); border:1px solid rgba(232,179,61,.4); }
+  #rulesBody td.hard { color:var(--red); font-weight:700; }
+  #rulesBody .pos { color:var(--green); font-weight:700; }
+  #rulesBody .neg { color:var(--red); font-weight:700; }
+  #rulesBody td.why, #rulesBody .why { color:var(--dim); font-weight:400; font-size:13px; }
+  #rulesBody .sechd { font-size:11.5px; margin:16px 0 4px; font-weight:700; }
   #rulesBody details.th { margin-top:3px; }
-  #rulesBody details.th > summary { cursor:pointer; font-size:11px; color:var(--accent); }
-  #rulesBody details.th p { font-size:11.5px; color:var(--dim); margin:4px 0; white-space:pre-wrap; }
-  #rulesBody .warn { border:1px solid #f0b90b; background:rgba(240,185,11,.08); color:#f0b90b;
-                     border-radius:4px; padding:6px 9px; font-size:11.5px; margin:4px 0 8px; }
+  #rulesBody details.th > summary { cursor:pointer; font-size:12px; color:var(--accent); }
+  #rulesBody details.th p { font-size:12.5px; color:var(--dim); margin:4px 0; white-space:pre-wrap; }
+  #rulesBody .warn { border:1px solid var(--amber); background:rgba(232,179,61,.1); color:var(--amber);
+                     border-radius:6px; padding:10px 14px; font-size:13px; line-height:1.5; margin:6px 0 12px; }
+  #rulesBody .empty { padding:12px; color:var(--dim); font-size:13px; }
 
   /* THE NUMBER THAT MATTERS BEFORE A CLICK.
      Deliberately the biggest thing in the panel: this is the rupees
