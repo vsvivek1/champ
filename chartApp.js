@@ -432,6 +432,24 @@ function breachFromSec(tok, count) {
 }
 
 /*
+The FORMING minute's low so far. Everything above excludes the live bar on
+purpose; the near-stop fallback is the one reader that wants it, because the
+user's rule is "or the current candle low" -- the lowest print of the bar
+being built right now. null before the first tick of the minute.
+*/
+function formingLow(tok) {
+    const arr = secCandles.get(Number(tok));
+    if (!arr || !arr.length) return null;
+    const cur = Math.floor(Date.now() / 1000 / 60) * 60;
+    let low = null;
+    for (const c of arr) {
+        if (Math.floor(c.time / 60) * 60 < cur) continue;
+        if (low == null || c.low < low) low = c.low;
+    }
+    return low;
+}
+
+/*
 Completed 1-minute bars off our own tick buckets, newest last. breachFromSec
 only needs the lows; the steep-candle gate needs the whole bar, so this is
 the shared builder. The forming minute is NEVER included -- a gate that read
@@ -1053,6 +1071,40 @@ const GUARD_DEFAULTS = {
     */
     partialMode: 'app',
     trail: true,          // a cleared resistance becomes the new stop
+
+    /*
+    PROFIT LOCK LADDER -- ASKS, DOES NOT ACT.
+
+    The user's rule (09/11/2026): "when the profit is 10% ask me to lock at
+    least 5, or dismiss. 5% lower, starting from 10, 15, 20 etc -- put stop
+    loss at that point."
+
+    So the rungs are lockFrom, lockFrom+lockStep, ... and the stop offered
+    at each one sits lockBehind under it:
+
+        +10% reached -> offer a stop at  +5%
+        +15% reached -> offer a stop at +10%
+        +20% reached -> offer a stop at +15%
+
+    Both numbers are percentages of the ENTRY premium, not of capital.
+
+    Why it asks instead of acting. The ladder in maybeTrail is automatic
+    because a cleared resistance is evidence -- price proved that level. A
+    round percentage proves nothing about the chart; it is a money rule, and
+    whether +5% is the right place to stand depends on where the next level
+    is. So this one surfaces the number and the user decides. That is also
+    why it is a separate ladder and not an extra rung inside maybeTrail.
+
+    Nagging is the thing to avoid. One ask per rung, ever: answering it --
+    lock OR dismiss -- retires that rung and every rung below it, so a
+    dismiss at +10% goes quiet until +15%. The ask is also dropped the
+    moment the stop is already at or above what it would offer, which is
+    the usual case once maybeTrail has done its job.
+    */
+    lockAsk: true,        // ask to lock profit as the rungs are reached
+    lockFrom: 10,         // first rung, % above entry
+    lockStep: 5,          // a rung every this many %
+    lockBehind: 5,        // the offered stop sits this many % under the rung
     levelGapPct: 2,       // ignore a resistance closer than this (inside the noise)
     levelMaxPct: 60,      // ignore one further than this (not a target, a dream)
     /*
@@ -1182,6 +1234,12 @@ function readGuardSettings() {
         if (!(s.slMaxPct === 0 || (s.slMaxPct > s.slPct && s.slMaxPct <= 100))) s.slMaxPct = def.slMaxPct;
         if (!['app', 'exchange'].includes(s.partialMode)) s.partialMode = def.partialMode;
         s.trail = s.trail !== false;
+        s.lockAsk = s.lockAsk !== false;
+        // a rung ladder only means anything while behind < from, else the
+        // "lock" would be at or above the rung price itself
+        if (!(s.lockFrom > 0 && s.lockFrom <= 200)) s.lockFrom = def.lockFrom;
+        if (!(s.lockStep > 0 && s.lockStep <= 100)) s.lockStep = def.lockStep;
+        if (!(s.lockBehind > 0 && s.lockBehind < s.lockFrom)) s.lockBehind = def.lockBehind;
         return s;
     } catch (e) {
         return def;
@@ -2075,7 +2133,7 @@ const NO_TRADE_DEFAULTS = {
     lunchTo: '13:15',         // volume-based dead zone window end
     noEntryAfter: '15:10',    // nothing new this late -- only theta and squaring off
     minVolumePct: 60,         // block lunch/late if volume < this % of opening vol (1-min candle)
-    minPrice: 3,              // INR minimum price for entry
+    minPrice: 1,              // INR minimum price for entry (09/11/2026: was 3)
     blockLunch: false,        // off: volume-based participation block now, not clocked
     maxDayLoss: 3000,         // INR realised, today
     maxLossStreak: 3,         // consecutive losing trades today
@@ -2115,8 +2173,18 @@ const NO_TRADE_DEFAULTS = {
     at 2.00 a single tick is 2.5% of the premium. Below that the spread
     itself decides the trade. Liquidity is no longer guessed from the price
     -- the `thin` gate below reads the traded volume instead.
+
+    09/11/2026: floor dropped again, 2 -> 1. One tick at 1.00 is 5% of the
+    premium, so the spread cost doubles. This is deliberate: the `thin` gate
+    and the stop width are what keep a cheap strike honest, not the price
+    itself. Watch two things on these trades -- the trail almost never fires
+    (trailClearPct is a PERCENT of the premium, and at 1.00 the option's own
+    median 1-min range is huge), so the halfway lift after a partial is doing
+    most of the work; and the stop cap (slMaxPct 25) is only 0.25 wide here,
+    which is 5 ticks. Both floors moved together, because minPrice 3 was the
+    binding one -- minPremium alone would not have let a 1.50 option through.
     */
-    minPremium: 2,            // INR per unit: one tick = 2.5% here
+    minPremium: 1,            // INR per unit: one tick = 5% here
     maxPremium: 400,
 
     /*
@@ -2197,7 +2265,12 @@ const NO_TRADE_DEFAULTS = {
     the whole reason the gate exists.
     */
     breakWin: 5,              // minutes set aside as "the break", the rest is the box
-    escapeFrac: 0.25,         // clear of the box edge by this fraction of its width
+    escapeFrac: 0.10,         // clear of the box edge by this fraction of its width
+                              // 0.25 -> 0.10 on 09/11/2026. A 21-day sweep: 0.25 gave
+                              // 42 releases, 28.6% win, -174 pts; 0.10 gave 82 releases,
+                              // 39.0% win, +45 pts. On the 24650PE at 13:15 a 59-pt box
+                              // needed 14.8 pts at 0.25 but only 5.9 pts at 0.10, so 0.10
+                              // released a full minute earlier, at 4.85 instead of 5.65.
     blockWrongWay: true,      // a CE needs the index biased up, a PE down
     emaMin: 20,               // minutes in the direction EMA
 
@@ -2236,8 +2309,56 @@ const NO_TRADE_DEFAULTS = {
     balance, and the SIZE is what moves to honour it -- never the stop. If
     the 3-candle low is far, the quantity shrinks; the stop stays where the
     candles put it. 0 = off (fall back to the margin-percentage buttons).
+
+    This is NOT the "15% stop" rule -- see maxStopPct below. On 09/11/2026
+    this was briefly cut to 15 on a misreading of that instruction and put
+    back to 25, because the user's correction was explicit: "not the
+    quantity change. i told to stop taking that trade." A far stop is now
+    refused by the slwide gate instead of being sized down to fit here.
     */
     riskPctOfCapital: 25,
+
+    /*
+    MAX STOP WIDTH -- a hard refusal, not a resize.
+
+    "If the stop loss is more than 15% away dont take the trade."
+    (09/11/2026, after the quantity-shrinking reading was rejected.)
+
+    Measured on the RAW candle-derived stop, before slMaxPct caps it, so the
+    cap cannot walk a too-wide setup through the gate. See the slwide block
+    in noTradeChecks for the full reasoning. 0 = off.
+    */
+    maxStopPct: 15,
+
+    /*
+    THE ONE WAY PAST maxStopPct -- a second, separate click.
+
+    "i mean dont take the trade. or ask a double confirmation" (09/11/2026).
+    So the gate stays a refusal everywhere nobody is watching, and the only
+    exception is a human saying yes twice:
+
+      autopilot, OI signal, armed triggers   refused, always. There is no
+                                             human at fire time to ask, and
+                                             a yes given now is not a yes to
+                                             a price five minutes from now.
+      a hand click (/api/buy, /api/quick)    refused the first time, with the
+                                             exact stop distance on screen.
+                                             Clicking TAKE IT ANYWAY sends
+                                             the same order back with a
+                                             one-shot ticket, and that one
+                                             goes through.
+
+    The ticket is deliberately hard to reuse: one order, 90 seconds, same
+    symbol, and the price must still be within slwideAskBand% of the price
+    that was quoted in the question. If the premium has moved more than
+    that, the stop distance has moved too, so the question is asked again
+    instead of being answered by an old yes.
+
+    false = no exception at all, the gate simply refuses.
+    */
+    maxStopAsk: true,
+    maxStopAskSec: 90,        // how long one ticket stays valid
+    maxStopAskBand: 2,        // % the premium may drift before re-asking
 
     /* participation gate -- see the PARTICIPATION block above */
     blockDead: true,          // refuse entries once size has left the tape
@@ -2341,6 +2462,8 @@ theory next to the number instead of leaving "efficiency 5.6%" to be taken on
 faith.
 */
 const RULE_THEORY = {
+    slwide: 'HOW FAR THE STOP IS, AS A STATEMENT ABOUT THE ENTRY.\n\nThe stop is a tick under the 3-candle low -- the nearest price at which the reason for being long is simply wrong. So the DISTANCE to it is not a sizing input, it is a measure of how far into open air the entry sits. A stop 30% away says the nearest honest invalidation level is 30% below: there is nothing underneath, and the entry is in the middle of the move rather than at the edge of a structure.\n\nThis is the gate that refuses instead of adjusting, and that is the point of it. Two other mechanisms already react to a far stop by changing something else and taking the trade anyway: riskPctOfCapital shrinks the quantity until the rupee loss fits, and slMaxPct moves the stop up to a fixed maximum width. Both keep a bad entry alive.\n\nNeither of those fixes anything real. Sizing down a poor entry does not improve the entry -- it buys the same low-probability outcome in smaller units, and pays the same spread twice to do it. Tightening the stop is worse: it moves the exit to a price no level defends, which converts a large occasional loss into a small frequent one and usually a worse expectancy, because the trade now dies on noise it would have survived.\n\nMeasured on the RAW candle stop, before slMaxPct caps it. Reading the capped number would let the cap massage a 40%-wide setup down to exactly the limit and walk it through -- the same "change something else and take it anyway" move, one level down.\n\nNever waived. speedgreen and holdlow waive most of this gate because they are defined by what it vetoes, but neither has anything to say about how far the stop is.\n\nONE EXCEPTION, AND IT NEEDS TWO CLICKS. For a machine -- the autopilot, the OI signal, an armed trigger -- this is a flat refusal, because there is nobody there to ask and a yes given now is not a yes to the price five minutes later. For a hand click the first press is refused and shows you the real distance; pressing TAKE IT ANYWAY sends the same order back with a one-shot ticket, good for one order, 90 seconds, the same symbol, and only while the premium has not drifted more than 2%. Move further than that and the question is asked again with the new number, because the old answer was about a stop distance that no longer exists. Set maxStopAsk false to remove the exception.\n\nTHE NEAR-STOP OFFER (12/11/2026). When the 3-candle stop is past the limit, the refusal now also looks one step nearer: first the 2-candle low, then the current (forming) bar\'s low. If one of them puts the stop under the limit -- and not inside the slPct noise band -- the TAKE IT ANYWAY click takes the trade WITH THAT stop: the breach line and the resting SL both move onto the nearer level, so one line is watched and rested at. Still two clicks, still hand-only; a machine is refused exactly as before. If neither nearer low fits under the limit, the old refusal stands unchanged.',
+
     open: 'The first prints of the day are a price-discovery auction, not a trend. Spreads are at their widest and the first 5 minutes routinely reverse, so an entry here pays the widest cost for the least information.',
 
     lunch: 'The clock-based version of the participation rule, kept switchable but off by default. It encodes a real effect -- institutional flow does thin midday while theta keeps charging -- but it encodes it as a fixed window, which is wrong on any day the flow leaves early or comes back early. The measured gate below asks the same question of the tape itself.',
@@ -2379,6 +2502,15 @@ const RULE_THEORY = {
 };
 
 // Calculate speed: ratio of last 3 candles' avg range vs previous 20 candles' avg range
+/*
+The R floor that applies to one kind -- its own if it has one, else minRR.
+See minRRByKind in SETUP_DEFAULTS for why speedgreen gets a lower one.
+*/
+function rrFloorFor(kind, cfg) {
+    const own = Number((cfg.minRRByKind || {})[kind]);
+    return own > 0 ? own : Number(cfg.minRR);
+}
+
 function calcSpeed(token) {
     const arr = secCandles.get(Number(token)) || [];
     if (arr.length < 23) return null; // need 20 prior + 3 recent
@@ -2421,7 +2553,7 @@ things that stop one bad afternoon becoming a bad month, and a setup is not
 allowed to vote on them.
 */
 const NEVER_WAIVED = ['dayloss', 'streak', 'cap', 'lock', 'guarded',
-    'open_count', 'same_symbol', 'premium', 'minprice'];
+    'open_count', 'same_symbol', 'premium', 'minprice', 'slwide'];
 
 const WAIVED_BY_KIND = {
     speedgreen: ['chop', 'wrongway', 'steep', 'redcandle', 'dead', 'thin', 'lunch', 'late', 'open', 'impulse'],
@@ -2463,37 +2595,57 @@ function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
         before != null && mins < before,
         `now ${now.format('HH:mm')} — the first minutes are a spread-widening coin flip`);
 
-    // volume-based lunch check: if time is in lunch window, check if volume < 60% of opening
-    let lunchFailed = false, lunchDetail = '';
-    if (!stTok) {
-        lunchDetail = 'n/a until a symbol is picked';
-    } else if (lFrom != null && lTo != null && mins >= lFrom && mins < lTo) {
-        const candles = secCandles.get(stTok) || [];
-        const firstCandle = candles[0];
-        const lastCandle = candles[candles.length - 1];
-        const openingVol = firstCandle ? (firstCandle.volume || 0) : 0;
-        const currentVol = lastCandle ? (lastCandle.volume || 0) : 0;
-        const volPct = openingVol > 0 ? (currentVol / openingVol) * 100 : 0;
-        lunchFailed = openingVol > 0 && volPct < s.minVolumePct;
-        lunchDetail = `${now.format('HH:mm')} — volume ${volPct.toFixed(0)}% of opening (${currentVol} vs ${openingVol}), need ≥${s.minVolumePct}%`;
-    }
-    add('lunch', `No entry ${s.lunchFrom}–${s.lunchTo} (low volume)`, lunchFailed, lunchDetail);
+    /* ------------------------------------------------------------------
+    LUNCH AND LATE, ON VOLUME.
 
-    // volume-based late check: if time is after noEntryAfter, check if volume < 60% of opening
-    let lateFailed = false, lateDetail = '';
-    if (!stTok) {
-        lateDetail = 'n/a until a symbol is picked';
-    } else if (after != null && mins >= after) {
-        const candles = secCandles.get(stTok) || [];
-        const firstCandle = candles[0];
-        const lastCandle = candles[candles.length - 1];
-        const openingVol = firstCandle ? (firstCandle.volume || 0) : 0;
-        const currentVol = lastCandle ? (lastCandle.volume || 0) : 0;
-        const volPct = openingVol > 0 ? (currentVol / openingVol) * 100 : 0;
-        lateFailed = openingVol > 0 && volPct < s.minVolumePct;
-        lateDetail = `${now.format('HH:mm')} — volume ${volPct.toFixed(0)}% of opening (${currentVol} vs ${openingVol}), need ≥${s.minVolumePct}%`;
+    Both windows ask one question: is anyone still in this strike, or is
+    the tape just the market maker breathing. The answer has to be a
+    comparison of LIKE WITH LIKE -- one completed minute of volume against
+    what a normal minute in this strike has been lately.
+
+    It used to read `secCandles[0].volume` as "opening volume". That was
+    wrong twice over. secCandles holds 5-SECOND buckets, not minutes, so
+    the last element is 5 seconds of volume. And the FIRST bucket is built
+    with secVolBase 0, so its `volume` is the whole day's CUMULATIVE volume
+    at the moment we subscribed. The gate was dividing 5 seconds by a day.
+
+    09/11/2026, 12:04, NIFTY26N0924650PE: "volume 0% of opening
+    (134030 vs 170191970), need >=60%". 0.08%. It could never pass. Every
+    minute of 12:00-13:15 and everything after 15:10 was blocked every
+    single day, and a BOUNCE at 7.1 with a 1.51R target was refused by it.
+
+    volFlow() already measures the honest thing -- the last completed
+    minute against the median of the previous 20, forming minute excluded
+    -- so both windows use it. Too few bars means no opinion, not a block:
+    the same way the `thin` gate behaves, because "we only just subscribed"
+    is not evidence about participation.
+
+    blockLunch is no longer dead. On, it blocks the window on the clock and
+    the volume cannot buy a way out; off, volume alone decides.
+    ------------------------------------------------------------------ */
+    const volWindowCheck = (code, label, inWindow) => {
+        // not na() -- that is declared further down, and this runs before it
+        if (!stTok) return chk.push({ code, label, ok: true, blocked: false, hard: true,
+            detail: 'n/a until a symbol is picked' });
+        if (!inWindow) return add(code, label, false, `now ${now.format('HH:mm')} — outside the window`);
+        const f = volFlow(stTok, 20);
+        if (!f.ok) return add(code, label, false, `${now.format('HH:mm')} — ${f.why}, so no opinion on participation`);
+        const pct = f.median > 0 ? (f.vol / f.median) * 100 : 0;
+        const detail = `${now.format('HH:mm')} — last minute ${f.vol} units, `
+            + `${pct.toFixed(0)}% of this strike's own ${f.n}-min median (${f.median}), need ≥${s.minVolumePct}%`;
+        return add(code, label, f.median > 0 && pct < s.minVolumePct, detail);
+    };
+
+    if (s.blockLunch && lFrom != null && lTo != null && mins >= lFrom && mins < lTo) {
+        add('lunch', `No entry ${s.lunchFrom}–${s.lunchTo}`, true,
+            `now ${now.format('HH:mm')} — lunch is blocked on the clock (blockLunch is on)`);
+    } else {
+        volWindowCheck('lunch', `No entry ${s.lunchFrom}–${s.lunchTo} (low volume)`,
+            lFrom != null && lTo != null && mins >= lFrom && mins < lTo);
     }
-    add('late', `No entry after ${s.noEntryAfter} (low volume)`, lateFailed, lateDetail);
+
+    volWindowCheck('late', `No entry after ${s.noEntryAfter} (low volume)`,
+        after != null && mins >= after);
 
     add('lock', `No entry while the exit lockout runs — only an ultra-positive trade (≥${s.ultraPosPct}% net) opens it early`,
         l.locked,
@@ -2712,6 +2864,84 @@ function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
     }
 
     /*
+    STOP TOO WIDE -- REFUSE THE TRADE.
+
+    The user's rule, stated twice and corrected once (09/11/2026): "if the
+    stop loss is more than 15% away dont take the trade. not the quantity
+    change." That correction is the whole point of this gate, so it is worth
+    writing down what it rejects.
+
+    There were already TWO mechanisms that reacted to a far stop, and both
+    of them keep the trade alive by changing something else:
+
+      riskPctOfCapital  shrinks the QUANTITY until the rupee loss fits. The
+                        trade still happens, just smaller.
+      slMaxPct          moves the STOP up to a fixed max width. The trade
+                        still happens, with a stop the candles never chose.
+
+    Neither is what was asked for. A stop 30% under entry means the nearest
+    honest invalidation level is 30% away, and that is a statement about the
+    SETUP, not about sizing: the entry is in the middle of nowhere. Sizing
+    down a bad entry does not make it a good one, and tightening the stop to
+    a level price has no reason to respect just converts a big loss into a
+    likely one. The trade is the thing to refuse.
+
+    MEASURED ON THE RAW STOP, NOT THE CAPPED ONE. plannedStop returns the
+    slMaxPct-capped stop in `stop` and the real candle-derived level in
+    `rawStop`. This gate reads the raw one deliberately: reading the capped
+    one would mean slMaxPct could massage a 40%-wide setup down to exactly
+    maxStopPct and walk it straight through the gate -- the same "change
+    something else and take it anyway" behaviour, one level down.
+
+    NEVER WAIVED. speedgreen and holdlow waive most of the gate because
+    they are defined by what the gate vetoes, but neither of them has
+    anything to say about how far the stop is. "Don't take the trade" was
+    unconditional, so it is in NEVER_WAIVED.
+    */
+    if (premium > 0 && s.maxStopPct > 0) {
+        const gset = readGuardSettings();
+        const frozen = stTok
+            ? (breachLevelByToken.get(Number(stTok)) ?? breachFromSec(stTok, CANDLE_COUNT))
+            : null;
+        const ps = plannedStop(premium, null, gset, frozen);
+        // the level the candles actually gave, before slMaxPct touched it
+        const raw = ps.capped && ps.rawStop > 0 ? ps.rawStop : ps.stop;
+        if (raw > 0 && raw < premium) {
+            const away = +(((premium - raw) / premium) * 100).toFixed(1);
+            /*
+            The near-stop offer (12/11/2026): a 3-candle stop past the limit
+            is still refused, but when a NEARER low (2-candle, then the
+            forming bar) gives a stop under the limit, the second click may
+            take the trade WITH THAT STOP instead of the far one.
+            */
+            const fb = away > s.maxStopPct
+                ? nearStopFallback(stTok, premium, s.maxStopPct, gset.slPct) : null;
+            add('slwide', `Stop within ${s.maxStopPct}% of entry`,
+                away > s.maxStopPct,
+                `stop ${raw} is ${away}% under ₹${premium}`
+                    + (ps.capped ? ` (the raw ${CANDLE_COUNT}-candle level; slMaxPct would have shown ${ps.stop})` : '')
+                    + ` — limit ${s.maxStopPct}%`
+                    + (away > s.maxStopPct
+                        ? '. The entry is too far from its own invalidation level: refused, not resized'
+                        : '')
+                    + (fb
+                        ? `. A nearer level exists: the ${fb.source} ${fb.level} puts the stop at ${fb.stop} (${fb.away}%) — the second click takes the trade with THAT stop`
+                        : ''));
+            // the double-confirm question quotes these, so they ride on the row
+            Object.assign(chk[chk.length - 1],
+                { away, rawStop: raw, limitPct: s.maxStopPct, token: stTok || null, fallback: fb });
+        } else {
+            chk.push({ code: 'slwide', label: `Stop within ${s.maxStopPct}% of entry`,
+                ok: true, blocked: false, hard: true,
+                detail: `no usable stop to measure yet (${ps.why})` });
+        }
+    } else {
+        chk.push({ code: 'slwide', label: `Stop within ${s.maxStopPct || '—'}% of entry`,
+            ok: true, blocked: false, hard: true,
+            detail: s.maxStopPct > 0 ? 'n/a until a price is picked' : 'off (maxStopPct 0)' });
+    }
+
+    /*
     THIN -- this strike's own traded volume. The real test the premium floor
     was only guessing at. `dead` above reads the whole option tape folded
     together; this one reads the single strike you are about to buy, because a
@@ -2779,18 +3009,219 @@ function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
     return { checks: chk, blockers, blocked: blockers.length > 0, settings: s, stats: st, lock: l, openPositions: open.length, regime: reg, part };
 }
 
+/* ---------------------------------------------------------------------
+IS AUTO RUN ON?
+
+Asked by the wide-stop log and printed on the page, because "the gate
+refused a trade" means two different things depending on the answer. With
+auto run OFF the refusal cost nothing -- nobody was going to buy it anyway.
+With auto run ON the gate is the only reason the money stayed in the
+account. The same line in a log, two different stories, so the state is
+written into every row rather than remembered.
+
+Two conditions, not one: the autopilot object has to exist (it only does in
+headless mode) AND cfg.enabled has to be true. Armed on the mock book is
+said separately -- it decides and fills nothing, so calling it ON would be
+a lie in the one place a lie is expensive.
+--------------------------------------------------------------------- */
+function autoRunState() {
+    let enabled = false;
+    try { enabled = !!require('./autoPilot.js').readCfg().enabled; } catch (e) { }
+    const on = !!autoPilot && enabled;
+    return {
+        on, mock: !!MOCK, enabled, running: !!autoPilot,
+        text: !on ? 'auto run off'
+            : (MOCK ? 'auto run is on (MOCK book)' : 'auto run is on'),
+    };
+}
+
+/* ---------------------------------------------------------------------
+THE WIDE-STOP LOG
+
+Every time the 15% rule has an opinion it is written down, not just
+printed. A console line is gone the next time PM2 rotates the file, and
+this is the one gate that can be overridden by hand -- so the only way to
+ever answer "was refusing those right?" is to have the rows.
+
+Three kinds of row:
+  refused    the gate said no and that was the end of it
+  asked      the gate said no and offered the second confirmation
+  taken      you confirmed twice and the order went out
+
+Each row carries the auto-run state at that moment, see autoRunState above.
+--------------------------------------------------------------------- */
+const SLWIDE_LOG_FILE = dataFile('slwideLog.json');
+
+function readSlwideLog() {
+    try { return JSON.parse(fs.readFileSync(SLWIDE_LOG_FILE, 'utf8')); } catch (e) { return []; }
+}
+
+function logSlwide(row) {
+    const ar = autoRunState();
+    const r = {
+        at: dayjs().format('YYYY-MM-DD HH:mm:ss'), date: dayjs().format('YYYY-MM-DD'),
+        autoRun: ar.on ? 'on' : 'off', autoRunText: ar.text, mock: ar.mock,
+        ...row,
+    };
+    try {
+        const rows = readSlwideLog();
+        rows.push(r);
+        fs.writeFileSync(SLWIDE_LOG_FILE, JSON.stringify(rows.slice(-500), null, 1));
+    } catch (e) { console.log('⚠️ slwideLog write failed', e.message); }
+    return r;
+}
+
+/* ---------------------------------------------------------------------
+THE DOUBLE CONFIRMATION FOR A WIDE STOP
+
+Only the slwide gate can be answered, and only by hand. The first click is
+refused with the stop distance printed on screen; that refusal hands back a
+one-shot ticket. Clicking TAKE IT ANYWAY re-sends the same order carrying
+the ticket, and the second attempt goes through.
+
+Why a ticket and not a flag: a flag is a mode, and a mode left on is how a
+wide stop gets taken tomorrow by accident. A ticket is one order, one
+symbol, 90 seconds, and it is destroyed the moment it is looked at --
+whether or not it turned out to be valid.
+
+The price band matters as much as the clock. The question said "the stop is
+32% away at 4.15". If the premium is 4.60 by the time the second click
+lands, 32% is no longer the truth, so the old yes is thrown away and the
+question is asked again with the new number.
+--------------------------------------------------------------------- */
+const slwideTickets = new Map();     // id -> { tradingsymbol, premium, away, stop, at, token, fallback }
+let slwideTicketSeq = 1;
+
+/*
+A confirmed near-stop ticket arms this: the next fill on the token places
+its SL under the nearer low the user said yes to, instead of the 3-candle
+low. One entry, 3 minutes -- a yes about THIS bar's lows is not a yes about
+the lows an hour later. Read once, destroyed at once, like the ticket.
+*/
+const nearStopByToken = new Map();   // token -> { level, stop, away, source, at }
+
+function takeNearStop(token) {
+    const t = Number(token);
+    const n = nearStopByToken.get(t);
+    if (!n) return null;
+    nearStopByToken.delete(t);
+    if (Date.now() - n.at > 180 * 1000) {
+        console.log(`↻ near-stop override for token ${t} expired unused (${((Date.now() - n.at) / 1000).toFixed(0)}s old)`);
+        return null;
+    }
+    return n;
+}
+
+function sweepSlwideTickets(ttlSec) {
+    const cut = Date.now() - ttlSec * 1000;
+    for (const [id, t] of slwideTickets) if (t.at < cut) slwideTickets.delete(id);
+}
+
+// the only blocker that may be answered -- and only when it is the ONLY one
+function slwideOnly(blockers) {
+    return blockers.length == 1 && blockers[0].code == 'slwide' ? blockers[0] : null;
+}
+
 /*
 The one call every entry path makes. Returns true (and has already
 answered 423) when the order must not be sent.
+
+`confirmable` is what separates a hand click from a machine: only /api/buy
+and /api/quick pass it. The autopilot, the OI signal and an armed trigger
+never do, so for them a wide stop is a plain refusal with no way past.
+`confirm` is the ticket id the second click sends back.
 */
 function entryBlocked(res, opts) {
-    const g = noTradeChecks(opts || {});
+    const o = opts || {};
+    const g = noTradeChecks(o);
     if (!g.blocked) return false;
+
+    const s = g.settings;
+    /*
+    Two different questions about the same rule, so two variables:
+      wideRow  is slwide among the blockers at all? -> it gets logged
+      wide     is slwide the ONLY blocker?          -> it may be confirmed
+    Logging the first one matters: a wide stop refused on a day that was
+    also streak-locked is still a wide stop that was refused, and leaving
+    those rows out would make the log read as if the rule rarely fires.
+    */
+    const wideRow = g.blockers.find(b => b.code == 'slwide') || null;
+    const wide = slwideOnly(g.blockers);
+    let ask = null;
+
+    if (wide && o.confirmable && s.maxStopAsk) {
+        sweepSlwideTickets(s.maxStopAskSec);
+        const t = o.confirm ? slwideTickets.get(String(o.confirm)) : null;
+        // read once, destroy at once: a ticket never gets a second chance
+        if (t) slwideTickets.delete(String(o.confirm));
+        const band = s.maxStopAskBand / 100;
+        const sameSym = t && t.tradingsymbol == o.tradingsymbol;
+        const samePx = t && o.premium > 0 && t.premium > 0
+            && Math.abs(o.premium - t.premium) <= t.premium * band;
+        if (t && sameSym && samePx) {
+            const ar = autoRunState();
+            // the yes was given for the NEARER stop when one was offered:
+            // arm it so the fill places the SL there, not at the far low
+            if (t.fallback && t.token) {
+                nearStopByToken.set(Number(t.token), { ...t.fallback, at: Date.now() });
+                console.log(`📏 near stop armed for ${o.tradingsymbol}: `
+                    + `${t.fallback.source} ${t.fallback.level}, stop ${t.fallback.stop} (${t.fallback.away}% under ₹${o.premium})`);
+            }
+            console.log(`⚠️ WIDE STOP TAKEN BY HAND: ${o.tradingsymbol} @ ₹${o.premium} — `
+                + `stop ${wide.rawStop} is ${wide.away}% away, limit ${wide.limitPct}% — confirmed twice`
+                + (t.fallback ? ` — stop moved to the ${t.fallback.source} (${t.fallback.away}%)` : '')
+                + ` — ${ar.text}`);
+            logSlwide({
+                event: 'taken', ticket: String(o.confirm),
+                tradingsymbol: o.tradingsymbol, premium: o.premium,
+                askedAt: t.premium, stop: wide.rawStop, away: wide.away, limitPct: wide.limitPct,
+                waitedSec: +((Date.now() - t.at) / 1000).toFixed(1),
+                fallback: t.fallback || null,
+            });
+            return false;
+        }
+        if (t) console.log(`↻ wide-stop ticket ${o.confirm} no longer fits `
+            + `(${t.tradingsymbol} @ ₹${t.premium} → ${o.tradingsymbol} @ ₹${o.premium}) — asking again`);
+        const id = `sw${slwideTicketSeq++}`;
+        slwideTickets.set(id, {
+            tradingsymbol: o.tradingsymbol, premium: o.premium,
+            away: wide.away, stop: wide.rawStop, at: Date.now(),
+            token: wide.token || null, fallback: wide.fallback || null
+        });
+        ask = {
+            id, tradingsymbol: o.tradingsymbol, premium: o.premium,
+            away: wide.away, stop: wide.rawStop, limitPct: wide.limitPct,
+            validSec: s.maxStopAskSec, bandPct: s.maxStopAskBand,
+            fallback: wide.fallback || null
+        };
+    }
+
     const why = g.blockers.map(b => `${b.label} — ${b.detail}`).join(' | ');
-    console.log(`⛔ entry refused: ${why}`);
+    const ar = autoRunState();
+    console.log(`⛔ entry refused: ${why}`
+        + (ask ? ` — asking for a second confirmation (${ask.id})` : '')
+        + ` — ${ar.text}`);
+    /*
+    Only the wide-stop rows go to slwideLog.json. The other gates are
+    written up elsewhere (setupLog, oiLog, the trade review); this file
+    exists for the one rule that can be argued with.
+    */
+    if (wideRow) logSlwide({
+        event: ask ? 'asked' : 'refused',
+        ticket: ask ? ask.id : null,
+        byHand: !!o.confirmable,
+        tradingsymbol: o.tradingsymbol, premium: o.premium,
+        stop: wideRow.rawStop, away: wideRow.away, limitPct: wideRow.limitPct,
+        alsoBlocked: g.blockers.filter(b => b.code != 'slwide').map(b => b.code),
+        // why no question was offered, when none was
+        noAsk: ask ? null
+            : (!o.confirmable ? 'not a hand click'
+                : (!s.maxStopAsk ? 'maxStopAsk is off'
+                    : (!wide ? 'other rules are also blocking' : null))),
+    });
     res.status(423).json({
         error: `⛔ NO TRADE: ${g.blockers.map(b => b.label).join(' | ')}`,
-        blockers: g.blockers, lock: g.lock
+        blockers: g.blockers, lock: g.lock, confirm: ask, autoRun: ar
     });
     return true;
 }
@@ -3031,7 +3462,10 @@ function logClosedTrade({ tradingsymbol, position, sellPrice, fallbackQty, token
         const today = dayjs().format('YYYY-MM-DD');
         const already = log.filter(t => t.date == today && t.tradingsymbol == tradingsymbol)
             .reduce((s, t) => s + (t.quantity || 0), 0);
-        const qty = Math.max(0, (position ? position.day_sell_quantity : 0) - already) || Number(fallbackQty) || 0;
+        const partials = partialFillsByToken.get(Number(token)) || [];
+        const partialQty = partials.reduce((a, p) => a + (Number(p.qty) || 0), 0);
+        const qty = Math.max(0, (position ? position.day_sell_quantity : 0) - already - partialQty)
+            || Number(fallbackQty) || 0;
         const buy = (ctx && ctx.entry) || actualBuyPriceByToken.get(token);
         const pnl = (buy != null && sellPrice > 0 && qty > 0)
             ? +((sellPrice - buy) * qty).toFixed(2)
@@ -3067,6 +3501,14 @@ function logClosedTrade({ tradingsymbol, position, sellPrice, fallbackQty, token
             quantity: qty, buy: buy != null ? +Number(buy).toFixed(2) : null,
             sell: sellPrice ? +Number(sellPrice).toFixed(2) : null,
             pnl, symbolDayPnl: position ? position.pnl : null,
+            /*
+            `pnl` is this leg only -- the runner. `tradePnl` is the whole
+            trade, partials included, and is the number to judge the trade by.
+            */
+            partials: partials.length ? partials.map(x => ({ qty: x.qty, price: x.price, gain: x.gain })) : null,
+            tradePnl: pnl != null
+                ? +(pnl + partials.reduce((a, x) => a + (Number(x.gain) || 0), 0)).toFixed(2)
+                : null,
             net: trip ? trip.net : null,
             charges: trip ? trip.total : null,
             breakEven: trip ? trip.breakEven : null,
@@ -3078,7 +3520,11 @@ function logClosedTrade({ tradingsymbol, position, sellPrice, fallbackQty, token
         fs.writeFileSync(TRADE_LOG_FILE, JSON.stringify(log, null, 2));
         familiar.forget();          // the record this trade is judged against just changed
         console.log(`🧾 Trade logged: ${tradingsymbol} qty ${qty} buy ${buy} sell ${sellPrice} `
-            + `gross ${pnl}${trip ? ` − charges ${trip.total} = NET ${trip.net}` : ''} [${rec.reasonLabel}]`);
+            + `gross ${pnl}${trip ? ` − charges ${trip.total} = NET ${trip.net}` : ''} [${rec.reasonLabel}]`
+            + (partials.length
+                ? `\n   ↳ plus ${partials.length} partial${partials.length == 1 ? '' : 's'} `
+                  + `(${partials.map(x => `${x.qty} @ ${x.price}`).join(', ')}) — whole trade gross ${rec.tradePnl}`
+                : ''));
         console.log(`   ↳ ${rec.verdict}`);
         return rec;
     } catch (err) { console.log(err, '⚠️ trade log failed'); return null; }
@@ -3157,7 +3603,25 @@ async function placeFirstOrder({ instrument_token, tradingsymbol, exchange, quan
     number by construction. No second Kite call, no chance of drift.
     */
     const frozen = breachLevelByToken.get(Number(instrument_token));
-    const planned = plannedStop(buyPrice, levels, s, frozen);
+    let planned = plannedStop(buyPrice, levels, s, frozen);
+    /*
+    A confirmed near stop beats everything: the second click was a yes to
+    THIS stop, under the nearer low, not to the 3-candle one. The watched
+    line moves onto the same level for the same reason the cap moves it --
+    one line, watched and rested at, or it is the 29/10/2026 split brain.
+    */
+    const near = takeNearStop(instrument_token);
+    if (near && near.stop > 0 && near.stop < buyPrice) {
+        planned = { stop: near.stop,
+            why: `confirmed NEAR STOP — one tick under the ${near.source} ${near.level}`
+                + ` (${(((buyPrice - near.stop) / buyPrice) * 100).toFixed(1)}% under ${buyPrice})` };
+        const t = Number(instrument_token);
+        breachLevelByToken.set(t, near.level);
+        breachSymbolByToken.set(t, tradingsymbol);
+        saveBreachOverride(t, near.level);
+        writeGuardState();
+        console.log(`📏 ${tradingsymbol}: near stop confirmed — breach line moved to the ${near.source} ${near.level}, stop ${near.stop}`);
+    }
     /*
     The cap bit, so the stop is no longer under the real low. Move the
     watched line up to the capped line as well, or the app would sit there
@@ -3491,7 +3955,7 @@ const OI_DEFAULTS = {
     oiDropPct: 3,       // OI must be at least this much LOWER than lookMin ago
     pxUpPct: 1.5,       // and price at least this much HIGHER
     cooldownMin: 10,    // per symbol, so one unwind is not twenty signals
-    minRR: 1.5,         // skip the fire if the partial at the resistance pays less
+    minRR: 2,           // skip the fire if the partial at the resistance pays less
     quantity: 0         // 0 = one lot
 };
 
@@ -3581,10 +4045,37 @@ opens a new minute.
 --------------------------------------------------------------------- */
 const SETUP_FILE = path.join(__dirname, 'setupAlerts.json');
 const SETUP_LOG_FILE = dataFile('setupLog.json');
+/* every setup kind the detectors can emit -- one list, so the validators agree */
+const SETUP_KINDS = ['bounce', 'break', 'coil', 'speedgreen', 'holdlow'];
+
 const SETUP_DEFAULTS = {
     enabled: true,
     cooldownMin: 10,     // per token per kind, so one level is not twenty alerts
-    minRR: 1.5,          // below this the partial is not worth the spread
+    minRR: 2,            // below this the partial is not worth the spread (1.5 -> 2 on 09/11/2026)
+
+    /*
+    PER-KIND R FLOOR.
+
+    minRR is the floor for a setup that fires off a LEVEL -- bounce, break,
+    coil. Those pick their entry, so demanding 2x the risk is fair.
+
+    speedgreen does not pick its entry. It fires because the option is
+    already running 2x its own pace, and it reads the minute in progress, so
+    by definition it buys into a move that has started. The nearest
+    resistance is therefore CLOSE, and a small R is a property of the setup,
+    not a sign of a bad trade. Of 10 speedgreen TAKEs in the log, 9 had a
+    measured R and none reached 2 -- so a flat 2R does not filter speedgreen,
+    it deletes it.
+
+    09/11/2026 is the day that showed the cost. At 13:13 speedgreen fired on
+    NIFTY26N0924650PE at 4.15 with 1.0R, went THIN on the new 2R floor, and
+    the premium ran to 8.25 inside five minutes (+99%). Nothing else caught
+    it: the bounce at 13:12 and the break at 13:15 were both refused by chop,
+    because the index was still inside its box until 13:16.
+
+    A kind listed here uses its own floor. Anything not listed uses minRR.
+    */
+    minRRByKind: { speedgreen: 1.2 },
     minTouches: 1,       // raise to 2 once there is a multi-day sample
     breakClearPct: 0.5,  // how far past the level the close must be
     wickPct: 0.2,        // how deep into the support the low may poke
@@ -3796,14 +4287,32 @@ async function checkSetups(token, ltp) {
         const g = noTradeChecks({ premium: ltp, tradingsymbol: inst.tradingsymbol, waive });
 
         /*
-        R is a veto too, and for these two it is the wrong one. Both fire on
-        movement, not on a level with a measured target above it, so there is
-        often no resistance to quote an R against -- and rr == null would
-        make every one of them THIN, which the autopilot skips. For a waived
-        kind the R is still computed and still shown; it just does not decide
-        the verdict.
+        R IS A VETO, AND IT APPLIES TO EVERY KIND.
+
+        There are two different reasons an R can fail, and only one of them
+        deserves a waiver:
+
+          rr == null   there is no resistance in the band at all, so there
+                       is nothing to measure. speedgreen and holdlow fire on
+                       MOVEMENT, not off a level, so this is their normal
+                       state -- failing them for it would delete the setup
+                       for a reason that is not about the trade.
+
+          rr < minRR   the level IS there and it pays less than the stop
+                       risks. That is measured, and it is bad on any kind.
+
+        It used to waive both for speedgreen and holdlow. 09/11/2026: the
+        floor went to 2R on instruction, so the hole mattered -- of 10
+        speedgreen TAKEs in the log, 9 had a measured R and NONE reached 2.
+        A waiver that let those through would make the 2R rule decorative.
+
+        So the waiver now covers only the unmeasurable case.
+
+        The floor itself is per kind -- see minRRByKind. speedgreen is held
+        to 1.2R, not 2R, because its R is small by construction.
         */
-        const thin = !waive && (rr == null || rr < cfg.minRR);
+        const rrFloor = rrFloorFor(h.kind, cfg);
+        const thin = rr == null ? !waive : (rr < rrFloor);
         const verdict = g.blocked ? 'BLOCKED' : (thin ? 'THIN' : 'TAKE');
 
         const row = {
@@ -3811,6 +4320,7 @@ async function checkSetups(token, ltp) {
             min, token: Number(token), tradingsymbol: inst.tradingsymbol,
             exchange: inst.exchange,   // the autopilot orders off this row
             kind: h.kind, level: h.level, touches: h.touches, what: h.what,
+            rrFloor,                   // the autopilot re-checks R against THIS, not its own minRR
             ltp: +ltp.toFixed(2), stop: ps.stop, stopWhy: ps.why, riskPerUnit: risk,
             target, rr, verdict, waive,
             waived: g.checks.filter(x => x.waived).map(x => x.code),
@@ -4167,6 +4677,39 @@ function plannedStop(entry, levels, s, breach) {
 }
 
 /*
+NEAR-STOP FALLBACK (user's rule, 12/11/2026). When the 3-candle stop is
+wider than maxStopPct, the entry is normally refused outright. The user's
+amendment: before refusing, look at the NEARER candle lows -- first the
+2-candle low, then the current (forming) bar's low -- and if one of them
+gives a stop that is still a real level AND under maxStopPct, offer THAT
+stop instead. Offer, not take: this only ever reaches an order through the
+same TAKE IT ANYWAY second click, so a machine still gets a flat refusal.
+
+Both candidates are fenced the same way plannedStop fences a level:
+  - tighter than slPct is noise, not a stop -- skipped
+  - wider than maxStopPct did not solve anything -- skipped
+2-candle first because it is the wider (more structural) of the two; the
+forming low is only consulted when the 2-candle low is still too far.
+*/
+function nearStopFallback(tok, premium, limitPct, minPct) {
+    if (!tok || !(premium > 0) || !(limitPct > 0)) return null;
+    const cands = [
+        { level: breachFromSec(tok, 2), source: '2-candle low' },
+        { level: formingLow(tok), source: 'current candle low' },
+    ];
+    for (const c of cands) {
+        if (!(c.level > 0) || c.level >= premium) continue;
+        const stop = roundDownToTick(c.level - TICK);
+        if (!(stop > 0) || stop >= premium) continue;
+        const away = +(((premium - stop) / premium) * 100).toFixed(1);
+        if (away > limitPct) continue;              // still too far: try the next
+        if (minPct > 0 && away < minPct) continue;  // inside the noise band
+        return { level: c.level, stop, away, source: c.source };
+    }
+    return null;
+}
+
+/*
 RISK-BASED SIZE CAP
 
 "25% of capital max loss for a trade." The stop is not negotiable -- it is a
@@ -4180,6 +4723,10 @@ The 25% figure is the user's explicit choice (29/10/2026) over a 25%-of-
 premium reading. It is very aggressive: at a 45% measured loss rate, four
 losers in a row is the account. maxDayLoss and maxLossStreak are the only
 things standing between that number and ruin -- they are not optional here.
+
+This sizes the trade; it does NOT decide whether to take it. A stop further
+than maxStopPct away is refused by the slwide gate before this runs, so the
+quantity this returns is always for a trade whose stop was already accepted.
 */
 function riskCappedQty({ price, lot, token, qty, cash }) {
     const s = readNoTrade();
@@ -4220,6 +4767,22 @@ down, and a manual drag still wins until the next level is cleared.
 const trailByToken = new Map();     // token -> { tradingsymbol, entry, ladder, stop, partial, support, steps }
 const trailInProgress = new Set();
 
+/*
+PARTIAL FILLS, REMEMBERED.
+
+A partial is deliberately not a closed trade -- see the SELL branch in
+guardOnOrderUpdate. But its QUANTITY still has to be remembered, because
+logClosedTrade sizes the closing record as `day_sell_quantity - already
+logged`, and an unlogged partial is in day_sell_quantity but not in
+`already`. The closing record then books the WHOLE lot at the exit price.
+
+09/11/2026 is the day that showed it: 455 of 975 sold at 4.00 for +Rs 205,
+the runner stopped out at 3.10, true day P&L -Rs 29 -- and the log said
+-Rs 492, with a verdict blaming the size. The money was fine; the record
+was wrong.
+*/
+const partialFillsByToken = new Map();   // token -> [{ at, qty, price, gain }]
+
 function armTrail(token, tradingsymbol, { entry, levels, partial, support, trail, appSide, slIds }) {
     const t = Number(token);
     const ladder = levels ? levels.resistances.map(L => L.price).filter(p => p > entry) : [];
@@ -4252,6 +4815,180 @@ function trailInfo(t) {
 function broadcastTrail(t) {
     const info = trailInfo(t);
     if (info) broadcast({ type: 'levels', ...info });
+}
+
+/* ---------------------------------------------------------------------
+MOVING THE STOP UP, IN ONE PLACE
+
+maybeTrail, liftStopAfterPartial and the profit-lock ladder all do the
+same five things: set the app-side breach line, persist the override,
+write the guard state, raise every resting SL at the exchange, and record
+a step. Three copies of that is three chances for them to disagree about
+the protocol -- and they share state, so disagreeing means a race.
+
+Returns { ok, moved, prev, why }. Never moves a stop DOWN, and never puts
+one at or above the price it is protecting. The caller owns trailInProgress
+(it has to, because the caller decides what else is part of its lock).
+--------------------------------------------------------------------- */
+async function raiseStopTo(token, want, { ltp, tag, step } = {}) {
+    const t = Number(token);
+    if (!(want > 0)) return { ok: false, moved: 0, why: 'no stop to move to' };
+
+    const prev = breachLevelByToken.get(t);
+    if (prev != null && want <= prev) {
+        return { ok: false, moved: 0, prev, why: `stop is already at ${prev}` };
+    }
+    if (ltp != null && !(want < ltp)) {
+        return { ok: false, moved: 0, prev, why: `a stop at ${want} is not under the price ${ltp}` };
+    }
+
+    breachLevelByToken.set(t, want);
+    saveBreachOverride(t, want);     // else applyBreachOverrides() puts the entry level back
+    writeGuardState();
+
+    const trigger = roundDownToTick(want);
+    const limit = roundDownToTick(trigger * 0.99);
+    const sls = (guardRestingByToken.get(t) || []).filter(o => o.order_type == 'SL');
+    let moved = 0, failed = null;
+    for (const o of sls) {
+        if (o.trigger_price >= trigger) continue;    // never move a stop down
+        try {
+            await kite.modifyOrder('regular', o.order_id, {
+                order_type: 'SL', price: limit, trigger_price: trigger
+            });
+            o.trigger_price = trigger; o.price = limit;   // cache honest until the next refresh
+            moved++;
+        } catch (err) {
+            failed = err;
+            console.log(err, `\u274c ${tag || 'stop'}: could not move resting SL ${o.order_id} to ${trigger} for token ${t}`);
+        }
+    }
+
+    const st = trailByToken.get(t);
+    if (st) {
+        st.stop = want;
+        if (step) st.steps.push({ at: new Date().toISOString(), level: want, ltp, moved, ...step });
+    }
+    // the app-side line DID move even when the exchange order refused -- it is
+    // the tighter of the two, so say so rather than reporting a clean success
+    return { ok: true, moved, prev, sls: sls.length, failed: failed ? (failed.message || String(failed)) : null };
+}
+
+/* ---------------------------------------------------------------------
+THE PROFIT LOCK LADDER -- see lockAsk in GUARD_DEFAULTS for the rule.
+
+Two maps, and the second one is the whole anti-nag mechanism:
+
+  lockAskByToken   the ONE question currently open for a token
+  lockRungByToken  the highest rung already answered, lock or dismiss
+
+maybeAskLock runs on every tick, so it must be cheap and it must be silent
+unless something actually changed. It never places or modifies anything --
+the only thing it can do is raise a question.
+--------------------------------------------------------------------- */
+const lockAskByToken = new Map();    // token -> { rung, lockPct, stop, ltp, entry, at, tradingsymbol }
+const lockRungByToken = new Map();   // token -> highest rung answered
+
+/* The rung a given gain has reached, or null below the first one. */
+function lockRungFor(gainPct, s) {
+    if (!(gainPct >= s.lockFrom)) return null;
+    const n = Math.floor((gainPct - s.lockFrom) / s.lockStep + 1e-9);
+    return +(s.lockFrom + n * s.lockStep).toFixed(2);
+}
+
+function lockAskInfo(t) {
+    const a = lockAskByToken.get(Number(t));
+    return a ? { ...a } : null;
+}
+
+function maybeAskLock(token, ltp) {
+    const t = Number(token);
+    const s = readGuardSettings();
+    if (!s.lockAsk) return;
+
+    const entry = actualBuyPriceByToken.get(t);
+    if (!(entry > 0) || !(ltp > 0)) return;
+    if (exitInProgressByToken.has(t)) return;
+
+    const gainPct = ((ltp - entry) / entry) * 100;
+    const rung = lockRungFor(gainPct, s);
+    if (rung == null) return;
+
+    // one ask per rung, ever -- answering retires this rung and all below
+    if ((lockRungByToken.get(t) ?? -Infinity) >= rung) return;
+
+    const open = lockAskByToken.get(t);
+    if (open && open.rung >= rung) return;            // already asked, still waiting
+
+    const lockPct = +(rung - s.lockBehind).toFixed(2);
+    const stop = roundDownToTick(entry * (1 + lockPct / 100));
+
+    // nothing to offer: the stop is already there or better. Retire the rung
+    // quietly -- asking the user to move a stop DOWN would be a bug, not a prompt
+    const now = breachLevelByToken.get(t);
+    if (now != null && stop <= now) { lockRungByToken.set(t, rung); return; }
+    if (!(stop < ltp)) { lockRungByToken.set(t, rung); return; }
+
+    const st = trailByToken.get(t);
+    const inst = instByToken.get(t);
+    const tradingsymbol = (st && st.tradingsymbol) || (inst && inst.tradingsymbol) || String(t);
+    const ask = { token: t, tradingsymbol, rung, lockPct, stop, ltp,
+        entry, nowStop: now != null ? now : null, at: new Date().toISOString() };
+    lockAskByToken.set(t, ask);
+
+    console.log(`\ud83d\udd12 LOCK? ${tradingsymbol}: +${gainPct.toFixed(1)}% (${entry} \u2192 ${ltp}) reached the +${rung}% rung`
+        + ` \u2014 offering a stop at ${stop} (+${lockPct}%)`
+        + `${now != null ? `, stop is ${now} now` : ', no stop line yet'}`);
+    broadcast({ type: 'lock_ask', ...ask });
+    alertPhone(`\ud83d\udd12 Lock +${ask.lockPct}%? ${tradingsymbol}`,
+        `+${gainPct.toFixed(1)}% at ${ltp}. Move the stop to ${stop}?`,
+        { key: `lockask:${t}:${rung}` });
+}
+
+/* The answer. action 'lock' moves the stop, 'dismiss' just retires the rung. */
+async function answerLockAsk(token, action) {
+    const t = Number(token);
+    const ask = lockAskByToken.get(t);
+    if (!ask) return { ok: false, error: 'no lock question open for that position' };
+
+    lockAskByToken.delete(t);
+    lockRungByToken.set(t, ask.rung);
+
+    if (action == 'dismiss') {
+        console.log(`\ud83e\udd1a LOCK DISMISSED ${ask.tradingsymbol}: +${ask.rung}% rung passed over,`
+            + ` stop left at ${ask.nowStop == null ? '\u2014' : ask.nowStop}`
+            + ` \u2014 quiet until +${ask.rung + readGuardSettings().lockStep}%`);
+        broadcast({ type: 'lock_answer', token: t, tradingsymbol: ask.tradingsymbol,
+            action: 'dismiss', rung: ask.rung });
+        return { ok: true, action: 'dismiss', rung: ask.rung };
+    }
+
+    if (trailInProgress.has(t)) return { ok: false, error: 'the trail is moving this stop right now, try again' };
+    if (exitInProgressByToken.has(t)) return { ok: false, error: 'this position is being exited' };
+
+    trailInProgress.add(t);
+    try {
+        const r = await raiseStopTo(t, ask.stop, { ltp: ask.ltp, tag: 'LOCK',
+            step: { lockRung: ask.rung, lockPct: ask.lockPct } });
+        if (!r.ok) {
+            console.log(`\u23ed LOCK ${ask.tradingsymbol}: nothing to do \u2014 ${r.why}`);
+            broadcast({ type: 'lock_answer', token: t, tradingsymbol: ask.tradingsymbol,
+                action: 'noop', rung: ask.rung, why: r.why });
+            return { ok: true, action: 'noop', why: r.why };
+        }
+        console.log(`\ud83d\udd12 LOCKED ${ask.tradingsymbol}: stop ${r.prev == null ? '\u2014' : r.prev} \u2192 ${ask.stop}`
+            + ` (+${ask.lockPct}% over entry ${ask.entry}, at the +${ask.rung}% rung)`
+            + (r.moved ? `, ${r.moved} SL order${r.moved > 1 ? 's' : ''} modified`
+                       : `, app-side line only \u2014 no SL order resting`)
+            + (r.failed ? ` [exchange refused: ${r.failed}]` : ''));
+        broadcast({ type: 'lock_answer', token: t, tradingsymbol: ask.tradingsymbol,
+            action: 'locked', rung: ask.rung, lockPct: ask.lockPct, stop: ask.stop,
+            prev: r.prev, moved: r.moved, failed: r.failed });
+        broadcastTrail(t);
+        return { ok: true, action: 'locked', stop: ask.stop, moved: r.moved, failed: r.failed };
+    } finally {
+        trailInProgress.delete(t);
+    }
 }
 
 async function maybeTrail(token, ltp) {
@@ -4362,6 +5099,88 @@ async function maybePartial(token, ltp) {
             try { await kite.modifyOrder('regular', o.order_id, { quantity: held }); o.quantity = held; }
             catch (e2) { console.log(e2, `❌ could not restore the SL quantity for ${st.tradingsymbol} — check it by hand`); }
         }
+    } finally {
+        trailInProgress.delete(t);
+    }
+}
+
+/* ---------------------------------------------------------------------
+HALFWAY STOP AFTER A PARTIAL
+
+Once the partial has paid, the runner is riding on money already made, and
+leaving its stop at the entry-time breach level means a green trade can
+still come back and finish red. 09/11/2026: 455 of 975 out at 4.00, the
+other 520 still sitting behind a stop at 3.05 -- 14% under a 3.55 entry --
+and it gave the whole thing back.
+
+Break-even is the obvious new stop, but it banks nothing. Halfway between
+break-even and the price the partial actually filled at banks half of what
+the partial proved, and it scales by itself: a far partial leaves the
+runner room, a near one keeps the stop tight.
+
+The ratchet in maybeTrail does NOT cover this. It fires only when price
+CLEARS a ladder rung by trailClearPct -- the option's own median 1-minute
+range -- and on a sub-5-rupee option one tick is already 1.4%, so that
+median came out at 11.22% while the rungs were 6% apart. The clear needed
+4.45; the high was exactly 4.00. The trail was never entitled to fire.
+This runs on the partial FILL instead, which needs no clearance at all.
+
+Same two guards as the ratchet: the stop only moves UP, and it is never
+parked at or above the level that just paid.
+--------------------------------------------------------------------- */
+const PARTIAL_LIFT_FRAC = 0.5;        // halfway between break-even and the fill
+
+async function liftStopAfterPartial(token, fillPrice, leftQty) {
+    const t = Number(token);
+    const entry = actualBuyPriceByToken.get(t);
+    const fill = Number(fillPrice);
+    if (!(entry > 0) || !(fill > 0) || !(leftQty > 0)) return;
+    if (exitInProgressByToken.has(t)) return;
+    if (trailInProgress.has(t)) return;     // the ratchet has the stop right now
+
+    const trip = roundTrip({ buy: entry, quantity: leftQty, exchange: exchangeOf(t) });
+    const be = trip && trip.breakEven > 0 ? trip.breakEven : entry;
+
+    // the partial did not even clear the charges: nothing proved, leave the stop
+    if (!(fill > be)) return;
+
+    const want = roundDownToTick(be + (fill - be) * PARTIAL_LIFT_FRAC);
+    const now = breachLevelByToken.get(t);
+    if (now != null && want <= now) return;     // only ever up
+    if (!(want < fill)) return;                 // never at or above the level just paid
+
+    trailInProgress.add(t);
+    try {
+        breachLevelByToken.set(t, want);
+        saveBreachOverride(t, want);            // else applyBreachOverrides() puts the entry level back
+        writeGuardState();
+
+        const trigger = roundDownToTick(want);
+        const limit = roundDownToTick(trigger * 0.99);
+        const sls = (guardRestingByToken.get(t) || []).filter(o => o.order_type == 'SL');
+        let moved = 0;
+        for (const o of sls) {
+            if (o.trigger_price >= trigger) continue;   // never move a stop down
+            try {
+                await kite.modifyOrder('regular', o.order_id, {
+                    order_type: 'SL', price: limit, trigger_price: trigger
+                });
+                o.trigger_price = trigger; o.price = limit;
+                moved++;
+            } catch (err) {
+                console.log(err, `\u274c could not lift the resting stop for token ${t} after the partial`);
+            }
+        }
+
+        const st = trailByToken.get(t);
+        if (st) {
+            st.stop = want;
+            st.steps.push({ at: new Date().toISOString(), level: want, ltp: fill, moved, partialLift: true });
+        }
+        console.log(`\ud83e\ude9c PARTIAL LIFT ${st ? st.tradingsymbol : t}: partial filled ${fill}, `
+            + `break-even ${be} \u2192 stop ${now == null ? '\u2014' : now} to ${want} (halfway), `
+            + `${moved} resting SL moved`);
+        broadcastTrail(t);
     } finally {
         trailInProgress.delete(t);
     }
@@ -4586,6 +5405,10 @@ async function guardOnTick(token, ltp) {
     await maybePartial(token, ltp);
     await maybeTrail(token, ltp);
 
+    // AFTER maybeTrail on purpose: if the ladder has already carried the stop
+    // past the rung, there is nothing left to ask and the rung retires silently
+    maybeAskLock(token, ltp);
+
     const level = breachLevelByToken.get(token);
     if (level == null || ltp > level) return;
 
@@ -4707,6 +5530,16 @@ async function guardOnOrderUpdate(u) {
                     ? +((u.average_price - actualBuyPriceByToken.get(token)) * quantity).toFixed(0) : null;
                 console.log(`✂️ PARTIAL ${tradingsymbol}: sold ${quantity} @ ${u.average_price}`
                     + (gain != null ? ` (+₹${gain})` : '') + `, ${open.quantity} still running`);
+
+                // the closing record subtracts this qty -- see partialFillsByToken
+                const fills = partialFillsByToken.get(token) || [];
+                fills.push({ at: new Date().toISOString(), qty: quantity,
+                    price: +Number(u.average_price).toFixed(2), gain });
+                partialFillsByToken.set(token, fills);
+
+                // the runner is riding on money already made: lift its stop
+                await liftStopAfterPartial(token, u.average_price, open.quantity);
+
                 broadcast({ type: 'partial_exit', token, tradingsymbol, qty: quantity,
                     price: u.average_price, left: open.quantity, gain });
                 return;
@@ -4753,6 +5586,10 @@ async function guardOnOrderUpdate(u) {
 
             tradeCtxByToken.delete(token);
             actualBuyPriceByToken.delete(token);
+            // a question about a position that no longer exists must not survive,
+            // and the next trade on this strike starts its ladder from scratch
+            lockAskByToken.delete(token);
+            lockRungByToken.delete(token);
             breachLevelByToken.delete(token); // the next trade freezes its own level
             breachSymbolByToken.delete(token);
             trailByToken.delete(token);       // the next trade reads its own levels
@@ -4761,6 +5598,7 @@ async function guardOnOrderUpdate(u) {
             guardTokens.delete(token);
             writeGuardState();
             clearBreachOverride(token);
+            partialFillsByToken.delete(token);   // must not outlive its trade
 
             const orders = await kiteRetry(() => kite.getOrders());
             const leftovers = orders.filter(
@@ -5233,13 +6071,14 @@ async function main() {
     */
     app.post('/api/buy', async (req, res) => {
         try {
-            const { tradingsymbol, exchange, token, quantity, price, firstOrder } = req.body;
+            const { tradingsymbol, exchange, token, quantity, price, firstOrder, confirmSlwide } = req.body;
             let qty = parseInt(quantity, 10);
             const px = Number(price);
             if (!tradingsymbol || !exchange || !qty || qty <= 0 || !px || px <= 0) {
                 return res.status(400).json({ error: "tradingsymbol, exchange, quantity, price required" });
             }
-            if (entryBlocked(res, { premium: px, tradingsymbol })) return;   // the no-trade gate
+            // confirmable: a hand click, so a wide stop may be confirmed twice
+            if (entryBlocked(res, { premium: px, tradingsymbol, confirmable: true, confirm: confirmSlwide })) return;
             /*
             The clicked quantity is a request, not a licence. Cap it at the
             configured max loss before anything reaches the exchange.
@@ -5290,7 +6129,7 @@ async function main() {
     */
     app.post('/api/quick', async (req, res) => {
         try {
-            const { tradingsymbol, exchange, token, side, pct, firstOrder } = req.body;
+            const { tradingsymbol, exchange, token, side, pct, firstOrder, confirmSlwide } = req.body;
             const p = Number(pct);
             if (!tradingsymbol || !exchange || !token || !['buy', 'sell'].includes(side) || ![50, 100].includes(p)) {
                 return res.status(400).json({ error: "tradingsymbol, exchange, token, side buy|sell, pct 50|100 required" });
@@ -5305,7 +6144,8 @@ async function main() {
             if (!(ltp > 0)) return res.status(400).json({ error: "no LTP for " + tradingsymbol });
 
             if (side == 'buy') {
-                if (entryBlocked(res, { premium: ltp, tradingsymbol })) return;   // the no-trade gate
+                // confirmable: a hand click, so a wide stop may be confirmed twice
+                if (entryBlocked(res, { premium: ltp, tradingsymbol, confirmable: true, confirm: confirmSlwide })) return;
                 const m = await kite.getMargins();
                 const cash = (m.equity && m.equity.available && m.equity.available.live_balance != null)
                     ? m.equity.available.live_balance : (m.equity ? m.equity.net : 0);
@@ -5435,13 +6275,27 @@ async function main() {
             }
             s.slMaxPct = v;
         }
+        if (req.body && req.body.lockAsk != null) s.lockAsk = !!req.body.lockAsk;
+        for (const k of ['lockFrom', 'lockStep', 'lockBehind']) {
+            if (!(req.body && req.body[k] != null)) continue;
+            const v = Number(req.body[k]);
+            if (!(v > 0)) return res.status(400).json({ error: `${k} must be a positive number` });
+            s[k] = v;
+        }
+        // the offered stop has to sit under the rung, or "lock" would mean
+        // putting the stop at the price that triggered the question
+        if (!(s.lockBehind < s.lockFrom)) {
+            return res.status(400).json({ error: `lockBehind (${s.lockBehind}) must be under lockFrom (${s.lockFrom})` });
+        }
+
         try { fs.writeFileSync(GUARD_SETTINGS_FILE, JSON.stringify(s, null, 2)); }
         catch (e) { return res.status(500).json({ error: String(e.message || e) }); }
         console.log(`⚙️ guardSettings: on fill → ${s.firstOrder}`
             + `, stop ${s.slMode == 'breach' ? `one tick under the ${CANDLE_COUNT}-candle low` : s.slMode == 'level' ? `a tick under the support (floor ${s.slPct}%)` : `${s.slPct}% flat`}`
             + `${s.slMaxPct > 0 ? ` — capped at ${s.slMaxPct}% wide` : ' — uncapped'}`
             + `, partial ${s.partialPct}% at the resistance (${s.partialMode == 'app' ? 'app-side, stop covers the full lot' : 'resting LIMIT, stop covers the remainder only'})`
-            + `, trail ${s.trail ? 'on' : 'off'}`);
+            + `, trail ${s.trail ? 'on' : 'off'}`
+            + `, lock ${s.lockAsk ? `ask from +${s.lockFrom}% every ${s.lockStep}%, stop ${s.lockBehind}% behind` : 'off'}`);
         res.json(s);
     });
 
@@ -5557,6 +6411,20 @@ async function main() {
         for (const k of Object.keys(SETUP_DEFAULTS)) {
             if (!(k in req.body)) continue;
             if (typeof SETUP_DEFAULTS[k] == 'boolean') { next[k] = !!req.body[k]; continue; }
+            // minRRByKind is a map, not a number -- Number({}) is NaN, which would 400
+            if (SETUP_DEFAULTS[k] && typeof SETUP_DEFAULTS[k] == 'object') {
+                const body = req.body[k];
+                if (!body || typeof body != 'object') return res.status(400).json({ error: `${k} must be an object` });
+                const map = {};
+                for (const [kind, raw] of Object.entries(body)) {
+                    if (!SETUP_KINDS.includes(kind)) return res.status(400).json({ error: `${k}: unknown kind ${kind}` });
+                    const n = Number(raw);
+                    if (!Number.isFinite(n) || n < 0 || n > 10) return res.status(400).json({ error: `${k}.${kind} must be 0-10` });
+                    map[kind] = n;
+                }
+                next[k] = map;
+                continue;
+            }
             const v = Number(req.body[k]);
             if (!Number.isFinite(v)) return res.status(400).json({ error: `${k} must be a number` });
             const [lo, hi] = RANGE[k] || [-Infinity, Infinity];
@@ -5570,9 +6438,42 @@ async function main() {
         res.json(next);
     });
 
+    /*
+    The open profit-lock questions. The page polls this on boot, because a
+    reload loses the WebSocket 'lock_ask' that first raised them -- and an
+    unanswered question is exactly the thing that must survive a refresh.
+    */
+    app.get('/api/lockProfit', (req, res) => {
+        const g = readGuardSettings();
+        res.json({
+            enabled: g.lockAsk, from: g.lockFrom, step: g.lockStep, behind: g.lockBehind,
+            asks: [...lockAskByToken.keys()].map(t => lockAskInfo(t)).filter(Boolean),
+            answered: [...lockRungByToken.entries()].map(([token, rung]) => ({ token, rung }))
+        });
+    });
+
+    app.post('/api/lockProfit', async (req, res) => {
+        const token = Number(req.body && req.body.token);
+        const action = String((req.body && req.body.action) || '');
+        if (!(token > 0)) return res.status(400).json({ error: 'token required' });
+        if (!['lock', 'dismiss'].includes(action)) {
+            return res.status(400).json({ error: "action must be 'lock' or 'dismiss'" });
+        }
+        try {
+            const r = await answerLockAsk(token, action);
+            if (!r.ok) return res.status(409).json(r);
+            res.json(r);
+        } catch (e) {
+            console.log(e, '\u274c /api/lockProfit failed');
+            res.status(500).json({ error: String(e.message || e) });
+        }
+    });
+
     app.get('/api/noTrade', (req, res) => {
         const premium = req.query.premium != null ? Number(req.query.premium) : undefined;
-        res.json(noTradeChecks({ premium, tradingsymbol: req.query.tradingsymbol }));
+        // autoRun rides along: the page polls this every 15s, so the chip
+        // that says whether anything is actually buying stays honest
+        res.json({ ...noTradeChecks({ premium, tradingsymbol: req.query.tradingsymbol }), autoRun: autoRunState() });
     });
 
     /*
@@ -5587,6 +6488,7 @@ async function main() {
     app.get('/api/rules', (req, res) => {
         try {
             const g = readGuardSettings();
+            const autoRun = autoRunState();
             const nt = readNoTrade();
             const gate = noTradeChecks({});
             const ap = require('./autoPilot.js');
@@ -5605,12 +6507,22 @@ async function main() {
             res.json({
                 asOf: dayjs().format('YYYY-MM-DD HH:mm:ss'),
                 candleCount: CANDLE_COUNT,
+                autoRun,
                 stop: {
                     mode: g.slMode, slPct: g.slPct, slMaxPct: g.slMaxPct,
                     partialPct: g.partialPct, partialMode: g.partialMode,
                     trail: g.trail, levelGapPct: g.levelGapPct, levelMaxPct: g.levelMaxPct,
                     firstOrder: g.firstOrder, targetPct: g.targetPct,
                     riskPctOfCapital: nt.riskPctOfCapital,
+                    // the ask-to-lock ladder: rungs and the stop offered at each
+                    lockAsk: g.lockAsk, lockFrom: g.lockFrom,
+                    lockStep: g.lockStep, lockBehind: g.lockBehind,
+                    lockRungs: g.lockAsk
+                        ? [0, 1, 2, 3, 4].map(i => {
+                            const rung = +(g.lockFrom + i * g.lockStep).toFixed(2);
+                            return { at: rung, lock: +(rung - g.lockBehind).toFixed(2) };
+                        })
+                        : [],
                 },
                 gates, noTrade: nt,
                 waivers: WAIVED_BY_KIND, neverWaived: NEVER_WAIVED,
@@ -5688,6 +6600,28 @@ async function main() {
     app.get('/api/analysis', (req, res) => {
         try { res.json(analyseAll()); }
         catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+    });
+
+    /*
+    THE WIDE-STOP LOG, AND WHETHER AUTO RUN WAS ON.
+
+    `autoRun` here is the state right now; every row carries the state at
+    the time it was written, so an old refusal cannot be re-read as if auto
+    run had always been in today's position. `?date=YYYY-MM-DD` narrows it.
+    */
+    app.get('/api/slwideLog', (req, res) => {
+        const nt = readNoTrade();
+        let rows = readSlwideLog();
+        if (req.query.date) rows = rows.filter(r => r.date == req.query.date);
+        const count = k => rows.filter(r => r.event == k).length;
+        res.json({
+            autoRun: autoRunState(),
+            maxStopPct: nt.maxStopPct, maxStopAsk: nt.maxStopAsk,
+            maxStopAskSec: nt.maxStopAskSec, maxStopAskBand: nt.maxStopAskBand,
+            total: rows.length,
+            refused: count('refused'), asked: count('asked'), taken: count('taken'),
+            rows: rows.slice(-200).reverse(),
+        });
     });
 
     app.get('/api/lock', (req, res) => res.json(lockInfo()));
@@ -5848,7 +6782,12 @@ async function main() {
             return res.status(400).json({ error: "tradingsymbol, exchange, token required" });
         }
         if (act == 'buy' && qty <= 0) return res.status(400).json({ error: "quantity required for buy trigger" });
-        // arming a BUY is an entry decision too -- gated now and again at fire time
+        /*
+        Arming a BUY is an entry decision too -- gated now and again at fire
+        time. NOT confirmable: the second gate runs minutes later with nobody
+        watching, so a wide stop confirmed at arm time would be a yes to a
+        price that no longer exists. A wide stop simply cannot be armed.
+        */
         if (act == 'buy' && entryBlocked(res, { premium: wat == 'option' ? lvl : undefined, tradingsymbol })) return;
         // 'exitall' spans every long, so there is no single option price to watch
         if (wat == 'option' && act == 'exitall') {
@@ -5986,8 +6925,8 @@ async function main() {
         const next = { ...cur };
         for (const k of Object.keys(ap.AUTO_DEFAULTS)) {
             if (b[k] === undefined) continue;
-            if (k == 'kinds') next.kinds = [].concat(b.kinds).filter(v => ['bounce', 'break', 'coil', 'speedgreen', 'holdlow'].includes(v));
-            else if (k == 'levelKinds') next.levelKinds = [].concat(b.levelKinds).filter(v => ['bounce', 'break', 'coil', 'speedgreen', 'holdlow'].includes(v));
+            if (k == 'kinds') next.kinds = [].concat(b.kinds).filter(v => SETUP_KINDS.includes(v));
+            else if (k == 'levelKinds') next.levelKinds = [].concat(b.levelKinds).filter(v => SETUP_KINDS.includes(v));
             else if (k == 'enabled') next.enabled = !!b.enabled;
             else if (k == 'index') next.index = String(b.index).toUpperCase();
             else if (k == 'offset') next.offset = b.offset == 'auto' ? 'auto' : (parseInt(b.offset, 10) || 0);

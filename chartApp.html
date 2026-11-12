@@ -265,16 +265,29 @@
   button.exitrow { background:var(--red); font-size:11px; padding:2px 6px; }
   .indsel { display:flex; gap:8px; color:var(--dim); font-size:12px; }
   .indsel label { display:flex; align-items:center; gap:3px; cursor:pointer; }
-  .cm { padding:5px 8px; font-size:12.5px; line-height:1.6; color:#c8cdd8; background:var(--panel); border-top:1px solid var(--border); min-height:24px; }
+  /* COMMENTARY STRIP (12/11/2026 redesign). One long dot-separated line was
+     unreadable: every signal now sits in its own colour-coded chip, so the
+     eye lands on red/green blocks instead of parsing a sentence. The words
+     inside each chip are unchanged -- the help drawer still describes them. */
+  .cm { display:flex; flex-wrap:wrap; align-items:center; gap:5px 6px; padding:7px 10px;
+        font-size:13px; line-height:1.3; color:#c8cdd8; background:var(--panel);
+        border-top:1px solid var(--border); min-height:38px; }
+  .cm:empty::after { content:'waiting for candles…'; color:var(--dim); font-size:12px; }
+  .cm .chip { display:inline-flex; align-items:center; padding:3px 10px; border-radius:999px;
+        font-weight:600; white-space:nowrap; border:1px solid transparent;
+        font-variant-numeric:tabular-nums; }
+  .cm .chip.bull { color:var(--green); background:rgba(45,189,133,.12); border-color:rgba(45,189,133,.35); }
+  .cm .chip.bear { color:var(--red);   background:rgba(246,70,93,.12);  border-color:rgba(246,70,93,.35); }
+  .cm .chip.neu  { color:#aab3c5;      background:rgba(138,147,168,.10); border-color:rgba(138,147,168,.28); }
   .cm.sc { animation:scblink 0.8s step-end infinite; border:1px solid var(--green); }
   @keyframes scblink { 50% { background:#0e3321; } }
-  .cm .sctag { color:var(--green); font-weight:bold; }
+  .cm .chip.sctag { color:#071912; background:var(--green); border-color:var(--green); font-weight:700; }
   .cm.fast { animation:fastblink 0.6s step-end infinite; border:1px solid #f0b90b; }
   @keyframes fastblink { 50% { background:#3a2e07; } }
-  .cm .fasttag { color:#f0b90b; font-weight:bold; }
-  .cm .deadtag { color:#60656f; font-style:italic; }
+  .cm .chip.fasttag { color:#1f1803; background:#f0b90b; border-color:#f0b90b; font-weight:700; }
+  .cm .chip.deadtag { color:#60656f; font-style:italic; background:transparent; border-color:rgba(96,101,111,.3); }
   .cm.hist { border:1px dashed #f0b90b; cursor:pointer; }
-  .cm .histtag { color:#f0b90b; font-weight:bold; }
+  .cm .chip.histtag { color:#f0b90b; background:rgba(240,185,11,.10); border:1px dashed rgba(240,185,11,.6); font-weight:700; }
   #helpBtn { position:fixed; right:0; top:40%; z-index:60; writing-mode:vertical-rl;
     padding:10px 4px; border-radius:6px 0 0 6px; background:var(--panel); border:1px solid var(--border); color:#c8cdd8; }
   #helpDrawer { position:fixed; top:0; right:0; width:380px; max-width:92vw; height:100%;
@@ -1815,7 +1828,8 @@ function commentary(slot, upto) {
   const live = arr[arr.length - 1];
   const ltp = live.close;
   const parts = [];
-  const tag = (txt, cls) => `<span class="${cls}">${txt}</span>`;
+  // each signal is its own chip now; the words inside are unchanged
+  const tag = (txt, cls) => `<span class="chip ${cls}">${txt}</span>`;
 
   // trend: last 5 completed candles
   const w5 = done.slice(-5);
@@ -1930,7 +1944,7 @@ function commentary(slot, upto) {
     else parts.unshift(tag(`speed ${x.toFixed(1)}×`, 'neu'));
   }
 
-  return parts.join(' · ');
+  return parts.join('');   // the flex gap separates the chips
 }
 
 // ---- pending spot triggers: amber lines on the spot chart + chips in the panel ----
@@ -1993,7 +2007,7 @@ function showHistCommentary(slot, time) {
   const el = document.getElementById('cm' + slot);
   el.classList.remove('sc', 'fast');
   el.classList.add('hist');
-  el.innerHTML = `<span class="histtag">⏱ at ${label}</span> ` + html;
+  el.innerHTML = `<span class="chip histtag">⏱ at ${label}</span>` + html;
   cmHold[slot] = Date.now() + 20000;
 }
 for (const s of [0, 1, 2]) {
@@ -2786,9 +2800,54 @@ function deadChartCheck() {
 
 function gateBlocked() { return !!(gateState && gateState.blocked) || lockedNow(); }
 
+/*
+PLAIN WORDS (09/11/2026). The rule labels are exact but read like a
+contract ("Fewer than 3 losses in a row" as a reason for NO). These two
+maps say the same thing the way a person would. Keyed by rule code, so a
+new rule without an entry still shows its full label — nothing is lost.
+*/
+const PLAIN_SHORT = {
+  open: 'too early in the day', lunch: 'lunch hour', late: 'too late in the day',
+  lock: 'cooling off after the last exit', dayloss: 'day loss limit hit',
+  streak: 'too many losses in a row', cap: 'daily trade count used up',
+  chop: 'index is going nowhere', wrongway: 'bet is against the index',
+  redcandle: 'candle is red right now', steep: 'last candle too steep',
+  impulse: 'too soon after the last entry', dead: 'big players are away',
+  guarded: 'a position has no SELL order', open_count: 'already holding the max positions',
+  same_symbol: 'already holding this symbol', premium: 'option price out of band',
+  minprice: 'option price too low', slwide: 'stop would be too far below',
+  thin: 'nobody is trading this strike', momentum: 'no real momentum',
+  deadchart: 'charts are flat',
+};
+const PLAIN_WHY = {
+  open: 'Too early. The first minutes are a coin flip with wide spreads.',
+  lunch: 'Lunch time. Volume is low, moves do not carry.',
+  late: 'Too late in the day. No time left to be right.',
+  lock: 'You just exited. Wait for the lockout so one loss does not become a chase.',
+  dayloss: 'Today’s loss has reached the limit. Stop for the day.',
+  streak: 'Too many losses in a row. Take a break — the next click is revenge, not a plan.',
+  cap: 'Daily trade count is used up.',
+  chop: 'The index is swinging but going NOWHERE. Buying options here only bleeds money while time runs.',
+  wrongway: 'This trade bets AGAINST the index direction.',
+  redcandle: 'The current candle is red. Buying into a falling bar fills at the worst tick.',
+  steep: 'The last candle jumped too much. Buying now is chasing.',
+  impulse: 'Too soon after the last entry. Wait a little.',
+  dead: 'Big players are not in this market right now. A move cannot carry.',
+  guarded: 'A position is sitting WITHOUT a SELL order protecting it.',
+  open_count: 'Already holding the maximum number of positions.',
+  same_symbol: 'Already holding this symbol.',
+  premium: 'The option price is outside the allowed band.',
+  minprice: 'The option price is too low — one tick is too big a slice.',
+  slwide: 'The stop would sit too far below. There is no support near this entry.',
+  thin: 'Nobody is trading this strike right now. The exit will be worse than the entry.',
+  momentum: 'The option is fast AND making higher highs — real one-way buying.',
+  deadchart: 'The charts are flat. A flat chart cannot even pay for the spread.',
+  nostop: 'After a 3-candle breach the target order turns into the stop. Automatic.',
+};
+
 function gateReasons() {
-  const r = (gateState && gateState.blockers || []).map(b => b.label);
-  if (lockedNow() && !r.some(x => /stop-out/.test(x))) r.push(`locked ${mmss(lockLeft())}`);
+  const r = (gateState && gateState.blockers || []).map(b => PLAIN_SHORT[b.code] || b.label);
+  if (lockedNow() && !r.some(x => /cooling|stop-out/.test(x))) r.push(`locked ${mmss(lockLeft())}`);
   return r;
 }
 
@@ -3211,10 +3270,17 @@ function showBlockModal(what, blockers, ask, retry) {
     if (ask && typeof retry == 'function') {
       take.style.display = '';
       take.disabled = false;
-      take.textContent = `TAKE IT ANYWAY — stop ${ask.away}% away`;
+      // with a near-stop offer the yes is for the NEARER stop, so the
+      // button must say that, not the far number
+      take.textContent = ask.fallback
+        ? `TAKE IT — stop moves to the ${ask.fallback.source} ${ask.fallback.level} (${ask.fallback.away}%)`
+        : `TAKE IT ANYWAY — stop ${ask.away}% away`;
       if (hint) {
         hint.style.display = '';
-        hint.textContent = `asked at ₹${ask.premium}; valid ${ask.validSec}s and only within ${ask.bandPct}% of that price`;
+        hint.textContent = (ask.fallback
+          ? `3-candle stop was ${ask.away}% away; confirming rests the SL at ${ask.fallback.stop} instead. `
+          : '')
+          + `asked at ₹${ask.premium}; valid ${ask.validSec}s and only within ${ask.bandPct}% of that price`;
       }
       take.onclick = async () => {
         take.disabled = true;                 // one click, not three
