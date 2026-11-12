@@ -568,6 +568,10 @@
   #gatePanel2 .row .lb { font-size:13px; }
   #gatePanel2 .row.bad .lb { color:var(--red); font-weight:600; }
   #gatePanel2 .row .dt { color:#9aa3b5; font-size:12.5px; }
+  /* the waiting (n/a) rules live folded under one line */
+  #gatePanel2 .naFold { margin-top:8px; }
+  #gatePanel2 .naFold > summary { cursor:pointer; color:var(--dim); font-size:12.5px; }
+  #gatePanel2 .naFold .rows { margin-top:6px; }
   #gatePanel2 .soft { color:#e0b050; }
   #gatePanel2 .gateFoot { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:9px 0 2px; }
   #gatePanel2 .gateFoot .hint2 { color:var(--dim); font-size:12px; }
@@ -2953,15 +2957,29 @@ function paintGate() {
   }
   rows.push(dead);
 
-  pan.innerHTML = `<div class="rows">` + rows.map(c => {
-      const cls = c.na ? 'na' : (c.ok ? 'good' : 'bad');
-      const mk = c.na ? '–' : (c.ok ? '✓' : '✗');
-      /* the essays moved to the THEORY tab (09/11/2026): a dropdown under
-         every row buried the one part of this list that changes */
-      return `<div class="row ${cls}"><span class="mk">${mk}</span>`
-        + `<span class="lb">${c.label}${c.soft ? ' <span class="soft">(soft)</span>' : ''}</span>`
-        + `<span class="dt">${c.detail || ''}</span></div>`;
-    }).join('') + `</div>`
+  /*
+  12/11/2026 ("decision support, not decision confusing"): most rows are
+  n/a until a symbol is picked, and that grey wall buried the one ✗ that
+  mattered. Order is now ✗ first, then ✓; the n/a rows fold into one
+  closed line. Nothing is dropped — it just stops shouting.
+  */
+  const rowHtml = c => {
+    const cls = c.na ? 'na' : (c.ok ? 'good' : 'bad');
+    const mk = c.na ? '–' : (c.ok ? '✓' : '✗');
+    /* the essays moved to the THEORY tab (09/11/2026): a dropdown under
+       every row buried the one part of this list that changes */
+    return `<div class="row ${cls}"><span class="mk">${mk}</span>`
+      + `<span class="lb">${c.label}${c.soft ? ' <span class="soft">(soft)</span>' : ''}</span>`
+      + `<span class="dt">${c.detail || ''}</span></div>`;
+  };
+  const bad = rows.filter(c => !c.na && !c.ok);
+  const good = rows.filter(c => !c.na && c.ok);
+  const na = rows.filter(c => c.na);
+  pan.innerHTML = `<div class="rows">` + [...bad, ...good].map(rowHtml).join('') + `</div>`
+    + (na.length
+      ? `<details class="naFold"><summary>${na.length} rules waiting — they apply once a strike is picked</summary>`
+        + `<div class="rows">${na.map(rowHtml).join('')}</div></details>`
+      : '')
     + `<div class="thHint">why each rule exists is written out on the <b onclick="showPane('paneTheory')">THEORY</b> tab</div>`
     + `<div class="gateFoot">`
     +   `<button id="btnCountFrom" class="sec">restart the ${gateState.settings.maxTradesPerDay}-trade count from now</button>`
