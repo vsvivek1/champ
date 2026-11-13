@@ -484,16 +484,20 @@ function formingLow(tok) {
 }
 
 /*
-The move over the last N minutes, signed, as a % -- open of the window to
-the latest close, off the 5s buckets. The slow-mover lock reads this for
-its 2-min and 10-min windows. Uses whatever buckets exist inside the
-window, so a freshly charted strike answers with the history it has;
-null only when there is no bucket at all.
+The move over the last N CANDLES, signed, as a % -- the forming 1-min
+candle plus the (N-1) before it, open of the oldest to the latest close,
+off the 5s buckets. Candle-aligned on the user's instruction: "2 min"
+means the forming candle and the previous one, not a rolling 120
+seconds. The slow-mover lock reads this for its 2- and 10-candle
+windows. Uses whatever buckets exist inside the window, so a freshly
+charted strike answers with the history it has; null only when there is
+no bucket at all.
 */
 function movePctOver(tok, minutes) {
     const arr = secCandles.get(Number(tok));
     if (!arr || !arr.length) return null;
-    const cutoff = Math.floor(Date.now() / 1000) - minutes * 60;
+    const curMin = Math.floor(Date.now() / 1000 / 60) * 60;
+    const cutoff = curMin - (minutes - 1) * 60;
     let open = null, last = null;
     for (const c of arr) {
         if (c.time < cutoff) continue;
