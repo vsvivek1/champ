@@ -557,6 +557,60 @@ function volFlow(tok, win) {
     };
 }
 
+/*
+REVERSAL ZONES -- where a buy after a drop is allowed to stand.
+
+Two kinds of ground, both read off this strike's own completed 1-minute
+bars, nothing fetched:
+
+  bullish FVG   bar i-2's high never touched bar i's low: the move up was so
+                one-sided that a price band traded zero contracts. Price
+                falling back into that band is meeting resting interest, not
+                air. A gap is DROPPED once a later low trades through its
+                bottom -- a filled gap already spent its interest.
+  swing low     a bar whose low undercuts the two bars on each side. The
+                plainest support there is: a price the sellers pushed to
+                twice and could not keep.
+
+Returned raw; the revzone gate and the chart both read this one list, so
+the line on the screen and the rule in the gate can never disagree.
+*/
+function revZones(tok, s) {
+    const bars = minBarsFromSec(tok, Math.max(20, s.revScanBars || 60));
+    if (bars.length < 10) return { ok: false, why: `only ${bars.length} completed 1m bars so far` };
+
+    // "after a move": how far the last close sits under the recent high
+    const win = Math.min(bars.length, Math.max(3, s.revWin || 15));
+    const recent = bars.slice(-win);
+    const hi = Math.max(...recent.map(b => b.high));
+    const lastClose = recent[recent.length - 1].close;
+    const dropPct = hi > 0 ? +(((hi - lastClose) / hi) * 100).toFixed(1) : 0;
+
+    const fvgs = [];
+    for (let i = 2; i < bars.length; i++) {
+        if (!(bars[i - 2].high < bars[i].low)) continue;
+        const lo = bars[i - 2].high, top = bars[i].low;
+        let filled = false;
+        for (let j = i + 1; j < bars.length; j++) {
+            if (bars[j].low <= lo) { filled = true; break; }
+        }
+        if (!filled) fvgs.push({ lo: +lo.toFixed(2), hi: +top.toFixed(2), at: bars[i].time });
+    }
+
+    const sups = [];
+    for (let i = 2; i < bars.length - 2; i++) {
+        const lw = bars[i].low;
+        if (lw <= bars[i - 1].low && lw <= bars[i - 2].low &&
+            lw <= bars[i + 1].low && lw <= bars[i + 2].low) {
+            // keep only the newest print of a level tested twice
+            if (!sups.some(z => Math.abs(z.level - lw) / (lw || 1) < 0.005)) {
+                sups.push({ level: +lw.toFixed(2), at: bars[i].time });
+            }
+        }
+    }
+    return { ok: true, dropPct, hi: +hi.toFixed(2), lastClose, fvgs, sups, win, bars: bars.length };
+}
+
 const TRIG_FILE = dataFile('chartTriggers.json');
 
 function saveTriggers() {
@@ -2288,6 +2342,23 @@ const NO_TRADE_DEFAULTS = {
     steepWin: 30,             // completed bars in the median window
 
     /*
+    REVERSAL ZONE GATE (13/11/2026). "If after a move a reversal is to
+    happen, only allow buy at points of FVG or any real support."
+
+    After the premium has dropped, a buy is a reversal bet, and a reversal
+    bought mid-air has nothing under it: the stop lands under no level and
+    the bounce has no reason to start where you clicked. So once the drop
+    is big enough, the buy must stand ON ground -- inside an unfilled
+    bullish FVG, or within revNearPct of a swing low. No drop in the
+    window, no opinion: the gate only exists after a move.
+    */
+    blockRevZone: true,
+    revWin: 15,               // completed 1m bars that define "after a move"
+    revDropPct: 8,            // % off the window high that counts as a move down
+    revNearPct: 2,            // % of price that counts as "at" a zone edge
+    revScanBars: 60,          // completed 1m bars scanned for FVGs and swing lows
+
+    /*
     IMPULSE GATE. Not a judgement about your entries -- a speed limit. The
     measured leak over 149 trades was 37 clicks a day against a stated cap of
     8, and 97.6% of 29/10's premium movement was round-trip churn. A minimum
@@ -2498,7 +2569,9 @@ const RULE_THEORY = {
 
     momentum: 'calcSpeed() is direction-blind. It measures range, so a premium collapsing at 3x reads exactly as fast as one going vertical at 3x -- and it was being used on its own to soften the red-candle and steep-candle gates, which exist for precisely those collapsing bars.\n\nThis is the direction half: each of the last 3 completed 1-minute bars must print a higher high than the one before it. Speed at or above 1.5x AND higher highs together means the move is real and one-way, and only that combination is allowed to soften the liquidity gate.\n\nIt never blocks anything. It is reported so the checklist can say why a soft row passed, instead of showing a green tick with no reason behind it.',
 
-    speed: 'A flat option chart cannot pay for the spread it costs to enter. If the instrument is not moving, the only certain outcome is the crossing cost.'
+    speed: 'A flat option chart cannot pay for the spread it costs to enter. If the instrument is not moving, the only certain outcome is the crossing cost.',
+
+    revzone: 'WHERE A REVERSAL BUY IS ALLOWED TO STAND.\n\nAfter a drop, a buy is a bet that the move turns here -- and "here" has to be a price with a reason, not the spot where the finger landed. Two kinds of price have a reason, both read off this strike\'s own completed 1-minute bars:\n\nAn unfilled bullish FVG -- a band the move up crossed so fast that nothing traded in it. Price falling back into that band meets the resting interest that never got filled on the way up. Once a later bar trades through the bottom of the gap, that interest is spent and the gap stops counting.\n\nA swing low -- a bar whose low undercuts its neighbours on both sides. The plainest support: a price sellers reached twice and could not hold.\n\nMid-air between those, the gate refuses. A reversal bought at no level has a stop under nothing and a bounce with no reason to start at the entry -- it is the falling-knife catch this checklist already refuses one bar at a time (redcandle), stated structurally.\n\nOnly in play AFTER a move: no recent drop in the window means buys are judged by the other gates alone, because without a drop there is no reversal being bet on.'
 };
 
 // Calculate speed: ratio of last 3 candles' avg range vs previous 20 candles' avg range
@@ -4387,17 +4460,19 @@ async function checkSetups(token, ltp) {
         }
 
         /*
-        Headless, this row is the click. The autopilot re-runs the gate and
-        the risk sizer itself before anything goes out -- see autoPilot.js
-        for why the verdict above is not trusted on its own.
+        This row is the click. The autopilot re-runs the gate and the risk
+        sizer itself before anything goes out -- see autoPilot.js for why
+        the verdict above is not trusted on its own.
 
-        With the browser open the human is the click, so bounce/break rows
-        are only shown, not traded. HEADLESS is checked here rather than at
-        creation because the autopilot object now exists in both modes --
-        coilWatch needs it, and it has to be the SAME object so the
-        per-day cap, the open cap and the entry gap are shared.
+        13/11/2026: HEADLESS is no longer checked here. It used to be --
+        "browser open means the human is the click" -- and that rule cost a
+        day of TAKE rows that never traded, because the live process runs
+        with the page open. Now the ONE switch is `enabled` in
+        autoTrade.json (the ARM button / POST /api/autopilot). onSetup
+        reads it on every row: off means it still decides and logs
+        "would have bought", but sends nothing.
         */
-        if (autoPilot && HEADLESS) {
+        if (autoPilot) {
             const out = await autoPilot.onSetup(row);
             /*
             Skips are broadcast too now. The page has an AUTOPILOT feed and

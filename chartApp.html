@@ -723,6 +723,43 @@
   @media (prefers-reduced-motion: reduce) {
     * { animation:none !important; transition:none !important; }
   }
+
+  /* =====================================================================
+     SQUARE GRID (12/11/2026). The AUTO RUN tab stacked its boxes top to
+     bottom, so the lower ones lived below the fold. Now each box is one
+     square tile in a grid and each tile scrolls inside itself. Written
+     at the end of the sheet as overrides: no id or script-toggled class
+     changes, the tiles only wrap the old boxes.
+     ===================================================================== */
+  #autoGrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));
+              gap:10px; align-items:start; margin-top:6px; }
+  #autoGrid .sq { aspect-ratio:1 / 1; overflow-y:auto; overflow-x:hidden; min-width:0;
+                  border:1px solid var(--border); border-radius:var(--radius);
+                  background:var(--card); box-shadow:var(--shadow); padding:8px; }
+  #autoGrid .sqhd { font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+                    color:var(--dim); padding:2px 2px 7px; }
+  /* the boxes carried their own card skin; inside a tile the tile IS the
+     card, so the inner skin goes flat and fills the tile */
+  #autoGrid #autoBox, #autoGrid #coilBox, #autoGrid #setupBox, #autoGrid .pset {
+    margin-top:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
+  /* the tile is the scroller now, not the inner lists */
+  #autoGrid #apFeed, #autoGrid #setupList { max-height:none; overflow-y:visible; }
+  /* box headers hold the top edge while the tile scrolls under them
+     (top:-8px cancels the tile padding so nothing peeks above) */
+  #autoGrid #autoBox .hd, #autoGrid #coilBox .hd, #autoGrid #setupBox .hd {
+    position:sticky; top:-8px; z-index:2; background:var(--card); }
+  #autoGrid #gateBar { margin-top:0; }
+  /* the live/armed/fire states used to colour the inner box border,
+     which is now flat — the tile edge carries the colour instead */
+  #autoGrid .sq:has(#autoBox.live)  { border-color:#4e8f6d; }
+  #autoGrid .sq:has(#coilBox.armed) { border-color:#c9a227; box-shadow:inset 0 0 0 1px rgba(201,162,39,.35); }
+  #autoGrid .sq:has(#coilBox.fire)  { border-color:#c62828; animation:nkblink 1.4s step-end 4; }
+  /* phones: a forced square wastes a tall narrow screen — one column,
+     each tile sized by its content, capped so it still scrolls */
+  @media (max-width:640px) {
+    #autoGrid { grid-template-columns:1fr; }
+    #autoGrid .sq { aspect-ratio:auto; max-height:70vh; }
+  }
 </style>
 </head>
 <body>
@@ -796,6 +833,14 @@
   <div id="msg"></div>
 
   <div class="pane on" id="paneAuto">
+  <!-- SQUARE GRID (12/11/2026). The tab stacked its boxes top to bottom,
+       so the lower ones lived below the fold. Now each box is one square
+       tile in a grid; each tile scrolls on its own, so every box has a
+       corner of the screen at all times. Only wrappers are added — every
+       id stays, so every script on this page still finds its elements. -->
+  <div id="autoGrid">
+
+  <div class="sq">
   <div id="autoBox">
     <div class="hd"><b>AUTOPILOT</b>
       <button id="apArm" class="sec">&hellip;</button>
@@ -808,18 +853,23 @@
     <div id="apCaps"></div>
     <div id="apFeed"><div class="empty">nothing scanned yet</div></div>
   </div>
-
+  </div>
 
   <!-- band 3: what the app is shouting about -->
+  <div class="sq">
+  <div class="sqhd">GATE &amp; ALERTS</div>
   <div id="gateBar" class="ok">checking the no-trade rules…</div>
   <div id="gatePanel2"></div>
   <div id="nakedAlert"></div>
   <div id="oiAlert"></div>
   <div id="lockAsk"></div>
   <div id="regBar" class="cold">index regime — waiting for ticks…</div>
+  </div>
+
   <!-- the shape that came before the 05/11 13:37 move, scored live both
        ways round. Alert only: the orders are coilWatch's own decision and
        are governed by coilWatch.json, not by anything on this page. -->
+  <div class="sq">
   <div id="coilBox">
     <div class="hd"><b>FAMILIAR SETUP &mdash; the 05/11 coil</b>
       <span id="coilStat" class="stat">reading&hellip;</span>
@@ -832,7 +882,9 @@
     </div>
     <div id="coilRel">release bar: waiting</div>
   </div>
+  </div>
 
+  <div class="sq">
   <div id="setupBox">
     <div class="hd"><b>SETUP ALERTS</b>
       <span id="suStat" class="stat">—</span>
@@ -843,9 +895,11 @@
     <div id="setupList"><div class="empty">no setups yet today</div></div>
   </div>
   <div id="trigList"></div>
+  </div>
 
   <!-- set once, then left alone for weeks. Folded, so it stops competing
        with the position table for attention. -->
+  <div class="sq">
   <details class="pset">
     <summary>settings — stop on fill · OI entry · setup alerts</summary>
     <div class="inner">
@@ -886,6 +940,9 @@ flat = slPct below entry, nothing else.">stop:
       </div>
     </div>
   </details>
+  </div>
+
+  </div><!-- /autoGrid -->
 
   </div>
 
@@ -1236,8 +1293,9 @@ flat = slPct below entry, nothing else.">stop:
   The row of chips is its own caps. A chip turns amber when that cap is what stopped the last decision, so you can
   see <i>which</i> of your rules is biting instead of guessing. Edit them in <code>autoTrade.json</code> or
   <code>POST /api/autopilot</code>.<br><br>
-  <b>While this page is open the autopilot does not act on bounce/break setups</b> &mdash; you are the hand on the
-  button, and the header says so. It still runs the coil release.</div>
+  <b>The ARM switch is the only thing that decides</b> &mdash; page open or not. Armed, it acts on every enabled
+  setup kind; off, it only writes down what it would have done. (Before 13/11/2026 an open page silently
+  disabled bounce/break &mdash; that rule is gone.)</div>
 
   <h4>The ARM switch &mdash; off does not mean asleep</h4>
   <div>The button in the autopilot header. One press switches it <b>off</b>; arming asks twice and says
@@ -2028,6 +2086,49 @@ function commentary(slot, upto) {
     if (x >= 2) parts.unshift(tag('', `⚡ MOVING FAST ${x.toFixed(1)}×`, 'bull fasttag'));
     else if (x <= 0.35) parts.unshift(tag('', `dead chart ${x.toFixed(1)}×`, 'neu deadtag'));
     else parts.unshift(tag('speed', `${x.toFixed(1)}× normal`, 'neu'));
+  }
+
+  // candle height: avg %range over the last 10 minutes vs the last 2.
+  // Cut by TIME, not candle count, so the 5s/15s charts read the same
+  // wall-clock windows as the 1m chart. The height carries a SIGN now:
+  // + when the window closed above where it opened, − when below. So
+  // the chip says both how tall and which way, and the 2m sign colours
+  // it and counts in the READ.
+  {
+    const nowT = live.time;
+    const sHt = cs => {
+      const h = cs.reduce((s, c) => s + (c.high - c.low) / (c.close || 1) * 100, 0) / cs.length;
+      return cs[cs.length - 1].close < cs[0].open ? -h : h;
+    };
+    const w10 = arr.filter(c => c.time > nowT - 600);
+    const w2  = arr.filter(c => c.time > nowT - 120);
+    if (w2.length && w10.length > w2.length) {
+      const h10 = sHt(w10), h2 = sHt(w2);
+      const x = Math.abs(h10) > 0 ? Math.abs(h2) / Math.abs(h10) : null;
+      const sg = v => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
+      parts.push(tag('height', `10m ${sg(h10)} · 2m ${sg(h2)}${x != null ? ` (${x.toFixed(1)}×)` : ''}`,
+        h2 >= 0 ? 'bull' : 'bear'));
+    }
+
+    // colour flips over the same 10 minutes, completed candles only:
+    // of all green candles, how many had a red one right after (G→R),
+    // and the same the other way (R→G). High numbers = chop, every
+    // candle undone by the next. Flat candles are skipped. Neutral —
+    // flipping says the chart is choppy, not which way it leans.
+    const w = done.filter(c => c.time > nowT - 600)
+                  .map(c => c.close > c.open ? 1 : c.close < c.open ? -1 : 0)
+                  .filter(v => v != 0);
+    if (w.length >= 4) {
+      let g = 0, gr = 0, gg = 0, r = 0, rg = 0;
+      for (let i = 0; i < w.length - 1; i++) {
+        if (w[i] > 0) { g++; if (w[i + 1] < 0) gr++; else gg++; }
+        else { r++; if (w[i + 1] > 0) rg++; }
+      }
+      // the raw counts ride along: "100% (2/2)" is two candles talking,
+      // "100% (8/8)" is a pattern — the % alone cannot tell them apart
+      const pc = (a, b) => b ? `${Math.round(a / b * 100)}% (${a}/${b})` : '—';
+      parts.push(tag('flips 10m', `G→R ${pc(gr, g)} · R→G ${pc(rg, r)} · G→G ${pc(gg, g)}`, 'neu'));
+    }
   }
 
   /*
