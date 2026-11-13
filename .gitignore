@@ -61,3 +61,5 @@ coilLog.json
 mockAutoRun-*.json
 backtest/mockbars/
 chartApp.out
+ticks/
+autoLog.jsonl

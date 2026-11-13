@@ -155,6 +155,37 @@ function createAutoPilot(deps) {
     const JOURNAL_MAX = 60;
 
     /*
+    13/11/2026: the journal also goes to disk, one JSON line per decision,
+    because stdout dies with pm2 flush and the in-memory copy dies with
+    every restart. autoLog.jsonl is append-only and never trimmed by the
+    code -- it IS the history the user asked to keep.
+
+    The same file seeds the books at boot: today's placed rows refill
+    `taken`, today's would rows refill `shadow`. Before this a restart
+    reset the daily counters, so maxTradesPerDay could be walked past by
+    restarting -- the one cap that must not have that hole.
+    */
+    const JOURNAL_FILE = path.join(__dirname, 'autoLog.jsonl');
+    function appendJournal(rec) {
+        try { fs.appendFileSync(JOURNAL_FILE, JSON.stringify(rec) + '\n'); }
+        catch (e) { console.log('⚠️ autoLog write failed —', e.message || e); }
+    }
+    try {
+        if (fs.existsSync(JOURNAL_FILE)) {
+            const today = new Date().toDateString();
+            for (const line of fs.readFileSync(JOURNAL_FILE, 'utf8').split('\n')) {
+                if (!line) continue;
+                let r; try { r = JSON.parse(line); } catch (e) { continue; }
+                if (new Date(r.at).toDateString() != today) continue;
+                if (r.action == 'placed') { taken.push(r); lastEntryAt = Math.max(lastEntryAt, new Date(r.at).getTime()); }
+                if (r.action == 'would') { shadow.push(r); lastShadowAt = Math.max(lastShadowAt, new Date(r.at).getTime()); }
+            }
+            if (taken.length || shadow.length) console.log(
+                `⏪ autopilot books reloaded: ${taken.length} placed, ${shadow.length} would-be today`);
+        }
+    } catch (e) { console.log('⚠️ autoLog reload failed —', e.message || e); }
+
+    /*
     13/11/2026: every entry carries its own explanation -- what the setup
     saw, a confidence %, and the exit plan. The confidence is not a model
     score: it is the plain history rate off row.familiar -- "this shape
@@ -419,7 +450,7 @@ function createAutoPilot(deps) {
     */
     async function onSetup(row) {
         const out = await decide(row);
-        journal.push({
+        const rec = {
             at: new Date().toISOString(),
             tradingsymbol: row && row.tradingsymbol,
             kind: row && row.kind,
@@ -433,7 +464,14 @@ function createAutoPilot(deps) {
             qty: out && out.qty != null ? out.qty : null,
             price: out && out.price != null ? out.price : null,
             riskRs: out && out.riskRs != null ? out.riskRs : null,
-        });
+            // the explanation, when there was an entry (real or shadow)
+            stop: out && out.stop != null ? out.stop : null,
+            confidence: out && out.confidence != null ? out.confidence : null,
+            confWhy: (out && out.confWhy) || null,
+            exit: (out && out.exit) || null,
+        };
+        journal.push(rec);
+        appendJournal(rec);
         while (journal.length > JOURNAL_MAX) journal.shift();
         return out;
     }

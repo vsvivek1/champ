@@ -351,6 +351,40 @@ function isoOrNull(v) {
     return isNaN(d.getTime()) ? null : d.toISOString();
 }
 
+/*
+13/11/2026: EVERY tick goes to disk, for analysis later. One JSONL file
+per day in ticks/, one line per tick: t (exchange time, epoch ms), tok,
+p (last price), v (day cumulative volume), oi, b/a (best bid/ask — the
+spread study needs them). Appended in 5s batches so the tick loop never
+touches the filesystem. ~20-30 MB a day for 5-6 tokens; delete old days
+by hand when the disk complains.
+*/
+const TICKS_DIR = path.join(__dirname, 'ticks');
+let tickLogBuf = [];
+function logTick(tok, t) {
+    const d = t.depth || {};
+    const bid = d.buy && d.buy[0] ? d.buy[0].price : null;
+    const ask = d.sell && d.sell[0] ? d.sell[0].price : null;
+    const ts = t.exchange_timestamp || t.last_trade_time;
+    tickLogBuf.push(JSON.stringify({
+        t: ts ? new Date(ts).getTime() : Date.now(), tok,
+        p: t.last_price,
+        v: t.volume_traded != null ? t.volume_traded : (t.volume || 0),
+        oi: t.oi || 0,
+        ...(bid != null ? { b: bid } : {}), ...(ask != null ? { a: ask } : {}),
+    }));
+}
+setInterval(() => {
+    if (!tickLogBuf.length) return;
+    const lines = tickLogBuf.join('\n') + '\n';
+    tickLogBuf = [];
+    try {
+        fs.mkdirSync(TICKS_DIR, { recursive: true });
+        const day = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD, local
+        fs.appendFileSync(path.join(TICKS_DIR, `${day}.jsonl`), lines);
+    } catch (e) { console.log('⚠️ tick log write failed —', e.message || e); }
+}, 5000);
+
 const SEC_BUCKET = 5, SEC_CAP = 5400; // 5400 × 5s = 7.5h
 const secCandles = new Map();  // token -> [{time,open,high,low,close,volume,oi}]
 const secVolBase = new Map();  // token -> day volume attributed to closed buckets
@@ -5821,6 +5855,7 @@ async function main() {
         for (const t of ticks) {
             const tok = Number(t.instrument_token);
             lastLtpByToken.set(tok, t.last_price);
+            logTick(tok, t);   // everything on disk first, judgement after
             // paper fills happen against this tick, BEFORE the guard looks at
             // it: a real fill would already have been on the wire by now
             if (mock) mock.onTick(tok);
