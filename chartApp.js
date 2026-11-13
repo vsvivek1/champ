@@ -484,6 +484,27 @@ function formingLow(tok) {
 }
 
 /*
+The move over the last N minutes, signed, as a % -- open of the window to
+the latest close, off the 5s buckets. The slow-mover lock reads this for
+its 2-min and 10-min windows. Uses whatever buckets exist inside the
+window, so a freshly charted strike answers with the history it has;
+null only when there is no bucket at all.
+*/
+function movePctOver(tok, minutes) {
+    const arr = secCandles.get(Number(tok));
+    if (!arr || !arr.length) return null;
+    const cutoff = Math.floor(Date.now() / 1000) - minutes * 60;
+    let open = null, last = null;
+    for (const c of arr) {
+        if (c.time < cutoff) continue;
+        if (open == null) open = c.open;
+        last = c.close;
+    }
+    if (open == null || !(open > 0) || last == null) return null;
+    return +((last - open) / open * 100).toFixed(2);
+}
+
+/*
 Completed 1-minute bars off our own tick buckets, newest last. breachFromSec
 only needs the lows; the steep-candle gate needs the whole bar, so this is
 the shared builder. The forming minute is NEVER included -- a gate that read
@@ -2473,7 +2494,15 @@ const NO_TRADE_DEFAULTS = {
     flowPct: 35,              // contracts/min, as % of today's median minute
     sizePct: 50,              // mean print size, as % of today's median
     oiPct: 25,                // |OI change|/min, as % of today's median
-    spreadMult: 1.8           // spread counts as dead above this x today's median
+    spreadMult: 1.8,          // spread counts as dead above this x today's median
+
+    /* slow-mover lock -- 13/11/2026, on the user's own instruction: if
+       neither the 10-min nor the 2-min move is +5% or more, lock the
+       entry and say so in his words */
+    blockSlow: true,
+    slowMovePct: 5,           // the +% at least one window must show
+    slowShortMin: 2,          // the quick window, minutes
+    slowLongMin: 10           // the patient window, minutes
 };
 
 function readNoTrade() {
@@ -2604,6 +2633,8 @@ const RULE_THEORY = {
     momentum: 'calcSpeed() is direction-blind. It measures range, so a premium collapsing at 3x reads exactly as fast as one going vertical at 3x -- and it was being used on its own to soften the red-candle and steep-candle gates, which exist for precisely those collapsing bars.\n\nThis is the direction half: each of the last 3 completed 1-minute bars must print a higher high than the one before it. Speed at or above 1.5x AND higher highs together means the move is real and one-way, and only that combination is allowed to soften the liquidity gate.\n\nIt never blocks anything. It is reported so the checklist can say why a soft row passed, instead of showing a green tick with no reason behind it.',
 
     speed: 'A flat option chart cannot pay for the spread it costs to enter. If the instrument is not moving, the only certain outcome is the crossing cost.',
+
+    slow: 'THE SLOW-MOVER LOCK (13/11/2026, added on the user\'s own instruction). Two windows, one question: has this premium gone UP 5% or more in the last 2 minutes, or in the last 10? One yes is enough. Two nos is a crawling strike, and a long option in a crawling strike has only certain costs -- theta every minute, spread on both doors -- and no movement paying for them.\n\nWhy two windows: the 2-minute one catches a move that just started, the 10-minute one keeps a strike alive mid-run when the latest 2 minutes happen to pause. Signed on purpose -- a strike DOWN 8% in 10 minutes is moving, but not in the direction a long option gets paid for.\n\nDiffers from `speed`: speed measures range against the strike\'s own median, so a jittery-but-flat tape can read fast. This one only counts net upward progress, which is the only thing that pays a long premium.\n\nApplies to everything -- hand clicks, autopilot, triggers -- and is not waived by speedgreen or holdlow. Tune or switch off with blockSlow / slowMovePct / slowShortMin / slowLongMin in noTrade.json.',
 
     revzone: 'WHERE A REVERSAL BUY IS ALLOWED TO STAND.\n\nAfter a drop, a buy is a bet that the move turns here -- and "here" has to be a price with a reason, not the spot where the finger landed. Two kinds of price have a reason, both read off this strike\'s own completed 1-minute bars:\n\nAn unfilled bullish FVG -- a band the move up crossed so fast that nothing traded in it. Price falling back into that band meets the resting interest that never got filled on the way up. Once a later bar trades through the bottom of the gap, that interest is spent and the gap stops counting.\n\nA swing low -- a bar whose low undercuts its neighbours on both sides. The plainest support: a price sellers reached twice and could not hold.\n\nMid-air between those, the gate refuses. A reversal bought at no level has a stop under nothing and a bounce with no reason to start at the entry -- it is the falling-knife catch this checklist already refuses one bar at a time (redcandle), stated structurally.\n\nOnly in play AFTER a move: no recent drop in the window means buys are judged by the other gates alone, because without a drop there is no reversal being bet on.'
 };
@@ -2933,6 +2964,34 @@ function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
             (part.dead
                 ? ' — this is churn, not flow: nobody is behind the move you are about to pay for'
                 : ''));
+    }
+
+    /*
+    THE SLOW-MOVER LOCK (13/11/2026). If neither the last slowLongMin
+    minutes nor the last slowShortMin minutes moved this premium up by
+    slowMovePct or more, the strike is crawling: a long option in it pays
+    theta every minute and the spread on both doors, and nothing is
+    paying back. The user asked for this lock in his own words, so the
+    refusal uses them.
+    */
+    if (!s.blockSlow) {
+        chk.push({ code: 'slow', label: 'Strike actually moving', ok: true, blocked: false, hard: false, detail: 'slow-mover lock switched off' });
+    } else if (!stTok) {
+        na('slow', 'Strike actually moving', 'n/a until a symbol is picked');
+    } else {
+        const need = s.slowMovePct != null ? s.slowMovePct : 5;
+        const shortMin = s.slowShortMin || 2, longMin = s.slowLongMin || 10;
+        const mS = movePctOver(stTok, shortMin);
+        const mL = movePctOver(stTok, longMin);
+        const pf = v => v == null ? 'n/a' : `${v >= 0 ? '+' : ''}${v}%`;
+        const noData = mS == null && mL == null;
+        const slow = noData || !((mS != null && mS >= need) || (mL != null && mL >= need));
+        add('slow', `Up ≥ ${need}% in ${shortMin}m or ${longMin}m`,
+            slow,
+            (noData
+                ? 'no tick history on this strike yet — cannot prove it is moving'
+                : `${shortMin}m ${pf(mS)}, ${longMin}m ${pf(mL)} — need +${need}% in one of them`)
+            + (slow ? ' — 🔒 NOT taking this, you slow-moving sucker: the strike is crawling and theta is not' : ''));
     }
 
     const bare = unprotectedList();
