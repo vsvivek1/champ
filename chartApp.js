@@ -2638,7 +2638,7 @@ const RULE_THEORY = {
 
     speed: 'A flat option chart cannot pay for the spread it costs to enter. If the instrument is not moving, the only certain outcome is the crossing cost.',
 
-    slow: 'THE SLOW-MOVER LOCK (13/11/2026, added on the user\'s own instruction). Two windows, one question: has this premium gone UP 5% or more in the last 2 minutes, or in the last 10? One yes is enough. Two nos is a crawling strike, and a long option in a crawling strike has only certain costs -- theta every minute, spread on both doors -- and no movement paying for them.\n\nWhy two windows: the 2-minute one catches a move that just started, the 10-minute one keeps a strike alive mid-run when the latest 2 minutes happen to pause. Signed on purpose -- a strike DOWN 8% in 10 minutes is moving, but not in the direction a long option gets paid for.\n\nDiffers from `speed`: speed measures range against the strike\'s own median, so a jittery-but-flat tape can read fast. This one only counts net upward progress, which is the only thing that pays a long premium.\n\nApplies to everything -- hand clicks, autopilot, triggers -- and is not waived by speedgreen or holdlow. Tune or switch off with blockSlow / slowMovePct / slowShortMin / slowLongMin in noTrade.json.',
+    slow: 'THE SLOW-MOVER LOCK (13/11/2026, added on the user\'s own instruction). Two windows, one question: has this premium MOVED 5% or more -- either way -- over the forming candle plus the previous one (2m), or plus the previous nine (10m)? One yes is enough. Two nos is a crawling strike, and a long option in a crawling strike has only certain costs -- theta every minute, spread on both doors -- and no movement paying for them.\n\nWhy two windows: the 2-minute one catches a move that just started, the 10-minute one keeps a strike alive mid-run when the latest 2 minutes happen to pause.\n\nDirection-blind on purpose (same day, second thought): a strike down 8% in 10 minutes is alive, and that is exactly where bounce and holdlow do their buying. Which WAY to trade stays the job of the direction gates -- redcandle, wrongway, revzone -- this one only refuses the tape where nothing is happening at all.\n\nDiffers from `speed`: speed measures range against the strike\'s own median, so the bar moves with the day. This one is an absolute net-move floor: crawl is crawl on any day.\n\nApplies to everything -- hand clicks, autopilot, triggers -- and is not waived by speedgreen or holdlow. Tune or switch off with blockSlow / slowMovePct / slowShortMin / slowLongMin in noTrade.json.',
 
     revzone: 'WHERE A REVERSAL BUY IS ALLOWED TO STAND.\n\nAfter a drop, a buy is a bet that the move turns here -- and "here" has to be a price with a reason, not the spot where the finger landed. Two kinds of price have a reason, both read off this strike\'s own completed 1-minute bars:\n\nAn unfilled bullish FVG -- a band the move up crossed so fast that nothing traded in it. Price falling back into that band meets the resting interest that never got filled on the way up. Once a later bar trades through the bottom of the gap, that interest is spent and the gap stops counting.\n\nA swing low -- a bar whose low undercuts its neighbours on both sides. The plainest support: a price sellers reached twice and could not hold.\n\nMid-air between those, the gate refuses. A reversal bought at no level has a stop under nothing and a bounce with no reason to start at the entry -- it is the falling-knife catch this checklist already refuses one bar at a time (redcandle), stated structurally.\n\nOnly in play AFTER a move: no recent drop in the window means buys are judged by the other gates alone, because without a drop there is no reversal being bet on.'
 };
@@ -2989,12 +2989,15 @@ function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
         const mL = movePctOver(stTok, longMin);
         const pf = v => v == null ? 'n/a' : `${v >= 0 ? '+' : ''}${v}%`;
         const noData = mS == null && mL == null;
-        const slow = noData || !((mS != null && mS >= need) || (mL != null && mL >= need));
-        add('slow', `Up ≥ ${need}% in ${shortMin}m or ${longMin}m`,
+        // direction-blind on purpose (13/11/2026): a strike DOWN 8% is
+        // alive too, and that is exactly where bounce/holdlow buy. The
+        // direction gates (redcandle, wrongway, revzone) keep their jobs.
+        const slow = noData || !((mS != null && Math.abs(mS) >= need) || (mL != null && Math.abs(mL) >= need));
+        add('slow', `Moving ≥ ${need}% in ${shortMin}m or ${longMin}m`,
             slow,
             (noData
                 ? 'no tick history on this strike yet — cannot prove it is moving'
-                : `${shortMin}m ${pf(mS)}, ${longMin}m ${pf(mL)} — need +${need}% in one of them`)
+                : `${shortMin}m ${pf(mS)}, ${longMin}m ${pf(mL)} — need ±${need}% in one of them`)
             + (slow ? ' — 🔒 NOT taking this, you slow-moving sucker: the strike is crawling and theta is not' : ''));
     }
 
