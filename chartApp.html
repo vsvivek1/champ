@@ -2405,6 +2405,9 @@ function connectWs() {
         msg(`🤖 AUTOPILOT BOUGHT ${m.quantity || m.qty} ${m.tradingsymbol} @ ${m.price}`
           + ` — ${m.setup || ''}, stop ${m.stop}`
           + (m.riskRs != null ? `, risk ₹${m.riskRs}` : ''));
+        if (m.why) msg(`💡 why: ${m.why}`);
+        if (m.confWhy) msg(`📊 confidence ${m.confidence != null ? m.confidence + '%' : 'unknown'} — ${m.confWhy}`);
+        if (m.exit) msg(`🚪 exit: ${m.exit}`);
         beep(880, 3);
         refreshPosition();
       } else if (m.action == 'would') {

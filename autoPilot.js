@@ -67,7 +67,21 @@ const DEFAULTS = {
     passes; that would have lied to the log as well as to the gate.
     */
     levelKinds: ['bounce', 'break'],
-    minRR: 1.5,              // on top of the setup detector's own minRR
+    minRR: 2,                // on top of the setup detector's own minRR
+
+    /*
+    PER-KIND R FLOOR, same idea as the detector's minRRByKind.
+
+    speedgreen buys a move that is ALREADY running, so the nearest
+    resistance is close and its R is small by construction -- a flat 2R
+    deletes the setup instead of filtering it. 09/11/2026: 13:13 on
+    NIFTY26N0924650PE fired at 4.15 with 1.0R and ran to 8.25 (+99%).
+
+    A row arrives carrying rrFloor -- the floor the DETECTOR applied. That
+    one wins, so the two gates can never disagree about the same row; this
+    map is only the fallback for an older row with no rrFloor on it.
+    */
+    minRRByKind: { speedgreen: 1.2 },
     minTouches: 2,           // a level with one touch is a line, not a level
     maxTradesPerDay: 6,      // after this, the day is over whatever the tape says
     maxOpen: 1,              // positions held at once. 1 = one trade at a time
@@ -140,6 +154,34 @@ function createAutoPilot(deps) {
     const journal = [];
     const JOURNAL_MAX = 60;
 
+    /*
+    13/11/2026: every entry carries its own explanation -- what the setup
+    saw, a confidence %, and the exit plan. The confidence is not a model
+    score: it is the plain history rate off row.familiar -- "this shape
+    before, how often did it go up". When the shape sample is thin it
+    falls back to the closed-trades rate, and says which one it used.
+    */
+    function explain(row) {
+        const f = row.familiar || {};
+        const sh = f.shapes || {}, tr = f.trades || {};
+        let confidence = null, confWhy = 'no history on file yet';
+        if (sh.n >= 5) {
+            confidence = Math.round(sh.wins / sh.n * 100);
+            confWhy = `${sh.wins}/${sh.n} of the same shape went up in 15 min`;
+        } else if (tr.n) {
+            confidence = Math.round(tr.wins / tr.n * 100);
+            confWhy = `${tr.wins}/${tr.n} closed trades green (${tr.why || 'history'})`;
+        }
+        return {
+            why: `${row.kind}: ${row.what || 'setup fired'}`
+                + (row.rr != null ? ` — ${row.rr}R to the first level above` : ''),
+            confidence, confWhy,
+            exit: `SL ${row.stop}` + (row.stopWhy ? ` (${row.stopWhy})` : '')
+                + (row.target != null ? `, partial at ${row.target}` : '')
+                + ', then the guard trails the 3-candle low',
+        };
+    }
+
     function note(reason, msg) {
         const now = Date.now();
         if (now - (skipLog.get(reason) || 0) < 60000) return;
@@ -194,10 +236,34 @@ function createAutoPilot(deps) {
                 return { action: 'skip', why: `verdict ${row.verdict}` };
             }
             const levelKinds = cfg.levelKinds || DEFAULTS.levelKinds;
+            /*
+            The R is checked on ANY row that carries one, not only on
+            levelKinds. A speedgreen that did find a resistance above it has
+            a real, measured R, and "it was not a bounce" is no reason to
+            stop reading it. A row with rr == null has nothing to measure
+            and is left to the kind rules below.
+
+            minTouches stays levelKinds-only, because a touch count is
+            genuinely meaningless without a horizontal level.
+            */
+            /*
+            Trust the row's own rrFloor first: that is the number the
+            detector judged it on. Falling back to our own map would let the
+            two gates disagree about one row, which is the failure the
+            waiver comment below warns about.
+            */
+            const byKind = cfg.minRRByKind || DEFAULTS.minRRByKind || {};
+            const floor = Number(row.rrFloor) > 0 ? Number(row.rrFloor)
+                : (Number(byKind[row.kind]) > 0 ? Number(byKind[row.kind]) : cfg.minRR);
+
+            if (row.rr != null && !(row.rr >= floor)) {
+                note('rr', `${row.tradingsymbol} ${row.rr}R is under the autopilot's ${floor}R`);
+                return { action: 'skip', why: `${row.rr}R < ${floor}R` };
+            }
             if (levelKinds.includes(row.kind)) {
-                if (!(row.rr >= cfg.minRR)) {
-                    note('rr', `${row.tradingsymbol} ${row.rr}R is under the autopilot's ${cfg.minRR}R`);
-                    return { action: 'skip', why: `${row.rr}R < ${cfg.minRR}R` };
+                if (!(row.rr >= floor)) {
+                    note('rr', `${row.tradingsymbol} ${row.rr}R is under the autopilot's ${floor}R`);
+                    return { action: 'skip', why: `${row.rr}R < ${floor}R` };
                 }
                 if (!(row.touches >= cfg.minTouches)) {
                     note('touches', `${row.tradingsymbol} level ${row.level} has ${row.touches} touch(es), autopilot wants ${cfg.minTouches}`);
@@ -290,12 +356,16 @@ function createAutoPilot(deps) {
                     qty, price, stop: row.stop, target: row.target, rr: row.rr,
                     riskRs: rc.per ? Math.round(rc.per * qty) : null,
                     order_ids: [], mock: false, dry: true,
+                    ...explain(row),
                 };
                 shadow.push(would);
                 console.log(`\u{1F4A4} autopilot is OFF \u2014 would have bought ${qty} ${row.tradingsymbol} @ ${price}`
                     + ` (${row.kind}, stop ${row.stop}`
                     + (would.riskRs != null ? `, risk \u20b9${would.riskRs}` : '')
                     + `) [${n + 1}/${cfg.maxTradesPerDay} would-be today]`);
+                console.log(`   \u{1F4A1} why: ${would.why}`);
+                console.log(`   \u{1F4CA} confidence ${would.confidence != null ? would.confidence + '%' : 'unknown'} \u2014 ${would.confWhy}`);
+                console.log(`   \u{1F6AA} exit: ${would.exit}`);
                 return { action: 'would', ...would };
             }
 
@@ -322,6 +392,7 @@ function createAutoPilot(deps) {
                 qty, price, stop: row.stop, target: row.target, rr: row.rr,
                 riskRs: rc.per ? Math.round(rc.per * qty) : null,
                 order_ids: ids, mock: !!isMock,
+                ...explain(row),
             };
             taken.push(rec);
             console.log(`🤖 AUTOPILOT${isMock ? ' (MOCK)' : ''} BUY ${qty} ${row.tradingsymbol} @ ${price}`
@@ -330,6 +401,9 @@ function createAutoPilot(deps) {
                 + `, stop ${row.stop}${row.rr != null ? `, ${row.rr}R` : ''}`
                 + (rec.riskRs != null ? `, risk ₹${rec.riskRs}` : '')
                 + ` → ${ids.join(',')} [${n + 1}/${cfg.maxTradesPerDay} today]`);
+            console.log(`   \u{1F4A1} why: ${rec.why}`);
+            console.log(`   \u{1F4CA} confidence ${rec.confidence != null ? rec.confidence + '%' : 'unknown'} — ${rec.confWhy}`);
+            console.log(`   \u{1F6AA} exit: ${rec.exit}`);
             return { action: 'placed', ...rec };
 
         } catch (e) {
