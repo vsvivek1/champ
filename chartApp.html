@@ -815,6 +815,7 @@
   <div id="panelTabs">
     <button class="ptab on" data-pane="paneAuto">AUTO RUN</button>
     <button class="ptab" data-pane="paneTrade">POSITIONS &amp; ORDERS</button>
+    <button class="ptab" data-pane="paneSignals">SIGNALS</button>
     <button class="ptab" data-pane="paneRules">RULES</button>
     <!-- THEORY: the long "why this rule exists" essays used to hang as a
          dropdown under every checklist row, which buried the numbers.
@@ -1008,6 +1009,19 @@ flat = slPct below entry, nothing else.">stop:
     <span id="tgtHint" style="color:var(--dim);font-size:11px"></span>
   </div>
   <div id="pnlPanel" style="display:none"></div>
+  </div>
+
+  <!-- SIGNALS: today's buy signals (placed + would-have) and the sells
+       that closed them, the same events the B/S marks on the charts show.
+       Time, price and the reason, newest first. -->
+  <div class="pane" id="paneSignals">
+    <div class="pbar">
+      <span class="ph">SIGNALS</span>
+      <span class="stat">today's buy signals and their sells — B and S on the charts are these rows</span>
+      <span style="flex:1"></span>
+      <button id="sigRe" class="sec">reload</button>
+    </div>
+    <div id="sigBody"><div class="empty">no signals yet today</div></div>
   </div>
 
   <div class="pane" id="paneRules">
@@ -1516,6 +1530,7 @@ async function loadSlot(slot) {
   if (candles.length) { lastLtp[slot] = candles[candles.length - 1].close; updateOb(slot, lastLtp[slot]); }
   cmHold[slot] = 0;               // a tf change invalidates any pinned historical note
   recomputeIndicators(slot);
+  applySignalMarkers(slot);      // B/S marks re-bucket to this chart's tf
   charts[slot].timeScale().fitContent();
   renderCommentary();
 }
@@ -5081,6 +5096,104 @@ The ws 'autopilot' message refreshes it the moment anything happens, so
 this poll is only the safety net.
 */
 setInterval(refreshAuto, 15000);
+
+/* ======================================================================
+B AND S ON THE CHART, AND THE SIGNALS TAB.
+
+A buy signal ('placed' = real order sent, 'would' = what the disarmed
+autopilot would have taken) gets a B under the bar it fired on; the sell
+that closed a buy gets an S above its bar. The SIGNALS tab lists the same
+events as rows -- time, price, reason -- so the mark on the chart and the
+line in the tab are one record seen two ways.
+
+The mark sits on the bar the signal's clock falls into at that chart's
+own timeframe, so a tf change re-buckets them (loadSlot re-applies).
+====================================================================== */
+let sigData = { buys: [], sells: [] };
+
+const sigBuyEpoch  = b => Math.floor(new Date(b.at).getTime() / 1000);
+const sigSellEpoch = s => Math.floor(new Date(`${s.date}T${s.time}`).getTime() / 1000);
+const sigClock = ep => new Date(ep * 1000).toLocaleTimeString('en-IN', { hour12: false });
+
+function applySignalMarkers(slot) {
+  if (!series[slot]) return;
+  const candles = candleData[slot];
+  const sym = exSymbols[slot] && exSymbols[slot].tradingsymbol;
+  if (!sym || !candles || !candles.length) { try { series[slot].setMarkers([]); } catch (e) {} return; }
+  const first = candles[0].time, last = candles[candles.length - 1].time;
+  // the bar this moment falls into, or null when it is off this chart
+  const snap = ep => {
+    const t = Math.floor((ep + IST_OFFSET) / TF_SEC[slot]) * TF_SEC[slot];
+    return (t >= first && t <= last) ? t : null;
+  };
+  const marks = [];
+  let firstBuyAt = Infinity;
+  for (const b of sigData.buys) {
+    if (b.tradingsymbol != sym) continue;
+    const t = snap(sigBuyEpoch(b));
+    if (t == null) continue;
+    firstBuyAt = Math.min(firstBuyAt, t);
+    marks.push({
+      time: t, position: 'belowBar', shape: 'arrowUp', text: 'B',
+      color: b.action == 'placed' ? '#2dbd85' : '#8ab4ff',
+    });
+  }
+  /* S only after a B: a sell with no buy signal before it on this chart
+     (a hand trade from before the first signal) stays off the chart. */
+  for (const s of sigData.sells) {
+    if (s.tradingsymbol != sym) continue;
+    const t = snap(sigSellEpoch(s));
+    if (t == null || t < firstBuyAt) continue;
+    marks.push({ time: t, position: 'aboveBar', shape: 'arrowDown', text: 'S', color: '#f6465d' });
+  }
+  marks.sort((a, b) => a.time - b.time);
+  try { series[slot].setMarkers(marks); } catch (e) { /* an off-chart time must not kill the poll */ }
+}
+
+function renderSignals() {
+  const el = document.getElementById('sigBody');
+  if (!el) return;
+  const rows = [];
+  for (const b of sigData.buys) rows.push({
+    t: sigBuyEpoch(b),
+    html: `<tr><td>${sigClock(sigBuyEpoch(b))}</td>`
+      + `<td style="color:${b.action == 'placed' ? '#2dbd85' : '#8ab4ff'};font-weight:700">`
+      + `B${b.action == 'would' ? ' (shadow)' : ''}</td>`
+      + `<td style="text-align:left">${esc(b.tradingsymbol || '')}</td>`
+      + `<td>${fmt(b.price)}</td>`
+      + `<td style="text-align:left">${esc(b.why || b.kind || '')}`
+      + (b.confidence != null ? ` · ${b.confidence}% before` : '')
+      + (b.exit ? `<br><span style="color:var(--dim)">${esc(b.exit)}</span>` : '') + `</td></tr>`,
+  });
+  for (const s of sigData.sells) rows.push({
+    t: sigSellEpoch(s),
+    html: `<tr><td>${esc(s.time || '')}</td>`
+      + `<td style="color:#f6465d;font-weight:700">S</td>`
+      + `<td style="text-align:left">${esc(s.tradingsymbol || '')}</td>`
+      + `<td>${fmt(s.price)}</td>`
+      + `<td style="text-align:left">${esc(s.reason || '')}`
+      + (s.pnl != null ? ` · P&amp;L ${s.pnl >= 0 ? '+' : ''}${fmt(s.pnl, 0)}` : '') + `</td></tr>`,
+  });
+  rows.sort((a, b) => b.t - a.t);   // newest first, same as the auto feed
+  el.innerHTML = rows.length
+    ? `<table><thead><tr><th>time</th><th style="text-align:left">B/S</th>`
+      + `<th style="text-align:left">symbol</th><th>price</th>`
+      + `<th style="text-align:left">reason</th></tr></thead>`
+      + `<tbody>${rows.map(r => r.html).join('')}</tbody></table>`
+    : '<div class="empty">no signals yet today</div>';
+}
+
+async function refreshSignals() {
+  try {
+    const d = await (await fetch(BASE + '/api/signals')).json();
+    sigData = { buys: d.buys || [], sells: d.sells || [] };
+    renderSignals();
+    for (const s of [0, 1, 2]) applySignalMarkers(s);
+  } catch (e) { /* transient; the next poll covers it */ }
+}
+refreshSignals();
+setInterval(refreshSignals, 30000);
+document.getElementById('sigRe').onclick = refreshSignals;
 
 async function setArmed(on) {
   try {

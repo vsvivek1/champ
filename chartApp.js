@@ -7094,6 +7094,45 @@ async function main() {
         });
     });
 
+    /*
+    Today's buy signals and sells, for the chart markers (B/S) and the
+    SIGNALS tab. Buys come from autoLog.jsonl -- every 'placed' (real
+    order) and 'would' (shadow entry while disarmed) row, with the why.
+    Sells come from tradeLog.json -- each one is the exit of a buy, so
+    the pairing the user asked for ("S only after a B") is already true
+    by construction. Hand exits are included on purpose: the chart has
+    to show every exit that closed an entry, however it was triggered.
+    */
+    app.get('/api/signals', (req, res) => {
+        const today = dayjs().format('YYYY-MM-DD');
+        const buys = [];
+        try {
+            const todayStr = new Date().toDateString();
+            for (const line of fs.readFileSync(path.join(__dirname, 'autoLog.jsonl'), 'utf8').split('\n')) {
+                if (!line) continue;
+                let r; try { r = JSON.parse(line); } catch (e) { continue; }
+                if (r.action != 'placed' && r.action != 'would') continue;
+                if (new Date(r.at).toDateString() != todayStr) continue;
+                buys.push({
+                    at: r.at, tradingsymbol: r.tradingsymbol, kind: r.kind,
+                    action: r.action, price: r.price != null ? r.price : r.ltp,
+                    qty: r.qty, why: r.why, confidence: r.confidence,
+                    stop: r.stop, exit: r.exit,
+                });
+            }
+        } catch (e) { /* no journal yet is a normal empty day */ }
+        let sells = [];
+        try {
+            const log = JSON.parse(fs.readFileSync(TRADE_LOG_FILE, 'utf8'));
+            sells = log.filter(t => t.date == today).map(t => ({
+                date: t.date, time: t.time, tradingsymbol: t.tradingsymbol,
+                price: t.sell, buy: t.buy, reason: t.reasonLabel || t.reason,
+                pnl: t.tradePnl != null ? t.tradePnl : t.pnl,
+            }));
+        } catch (e) { /* no trades yet */ }
+        res.json({ buys, sells });
+    });
+
     app.post('/api/autopilot', (req, res) => {
         const ap = require('./autoPilot.js');
         const cur = ap.readCfg();
