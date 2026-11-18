@@ -5,6 +5,7 @@
 - Kinds on: bounce, break, coil, speedgreen, holdlow.
 - bounce/break need a level with ≥2 touches.
 - bounce bar volume ≥1.2x average of all earlier bars (18/11/2026).
+- bounce bar OI not flat: |ΔOI| ≥0.25x strike's median per-minute |ΔOI| (18/11/2026; no OI data = no block).
 - R:R floor: ≥2R to first level above (speedgreen ≥1.2R).
 - Verdict must be TAKE (not THIN, not BLOCKED).
 

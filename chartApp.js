@@ -4254,6 +4254,12 @@ const SETUP_DEFAULTS = {
     // volume of all completed bars before it -- a bounce nobody bought is
     // just a wick (18/11/2026, user's own instruction)
     bounceVolMult: 1.2,
+    // flat-OI block on bounce (18/11/2026, user's own instruction): the
+    // signal bar's |OI change| must be at least this fraction of the
+    // strike's own median per-minute |OI change| today. Volume with no OI
+    // change is churn -- nobody opened a position behind the bounce. No OI
+    // data yet -> does not block.
+    bounceOiMult: 0.25,
     breakClearPct: 0.5,  // how far past the level the close must be
     wickPct: 0.2,        // how deep into the support the low may poke
 
@@ -4379,10 +4385,30 @@ async function checkSetups(token, ltp) {
     const avgVol = c.length > 1
         ? c.slice(0, -1).reduce((s, x) => s + (x.volume || 0), 0) / (c.length - 1)
         : 0;
+    /*
+    Flat OI on the signal bar kills the bounce: volume with no OI change is
+    the same contracts going round, nobody opened a position behind the
+    move. "Flat" is judged against this strike's own median per-minute
+    |OI change| today, so a quiet expiry sets its own bar. Too little OI
+    data (early session, restart) does not block.
+    */
+    const oiFlat = (() => {
+        const a = oiSeries.get(Number(token)) || [];
+        const s1 = a.find(r => r.min == min - 1);   // signal bar
+        const s0 = a.find(r => r.min == min - 2);   // bar before it
+        if (!s1 || !s0 || !(s0.oi > 0)) return false;
+        const diffs = [];
+        for (let i = 1; i < a.length; i++)
+            if (a[i].min - a[i - 1].min == 1) diffs.push(Math.abs(a[i].oi - a[i - 1].oi));
+        if (diffs.length < 5) return false;
+        const med = diffs.slice().sort((x, y) => x - y)[Math.floor(diffs.length / 2)];
+        return med > 0 && Math.abs(s1.oi - s0.oi) < cfg.bounceOiMult * med;
+    })();
     if (sup && sup.touches >= cfg.minTouches
         && last.low <= sup.price * (1 + cfg.wickPct / 100)
         && last.close > sup.price && last.close > last.open
-        && (last.volume || 0) >= cfg.bounceVolMult * avgVol) {
+        && (last.volume || 0) >= cfg.bounceVolMult * avgVol
+        && !oiFlat) {
         hits.push({ kind: 'bounce', level: sup.price, touches: sup.touches,
             what: `wicked into ${sup.price} (${sup.touches}t) and closed back above at ${last.close}` });
     }
