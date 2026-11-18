@@ -4250,6 +4250,10 @@ const SETUP_DEFAULTS = {
     */
     minRRByKind: { speedgreen: 1.2 },
     minTouches: 1,       // raise to 2 once there is a multi-day sample
+    // bounce bar's volume must be at least this many times the average
+    // volume of all completed bars before it -- a bounce nobody bought is
+    // just a wick (18/11/2026, user's own instruction)
+    bounceVolMult: 1.2,
     breakClearPct: 0.5,  // how far past the level the close must be
     wickPct: 0.2,        // how deep into the support the low may poke
 
@@ -4371,9 +4375,14 @@ async function checkSetups(token, ltp) {
 
     const hits = [];
     const sup = speedOnly ? null : pickSupport(lv, last.close);
+    // average volume of every completed bar before the signal bar
+    const avgVol = c.length > 1
+        ? c.slice(0, -1).reduce((s, x) => s + (x.volume || 0), 0) / (c.length - 1)
+        : 0;
     if (sup && sup.touches >= cfg.minTouches
         && last.low <= sup.price * (1 + cfg.wickPct / 100)
-        && last.close > sup.price && last.close > last.open) {
+        && last.close > sup.price && last.close > last.open
+        && (last.volume || 0) >= cfg.bounceVolMult * avgVol) {
         hits.push({ kind: 'bounce', level: sup.price, touches: sup.touches,
             what: `wicked into ${sup.price} (${sup.touches}t) and closed back above at ${last.close}` });
     }
