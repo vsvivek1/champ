@@ -5985,13 +5985,24 @@ async function main() {
         if (wsClients.size == 0) return;
         const payload = JSON.stringify({
             type: "ticks",
-            ticks: ticks.map(t => ({
-                token: Number(t.instrument_token),
-                ltp: t.last_price,
-                ts: Date.now(),
-                vol: t.volume_traded != null ? t.volume_traded : (t.volume || 0), // cumulative day volume
-                oi: t.oi || 0
-            }))
+            ticks: ticks.map(t => {
+                // full 5-level book (modeFull) -> the page draws it on the y axis
+                const d = t.depth;
+                const lvl = l => ({ p: l.price, q: l.quantity });
+                return {
+                    token: Number(t.instrument_token),
+                    ltp: t.last_price,
+                    ts: Date.now(),
+                    vol: t.volume_traded != null ? t.volume_traded : (t.volume || 0), // cumulative day volume
+                    oi: t.oi || 0,
+                    ...(d && (d.buy || d.sell) ? {
+                        depth: {
+                            buy: (d.buy || []).filter(l => l.quantity > 0).map(lvl),
+                            sell: (d.sell || []).filter(l => l.quantity > 0).map(lvl),
+                        }
+                    } : {})
+                };
+            })
         });
         for (const c of wsClients) {
             if (c.readyState == 1) c.send(payload);

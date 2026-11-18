@@ -55,6 +55,7 @@
   .chart { height:clamp(340px, 54vh, 900px); resize:both; overflow:hidden; min-height:180px; min-width:280px; max-width:100%; }
   .fx { position:absolute; z-index:7; top:46px; right:8px; cursor:pointer; opacity:.55; font-size:15px; user-select:none; }
   .fx:hover { opacity:1; }
+  .depthOverlay { position:absolute; inset:0; z-index:3; pointer-events:none; }
   .chartbox .tfbox { position:absolute; z-index:6; top:24px; left:8px; font-size:11px; color:var(--dim); }
   .chartbox .tfbox select { background:#1e222d; color:var(--text); border:1px solid #2a2e39; border-radius:3px; font-size:11px; padding:1px 3px; cursor:pointer; }
   .chartbox.full { position:fixed; inset:0; z-index:40; padding:6px 10px; overflow:auto; display:flex; flex-direction:column; }
@@ -1423,6 +1424,7 @@ const chartOpts = {
 };
 
 const charts = [], series = [], volSeries = [], oiSeries = [], ma20Series = [], vwapSeries = [];
+const depthCanvas = [];
 for (let i = 0; i < 3; i++) {
   const el = document.getElementById('c' + i);
   const ch = LightweightCharts.createChart(el, chartOpts);
@@ -1435,7 +1437,53 @@ for (let i = 0; i < 3; i++) {
   const m = ch.addLineSeries({ color:'#ff9800', lineWidth:1, priceLineVisible:false, title:'MA20' });
   const w = ch.addLineSeries({ color:'#ab47bc', lineWidth:1, priceLineVisible:false, title:'VWAP' });
   charts.push(ch); series.push(s); volSeries.push(v); oiSeries.push(o); ma20Series.push(m); vwapSeries.push(w);
-  new ResizeObserver(() => ch.applyOptions({ width: el.clientWidth, height: el.clientHeight })).observe(el);
+  // order-book overlay: resting buys/sells drawn from the y axis leftwards
+  const dc = document.createElement('canvas');
+  dc.className = 'depthOverlay';
+  el.style.position = 'relative';
+  el.appendChild(dc);
+  depthCanvas.push(dc);
+  new ResizeObserver(() => { ch.applyOptions({ width: el.clientWidth, height: el.clientHeight }); drawDepth(i); }).observe(el);
+}
+
+/*
+MARKET DEPTH ON THE Y AXIS. The 5 resting buy levels (green) and 5 sell
+levels (red) from the live book, each drawn as a bar at its own price,
+anchored at the price scale and growing right-to-left. Bar length is the
+quantity relative to the largest level on either side; the quantity is
+printed at the bar's tip. Index spot has no book, so chart 0 stays clean.
+*/
+let depthByToken = {};
+function drawDepth(slot) {
+  const dc = depthCanvas[slot]; if (!dc) return;
+  const el = dc.parentElement;
+  const w = el.clientWidth, h = el.clientHeight;
+  if (dc.width != w || dc.height != h) { dc.width = w; dc.height = h; }
+  const ctx = dc.getContext('2d');
+  ctx.clearRect(0, 0, w, h);
+  const tok = slotToken[slot];
+  const d = tok != null ? depthByToken[tok] : null;
+  if (!d) return;
+  let psw = 0;
+  try { psw = charts[slot].priceScale('right').width(); } catch (e) {}
+  const x0 = w - psw;                       // the y axis edge: bars start here
+  const maxLen = Math.max(30, Math.min(100, x0 * 0.25));
+  const maxQ = Math.max(1, ...[...(d.buy || []), ...(d.sell || [])].map(l => l.q));
+  ctx.font = '9px sans-serif';
+  ctx.textAlign = 'right';
+  for (const side of ['buy', 'sell']) {
+    const col = side == 'buy' ? '45,189,133' : '246,70,93';
+    for (const l of (d[side] || [])) {
+      if (!l.q) continue;
+      const y = series[slot].priceToCoordinate(l.p);
+      if (y == null || y < 2 || y > h - 2) continue;
+      const len = Math.max(2, (l.q / maxQ) * maxLen);
+      ctx.fillStyle = `rgba(${col},0.8)`;
+      ctx.fillRect(x0 - len, y - 1.5, len, 3);
+      ctx.fillStyle = `rgba(${col},1)`;
+      ctx.fillText(String(l.q), x0 - len - 3, y + 3);
+    }
+  }
 }
 
 let cfg = null;                 // /api/setup response
@@ -2365,7 +2413,14 @@ function connectWs() {
   };
   ws.onmessage = ev => {
     const m = JSON.parse(ev.data);
-    if (m.type == 'ticks') for (const t of m.ticks) onTick(t.token, t.ltp, t.ts, t.vol, t.oi);
+    if (m.type == 'ticks') for (const t of m.ticks) {
+      onTick(t.token, t.ltp, t.ts, t.vol, t.oi);
+      if (t.depth) {
+        depthByToken[t.token] = t.depth;
+        const s = tokenSlot[t.token];
+        if (s != null) drawDepth(s);
+      }
+    }
     if (m.type == 'order_update') refreshPosition();
     if (m.type == 'trigger_fired') { msg(`⚡ trigger #${m.id} FIRED: ${m.action == 'exitall' ? 'EXIT ALL' : (m.action || 'buy').toUpperCase()} ${m.tradingsymbol} (spot crossed ${m.level})`); refreshTriggers(); refreshPosition(); }
     if (m.type == 'trigger_failed') { msg(`❌ trigger #${m.id} order failed: ${m.error}`); refreshTriggers(); }
