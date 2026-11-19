@@ -374,6 +374,17 @@ function createAutoPilot(deps) {
             qty = rc.qty;
 
             /*
+            19/11/2026: chop is a warning, not a veto. The gate lets the
+            row through and asks for half size instead (min one lot).
+            */
+            const half = !!g.halfQty;
+            if (half) {
+                const was = qty;
+                qty = Math.max(lot, Math.floor(qty / 2 / lot) * lot);
+                console.log(`⚠️ autopilot ${row.tradingsymbol}: index is chopping — HALF quantity, ${was} → ${qty}`);
+            }
+
+            /*
             Disarmed, this is where it stops. Everything above has already
             happened -- the gate, the sizing, the risk cap -- so the line in
             the feed is the real decision with the real quantity, just
@@ -385,6 +396,7 @@ function createAutoPilot(deps) {
                     at: new Date().toISOString(), tradingsymbol: row.tradingsymbol, token,
                     kind: row.kind, level: row.level, touches: row.touches,
                     qty, price, stop: row.stop, target: row.target, rr: row.rr,
+                    halfQty: half,
                     riskRs: rc.per ? Math.round(rc.per * qty) : null,
                     order_ids: [], mock: false, dry: true,
                     ...explain(row),
@@ -421,6 +433,7 @@ function createAutoPilot(deps) {
                 at: new Date().toISOString(), tradingsymbol: row.tradingsymbol, token,
                 kind: row.kind, level: row.level, touches: row.touches,
                 qty, price, stop: row.stop, target: row.target, rr: row.rr,
+                halfQty: half,
                 riskRs: rc.per ? Math.round(rc.per * qty) : null,
                 order_ids: ids, mock: !!isMock,
                 ...explain(row),

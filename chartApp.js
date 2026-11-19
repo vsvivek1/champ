@@ -829,20 +829,27 @@ async function fireTrigger(trig, spotLtp) {
                 return;
             }
             const price = roundToTick(optLtp * 1.02); // marketable LIMIT
+            // chop warning: the trigger still fires, but at half size (min one lot)
+            let buyQty = trig.quantity;
+            if (g.halfQty) {
+                const lot = lotSizeByToken.get(Number(trig.token)) || 1;
+                buyQty = Math.max(lot, Math.floor(buyQty / 2 / lot) * lot);
+                console.log(`⚠️ trigger #${trig.id} ${trig.tradingsymbol}: index is chopping — HALF quantity, ${trig.quantity} → ${buyQty}`);
+            }
             // must be on disk before the BUY: the fill can land immediately
             if (trig.firstOrder) setFirstOrderOverride(trig.token, trig.firstOrder);
             orderIds = await placeOrderInFreezeChunks(kite, {
                 exchange: trig.exchange,
                 tradingsymbol: trig.tradingsymbol,
                 transaction_type: "BUY",
-                quantity: trig.quantity,
+                quantity: buyQty,
                 order_type: "LIMIT",
                 price,
                 product: "NRML",
                 validity: "DAY",
                 tag: "SPOTTRIG"
             }, lotSizeByToken.get(Number(trig.token)));
-            console.log(`⚡ trigger #${trig.id} fired at ${firedAt}: BUY ${trig.quantity} ${trig.tradingsymbol} @ ${price} → ${orderIds.join(',')}`);
+            console.log(`⚡ trigger #${trig.id} fired at ${firedAt}: BUY ${buyQty} ${trig.tradingsymbol} @ ${price} → ${orderIds.join(',')}`);
         }
         broadcast({ type: "trigger_fired", id: trig.id, action: trig.action, tradingsymbol: trig.tradingsymbol, level: trig.level, order_ids: orderIds });
     } catch (e) {
@@ -2335,7 +2342,7 @@ const NO_TRADE_DEFAULTS = {
     minSpeed: 0.6,            // page-side only: chart dead-ness cutoff
 
     /* regime gate -- see the REGIME block above */
-    blockChop: true,          // refuse entries while the index is chopping
+    blockChop: true,          // chop check on. 19/11/2026: it WARNS and halves the quantity, it does not refuse
     regimeWin: 30,            // minutes in the efficiency window
     minEff: 10,               // % efficiency below which it counts as chop
     /*
@@ -2860,8 +2867,11 @@ function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
                 : (reg.chop ? ' — this is the day that bleeds you: swings that pay nothing while theta runs' : '')) +
             (reg.chop && reg.escape && !broke
                 ? ` — the break is ${reg.escape}, which is the wrong way for a ${leg ? leg.toUpperCase() : 'long'}`
+                : '') +
+            (reg.chop && !broke
+                ? ' — WARNING only (19/11/2026): the entry goes through at HALF quantity'
                 : ''),
-            !fastMoving); // soft check when speed > 1.2x
+            false); // 19/11/2026: chop never blocks — it warns, and every entry path halves the quantity
     }
 
     if (!s.blockWrongWay) {
@@ -3179,7 +3189,15 @@ function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
     }
 
     const blockers = chk.filter(c => c.blocked);
-    return { checks: chk, blockers, blocked: blockers.length > 0, settings: s, stats: st, lock: l, openPositions: open.length, regime: reg, part };
+    /*
+    19/11/2026: chop is not a veto any more. A failed chop row rides
+    through as a warning, and every entry path reads halfQty off this
+    result to cut the size in half. A kind that waives chop (speedgreen,
+    holdlow) is DEFINED by firing in chop, so it keeps full size.
+    */
+    const chopRow = chk.find(c => c.code == 'chop');
+    const halfQty = !!(chopRow && !chopRow.ok && !waived.includes('chop'));
+    return { checks: chk, blockers, blocked: blockers.length > 0, halfQty, settings: s, stats: st, lock: l, openPositions: open.length, regime: reg, part };
 }
 
 /* ---------------------------------------------------------------------
@@ -3307,6 +3325,7 @@ never do, so for them a wide stop is a plain refusal with no way past.
 function entryBlocked(res, opts) {
     const o = opts || {};
     const g = noTradeChecks(o);
+    o.gate = g;   // the caller reads halfQty (chop warning) off this
     if (!g.blocked) return false;
 
     const s = g.settings;
@@ -4714,7 +4733,13 @@ async function checkOiSignal(token, ltp, oi) {
         } else {
             try {
                 const lot = lotSizeByToken.get(token) || 1;
-                const qty = cfg.quantity > 0 ? cfg.quantity : lot;
+                let qty = cfg.quantity > 0 ? cfg.quantity : lot;
+                // chop warning: the signal still buys, but at half size (min one lot)
+                if (g.halfQty) {
+                    const was = qty;
+                    qty = Math.max(lot, Math.floor(qty / 2 / lot) * lot);
+                    console.log(`⚠️ OI signal ${inst.tradingsymbol}: index is chopping — HALF quantity, ${was} → ${qty}`);
+                }
                 // on disk before the BUY: the fill can land before the next line runs
                 setFirstOrderOverride(token, 'sl');
                 row.orderIds = await placeOrderInFreezeChunks(kite, {
@@ -6300,7 +6325,8 @@ async function main() {
                 return res.status(400).json({ error: "tradingsymbol, exchange, quantity, price required" });
             }
             // confirmable: a hand click, so a wide stop may be confirmed twice
-            if (entryBlocked(res, { premium: px, tradingsymbol, confirmable: true, confirm: confirmSlwide })) return;
+            const gateOpts = { premium: px, tradingsymbol, confirmable: true, confirm: confirmSlwide };
+            if (entryBlocked(res, gateOpts)) return;
             /*
             The clicked quantity is a request, not a licence. Cap it at the
             configured max loss before anything reaches the exchange.
@@ -6317,6 +6343,13 @@ async function main() {
             } catch (e) {
                 // a margin call that fails must not silently drop the cap
                 console.log(`⚠️ ${tradingsymbol}: risk cap skipped — ${e.message || e}`);
+            }
+            // chop warning: the trade goes, but at half size (min one lot)
+            if (gateOpts.gate && gateOpts.gate.halfQty) {
+                const lot = lotSizeByToken.get(Number(token)) || 1;
+                const was = qty;
+                qty = Math.max(lot, Math.floor(qty / 2 / lot) * lot);
+                console.log(`⚠️ ${tradingsymbol}: index is chopping — HALF quantity, ${was} → ${qty}`);
             }
             // before the BUY: the guard sees the fill the moment it lands
             if (['target', 'sl'].includes(firstOrder)) setFirstOrderOverride(token, firstOrder);
@@ -6367,7 +6400,8 @@ async function main() {
 
             if (side == 'buy') {
                 // confirmable: a hand click, so a wide stop may be confirmed twice
-                if (entryBlocked(res, { premium: ltp, tradingsymbol, confirmable: true, confirm: confirmSlwide })) return;
+                const gateOpts = { premium: ltp, tradingsymbol, confirmable: true, confirm: confirmSlwide };
+                if (entryBlocked(res, gateOpts)) return;
                 const m = await kite.getMargins();
                 const cash = (m.equity && m.equity.available && m.equity.available.live_balance != null)
                     ? m.equity.available.live_balance : (m.equity ? m.equity.net : 0);
@@ -6382,6 +6416,12 @@ async function main() {
                 if (rc.capped && rc.qty < lot) return res.status(400).json({ error: `risk limit: ${rc.why}` });
                 if (rc.capped) console.log(`📐 ${tradingsymbol}: risk cap — ${rc.why}`);
                 qty = rc.qty;
+                // chop warning: the trade goes, but at half size (min one lot)
+                if (gateOpts.gate && gateOpts.gate.halfQty) {
+                    const was = qty;
+                    qty = Math.max(lot, Math.floor(qty / 2 / lot) * lot);
+                    console.log(`⚠️ ${tradingsymbol}: index is chopping — HALF quantity, ${was} → ${qty}`);
+                }
                 /*
                 Use the firstOrder setting from guardSettings (target or SL).
                 An explicit choice from the chart menu always wins over this default.
