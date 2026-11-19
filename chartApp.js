@@ -617,6 +617,54 @@ function volFlow(tok, win) {
 }
 
 /*
+VOLUME + OI AGREEMENT -- the quick-buy caution (19/11/2026).
+
+B100/B50 is a hand firing at market speed, so before the order goes out
+the tape is asked one question: is anybody actually behind this move?
+
+  volume  the last completed minute against this strike's own median.
+          Under the median minute means the move is running on air.
+  oi      the last completed minute's |change| against the median
+          per-minute |change| today. Volume with no OI change is the
+          same contracts going round (see the dead gate) -- nobody is
+          opening a position behind the move.
+
+Either axis failing is a CAUTION, not a block: /api/quick answers 423
+once with the numbers, and PROCEED ANYWAY sends the same order back with
+confirmVolOi set. Too little data is no opinion, not a caution -- the
+same stance volFlow and the bounce OI test take.
+*/
+function volOiAgree(token) {
+    const tok = Number(token);
+    const parts = [];
+    let caution = false;
+
+    const f = volFlow(tok, 20);
+    if (!f.ok) parts.push(`volume: no opinion (${f.why})`);
+    else if (f.median > 0 && f.vol < f.median) {
+        caution = true;
+        parts.push(`volume NOT confirming — last minute ${f.vol} is under this strike's own ${f.n}-min median ${f.median} (${f.volX}x)`);
+    } else parts.push(`volume ok — last minute ${f.vol} vs median ${f.median} (${f.volX}x)`);
+
+    // completed minutes only: the forming minute's OI is still being written
+    const curMin = Math.floor(Date.now() / 60000);
+    const a = (oiSeries.get(tok) || []).filter(r => r.min < curMin);
+    const diffs = [];
+    for (let i = 1; i < a.length; i++)
+        if (a[i].min - a[i - 1].min == 1) diffs.push(Math.abs(a[i].oi - a[i - 1].oi));
+    if (diffs.length < 5) parts.push('OI: no opinion (too few minutes on this strike yet)');
+    else {
+        const med = diffs.slice().sort((x, y) => x - y)[Math.floor(diffs.length / 2)];
+        const lastD = diffs[diffs.length - 1];
+        if (med > 0 && lastD < 0.25 * med) {
+            caution = true;
+            parts.push(`OI NOT confirming — moved ${lastD} last minute vs its own median ${Math.round(med)}: churn, nobody is opening positions`);
+        } else parts.push(`OI ok — moved ${lastD} last minute vs median ${Math.round(med)}`);
+    }
+    return { caution, why: parts.join(' | ') };
+}
+
+/*
 REVERSAL ZONES -- where a buy after a drop is allowed to stand.
 
 Two kinds of ground, both read off this strike's own completed 1-minute
@@ -6384,7 +6432,7 @@ async function main() {
     */
     app.post('/api/quick', async (req, res) => {
         try {
-            const { tradingsymbol, exchange, token, side, pct, firstOrder, confirmSlwide } = req.body;
+            const { tradingsymbol, exchange, token, side, pct, firstOrder, confirmSlwide, confirmVolOi } = req.body;
             const p = Number(pct);
             if (!tradingsymbol || !exchange || !token || !['buy', 'sell'].includes(side) || ![50, 100].includes(p)) {
                 return res.status(400).json({ error: "tradingsymbol, exchange, token, side buy|sell, pct 50|100 required" });
@@ -6402,6 +6450,26 @@ async function main() {
                 // confirmable: a hand click, so a wide stop may be confirmed twice
                 const gateOpts = { premium: ltp, tradingsymbol, confirmable: true, confirm: confirmSlwide };
                 if (entryBlocked(res, gateOpts)) return;
+                /*
+                Volume + OI agreement (19/11/2026). A caution, not a gate
+                rule: answered 423 ONCE with the numbers, and the page's
+                PROCEED ANYWAY resends the same order with confirmVolOi.
+                */
+                if (!confirmVolOi) {
+                    const vo = volOiAgree(token);
+                    if (vo.caution) {
+                        console.log(`⚠️ QUICK B${p} ${tradingsymbol}: CAUTION — ${vo.why}`);
+                        return res.status(423).json({
+                            error: `⚠️ CAUTION on ${tradingsymbol}: volume/OI not confirming`,
+                            blockers: [{ code: 'voloi', label: 'Volume + OI not confirming the move', detail: vo.why }],
+                            confirm: { kind: 'voloi', why: vo.why },
+                            autoRun: autoRunState(),
+                        });
+                    }
+                    console.log(`✅ QUICK B${p} ${tradingsymbol}: ${vo.why}`);
+                } else {
+                    console.log(`⚠️ QUICK B${p} ${tradingsymbol}: vol/OI caution CONFIRMED by hand — proceeding`);
+                }
                 const m = await kite.getMargins();
                 const cash = (m.equity && m.equity.available && m.equity.available.live_balance != null)
                     ? m.equity.available.live_balance : (m.equity ? m.equity.net : 0);

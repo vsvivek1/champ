@@ -3562,21 +3562,25 @@ function showBlockModal(what, blockers, ask, retry) {
       take.disabled = false;
       // with a near-stop offer the yes is for the NEARER stop, so the
       // button must say that, not the far number
-      take.textContent = ask.fallback
-        ? `TAKE IT — stop moves to the ${ask.fallback.source} ${ask.fallback.level} (${ask.fallback.away}%)`
-        : `TAKE IT ANYWAY — stop ${ask.away}% away`;
+      take.textContent = ask.kind == 'voloi'
+        ? 'PROCEED ANYWAY — volume/OI say nobody is behind this move'
+        : (ask.fallback
+            ? `TAKE IT — stop moves to the ${ask.fallback.source} ${ask.fallback.level} (${ask.fallback.away}%)`
+            : `TAKE IT ANYWAY — stop ${ask.away}% away`);
       if (hint) {
         hint.style.display = '';
-        hint.textContent = (ask.fallback
-          ? `3-candle stop was ${ask.away}% away; confirming rests the SL at ${ask.fallback.stop} instead. `
-          : '')
-          + `asked at ₹${ask.premium}; valid ${ask.validSec}s and only within ${ask.bandPct}% of that price`;
+        hint.textContent = ask.kind == 'voloi'
+          ? 'a caution, not a block: the numbers above are the tape right now — proceeding is your call'
+          : (ask.fallback
+              ? `3-candle stop was ${ask.away}% away; confirming rests the SL at ${ask.fallback.stop} instead. `
+              : '')
+            + `asked at ₹${ask.premium}; valid ${ask.validSec}s and only within ${ask.bandPct}% of that price`;
       }
       take.onclick = async () => {
         take.disabled = true;                 // one click, not three
         take.textContent = 'sending…';
         hideBlockModal();
-        try { await retry(ask.id); }
+        try { await retry(ask.kind == 'voloi' ? { voloi: true } : ask.id); }
         finally { take.disabled = false; take.textContent = 'TAKE IT ANYWAY'; }
       };
     } else {
@@ -3594,8 +3598,9 @@ function showBlockModal(what, blockers, ask, retry) {
   if (!list.length) list = [{ label: 'Entry refused by the no-trade gate',
                               detail: gateReasons().join(' | ') || 'open the gate panel for the current rule states' }];
 
-  document.getElementById('bmWhat').textContent =
-    `${what} refused — ${list.length} rule${list.length > 1 ? 's' : ''} said no`;
+  document.getElementById('bmWhat').textContent = (ask && ask.kind == 'voloi')
+    ? `${what} caution — the tape is not confirming`
+    : `${what} refused — ${list.length} rule${list.length > 1 ? 's' : ''} said no`;
   document.getElementById('bmRows').innerHTML = list.map(b =>
     `<div class="bmRow"><div class="l">✗ ${esc(b.label || 'rule')}</div>`
     + (b.detail ? `<div class="d">${esc(b.detail)}</div>` : '')
@@ -4104,23 +4109,30 @@ async function quickAction(btn, slot, side, pct) {
   disarmQuick();
   if (side == 'buy' && blockedByGate(`B${pct}`, slot)) return;
   /*
-  One send function, called twice at most. The first call carries no ticket
-  and may come back 423 with a wide-stop question; the TAKE IT ANYWAY button
-  calls this same function again with the ticket id, so the second order is
-  the same order -- not a new one assembled from stale screen values.
-  The retry is passed only on the first call, so a confirmed order can never
-  itself raise another question.
+  One send function, re-called at most once per question. Two questions can
+  come back 423: the wide-stop ticket and the vol/OI caution (19/11/2026).
+  Each confirm is remembered in the closure, so the button press resends
+  the SAME order -- not a new one assembled from stale screen values --
+  and a question already answered can never be asked again.
   */
-  const send = async (confirmSlwide) => {
+  let okWide = null, okVolOi = false;
+  const send = async () => {
     msg(`⚡ ${side.toUpperCase()} ${pct}% ${o.tradingsymbol} …`
-      + (confirmSlwide ? ' (wide stop, confirmed)' : ''));
+      + (okWide ? ' (wide stop, confirmed)' : '')
+      + (okVolOi ? ' (vol/OI caution, proceeding)' : ''));
     try {
       const r = await fetch(BASE+'/api/quick', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tradingsymbol: o.tradingsymbol, exchange: o.exchange, token: o.token, side, pct, confirmSlwide })
+        body: JSON.stringify({ tradingsymbol: o.tradingsymbol, exchange: o.exchange, token: o.token, side, pct,
+          confirmSlwide: okWide, confirmVolOi: okVolOi })
       });
       const j = await r.json();
-      if (handled423(r, j, `B${pct}`, confirmSlwide ? null : send)) return;
+      const retry = (ans) => {
+        if (ans && ans.voloi) { if (okVolOi) return; okVolOi = true; }
+        else { if (okWide) return; okWide = ans; }
+        return send();
+      };
+      if (handled423(r, j, `B${pct}`, retry)) return;
       if (!r.ok) { msg('❌ ' + (j.error || ('HTTP ' + r.status))); return; }
       const rk = j.risk;
       msg(`✅ ${side == 'buy' ? 'B' : 'S'}${pct}: ${side.toUpperCase()} ${j.qty} ${o.tradingsymbol} @ ${j.price}`
@@ -4130,7 +4142,7 @@ async function quickAction(btn, slot, side, pct) {
       refreshPosition();
     } catch (e) { msg('❌ ' + e); }
   };
-  await send(null);
+  await send();
 }
 function buildQuick(el, slot, tag) {
   if (tag) { const t = document.createElement('i'); t.textContent = tag; el.appendChild(t); }
