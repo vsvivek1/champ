@@ -1589,6 +1589,7 @@ const EXIT_LABELS = {
     manual_exit: 'manual EXIT button',
     quick_sell: 'quick S50/S100',
     trigger_sell: 'price-trigger SELL',
+    hard_enforce: 'squared off by the guard (entry past the walls)',
     unknown: 'closed'
 };
 // the two that mean "you were stopped out" -> lockout
@@ -2371,6 +2372,16 @@ const NO_TRADE_DEFAULTS = {
     maxDayLoss: 3000,         // INR realised, today
     maxLossStreak: 3,         // consecutive losing trades today
     maxTradesPerDay: 8,       // closed trades today
+    /*
+    HARD ENFORCEMENT. 20/11/2026: every rule above was skipped by buying
+    straight from the Kite app -- this process never had a veto, only its
+    own buttons did. So the guard now enforces from the position side:
+    a NEW long (new token, or more quantity on an open one) that appears
+    while the day's NET loss is past maxDayLoss, or while an entry lock
+    is running, is squared off at once. Positions already open when this
+    process boots are left alone.
+    */
+    hardEnforce: true,        // square off outside entries made past the walls
     /*
     THE IMPULSE LOCK. Every exit arms the lockout now, not only the
     stop-style ones: the click straight after closing something by hand is
@@ -5651,6 +5662,63 @@ async function reloginLive(err) {
     return true;
 }
 
+/*
+HARD ENFORCEMENT STATE. guardRefresh compares each pass's net quantities
+against the last pass. Quantity that GREW while the day-loss wall or an
+entry lock was up means someone bought from outside this app (the app's own
+buttons and the autopilot both refuse in that state), and that position is
+sold at once. The first pass after boot only records what is open -- a
+position that predates this process is not punished for it.
+*/
+const enforceQtyByToken = new Map();   // token -> net qty on the last pass
+const enforceFiredByToken = new Map(); // token -> when it was force-exited
+let enforceSeeded = false;             // boot pass done, comparisons are live
+
+async function hardEnforceCheck(netLong) {
+    if (!enforceSeeded) {
+        for (const p of netLong) enforceQtyByToken.set(Number(p.instrument_token), p.quantity);
+        enforceSeeded = true;
+        return;
+    }
+
+    const s = readNoTrade();
+    const st = todayStats();
+    const dayLossHit = st.pnl <= -Math.abs(s.maxDayLoss);
+    const locked = Date.now() < lockUntil;
+
+    const seen = new Set();
+    for (const p of netLong) {
+        const token = Number(p.instrument_token);
+        seen.add(token);
+        const prev = enforceQtyByToken.get(token) || 0;
+        const grew = p.quantity > prev;
+        enforceQtyByToken.set(token, p.quantity);
+
+        if (!grew || s.hardEnforce === false) continue;
+        if (!dayLossHit && !locked) continue;
+
+        // one dump per position; the exit takes a few passes to fill
+        const last = enforceFiredByToken.get(token) || 0;
+        if (Date.now() - last < 60 * 1000) continue;
+        enforceFiredByToken.set(token, Date.now());
+
+        const why = dayLossHit
+            ? `day loss is past ₹${Math.abs(s.maxDayLoss)} (net ${st.pnl.toFixed(0)})`
+            : `an entry lock is running (${lockWhy || 'lockout'})`;
+        console.log(`⛔ HARD ENFORCE: new ${p.tradingsymbol} quantity while ${why} -- squaring off`);
+
+        try { await exitAllLongs(p.tradingsymbol, 'hard_enforce'); }
+        catch (e) { console.log(e, `❌ hard enforce exit failed for ${p.tradingsymbol}`); }
+
+        await alertPhone('⛔ Squared off by the guard',
+            `${p.tradingsymbol} was bought from outside while ${why}. The guard sold it.`,
+            { key: `enforce:${token}:${Date.now()}` });
+    }
+
+    for (const t of [...enforceQtyByToken.keys()])
+        if (!seen.has(t)) enforceQtyByToken.delete(t);
+}
+
 async function guardRefresh() {
 
     try {
@@ -5663,6 +5731,8 @@ async function guardRefresh() {
         guardPositionByToken.clear();
 
         if (netLong.length == 0) {
+            enforceQtyByToken.clear();
+            enforceSeeded = true; // flat at this pass: anything later is new by definition
             guardRestingByToken.clear();
             trailByToken.clear();
             for (const t of [...unprotectedByToken.keys()]) markProtected(t);
@@ -5742,6 +5812,8 @@ async function guardRefresh() {
         // a flag for a position that is no longer open is noise
         for (const t of [...unprotectedByToken.keys()])
             if (!guardPositionByToken.has(t)) markProtected(t);
+
+        await hardEnforceCheck(netLong);
 
         applyBreachOverrides();
 
