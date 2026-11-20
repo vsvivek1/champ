@@ -20,6 +20,14 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background: var(--bg); color: var(--text); font: 13px/1.45 -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
          -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+  /* the top tab bar. Sticky and above the overlays, so the tabs can switch
+     views even while trade analysis / failed days is covering the page. */
+  #topTabs { position:sticky; top:0; z-index:95; display:flex; align-items:stretch; height:36px;
+             background:var(--panel); border-bottom:1px solid var(--border); padding:0 8px; }
+  #topTabs .ttab { background:none; border:none; border-radius:0; color:var(--dim);
+                   padding:0 16px; font-size:13px; border-bottom:2px solid transparent; }
+  #topTabs .ttab:hover { color:var(--text); }
+  #topTabs .ttab.on { color:var(--text); font-weight:600; border-bottom-color:var(--accent); }
   header { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--panel); border-bottom:1px solid var(--border); flex-wrap:wrap; }
   select,input,button { background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:5px 8px; font-size:13px; }
   button { cursor:pointer; background:var(--accent); border:none; color:#fff; }
@@ -509,7 +517,7 @@
 
   /* ---- post-trade review: deliberately full-page and in the way. After a
      close you should be reading the verdict, not hunting the next entry. ---- */
-  #review, #analysis { position:fixed; inset:0; z-index:90; background:rgba(10,12,18,.97);
+  #review, #analysis { position:fixed; inset:0; top:36px; z-index:90; background:rgba(10,12,18,.97);
             overflow:auto; padding:18px 20px 40px; display:none; }
   #review.open, #analysis.open { display:block; }
   #review .rvTop, #analysis .rvTop { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
@@ -765,6 +773,14 @@
 </head>
 <body>
 
+<!-- the top tabs. First one is the floor itself -- charts, orders, the
+     guard. The other two are the reading rooms over the trade log. -->
+<div id="topTabs">
+  <button class="ttab on" id="tabFloor">trading floor</button>
+  <button class="ttab" id="tabAna">trade analysis</button>
+  <button class="ttab" id="tabFail">failed days</button>
+</div>
+
 <header>
   <select id="indexSel">
     <option value="NIFTY">NIFTY</option>
@@ -970,8 +986,6 @@ flat = slPct below entry, nothing else.">stop:
     <span style="flex:1"></span>
     <button id="pnlBtn" class="sec">P&amp;L history</button>
     <button id="reviewBtn" class="sec">last trade</button>
-    <button id="anaBtn" class="sec">trade analysis</button>
-    <button id="failBtn" class="sec">failed days</button>
   </div>
 
   <div id="posStale"></div>
@@ -1294,7 +1308,7 @@ flat = slPct below entry, nothing else.">stop:
   that is not pessimism, it is what 28/10 cost.</div>
 
   <h4>Trade analysis (date wise)</h4>
-  <div>The <b>trade analysis</b> button opens one card per trading day, newest first: an abstract of the day, then the
+  <div>The <b>trade analysis</b> tab at the top opens one card per trading day, newest first: an abstract of the day, then the
   lessons ranked by what they actually cost — the day-loss limit being crossed and what the trades after it added,
   overtrading past the cap, longest loss streak, tilt re-entries (in and out again within 2 min of a loss), churned strikes,
   worst hour of the day, and any single trade that was more than half the damage. Under each abstract: every trade of that day with
@@ -1302,7 +1316,7 @@ flat = slPct below entry, nothing else.">stop:
   day-level patterns only (no MFE/MAE or hold time).</div>
 
   <h4>Failed days</h4>
-  <div>The <b>failed days</b> button is the same view cut down to only the red days, sorted worst first. The header adds
+  <div>The <b>failed days</b> tab at the top is the same view cut down to only the red days, sorted worst first. The header adds
   what skipping the rules cost across all of them: rupees bled after the day-loss wall was already crossed, trades taken
   after it, and the bleed past the trade cap. Open it before the next session, not after the next loss.</div>
 
@@ -3937,9 +3951,16 @@ function anaHtml(a, failedOnly) {
     return h;
 }
 
-function closeAna() { document.getElementById('analysis').classList.remove('open'); }
+function setTopTab(which) {
+    document.getElementById('tabFloor').classList.toggle('on', which == 'floor');
+    document.getElementById('tabAna').classList.toggle('on', which == 'analysis');
+    document.getElementById('tabFail').classList.toggle('on', which == 'failed');
+}
 
-let anaMode = null; // which tab the overlay is showing: 'all' | 'failed'
+function closeAna() {
+    document.getElementById('analysis').classList.remove('open');
+    setTopTab('floor');
+}
 
 async function openAna(failedOnly) {
     const el = document.getElementById('analysis');
@@ -3948,7 +3969,7 @@ async function openAna(failedOnly) {
         if (a.error) { msg('❌ analysis: ' + a.error); return; }
         el.className = 'open';
         el.innerHTML = anaHtml(a, failedOnly);
-        anaMode = failedOnly ? 'failed' : 'all';
+        setTopTab(failedOnly ? 'failed' : 'analysis');
         document.getElementById('anaClose').onclick = closeAna;
         el.querySelectorAll('.dayHead').forEach(hd =>
             hd.onclick = () => hd.parentElement.classList.toggle('open'));
@@ -3956,14 +3977,9 @@ async function openAna(failedOnly) {
     } catch (e) { msg('❌ analysis load failed: ' + e); }
 }
 
-document.getElementById('anaBtn').onclick = () => {
-    const el = document.getElementById('analysis');
-    if (el.classList.contains('open') && anaMode == 'all') closeAna(); else openAna(false);
-};
-document.getElementById('failBtn').onclick = () => {
-    const el = document.getElementById('analysis');
-    if (el.classList.contains('open') && anaMode == 'failed') closeAna(); else openAna(true);
-};
+document.getElementById('tabFloor').onclick = closeAna;
+document.getElementById('tabAna').onclick = () => openAna(false);
+document.getElementById('tabFail').onclick = () => openAna(true);
 
 document.addEventListener('keydown', e => {
   if (e.key != 'Escape') return;
