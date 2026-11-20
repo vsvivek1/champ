@@ -517,9 +517,11 @@
 
   /* ---- post-trade review: deliberately full-page and in the way. After a
      close you should be reading the verdict, not hunting the next entry. ---- */
-  #review, #analysis { position:fixed; inset:0; top:36px; z-index:90; background:rgba(10,12,18,.97);
+  #review, #analysis, #pnlView { position:fixed; inset:0; top:36px; z-index:90; background:rgba(10,12,18,.97);
             overflow:auto; padding:18px 20px 40px; display:none; }
-  #review.open, #analysis.open { display:block; }
+  #review.open, #analysis.open, #pnlView.open { display:block; }
+  #pnlView .rvClose { position:absolute; top:14px; right:16px; }
+  #pnlView table { max-width:760px; }
   #review .rvTop, #analysis .rvTop { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
   #review h2, #analysis h2 { font-size:19px; }
   #review .big, #analysis .big { font-size:46px; font-weight:700; line-height:1.1; }
@@ -779,6 +781,8 @@
   <button class="ttab on" id="tabFloor">trading floor</button>
   <button class="ttab" id="tabAna">trade analysis</button>
   <button class="ttab" id="tabFail">failed days</button>
+  <button class="ttab" id="tabPnl">P&amp;L history</button>
+  <button class="ttab" id="tabReview">last trade</button>
 </div>
 
 <header>
@@ -984,8 +988,6 @@ flat = slPct below entry, nothing else.">stop:
     <span id="marginTxt">—</span>
     <span id="guardTxt">guard: …</span>
     <span style="flex:1"></span>
-    <button id="pnlBtn" class="sec">P&amp;L history</button>
-    <button id="reviewBtn" class="sec">last trade</button>
   </div>
 
   <div id="posStale"></div>
@@ -1034,7 +1036,6 @@ flat = slPct below entry, nothing else.">stop:
     <button id="btnExitAll" class="danger">EXIT ALL</button>
     <span id="tgtHint" style="color:var(--dim);font-size:11px"></span>
   </div>
-  <div id="pnlPanel" style="display:none"></div>
   </div>
 
   <!-- SIGNALS: today's buy signals (placed + would-have) and the sells
@@ -1090,6 +1091,7 @@ flat = slPct below entry, nothing else.">stop:
 
 <div id="review"></div>
 <div id="analysis"></div>
+<div id="pnlView"></div>
 
 <button id="helpBtn">? help</button>
 <div id="helpDrawer">
@@ -3066,15 +3068,18 @@ async function manualTrail(token, symbol) {
   refreshPosition();
 }
 // P&L history (tradeLog.json, written by the guard at every trade close):
-// today's trades, per-symbol totals, and the per-day running record
-document.getElementById('pnlBtn').onclick = async () => {
-  const el = document.getElementById('pnlPanel');
-  if (el.style.display == 'block') { el.style.display = 'none'; return; }
+// today's trades, per-symbol totals, and the per-day running record.
+// Lives on its own top tab now, full page like the other reading views.
+async function openPnl() {
+  const el = document.getElementById('pnlView');
   try {
     const d = await (await fetch(BASE+'/api/pnl')).json();
     const pc = v => `class="${pnlClass(v)}"`;
     const money = v => (v == null ? '—' : (v >= 0 ? '+' : '') + fmt(v));
-    let h = `<h4 style="margin:8px 0 4px">Today's trades — total <span ${pc(d.todayTotal)}>${money(d.todayTotal)}</span></h4>`;
+    let h = `<button class="sec rvClose" id="pnlClose">✕ close (Esc)</button>
+      <div class="rvTop"><h2>P&L history</h2>
+        <span class="sub">every closed trade the guard logged, and the day-by-day record</span></div>`;
+    h += `<h4 style="margin:8px 0 4px">Today's trades — total <span ${pc(d.todayTotal)}>${money(d.todayTotal)}</span></h4>`;
     if (d.today.length == 0) h += `<div style="color:var(--dim)">no closed trades yet today</div>`;
     else {
       h += `<table><thead><tr><th>Time</th><th>Symbol</th><th>Qty</th><th>Buy</th><th>Sell</th><th>P&L</th></tr></thead><tbody>`;
@@ -3088,10 +3093,18 @@ document.getElementById('pnlBtn').onclick = async () => {
       for (const day of d.days) h += `<tr><td>${day.date}</td><td>${day.trades}</td><td ${pc(day.pnl)}>${money(day.pnl)}</td></tr>`;
       h += `</tbody></table>`;
     }
+    hideViews();
     el.innerHTML = h;
-    el.style.display = 'block';
+    el.classList.add('open');
+    setTopTab('pnl');
+    document.getElementById('pnlClose').onclick = closePnl;
+    el.scrollTop = 0;
   } catch (e) { msg('❌ pnl load failed: ' + e); }
-};
+}
+function closePnl() {
+  document.getElementById('pnlView').classList.remove('open');
+  setTopTab('floor');
+}
 
 
 
@@ -3823,7 +3836,10 @@ function reviewHtml(d) {
   return h;
 }
 
-function closeReview() { document.getElementById('review').classList.remove('open'); }
+function closeReview() {
+  document.getElementById('review').classList.remove('open');
+  setTopTab('floor');
+}
 
 async function openReview(trade) {
   const el = document.getElementById('review');
@@ -3832,18 +3848,15 @@ async function openReview(trade) {
     if (trade) d.trade = trade;            // the close we were just told about wins
     if (d.lock) applyLock(d.lock);
     lastReviewData = d;
+    hideViews();
     el.className = 'open tag' + ((d.trade && d.trade.tag) || '');
     el.innerHTML = reviewHtml(d);
+    setTopTab('review');
     document.getElementById('rvClose').onclick = closeReview;
     paintLock();
     el.scrollTop = 0;
   } catch (e) { msg('❌ review load failed: ' + e); }
 }
-
-document.getElementById('reviewBtn').onclick = () => {
-  const el = document.getElementById('review');
-  if (el.classList.contains('open')) closeReview(); else openReview(null);
-};
 /* ---------------------------------------------------------------------
 TRADE ANALYSIS TAB, DATE WISE
 
@@ -3951,10 +3964,16 @@ function anaHtml(a, failedOnly) {
     return h;
 }
 
+const TOP_TABS = { floor: 'tabFloor', analysis: 'tabAna', failed: 'tabFail', pnl: 'tabPnl', review: 'tabReview' };
 function setTopTab(which) {
-    document.getElementById('tabFloor').classList.toggle('on', which == 'floor');
-    document.getElementById('tabAna').classList.toggle('on', which == 'analysis');
-    document.getElementById('tabFail').classList.toggle('on', which == 'failed');
+    for (const [k, id] of Object.entries(TOP_TABS))
+        document.getElementById(id).classList.toggle('on', k == which);
+}
+
+// one reading view at a time: whatever is open goes before the next opens
+function hideViews() {
+    for (const id of ['analysis', 'review', 'pnlView'])
+        document.getElementById(id).classList.remove('open');
 }
 
 function closeAna() {
@@ -3967,6 +3986,7 @@ async function openAna(failedOnly) {
     try {
         const a = await (await fetch(BASE + '/api/analysis')).json();
         if (a.error) { msg('❌ analysis: ' + a.error); return; }
+        hideViews();
         el.className = 'open';
         el.innerHTML = anaHtml(a, failedOnly);
         setTopTab(failedOnly ? 'failed' : 'analysis');
@@ -3977,14 +3997,17 @@ async function openAna(failedOnly) {
     } catch (e) { msg('❌ analysis load failed: ' + e); }
 }
 
-document.getElementById('tabFloor').onclick = closeAna;
+document.getElementById('tabFloor').onclick = () => { hideViews(); setTopTab('floor'); };
 document.getElementById('tabAna').onclick = () => openAna(false);
 document.getElementById('tabFail').onclick = () => openAna(true);
+document.getElementById('tabPnl').onclick = openPnl;
+document.getElementById('tabReview').onclick = () => openReview(null);
 
 document.addEventListener('keydown', e => {
   if (e.key != 'Escape') return;
   if (document.getElementById('review').classList.contains('open')) closeReview();
   if (document.getElementById('analysis').classList.contains('open')) closeAna();
+  if (document.getElementById('pnlView').classList.contains('open')) closePnl();
 });
 refreshLock();
 
