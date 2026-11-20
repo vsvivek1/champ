@@ -971,6 +971,7 @@ flat = slPct below entry, nothing else.">stop:
     <button id="pnlBtn" class="sec">P&amp;L history</button>
     <button id="reviewBtn" class="sec">last trade</button>
     <button id="anaBtn" class="sec">trade analysis</button>
+    <button id="failBtn" class="sec">failed days</button>
   </div>
 
   <div id="posStale"></div>
@@ -1299,6 +1300,11 @@ flat = slPct below entry, nothing else.">stop:
   worst hour of the day, and any single trade that was more than half the damage. Under each abstract: every trade of that day with
   its exit reason and diagnosis. Click a date to fold it open or shut. Days logged before the per-trade review existed show
   day-level patterns only (no MFE/MAE or hold time).</div>
+
+  <h4>Failed days</h4>
+  <div>The <b>failed days</b> button is the same view cut down to only the red days, sorted worst first. The header adds
+  what skipping the rules cost across all of them: rupees bled after the day-loss wall was already crossed, trades taken
+  after it, and the bleed past the trade cap. Open it before the next session, not after the next loss.</div>
 
   <h4>AUTOPILOT &mdash; what the script is doing</h4>
   <div>The top box. <b class="g">ARMED &middot; LIVE</b> means real orders; <b>ARMED &middot; MOCK BOOK</b> is amber and
@@ -3890,15 +3896,36 @@ function anaDayHtml(d, open) {
     return h + `</div></div>`;
 }
 
-function anaHtml(a) {
+function anaHtml(a, failedOnly) {
     const money = v => (v == null ? '—' : (v >= 0 ? '+₹' : '-₹') + Math.abs(v).toFixed(0));
     const pc = v => `class="${pnlClass(v)}"`;
     const o = a.overall || {};
     let h = `<button class="sec rvClose" id="anaClose">✕ close (Esc)</button>
-      <div class="rvTop"><h2>Trade analysis</h2>
-        <span class="sub">date wise — what went wrong, and why</span></div>`;
+      <div class="rvTop"><h2>${failedOnly ? 'Failed days' : 'Trade analysis'}</h2>
+        <span class="sub">${failedOnly ? 'only the red days, worst first — read these before the next open' : 'date wise — what went wrong, and why'}</span></div>`;
 
     if (!a.days || !a.days.length) return h + `<div class="sub">No closed trades logged yet.</div>`;
+
+    /* the failed-days tab: same per-day cards, but only the losses, sorted
+       by damage. The header counts what obeying each rule would have kept. */
+    if (failedOnly) {
+        const days = a.days.filter(d => d.pnl < 0).sort((x, y) => x.pnl - y.pnl);
+        if (!days.length) return h + `<div class="sub">No red days in the log. Keep it that way.</div>`;
+        const lost = days.reduce((s, d) => s + d.pnl, 0);
+        const afterBreach = days.reduce((s, d) => s + (d.afterBreachPnl < 0 ? d.afterBreachPnl : 0), 0);
+        const afterCap = days.reduce((s, d) => s + (d.afterNPnl < 0 ? d.afterNPnl : 0), 0);
+        const tradesAfter = days.reduce((s, d) => s + (d.tradesAfterBreach || 0), 0);
+        h += `<div class="big r">${money(lost)}</div>
+          <div class="sub">${days.length} red day${days.length == 1 ? '' : 's'} of ${a.days.length} · worst ${days[0].date} ${money(days[0].pnl)}</div>
+          <div class="grid">
+            <div class="cell"><span class="sub">bled after the day-loss wall</span><b class="r">${money(afterBreach)}</b></div>
+            <div class="cell"><span class="sub">trades taken after the wall</span><b>${tradesAfter}</b></div>
+            <div class="cell"><span class="sub">bled after the trade cap</span><b class="r">${money(afterCap)}</b></div>
+            <div class="cell"><span class="sub">avg red day</span><b class="r">${money(lost / days.length)}</b></div>
+          </div>`;
+        h += days.map((d, i) => anaDayHtml(d, i == 0)).join('');
+        return h;
+    }
 
     h += `<div class="big" ${pc(o.pnl)}>${money(o.pnl)}</div>
       <div class="sub">${o.trades} trades over ${o.days} day${o.days == 1 ? '' : 's'} · ${o.greenDays} green / ${o.redDays} red</div>
@@ -3912,13 +3939,16 @@ function anaHtml(a) {
 
 function closeAna() { document.getElementById('analysis').classList.remove('open'); }
 
-async function openAna() {
+let anaMode = null; // which tab the overlay is showing: 'all' | 'failed'
+
+async function openAna(failedOnly) {
     const el = document.getElementById('analysis');
     try {
         const a = await (await fetch(BASE + '/api/analysis')).json();
         if (a.error) { msg('❌ analysis: ' + a.error); return; }
         el.className = 'open';
-        el.innerHTML = anaHtml(a);
+        el.innerHTML = anaHtml(a, failedOnly);
+        anaMode = failedOnly ? 'failed' : 'all';
         document.getElementById('anaClose').onclick = closeAna;
         el.querySelectorAll('.dayHead').forEach(hd =>
             hd.onclick = () => hd.parentElement.classList.toggle('open'));
@@ -3928,7 +3958,11 @@ async function openAna() {
 
 document.getElementById('anaBtn').onclick = () => {
     const el = document.getElementById('analysis');
-    if (el.classList.contains('open')) closeAna(); else openAna();
+    if (el.classList.contains('open') && anaMode == 'all') closeAna(); else openAna(false);
+};
+document.getElementById('failBtn').onclick = () => {
+    const el = document.getElementById('analysis');
+    if (el.classList.contains('open') && anaMode == 'failed') closeAna(); else openAna(true);
 };
 
 document.addEventListener('keydown', e => {
