@@ -787,6 +787,16 @@
     <label><input type="checkbox" id="iVwap" checked> VWAP</label>
     <label title="The faint dashed R (resistance) and S (support) lines on the option charts -- the clustered swing pivots the stop trails up through. They are a map, not orders: untick to clear the chart. The guard still uses them server-side either way; hiding them changes nothing about where the stop goes."><input type="checkbox" id="iLvl" checked> R/S</label>
   </span>
+  <!-- exit knobs, saved the moment they change (no Save button up here):
+       how much comes off at the resistance, and whether the stop trails
+       itself or waits for the TRAIL button -->
+  <label title="Sell part of the lot at the next resistance on the option's own chart. Untick = no partial, the whole lot rides to the stop. The % is the share of the lot that comes off at the level. One-lot positions never split either way. Applies to the NEXT fill.">partial at R <input type="checkbox" id="gPartialOn"> <input id="gPartialPct" type="number" step="5" min="5" max="95" style="width:44px">%</label>
+  <label title="auto = the stop climbs by itself once price clears a resistance by the clearance %. manual = the stop stays put until you press TRAIL ↑ on the position row (or drag the line). The TRAIL ↑ button works in both modes. Applies to the NEXT fill.">trail
+    <select id="gTrail" style="width:80px">
+      <option value="auto">auto</option>
+      <option value="manual">manual</option>
+    </select>
+  </label>
   <span id="spotLtp">—</span>
   <span id="rangeBadge" class="badge">—</span>
   <span id="ydayTxt" style="color:var(--dim)"></span>
@@ -917,13 +927,6 @@ flat = slPct below entry, nothing else.">stop:
             <option value="breach">3-candle low − 1 tick</option>
             <option value="level">support (fenced)</option>
             <option value="pct">flat −SL%</option>
-          </select>
-        </label>
-        <label title="Sell part of the lot at the next resistance on the option's own chart. Untick = no partial, the whole lot rides to the stop. The % is the share of the lot that comes off at the level. One-lot positions never split either way.">partial at R <input type="checkbox" id="gPartialOn"> <input id="gPartialPct" type="number" step="5" min="5" max="95" style="width:44px">%</label>
-        <label title="auto = the stop climbs by itself once price clears a resistance by the clearance %. manual = the stop stays where it is until you press the TRAIL button on the position row (or drag the line). The TRAIL button works in both modes.">trail
-          <select id="gTrail" style="width:84px">
-            <option value="auto">auto</option>
-            <option value="manual">manual</option>
           </select>
         </label>
         <button id="gSave" class="sec">Save</button>
@@ -4458,6 +4461,30 @@ document.getElementById('gSave').onclick = async () => {
       + `${d.partialPct > 0 ? `, ${d.partialPct}% off at the resistance` : ', no partial'}`
       + `, trail ${d.trail === false ? 'MANUAL (use the TRAIL button)' : 'auto'} — applies to the next fill`);
 };
+/* The partial and trail knobs live in the HEADER, above the charts, and
+   save themselves the moment they change -- a knob up there with a Save
+   button buried in a folded panel would be a lie waiting to happen. */
+async function patchGuard(body, say) {
+  try {
+    const r = await fetch(BASE+'/api/guardSettings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const d = await r.json();
+    if (d.error) { msg('❌ ' + d.error); fetchGuardSettings(); return; }  // put the real value back
+    guardCfg = d;
+    msg('✅ ' + say(d) + ' — applies to the next fill');
+  } catch (e) { msg('❌ ' + e); }
+}
+const partialBody = () => ({ partialPct: document.getElementById('gPartialOn').checked
+  ? parseFloat(document.getElementById('gPartialPct').value) : 0 });
+const sayPartial = d => d.partialPct > 0
+  ? `partial ON: ${d.partialPct}% of the lot at the resistance`
+  : 'partial OFF: the whole lot rides to the stop';
+document.getElementById('gPartialOn').onchange = () => patchGuard(partialBody(), sayPartial);
+document.getElementById('gPartialPct').onchange = () => {
+  if (document.getElementById('gPartialOn').checked) patchGuard(partialBody(), sayPartial);
+};
+document.getElementById('gTrail').onchange = () => patchGuard(
+  { trail: document.getElementById('gTrail').value == 'auto' },
+  d => d.trail === false ? 'trail MANUAL — move the stop with the TRAIL ↑ button' : 'trail AUTO — the stop climbs cleared resistances itself');
 fetchGuardSettings();
 
 /* ======================================================================
