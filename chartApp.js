@@ -882,7 +882,7 @@ async function fireTrigger(trig, spotLtp) {
             if (g.halfQty) {
                 const lot = lotSizeByToken.get(Number(trig.token)) || 1;
                 buyQty = Math.max(lot, Math.floor(buyQty / 2 / lot) * lot);
-                console.log(`⚠️ trigger #${trig.id} ${trig.tradingsymbol}: index is chopping — HALF quantity, ${trig.quantity} → ${buyQty}`);
+                console.log(`⚠️ trigger #${trig.id} ${trig.tradingsymbol}: ${g.halfWhy} — HALF quantity, ${trig.quantity} → ${buyQty}`);
             }
             // must be on disk before the BUY: the fill can land immediately
             if (trig.firstOrder) setFirstOrderOverride(trig.token, trig.firstOrder);
@@ -1984,8 +1984,13 @@ function pushSpotSample(token, px) {
     if (!a) { a = []; spotSeries.set(token, a); }
     if (a.length && min - a[a.length - 1].min > 60) a.length = 0;
     const last = a[a.length - 1];
-    if (last && last.min == min) { last.px = px; return; }
-    a.push({ min, px });
+    if (last && last.min == min) {
+        last.px = px;
+        if (!(last.hi >= px)) last.hi = Math.max(last.hi ?? px, px);
+        if (!(last.lo <= px)) last.lo = Math.min(last.lo ?? px, px);
+        return;
+    }
+    a.push({ min, px, hi: px, lo: px });
     if (a.length > SPOT_SERIES_MAX) a.shift();
 }
 
@@ -2003,10 +2008,19 @@ async function seedSpotSeries(token) {
         const bars = await kiteRetry(() => kite.getHistoricalData(token, 'minute', from, to));
         const live = spotSeries.get(token) || [];
         const byMin = new Map();
-        for (const b of bars) byMin.set(Math.floor(new Date(b.date).getTime() / 60000), b.close);
-        for (const s of live) byMin.set(s.min, s.px);   // a live sample beats the bar
+        for (const b of bars) byMin.set(Math.floor(new Date(b.date).getTime() / 60000),
+            { px: b.close, hi: b.high, lo: b.low });
+        for (const s of live) {
+            // a live sample beats the bar for the close; the wider hi/lo wins
+            const bar = byMin.get(s.min);
+            byMin.set(s.min, {
+                px: s.px,
+                hi: bar ? Math.max(bar.hi, s.hi ?? s.px) : (s.hi ?? s.px),
+                lo: bar ? Math.min(bar.lo, s.lo ?? s.px) : (s.lo ?? s.px)
+            });
+        }
         const merged = [...byMin.entries()].sort((a, b) => a[0] - b[0])
-            .map(([min, px]) => ({ min, px })).slice(-SPOT_SERIES_MAX);
+            .map(([min, v]) => ({ min, px: v.px, hi: v.hi, lo: v.lo })).slice(-SPOT_SERIES_MAX);
         spotSeries.set(token, merged);
         console.log(`📐 regime seeded: ${merged.length} index minutes for token ${token}`);
     } catch (e) {
@@ -2084,9 +2098,60 @@ function computeRegime(token) {
     const bias = (px > emaNow && slope > 0) ? 'up'
         : ((px < emaNow && slope < 0) ? 'down' : 'flat');
 
+    /*
+    V-REVERSAL (20/11/2026). The EMA bias is an average of the past, so at
+    a sharp turn it points the old way for 5-10 minutes and the wrongway
+    gate blocks the right leg exactly at the reversal. This measures the
+    turn itself, on the minute candles of the same window. Only a REAL V
+    qualifies -- three parts, all required, so a sideways market can never
+    fire it:
+      1. STAIRS IN: the vTrendBars candles into the extreme each step the
+         old way (lower high AND lower low into a low; mirrored for a top).
+         Sideways wiggle has no staircase.
+      2. FRESH + DEEP: the extreme printed within the last vWin minutes and
+         price has snapped back at least vFrac of the window range and at
+         least vMinPts points.
+      3. ONE RUNG OUT: at least one candle after the extreme makes a higher
+         high AND a higher low (mirrored) -- new structure, not just a wick.
+    Old samples without hi/lo fall back to the close, which can only make
+    the staircase tests stricter, never looser.
+    */
+    const cs = seg.map(q => ({ min: q.min, px: q.px, hi: q.hi ?? q.px, lo: q.lo ?? q.px }));
+    const range = Math.max(...cs.map(c => c.px)) - Math.min(...cs.map(c => c.px));
+    const vWin = Math.max(1, Math.round(s.vWin ?? 5));
+    const vFrac = Math.max(0, Number(s.vFrac ?? 0.5));
+    const vMinPts = Math.max(0, Number(s.vMinPts ?? 15));
+    const vTrend = Math.max(1, Math.round(s.vTrendBars ?? 3));
+    const vNeed = Math.max(vMinPts, vFrac * range);
+    const vCheck = (dir) => {            // 'up' = V bottom (for a CE), 'down' = V top (for a PE)
+        let iX = 0;
+        for (let i = 1; i < cs.length; i++)
+            if (dir == 'up' ? cs[i].px < cs[iX].px : cs[i].px > cs[iX].px) iX = i;
+        const age = cs[cs.length - 1].min - cs[iX].min;
+        if (age > vWin || iX < vTrend || iX >= cs.length - 1) return null;
+        const snap = dir == 'up' ? px - cs[iX].px : cs[iX].px - px;
+        if (snap < vNeed) return null;
+        for (let i = iX - vTrend + 1; i <= iX; i++) {          // stairs in
+            if (!(dir == 'up'
+                ? cs[i].hi < cs[i - 1].hi && cs[i].lo < cs[i - 1].lo
+                : cs[i].hi > cs[i - 1].hi && cs[i].lo > cs[i - 1].lo)) return null;
+        }
+        for (let i = iX + 1; i < cs.length; i++) {             // one rung out
+            if (dir == 'up'
+                ? cs[i].hi > cs[i - 1].hi && cs[i].lo > cs[i - 1].lo
+                : cs[i].hi < cs[i - 1].hi && cs[i].lo < cs[i - 1].lo)
+                return { pts: +snap.toFixed(1), age };
+        }
+        return null;
+    };
+    const vu = vCheck('up'), vd = vCheck('down');
+    const vturn = vu && !vd ? 'up' : (vd && !vu ? 'down' : null);
+    const v = vturn == 'up' ? vu : (vturn == 'down' ? vd : null);
+
     return {
         ok: true, token, bars: a.length, win, eff, minEff: s.minEff,
         chop: eff < s.minEff, bias,
+        vturn, vPts: v ? v.pts : null, vAge: v ? v.age : null,
         breakWin: bw, boxHi, boxLo, escape, escapePts,
         px: +px.toFixed(2), ema: +emaNow.toFixed(2), slope: +slope.toFixed(2),
         net: +net.toFixed(1), path: +path.toFixed(1)
@@ -2441,6 +2506,16 @@ const NO_TRADE_DEFAULTS = {
                               // released a full minute earlier, at 4.85 instead of 5.65.
     blockWrongWay: true,      // a CE needs the index biased up, a PE down
     emaMin: 20,               // minutes in the direction EMA
+    /*
+    V-REVERSAL OVERRIDE on the wrongway gate -- see computeRegime. The EMA
+    is late by construction at a sharp turn, so a measured V (stairs in,
+    deep fresh snap, one rung of new structure out) passes the gate, at
+    HALF quantity because it is counter-trend.
+    */
+    vWin: 5,                  // the extreme must have printed within this many minutes
+    vFrac: 0.5,               // snap back at least this fraction of the window range...
+    vMinPts: 15,              // ...and at least this many points, so a dead day cannot fake it
+    vTrendBars: 3,            // candles that must stair-step INTO the extreme
 
     /* red-candle gate -- do not buy into a falling bar */
     blockRedCandle: true,     // refuse the buy while the live 1m candle is red
@@ -2675,7 +2750,7 @@ const RULE_THEORY = {
 
     chop: 'EFFICIENCY RATIO (Kaufman). Over the window, efficiency = |net displacement| / total distance walked, as a percent. 100% is a straight line; 0% is ending exactly where it started after walking all day.\n\nIt matters for a LONG option specifically because of which side each cost sits on. What pays you is NET displacement (delta times the move). What charges you is TIME (theta) and every bid-ask crossing. Distance walked pays you nothing at all. So efficiency is literally the ratio of the thing that pays to the thing you sit through.\n\nThe anchor worth knowing: a pure coin-flip random walk over n bars has an expected efficiency of about 1/sqrt(n). Over 30 bars that is roughly 18%. So ~18% is what NO edge looks like; meaningfully below it means price is actively pulling back on itself (mean-reverting), and above it means it is trending more than chance.\n\nCaveat worth being honest about: this rule assumes you are making a DIRECTIONAL bet that needs follow-through. A small fixed-target scalp that harvests pops does not need net displacement and can prefer a choppy tape - against that style this rule is mis-aimed.\n\nTHE BREAKOUT OVERRIDE. A range is low efficiency by construction -- price ends near where it started -- and the break out of it is the last minute or two of the same 30-minute window, drowned by the rotation in front of it. 30 bars rotating in a 20-point range walk ~300 points for ~0 net; a 40-point break then still reads only ~5%, and on a wider coil the SAME break reads 1.5%. The tighter and longer the coil -- the better the setup -- the more certainly this gate said no.\n\nA shorter efficiency window does not fix it: 10 minutes still holds 6 minutes of rotation in front of a 4-minute break, which measures 17.6%. Efficiency is net over DISTANCE WALKED, and the problem is that a coil walks a lot. No window length rescues it.\n\nSo the override measures what a breakout actually is: price has LEFT THE BOX. The last breakWin minutes are set aside as the candidate break, and the high and low of the rest of the window is the range that was being traded. Clear of that edge by escapeFrac of the box own width and it is a break. Because the margin scales with the box, a longer and tighter coil makes this easier to satisfy, not harder -- the right way round.\n\nIt must point the way of the leg: a collapse leaves the box just as convincingly as a rise, and must not unlock a CE. This is an override with evidence, not a waiver -- a fake break inside a rotting range never leaves the box, so it is still refused.',
 
-    wrongway: 'Buying a CE is a long delta bet and a PE is a short delta bet, so the position has a side whether or not the trade was framed that way. Price above a rising EMA and below a falling one is the cheapest honest read of which side the index is paying. Taking the other side means needing the index to turn before theta runs out - paying for time while betting against the drift.',
+    wrongway: 'Buying a CE is a long delta bet and a PE is a short delta bet, so the position has a side whether or not the trade was framed that way. Price above a rising EMA and below a falling one is the cheapest honest read of which side the index is paying. Taking the other side means needing the index to turn before theta runs out - paying for time while betting against the drift.\n\nTHE V-REVERSAL OVERRIDE (20/11/2026). The EMA is an average of the past, so at a sharp turn it points the old way for 5-10 minutes and this gate blocks the right leg exactly at the reversal. The override measures the turn itself and needs all three: stairs INTO the extreme (vTrendBars candles each making a lower high and lower low into a low, mirrored for a top - a sideways market has no staircase, so it can never fire this), a FRESH DEEP snap (the extreme within vWin minutes, price back by vFrac of the window range and at least vMinPts points), and ONE RUNG OUT (a candle after the extreme with a higher high and higher low, mirrored). It is still counter-trend, so the entry goes at HALF quantity.',
 
     redcandle: 'A red bar means the last print is below where the minute opened: right now, in the only timeframe an entry actually lives in, sellers are winning. Buying into that is paying the ask while the bar is still falling, and the fill lands at the worst price the minute has printed so far.\n\nWhat the rule buys you is not direction, it is ENTRY PRICE. The bar being green does not make the trade right -- it makes the fill land on a tick that something is already lifting, which is the difference between a stop placed under a low and a stop placed under nothing. On a tape where the median 1-minute range is 15-20% of premium, that one tick of position is worth more than most of the other rules combined.\n\nRead off the live 1-MINUTE candle regardless of what the chart is showing, so the answer cannot be changed by switching timeframes. Close below open is red; close equal to open, or a minute with no print yet, is flat and passes -- the rule only ever refuses a bar it can see going down.\n\nThe honest caveat: this is a momentum entry filter and it will cost you the exact bottom. The best fills of a reversal are red bars by definition, and a V-shaped low will always refuse until the minute has already turned. It trades the first tick of the move for not being the one holding the falling knife.',
 
@@ -2930,10 +3005,14 @@ function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
         na('wrongway', 'Trading with the index', `n/a — ${reg.why}`);
     } else {
         const want = leg == 'ce' ? 'up' : 'down';
+        const vGo = reg.bias != want && reg.vturn == want;   // the V points the leg's way
         add('wrongway', `${leg.toUpperCase()} needs the index biased ${want}`,
-            reg.bias != want,
+            reg.bias != want && !vGo,
             `index ${reg.px} vs ${s.emaMin}-min EMA ${reg.ema} (slope ${reg.slope >= 0 ? '+' : ''}${reg.slope}) — bias ${reg.bias}` +
-            (reg.bias != want ? ` — a ${leg.toUpperCase()} here bets against the index` : ''));
+            (vGo
+                ? ` — BUT V-REVERSAL ${want.toUpperCase()}: stairs into the extreme, ${reg.vPts} pts snapped back from it (printed ${reg.vAge} min ago), one ${want == 'up' ? 'HH+HL' : 'LH+LL'} candle out — the EMA has not caught up yet. Counter-trend: HALF quantity`
+                : (reg.bias != want ? ` — a ${leg.toUpperCase()} here bets against the index` : '')));
+        if (vGo) chk[chk.length - 1].vOverride = true;
     }
 
     /*
@@ -3244,8 +3323,12 @@ function noTradeChecks({ premium, tradingsymbol, waive } = {}) {
     holdlow) is DEFINED by firing in chop, so it keeps full size.
     */
     const chopRow = chk.find(c => c.code == 'chop');
-    const halfQty = !!(chopRow && !chopRow.ok && !waived.includes('chop'));
-    return { checks: chk, blockers, blocked: blockers.length > 0, halfQty, settings: s, stats: st, lock: l, openPositions: open.length, regime: reg, part };
+    const chopHalf = !!(chopRow && !chopRow.ok && !waived.includes('chop'));
+    // a V-reversal entry rides against the EMA, so it is half size too
+    const vRow = chk.find(c => c.code == 'wrongway' && c.vOverride);
+    const halfQty = chopHalf || !!vRow;
+    const halfWhy = chopHalf ? 'index is chopping' : (vRow ? 'V-reversal is counter-trend' : null);
+    return { checks: chk, blockers, blocked: blockers.length > 0, halfQty, halfWhy, settings: s, stats: st, lock: l, openPositions: open.length, regime: reg, part };
 }
 
 /* ---------------------------------------------------------------------
@@ -4786,7 +4869,7 @@ async function checkOiSignal(token, ltp, oi) {
                 if (g.halfQty) {
                     const was = qty;
                     qty = Math.max(lot, Math.floor(qty / 2 / lot) * lot);
-                    console.log(`⚠️ OI signal ${inst.tradingsymbol}: index is chopping — HALF quantity, ${was} → ${qty}`);
+                    console.log(`⚠️ OI signal ${inst.tradingsymbol}: ${g.halfWhy} — HALF quantity, ${was} → ${qty}`);
                 }
                 // on disk before the BUY: the fill can land before the next line runs
                 setFirstOrderOverride(token, 'sl');
@@ -6397,7 +6480,7 @@ async function main() {
                 const lot = lotSizeByToken.get(Number(token)) || 1;
                 const was = qty;
                 qty = Math.max(lot, Math.floor(qty / 2 / lot) * lot);
-                console.log(`⚠️ ${tradingsymbol}: index is chopping — HALF quantity, ${was} → ${qty}`);
+                console.log(`⚠️ ${tradingsymbol}: ${gateOpts.gate.halfWhy} — HALF quantity, ${was} → ${qty}`);
             }
             // before the BUY: the guard sees the fill the moment it lands
             if (['target', 'sl'].includes(firstOrder)) setFirstOrderOverride(token, firstOrder);
@@ -6488,7 +6571,7 @@ async function main() {
                 if (gateOpts.gate && gateOpts.gate.halfQty) {
                     const was = qty;
                     qty = Math.max(lot, Math.floor(qty / 2 / lot) * lot);
-                    console.log(`⚠️ ${tradingsymbol}: index is chopping — HALF quantity, ${was} → ${qty}`);
+                    console.log(`⚠️ ${tradingsymbol}: ${gateOpts.gate.halfWhy} — HALF quantity, ${was} → ${qty}`);
                 }
                 /*
                 Use the firstOrder setting from guardSettings (target or SL).

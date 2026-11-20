@@ -8,7 +8,7 @@
   "maxDayLoss": 3000,
   "maxLossStreak": 3,
   "maxTradesPerDay": 8,
-  "minPremium": 2,
+  "minPremium": 1,
   "maxPremium": 400,
   "minVolUnits": 50000,
   "minVolX": 1,
@@ -22,6 +22,10 @@
   "minEff": 10,
   "blockWrongWay": true,
   "emaMin": 20,
+  "vWin": 5,
+  "vFrac": 0.5,
+  "vMinPts": 15,
+  "vTrendBars": 3,
   "blockRedCandle": true,
   "blockSteep": true,
   "steepMult": 2.5,
@@ -39,5 +43,11 @@
   "oiPct": 25,
   "spreadMult": 1.8,
   "countFrom": "11:51:23",
-  "countFromDate": "2026-10-29"
+  "countFromDate": "2026-10-29",
+  "minPrice": 1,
+  "escapeFrac": 0.1,
+  "maxStopPct": 15,
+  "maxStopAsk": true,
+  "maxStopAskSec": 90,
+  "maxStopAskBand": 2
 }
