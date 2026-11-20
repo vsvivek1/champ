@@ -6325,6 +6325,21 @@ async function main() {
     });
 
     /*
+    Symbol -> token, for charting a symbol clicked in trade analysis.
+    Only contracts in the current instrument list resolve -- an expired
+    one has no chart, and saying "expired" beats a silently blank chart.
+    */
+    app.get('/api/resolve', (req, res) => {
+        const sym = String(req.query.symbol || '').trim().toUpperCase();
+        if (!sym) return res.status(400).json({ error: 'symbol required' });
+        const token = tokenBySymbol.get(sym);
+        if (!token) return res.status(404).json({ error: `${sym} is not listed any more — an expired contract cannot be charted` });
+        const i = instByToken.get(token) || {};
+        res.json({ token, tradingsymbol: sym, exchange: i.exchange,
+                   strike: Number(i.strike) || null, type: i.instrument_type, lot_size: i.lot_size });
+    });
+
+    /*
     Re-register the tokens a page is charting, without re-running the strike
     pick. A server restart forgets chartedTokens, so an open browser would sit
     there with dead option charts until someone pressed Load; the page calls

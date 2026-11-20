@@ -573,6 +573,9 @@
   #review table, #analysis table { width:100%; border-collapse:collapse; margin-top:6px; }
   #review th, #analysis th, #review td, #analysis td { border-bottom:1px solid var(--border); padding:4px 6px; text-align:right; font-size:12px; }
   #review th:nth-child(-n+3), #analysis th:nth-child(-n+3), #review td:nth-child(-n+3), #analysis td:nth-child(-n+3) { text-align:left; }
+  /* a symbol is a door to its chart */
+  #analysis .symChart { cursor:pointer; color:var(--accent); border-bottom:1px dotted var(--accent); }
+  #analysis .symChart:hover { color:var(--text); border-bottom-color:var(--text); }
   #review h4, #analysis h4 { margin:16px 0 2px; }
   #review .rvClose, #analysis .rvClose { position:absolute; top:14px; right:16px; }
   /* ---- trade analysis, date wise ---- */
@@ -3905,7 +3908,7 @@ function anaDayHtml(d, open) {
     h += `<table><thead><tr><th>Time</th><th>Symbol</th><th>Why it ended</th><th>Diagnosis</th>
         <th>Qty</th><th>MFE</th><th>MAE</th><th>Held</th><th>P&L</th></tr></thead><tbody>`;
     for (const x of d.rows) {
-        h += `<tr><td>${x.time}</td><td>${x.tradingsymbol}</td><td>${x.reasonLabel || '—'}</td>`
+        h += `<tr><td>${x.time}</td><td><a class="symChart" data-sym="${x.tradingsymbol}" title="open this contract on its chart">${x.tradingsymbol}</a></td><td>${x.reasonLabel || '—'}</td>`
             + `<td>${x.verdict || (x.tag ? x.tag : '<span class="sub">no diagnosis</span>')}</td>`
             + `<td>${x.quantity}</td><td>${pct(x.mfePct)}</td><td>${pct(x.maePct)}</td><td>${hm(x.heldMin)}</td>`
             + `<td ${pc(x.pnl)}>${money(x.pnl)}</td></tr>`;
@@ -4055,6 +4058,35 @@ function closeAna() {
     setTopTab('floor');
 }
 
+/*
+Trade analysis -> chart. Clicking a symbol in a day table loads that
+contract into its CE or PE chart slot and returns to the floor. The slot
+then behaves as if Load had picked it: ticks flow, and the order buttons
+under that chart trade THIS symbol. Expired contracts say so instead of
+leaving a blank chart.
+*/
+async function chartSym(sym) {
+    try {
+        const r = await fetch(BASE + '/api/resolve?symbol=' + encodeURIComponent(sym));
+        const d = await r.json();
+        if (!r.ok || d.error) { msg('❌ ' + (d.error || 'could not resolve ' + sym)); closeAna(); return; }
+        const slot = d.type == 'PE' ? 2 : 1;
+        delete tokenSlot[slotToken[slot]];
+        tokenSlot[d.token] = slot;
+        slotToken[slot] = d.token;
+        exSymbols[slot] = { tradingsymbol: d.tradingsymbol, exchange: d.exchange };
+        document.getElementById('t' + slot).innerHTML =
+            `<b>${d.tradingsymbol}</b> (${d.type}${d.strike ? ' ' + d.strike : ''})`
+            + ` <a class="ktlink" target="_blank" href="https://kite.zerodha.com/chart/ext/tvc/${d.exchange}/${encodeURIComponent(d.tradingsymbol)}/${d.token}">Kite ↗</a>`;
+        const toks = Object.keys(tokenSlot).map(Number).filter(t => t > 0);
+        if (toks.length) fetch(BASE + '/api/watch', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tokens: toks }) }).catch(() => {});
+        closeAna();
+        await loadSlot(slot);
+        msg(`📈 ${d.tradingsymbol} is on the ${slot == 1 ? 'CE' : 'PE'} chart — its buy buttons trade it now`);
+    } catch (e) { msg('❌ chart open failed: ' + e); }
+}
+
 async function openAna(failedOnly) {
     const el = document.getElementById('analysis');
     try {
@@ -4067,6 +4099,8 @@ async function openAna(failedOnly) {
         document.getElementById('anaClose').onclick = closeAna;
         el.querySelectorAll('.dayHead').forEach(hd =>
             hd.onclick = () => hd.parentElement.classList.toggle('open'));
+        el.querySelectorAll('.symChart').forEach(s =>
+            s.onclick = () => chartSym(s.dataset.sym));
         el.scrollTop = 0;
     } catch (e) { msg('❌ analysis load failed: ' + e); }
 }
