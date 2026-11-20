@@ -514,7 +514,7 @@
             overflow:auto; padding:18px 20px 40px; display:none; }
   #review.open, #analysis.open, #pnlView.open, #slwView.open, #rulesView.open, #theoryView.open, #autoView.open, #signalsView.open { display:block; }
   #pnlView .rvClose, #slwView .rvClose, #rulesView .rvClose, #theoryView .rvClose, #autoView .rvClose, #signalsView .rvClose { position:absolute; top:14px; right:16px; }
-  #autoView .pane, #signalsView .pane { display:block; max-width:900px; }
+  #signalsView .pane { display:block; max-width:1100px; }
   #pnlView table { max-width:760px; }
   #slwView table { max-width:1050px; }
   #slwView .evt { font-size:11px; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,.06); }
@@ -732,40 +732,38 @@
   }
 
   /* =====================================================================
-     SQUARE GRID (12/11/2026). The AUTO RUN tab stacked its boxes top to
-     bottom, so the lower ones lived below the fold. Now each box is one
-     square tile in a grid and each tile scrolls inside itself. Written
-     at the end of the sheet as overrides: no id or script-toggled class
-     changes, the tiles only wrap the old boxes.
+     AUTO RUN, full page (20/11/2026). As a bottom pane it was square tiles
+     fighting for corners. As a top tab it owns the screen, so it reads in
+     the order the questions come: is it armed -> what can refuse a buy ->
+     what did it do -> what is it watching -> the knobs. Ids untouched.
      ===================================================================== */
-  #autoGrid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));
-              gap:10px; align-items:start; margin-top:6px; }
-  #autoGrid .sq { aspect-ratio:1 / 1; overflow-y:auto; overflow-x:hidden; min-width:0;
-                  border:1px solid var(--border); border-radius:var(--radius);
-                  background:var(--card); box-shadow:var(--shadow); padding:8px; }
-  #autoGrid .sqhd { font-size:11px; letter-spacing:.1em; text-transform:uppercase;
-                    color:var(--dim); padding:2px 2px 7px; }
-  /* the boxes carried their own card skin; inside a tile the tile IS the
-     card, so the inner skin goes flat and fills the tile */
-  #autoGrid #autoBox, #autoGrid #coilBox, #autoGrid #setupBox, #autoGrid .pset {
+  #autoLayout { display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);
+                gap:12px; align-items:start; max-width:1500px; margin:6px auto 0; }
+  #autoLayout .acard { background:var(--card); border:1px solid var(--border);
+                       border-radius:var(--radius); box-shadow:var(--shadow);
+                       padding:10px; min-width:0; }
+  /* the switch, the walls and the knobs run the full width; the feed is a
+     tall left column and the two watchers stack beside it */
+  #acSwitch, #acGate, #acSet { grid-column:1 / -1; }
+  #acFeed { grid-row:span 2; }
+  #autoLayout .ahd { font-size:11px; letter-spacing:.1em; text-transform:uppercase;
+                     color:var(--dim); padding:2px 2px 8px; }
+  /* inside a card the card is the skin -- the old boxes go flat */
+  #autoLayout #autoBox, #autoLayout #coilBox, #autoLayout #setupBox, #autoLayout .pset {
     margin-top:0; border:0; border-radius:0; background:transparent; box-shadow:none; }
-  /* the tile is the scroller now, not the inner lists */
-  #autoGrid #apFeed, #autoGrid #setupList { max-height:none; overflow-y:visible; }
-  /* box headers hold the top edge while the tile scrolls under them
-     (top:-8px cancels the tile padding so nothing peeks above) */
-  #autoGrid #autoBox .hd, #autoGrid #coilBox .hd, #autoGrid #setupBox .hd {
-    position:sticky; top:-8px; z-index:2; background:var(--card); }
-  #autoGrid #gateBar { margin-top:0; }
-  /* the live/armed/fire states used to colour the inner box border,
-     which is now flat — the tile edge carries the colour instead */
-  #autoGrid .sq:has(#autoBox.live)  { border-color:#4e8f6d; }
-  #autoGrid .sq:has(#coilBox.armed) { border-color:#c9a227; box-shadow:inset 0 0 0 1px rgba(201,162,39,.35); }
-  #autoGrid .sq:has(#coilBox.fire)  { border-color:#c62828; animation:nkblink 1.4s step-end 4; }
-  /* phones: a forced square wastes a tall narrow screen — one column,
-     each tile sized by its content, capped so it still scrolls */
-  @media (max-width:640px) {
-    #autoGrid { grid-template-columns:1fr; }
-    #autoGrid .sq { aspect-ratio:auto; max-height:70vh; }
+  /* the feed gets real height at last, and scrolls on its own */
+  #autoLayout #apFeed { max-height:64vh; overflow-y:auto; }
+  #autoLayout #setupList { max-height:30vh; overflow-y:auto; }
+  #autoLayout #gateBar { margin-top:0; }
+  /* live/armed/fire colour the card edge, since the inner box is flat */
+  #autoLayout .acard:has(#autoBox.live)  { border-color:#4e8f6d; }
+  #autoLayout .acard:has(#coilBox.armed) { border-color:#c9a227; box-shadow:inset 0 0 0 1px rgba(201,162,39,.35); }
+  #autoLayout .acard:has(#coilBox.fire)  { border-color:#c62828; animation:nkblink 1.4s step-end 4; }
+  /* phones: one column, natural heights */
+  @media (max-width:760px) {
+    #autoLayout { grid-template-columns:1fr; }
+    #acFeed { grid-row:auto; }
+    #autoLayout #apFeed { max-height:50vh; }
   }
 </style>
 </head>
@@ -963,15 +961,11 @@
   <button class="sec rvClose" id="autoClose">✕ close (Esc)</button>
   <div class="rvTop"><h2>Auto run</h2>
     <span class="sub">the autopilot, its settings and every alert — the chip on the floor shows its state</span></div>
-  <div class="pane on" id="paneAuto">
-  <!-- SQUARE GRID (12/11/2026). The tab stacked its boxes top to bottom,
-       so the lower ones lived below the fold. Now each box is one square
-       tile in a grid; each tile scrolls on its own, so every box has a
-       corner of the screen at all times. Only wrappers are added — every
-       id stays, so every script on this page still finds its elements. -->
-  <div id="autoGrid">
+  <div id="autoLayout">
 
-  <div class="sq">
+  <!-- band 1: the switch. Armed or not, where it points, and the caps it
+       is living under. The one block you read before leaving the desk. -->
+  <section class="acard" id="acSwitch">
   <div id="autoBox">
     <div class="hd"><b>AUTOPILOT</b>
       <button id="apArm" class="sec">&hellip;</button>
@@ -982,25 +976,31 @@
       <span id="apCount" class="stat"></span>
     </div>
     <div id="apCaps"></div>
-    <div id="apFeed"><div class="empty">nothing scanned yet</div></div>
   </div>
-  </div>
+  </section>
 
-  <!-- band 3: what the app is shouting about -->
-  <div class="sq">
-  <div class="sqhd">GATE &amp; ALERTS</div>
+  <!-- band 2: the walls. Everything that can refuse a buy, in one place,
+       so "why is it not buying" is answered without hunting. -->
+  <section class="acard" id="acGate">
+  <div class="ahd">THE WALLS &mdash; what can refuse a buy right now</div>
   <div id="gateBar" class="ok">checking the no-trade rules…</div>
   <div id="gatePanel2"></div>
   <div id="nakedAlert"></div>
   <div id="oiAlert"></div>
   <div id="lockAsk"></div>
   <div id="regBar" class="cold">index regime — waiting for ticks…</div>
-  </div>
+  </section>
 
-  <!-- the shape that came before the 05/11 13:37 move, scored live both
-       ways round. Alert only: the orders are coilWatch's own decision and
-       are governed by coilWatch.json, not by anything on this page. -->
-  <div class="sq">
+  <!-- band 3, left: the record. Every scan and what came of it, newest
+       first -- armed it shows trades, disarmed it shows would-haves. -->
+  <section class="acard" id="acFeed">
+  <div class="ahd">WHAT IT DID &mdash; every scan, newest first</div>
+  <div id="apFeed"><div class="empty">nothing scanned yet</div></div>
+  </section>
+
+  <!-- band 3, right: the watchers. Alert only -- the 05/11 coil shape and
+       the bounce/break setup scanner. Neither places an order from here. -->
+  <section class="acard" id="acCoil">
   <div id="coilBox">
     <div class="hd"><b>FAMILIAR SETUP &mdash; the 05/11 coil</b>
       <span id="coilStat" class="stat">reading&hellip;</span>
@@ -1013,9 +1013,9 @@
     </div>
     <div id="coilRel">release bar: waiting</div>
   </div>
-  </div>
+  </section>
 
-  <div class="sq">
+  <section class="acard" id="acSetups">
   <div id="setupBox">
     <div class="hd"><b>SETUP ALERTS</b>
       <span id="suStat" class="stat">—</span>
@@ -1026,11 +1026,11 @@
     <div id="setupList"><div class="empty">no setups yet today</div></div>
   </div>
   <div id="trigList"></div>
-  </div>
+  </section>
 
-  <!-- set once, then left alone for weeks. Folded, so it stops competing
-       with the position table for attention. -->
-  <div class="sq">
+  <!-- band 4: the knobs. Set once, then left alone for weeks -- folded so
+       they never compete with the live bands above. -->
+  <section class="acard" id="acSet">
   <details class="pset">
     <summary>settings — stop on fill · OI entry · setup alerts</summary>
     <div class="inner">
@@ -1071,11 +1071,10 @@ flat = slPct below entry, nothing else.">stop:
       </div>
     </div>
   </details>
-  </div>
+  </section>
 
-  </div><!-- /autoGrid -->
-
-  </div>
+  </div><!-- /autoLayout -->
+</div>
 </div>
 
 <div id="signalsView">
