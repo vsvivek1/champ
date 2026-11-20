@@ -348,16 +348,16 @@
     alerts the gate, the regime, the setups
   and everything you set once a week is folded into <details>.
   --------------------------------------------------------------- */
-  #panel .pbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+  #panel .pbar, #autoView .pbar, #signalsView .pbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap;
                  padding-bottom:7px; margin-bottom:8px; border-bottom:1px solid var(--border); }
-  #panel .pbar .ph { letter-spacing:.06em; font-size:11px; color:var(--dim); }
-  #panel .pset { margin-top:8px; border:1px solid var(--border); border-radius:4px; background:var(--bg); }
-  #panel .pset > summary { cursor:pointer; padding:5px 9px; font-size:11.5px; color:var(--dim);
+  #panel .pbar .ph, #autoView .pbar .ph, #signalsView .pbar .ph { letter-spacing:.06em; font-size:11px; color:var(--dim); }
+  #panel .pset, #autoView .pset { margin-top:8px; border:1px solid var(--border); border-radius:4px; background:var(--bg); }
+  #panel .pset > summary, #autoView .pset > summary { cursor:pointer; padding:5px 9px; font-size:11.5px; color:var(--dim);
                            letter-spacing:.04em; }
-  #panel .pset[open] > summary { border-bottom:1px solid var(--border); color:var(--fg); }
-  #panel .pset .inner { padding:4px 9px 9px; }
-  #panel .pset .inner .orderctl:first-child { margin-top:4px; }
-  #panel .sechd { font-size:11px; letter-spacing:.06em; color:var(--dim); margin:10px 0 2px; }
+  #panel .pset[open] > summary, #autoView .pset[open] > summary { border-bottom:1px solid var(--border); color:var(--fg); }
+  #panel .pset .inner, #autoView .pset .inner { padding:4px 9px 9px; }
+  #panel .pset .inner .orderctl:first-child, #autoView .pset .inner .orderctl:first-child { margin-top:4px; }
+  #panel .sechd, #autoView .sechd { font-size:11px; letter-spacing:.06em; color:var(--dim); margin:10px 0 2px; }
 
   /* ---- THE TABS ----
      One strip, three panes. A hidden pane is display:none, so nothing in it
@@ -517,20 +517,21 @@
 
   /* ---- post-trade review: deliberately full-page and in the way. After a
      close you should be reading the verdict, not hunting the next entry. ---- */
-  #review, #analysis, #pnlView, #slwView, #rulesView, #theoryView {
+  #review, #analysis, #pnlView, #slwView, #rulesView, #theoryView, #autoView, #signalsView {
             position:fixed; inset:0; top:36px; z-index:90; background:rgba(10,12,18,.97);
             overflow:auto; padding:18px 20px 40px; display:none; }
-  #review.open, #analysis.open, #pnlView.open, #slwView.open, #rulesView.open, #theoryView.open { display:block; }
-  #pnlView .rvClose, #slwView .rvClose, #rulesView .rvClose, #theoryView .rvClose { position:absolute; top:14px; right:16px; }
+  #review.open, #analysis.open, #pnlView.open, #slwView.open, #rulesView.open, #theoryView.open, #autoView.open, #signalsView.open { display:block; }
+  #pnlView .rvClose, #slwView .rvClose, #rulesView .rvClose, #theoryView .rvClose, #autoView .rvClose, #signalsView .rvClose { position:absolute; top:14px; right:16px; }
+  #autoView .pane, #signalsView .pane { display:block; max-width:900px; }
   #pnlView table { max-width:760px; }
   #slwView table { max-width:1050px; }
   #slwView .evt { font-size:11px; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,.06); }
   #slwView .evt.refused { background:rgba(239,83,80,.15); color:var(--red); }
   #slwView .evt.taken { background:rgba(232,179,61,.15); color:var(--amber); }
-  #pnlView .rvTop, #slwView .rvTop, #rulesView .rvTop, #theoryView .rvTop {
+  #pnlView .rvTop, #slwView .rvTop, #rulesView .rvTop, #theoryView .rvTop, #autoView .rvTop, #signalsView .rvTop {
             display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
-  #pnlView h2, #slwView h2, #rulesView h2, #theoryView h2 { font-size:19px; }
-  #pnlView .sub, #slwView .sub, #rulesView .sub, #theoryView .sub { color:var(--dim); font-size:12px; }
+  #pnlView h2, #slwView h2, #rulesView h2, #theoryView h2, #autoView h2, #signalsView h2 { font-size:19px; }
+  #pnlView .sub, #slwView .sub, #rulesView .sub, #theoryView .sub, #autoView .sub, #signalsView .sub { color:var(--dim); font-size:12px; }
   #review .rvTop, #analysis .rvTop { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
   #review h2, #analysis h2 { font-size:19px; }
   #review .big, #analysis .big { font-size:46px; font-weight:700; line-height:1.1; }
@@ -692,7 +693,7 @@
   header { position:relative; z-index:20; box-shadow: var(--shadow); border-bottom:1px solid var(--border); }
 
   /* the big boxes become cards: same bones, quieter borders, soft depth */
-  #autoBox, #coilBox, #setupBox, #panel .pset {
+  #autoBox, #coilBox, #setupBox, #panel .pset, #autoView .pset {
     border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
   #autoBox .hd b, #coilBox .hd b, #setupBox .hd b {
     font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
@@ -788,6 +789,8 @@
      guard. The other two are the reading rooms over the trade log. -->
 <div id="topTabs">
   <button class="ttab on" id="tabFloor">trading floor</button>
+  <button class="ttab" id="tabAuto">auto run</button>
+  <button class="ttab" id="tabSignals">signals</button>
   <button class="ttab" id="tabAna">trade analysis</button>
   <button class="ttab" id="tabFail">failed days</button>
   <button class="ttab" id="tabPnl">P&amp;L history</button>
@@ -856,11 +859,8 @@
        rule the app enforces. Only the display moves; no element is removed,
        so every script on this page still finds its ids. -->
   <div id="panelTabs">
-    <button class="ptab on" data-pane="paneAuto">AUTO RUN</button>
-    <button class="ptab" data-pane="paneTrade">POSITIONS &amp; ORDERS</button>
-    <button class="ptab" data-pane="paneSignals">SIGNALS</button>
-    <!-- RULES and THEORY are reading, not controls: they moved to the top
-         tab bar with the other full-page views. -->
+    <!-- AUTO RUN, SIGNALS, RULES and THEORY all moved to the top tab bar.
+         The floor keeps only positions and orders, under the messages. -->
     <!--
     The AUTOPILOT header already says ARMED or OFF, but only on the AUTO RUN
     tab. Sitting on POSITIONS for twenty minutes and not knowing whether
@@ -873,6 +873,117 @@
   </div>
   <div id="msg"></div>
 
+  <div class="pane on" id="paneTrade">
+  <!-- band 1: state. Who is stopping you, what you can spend, is the guard
+       alive. Plus the reading buttons, which are not order buttons and so
+       do not belong next to EXIT ALL. -->
+  <div class="pbar">
+    <span class="ph">POSITIONS</span>
+    <span id="lockTxt"></span>
+    <span id="marginTxt">—</span>
+    <span id="guardTxt">guard: …</span>
+    <span style="flex:1"></span>
+  </div>
+
+  <div id="posStale"></div>
+  <table id="posTable">
+    <thead><tr>
+      <th>Position</th><th>Qty</th>
+      <th title="What you paid, then the price that gets you out at zero once brokerage, STT, exchange, SEBI, GST and stamp duty on BOTH legs are paid. Above the second number is where the trade starts being worth anything.">Entry → B/E</th>
+      <th>LTP</th><th>% gain / to SL</th>
+      <th title="NET: (LTP − break-even) × qty, so all entry and exit charges are already out of it. The gross figure is in the small text.">NET P&amp;L</th>
+      <th title="Kite's day P&L for this symbol, gross of charges">day</th>
+      <th title="rupees between entry and the stop that is actually resting">Risk</th>
+      <th>Stop resting</th><th></th>
+    </tr></thead>
+    <tbody></tbody>
+  </table>
+
+  <!-- the loss-if-wrong number, filled the moment a B100/B50 is armed -->
+  <div id="riskBox" class="idle">
+    <span class="rbL">IF WRONG</span>
+    <span class="rbN" id="rbLoss">—</span>
+    <span class="rbD" id="rbWhat">arm a B100 / B50 on a chart, or click a price, and the rupee loss shows here</span>
+  </div>
+
+  <!-- band 2: the orders. Only things that send an order live here. -->
+  <div class="orderctl">
+    <select id="ordSymbol"></select>
+    <input id="tgtPrice" type="number" step="0.05" placeholder="target">
+    <select id="tgtMode" title="₹ = absolute price · % = above entry · Auto = from the SL distance, ATR and current speed">
+      <option value="price">₹</option>
+      <option value="pct">%</option>
+      <option value="auto">Auto</option>
+    </select>
+    <button id="btnTarget">Set / Modify Target</button>
+    <input id="slTrigger" type="number" step="0.05" placeholder="SL trigger">
+    <select id="slMode" title="read the SL box as an absolute price, or as a % below entry">
+      <option value="price">₹</option>
+      <option value="pct">%</option>
+    </select>
+    <button id="btnSl" class="sec">Set / Modify SL</button>
+    <label>buy <input id="buyQty" type="number" step="1" placeholder="50" style="width:60px">
+      <select id="qtyMode">
+        <option value="pct">% of margin</option>
+        <option value="abs">abs qty</option>
+      </select>
+    </label>
+    <button id="btnExitAll" class="danger">EXIT ALL</button>
+    <span id="tgtHint" style="color:var(--dim);font-size:11px"></span>
+  </div>
+  </div>
+
+  <!-- SIGNALS: today's buy signals (placed + would-have) and the sells
+       that closed them, the same events the B/S marks on the charts show.
+       Time, price and the reason, newest first. -->
+
+</div>
+
+<div id="blockModal" role="alertdialog" aria-modal="true" aria-labelledby="bmHead">
+  <div class="bmBox">
+    <div class="bmHead" id="bmHead">&#9940; NO TRADE</div>
+    <div class="bmWhat" id="bmWhat"></div>
+    <div id="bmRows"></div>
+    <div class="bmLock" id="bmLock" style="display:none"></div>
+    <div class="bmFoot">
+      <button id="bmClose" class="sec">OK &mdash; stand down</button>
+      <button id="bmTake" style="display:none">TAKE IT ANYWAY</button>
+      <span class="bmHint" id="bmTakeHint" style="display:none"></span>
+      <span class="bmHint" id="bmHint">Esc or click outside also closes. Exits are never blocked.</span>
+    </div>
+  </div>
+</div>
+
+<div id="review"></div>
+<div id="analysis"></div>
+<div id="pnlView"></div>
+<div id="slwView"></div>
+
+<!-- RULES and THEORY used to be panel panes; same ids inside, so the CSS
+     and the loaders did not move an inch. Only the wrapper is new. -->
+<div id="rulesView">
+  <button class="sec rvClose" id="rulesClose">✕ close (Esc)</button>
+  <div class="rvTop"><h2>Rules</h2>
+    <span class="sub">read-only — every number comes live from the files the guard reads</span>
+    <span id="rulesAsOf" class="sub"></span>
+    <button id="rulesRe" class="sec">reload</button></div>
+  <div id="rulesBody"><div class="empty">reading the rules…</div></div>
+</div>
+
+<div id="theoryView">
+  <button class="sec rvClose" id="theoryClose">✕ close (Esc)</button>
+  <div class="rvTop"><h2>Theory</h2>
+    <span class="sub">why each rule exists — reading, not controls; the live numbers stay on the rules tab</span>
+    <button id="theoryRe" class="sec">reload</button></div>
+  <div id="theoryBody"><div class="empty">reading the theory…</div></div>
+</div>
+
+<!-- AUTO RUN and SIGNALS keep their old ids and inner markup, so every
+     interval and handler still finds them; only the wrapper is an overlay. -->
+<div id="autoView">
+  <button class="sec rvClose" id="autoClose">✕ close (Esc)</button>
+  <div class="rvTop"><h2>Auto run</h2>
+    <span class="sub">the autopilot, its settings and every alert — the chip on the floor shows its state</span></div>
   <div class="pane on" id="paneAuto">
   <!-- SQUARE GRID (12/11/2026). The tab stacked its boxes top to bottom,
        so the lower ones lived below the fold. Now each box is one square
@@ -986,70 +1097,12 @@ flat = slPct below entry, nothing else.">stop:
   </div><!-- /autoGrid -->
 
   </div>
+</div>
 
-  <div class="pane" id="paneTrade">
-  <!-- band 1: state. Who is stopping you, what you can spend, is the guard
-       alive. Plus the reading buttons, which are not order buttons and so
-       do not belong next to EXIT ALL. -->
-  <div class="pbar">
-    <span class="ph">POSITIONS</span>
-    <span id="lockTxt"></span>
-    <span id="marginTxt">—</span>
-    <span id="guardTxt">guard: …</span>
-    <span style="flex:1"></span>
-  </div>
-
-  <div id="posStale"></div>
-  <table id="posTable">
-    <thead><tr>
-      <th>Position</th><th>Qty</th>
-      <th title="What you paid, then the price that gets you out at zero once brokerage, STT, exchange, SEBI, GST and stamp duty on BOTH legs are paid. Above the second number is where the trade starts being worth anything.">Entry → B/E</th>
-      <th>LTP</th><th>% gain / to SL</th>
-      <th title="NET: (LTP − break-even) × qty, so all entry and exit charges are already out of it. The gross figure is in the small text.">NET P&amp;L</th>
-      <th title="Kite's day P&L for this symbol, gross of charges">day</th>
-      <th title="rupees between entry and the stop that is actually resting">Risk</th>
-      <th>Stop resting</th><th></th>
-    </tr></thead>
-    <tbody></tbody>
-  </table>
-
-  <!-- the loss-if-wrong number, filled the moment a B100/B50 is armed -->
-  <div id="riskBox" class="idle">
-    <span class="rbL">IF WRONG</span>
-    <span class="rbN" id="rbLoss">—</span>
-    <span class="rbD" id="rbWhat">arm a B100 / B50 on a chart, or click a price, and the rupee loss shows here</span>
-  </div>
-
-  <!-- band 2: the orders. Only things that send an order live here. -->
-  <div class="orderctl">
-    <select id="ordSymbol"></select>
-    <input id="tgtPrice" type="number" step="0.05" placeholder="target">
-    <select id="tgtMode" title="₹ = absolute price · % = above entry · Auto = from the SL distance, ATR and current speed">
-      <option value="price">₹</option>
-      <option value="pct">%</option>
-      <option value="auto">Auto</option>
-    </select>
-    <button id="btnTarget">Set / Modify Target</button>
-    <input id="slTrigger" type="number" step="0.05" placeholder="SL trigger">
-    <select id="slMode" title="read the SL box as an absolute price, or as a % below entry">
-      <option value="price">₹</option>
-      <option value="pct">%</option>
-    </select>
-    <button id="btnSl" class="sec">Set / Modify SL</button>
-    <label>buy <input id="buyQty" type="number" step="1" placeholder="50" style="width:60px">
-      <select id="qtyMode">
-        <option value="pct">% of margin</option>
-        <option value="abs">abs qty</option>
-      </select>
-    </label>
-    <button id="btnExitAll" class="danger">EXIT ALL</button>
-    <span id="tgtHint" style="color:var(--dim);font-size:11px"></span>
-  </div>
-  </div>
-
-  <!-- SIGNALS: today's buy signals (placed + would-have) and the sells
-       that closed them, the same events the B/S marks on the charts show.
-       Time, price and the reason, newest first. -->
+<div id="signalsView">
+  <button class="sec rvClose" id="signalsClose">✕ close (Esc)</button>
+  <div class="rvTop"><h2>Signals</h2>
+    <span class="sub">today's buy signals and their sells — B and S on the charts are these rows</span></div>
   <div class="pane" id="paneSignals">
     <div class="pbar">
       <span class="ph">SIGNALS</span>
@@ -1059,46 +1112,6 @@ flat = slPct below entry, nothing else.">stop:
     </div>
     <div id="sigBody"><div class="empty">no signals yet today</div></div>
   </div>
-
-</div>
-
-<div id="blockModal" role="alertdialog" aria-modal="true" aria-labelledby="bmHead">
-  <div class="bmBox">
-    <div class="bmHead" id="bmHead">&#9940; NO TRADE</div>
-    <div class="bmWhat" id="bmWhat"></div>
-    <div id="bmRows"></div>
-    <div class="bmLock" id="bmLock" style="display:none"></div>
-    <div class="bmFoot">
-      <button id="bmClose" class="sec">OK &mdash; stand down</button>
-      <button id="bmTake" style="display:none">TAKE IT ANYWAY</button>
-      <span class="bmHint" id="bmTakeHint" style="display:none"></span>
-      <span class="bmHint" id="bmHint">Esc or click outside also closes. Exits are never blocked.</span>
-    </div>
-  </div>
-</div>
-
-<div id="review"></div>
-<div id="analysis"></div>
-<div id="pnlView"></div>
-<div id="slwView"></div>
-
-<!-- RULES and THEORY used to be panel panes; same ids inside, so the CSS
-     and the loaders did not move an inch. Only the wrapper is new. -->
-<div id="rulesView">
-  <button class="sec rvClose" id="rulesClose">✕ close (Esc)</button>
-  <div class="rvTop"><h2>Rules</h2>
-    <span class="sub">read-only — every number comes live from the files the guard reads</span>
-    <span id="rulesAsOf" class="sub"></span>
-    <button id="rulesRe" class="sec">reload</button></div>
-  <div id="rulesBody"><div class="empty">reading the rules…</div></div>
-</div>
-
-<div id="theoryView">
-  <button class="sec rvClose" id="theoryClose">✕ close (Esc)</button>
-  <div class="rvTop"><h2>Theory</h2>
-    <span class="sub">why each rule exists — reading, not controls; the live numbers stay on the rules tab</span>
-    <button id="theoryRe" class="sec">reload</button></div>
-  <div id="theoryBody"><div class="empty">reading the theory…</div></div>
 </div>
 
 <button id="helpBtn">? help</button>
@@ -3972,7 +3985,8 @@ function anaHtml(a, failedOnly) {
     return h;
 }
 
-const TOP_TABS = { floor: 'tabFloor', analysis: 'tabAna', failed: 'tabFail', pnl: 'tabPnl',
+const TOP_TABS = { floor: 'tabFloor', auto: 'tabAuto', signals: 'tabSignals',
+                   analysis: 'tabAna', failed: 'tabFail', pnl: 'tabPnl',
                    review: 'tabReview', slw: 'tabSlw', rules: 'tabRules', theory: 'tabTheory' };
 function setTopTab(which) {
     for (const [k, id] of Object.entries(TOP_TABS))
@@ -3981,7 +3995,7 @@ function setTopTab(which) {
 
 // one reading view at a time: whatever is open goes before the next opens
 function hideViews() {
-    for (const id of ['analysis', 'review', 'pnlView', 'slwView', 'rulesView', 'theoryView'])
+    for (const id of ['analysis', 'review', 'pnlView', 'slwView', 'rulesView', 'theoryView', 'autoView', 'signalsView'])
         document.getElementById(id).classList.remove('open');
 }
 
@@ -4002,6 +4016,23 @@ function openTheory() {
     if (!theoryLoaded) loadTheory();
 }
 function closeTheory() { document.getElementById('theoryView').classList.remove('open'); setTopTab('floor'); }
+
+// auto run and signals are the old floor panes moved whole into these
+// wrappers -- their inner ids and refresh timers keep running as before
+function openAuto() {
+    hideViews();
+    document.getElementById('autoView').classList.add('open');
+    setTopTab('auto');
+}
+function closeAuto() { document.getElementById('autoView').classList.remove('open'); setTopTab('floor'); }
+
+function openSignals() {
+    hideViews();
+    document.getElementById('signalsView').classList.add('open');
+    setTopTab('signals');
+    refreshSignals();
+}
+function closeSignals() { document.getElementById('signalsView').classList.remove('open'); setTopTab('floor'); }
 
 // the wide-stop log: every entry whose stop sat too far below, and what
 // happened to it -- refused, asked and waited, or taken anyway
@@ -4063,6 +4094,8 @@ async function openAna(failedOnly) {
 }
 
 document.getElementById('tabFloor').onclick = () => { hideViews(); setTopTab('floor'); };
+document.getElementById('tabAuto').onclick = openAuto;
+document.getElementById('tabSignals').onclick = openSignals;
 document.getElementById('tabAna').onclick = () => openAna(false);
 document.getElementById('tabFail').onclick = () => openAna(true);
 document.getElementById('tabPnl').onclick = openPnl;
@@ -4072,6 +4105,8 @@ document.getElementById('tabRules').onclick = openRules;
 document.getElementById('tabTheory').onclick = openTheory;
 document.getElementById('rulesClose').onclick = closeRules;
 document.getElementById('theoryClose').onclick = closeTheory;
+document.getElementById('autoClose').onclick = closeAuto;
+document.getElementById('signalsClose').onclick = closeSignals;
 
 document.addEventListener('keydown', e => {
   if (e.key != 'Escape') return;
@@ -4081,6 +4116,8 @@ document.addEventListener('keydown', e => {
   if (document.getElementById('slwView').classList.contains('open')) closeSlw();
   if (document.getElementById('rulesView').classList.contains('open')) closeRules();
   if (document.getElementById('theoryView').classList.contains('open')) closeTheory();
+  if (document.getElementById('autoView').classList.contains('open')) closeAuto();
+  if (document.getElementById('signalsView').classList.contains('open')) closeSignals();
 });
 refreshLock();
 
