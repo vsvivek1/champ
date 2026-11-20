@@ -322,7 +322,7 @@
   .trig { display:inline-flex; align-items:center; gap:6px; margin:2px 8px 2px 0; padding:3px 8px; border:1px solid #f0b90b55; border-radius:4px; font-size:12px; color:#f0b90b; }
   .trig button { padding:0 6px; font-size:12px; background:transparent; border:1px solid var(--border); color:var(--red); }
   .cm .bull { color:var(--green); } .cm .bear { color:var(--red); } .cm .neu { color:var(--dim); }
-  #panel { padding:10px 12px; background:var(--panel); color:var(--text); border-top:1px solid var(--border); }
+  #panel { padding:10px 12px; background:var(--panel); color:var(--text); border-bottom:1px solid var(--border); }
   table { border-collapse:collapse; width:100%; margin-bottom:8px; }
   th,td { text-align:right; padding:4px 8px; border-bottom:1px solid var(--border); font-variant-numeric:tabular-nums; }
   th { color:var(--dim); font-weight:500; }
@@ -880,14 +880,6 @@
   <span title="Kite's own day figure for the account, gross of charges. The net view of the day is in P&L history, which prices every closed trade through charges.js.">Day P&L: <span id="totalPnl">—</span></span>
 </header>
 
-<div class="charts">
-  <div class="chartbox"><h3 id="t0">SPOT</h3><div class="quick" id="qk0"></div><div class="tfbox" id="tfbox0"></div><div class="lp" id="lp0"></div><div class="fx" onclick="toggleFull(0)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c0"></div><div class="cm" id="cm0"></div></div>
-  <div class="chartbox"><h3 id="t1">CE</h3><div class="quick" id="qk1"></div><div class="tfbox" id="tfbox1"></div><div class="lp" id="lp1"></div><div class="ob" id="ob1"></div><div class="sd" id="sd1"></div><div class="pb" id="pb1"></div><div class="fx" onclick="toggleFull(1)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c1"></div><div class="cm" id="cm1"></div></div>
-  <div class="chartbox"><h3 id="t2">PE</h3><div class="quick" id="qk2"></div><div class="tfbox" id="tfbox2"></div><div class="lp" id="lp2"></div><div class="ob" id="ob2"></div><div class="sd" id="sd2"></div><div class="pb" id="pb2"></div><div class="fx" onclick="toggleFull(2)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c2"></div><div class="cm" id="cm2"></div></div>
-</div>
-
-<div id="ctxMenu"></div>
-
 <div id="panel">
   <!-- THREE TABS.
        The panel had grown to eleven stacked boxes and the autopilot -- the
@@ -965,6 +957,14 @@
        Time, price and the reason, newest first. -->
 
 </div>
+
+<div class="charts">
+  <div class="chartbox"><h3 id="t0">SPOT</h3><div class="quick" id="qk0"></div><div class="tfbox" id="tfbox0"></div><div class="lp" id="lp0"></div><div class="fx" onclick="toggleFull(0)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c0"></div><div class="cm" id="cm0"></div></div>
+  <div class="chartbox"><h3 id="t1">CE</h3><div class="quick" id="qk1"></div><div class="tfbox" id="tfbox1"></div><div class="lp" id="lp1"></div><div class="ob" id="ob1"></div><div class="sd" id="sd1"></div><div class="pb" id="pb1"></div><div class="fx" onclick="toggleFull(1)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c1"></div><div class="cm" id="cm1"></div></div>
+  <div class="chartbox"><h3 id="t2">PE</h3><div class="quick" id="qk2"></div><div class="tfbox" id="tfbox2"></div><div class="lp" id="lp2"></div><div class="ob" id="ob2"></div><div class="sd" id="sd2"></div><div class="pb" id="pb2"></div><div class="fx" onclick="toggleFull(2)" title="full view (Esc to exit)">⛶</div><div class="chart" id="c2"></div><div class="cm" id="cm2"></div></div>
+</div>
+
+<div id="ctxMenu"></div>
 
 <div id="blockModal" role="alertdialog" aria-modal="true" aria-labelledby="bmHead">
   <div class="bmBox">
@@ -1617,7 +1617,7 @@ buildTfPickers();
 
 /* Full view carries the whole trading panel (positions, EXIT ALL, target/SL,
    msg) along by moving the #panel node into the full chartbox; it is moved
-   back before #helpBtn (its original spot) on exit. */
+   back above the charts (its original spot) on exit. */
 function setFull(box) {
   const panel = document.getElementById('panel');
   document.querySelectorAll('.chartbox.full').forEach(b => b.classList.remove('full'));
@@ -1626,7 +1626,7 @@ function setFull(box) {
     box.appendChild(panel);
     document.body.style.overflow = 'hidden';
   } else {
-    document.body.insertBefore(panel, document.getElementById('helpBtn'));
+    document.body.insertBefore(panel, document.querySelector('.charts'));
     document.body.style.overflow = '';
   }
 }
