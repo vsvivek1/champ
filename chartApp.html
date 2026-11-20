@@ -768,6 +768,49 @@
     #acFeed { grid-row:auto; }
     #autoLayout #apFeed { max-height:50vh; }
   }
+
+  /* =====================================================================
+     FINISH PASS (20/11/2026). No layout moves — identity, hierarchy and
+     touch: the wordmark, grouped tabs, number alignment, row hover,
+     sticky table heads in the reading views, quiet scrollbars, a visible
+     keyboard focus. Nothing here changes what any script toggles.
+     ===================================================================== */
+  #brand { align-self:center; margin-right:14px; font-size:13px; font-weight:800;
+           letter-spacing:.22em; color:var(--accent); user-select:none; cursor:default; }
+  #brand::after { content:""; display:inline-block; width:6px; height:6px; margin-left:7px;
+                  border-radius:50%; background:var(--green); vertical-align:2px; }
+  #topTabs .tsep { align-self:center; width:1px; height:16px; background:var(--border); margin:0 6px; }
+  #topTabs .ttab { transition:color .12s ease, border-color .12s ease; }
+
+  /* numbers line up everywhere they stack */
+  table, .stat, #apCount, #spotLtp, #totalPnl, #entryPnlAll, .lp, #apFeed, #posTable,
+  #pnlView, #slwView, #analysis, #review { font-variant-numeric:tabular-nums; }
+
+  /* reading views: the eye keeps the header while the rows scroll */
+  #analysis thead th, #review thead th, #pnlView thead th, #slwView thead th {
+    position:sticky; top:0; background:var(--bg); z-index:1; }
+  #analysis tbody tr:hover td, #review tbody tr:hover td,
+  #pnlView tbody tr:hover td, #slwView tbody tr:hover td { background:rgba(79,140,255,.06); }
+
+  /* the message line reads as a line of its own, not loose text */
+  #msg:not(:empty) { margin:6px 0 2px; padding:6px 10px; border-left:3px solid var(--accent);
+                     background:rgba(79,140,255,.07); border-radius:0 4px 4px 0; }
+
+  /* touch: every button answers the hand */
+  button { transition:filter .1s ease, background .12s ease; }
+  button:hover:not(:disabled) { filter:brightness(1.12); }
+  :focus-visible { outline:2px solid var(--accent); outline-offset:1px; border-radius:3px; }
+
+  /* quiet scrollbars for the dark desk */
+  ::-webkit-scrollbar { width:10px; height:10px; }
+  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:6px; border:2px solid var(--bg); }
+  ::-webkit-scrollbar-thumb:hover { background:#36425f; }
+  ::-webkit-scrollbar-track { background:transparent; }
+
+  /* the commentary strip says what it is, once, quietly */
+  .cm::before { content:"CHART READ"; flex-basis:100%; font-size:9.5px; letter-spacing:.14em;
+                color:var(--dim); opacity:.75; }
+  .cm:empty::before { content:none; } /* no label while the strip waits for candles */
 </style>
 </head>
 <body>
@@ -775,14 +818,18 @@
 <!-- the top tabs. First one is the floor itself -- charts, orders, the
      guard. The other two are the reading rooms over the trade log. -->
 <div id="topTabs">
+  <span id="brand" title="Champ — the charts, the guard and the autopilot">CHAMP</span>
+  <!-- three groups: the desk, the record, the book -->
   <button class="ttab on" id="tabFloor">trading floor</button>
   <button class="ttab" id="tabAuto">auto run</button>
   <button class="ttab" id="tabSignals">signals</button>
+  <span class="tsep"></span>
   <button class="ttab" id="tabAna">trade analysis</button>
   <button class="ttab" id="tabFail">failed days</button>
   <button class="ttab" id="tabPnl">P&amp;L history</button>
   <button class="ttab" id="tabReview">last trade</button>
   <button class="ttab" id="tabSlw">SL wide log</button>
+  <span class="tsep"></span>
   <button class="ttab" id="tabRules">rules</button>
   <button class="ttab" id="tabTheory">theory</button>
   <span style="flex:1"></span>
@@ -2069,9 +2116,9 @@ function commentary(slot, upto) {
   'dead chart') are kept exactly.
   */
   let nUp = 0, nDn = 0;
-  const tag = (lbl, txt, cls) => {
+  const tag = (lbl, txt, cls, tip) => {
     if (cls.indexOf('bull') >= 0) nUp++; else if (cls.indexOf('bear') >= 0) nDn++;
-    return `<span class="chip ${cls}">${lbl ? `<i>${lbl}</i>` : ''}${txt}</span>`;
+    return `<span class="chip ${cls}"${tip ? ` title="${tip}"` : ''}>${lbl ? `<i>${lbl}</i>` : ''}${txt}</span>`;
   };
 
   // trend: last 5 completed candles
@@ -2080,15 +2127,16 @@ function commentary(slot, upto) {
     const ups = w5.filter(c => c.close >= c.open).length;
     const hh = w5[4].high > w5[0].high, hl = w5[4].low > w5[0].low;
     const lh = w5[4].high < w5[0].high, ll = w5[4].low < w5[0].low;
-    if (hh && hl) parts.push(tag('trend', `UP — HH+HL, ${ups}/5 green`, 'bull'));
-    else if (lh && ll) parts.push(tag('trend', `DOWN — LH+LL, ${5 - ups}/5 red`, 'bear'));
-    else parts.push(tag('trend', 'sideways', 'neu'));
+    const trendTip = 'last 5 completed candles: are the highs and lows stepping up or down?';
+    if (hh && hl) parts.push(tag('trend', `rising — higher highs &amp; lows · ${ups}/5 green`, 'bull', trendTip));
+    else if (lh && ll) parts.push(tag('trend', `falling — lower highs &amp; lows · ${5 - ups}/5 red`, 'bear', trendTip));
+    else parts.push(tag('trend', 'sideways', 'neu', trendTip));
   }
 
   // vs day open
   if (dayOpen[slot] != null) {
     const d = (ltp - dayOpen[slot]) / dayOpen[slot] * 100;
-    parts.push(tag('vs open', `${d >= 0 ? '+' : ''}${d.toFixed(1)}%`, d >= 0 ? 'bull' : 'bear'));
+    parts.push(tag('vs open', `${d >= 0 ? '+' : ''}${d.toFixed(1)}%`, d >= 0 ? 'bull' : 'bear', 'price vs today\'s 09:15 open'));
   }
 
   // vs VWAP (options)
@@ -2097,7 +2145,7 @@ function commentary(slot, upto) {
     for (const c of arr) { const tp = (c.high + c.low + c.close) / 3; pv += tp * (c.volume || 0); vv += c.volume || 0; }
     if (vv > 0) {
       const vwap = pv / vv;
-      parts.push(tag('vwap', `${ltp >= vwap ? 'above' : 'below'} ${vwap.toFixed(2)}`, ltp >= vwap ? 'bull' : 'bear'));
+      parts.push(tag('vwap', `${ltp >= vwap ? 'above' : 'below'} ${vwap.toFixed(2)}`, ltp >= vwap ? 'bull' : 'bear', 'where the average rupee traded today — above it, the day\'s buyers are in profit'));
     }
   }
 
@@ -2106,7 +2154,7 @@ function commentary(slot, upto) {
     const ma = i => { let s = 0; for (let k = i - 19; k <= i; k++) s += arr[k].close; return s / 20; };
     const m1 = ma(arr.length - 1), m5 = ma(arr.length - 6);
     const cls = (ltp >= m1 && m1 > m5) ? 'bull' : (ltp < m1 && m1 < m5) ? 'bear' : 'neu';
-    parts.push(tag('ma20', `${ltp >= m1 ? 'above' : 'below'} · ${m1 > m5 ? 'rising' : 'falling'}`, cls));
+    parts.push(tag('ma20', `${ltp >= m1 ? 'above' : 'below'} · ${m1 > m5 ? 'rising' : 'falling'}`, cls, '20-candle average — best is above it while it rises'));
   }
 
   // volume of last completed candle vs 20-candle average
@@ -2115,8 +2163,8 @@ function commentary(slot, upto) {
     const avg = done.slice(-21, -1).reduce((s, c) => s + (c.volume || 0), 0) / 20;
     if (avg > 0) {
       const x = lastV / avg;
-      if (x >= 1.8) parts.push(tag('volume', `spike ${x.toFixed(1)}× avg`, 'bull'));
-      else if (x <= 0.5) parts.push(tag('volume', 'thin — ≤½ avg', 'neu'));
+      if (x >= 1.8) parts.push(tag('volume', `spike ${x.toFixed(1)}× avg`, 'bull', 'last candle traded far more than the 20-candle average'));
+      else if (x <= 0.5) parts.push(tag('volume', 'thin — ≤½ avg', 'neu', 'last candle traded under half the usual volume — moves here carry less weight'));
     }
   }
 
@@ -2131,7 +2179,7 @@ function commentary(slot, upto) {
       else if (dpx > 0.5 && doi < -0.5) { label = 'short covering'; cls = 'bull sctag'; }
       else if (dpx < -0.5 && doi > 0.5) { label = 'short buildup'; cls = 'bear'; }
       else if (dpx < -0.5 && doi < -0.5) { label = 'long unwinding'; cls = 'bear'; }
-      if (label) parts.push(tag('oi 15m', `${label} · px ${dpx >= 0 ? '+' : ''}${dpx.toFixed(1)}% oi ${doi >= 0 ? '+' : ''}${doi.toFixed(1)}%`, cls));
+      if (label) parts.push(tag('oi 15m', `${label} · px ${dpx >= 0 ? '+' : ''}${dpx.toFixed(1)}% oi ${doi >= 0 ? '+' : ''}${doi.toFixed(1)}%`, cls, 'price and open interest over ~15 min, read together: who is adding positions and which way'));
     }
     // sharp OI drop in just 5 min = writers bailing fast; with price holding
     // or rising, a short-covering rally often follows
@@ -2141,7 +2189,8 @@ function commentary(slot, upto) {
       if (doi5 <= -2) {
         const holding = ltp >= back5.close * 0.998;
         parts.unshift(tag('', `🔥 OI CRASH ${doi5.toFixed(1)}% in 5m${holding ? ' — covering rally likely' : ''}`,
-          holding ? 'bull sctag' : 'bear'));
+          holding ? 'bull sctag' : 'bear',
+          'open interest fell fast — option writers bailing out. With price holding, their buy-backs can fuel a sharp up-move'));
       }
     }
   }
@@ -2163,9 +2212,10 @@ function commentary(slot, upto) {
   if (done.length >= 11) {
     const w = done.slice(-11, -1);
     const hi = Math.max(...w.map(c => c.high)), lo = Math.min(...w.map(c => c.low));
-    if (ltp > hi) parts.push(tag('10-bar', `breaking HIGH ${hi.toFixed(2)}`, 'bull'));
-    else if (ltp < lo) parts.push(tag('10-bar', `breaking LOW ${lo.toFixed(2)}`, 'bear'));
-    else if (slot == 0 && (hi - lo) / ltp < 0.004) parts.push(tag('10-bar', 'tight range', 'neu'));
+    const brkTip = 'price vs the high and low of the last 10 completed candles';
+    if (ltp > hi) parts.push(tag('10-bar', `above the last 10 bars' high ${hi.toFixed(2)}`, 'bull', brkTip));
+    else if (ltp < lo) parts.push(tag('10-bar', `below the last 10 bars' low ${lo.toFixed(2)}`, 'bear', brkTip));
+    else if (slot == 0 && (hi - lo) / ltp < 0.004) parts.push(tag('10-bar', 'tight range', 'neu', brkTip));
   }
 
   // spot vs yesterday's range
@@ -2180,9 +2230,10 @@ function commentary(slot, upto) {
   // ≥2× normal = MOVING FAST, ≤0.35× = dead chart
   const x = speedRatio(arr);
   if (x != null) {
-    if (x >= 2) parts.unshift(tag('', `⚡ MOVING FAST ${x.toFixed(1)}×`, 'bull fasttag'));
-    else if (x <= 0.35) parts.unshift(tag('', `dead chart ${x.toFixed(1)}×`, 'neu deadtag'));
-    else parts.unshift(tag('speed', `${x.toFixed(1)}× normal`, 'neu'));
+    const spdTip = 'size of the last 3 candles vs this chart\'s normal — 2× and up is momentum, 0.35× and under is nothing moving';
+    if (x >= 2) parts.unshift(tag('', `⚡ MOVING FAST ${x.toFixed(1)}×`, 'bull fasttag', spdTip));
+    else if (x <= 0.35) parts.unshift(tag('', `dead chart ${x.toFixed(1)}×`, 'neu deadtag', spdTip));
+    else parts.unshift(tag('speed', `${x.toFixed(1)}× normal`, 'neu', spdTip));
   }
 
   // candle height: avg %range over the last 10 minutes vs the last 2.
@@ -2203,8 +2254,8 @@ function commentary(slot, upto) {
       const h10 = sHt(w10), h2 = sHt(w2);
       const x = Math.abs(h10) > 0 ? Math.abs(h2) / Math.abs(h10) : null;
       const sg = v => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
-      parts.push(tag('height', `10m ${sg(h10)} · 2m ${sg(h2)}${x != null ? ` (${x.toFixed(1)}×)` : ''}`,
-        h2 >= 0 ? 'bull' : 'bear'));
+      parts.push(tag('candle size', `10m ${sg(h10)} · 2m ${sg(h2)}${x != null ? ` (${x.toFixed(1)}×)` : ''}`,
+        h2 >= 0 ? 'bull' : 'bear', 'how tall the candles are and which way they closed — last 10 minutes vs the last 2'));
     }
 
     // colour flips over the same 10 minutes, completed candles only:
@@ -2224,7 +2275,8 @@ function commentary(slot, upto) {
       // the raw counts ride along: "100% (2/2)" is two candles talking,
       // "100% (8/8)" is a pattern — the % alone cannot tell them apart
       const pc = (a, b) => b ? `${Math.round(a / b * 100)}% (${a}/${b})` : '—';
-      parts.push(tag('flips 10m', `G→R ${pc(gr, g)} · R→G ${pc(rg, r)} · G→G ${pc(gg, g)}`, 'neu'));
+      parts.push(tag('flips 10m', `green→red ${pc(gr, g)} · red→green ${pc(rg, r)} · green held ${pc(gg, g)}`, 'neu',
+        'how often a candle was undone by the next one — high numbers mean chop, not direction'));
     }
   }
 
@@ -2240,7 +2292,8 @@ function commentary(slot, upto) {
   else if (up - dn >= 2) { vTxt = `LEANING UP · ${up} up / ${dn} down`; vCls = 'bull'; }
   else if (dn - up >= 2) { vTxt = `LEANING DOWN · ${up} up / ${dn} down`; vCls = 'bear'; }
   else { vTxt = `MIXED · ${up} up / ${dn} down — no clear side`; vCls = 'neu'; }
-  parts.unshift(tag('read', vTxt, vCls + ' verdict'));
+  parts.unshift(tag('read', vTxt, vCls + ' verdict',
+    'the chips added up: green vs red. One signal either way is noise — a lean needs a margin of 2'));
 
   return parts.join('');   // the flex gap separates the chips
 }
