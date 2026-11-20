@@ -28,6 +28,7 @@
                    padding:0 16px; font-size:13px; border-bottom:2px solid transparent; }
   #topTabs .ttab:hover { color:var(--text); }
   #topTabs .ttab.on { color:var(--text); font-weight:600; border-bottom-color:var(--accent); }
+  #topTabs #autoRunChip, #topTabs #uiTheme { align-self:center; margin-left:8px; }
   header { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--panel); border-bottom:1px solid var(--border); flex-wrap:wrap; }
   select,input,button { background:var(--bg); color:var(--text); border:1px solid var(--border); border-radius:4px; padding:5px 8px; font-size:13px; }
   button { cursor:pointer; background:var(--accent); border:none; color:#fff; }
@@ -359,16 +360,7 @@
   #panel .pset .inner .orderctl:first-child, #autoView .pset .inner .orderctl:first-child { margin-top:4px; }
   #panel .sechd, #autoView .sechd { font-size:11px; letter-spacing:.06em; color:var(--dim); margin:10px 0 2px; }
 
-  /* ---- THE TABS ----
-     One strip, three panes. A hidden pane is display:none, so nothing in it
-     is measured or painted -- the charts are outside the panel, so none of
-     them get resized by a tab change. */
-  #panelTabs { display:flex; gap:6px; align-items:center; flex-wrap:wrap;
-               padding-bottom:7px; margin-bottom:8px; border-bottom:1px solid var(--border); }
-  #panelTabs .ptab { background:var(--bg); border:1px solid var(--border); color:var(--dim);
-                     font-size:11.5px; font-weight:600; letter-spacing:.06em; padding:5px 11px; }
-  #panelTabs .ptab:hover { color:var(--fg); }
-  #panelTabs .ptab.on { color:#fff; background:var(--accent); border-color:var(--accent); }
+  /* the auto-run chip rides the top tab bar; its colors are its state */
   #autoRunChip { font:inherit; font-size:11px; font-weight:700; letter-spacing:.04em;
                  padding:2px 7px; border-radius:3px; border:1px solid var(--border);
                  background:var(--bg); cursor:pointer; white-space:nowrap; }
@@ -698,12 +690,6 @@
   #autoBox .hd b, #coilBox .hd b, #setupBox .hd b {
     font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
 
-  /* tabs: a segmented strip, the active pane filled, the rest ghosted */
-  #panelTabs { gap:4px; border-bottom:1px solid var(--border); }
-  #panelTabs .ptab { border:1px solid transparent; background:transparent; border-radius:6px 6px 0 0;
-    padding:7px 14px; letter-spacing:.08em; }
-  #panelTabs .ptab:hover { background:rgba(79,140,255,.08); }
-  #panelTabs .ptab.on { background:var(--accent); color:#fff; }
 
   /* the gate: the one strip that decides money gets the strongest voice */
   #gateBar { border-radius: var(--radius-s); margin-top:6px; border-left:4px solid transparent; cursor:pointer; }
@@ -798,6 +784,11 @@
   <button class="ttab" id="tabSlw">SL wide log</button>
   <button class="ttab" id="tabRules">rules</button>
   <button class="ttab" id="tabTheory">theory</button>
+  <span style="flex:1"></span>
+  <!-- the two floor controls ride the tab bar, so they stay on screen
+       whatever tab is open: is anything buying, and light or dark -->
+  <button id="autoRunChip" class="off" title="reading&hellip;">auto run &hellip;</button>
+  <button id="uiTheme" class="sec" title="light or dark for this panel only — the charts stay dark">◐ light</button>
 </div>
 
 <header>
@@ -858,19 +849,7 @@
        buttons move to their own tab, and RULES is a read-only print of every
        rule the app enforces. Only the display moves; no element is removed,
        so every script on this page still finds its ids. -->
-  <div id="panelTabs">
-    <!-- AUTO RUN, SIGNALS, RULES and THEORY all moved to the top tab bar.
-         The floor keeps only positions and orders, under the messages. -->
-    <!--
-    The AUTOPILOT header already says ARMED or OFF, but only on the AUTO RUN
-    tab. Sitting on POSITIONS for twenty minutes and not knowing whether
-    anything is buying is the state this chip exists to remove, so it lives
-    in the tab bar and is on screen whatever tab is open.
-    -->
-    <button id="autoRunChip" class="off" title="reading&hellip;">auto run &hellip;</button>
-    <span style="flex:1"></span>
-    <button id="uiTheme" class="sec" title="light or dark for this panel only — the charts stay dark">◐ light</button>
-  </div>
+  <!-- every control that used to sit here rides the top tab bar now -->
   <div id="msg"></div>
 
   <div class="pane on" id="paneTrade">
@@ -4683,17 +4662,7 @@ being enforced.
 It is a print, not a control: nothing here saves anything. The boxes that
 change a rule stay where they already are, in the AUTO RUN tab.
 ====================================================================== */
-const panelTabs = document.getElementById('panelTabs');
 let rulesLoaded = false;
-
-function showPane(id) {
-  for (const b of panelTabs.querySelectorAll('.ptab')) b.classList.toggle('on', b.dataset.pane == id);
-  for (const p of document.querySelectorAll('#panel .pane')) p.classList.toggle('on', p.id == id);
-}
-panelTabs.addEventListener('click', e => {
-  const b = e.target.closest('.ptab');
-  if (b) showPane(b.dataset.pane);
-});
 
 // one small card: setting name, the live value big, plain meaning under it
 function rCard(name, val, note) {
