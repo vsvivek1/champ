@@ -6744,6 +6744,53 @@ async function main() {
     });
 
     /*
+    MANUAL TRAIL -- the same move maybeTrail makes, but on the user's click,
+    and it works with the automatic trail ON or OFF. One difference on
+    purpose: no clearance buffer. The automatic trail waits for price to
+    clear a level by trailClearPct before trusting it; a click IS the trust,
+    so the stop snaps to the highest ladder level under the current price
+    (or to an explicit `stop` the caller sends). raiseStopTo keeps the two
+    invariants either way: never down, never at or above the price.
+    */
+    app.post('/api/trail', async (req, res) => {
+        const t = Number(req.body && req.body.token);
+        if (!(t > 0)) return res.status(400).json({ error: 'token required' });
+        const st = trailByToken.get(t);
+        if (!st) return res.status(400).json({ error: 'no trail state for that position (was it bought before the app started?)' });
+        if (trailInProgress.has(t)) return res.status(409).json({ error: 'the trail is moving this stop right now, try again' });
+        if (exitInProgressByToken.has(t)) return res.status(409).json({ error: 'this position is being exited' });
+
+        const ltp = lastLtpByToken.get(t);
+        let want = Number(req.body && req.body.stop) || 0;
+        if (!(want > 0)) {
+            for (const L of st.ladder) {
+                if (st.stop != null && L <= st.stop) continue;
+                if (ltp != null && L < ltp) want = L;   // ladder is ascending: keep the highest
+            }
+            if (!(want > 0)) return res.status(400).json({ error: `no ladder level between the stop${st.stop != null ? ` ${st.stop}` : ''} and the price${ltp != null ? ` ${ltp}` : ''} yet` });
+        }
+        want = roundToTick(want);
+
+        trailInProgress.add(t);
+        try {
+            const r = await raiseStopTo(t, want, { ltp, tag: 'MANUAL TRAIL', step: { manual: true } });
+            if (!r.ok) return res.status(400).json({ error: r.why });
+            const lockedPct = +(((want - st.entry) / st.entry) * 100).toFixed(1);
+            console.log(`🪜 MANUAL TRAIL ${st.tradingsymbol}: stop ${r.prev == null ? '—' : r.prev} → ${want}`
+                + ` (${lockedPct >= 0 ? '+' : ''}${lockedPct}% vs entry ${st.entry})`
+                + (r.moved ? `, ${r.moved} SL order${r.moved > 1 ? 's' : ''} modified`
+                           : `, app-side line only — no SL order resting`)
+                + (r.failed ? ` [exchange refused: ${r.failed}]` : ''));
+            broadcast({ type: 'trail', token: t, tradingsymbol: st.tradingsymbol, level: want, ltp,
+                prev: r.prev, moved: r.moved, entry: st.entry, lockedPct, manual: true });
+            broadcastTrail(t);
+            res.json({ ok: true, stop: want, prev: r.prev, moved: r.moved, failed: r.failed, lockedPct });
+        } finally {
+            trailInProgress.delete(t);
+        }
+    });
+
+    /*
     P&L history from tradeLog.json (the guard appends one record per closed
     trade): today's trades, per-symbol totals today, per-day totals.
     */

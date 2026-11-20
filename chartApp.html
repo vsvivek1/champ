@@ -919,6 +919,13 @@ flat = slPct below entry, nothing else.">stop:
             <option value="pct">flat −SL%</option>
           </select>
         </label>
+        <label title="Sell part of the lot at the next resistance on the option's own chart. Untick = no partial, the whole lot rides to the stop. The % is the share of the lot that comes off at the level. One-lot positions never split either way.">partial at R <input type="checkbox" id="gPartialOn"> <input id="gPartialPct" type="number" step="5" min="5" max="95" style="width:44px">%</label>
+        <label title="auto = the stop climbs by itself once price clears a resistance by the clearance %. manual = the stop stays where it is until you press the TRAIL button on the position row (or drag the line). The TRAIL button works in both modes.">trail
+          <select id="gTrail" style="width:84px">
+            <option value="auto">auto</option>
+            <option value="manual">manual</option>
+          </select>
+        </label>
         <button id="gSave" class="sec">Save</button>
       </div>
       <div class="sechd">SETUP ALERTS</div>
@@ -2503,7 +2510,7 @@ function connectWs() {
     }
     if (m.type == 'trail') {
       // the stop moving up is the whole point of the ladder: say it out loud
-      msg(`🪜 ${m.tradingsymbol}: stop → ${m.level} (price cleared it at ${m.ltp}`
+      msg(`🪜 ${m.tradingsymbol}: stop → ${m.level} (${m.manual ? `manual, price at ${m.ltp}` : `price cleared it at ${m.ltp}`}`
         + (m.lockedPct != null ? `, ${m.lockedPct >= 0 ? '+' : ''}${m.lockedPct}% vs entry` : '') + ')'
         + (m.moved ? '' : ' — app-side line only, no SL order resting'));
       refreshPosition();
@@ -2656,6 +2663,10 @@ function renderPositions(d, stale) {
     }
     const exitBtn = p.quantity > 0
       ? `<button class="exitrow" onclick="armExit(this, '${p.tradingsymbol}')">${armedExit == p.tradingsymbol ? 'CONFIRM EXIT' : 'EXIT'}</button>` : '';
+    // manual trail: snap the stop (app line + resting SL together) to the
+    // highest R level under the price. Works with trail auto OR manual.
+    const trailBtn = p.quantity > 0
+      ? ` <button class="exitrow" style="border-color:#26a69a;color:#26a69a" onclick="manualTrail(${p.token}, '${p.tradingsymbol}')">TRAIL ↑</button>` : '';
     // % gain since entry vs % at the SL (resting SL trigger, else the guard line)
     let pctCell = '—';
     slPartByToken[p.token] = '';
@@ -2711,7 +2722,7 @@ function renderPositions(d, stale) {
       `<td id="te${p.token}" class="${pnlClass(p.netEntryPnl != null ? p.netEntryPnl : p.entryPnl)}">${fmt(p.netEntryPnl != null ? p.netEntryPnl : p.entryPnl)}</td>` +
       `<td class="${pnlClass(p.dayPnl)}">${fmt(p.dayPnl)}</td>` +
       `<td${riskCell.bad ? ' class="naked"' : ''}>${riskCell.html}</td>` +
-      `<td${isNaked ? ' class="naked"' : ''}>${resting}</td><td>${exitBtn}</td></tr>`);
+      `<td${isNaked ? ' class="naked"' : ''}>${resting}</td><td>${exitBtn}${trailBtn}</td></tr>`);
     if (p.quantity > 0) {
       sel.insertAdjacentHTML('beforeend', `<option value="${p.tradingsymbol}|${p.exchange}">${p.tradingsymbol}</option>`);
     }
@@ -3013,6 +3024,22 @@ async function doExit(symbol) {
     if (!d.done || d.done.length == 0) { msg(d.message || 'nothing to exit'); return; }
     msg('🚨 EXIT sent: ' + d.done.map(x => `${x.tradingsymbol} ${x.quantity} @ ${x.price}`).join(' | '));
   } catch (e) { msg('❌ exit failed: ' + e); }
+  refreshPosition();
+}
+/* Manual trail: ask the server to snap this position's stop up to the
+   highest resistance under the price. One click, no confirm -- the move
+   only ever TIGHTENS the stop, it can never widen the risk. */
+async function manualTrail(token, symbol) {
+  msg(`trailing ${symbol}…`);
+  try {
+    const r = await fetch(BASE+'/api/trail', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token }) });
+    const d = await r.json();
+    if (d.error) { msg('❌ trail: ' + d.error); return; }
+    msg(`🪜 ${symbol}: stop ${d.prev == null ? '—' : d.prev} → ${d.stop} (+${d.lockedPct}% locked)`
+      + (d.moved ? `, SL order moved` : `, app-side line only`)
+      + (d.failed ? ` ⚠ exchange refused: ${d.failed}` : ''));
+  } catch (e) { msg('❌ trail failed: ' + e); }
   refreshPosition();
 }
 // P&L history (tradeLog.json, written by the guard at every trade close):
@@ -4403,6 +4430,10 @@ async function fetchGuardSettings() {
     document.getElementById('gSlPct').value = s.slPct;
     document.getElementById('gSlMaxPct').value = s.slMaxPct != null ? s.slMaxPct : 0;
     if (s.slMode) document.getElementById('gSlMode').value = s.slMode;
+    document.getElementById('gPartialOn').checked = s.partialPct > 0;
+    if (s.partialPct > 0) document.getElementById('gPartialPct').value = s.partialPct;
+    else if (!document.getElementById('gPartialPct').value) document.getElementById('gPartialPct').value = 50;
+    document.getElementById('gTrail').value = s.trail === false ? 'manual' : 'auto';
   } catch (e) { /* transient */ }
 }
 document.getElementById('gSave').onclick = async () => {
@@ -4411,7 +4442,10 @@ document.getElementById('gSave').onclick = async () => {
     targetPct: guardCfg && guardCfg.targetPct != null ? Number(guardCfg.targetPct) : 50,
     slPct: parseFloat(document.getElementById('gSlPct').value),
     slMaxPct: parseFloat(document.getElementById('gSlMaxPct').value),
-    slMode: document.getElementById('gSlMode').value
+    slMode: document.getElementById('gSlMode').value,
+    // unticked = 0 = no partial; the % box keeps its number for when it comes back on
+    partialPct: document.getElementById('gPartialOn').checked ? parseFloat(document.getElementById('gPartialPct').value) : 0,
+    trail: document.getElementById('gTrail').value == 'auto'
   };
   const r = await fetch(BASE+'/api/guardSettings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
   const d = await r.json();
@@ -4420,7 +4454,9 @@ document.getElementById('gSave').onclick = async () => {
     : `✅ on fill: stop = ${d.slMode == 'breach' ? `the ${guardCfg.candleCount || 3}-candle low − 1 tick`
         : d.slMode == 'level' ? `a tick under the support, floor -${d.slPct}%`
         : `flat -${d.slPct}%`}`
-      + `${d.slMaxPct > 0 ? `, capped at -${d.slMaxPct}%` : ', uncapped'} — applies to the next fill`);
+      + `${d.slMaxPct > 0 ? `, capped at -${d.slMaxPct}%` : ', uncapped'}`
+      + `${d.partialPct > 0 ? `, ${d.partialPct}% off at the resistance` : ', no partial'}`
+      + `, trail ${d.trail === false ? 'MANUAL (use the TRAIL button)' : 'auto'} — applies to the next fill`);
 };
 fetchGuardSettings();
 
