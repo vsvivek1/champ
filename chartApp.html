@@ -517,11 +517,20 @@
 
   /* ---- post-trade review: deliberately full-page and in the way. After a
      close you should be reading the verdict, not hunting the next entry. ---- */
-  #review, #analysis, #pnlView { position:fixed; inset:0; top:36px; z-index:90; background:rgba(10,12,18,.97);
+  #review, #analysis, #pnlView, #slwView, #rulesView, #theoryView {
+            position:fixed; inset:0; top:36px; z-index:90; background:rgba(10,12,18,.97);
             overflow:auto; padding:18px 20px 40px; display:none; }
-  #review.open, #analysis.open, #pnlView.open { display:block; }
-  #pnlView .rvClose { position:absolute; top:14px; right:16px; }
+  #review.open, #analysis.open, #pnlView.open, #slwView.open, #rulesView.open, #theoryView.open { display:block; }
+  #pnlView .rvClose, #slwView .rvClose, #rulesView .rvClose, #theoryView .rvClose { position:absolute; top:14px; right:16px; }
   #pnlView table { max-width:760px; }
+  #slwView table { max-width:1050px; }
+  #slwView .evt { font-size:11px; padding:2px 7px; border-radius:4px; background:rgba(255,255,255,.06); }
+  #slwView .evt.refused { background:rgba(239,83,80,.15); color:var(--red); }
+  #slwView .evt.taken { background:rgba(232,179,61,.15); color:var(--amber); }
+  #pnlView .rvTop, #slwView .rvTop, #rulesView .rvTop, #theoryView .rvTop {
+            display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
+  #pnlView h2, #slwView h2, #rulesView h2, #theoryView h2 { font-size:19px; }
+  #pnlView .sub, #slwView .sub, #rulesView .sub, #theoryView .sub { color:var(--dim); font-size:12px; }
   #review .rvTop, #analysis .rvTop { display:flex; align-items:baseline; gap:14px; flex-wrap:wrap; margin-bottom:12px; }
   #review h2, #analysis h2 { font-size:19px; }
   #review .big, #analysis .big { font-size:46px; font-weight:700; line-height:1.1; }
@@ -783,6 +792,9 @@
   <button class="ttab" id="tabFail">failed days</button>
   <button class="ttab" id="tabPnl">P&amp;L history</button>
   <button class="ttab" id="tabReview">last trade</button>
+  <button class="ttab" id="tabSlw">SL wide log</button>
+  <button class="ttab" id="tabRules">rules</button>
+  <button class="ttab" id="tabTheory">theory</button>
 </div>
 
 <header>
@@ -847,11 +859,8 @@
     <button class="ptab on" data-pane="paneAuto">AUTO RUN</button>
     <button class="ptab" data-pane="paneTrade">POSITIONS &amp; ORDERS</button>
     <button class="ptab" data-pane="paneSignals">SIGNALS</button>
-    <button class="ptab" data-pane="paneRules">RULES</button>
-    <!-- THEORY: the long "why this rule exists" essays used to hang as a
-         dropdown under every checklist row, which buried the numbers.
-         The help moved here; the checklist keeps only the live reading. -->
-    <button class="ptab" data-pane="paneTheory">THEORY</button>
+    <!-- RULES and THEORY are reading, not controls: they moved to the top
+         tab bar with the other full-page views. -->
     <!--
     The AUTOPILOT header already says ARMED or OFF, but only on the AUTO RUN
     tab. Sitting on POSITIONS for twenty minutes and not knowing whether
@@ -1051,27 +1060,6 @@ flat = slPct below entry, nothing else.">stop:
     <div id="sigBody"><div class="empty">no signals yet today</div></div>
   </div>
 
-  <div class="pane" id="paneRules">
-    <div class="pbar">
-      <span class="ph">RULES</span>
-      <span class="stat">read-only — every number comes live from the files the guard reads</span>
-      <span style="flex:1"></span>
-      <span id="rulesAsOf" class="stat"></span>
-      <button id="rulesRe" class="sec">reload</button>
-    </div>
-    <div id="rulesBody"><div class="empty">reading the rules…</div></div>
-  </div>
-
-  <div class="pane" id="paneTheory">
-    <div class="pbar">
-      <span class="ph">THEORY</span>
-      <span class="stat">why each rule exists — reading, not controls; the live numbers stay on the checklist</span>
-      <span style="flex:1"></span>
-      <button id="theoryRe" class="sec">reload</button>
-    </div>
-    <div id="theoryBody"><div class="empty">reading the theory…</div></div>
-  </div>
-
 </div>
 
 <div id="blockModal" role="alertdialog" aria-modal="true" aria-labelledby="bmHead">
@@ -1092,6 +1080,26 @@ flat = slPct below entry, nothing else.">stop:
 <div id="review"></div>
 <div id="analysis"></div>
 <div id="pnlView"></div>
+<div id="slwView"></div>
+
+<!-- RULES and THEORY used to be panel panes; same ids inside, so the CSS
+     and the loaders did not move an inch. Only the wrapper is new. -->
+<div id="rulesView">
+  <button class="sec rvClose" id="rulesClose">✕ close (Esc)</button>
+  <div class="rvTop"><h2>Rules</h2>
+    <span class="sub">read-only — every number comes live from the files the guard reads</span>
+    <span id="rulesAsOf" class="sub"></span>
+    <button id="rulesRe" class="sec">reload</button></div>
+  <div id="rulesBody"><div class="empty">reading the rules…</div></div>
+</div>
+
+<div id="theoryView">
+  <button class="sec rvClose" id="theoryClose">✕ close (Esc)</button>
+  <div class="rvTop"><h2>Theory</h2>
+    <span class="sub">why each rule exists — reading, not controls; the live numbers stay on the rules tab</span>
+    <button id="theoryRe" class="sec">reload</button></div>
+  <div id="theoryBody"><div class="empty">reading the theory…</div></div>
+</div>
 
 <button id="helpBtn">? help</button>
 <div id="helpDrawer">
@@ -3273,7 +3281,7 @@ function paintGate() {
     + (softBad.length ? `<div class="stopList soft">${softBad.map(rowHtml).join('')}</div>` : '')
     + `<details class="naFold"><summary>${good.length} rules pass, ${na.length} waiting for a strike — see the full list</summary>`
       + `<div class="rows">${[...good, ...na].map(rowHtml).join('')}</div></details>`
-    + `<div class="thHint">why each rule exists is written out on the <b onclick="showPane('paneTheory')">THEORY</b> tab</div>`
+    + `<div class="thHint">why each rule exists is written out on the <b onclick="openTheory()">theory</b> tab at the top</div>`
     + `<div class="gateFoot">`
     +   `<button id="btnCountFrom" class="sec">restart the ${gateState.settings.maxTradesPerDay}-trade count from now</button>`
     +   (st.countFrom ? `<button id="btnCountAll" class="sec">count the whole day again</button>` : '')
@@ -3964,7 +3972,8 @@ function anaHtml(a, failedOnly) {
     return h;
 }
 
-const TOP_TABS = { floor: 'tabFloor', analysis: 'tabAna', failed: 'tabFail', pnl: 'tabPnl', review: 'tabReview' };
+const TOP_TABS = { floor: 'tabFloor', analysis: 'tabAna', failed: 'tabFail', pnl: 'tabPnl',
+                   review: 'tabReview', slw: 'tabSlw', rules: 'tabRules', theory: 'tabTheory' };
 function setTopTab(which) {
     for (const [k, id] of Object.entries(TOP_TABS))
         document.getElementById(id).classList.toggle('on', k == which);
@@ -3972,9 +3981,65 @@ function setTopTab(which) {
 
 // one reading view at a time: whatever is open goes before the next opens
 function hideViews() {
-    for (const id of ['analysis', 'review', 'pnlView'])
+    for (const id of ['analysis', 'review', 'pnlView', 'slwView', 'rulesView', 'theoryView'])
         document.getElementById(id).classList.remove('open');
 }
+
+// rules and theory render into their old #rulesBody / #theoryBody, so the
+// pane-era loaders run untouched -- only the wrapper opening is new
+function openRules() {
+    hideViews();
+    document.getElementById('rulesView').classList.add('open');
+    setTopTab('rules');
+    if (!rulesLoaded) loadRules();
+}
+function closeRules() { document.getElementById('rulesView').classList.remove('open'); setTopTab('floor'); }
+
+function openTheory() {
+    hideViews();
+    document.getElementById('theoryView').classList.add('open');
+    setTopTab('theory');
+    if (!theoryLoaded) loadTheory();
+}
+function closeTheory() { document.getElementById('theoryView').classList.remove('open'); setTopTab('floor'); }
+
+// the wide-stop log: every entry whose stop sat too far below, and what
+// happened to it -- refused, asked and waited, or taken anyway
+async function openSlw() {
+    const el = document.getElementById('slwView');
+    try {
+        const d = await (await fetch(BASE + '/api/slwideLog')).json();
+        let h = `<button class="sec rvClose" id="slwClose">✕ close (Esc)</button>
+          <div class="rvTop"><h2>SL wide log</h2>
+            <span class="sub">entries whose stop sat further than ${d.maxStopPct}% below, and what happened to them</span></div>`;
+        h += `<div class="sub">auto run ${d.autoRun} · ask-anyway ${d.maxStopAsk ? 'on (' + d.maxStopAskBand + '% band, ' + d.maxStopAskSec + 's)' : 'off'}
+            · ${d.total} rows — ${d.refused} refused / ${d.asked} asked / ${d.taken} taken</div>`;
+        if (!d.rows || !d.rows.length) {
+            h += `<div class="sub" style="margin-top:12px">nothing logged yet — no entry has needed a stop wider than ${d.maxStopPct}%</div>`;
+        } else {
+            h += `<table><thead><tr><th>When</th><th>Symbol</th><th>What happened</th><th>Premium</th>
+                <th>Stop</th><th>Away</th><th>Hand</th><th>Note</th></tr></thead><tbody>`;
+            for (const r of d.rows) {
+                const note = r.noAsk ? ('no ask: ' + r.noAsk)
+                    : r.waitedSec != null ? ('waited ' + r.waitedSec + 's' + (r.fallback ? ', ' + r.fallback : ''))
+                    : (r.alsoBlocked && r.alsoBlocked.length) ? ('also blocked: ' + r.alsoBlocked.join(', '))
+                    : (r.mock ? 'mock' : '—');
+                h += `<tr><td>${r.at}</td><td style="text-align:left">${r.tradingsymbol}</td>
+                    <td style="text-align:left"><span class="evt ${r.event}">${r.event}</span></td>
+                    <td>${r.premium}</td><td>${r.stop}</td><td>${r.away}%</td>
+                    <td>${r.byHand ? 'by hand' : 'auto'}</td><td style="text-align:left">${note}</td></tr>`;
+            }
+            h += `</tbody></table>`;
+        }
+        hideViews();
+        el.innerHTML = h;
+        el.classList.add('open');
+        setTopTab('slw');
+        document.getElementById('slwClose').onclick = closeSlw;
+        el.scrollTop = 0;
+    } catch (e) { msg('❌ SL wide log load failed: ' + e); }
+}
+function closeSlw() { document.getElementById('slwView').classList.remove('open'); setTopTab('floor'); }
 
 function closeAna() {
     document.getElementById('analysis').classList.remove('open');
@@ -4002,12 +4067,20 @@ document.getElementById('tabAna').onclick = () => openAna(false);
 document.getElementById('tabFail').onclick = () => openAna(true);
 document.getElementById('tabPnl').onclick = openPnl;
 document.getElementById('tabReview').onclick = () => openReview(null);
+document.getElementById('tabSlw').onclick = openSlw;
+document.getElementById('tabRules').onclick = openRules;
+document.getElementById('tabTheory').onclick = openTheory;
+document.getElementById('rulesClose').onclick = closeRules;
+document.getElementById('theoryClose').onclick = closeTheory;
 
 document.addEventListener('keydown', e => {
   if (e.key != 'Escape') return;
   if (document.getElementById('review').classList.contains('open')) closeReview();
   if (document.getElementById('analysis').classList.contains('open')) closeAna();
   if (document.getElementById('pnlView').classList.contains('open')) closePnl();
+  if (document.getElementById('slwView').classList.contains('open')) closeSlw();
+  if (document.getElementById('rulesView').classList.contains('open')) closeRules();
+  if (document.getElementById('theoryView').classList.contains('open')) closeTheory();
 });
 refreshLock();
 
@@ -4579,9 +4652,6 @@ let rulesLoaded = false;
 function showPane(id) {
   for (const b of panelTabs.querySelectorAll('.ptab')) b.classList.toggle('on', b.dataset.pane == id);
   for (const p of document.querySelectorAll('#panel .pane')) p.classList.toggle('on', p.id == id);
-  // read the rules the first time the tab is opened, not on every page load
-  if (id == 'paneRules' && !rulesLoaded) loadRules();
-  if (id == 'paneTheory' && !theoryLoaded) loadTheory();
 }
 panelTabs.addEventListener('click', e => {
   const b = e.target.closest('.ptab');
